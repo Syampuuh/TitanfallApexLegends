@@ -1,5 +1,5 @@
 global function ShSceneCapture_LevelInit
-#if CLIENT
+#if(CLIENT)
 global function ClSceneCapture_PROTO_AddCaptureRoom
 global function IsCaptureRoomAvailable
 global function ReserveCaptureRoom
@@ -10,7 +10,7 @@ global function ReleaseCaptureRoom
 global const asset SCENE_CAPTURE_LIGHTING_RIG_MODEL = $"mdl/empty/lights/empty_lights.rmdl"
 const int SCENE_CAPTURE_EXPECTED_TWEAK_LIGHT_COUNT = 4
 
-#if CLIENT
+#if(CLIENT)
 global struct CaptureRoom
 {
 	vector        center
@@ -22,7 +22,7 @@ global struct CaptureRoom
 
 struct
 {
-	#if CLIENT
+	#if(CLIENT)
 		array<CaptureRoom> roomList
 		table              signalDummy
 	#endif
@@ -30,24 +30,24 @@ struct
 
 void function ShSceneCapture_LevelInit()
 {
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		PrecacheModel( SCENE_CAPTURE_LIGHTING_RIG_MODEL )
 	#endif
 
-	#if CLIENT
+	#if(CLIENT)
 		AddCallback_EntitiesDidLoad( EntitiesDidLoad )
 
 		RegisterSignal( "CaptureRoomAvailable" )
 	#endif
 }
 
-#if CLIENT
+#if(CLIENT)
 void function EntitiesDidLoad()
 {
 	bool didHaveRooms = false
 	foreach( entity target in GetEntArrayByScriptName( "scene_capture_room" ) )
 	{
-		// todo(dw): remove this loop
+		//
 		CaptureRoom room
 		room.center = target.GetOrigin()
 		room.ang = target.GetAngles()
@@ -86,7 +86,7 @@ void function EntitiesDidLoad()
 		Assert( room.tweakLights.len() == SCENE_CAPTURE_EXPECTED_TWEAK_LIGHT_COUNT, "Scene capture room does not have the expected four tweak lights" )
 	}
 
-	#if DEV
+	#if(DEV)
 		if ( !didHaveRooms )
 			DEV_AddDevCaptureRooms()
 	#endif
@@ -94,7 +94,7 @@ void function EntitiesDidLoad()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClSceneCapture_PROTO_AddCaptureRoom( vector center )
 {
 	CaptureRoom room
@@ -105,7 +105,7 @@ void function ClSceneCapture_PROTO_AddCaptureRoom( vector center )
 }
 #endif
 
-#if CLIENT && DEV
+#if CLIENT && DEV 
 void function DEV_AddDevCaptureRooms()
 {
 	ClSceneCapture_PROTO_AddCaptureRoom( <0, 0, 10000> )
@@ -115,7 +115,7 @@ void function DEV_AddDevCaptureRooms()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 bool function IsCaptureRoomAvailable()
 {
 	foreach( CaptureRoom room in file.roomList )
@@ -128,12 +128,12 @@ bool function IsCaptureRoomAvailable()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 CaptureRoom function ReserveCaptureRoom()
 {
-	//#if DEV
-	//	DEV_AddDevCaptureRooms()
-	//#endif
+	//
+	//
+	//
 	foreach( int roomIndex, CaptureRoom room in file.roomList )
 	{
 		if ( room.inUse )
@@ -150,12 +150,12 @@ CaptureRoom function ReserveCaptureRoom()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 CaptureRoom function WaitForReserveCaptureRoom()
 {
-	//#if DEV
-	//	DEV_AddDevCaptureRooms()
-	//#endif
+	//
+	//
+	//
 	while( true )
 	{
 		foreach( int roomIndex, CaptureRoom room in file.roomList )
@@ -175,12 +175,12 @@ CaptureRoom function WaitForReserveCaptureRoom()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ReleaseCaptureRoom( CaptureRoom room )
 {
 	Assert( room.inUse, "Attempted to end release a Scene capture room that was not in use." )
 
-	#if DEV
+	#if(DEV)
 		foreach( entity light in room.tweakLights )
 			Assert( IsValid( light ), "Something deleted a scene capture tweak light!" )
 	#endif

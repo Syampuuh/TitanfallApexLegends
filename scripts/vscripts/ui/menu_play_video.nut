@@ -103,7 +103,7 @@ void function OnPlayVideoMenu_Close()
 
 void function OnPlayVideoMenu_NavigateBack()
 {
-	// Do nothing
+	//
 }
 
 void function WaitForSkipInput()
@@ -112,7 +112,7 @@ void function WaitForSkipInput()
 
 	array<int> inputs
 
-	// Gamepad
+	//
 	inputs.append( BUTTON_A )
 	inputs.append( BUTTON_B )
 	inputs.append( BUTTON_X )
@@ -124,13 +124,13 @@ void function WaitForSkipInput()
 	inputs.append( BUTTON_BACK )
 	inputs.append( BUTTON_START )
 
-	// Keyboard/Mouse
+	//
 	inputs.append( KEY_SPACE )
 	inputs.append( KEY_ESCAPE )
 	inputs.append( KEY_ENTER )
 	inputs.append( KEY_PAD_ENTER )
 
-	WaitFrame() // Without this the skip message would show instantly if you chose the main menu intro option with BUTTON_A or KEY_SPACE
+	WaitFrame() //
 	foreach ( input in inputs )
 	{
 		if ( input == BUTTON_A || input == KEY_SPACE )
@@ -183,7 +183,7 @@ void function SkipButton_Press()
 	file.holdInProgress = true
 
 	float holdStartTime = Time()
-	table hold // Table is needed to pass by reference
+	table hold //
 	hold.completed <- false
 
 	EndSignal( uiGlobal.signalDummy, "SkipVideoHoldReleased" )

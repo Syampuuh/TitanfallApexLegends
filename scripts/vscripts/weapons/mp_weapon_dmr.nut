@@ -5,9 +5,9 @@ global function MpWeaponDmr_Init
 global function OnWeaponActivate_weapon_dmr
 global function OnWeaponDeactivate_weapon_dmr
 
-#if CLIENT
+#if(CLIENT)
 global function OnClientAnimEvent_weapon_dmr
-#endif // #if CLIENT
+#endif //
 
 
 void function MpWeaponDmr_Init()
@@ -26,7 +26,7 @@ void function OnWeaponActivate_weapon_dmr( entity weapon )
 	if ( !( "zoomTimeIn" in weapon.s ) )
 		weapon.s.zoomTimeIn <- weapon.GetWeaponSettingFloat( eWeaponVar.zoom_time_in )
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( weapon.GetWeaponOwner() != GetLocalViewPlayer() )
 			return
 	#endif
@@ -36,7 +36,7 @@ void function OnWeaponDeactivate_weapon_dmr( entity weapon )
 {
 }
 
-#if CLIENT
+#if(CLIENT)
 void function OnClientAnimEvent_weapon_dmr( entity weapon, string name )
 {
 	GlobalClientEventHandler( weapon, name )
@@ -57,7 +57,7 @@ void function OnClientAnimEvent_weapon_dmr( entity weapon, string name )
 		thread DelayedCasingsSound( weapon, 0.6 )
 	}
 }
-#endif // #if CLIENT
+#endif //
 
 void function DelayedCasingsSound( entity weapon, float delayTime )
 {

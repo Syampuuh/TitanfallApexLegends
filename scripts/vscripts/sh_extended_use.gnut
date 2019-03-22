@@ -1,5 +1,7 @@
 global function ExtendedUse
+#if(false)
 
+#endif
 global struct ExtendedUseSettings
 {
 	void functionref( entity ent, entity player, ExtendedUseSettings settings ) successFunc
@@ -10,7 +12,7 @@ global struct ExtendedUseSettings
 	float duration = 1.0
 	entity entityArg = null
 	bool requireMatchingUseEnt = false
-	#if CLIENT
+	#if(CLIENT)
 		string hint
 		string holdHint = "%use_long%"
 		asset displayRui
@@ -18,20 +20,28 @@ global struct ExtendedUseSettings
 		asset icon
 		bool successPlayPickupEffect = false
 	#endif
-	#if SERVER
-		bool holsterWeapon
-		bool movementDisable
-		bool exclusiveUse
-	#endif
+	#if(false)
+
+
+
+#endif
 	int useInputFlag = IN_USE_LONG
 }
 
 struct
 {
-#if CLIENT
+#if(CLIENT)
 	var extendedUseRui
 #endif
 } file
+
+#if(false)
+
+
+
+
+#endif
+
 
 void function ExtendedUse( entity ent, entity player, ExtendedUseSettings settings )
 {
@@ -52,7 +62,7 @@ void function ExtendedUse( entity ent, entity player, ExtendedUseSettings settin
 	if ( settings.startFunc != null )
 		settings.startFunc( ent, player, settings )
 
-	#if CLIENT
+	#if(CLIENT)
 	var rui = CreateCockpitRui( settings.displayRui )
 	settings.displayRuiFunc( ent, player, rui, settings )
 	file.extendedUseRui = rui
@@ -70,29 +80,30 @@ void function ExtendedUse( entity ent, entity player, ExtendedUseSettings settin
 	table<string,bool> e
 	e["success"] <- false
 
-	#if CLIENT
+	#if(CLIENT)
 	if ( settings.loopSound != "" && ( !IsValid( localViewPlayer ) || localViewPlayer.DoesShareRealms( player ) ) )
 		EmitSoundOnEntity( ent, settings.loopSound )
 	#endif
 
 	int oldUsableValue
 
-	#if SERVER
-		oldUsableValue = ent.GetUsableValue()
+	#if(false)
 
-		if ( settings.holsterWeapon )
-		{
-			HolsterAndDisableWeapons( player )
-		}
-		if ( settings.movementDisable )
-		{
-			player.MovementDisable()
-		}
-		if ( settings.exclusiveUse )
-		{
-			ent.UnsetUsable()
-		}
-	#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 	OnThreadEnd(
 		function() : ( e, ent, player, settings, oldUsableValue )
@@ -110,29 +121,29 @@ void function ExtendedUse( entity ent, entity player, ExtendedUseSettings settin
 			if ( IsValid( player ) )
 				thread TryClearPlayerExtendedUse( player, settings.useInputFlag )
 
-			#if SERVER
-				if ( IsAlive( player ) )
-				{
-					if ( settings.holsterWeapon )
-					{
-						DeployAndEnableWeapons( player )
-					}
-					if ( settings.movementDisable )
-					{
-						player.MovementEnable()
-					}
-				}
+			#if(false)
 
-				if ( settings.exclusiveUse )
-				{
-					if ( IsValid( ent ) )
-					{
-						ent.SetUsable()
-						ent.SetUsableByGroup( "pilot" )
-						ent.AddUsableValue( oldUsableValue )
-					}
-				}
-			#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 		}
 	)
 
@@ -144,22 +155,22 @@ void function ExtendedUse( entity ent, entity player, ExtendedUseSettings settin
 	if ( settings.loopSound != "" )
 		StopSoundOnEntity( ent, settings.loopSound )
 
-#if CLIENT
+#if(CLIENT)
 	if ( !IsValid( localViewPlayer ) || localViewPlayer.DoesShareRealms( player ) )
 	{
 		if ( settings.successSound != "" )
 			EmitSoundAtPosition( TEAM_UNASSIGNED, ent.GetOrigin(), settings.successSound )
 	}
 #endif
-#if SERVER
-	if ( settings.successSound != "" )
-		EmitSoundAtPosition( TEAM_UNASSIGNED, ent.GetOrigin(), settings.successSound, player )
+#if(false)
+
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 	if ( settings.successPlayPickupEffect )
 		PlayLootPickupFeedbackFX( ent )
-#endif // CLIENT
+#endif //
 
 	e["success"] = true
 }

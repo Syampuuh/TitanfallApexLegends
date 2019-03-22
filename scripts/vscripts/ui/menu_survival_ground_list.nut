@@ -74,7 +74,7 @@ void function InitGroundListMenu()
 
 	file.groundList = Hud_GetChild( menu, "ListPanel" )
 	file.groundScrollBar = Hud_GetChild( menu, "ScrollBar" )
-	ListPanel_InitPanel( file.groundList, OnBindListItem, GetGroundItemCount, Survival_CommonButtonInit )
+	ListPanel_InitPanel( file.groundList, OnBindListItem, GetGroundItemDef, Survival_CommonButtonInit )
 	ListPanel_SetExclusiveSelection( file.groundList, true )
 	ListPanel_InitScrollBar( file.groundList, file.groundScrollBar )
 	ListPanel_SetButtonHandler( file.groundList, UIE_CLICK, OnGroundItemClick )
@@ -114,8 +114,8 @@ void function InitGroundListMenu()
 
 	var weaponSwapButton = Hud_GetChild( menu, "WeaponSwapButton" )
 	var rui = Hud_GetRui( weaponSwapButton )
-	RuiSetImage( rui, "iconImage", $"rui/hud/loot/loot_swap_icon" )
-	//RuiSetString( rui, "buttonText", "Cycle Weapon" )
+	RuiSetImage( rui, "iconImage", $"rui/hud/loot/weapon_swap_icon" )
+	//
 	RuiSetInt( rui, "lootTier", 1 )
 	Hud_AddEventHandler( weaponSwapButton, UIE_CLICK, OnWeaponSwapButtonClick )
 }
@@ -153,7 +153,7 @@ void function Delayed_SetCursorToObject( var obj )
 	Signal( uiGlobal.signalDummy, "Delayed_SetCursorToObject" )
 	EndSignal( uiGlobal.signalDummy, "Delayed_SetCursorToObject" )
 
-	wait 0.1 // TODO: Why do we need this?
+	wait 0.1 //
 
 	float width  = 1920
 	float height = 1080
@@ -219,7 +219,7 @@ void function OnGroundItemClick( var panel, var button, int position )
 	if ( file.groundItemUpdateInProgress )
 		return
 
-	// close quick swap
+	//
 	if ( Hud_IsSelected( button ) )
 	{
 		file.groundListSelected = null
@@ -344,6 +344,7 @@ void function OnGroundListScroll( var panel, float scrollValue )
 	if ( file.trackedScrollValue > 7.0 )
 		RunClientScript( "GroundListUpdateNextFrame" )
 }
+
 
 bool function OnGroundItemKeyPress( var panel, var button, int position, int keyId, bool isDown )
 {

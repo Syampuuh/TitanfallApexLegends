@@ -25,20 +25,20 @@ void function CreateCallback_Spectre( entity spectre )
 		return
 	file.initialized[ model ] <- true
 
-	//----------------------
-	// model Lights - Friend
-	//----------------------
+	//
+	//
+	//
 	ModelFX_BeginData( "friend_lights", model, "friend", true )
 		ModelFX_HideFromLocalPlayer()
 		ModelFX_AddTagSpawnFX( "EYEGLOW",		$"P_spectre_eye_friend" )
 	ModelFX_EndData()
 
-	//----------------------
-	// model Lights - Foe
-	//----------------------
+	//
+	//
+	//
 	ModelFX_BeginData( "foe_lights", model, "foe", true )
 		ModelFX_HideFromLocalPlayer()
-		//ModelFX_AddTagSpawnFX( "EYEGLOW",		$"P_spectre_eye_foe" )
+		//
 		ModelFX_AddTagSpawnFX( "EYEGLOW",		$"P_spectre_eye_friend" )
 	ModelFX_EndData()
 }

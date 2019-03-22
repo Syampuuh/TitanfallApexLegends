@@ -42,8 +42,8 @@ void function ClIndicatorsHud_Init()
 	AddLocalPlayerFunc( OutOfBoundsOverlayHUD_AddPlayer )
 	AddCallback_KillReplayEnded( DeactivateOutOfBoundsIndicator )
 
-	//AddCallback_LocalClientPlayerSpawned( DeathIcon_LocalClientPlayerSpawned )
-	//AddOnDeathCallback( "player", DeathIcon_OnDeathCallback )
+	//
+	//
 }
 
 void function DeathIcon_LocalClientPlayerSpawned( entity player )
@@ -52,7 +52,7 @@ void function DeathIcon_LocalClientPlayerSpawned( entity player )
 	{
 		vector pos = expect vector( player.cv.deathOrigin ) + DEATH_ICON_OFFSET
 		var rui = CreateCockpitRui( $"ui/death_icons.rpak", RuiCalculateDistanceSortKey( player.EyePosition(), pos ) )
-		//var rui = RuiCreate( $"ui/death_icons.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, int( -Distance( player.EyePosition(), pos ) ) )
+		//
 		RuiSetGameTime( rui, "startTime", Time() )
 		RuiSetFloat3( rui, "pos", pos )
 		RuiKeepSortKeyUpdated( rui, true, "pos" )
@@ -70,7 +70,7 @@ void function DeathIcon_OnDeathCallback( entity player )
 
 	vector pos = player.GetOrigin() + DEATH_ICON_OFFSET
 	var rui = CreateCockpitRui( $"ui/death_icons.rpak", RuiCalculateDistanceSortKey( localClientPlayer.EyePosition(), pos ) )
-	//var rui = RuiCreate( $"ui/death_icons.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, int( -Distance( player.EyePosition(), pos ) ) )
+	//
 	RuiSetGameTime( rui, "startTime", Time() )
 	RuiSetFloat3( rui, "pos", pos )
 	RuiKeepSortKeyUpdated( rui, true, "pos" )
@@ -136,7 +136,7 @@ void function FriendIconAddEntity_Thread( entity ent )
 	ent.EndSignal( "FriendIconAddEntity_Thread" )
 	ent.EndSignal( "OnDestroy" )
 
-	WaitEndFrame() // returning from/entering kill replay seems to kill the effects too late in the frame?
+	WaitEndFrame() //
 
 	if ( !IsAlive( ent ) )
 		return
@@ -167,7 +167,7 @@ void function FriendIconAddEntity_Thread( entity ent )
 
 	while ( IsAlive( ent ) )
 	{
-		// effects aren't playing in the correct position on parented entities sometimes
+		//
 		if ( ent.GetParent() )
 		{
 			if ( EffectDoesExist( ent.s.fxHandle ) )
@@ -210,10 +210,10 @@ void function OutOfBoundsOverlayHUD_AddPlayer( entity player )
 
 void function OutOfBoundsDeadTime_Changed( entity player )
 {
-	if ( player != GetLocalViewPlayer() ) //Looks like there's lag to when GetLocalViewPlayer is set. WatchingKillReplay() can be false and LocalViewPlayer can be not equal to LocalClientPlayer
+	if ( player != GetLocalViewPlayer() ) //
 	{
-		//printt( "IsWatchingKillReplay?" + IsWatchingReplay() )
-		//printt( "Returning because not local view player" )
+		//
+		//
 		return
 	}
 
@@ -258,8 +258,8 @@ void function ActivateOutOfBoundsIndicator()
 
 	thread OutOfBoundsDeadTime_ColorChange( player, player.hudElems.OutOfBoundsWarning_Message, player.hudElems.OutOfBoundsWarning_Timer )
 
-	//Note: Currently looping sounds aren't stopped on entities that are detroyed in kill replay. Eric is going to fix this. Get rid of the below block once he does.
-	if ( IsWatchingReplay() ) //HACK. Need to do this because of kill replay stuff. This sound is played on the player who killed you if you're watching a kill replay. When kill replay ends, we have no way to get a handle to this player to stop the sound there.
+	//
+	if ( IsWatchingReplay() ) //
 	{
 		player.EndSignal( "OnDestroy" )
 		OnThreadEnd(
@@ -286,7 +286,7 @@ void function OutOfBoundsDeadTime_ColorChange( entity player, elem1, elem2 )
 		}
 	)
 
-	//float timeLeft = max( 0, player.GetOutOfBoundsDeadTime() - Time() )
+	//
 
 	while ( IsValid( player ) )
 	{

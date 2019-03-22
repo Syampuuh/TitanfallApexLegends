@@ -1,53 +1,53 @@
 global function CaptureMode_Shared_Init
 
-#if CLIENT
+#if(CLIENT)
 global function CL_CaptureInit
 global function CL_CM_PlayAnim
 global function CL_CM_StopAnim
 global function CL_CM_KeyBox_Start
 global function CL_CM_KeyBox_End
-#endif //CLIENT
+#endif //
 
-#if SERVER
+#if(false)
 
-global function ClientCommand_CM_PlayAnim
-global function ClientCommand_CM_StopAnim
-global function CM_KeyBox_Cycle_Up
-global function CM_KeyBox_Cycle_Down
-global function ClientCommand_CM_KeyBox_Start
-global function ClientCommand_CM_KeyBox_End
 
-struct
-{
-	int keybox_V = 0
 
-	int keybox_R = 255
-	int keybox_G = 0
-	int keybox_B = 255
 
-} file
 
-#endif //SERVER
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 
 
 void function CaptureMode_Shared_Init()
 {
-	#if SERVER
-		AddClientCommandCallback( "CM_PlayAnim", 		ClientCommand_CM_PlayAnim )
-		AddClientCommandCallback( "CM_StopAnim", 		ClientCommand_CM_StopAnim )
-		AddClientCommandCallback( "CM_KeyBox_Start", 	ClientCommand_CM_KeyBox_Start )
-		AddClientCommandCallback( "CM_KeyBox_End", 		ClientCommand_CM_KeyBox_End )
-	#endif //SERVER
+	#if(false)
 
-	#if CLIENT
+
+
+
+#endif //
+
+	#if(CLIENT)
 		RunUIScript( "AddLevelDevCommand", "CAPTURE MODE", "exec capture.cfg; script_client CL_CaptureInit(); script FlagSet( \"DisableLootDrops\" )" )
-	#endif //CLIENT
+	#endif //
 }
 
 
 table<string, table<string, array<string> > > function CM_GetAnimTable()
 {
-	//TABLE
+	//
 	table<string, table<string, array<string> > > anims
 	anims[ "null" ] <- {}
 
@@ -146,7 +146,7 @@ table<string, table<string, array<string> > > function CM_GetAnimTable()
 
 	return anims
 }
-#if CLIENT
+#if(CLIENT)
 
 void function CL_CaptureInit()
 {
@@ -173,6 +173,7 @@ void function CL_CaptureInit()
 
 	RunUIScript( "AddLevelDevCommand", "CAPTURE MODE/MISC/Toggle Death Boxes", "script FlagToggle( \"DisableLootDrops\" )" )
 	RunUIScript( "AddLevelDevCommand", "CAPTURE MODE/MISC/Toggle HUD", "toggle cl_drawhud 1 0" )
+	RunUIScript( "AddLevelDevCommand", "CAPTURE MODE/MISC/Toggle rui HUD", "script HasCinematicFlag( GP(), CE_FLAG_TITAN_3P_CAM ) ? RemoveCinematicFlag( GP(), CE_FLAG_TITAN_3P_CAM ) : AddCinematicFlag( GP(), CE_FLAG_TITAN_3P_CAM )" )
 }
 
 void function CL_CM_PlayAnim( int number )
@@ -195,228 +196,228 @@ void function CL_CM_KeyBox_End()
 	GetLocalClientPlayer().ClientCommand( "CM_KeyBox_End" )
 }
 
-#endif //CLIENT
+#endif //
 
-#if SERVER
+#if(false)
 
-bool function ClientCommand_CM_PlayAnim( entity player, array<string> args )
-{
-	if ( args.len() == 0 )
-		return false
 
-	thread CM_PlayAnim( player, int( args[0] ) )
-	return true
-}
 
-void function CM_PlayAnim( entity player, int number )
-{
-	//DATA
-	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( player ), Loadout_CharacterClass() )
-	string name = ItemFlavor_GetHumanReadableRef( character )
 
-	table<string, table<string, array<string> > > animTable = CM_GetAnimTable()
-	if ( !( name in animTable ) )
-		return
 
-	table<string, array<string> > anims = animTable[ name ]
 
-	string style = ""
-	int index = -1
 
-	int lobbyNum 	= anims[ "lobby" ].len()
 
-	//set the index based on the style
-	if ( number < lobbyNum )
-	{
-		style = "lobby"
-		index = number
-	}
-	else
-	{
-		style = "other"
-		index = number - lobbyNum
-	}
 
-	if ( index >= anims[ style ].len() )
-		return
 
-	//KILL PREVIOUS INCARNATIONS
-	player.Signal( "ScriptAnimStop" )
 
-	player.EndSignal( "ScriptAnimStop" )
-	player.EndSignal( "OnDestroy" )
-	player.EndSignal( "OnDeath" )
 
-	//always play the animation asked for, but lobby anims should end in the zero index idle, others should check to see if they have an end idle
-	string anim1 = anims[ style ][ index ]
-	string anim2 = ""
+//
 
-	if ( style == "lobby" && index != 0 )
-	{
-		anim2 = anims[ style ][ 0 ]
-	}
-	else
-	{
-		string test = anim1 + "_idle"
-		if ( player.Anim_HasSequence( test ) )
-			anim2 = test
-	}
 
-	float length = player.GetSequenceDuration( anim1 )
-	thread PlayAnim( player, anim1 )
 
-	// is there an ending idle to play?
-	if ( anim2 != "" )
-	{
-		wait length - 0.1
 
-		while( 1 )
-		{
-			//if the player char has changed, exit the loop
-			ItemFlavor charTest = LoadoutSlot_WaitForItemFlavor( ToEHI( player ), Loadout_CharacterClass() )
-			string nameTest = ItemFlavor_GetHumanReadableRef( charTest )
-			if ( nameTest != name )
-				return
 
-			thread PlayAnim( player, anim2 )
 
-			length = player.GetSequenceDuration( anim2 )
-			wait length - 0.1
-		}
 
-	}
-}
 
-bool function ClientCommand_CM_StopAnim( entity player, array<string> args )
-{
-	player.Signal( "ScriptAnimStop" )
-	player.Anim_Stop()
-	return true
-}
 
-void function CM_KeyBox_Set( int style )
-{
-	file.keybox_V = style
 
-	switch( style )
-	{
-		case 0:
-			file.keybox_R = 255
-			file.keybox_G = 0
-			file.keybox_B = 255
-			break
 
-		case 1:
-			file.keybox_R = 0
-			file.keybox_G = 0
-			file.keybox_B = 255
-			break
 
-		case 2:
-			file.keybox_R = 0
-			file.keybox_G = 255
-			file.keybox_B = 0
-			break
 
-		case 3:
-			file.keybox_R = 0
-			file.keybox_G = 0
-			file.keybox_B = 0
-			break
 
-		case 4:
-			file.keybox_R = 255
-			file.keybox_G = 255
-			file.keybox_B = 255
-			break
-	}
-}
+//
 
-void function CM_KeyBox_Cycle_Up()
-{
-	switch( file.keybox_V )
-	{
-		case 0:
-			CM_KeyBox_Set( 1 )
-			break
 
-		case 1:
-			CM_KeyBox_Set( 2 )
-			break
 
-		case 2:
-			CM_KeyBox_Set( 3 )
-			break
 
-		case 3:
-			CM_KeyBox_Set( 4 )
-			break
 
-		case 4:
-			CM_KeyBox_Set( 0 )
-			break
-	}
-}
 
-void function CM_KeyBox_Cycle_Down()
-{
-	switch( file.keybox_V )
-	{
-		case 0:
-			CM_KeyBox_Set( 4 )
-			break
 
-		case 1:
-			CM_KeyBox_Set( 0 )
-			break
 
-		case 2:
-			CM_KeyBox_Set( 1 )
-			break
 
-		case 3:
-			CM_KeyBox_Set( 2 )
-			break
 
-		case 4:
-			CM_KeyBox_Set( 3 )
-			break
-	}
-}
 
-bool function ClientCommand_CM_KeyBox_Start( entity player, array<string> args )
-{
-	thread CM_KeyBox_Start( player )
-	return true
-}
 
-void function CM_KeyBox_Start( entity player )
-{
-	//KILL PREVIOUS INCARNATIONS
-	player.Signal( "OnActivate" )
 
-	player.EndSignal( "OnActivate" )
-	player.EndSignal( "OnDestroy" )
-	player.EndSignal( "OnDeath" )
 
-	int a = 255
+//
 
-	float size = 200
-	float time = 0.3
 
-	vector origin = player.GetOrigin()
 
-	while( 1 )
-	{
-		DebugDrawBox( origin, < -size, -size, -size >, < size, size, size >, file.keybox_R, file.keybox_G, file.keybox_B, a , time )
-		wait 0.1
-	}
-}
 
-bool function ClientCommand_CM_KeyBox_End( entity player, array<string> args )
-{
-	player.Signal( "OnActivate" )
-	return true
-}
 
-#endif //SERVER
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //

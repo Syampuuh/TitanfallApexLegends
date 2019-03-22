@@ -1,8 +1,8 @@
 global function InitCharacterCardsPanel
-//global function CardFrameButton_UpdateRui
-//global function CardPoseButton_UpdateRui
-//global function CardBadgeButton_UpdateRui
-//global function CardStatButton_UpdateRui
+//
+//
+//
+//
 global function SetCardPropertyIndex
 global function GetCardPropertyIndex
 
@@ -25,10 +25,10 @@ struct
 
 	ItemFlavor ornull lastNewnessCharacter
 
-	//var frameHeaderRui
-	//var poseHeaderRui
-	//var badgesHeaderRui
-	//var statsHeaderRui
+	//
+	//
+	//
+	//
 } file
 
 void function InitCharacterCardsPanel( var panel )
@@ -42,25 +42,28 @@ void function InitCharacterCardsPanel( var panel )
 
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, CharacterCardsPanel_OnShow )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, CharacterCardsPanel_OnHide )
-	AddPanelEventHandler( panel, eUIEvent.PANEL_NAVUP, CharacterCardsPanel_OnNavUp )
-	AddPanelEventHandler( panel, eUIEvent.PANEL_NAVDOWN, CharacterCardsPanel_OnNavDown )
 
-	//AddPanelFooterOption( panel, LEFT, BUTTON_DPAD_LEFT, false, "#TRIGGERS_CHANGE_LEGEND", "", CustomizeCharacterMenu_PrevButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_DPAD_RIGHT, false, "", "", CustomizeCharacterMenu_NextButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_TRIGGER_LEFT, false, "", "", CustomizeCharacterMenu_PrevButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_TRIGGER_RIGHT, false, "", "", CustomizeCharacterMenu_NextButton_OnActivate )
-
-	//file.frameHeaderRui = Hud_GetRui( Hud_GetChild( panel, "FrameHeader" ) )
-	//RuiSetString( file.frameHeaderRui, "title", "FRAMES" )
 	//
-	//file.poseHeaderRui = Hud_GetRui( Hud_GetChild( panel, "PoseHeader" ) )
-	//RuiSetString( file.poseHeaderRui, "title", "POSES" )
+	//
+	//
+	//
 
-	//file.badgesHeaderRui = Hud_GetRui( Hud_GetChild( panel, "BadgesHeader" ) )
-	//RuiSetString( file.badgesHeaderRui, "title", "BADGES" )
+	//
+	//
+	//
+	//
 
-	//file.statsHeaderRui = Hud_GetRui( Hud_GetChild( panel, "StatsHeader" ) )
-	//RuiSetString( file.statsHeaderRui, "title", "STATS" )
+	//
+	//
+	//
+	//
+	//
+
+	//
+	//
+
+	//
+	//
 
 	file.combinedCard = Hud_GetChild( panel, "CombinedCard" )
 
@@ -246,14 +249,14 @@ void function CharacterCardsPanel_OnShow( var panel )
 {
 	UI_SetPresentationType( ePresentationType.CHARACTER_CARD )
 
-	//int activeIndex = CardSections_GetActive()
-	//if ( activeIndex < 0 )
-	//	activeIndex = 0
 	//
-	//if ( uiGlobal.lastMenuNavDirection == MENU_NAV_FORWARD )
-	//	activeIndex = 0
 	//
-	//CardSectionButton_Activate( file.cardSections[0].button )
+	//
+	//
+	//
+	//
+	//
+	//
 	file.activeSectionIndex = 0
 
 	CharacterCardsPanel_Update()
@@ -271,22 +274,22 @@ void function CharacterCardsPanel_OnCustomizeContextChanged( var panel )
 
 void function CharacterCardsPanel_Update()
 {
-	//LoadoutEntry frameEntry = Loadout_GladiatorCardFrame( GetCustomizeContext() )
-	//int ownedFrames = GetUnlockedItemFlavorsForLoadoutSlot( LocalClientEHI(), frameEntry ).len()
-	//int totalFrames = GetValidItemFlavorsForLoadoutSlot( LocalClientEHI(), frameEntry ).len()
 	//
-	//LoadoutEntry poseEntry = Loadout_GladiatorCardStance( GetCustomizeContext() )
-	//int ownedPoses = GetUnlockedItemFlavorsForLoadoutSlot( LocalClientEHI(), poseEntry ).len()
-	//int totalPoses = GetValidItemFlavorsForLoadoutSlot( LocalClientEHI(), poseEntry ).len()
 	//
-	//LoadoutEntry badgeEntry = Loadout_GladiatorCardBadge( GetCustomizeContext(), 0 )
-	//int ownedBadges = GetUnlockedItemFlavorsForLoadoutSlot( LocalClientEHI(), badgeEntry ).len()
-	//int totalBadges = GetValidItemFlavorsForLoadoutSlot( LocalClientEHI(), badgeEntry ).len()
 	//
-	//RuiSetString( file.frameHeaderRui, "detail", ownedFrames + " / " + totalFrames )
-	//RuiSetString( file.poseHeaderRui, "detail", ownedPoses + " / " + totalPoses )
-	//RuiSetString( file.badgesHeaderRui, "detail", ownedBadges + " / " + totalBadges )
-	//RuiSetString( file.statsHeaderRui, "detail", "? / ?" )
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	SetupMenuGladCard( file.combinedCard, "card", true )
 	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.CHARACTER, 0, GetTopLevelCustomizeContext() )
@@ -327,9 +330,9 @@ void function UpdateNewnessCallbacks()
 	ItemFlavor character = GetTopLevelCustomizeContext()
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardFramesSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton0" ) )
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardStancesSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton1" ) )
-	//Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardBadgesSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton2" ) )
-	//Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardBadgesSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton3" ) )
-	//Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardBadgesSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton4" ) )
+	//
+	//
+	//
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardTrackersSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton5" ) )
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardTrackersSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton6" ) )
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardTrackersSectionButton[character], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton7" ) )
@@ -344,9 +347,9 @@ void function ClearNewnessCallbacks()
 
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardFramesSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton0" ) )
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardStancesSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton1" ) )
-	//Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardBadgesSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton2" ) )
-	//Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardBadgesSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton3" ) )
-	//Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardBadgesSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton4" ) )
+	//
+	//
+	//
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardTrackersSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton5" ) )
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardTrackersSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton6" ) )
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.GCardTrackersSectionButton[expect ItemFlavor( file.lastNewnessCharacter )], OnNewnessQueryChangedUpdateButton, Hud_GetChild( file.panel, "SectionButton7" ) )

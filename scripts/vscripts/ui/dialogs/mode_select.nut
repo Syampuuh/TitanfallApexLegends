@@ -33,16 +33,15 @@ void function InitModeSelectDialog()
 
 void function OnOpenModeSelectDialog()
 {
-	// TEMP START
+	//
 	foreach ( button, playlistName in file.buttonToMode )
 	{
 		Hud_RemoveEventHandler( button, UIE_CLICK, OnModeButton_Activate )
 	}
 	file.buttonToMode.clear()
-	// TEMP END
+	//
 
 	var ownerButton = GetModeSelectButton()
-	Hud_SetSelected( ownerButton, true )
 
 	UIPos ownerPos   = REPLACEHud_GetAbsPos( ownerButton )
 	UISize ownerSize = REPLACEHud_GetSize( ownerButton )
@@ -60,6 +59,12 @@ void function OnOpenModeSelectDialog()
 			Hud_SetPos( file.modeSelectPopup, ownerPos.x, ownerPos.y - popupHeight )
 			Hud_SetSize( file.modeSelectPopup, ownerSize.width, popupHeight )
 			Hud_SetSize( file.modeList, ownerSize.width, popupHeight )
+
+			if( GetDpadNavigationActive() )
+			{
+				Hud_SetFocused( button )
+				Hud_SetSelected( button, true )
+			}
 		}
 
 		ModeButton_Init( button, playlists[i] )
@@ -71,6 +76,9 @@ void function OnCloseModeSelectDialog()
 {
 	var modeSelectButton = GetModeSelectButton()
 	Hud_SetSelected( modeSelectButton, false )
+
+	if( GetDpadNavigationActive() )
+		Hud_SetFocused( modeSelectButton )
 }
 
 
@@ -98,7 +106,7 @@ void function ModeButton_Init( var button, string playlistName )
 	else
 	{
 		ToolTipData toolTipData
-		toolTipData.titleText = "" //name
+		toolTipData.titleText = "" //
 		toolTipData.descText = GetPlaylistVarOrUseValue( playlistName, "description", "#HUD_UNKNOWN" )
 
 		Hud_SetToolTipData( button, toolTipData )

@@ -5,7 +5,7 @@ global function OnProjectileCollision_weapon_deployable
 
 entity function ThrowDeployable( entity weapon, WeaponPrimaryAttackParams attackParams, float throwPower, void functionref(entity) deployFunc, vector ornull angularVelocity = null )
 {
-	#if CLIENT
+	#if(CLIENT)
 		if ( !weapon.ShouldPredictProjectiles() )
 			return null
 	#endif
@@ -24,7 +24,7 @@ entity function ThrowDeployable( entity weapon, WeaponPrimaryAttackParams attack
 		angularVelocity = <600, RandomFloatRange( -300, 300 ), 0>
 	expect vector( angularVelocity )
 
-	float fuseTime = 0.0	// infinite
+	float fuseTime = 0.0	//
 
 	bool isPredicted = PROJECTILE_PREDICTED
 	if ( player.IsNPC() )
@@ -42,20 +42,20 @@ entity function ThrowDeployable( entity weapon, WeaponPrimaryAttackParams attack
 	fireGrenadeParams.useScriptOnDamage = true
 	entity deployable = weapon.FireWeaponGrenade( fireGrenadeParams )
 
-	#if SERVER
-		if ( deployable )
-		{
-			if ( IsValid( player ) )
-			{
-				deployable.RemoveFromAllRealms()
-				deployable.AddToOtherEntitysRealms( player )
-			}
+	#if(false)
 
-			deployable.proj.savedAngles = <0, angles.y, 0>
-			Grenade_Init( deployable, weapon )
-			thread OnProjectilePlanted( deployable, deployFunc )
-		}
-	#endif
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 	return deployable
 }
@@ -70,7 +70,7 @@ vector function GetDeployableThrowStartPos( entity player, vector baseStartPos )
 		return attackPos + ( attackDir * 50 )
 	}
 
-	vector attackPos = player.OffsetPositionFromView( baseStartPos, <15,0,0> )	// forward, right, up
+	vector attackPos = player.OffsetPositionFromView( baseStartPos, <15,0,0> )	//
 	return attackPos
 }
 
@@ -92,14 +92,14 @@ vector function GetDeployableThrowVelocity( entity player, vector baseAngles, fl
 
 void function OnProjectileCollision_weapon_deployable( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	#if SERVER
-	if ( projectile.proj.isPlanted )
-		return
+	#if(false)
 
-	if ( projectile.proj.projectileBounceCount > 50 )
-		projectile.Destroy()
-	projectile.proj.projectileBounceCount++
-	#endif
+
+
+
+
+
+#endif
 	table collisionParams =
 	{
 		pos = pos,
@@ -111,12 +111,12 @@ void function OnProjectileCollision_weapon_deployable( entity projectile, vector
 	bool result = PlantStickyEntityThatBouncesOffWalls( projectile, collisionParams, 0.7, <90,0,0> )
 }
 
-#if SERVER
-void function OnProjectilePlanted( entity projectile, void functionref(entity) deployFunc )
-{
-	projectile.EndSignal( "OnDestroy" )
-	projectile.WaitSignal( "Planted" )
-	projectile.proj.isPlanted = true
-	thread deployFunc( projectile )
-}
+#if(false)
+
+
+
+
+
+
+
 #endif

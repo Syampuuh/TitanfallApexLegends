@@ -3,22 +3,22 @@ untyped
 global function CodeCallback_RegisterClass_C_BaseEntity
 
 
-//=========================================================
-// C_BaseEntity
-// Properties and methods added here can be accessed on all script entities
-//=========================================================
+//
+//
+//
+//
 
 var function CodeCallback_RegisterClass_C_BaseEntity()
 {
-	//printl( "Class Script: C_BaseEntity" )
+	//
 
 	C_BaseEntity.ClassName <- "C_BaseEntity"
 
-	// Script variables; initializing these to something other than "null" will cause them to be treated as a
-	// static variable on the class instead of a unique variable on each instance.
+	//
+	//
 	C_BaseEntity.s <- null
-	//C_BaseEntity.kv <- null
-	//C_BaseEntity.nv <- null
+	//
+	//
 	C_BaseEntity.hudElems <- null
 	C_BaseEntity.hudVisible <- null
 
@@ -31,7 +31,7 @@ var function CodeCallback_RegisterClass_C_BaseEntity()
 		this.s = {}
 		this.hudElems = {}
 		this.hudVisible = false
-		//this.nv = NetworkValueInterface( this.weakref() )
+		//
 	}
 
 	function C_BaseEntity::Get( val )
@@ -98,5 +98,5 @@ var function CodeCallback_RegisterClass_C_BaseEntity()
 	{
 		this.Destroy()
 	}
-	#document( "C_BaseEntity::Kill_Deprecated_UseDestroyInstead", "Kill this entity; deprecated: use ent.Destroy() instead" )
+	#document("C_BaseEntity::Kill_Deprecated_UseDestroyInstead","Kill this entity; deprecated: use ent.Destroy() instead")
 }

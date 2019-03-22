@@ -4,7 +4,7 @@ global function Loadout_CharacterSkin
 global function Loadout_CharacterExecution
 global function Loadout_CharacterIntroQuip
 global function Loadout_CharacterKillQuip
-#if SERVER || CLIENT
+#if(CLIENT)
 global function PlayIntroQuipThread
 global function PlayKillQuipThread
 #endif
@@ -32,28 +32,28 @@ global function CharacterIntroQuip_GetCharacterFlavor
 global function CharacterIntroQuip_GetVoiceSoundEvent
 global function CharacterIntroQuip_GetStingSoundEvent
 global function CharacterIntroQuip_GetSortOrdinal
-#if SERVER || CLIENT
+#if(CLIENT)
 global function CharacterSkin_Apply
 global function CharacterSkin_WaitForAndApplyFromLoadout
 #endif
-#if DEV && CLIENT
+#if DEV && CLIENT 
 global function DEV_TestCharacterSkinData
 #endif
 
 
-//////////////////////
-//////////////////////
-//// Global Types ////
-//////////////////////
-//////////////////////
+//
+//
+//
+//
+//
 //
 
 
-///////////////////////
-///////////////////////
-//// Private Types ////
-///////////////////////
-///////////////////////
+//
+//
+//
+//
+//
 struct FileStruct_LifetimeLevel
 {
 	table<ItemFlavor, LoadoutEntry>             loadoutCharacterSkinSlotMap
@@ -71,11 +71,11 @@ struct FileStruct_LifetimeLevel
 FileStruct_LifetimeLevel& fileLevel
 
 
-////////////////////////
-////////////////////////
-//// Initialization ////
-////////////////////////
-////////////////////////
+//
+//
+//
+//
+//
 void function ShCharacterCosmetics_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileLevel
@@ -87,7 +87,7 @@ void function ShCharacterCosmetics_LevelInit()
 
 void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 {
-	// skins
+	//
 	{
 		array<ItemFlavor> skinList = RegisterReferencedItemFlavorsFromArray( characterClass, "skins", "flavor" )
 		foreach( ItemFlavor skin in skinList )
@@ -99,6 +99,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		MakeItemFlavorSet( skinList, fileLevel.cosmeticFlavorSortOrdinalMap )
 
 		LoadoutEntry entry = RegisterLoadoutSlot( eLoadoutEntryType.ITEM_FLAVOR, "character_skin_for_" + ItemFlavor_GetGUIDString( characterClass ) )
+		entry.pdefSectionKey = "character " + ItemFlavor_GetGUIDString( characterClass )
 		entry.DEV_category = "character_skins"
 		entry.DEV_name = ItemFlavor_GetHumanReadableRef( characterClass ) + " Skin"
 		entry.stryderCharDataArrayIndex = ePlayerStryderCharDataArraySlots.CHARACTER_SKIN
@@ -110,7 +111,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		entry.isActiveConditions = { [Loadout_CharacterClass()] = { [characterClass] = true, }, }
 		entry.networkTo = eLoadoutNetworking.PLAYER_GLOBAL
 		entry.networkVarName = "CharacterSkin"
-		#if CLIENT
+		#if(CLIENT)
 			if ( IsLobby() )
 			{
 		AddCallback_ItemFlavorLoadoutSlotDidChange_AnyPlayer( entry, void function( EHI playerEHI, ItemFlavor skin ) {
@@ -121,7 +122,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		fileLevel.loadoutCharacterSkinSlotMap[characterClass] <- entry
 	}
 
-	// executions
+	//
 	{
 		array<ItemFlavor> executionsList = RegisterReferencedItemFlavorsFromArray( characterClass, "executions", "flavor" )
 		foreach( ItemFlavor execution in executionsList )
@@ -129,6 +130,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		MakeItemFlavorSet( executionsList, fileLevel.cosmeticFlavorSortOrdinalMap )
 
 		LoadoutEntry entry = RegisterLoadoutSlot( eLoadoutEntryType.ITEM_FLAVOR, "character_execution_for_" + ItemFlavor_GetGUIDString( characterClass ) )
+		entry.pdefSectionKey = "character " + ItemFlavor_GetGUIDString( characterClass )
 		entry.DEV_category = "character_executions"
 		entry.DEV_name = ItemFlavor_GetHumanReadableRef( characterClass ) + " Execution"
 		entry.defaultItemFlavor = executionsList[0]
@@ -141,7 +143,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		fileLevel.loadoutCharacterExecutionSlotMap[characterClass] <- entry
 	}
 
-	// intro quips
+	//
 	{
 		array<ItemFlavor> quipList = RegisterReferencedItemFlavorsFromArray( characterClass, "introQuips", "flavor" )
 		foreach( ItemFlavor quip in quipList )
@@ -149,6 +151,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		MakeItemFlavorSet( quipList, fileLevel.cosmeticFlavorSortOrdinalMap )
 
 		LoadoutEntry entry = RegisterLoadoutSlot( eLoadoutEntryType.ITEM_FLAVOR, "character_intro_quip_for_" + ItemFlavor_GetGUIDString( characterClass ) )
+		entry.pdefSectionKey = "character " + ItemFlavor_GetGUIDString( characterClass )
 		entry.DEV_category = "character_intro_quips"
 		entry.DEV_name = ItemFlavor_GetHumanReadableRef( characterClass ) + " Intro Quip"
 		entry.stryderCharDataArrayIndex = ePlayerStryderCharDataArraySlots.CHARACTER_INTRO_QUIP
@@ -163,7 +166,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		fileLevel.loadoutCharacterIntroQuipSlotMap[characterClass] <- entry
 	}
 
-	// kill quips
+	//
 	{
 		array<ItemFlavor> quipList = RegisterReferencedItemFlavorsFromArray( characterClass, "killQuips", "flavor" )
 		foreach( ItemFlavor quip in quipList )
@@ -171,6 +174,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 		MakeItemFlavorSet( quipList, fileLevel.cosmeticFlavorSortOrdinalMap )
 
 		LoadoutEntry entry = RegisterLoadoutSlot( eLoadoutEntryType.ITEM_FLAVOR, "character_kill_quip_for_" + ItemFlavor_GetGUIDString( characterClass ) )
+		entry.pdefSectionKey = "character " + ItemFlavor_GetGUIDString( characterClass )
 		entry.DEV_category = "character_kill_quips"
 		entry.DEV_name = ItemFlavor_GetHumanReadableRef( characterClass ) + " Kill Quip"
 		entry.defaultItemFlavor = quipList[0]
@@ -188,18 +192,18 @@ void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 
 void function SetupCharacterSkin( ItemFlavor skin )
 {
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		PrecacheModel( CharacterSkin_GetBodyModel( skin ) )
 		PrecacheModel( CharacterSkin_GetArmsModel( skin ) )
 	#endif
 }
 
 
-//////////////////////////
-//////////////////////////
-//// Global functions ////
-//////////////////////////
-//////////////////////////
+//
+//
+//
+//
+//
 LoadoutEntry function Loadout_CharacterSkin( ItemFlavor characterClass )
 {
 	return fileLevel.loadoutCharacterSkinSlotMap[characterClass]
@@ -224,17 +228,17 @@ LoadoutEntry function Loadout_CharacterKillQuip( ItemFlavor characterClass )
 }
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function PlayIntroQuipThread( entity emitter, EHI playerEHI, entity exceptionPlayer = null )
 {
 	EndSignal( emitter, "OnDestroy" )
-	#if CLIENT
+	#if(CLIENT)
 		Timeout timeout = BeginTimeout( 4.0 )
 		EndSignal( timeout, "Timeout" )
 	#endif
 	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( playerEHI, Loadout_CharacterClass() )
 	ItemFlavor quip      = LoadoutSlot_WaitForItemFlavor( playerEHI, Loadout_CharacterIntroQuip( character ) )
-	#if CLIENT
+	#if(CLIENT)
 		CancelTimeoutIfAlive( timeout )
 	#endif
 
@@ -244,17 +248,17 @@ void function PlayIntroQuipThread( entity emitter, EHI playerEHI, entity excepti
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function PlayKillQuipThread( entity emitter, EHI playerEHI, entity exceptionPlayer = null )
 {
 	EndSignal( emitter, "OnDestroy" )
-	#if CLIENT
+	#if(CLIENT)
 		Timeout timeout = BeginTimeout( 4.0 )
 		EndSignal( timeout, "Timeout" )
 	#endif
 	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( playerEHI, Loadout_CharacterClass() )
 	ItemFlavor quip      = LoadoutSlot_WaitForItemFlavor( playerEHI, Loadout_CharacterKillQuip( character ) )
-	#if CLIENT
+	#if(CLIENT)
 		CancelTimeoutIfAlive( timeout )
 	#endif
 
@@ -264,17 +268,17 @@ void function PlayKillQuipThread( entity emitter, EHI playerEHI, entity exceptio
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function PlayQuip( string quipAlias, entity emitter, EHI playerEHI, entity exceptionPlayer )
 {
 	if ( quipAlias != "" )
 	{
-		#if SERVER
-			if ( exceptionPlayer == null )
-				EmitSoundOnEntity( emitter, quipAlias )
-			else
-				EmitSoundOnEntityExceptToPlayer( emitter, exceptionPlayer, quipAlias )
-		#else
+		#if(false)
+
+
+
+
+#else
 		EmitSoundOnEntity( emitter, quipAlias )
 		#endif
 	}
@@ -314,7 +318,7 @@ int function CharacterSkin_GetCamoIndex( ItemFlavor flavor )
 }
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function CharacterSkin_Apply( entity ent, ItemFlavor skin )
 {
 	Assert( ItemFlavor_GetType( skin ) == eItemType.character_skin )
@@ -322,7 +326,7 @@ void function CharacterSkin_Apply( entity ent, ItemFlavor skin )
 	asset bodyModel = CharacterSkin_GetBodyModel( skin )
 	asset armsModel = CharacterSkin_GetArmsModel( skin )
 
-	ent.SetSkin( 0 ) // Lame that we need this, but this avoids invalid skin errors when the model changes and the currently shown skin index doesn't exist for the new model
+	ent.SetSkin( 0 ) //
 	ent.SetModel( bodyModel )
 
 	int skinIndex = ent.GetSkinIndexByName( CharacterSkin_GetSkinName( skin ) )
@@ -337,18 +341,18 @@ void function CharacterSkin_Apply( entity ent, ItemFlavor skin )
 	ent.SetSkin( skinIndex )
 	ent.SetCamo( camoIndex )
 
-	#if SERVER
-		if ( ent.IsPlayer() )
-		{
-			ent.SetBodyModelOverride( bodyModel )
-			ent.SetArmsModelOverride( armsModel )
-		}
-	#endif // SERVER
+	#if(false)
+
+
+
+
+
+#endif //
 }
-#endif // SERVER || CLIENT
+#endif //
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function CharacterSkin_WaitForAndApplyFromLoadout( entity player, entity targetEnt )
 {
 	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( player ), Loadout_CharacterClass() )
@@ -549,7 +553,7 @@ ItemFlavor function CharacterIntroQuip_GetCharacterFlavor( ItemFlavor flavor )
 }
 
 
-#if DEV && CLIENT
+#if DEV && CLIENT 
 void function DEV_TestCharacterSkinData()
 {
 	entity model = CreateClientSidePropDynamic( <0, 0, 0>, <0, 0, 0>, $"mdl/dev/empty_model.rmdl" )
@@ -567,4 +571,4 @@ void function DEV_TestCharacterSkinData()
 
 	model.Destroy()
 }
-#endif // DEV && CLIENT
+#endif //

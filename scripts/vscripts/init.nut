@@ -1,8 +1,8 @@
-//========== Copyright � 2008, Valve Corporation, All rights reserved. ========
-//  Purpose: Script initially run after squirrel VM is initialized
 //
-//  !!!NOTE: Reference script only; changes made to this script will not work in game.
-//=============================================================================
+//
+//
+//
+//
 
 global function printl
 global function Msg
@@ -275,14 +275,14 @@ global struct MainMenuPromos
 	string layout
 }
 
-#if SERVER || UI
+#if(UI)
 global struct GRXCodeOffer
 {
 	int itemIdx
 	array< array< int > > prices
 	table< string, string > attrs
 }
-#endif // #if SERVER || UI
+#endif //
 
 global struct GRXUserInfo
 {
@@ -296,6 +296,8 @@ global struct GRXUserInfo
 	array< int > balances
 
 	int marketplaceEdition
+
+	bool isOfferRestricted
 }
 
 global struct VortexBulletHit
@@ -310,25 +312,10 @@ global struct AnimRefPoint
 	vector angles
 }
 
-global enum eSPLevel
-{
-	UNKNOWN,
-	TRAINING,
-	WILDS,
-	SEWERS,
-	BOOM_TOWN,
-	TIME_SHIFT,
-	BEACON,
-	TDAY,
-	SHIP2SHIP,
-	SKYWAY,
-	CLOUD_CITY
-}
-
 global struct LevelTransitionStruct
 {
-	// only ints, floats, bools, vectors, and other structs or fixed-size arrays containing those are allowed.
-	// "ornull" may also be used.
+	//
+	//
 
 	int startPointIndex
 
@@ -342,22 +329,7 @@ global struct LevelTransitionStruct
 	int titan_mainWeapon = -1
 	int titan_unlocksBitfield = 0
 
-	int levelID = eSPLevel.UNKNOWN
-
 	int difficulty = 0
-
-	bool pilotHasBattery
-	bool embarked
-
-	//timeshift
-	bool timeshiftKilledLobbyMarvin = false
-	int timeshiftMostRecentTimeline
-	int boyleAudioLogsCollected = 0
-	int[5] boyleAudioLogNumberAssignments = [ 0, 0, 0, 0, 0 ]
-
-	//cloud city
-	// bool elevatorSpotted
-	vector playerPos
 }
 
 global struct WeaponOwnerChangedParams
@@ -488,38 +460,38 @@ global struct SmartAmmoTarget
 
 global struct StaticPropRui
 {
-	//------------------------------
-	// These values are ignored by RuiCreateOnStaticProp. They are given to ClientCodeCallback_OnEnumStaticPropRui to be informative.
 	//
-	// If you create a StaticPropRui struct from scratch to pass to RuiCreateOnStaticProp, you can leave these blank.
+	//
+	//
+	//
 
-	string scriptName           // "script_name" in LevelEd.
-	string mockupName           // Name of the mockup material in Maya.
-	string modelName            // Name of the model.
-	vector spawnOrigin			// World coordinates of the model's origin when spawned. Parented static props can move away from here.
-	vector spawnMins			// Minimum world coordinates of the model's bounding box when spawned. This can be wrong for parented static props once the level starts.
-	vector spawnMaxs			// Maximum world coordinates of the model's bounding box when spawned. This can be wrong for parented static props once the level starts.
+	string scriptName           //
+	string mockupName           //
+	string modelName            //
+	vector spawnOrigin			//
+	vector spawnMins			//
+	vector spawnMaxs			//
 
 	vector spawnForward
 	vector spawnRight
 	vector spawnUp
 
-	//------------------------------
-	// These values are used by RuiCreateOnStaticProp to create a RUI on a static prop.
-	// They are initialized to default values in ClientCodeCallback_OnEnumStaticPropRui.
-	// You can change them to customize behavior.
 	//
-	// If you create a StaticPropRui struct from scratch to pass to RuiCreateOnStaticProp, you must initialize "ruiName", but "args" can be left empty.
-
-	asset ruiName               // Name of the RUI asset to create
-	table<string, string> args  // Arg overrides.
-
-	//------------------------------
-	// This magic number is how code knows which prop and RUI mesh to use for the topology. Do not remember this across levels, and do not modify it.
-	// If you want to remember a RUI mesh on a static prop at startup so that you can create a RUI on it later, this is all you have to remember.
 	//
-	// If you create a StaticPropRui struct from scratch to pass to RuiCreateOnStaticProp, this must be initialized to the value you remembered from
-	// ClientCodeCallback_OnEnumStaticPropRui.
+	//
+	//
+	//
+	//
+
+	asset ruiName               //
+	table<string, string> args  //
+
+	//
+	//
+	//
+	//
+	//
+	//
 
 	int magicId
 }
@@ -568,9 +540,9 @@ global struct NavMesh_FindMeshPath_Result
 
 global typedef SettingsAssetGUID int
 
-//-----------------------------------------------------------------------------
-// General
-//-----------------------------------------------------------------------------
+//
+//
+//
 
 void function printl( var text )
 {
@@ -584,9 +556,9 @@ void function Msg( var text )
 
 void function CodeCallback_Precompile()
 {
-#if DEV
-	// save the const table for later printing when documenting code consts
-	//if ( Dev_CommandLineHasParm( "-scriptdocs" ) )
+#if(DEV)
+	//
+	//
 		getroottable().originalConstTable <- clone getconsttable()
 #endif
 }

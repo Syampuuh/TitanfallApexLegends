@@ -85,21 +85,21 @@ void function TrackingVision_CreateSonarPulseArea( vector origin, float radius, 
 
 void function TrackingVision_Start( entity ent, int statusEffect, bool actuallyChanged )
 {
-//	printt( "CLIENT: TRYING TO START TRACKING VISION" )
-//	printt( "TRACKED POI COUNT: " + file.trackedPOI.len() )
-//	printt( "TRACKED PLAYERS: " + file.trackedEnts.len() )
+//
+//
+//
 	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
 		return
 
-//	printt( "CLIENT: TRACKING VISION STATE CHANGED" )
-//	printt( "CLIENT: ENTITY IS " + ent )
+//
+//
 
 
 
 	if ( ent != GetLocalViewPlayer() )
 		return
 
-//	printt( "CLIENT: STARTING TRACKING VISION FOR LOCAL PLAYER" )
+//
 	ResetWaypointVisibilities()
 	file.currentTracker = ent
 
@@ -109,20 +109,20 @@ void function TrackingVision_Start( entity ent, int statusEffect, bool actuallyC
 
 void function TrackingVision_Stop( entity ent, int statusEffect, bool actuallyChanged )
 {
-//	printt( "CLIENT: TRYING TO STOP TRACKING VISION" )
-//	printt( "TRACKED POI COUNT: " + file.trackedPOI.len() )
-// 	printt( "TRACKED PLAYERS: " + file.trackedEnts.len() )
+//
+//
+//
 	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
 		return
 
-//	printt( "CLIENT: TRACKING VISION STATE CHANGED" )
-//	printt( "CLIENT: ENTITY IS " + ent )
+//
+//
 	if ( ent != GetLocalViewPlayer() )
 		return
 
-//	printt( "CLIENT: STOPPING TRACKING VISION FOR LOCAL PLAYER" )
+//
 
-	//printt( "STOPING TRACKING VISION" )
+	//
 	ResetWaypointVisibilities()
 	file.currentTracker = null
 
@@ -132,7 +132,7 @@ void function TrackingVision_Stop( entity ent, int statusEffect, bool actuallyCh
 void function TrackingVision_OnPlayerClassChanged( entity player )
 {
 
-//	printt( "CLIENT: PLAYER CLASS CHANGED" )
+//
 
 	entity localViewPlayer = GetLocalViewPlayer()
 	entity localClientPlayer = GetLocalClientPlayer()
@@ -140,10 +140,10 @@ void function TrackingVision_OnPlayerClassChanged( entity player )
 	if ( player.IsTitan() )
 		return
 
-//	printt( "CLIENT: PLAYER IS NOT A TITAN" )
-//	printt( "CLIENT: CLASS CHANGE PLAYER IS " + player )
-//	printt( "CLIENT: VIEW PLAYER IS " + localViewPlayer )
-//	printt( "CLIENT: CLIENT PLAYER IS " + localClientPlayer )
+//
+//
+//
+//
 
 	bool playerIsLocalViewPlayer = (player == localViewPlayer)
 
@@ -153,17 +153,17 @@ void function TrackingVision_OnPlayerClassChanged( entity player )
 	if ( PlayerHasPassive( localViewPlayer, ePassives.PAS_TRACKING_VISION ) )
 		return
 
-//	printt( "CLIENT: PLAYER IS NOT A BLOODHOUND OR IS SPECTATING A BLOODHOUND" )
+//
 
 	if ( playerIsLocalViewPlayer )
 	{
 		player.Signal( "TrackingVision_ForceStop" )
-	//	printt( "CLIENT: STOPPING TRACKING VISION" )
+	//
 	}
 	else
 	{
 		player.Signal( "TrackingVision_StopLoopFX" )
-	//	printt( "CLIENT: STOPPING FX LOOP" )
+	//
 	}
 }
 
@@ -176,10 +176,10 @@ void function TrackingVisionUpdate( entity player )
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "TrackingVision_ForceStop" )
 
-	//We need to update all the entities the player should be able to see.
-	//These should be living player pilots or titans.
-	//We need to handle the case where a player connects mid-game.
-	//Ideally, this should only update when there is a state change.
+	//
+	//
+	//
+	//
 
 	while ( true )
 	{
@@ -245,7 +245,7 @@ void function PlayTrackingVisionLoopFX_Internal( entity player, entity ent )
 		{
 			if ( fxHandle != -1  )
 			{
-				//printt("STOPPING TRACKING FX")
+				//
 				EffectStop( fxHandle, true, false )
 
 				if ( IsValid( ent ) )
@@ -277,7 +277,7 @@ void function TrackingVision_UpdatePOI( entity player )
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "TrackingVision_ForceStop" )
 
-	//Destroy all RUI icons and reset draw distance on thread end.
+	//
 	OnThreadEnd(
 		function() : ()
 		{
@@ -286,7 +286,7 @@ void function TrackingVision_UpdatePOI( entity player )
 		}
 	)
 
-	//If we shouldn't draw tracking icons, early out.
+	//
 	if ( !ShouldShowTrackingVisionIcons() )
 		return
 
@@ -297,7 +297,7 @@ void function TrackingVision_UpdatePOI( entity player )
 		foreach ( entity waypoint in waypoints )
 			TrackingVision_UpdateWaypointPOIDrawing( waypoint )
 
-		//Remove Sonar Pulse Areas now that they have been used in the discovery check.
+		//
 		file.activeSonarPulseAreas = []
 
 		wait TRACKING_VISION_UPDATE_INTERVAL
@@ -310,13 +310,13 @@ void function TrackingVision_UpdateWaypointPOIDrawing( entity waypoint )
 	int waypointID = waypoint.WaypointGetID()
 
 	if ( waypointID < 0 )
-		return //may not have assigned id to a waypoint yet
+		return //
 
 	entity localViewPlayer = GetLocalViewPlayer()
 	if ( !IsValid( localViewPlayer ) )
 		return
 
-#if DEV
+#if(DEV)
 	if ( localViewPlayer != file.currentTracker )
 	{
 		ResetWaypointVisibilities()
@@ -351,7 +351,7 @@ void function TrackingVision_UpdateWaypointPOIDrawing( entity waypoint )
 				float sonarDistSqr = DistanceSqr( sonarData.origin, waypointPos )
 				if ( sonarDistSqr <= ( sonarData.radius * sonarData.radius ) )
 				{
-					//Only reveal evidince markers that are within our sonar cone.
+					//
 					vector posToTarget = Normalize( waypointPos - sonarData.origin )
 					float dot = DotProduct( posToTarget, sonarData.dir )
 					float angle = DotToAngle( dot )
@@ -438,7 +438,7 @@ void function WaypointPOIVisibilityChanged_Internal( entity waypoint, bool isVis
 	}
 }
 
-// turn this into a code callback that happens on client creation client will handle los traces and such
+//
 void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID, vector pos, entity ent, int team )
 {
 	waypoint.WaypointSetID( file.nextPOIID )
@@ -447,7 +447,7 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 	switch ( poiEventID )
 	{
 
-		//WORLD AND PLAYER ACTION EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.DROPPOD:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR )
@@ -527,7 +527,7 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_LONG )
 			break
 
-		//PLAYER TRAVERSAL EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_TRAVERSAL_ZIPLINE_START:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR )
@@ -564,7 +564,7 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_SHORT )
 			break
 
-		//PLAYER ABILITY EVENTS
+		//
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITIES_PHASE_DASH_START:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR )
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_SHORT )
@@ -585,7 +585,7 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_SHORT )
 			break
 
-		//LOOT PICKUP EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR )
@@ -642,7 +642,14 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_SHORT )
 			break
 
-		//LOOT EXCHANGE EVENTS
+#if(false)
+
+
+
+
+#endif
+
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_ARMOR:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR )
@@ -674,7 +681,7 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_SHORT )
 			break
 
-		//LOOT DROPPED EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR | WPF_DYNAMIC_UPDATE )
@@ -731,12 +738,31 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_SHORT )
 			break
 
+#if(false)
+
+
+
+
+#endif
+
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_DIRTY_BOMB:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR | WPF_DEPLOYABLE )
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_MEDIUM )
 			break
 
+#if(false)
+
+
+
+
+#endif
+
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_DEPLOYABLE_MEDIC:
+			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR | WPF_DEPLOYABLE )
+			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_MEDIUM )
+			break
+
+		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_JUMP_PAD:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR | WPF_DEPLOYABLE )
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_MEDIUM )
 			break
@@ -745,6 +771,27 @@ void function TrackingVisionCreatePOIBlueprint( entity waypoint, int poiEventID,
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR | WPF_DEPLOYABLE )
 			waypoint.WaypointSetCheckDist( TRACKING_VISION_DRAW_DIST_MAX )
 			break
+
+#if(false)
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+#endif
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_PHASE_GATE:
 			waypoint.WaypointAddFlag( WPF_VISBILITY_LOS | WPF_VISIBILITY_SONAR | WPF_DEPLOYABLE )
@@ -860,7 +907,7 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = GetKillAttackerDisplayText( damageSourceID, dist )
 			break
 
-		//PLAYER TRAVERSAL EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_TRAVERSAL_ZIPLINE_START:
 			drawInfo.drawSize = eTrackingPOIDrawSize.NORMAL
@@ -904,7 +951,7 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = "#GEAR_TRACKING_VISION_OBJECT_TRAVERSAL_JUMP_DOWN_STOP"
 			break
 
-		//PLAYER ABILITY EVENTS
+		//
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITIES_PHASE_DASH_START:
 			drawInfo.drawSize = eTrackingPOIDrawSize.SMALL
 			drawInfo.icon = $"rui/hud/poi_icons/poi_blink_start"
@@ -929,7 +976,7 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = "#GEAR_TRACKING_VISION_OBJECT_ABILITIES_GAS"
 			break
 
-		//LOOT PICKUP EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP:
 			drawInfo.drawSize = eTrackingPOIDrawSize.SMALL
@@ -997,7 +1044,15 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = "#GEAR_TRACKING_VISION_OBJECT_LOOT_PICKUP_INCAPSHIELD"
 			break
 
-		//LOOT EXCHANGE EVENTS
+#if(false)
+
+
+
+
+
+#endif
+
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_ARMOR:
 			drawInfo.drawSize = eTrackingPOIDrawSize.SMALL
@@ -1035,7 +1090,7 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = "#GEAR_TRACKING_VISION_OBJECT_LOOT_EXCHANGE_INCAPSHIELD"
 			break
 
-		//LOOT DROPPED EVENTS
+		//
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP:
 			drawInfo.drawSize = eTrackingPOIDrawSize.SMALL
@@ -1103,11 +1158,27 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = "#GEAR_TRACKING_VISION_OBJECT_LOOT_DROP_INCAPSHIELD"
 			break
 
+#if(false)
+
+
+
+
+
+#endif
+
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_DIRTY_BOMB:
 			drawInfo.drawSize = eTrackingPOIDrawSize.NORMAL
 			drawInfo.icon = $"rui/hud/poi_icons/poi_trap"
 			drawInfo.displayText = "#WPN_DIRTY_BOMB"
 			break
+
+#if(false)
+
+
+
+
+
+#endif
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_DEPLOYABLE_MEDIC:
 			drawInfo.drawSize = eTrackingPOIDrawSize.NORMAL
@@ -1115,11 +1186,41 @@ void function TrackingVision_GetDrawInfo( entity waypoint, TrackingVisionDrawInf
 			drawInfo.displayText = "#WPN_DEPLOYABLE_MEDIC"
 			break
 
+		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_JUMP_PAD:
+			drawInfo.drawSize = eTrackingPOIDrawSize.NORMAL
+			drawInfo.icon = $"rui/hud/poi_icons/poi_deployable"
+			drawInfo.displayText = "#WPN_JUMP_PAD"
+			break
+
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_BUBBLE_BUNKER:
 			drawInfo.drawSize = eTrackingPOIDrawSize.NORMAL
 			drawInfo.icon = $"rui/hud/poi_icons/poi_deployable"
 			drawInfo.displayText = "#WPN_BUBBLE_BUNKER"
 			break
+
+#if(false)
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+#endif
 
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_PHASE_GATE:
 			drawInfo.drawSize = eTrackingPOIDrawSize.NORMAL
@@ -1140,7 +1241,7 @@ int function GetPingTypeFromPOIType( entity waypoint )
 
 	switch( poiType )
 	{
-		// TRAVELER
+		//
 		case eTrackingVisionNetworkedPOITypes.PLAYER_TRAVERSAL_ZIPLINE_START:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_TRAVERSAL_ZIPLINE_STOP:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_TRAVERSAL_FOOTPRINT:
@@ -1151,6 +1252,7 @@ int function GetPingTypeFromPOIType( entity waypoint )
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITIES_PHASE_DASH_START:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITIES_PHASE_DASH_STOP:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_PHASE_GATE:
+		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_JUMP_PAD:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_OPENDROPPOD:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_CLASS_DEPLOYABLE:
 		case eTrackingVisionNetworkedPOITypes.DROPPOD:
@@ -1162,17 +1264,27 @@ int function GetPingTypeFromPOIType( entity waypoint )
 		case eTrackingVisionNetworkedPOITypes.PLAYER_RELOAD:
 				return (age > 30) ? ePingType.BLOODHOUND_POI_TRAVELER : ePingType.BLOODHOUND_POI_TRAVELER_RECENT
 
-		// BATTLE
+		//
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITIES_SMOKE:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITIES_GAS:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_DIRTY_BOMB:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_DEPLOYABLE_MEDIC:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_ABILITY_BUBBLE_BUNKER:
+#if(false)
+
+
+#endif
+#if(false)
+
+#endif
 		case eTrackingVisionNetworkedPOITypes.PLAYER_FIRE_WEAPON_BULLET:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_FIRE_WEAPON_GRENADE:
+#if(false)
+
+#endif
 			return (age > 30) ? ePingType.BLOODHOUND_POI_BATTLE : ePingType.BLOODHOUND_POI_BATTLE_RECENT
 
-		// WOUNDED
+		//
 		case eTrackingVisionNetworkedPOITypes.PLAYER_DEATH:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_KILLER:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_HEAL:
@@ -1180,7 +1292,7 @@ int function GetPingTypeFromPOIType( entity waypoint )
 		case eTrackingVisionNetworkedPOITypes.PLAYER_TOOK_DAMAGE:
 			return (age > 30) ? ePingType.BLOODHOUND_POI_WOUNDED : ePingType.BLOODHOUND_POI_WOUNDED_RECENT
 
-		// LOOT
+		//
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_AMMO:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_ARMOR:
@@ -1192,6 +1304,9 @@ int function GetPingTypeFromPOIType( entity waypoint )
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_HELMET:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_BACKPACK:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_INCAPSHIELD:
+#if(false)
+
+#endif
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_ARMOR:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_WEAPON:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_JUMPKIT:
@@ -1209,6 +1324,9 @@ int function GetPingTypeFromPOIType( entity waypoint )
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_HELMET:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_BACKPACK:
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_INCAPSHIELD:
+#if(false)
+
+#endif
 		case eTrackingVisionNetworkedPOITypes.PLAYER_LOOTBIN_USED:
 			return (age > 30) ? ePingType.BLOODHOUND_POI_LOOTING : ePingType.BLOODHOUND_POI_LOOTING_RECENT
 
@@ -1262,7 +1380,7 @@ int function GetBloodhoundPingCommsAction( entity pingingPlayer, int pingType, e
 		case ePingType.BLOODHOUND_POI_WOUNDED:
 			return eCommsAction.BLOOHOUND_WARN_WOUNDED
 
-		// RECENT
+		//
 
 		case ePingType.BLOODHOUND_POI_TRAVELER_RECENT:
 			return eCommsAction.BLOOHOUND_WARN_TRAVELER_RECENT
@@ -1291,12 +1409,13 @@ void function TrackingVision_CreateGenericTrackerMarker( entity waypoint )
 	entity localViewPlayer = GetLocalViewPlayer()
 
 	vector pos = waypoint.WaypointGetPOIPosition()
-	var rui = CreateCockpitPostFXRui( $"ui/tracking_vision_object_icons.rpak", RuiCalculateDistanceSortKey( localViewPlayer.EyePosition(), pos ) )
+	var rui = CreateTransientFullscreenRui( $"ui/tracking_vision_object_icons.rpak", RuiCalculateDistanceSortKey( localViewPlayer.EyePosition(), pos ) )
+
 	RuiSetGameTime( rui, "startTime", waypoint.WaypointGetCreationTime() )
 	RuiSetGameTime( rui, "iconCreationTime", Time() )
 	RuiSetFloat( rui, "duration", waypoint.WaypointGetLifetime() )
 
-	//If this POI needs its position dynamically updated and the POI's entity is valid, have our rui track the position of the entity.
+	//
 	entity attachedEnt = waypoint.WaypointGetAttachedPOIEnt()
 	if ( waypoint.WaypointIsFlagSet( WPF_DYNAMIC_UPDATE ) && IsValid( attachedEnt ) )
 		RuiTrackFloat3( rui, "pos", attachedEnt, RUI_TRACK_OVERHEAD_FOLLOW )

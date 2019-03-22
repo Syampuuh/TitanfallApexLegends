@@ -1,11 +1,11 @@
 //
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 global function ShCharacterAbilities_LevelInit
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 global function CharacterClass_GetTacticalAbility
 global function CharacterClass_GetUltimateAbility
 global function CharacterClass_GetPassiveAbility
@@ -15,11 +15,11 @@ global function CharacterAbility_GetPassiveIndex
 
 
 
-///////////////////////
-///////////////////////
-//// Private Types ////
-///////////////////////
-///////////////////////
+//
+//
+//
+//
+//
 struct FileStruct_LifetimeLevel
 {
 	table<ItemFlavor, ItemFlavor> characterTacAbilityMap
@@ -30,12 +30,12 @@ FileStruct_LifetimeLevel& fileLevel
 
 
 
-/////////////////////////
-/////////////////////////
-//// Initialiszation ////
-/////////////////////////
-/////////////////////////
-#if SERVER || CLIENT || UI
+//
+//
+//
+//
+//
+#if CLIENT || UI 
 void function ShCharacterAbilities_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileLevel
@@ -46,12 +46,12 @@ void function ShCharacterAbilities_LevelInit()
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 void function OnItemFlavorRegistered_Character( ItemFlavor character )
 {
 	array<ItemFlavor> abilityList = []
 
-	// tactical
+	//
 	{
 		asset settingsAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( character ), "tacticalAbility" )
 		if ( settingsAsset != $"" )
@@ -61,14 +61,14 @@ void function OnItemFlavorRegistered_Character( ItemFlavor character )
 			{
 				expect ItemFlavor(ability)
 				Assert( CharacterAbility_GetWeaponClassname( ability ) != "" )
-				Assert( CharacterAbility_GetPassiveIndex( ability ) == ePassives.INVALID )  // no real reason for this other than sanity
+				Assert( CharacterAbility_GetPassiveIndex( ability ) == ePassives.INVALID )  //
 				fileLevel.characterTacAbilityMap[character] <- ability
 				abilityList.append( ability )
 			}
 		}
 	}
 
-	// ultimate
+	//
 	{
 		asset settingsAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( character ), "ultimateAbility" )
 		if ( settingsAsset != $"" )
@@ -78,14 +78,14 @@ void function OnItemFlavorRegistered_Character( ItemFlavor character )
 			{
 				expect ItemFlavor(ability)
 				Assert( CharacterAbility_GetWeaponClassname( ability ) != "" )
-				Assert( CharacterAbility_GetPassiveIndex( ability ) == ePassives.INVALID )  // no real reason for this other than sanity
+				Assert( CharacterAbility_GetPassiveIndex( ability ) == ePassives.INVALID )  //
 				fileLevel.characterUltAbilityMap[character] <- ability
 				abilityList.append( ability )
 			}
 		}
 	}
 
-	// passive
+	//
 	{
 		asset settingsAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( character ), "passive1" )
 		if ( settingsAsset != $"" )
@@ -95,7 +95,7 @@ void function OnItemFlavorRegistered_Character( ItemFlavor character )
 			{
 				expect ItemFlavor(ability)
 				Assert( CharacterAbility_GetWeaponClassname( ability ) == "" )
-				Assert( CharacterAbility_GetPassiveIndex( ability ) != ePassives.INVALID )  // no real reason for this other than sanity
+				Assert( CharacterAbility_GetPassiveIndex( ability ) != ePassives.INVALID )  //
 				fileLevel.characterPasAbilityMap[character] <- ability
 				abilityList.append( ability )
 			}
@@ -105,12 +105,12 @@ void function OnItemFlavorRegistered_Character( ItemFlavor character )
 	foreach ( ItemFlavor ability in abilityList )
 	{
 		string weaponClassname = CharacterAbility_GetWeaponClassname( ability )
-		#if SERVER || CLIENT
+		#if(CLIENT)
 			if ( weaponClassname != "" )
 				PrecacheWeapon( weaponClassname )
 		#endif
 
-		// (dw): Result not used. This is called here just to trigger an assert inside it at load time.
+		//
 		CharacterAbility_GetPassiveIndex( ability )
 	}
 }
@@ -118,12 +118,12 @@ void function OnItemFlavorRegistered_Character( ItemFlavor character )
 
 
 
-//////////////////////////
-//////////////////////////
-//// Global functions ////
-//////////////////////////
-//////////////////////////
-#if SERVER || CLIENT || UI
+//
+//
+//
+//
+//
+#if CLIENT || UI 
 ItemFlavor function CharacterClass_GetTacticalAbility( ItemFlavor character )
 {
 	Assert( ItemFlavor_GetType( character ) == eItemType.character )
@@ -133,7 +133,7 @@ ItemFlavor function CharacterClass_GetTacticalAbility( ItemFlavor character )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 ItemFlavor function CharacterClass_GetUltimateAbility( ItemFlavor character )
 {
 	Assert( ItemFlavor_GetType( character ) == eItemType.character )
@@ -143,7 +143,7 @@ ItemFlavor function CharacterClass_GetUltimateAbility( ItemFlavor character )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 ItemFlavor function CharacterClass_GetPassiveAbility( ItemFlavor character )
 {
 	Assert( ItemFlavor_GetType( character ) == eItemType.character )
@@ -153,7 +153,7 @@ ItemFlavor function CharacterClass_GetPassiveAbility( ItemFlavor character )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 string function CharacterAbility_GetWeaponClassname( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.ability )
@@ -163,7 +163,7 @@ string function CharacterAbility_GetWeaponClassname( ItemFlavor flavor )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 int function CharacterAbility_GetPassiveIndex( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.ability )
@@ -179,10 +179,10 @@ int function CharacterAbility_GetPassiveIndex( ItemFlavor flavor )
 
 
 
-///////////////////
-///////////////////
-//// Internals ////
-///////////////////
-///////////////////
+//
+//
+//
+//
+//
 
 

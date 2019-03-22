@@ -27,11 +27,6 @@ global function ShouldPlaySquadConversation
 
 int convIndex
 
-global const int GENERIC_PILOT	=	0
-global const int BLISK_ID		=	1
-global const int SPYGLASS_ID	=	2
-global const int GRAVES_ID		=	3
-
 global struct ConversationStruct
 {
 	int priority
@@ -39,7 +34,7 @@ global struct ConversationStruct
 	float lastPlayedTime
 	int range
 	array<string> inheritedDebounceConversations
-	table<int, array> conversationTable //Mainly an SP concept at this point in time
+	table<int, array> conversationTable //
 }
 
 struct
@@ -54,13 +49,13 @@ void function DialogueShared_Init()
 {
 	DialogueScheduleShared_Init()
 
-	#if CLIENT
+	#if(CLIENT)
 		DialogueScheduleClient_Init()
 	#else
 		DialogueScheduleServer_Init()
 	#endif
 
-	#if HAS_GAMEMODES
+	#if(true)
 	GameStateDialog_Init()
 	#endif
 
@@ -70,9 +65,9 @@ void function DialogueShared_Init()
 void function RegisterConversation( string conversation, int priority, float debounceTime = DEFAULT_CONVERSATION_DEBOUNCE_TIME, int range = 0, array<string> inheritedDebounceConversations = [] )
 {
 	convIndex++
-	#if SERVER
-		file.convToIndex[ conversation ] <- convIndex
-	#else
+	#if(false)
+
+#else
 		file.indexToConv[ convIndex ] <- conversation
 	#endif
 
@@ -184,10 +179,10 @@ array<string> function Voices( int team, string baseAlias, array<int> voiceAvail
 
 array<string> function AI_Dialogue_AliasAllVoices( string aliasPreVoice, string aliasPostVoice, array<int> voiceAvailability, bool hasDry = true )
 {
-	Assert( !Flag( "EntitiesDidLoad" ) ) // you must set up your aliases at map init so they can be precached
+	Assert( !Flag( "EntitiesDidLoad" ) ) //
 
-	// voiceAvailability is an array, hopefully [true,true,true], that specifies which voices exist for this sound.
-	// this lets us hack around missing voices that were not recorded.
+	//
+	//
 
 	Assert( voiceAvailability.len() == VOICE_COUNT )
 
@@ -232,13 +227,13 @@ bool function ShouldPlaySquadConversation( entity player, string conversationTyp
 
 	if ( IsForcedDialogueOnly( player ) )
 	{
-		//printt( "ForcedDialogueOnly, not playing AI Conversation:"  + conversationType )
+		//
 		return false
 	}
 
 	if ( !GetGlobalNetBool( "squadConversationEnabled" ) )
 	{
-		//printt( "SquadConversationEnabled is false, not playing AI Conversation:"  + conversationType )
+		//
 		return false
 	}
 

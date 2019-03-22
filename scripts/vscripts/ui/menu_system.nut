@@ -44,11 +44,11 @@ void function InitSystemPanelMain( var panel )
 
 	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
 
-	#if CONSOLE_PROG
+	#if(CONSOLE_PROG)
 	AddPanelFooterOption( panel, RIGHT, BUTTON_BACK, false, "#BUTTON_RETURN_TO_MAIN", "", ReturnToMain_OnActivate )
 	#endif
 
-	#if DEV
+	#if(DEV)
 		AddPanelFooterOption( panel, LEFT, BUTTON_Y, true, "#Y_BUTTON_DEV_MENU", "#DEV_MENU", OpenDevMenu )
 	#endif
 }
@@ -122,16 +122,42 @@ void function UpdateSystemPanel( var panel )
 		SetCursorPosition( <1920.0 * 0.5, 1080.0 * 0.5, 0> )
 
 		SetButtonData( panel, buttonIndex++, file.settingsButtonData[ panel ] )
-		SetButtonData( panel, buttonIndex++, file.leaveMatchButtonData[ panel ] )
+#if(false)
+
+
+
+
+
+
+
+
+#endif
+		{
+			SetButtonData( panel, buttonIndex++, file.leaveMatchButtonData[ panel ] )
+		}
 	}
 	else
 	{
 		if ( AmIPartyMember() || AmIPartyLeader() && GetPartySize() > 1 )
 			SetButtonData( panel, buttonIndex++, file.leavePartyData[ panel ] )
 		SetButtonData( panel, buttonIndex++, file.settingsButtonData[ panel ] )
-		#if PC_PROG
+		#if(PC_PROG)
 			SetButtonData( panel, buttonIndex++, file.exitButtonData[ panel ] )
 		#endif
+	}
+
+	const int maxNumButtons = 4;
+	for( int i = 0; i < maxNumButtons; i++ )
+	{
+		if( i > 0 && i < buttonIndex)
+			Hud_SetNavUp( file.buttons[ panel ][i], file.buttons[ panel ][i - 1] )
+		else
+			Hud_SetNavUp( file.buttons[ panel ][i], null )
+
+		if( i < (buttonIndex - 1) )
+			Hud_SetNavDown( file.buttons[ panel ][i], file.buttons[ panel ][i + 1] )
+		else
+			Hud_SetNavDown( file.buttons[ panel ][i], null )
 	}
 }
 
@@ -183,14 +209,14 @@ void function OpenSettingsMenu()
 	AdvanceMenu( GetMenu( "MiscMenu" ) )
 }
 
-#if CONSOLE_PROG
+#if(CONSOLE_PROG)
 void function ReturnToMain_OnActivate( var button )
 {
 	ConfirmDialogData data
 	data.headerText = "#EXIT_TO_MAIN"
 	data.messageText = ""
 	data.resultCallback = OnReturnToMainMenu
-	//data.yesText = ["YES_RETURN_TO_TITLE_MENU", "#YES_RETURN_TO_TITLE_MENU"]
+	//
 
 	OpenConfirmDialogFromData( data )
 	AdvanceMenu( GetMenu( "ConfirmDialog" ) )

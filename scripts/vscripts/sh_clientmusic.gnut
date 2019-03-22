@@ -1,0 +1,723 @@
+//
+
+#if(CLIENT)
+global function ClientMusic_SharedInit
+global function ClientMusic_RegisterNetworking
+global function ClientMusic_DisableForClient
+global function ClientMusic_EnableForClient
+#endif
+
+#if(false)
+
+
+#endif
+
+#if(false)
+
+
+#endif //
+
+#if(CLIENT)
+global function ClientMusic_RequestStingerForNewZone
+#endif
+
+#if CLIENT && DEV 
+global function ClientMusic_PrintStatus
+#endif //
+
+
+
+//
+//
+//
+//
+//
+
+#if(CLIENT)
+global enum eMusicTrack
+{
+	ZoneTransitionStingers,
+
+	#if(false)
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+#endif //
+
+	_count
+}
+#endif
+
+
+#if(CLIENT)
+enum eMusicLevel
+{
+	None,
+	#if(false)
+
+
+
+
+
+
+
+#endif
+
+	_count
+}
+#endif
+
+
+//
+//
+//
+//
+//
+
+#if(CLIENT)
+struct TrackPlayData
+{
+	int        shufflePos = 999
+	array<int> shuffledIndices
+
+	int lastIndex = -1
+}
+#endif
+
+
+#if CLIENT || UI 
+struct
+{
+	#if(false)
+
+#endif
+
+	#if(CLIENT)
+		table<int, array<string> > tracksMap
+
+		bool  musicSystemIsDisabled = false
+		bool  zoneStingerRequested = false
+		float zoneStingerRequestedTime
+		bool  threadIsRunning = false
+		bool  threadInFrame = false
+		bool  threadInLoopWaitFrame = false
+		float threadStartTime = -999.0
+		float threadLastFrameTime = -999.0
+		int   queuedCustomTrack = -1
+		int   musicLevel = eMusicLevel.None
+		bool  customTrackIsPlaying = false
+
+		TrackPlayData[eMusicTrack._count] trackPlayDatas
+		int                               lastPlayedMusicTrackDEBUG
+		string                            lastPlayedAliasDEBUG
+		var                               lastPlayedHandle = null
+
+		#if(false)
+
+
+
+#endif
+	#endif
+} file
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+#if CLIENT || UI 
+void function ClientMusic_SharedInit()
+{
+	#if(CLIENT)
+		#if(false)
+
+#endif
+	#endif
+
+	#if(CLIENT)
+		RegisterSignal( "ClientMusic_CustomTrackStop" )
+
+		file.tracksMap[eMusicTrack.ZoneTransitionStingers] <- [
+			"music_beacon_12_spoke1fallensoldiers",
+			"music_skyway_17_slonedies",
+			"music_timeshift_16_explorepresent",
+			"music_timeshift_22_panicburst",
+			"music_wilds_14_timetoinstallbatterytwo"]
+
+		#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+
+		thread ClientMusicThinkThread()
+	#endif
+}
+#endif
+
+
+#if(CLIENT)
+void function ClientMusic_RegisterNetworking()
+{
+	Remote_RegisterClientFunction( "ClientMusic_DisableForClient", "entity" )
+	Remote_RegisterClientFunction( "ClientMusic_EnableForClient", "entity" )
+	#if(false)
+
+
+#endif
+}
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+#if(CLIENT)
+void function ClientMusic_RequestStingerForNewZone( int zoneId )
+{
+	file.zoneStingerRequested = true
+	file.zoneStingerRequestedTime = Time()
+}
+#endif
+
+
+#if(CLIENT)
+void function ClientMusic_DisableForClient( entity player )
+{
+	#if(false)
+
+#else
+		Assert( player == GetLocalClientPlayer() )
+		file.musicSystemIsDisabled = true
+	#endif
+}
+#endif
+
+
+#if(CLIENT)
+void function ClientMusic_EnableForClient( entity player )
+{
+	#if(false)
+
+#else
+		Assert( player == GetLocalClientPlayer() )
+		file.musicSystemIsDisabled = false
+	#endif
+}
+#endif
+
+
+#if(false)
+
+
+
+
+
+//
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+
+#if(false)
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+#if CLIENT && DEV 
+void function ClientMusic_PrintStatus()
+{
+	printf( "running: %s, mid-frame: %s, in-waitframe: %s, startTime: %.2f, lastFrameTime: %.2f, timeNow: %.2f", (file.threadIsRunning ? "yes" : "no"), (file.threadInFrame ? "yes" : "no"), (file.threadInLoopWaitFrame ? "yes" : "no"), file.threadStartTime, file.threadLastFrameTime, Time() )
+	printf( "status: %s", GetClientMusicStatusLine() )
+}
+#endif
+
+
+#if CLIENT && DEV 
+string function GetClientMusicStatusLine()
+{
+	//
+	return format( "'%s',   latest - %s::'%s'", GetDebugNameForMusicLevel( file.musicLevel ), GetDebugNameForMusicTrack( file.lastPlayedMusicTrackDEBUG ), file.lastPlayedAliasDEBUG )
+}
+#endif
+
+
+#if CLIENT && DEV 
+string function GetDebugNameForMusicLevel( int musicLevel )
+{
+	foreach( string key, int val in eMusicLevel )
+	{
+		if ( val == musicLevel )
+			return key
+	}
+	return ""
+}
+#endif
+
+
+#if CLIENT && DEV 
+string function GetDebugNameForMusicTrack( int musicTrack )
+{
+	foreach( string key, int val in eMusicTrack )
+	{
+		if ( val == musicTrack )
+			return key
+	}
+	return ""
+}
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+
+#if(CLIENT)
+void function ClientMusicThinkThread()
+{
+	Assert( !file.threadIsRunning )
+	file.threadIsRunning = true
+	file.threadStartTime = Time()
+
+	while ( true )
+	{
+		#if(DEV)
+			float preFrameTime = Time()
+		#endif
+
+		file.threadInFrame = true
+		file.threadLastFrameTime = Time()
+		ClientMusicThink()
+		file.threadInFrame = false
+
+		#if(DEV)
+			float postFrameTime = Time()
+			Assert( preFrameTime == postFrameTime, format( "ClientMusicFRAME() stalled for %.2f seconds. Should have no waits.", (postFrameTime - preFrameTime) ) )
+		#endif
+
+		file.threadInLoopWaitFrame = true
+		WaitFrame()
+		file.threadInLoopWaitFrame = false
+	}
+}
+#endif
+
+
+#if(CLIENT)
+void function ClientMusicThink()
+{
+	bool allowStinger = true
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+	if ( file.zoneStingerRequested && allowStinger )
+	{
+		float timeSinceRequest = (Time() - file.zoneStingerRequestedTime)
+		if ( timeSinceRequest < 10.0 )
+		{
+#if(false)
+
+
+
+
+
+#endif
+			{
+				StartPlayingMusic( "music_skyway_17_slonedies" )
+			}
+		}
+
+		file.zoneStingerRequested = false
+	}
+
+	//
+	#if(false)
+
+
+
+
+
+#endif //
+}
+#endif
+
+
+#if(CLIENT)
+void function StartPlayingMusic( string musicAlias )
+{
+	if ( musicAlias == "" )
+		return
+	entity player = GetLocalViewPlayer()
+	if ( !IsValid( player ) )
+		return
+
+	file.lastPlayedHandle = EmitSoundOnEntity( player, musicAlias )        //
+	SetPlayThroughKillReplay( file.lastPlayedHandle )
+	file.lastPlayedAliasDEBUG = musicAlias
+
+	printf( "%s() - '%s'", FUNC_NAME(), musicAlias )
+}
+#endif
+
+
+#if(CLIENT)
+void function StopPlayingMusic()
+{
+	//
+
+	if ( file.lastPlayedHandle != null )
+		StopSound( file.lastPlayedHandle )
+
+	file.lastPlayedHandle = null
+}
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+#endif
+
+

@@ -1,5 +1,7 @@
-#if CLIENT
-const float CARD_TAG_SCALE = 0.0 // update to match same const in hud_defs.rui
+//
+
+#if(CLIENT)
+const float CARD_TAG_SCALE = 0.0 //
 
 const float DEFAULT_FOV = 70.0
 const float DEFAULT_DOF_NEAR_START = 7.5
@@ -11,9 +13,9 @@ const float TRANSITION_DURATION = 0.25
 const float DEFAULT_MAX_TURN_SPEED = 270.0
 
 const asset CHARACTER_BASE_EFFECT = $"P_menu_char_base_rarity"
-//#if DEV
-//const asset MENU_TEST_EFFECT = $"P_menu_char_swap"
-//#endif
+//
+//
+//
 
 const vector MENU_MODELS_DEFAULT_HIGHLIGHT_COLOR = <102, 120, 242>
 
@@ -22,7 +24,7 @@ const vector PLAYER_INFO_OFFSET = <0, 0, 74>
 global struct MenuCharacterDef
 {
 	ItemFlavor ornull characterSkin = null
-	//string idleAnim
+	//
 }
 
 global struct MenuModelData
@@ -86,21 +88,22 @@ struct PresentationDef
 	void functionref() startFunc
 	void functionref() endFunc
 }
-#endif // CLIENT
+#endif //
 
 struct
 {
-	#if UI
+	#if(UI)
 		bool interpolateCameraMoves = true
 		int  activePresentationType = ePresentationType.INACTIVE
-	#endif // UI
+	#endif //
 
-	#if CLIENT
+	#if(CLIENT)
 		entity   defaultCameraTarget
 		entity   playCameraTarget
 		entity   closeCharacterCameraTarget
 		entity   customizeCharacterCameraTarget
 		entity   customizeWeaponCameraTarget
+		entity   battlepassCameraTarget
 		float[2] mouseRotateDelta
 		float    mouseWheelNewValue = 0.0
 		float    mouseWheelLastValue = 0.0
@@ -134,14 +137,14 @@ struct
 
 		array<entity> dimmedEnts
 
-		#if DEV
+		#if(DEV)
 			bool DEV_previewSelfAsParty = false
-		#endif // DEV
+		#endif //
 		int  transitionTest = 3
-	#endif // CLIENT
+	#endif //
 } file
 
-#if CLIENT
+#if(CLIENT)
 global function ClMenuModels_Init
 global function PROTO_HighlightTest
 global function MenuModelHighlightBloom
@@ -177,20 +180,22 @@ global function UIToClient_PartyMemberLoseFocus
 global function DisableModelTurn
 global function EnableModelTurn
 
-#if DEV
+global function GetAttachmentOriginOffset
+
+#if(DEV)
 global function DEV_TweakPlayCamera
 global function DEV_TweakCharacterCamera
 global function DEV_TweakWeaponCamera
 global function DEV_TogglePreviewParty
 global function DEV_TransitionTest
 global function DEV_ScaleModel
-#endif // DEV
+#endif //
 
 global function UIToClient_PROTO_UpdateClientWithLocalClientUID
 
-#endif // CLIENT
+#endif //
 
-#if UI
+#if(UI)
 const MOUSE_ROTATE_MULTIPLIER = 25.0
 
 global function RunMenuClientFunction
@@ -203,15 +208,15 @@ global function DeregisterMouseWheelZoom
 global function ClientToUI_PROTO_UpdateClientWithLocalClientUID
 
 global function TrackIsOverScrollBar
-#endif // UI
+#endif //
 
-#if CLIENT
+#if(CLIENT)
 void function ClMenuModels_Init()
 {
 	PrecacheParticleSystem( CHARACTER_BASE_EFFECT )
-	//#if DEV
-	//	PrecacheParticleSystem( MENU_TEST_EFFECT )
-	//#endif
+	//
+	//
+	//
 
 	RegisterSignal( "DrawSelfInfo" )
 	RegisterSignal( "ChangedTeam" )
@@ -222,7 +227,7 @@ void function ClMenuModels_Init()
 
 	InitPresentationData()
 
-	//AddCallback_EntitiesDidLoad( EntitiesDidLoad )
+	//
 	AddCallback_OnClientScriptInit( OnClientScriptInit )
 	AddCallback_FullUpdate( OnFullUpdate )
 }
@@ -290,7 +295,7 @@ const float STICK_DEADZONE = 0.1
 void function TurntableUpdateEntityAngles( MenuModelData modelData )
 {
 	float[2] rotationDelta   = ModelData_GetRotationDelta( modelData )
-	//printt( "RotationDelta:", rotationDelta[0], rotationDelta[1] )
+	//
 	vector baseAngles        = ModelData_GetBaseAngles( modelData )
 	vector pitchTowardCamera = AnglesCompose( baseAngles + <0, -90, 0>, AnglesCompose( <rotationDelta[1], 0, 0>, <0, 90, 0> ) )
 	vector newAng            = AnglesCompose( pitchTowardCamera, <0, rotationDelta[0], 0> )
@@ -304,7 +309,7 @@ bool function TurntableUpdateAnglesFromInput( MenuModelData modelData, float max
 	float[2] rotationDelta
 	float maxTurnSpeed            = ModelData_GetMaxTurnSpeed( modelData )
 
-	if ( !file.modelTurnEnabled )
+	if ( !file.modelTurnEnabled && !GetDpadNavigationActive() )
 		return false
 
 	if ( IsControllerModeActive() )
@@ -324,10 +329,10 @@ bool function TurntableUpdateAnglesFromInput( MenuModelData modelData, float max
 	else
 	{
 		rotationDelta[0] = ((currentRotationDelta[0] + file.mouseRotateDelta[0] * FrameTime()) % 360.0)
-		file.mouseRotateDelta[0] = 0 // clear because otherwise it would keep spinning
+		file.mouseRotateDelta[0] = 0 //
 
 		rotationDelta[1] = ((currentRotationDelta[1] - file.mouseRotateDelta[1] * FrameTime()) % 360.0)
-		file.mouseRotateDelta[1] = 0 // clear because otherwise it would keep spinning
+		file.mouseRotateDelta[1] = 0 //
 	}
 
 	if ( maxYawDegrees < 360.0 )
@@ -438,7 +443,7 @@ void function TurntableSetCameraZoomPos( CameraZoomData data, float maxPercentIn
 
 void function InitPresentationData()
 {
-	// TODO: Rework so scenes can be defined in a more flexible way (what entities get created, shown, hidden, animated)
+	//
 
 	SetPresentationData( ePresentationType.INACTIVE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0 )
 	SetPresentationData( ePresentationType.PLAY, file.playCharacter, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_PLAY, EndPresentation_PLAY )
@@ -448,12 +453,13 @@ void function InitPresentationData()
 	SetPresentationData( ePresentationType.CHARACTER_QUIPS, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_CHARACTER_SELECT )
 	SetPresentationData( ePresentationType.WEAPON_CATEGORY, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0 )
 	SetPresentationData( ePresentationType.WEAPON_SKIN, file.customizeWeapon, false, 80, 80, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, StartPresentation_WEAPON_SKIN, EndPresentation_WEAPON_SKIN )
-	//SetPresentationData( ePresentationType.POSTGAME,			file.playCharacter,		 false, 0,   0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, 200.0, 				  300.0, 		       0.4,  0.55, 70.0, StartPresentation_TEMP )
+	//
 	SetPresentationData( ePresentationType.STORE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, 2300.0, 3000.0, 1.0, 1.0, 0.0, StartPresentation_TEMP )
 	SetPresentationData( ePresentationType.NO_MODELS, null, false, 0, 0, 15, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, StartPresentation_TEMP )
+	SetPresentationData( ePresentationType.BATTLE_PASS, null, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_BATTLE_PASS, EndPresentation_BATTLE_PASS )
 }
 
-// TODO: Break out camera settings
+//
 void function SetPresentationData( int presentationType, MenuModelData ornull modelData, bool useCharacterOffsets, float maxYawDegrees, float maxPitchDegrees, float fov, float dofNearStart, float dofNearEnd, float dofFarStart, float dofFarEnd, float csmTexelScale1, float csmTexelScale2, float csmStartDistance, void functionref() startFunc = null, void functionref() endFunc = null )
 {
 	file.presentationData[ presentationType ].modelData = modelData
@@ -477,7 +483,7 @@ void function StartPresentation_PLAY()
 	ModelData_SetAnim( file.playCharacter, "ACT_MP_MENU_LOBBY_CENTER_IDLE" )
 	UpdateMenuCharacterModel( GetLocalClientPlayer(), -1 )
 
-	//thread DrawSelfInfo()
+	//
 	thread TrackPartyMembersAndDisplayModelsThread()
 
 	AddCallback_OnPartyUpdated( UpdateMenuWithPartyMembers )
@@ -531,13 +537,23 @@ void function EndPresentation_WEAPON_SKIN()
 	ModelData_GetModel( file.customizeWeapon ).Hide()
 }
 
+void function StartPresentation_BATTLE_PASS()
+{
+	BattlePassLightsOn()
+}
+
+void function EndPresentation_BATTLE_PASS()
+{
+	BattlePassLightsOff()
+}
+
 void function StartPresentation_TEMP()
 {
 }
 
 void function InitMenuEntities()
 {
-	#if DEV
+	#if(DEV)
 		if ( BuildingCubeMaps() )
 			return
 	#endif
@@ -546,18 +562,18 @@ void function InitMenuEntities()
 
 	for ( int teammateRefEntIndex = 0; true; teammateRefEntIndex++ )
 	{
-		// detect all available teammate position ref entities
+		//
 		string scriptName                  = "play_teammate" + (1 + teammateRefEntIndex) + "_ref"
 		array<entity> teammateRefEntSearch = GetEntArrayByScriptName( scriptName )
 		if ( teammateRefEntSearch.len() == 0 )
-			break // no entities of this name, stop search
+			break //
 		Assert( teammateRefEntSearch.len() <= 1, "Multiple entities with scriptname: " + scriptName )
 		entity teammateRefEnt = teammateRefEntSearch[0]
 
 		file.teammateRefEnts.append( teammateRefEnt )
 		file.teammateRefEntsUsedMap[teammateRefEnt] <- false
 
-		// todo(dw): temp
+		//
 		file.teammateRefEntIdleAnimMap[teammateRefEnt] <- (teammateRefEntIndex == 0 ? "ACT_MP_MENU_LOBBY_LEFT_IDLE" : "ACT_MP_MENU_LOBBY_RIGHT_IDLE")
 	}
 
@@ -566,12 +582,13 @@ void function InitMenuEntities()
 	file.closeCharacterCameraTarget = GetEntByScriptName( "close_character_camera_target" )
 	file.customizeCharacterCameraTarget = GetEntByScriptName( "customize_character_camera_target" )
 	file.customizeWeaponCameraTarget = GetEntByScriptName( "customize_weapon_camera_target" )
+	file.battlepassCameraTarget = GetEntByScriptName( "battlepass_camera_target" )
 	clGlobal.menuCamera = CreateClientSidePointCamera( <0, 0, 0>, <0, 0, 0>, DEFAULT_FOV )
 
-	// Wait for character class to be known
+	//
 	EHI localPlayerEHI = WaitForLocalClientEHI()
 	if ( IsDemoSpectator( GetLocalClientPlayer() ) )
-		return // server demo
+		return //
 
 	entity refEnt
 	entity model
@@ -609,8 +626,10 @@ void function InitMenuEntities()
 	ItemFlavor weaponSkin = LoadoutSlot_GetItemFlavor( localPlayerEHI, Loadout_WeaponSkin( weapon ) )
 	WeaponSkin_Apply( model, weaponSkin )
 
-	//thread DrawOrg( ModelData_GetMover( file.playCharacter ) )
-	//thread DrawOrg( ModelData_GetMover( file.customizeWeapon ) )
+	//
+	//
+
+	InitBattlePassLights()
 
 	file.initializedMenuModels = true
 }
@@ -648,13 +667,13 @@ void function UpdateMenuCharacterModel( entity player, int overrideCharacterFlav
 	thread UpdateMenuCharacterModelInternal( overrideCharacterFlavorNetworkIndex )
 }
 
-// TODO: Should have a single flag that we're ready rather than sprinkle waits around with LoadoutSlot_WaitForItemFlavor()
+//
 void function UpdateMenuCharacterModelInternal( int overrideCharacterFlavorNetworkIndex )
 {
 	Signal( file.signalDummy, "UpdateMenuCharacterModelInternal" )
 	EndSignal( file.signalDummy, "UpdateMenuCharacterModelInternal" )
 
-	while ( !file.initializedMenuModels ) // Handle early calls that UI script can trigger before client is ready
+	while ( !file.initializedMenuModels ) //
 		WaitFrame()
 
 	EHI playerEHI = LocalClientEHI()
@@ -668,7 +687,7 @@ void function UpdateMenuCharacterModelInternal( int overrideCharacterFlavorNetwo
 	LoadoutSlot_WaitForItemFlavor( playerEHI, Loadout_CharacterSkin( character ) )
 
 	clGlobal.currentMenuPilotModels.characterSkin = LoadoutSlot_GetItemFlavor( playerEHI, Loadout_CharacterSkin( character ) )
-	//clGlobal.currentMenuPilotModels.idleAnim = "NOTUSED"
+	//
 
 	if ( file.presentationData[ file.currentPresentationType ].useCharacterOffsets && file.presentationData[ file.currentPresentationType ].modelData != null )
 	{
@@ -695,10 +714,10 @@ void function UIToClient_PreviewCharacterSkin( int index, int overrideCharacterF
 
 void function UpdateCharacterModelDisplay( MenuModelData modelData, bool doTransitionFX )
 {
-	if ( !file.initializedMenuModels ) // Handle early calls that UI script can trigger before client is ready
+	if ( !file.initializedMenuModels ) //
 		return
 
-	if ( clGlobal.currentMenuPilotModels.characterSkin == null ) // Other script is running too early when this can be null
+	if ( clGlobal.currentMenuPilotModels.characterSkin == null ) //
 		return
 
 	entity model         = ModelData_GetModel( modelData )
@@ -710,14 +729,14 @@ void function UpdateCharacterModelDisplay( MenuModelData modelData, bool doTrans
 		characterSkin = clGlobal.currentMenuPilotModels.characterSkin
 	CharacterSkin_Apply( model, expect ItemFlavor( characterSkin ) )
 
-	//asset bodyModel = CharacterSkin_GetBodyModel( expect ItemFlavor( characterSkin ) )
-	//string idleAnim = clGlobal.previewMenuPilotModels.idleAnim
-	//if ( idleAnim == "" )
-	//	idleAnim = clGlobal.currentMenuPilotModels.idleAnim
+	//
+	//
+	//
+	//
 
 	bool modelChanged = model.GetModelName() != lastModelAsset
-	//bool animChanged = idleAnim != character.bodyAnim
-	if ( modelChanged ) // || animChanged
+	//
+	if ( modelChanged ) //
 	{
 		model = CreateMenuModel( modelData, model.GetModelName() )
 		entity mover = ModelData_GetMover( modelData )
@@ -735,7 +754,7 @@ void function UpdateCharacterModelDisplay( MenuModelData modelData, bool doTrans
 			ModelData_SetAnim( modelData, "ACT_MP_MENU_LOBBY_CENTER_IDLE" )
 		else
 			ModelData_SetAnim( modelData, "ACT_MP_MENU_LOBBY_SELECT_IDLE" )
-		//character.bodyAnim = idleAnim
+		//
 	}
 
 	if ( model == ModelData_GetModel( file.customizeCharacter ) )
@@ -782,7 +801,7 @@ void function DrawSelfInfo()
 	EndSignal( level, "EndSetPresentationType" )
 	player.EndSignal( "OnDestroy" )
 
-	// Handle early calls that UI script can trigger before client is ready
+	//
 	while ( !file.initializedMenuModels )
 		WaitFrame()
 
@@ -821,22 +840,22 @@ void function DrawSelfInfo()
 	}
 }
 
-// TODO: All of this needs replacing because it's merely by chance that party members have been connecting to the same server as you
-// In the wild this will almost never be the case
+//
+//
 void function UpdateMenuWithPartyMembers()
 {
-	//thread DrawSelfInfo() // TEMP?
+	//
 	thread TrackPartyMembersAndDisplayModelsThread()
 }
 
 void function TrackPartyMembersAndDisplayModelsThread()
 {
-	EndSignal( level, "EndSetPresentationType" ) // if presentation type changes, stop monitoring teammates and also kill all existing models
+	EndSignal( level, "EndSetPresentationType" ) //
 
-	Signal( level, "TrackPartyMembersAndDisplayModelsThread" ) // ensure only one is running at a time
+	Signal( level, "TrackPartyMembersAndDisplayModelsThread" ) //
 	EndSignal( level, "TrackPartyMembersAndDisplayModelsThread" )
 
-	// Handle early calls that UI script can trigger before client is ready
+	//
 	while ( !file.initializedMenuModels )
 		WaitFrame()
 
@@ -862,10 +881,10 @@ void function TrackPartyMembersAndDisplayModelsThread()
 		}
 
 		Party party           = GetParty()
-		//Assert( party.amIInThis )
+		//
 		string localClientUid = PROTO_GetLocalClientUIDFromUIVM()
 
-		#if DEV
+		#if(DEV)
 			if ( file.DEV_previewSelfAsParty )
 			{
 				party.members.clear()
@@ -878,7 +897,7 @@ void function TrackPartyMembersAndDisplayModelsThread()
 					party.members.append( fakeMember )
 				}
 			}
-		#endif // DEV
+		#endif //
 
 		foreach( PartyMember partyMemberInfo in party.members )
 		{
@@ -905,7 +924,7 @@ void function TrackPartyMembersAndDisplayModelsThread()
 				if ( userInfoOrNull != null )
 					partyMemberDisplayThreadData.userInfo = expect CommunityUserInfo( userInfoOrNull )
 			}
-			partyMemberDisplayThreadData.userInfo.charData.resize( ePlayerStryderCharDataArraySlots.COUNT, 0 ) // (dw): charData is sometimes empty (R5DEV-48722)
+			partyMemberDisplayThreadData.userInfo.charData.resize( ePlayerStryderCharDataArraySlots.COUNT, 0 ) //
 
 			partyMemberDisplayThreadData.partyMemberSeenThisUpdate = true
 			if ( partyMemberDisplayThreadData.isReady != partyMemberInfo.ready || partyMemberDisplayThreadData.isDirty)
@@ -929,14 +948,14 @@ void function TrackPartyMembersAndDisplayModelsThread()
 		foreach( string partyMemberUid, PartyMemberDisplayThreadData partyMemberDisplayThreadData in file.partyMemberUidCharacterDataMap )
 		{
 			bool shouldDestroyModel = false
-			bool shouldCreateModel  = false // will only create if model doesn't exist (because new party member or because shouldDestroyModel was true)
+			bool shouldCreateModel  = false //
 
 			if ( partyMemberDisplayThreadData.partyMemberSeenThisUpdate )
 			{
 				shouldCreateModel = true
 
 				ItemFlavor ornull characterOrNull = null
-				#if DEV
+				#if(DEV)
 					if ( file.DEV_previewSelfAsParty )
 						characterOrNull = LoadoutSlot_GetItemFlavor( LocalClientEHI(), Loadout_CharacterClass() )
 				#endif
@@ -955,7 +974,7 @@ void function TrackPartyMembersAndDisplayModelsThread()
 					characterOrNull = partyMemberDisplayThreadData.character
 
 				if ( characterOrNull == null )
-					characterOrNull = GetRandomGoodItemFlavorForLoadoutSlot( EHI_null, Loadout_CharacterClass(), true ) // todo(dw): temp
+					characterOrNull = GetItemFlavorByHumanReadableRef( "character_lifeline" ) //
 
 				ItemFlavor character = expect ItemFlavor(characterOrNull)
 				if ( partyMemberDisplayThreadData.character != character )
@@ -982,7 +1001,7 @@ void function TrackPartyMembersAndDisplayModelsThread()
 					skinOrNull = partyMemberDisplayThreadData.skin
 
 				if ( skinOrNull == null )
-					skinOrNull = GetRandomGoodItemFlavorForLoadoutSlot( EHI_null, Loadout_CharacterSkin( character ), true ) // todo(dw): temp
+					skinOrNull = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_CharacterSkin( character ) )
 
 				ItemFlavor skin = expect ItemFlavor(skinOrNull)
 				if ( partyMemberDisplayThreadData.skin != skin )
@@ -1014,9 +1033,9 @@ void function TrackPartyMembersAndDisplayModelsThread()
 				foreach( entity candidateRefEnt in file.teammateRefEnts )
 				{
 					if ( file.teammateRefEntsUsedMap[candidateRefEnt] )
-						continue // spot is used
+						continue //
 
-					file.teammateRefEntsUsedMap[candidateRefEnt] = true // spot is free, reserve it!
+					file.teammateRefEntsUsedMap[candidateRefEnt] = true //
 					refEnt = candidateRefEnt
 					idleActivity = file.teammateRefEntIdleAnimMap[candidateRefEnt]
 
@@ -1063,7 +1082,7 @@ void function TellUIToUpdateInviteButtons()
 	string rightSpotName = ""
 	bool rightSpotInMatch = false
 
-	// TODO: (bw) Client/UI should understand and agree about GetParty() return values and the slots that they fill
+	//
 	foreach( string partyMemberUid, PartyMemberDisplayThreadData partyMemberDisplayThreadData in file.partyMemberUidCharacterDataMap )
 	{
 		if ( partyMemberDisplayThreadData.posRef == file.teammateRefEnts[0] && file.teammateRefEntsUsedMap[file.teammateRefEnts[0]] )
@@ -1084,10 +1103,10 @@ void function TellUIToUpdateInviteButtons()
 
 	RunUIScript( "ClientToUI_PartyMemberJoinedOrLeft", leftSpotUID, leftSpotHardware, leftSpotName, leftSpotInMatch, rightSpotUID, rightSpotHardware, rightSpotName, rightSpotInMatch )
 
-	// todo(dw): hard-coded for now
-	//bool personInLeftSpot  = file.teammateRefEntsUsedMap[file.teammateRefEnts[0]] // assume index 0 is left spot
-	//bool personInRightSpot = file.teammateRefEntsUsedMap[file.teammateRefEnts[1]] // assume index 1 is right spot
-	//RunUIScript( "ClientToUI_PartyMemberJoinedOrLeft", personInLeftSpot, personInRightSpot )
+	//
+	//
+	//
+	//
 }
 
 bool function PartyMemberInMatch( PartyMember partyMemberInfo )
@@ -1114,26 +1133,26 @@ void function DisplayPartyMemberModelThread( PartyMemberDisplayThreadData data )
 	data.body.Anim_Play( data.idleActivity )
 
 /*
-	data.rui = CreateFullscreenRui( $"ui/lobby_player_info.rpak" )
 
-	// "VDU" when animations have this in the correct place for all characters
-	//RuiSetFloat3( data.rui, "pos", data.body.GetAttachmentOrigin( data.body.LookupAttachment( "CHESTFOCUS" ) ) + <0, 0, 25> )
-	RuiSetFloat3( data.rui, "pos", data.body.GetOrigin() + PLAYER_INFO_OFFSET )
 
-	RuiSetString( data.rui, "playerName", data.partyMemberInfo.name )
-	RuiSetBool( data.rui, "isReady", data.partyMemberInfo.ready )
+
+
+
+
+
+
 */
 
 	data.isReady = data.partyMemberInfo.ready
 /*
 
-	RuiSetBool( data.rui, "isLeader", data.isLeader )
+
 */
 
 	OnThreadEnd( function() : ( data ) {
 		data.displayThreadActive = false
 
-		file.teammateRefEntsUsedMap[data.posRef] = false // release the spot
+		file.teammateRefEntsUsedMap[data.posRef] = false //
 		data.posRef = null
 		data.idleActivity = ""
 		data.isReady = data.partyMemberInfo.ready
@@ -1154,7 +1173,7 @@ void function DisplayPartyMemberModelThread( PartyMemberDisplayThreadData data )
 		}
 
 /*
-		RuiDestroy( data.rui )
+
 */
 		data.rui = null
 	} )
@@ -1211,7 +1230,7 @@ void function UIToClient_ResetWeaponRotation()
 
 void function UIToClient_PreviewWeaponSkin( int index )
 {
-	if ( !file.initializedMenuModels ) // Handle early calls that UI script can trigger before client is ready
+	if ( !file.initializedMenuModels ) //
 		return
 
 	ItemFlavor weaponSkin   = GetItemFlavorByNetworkIndex_DEPRECATED( index )
@@ -1343,7 +1362,7 @@ vector function GetAttachmentOriginOffset( entity ent, string attachName, vector
 void function ClearAllCharacterPreview( entity player )
 {
 	clGlobal.previewMenuPilotModels.characterSkin = null
-	//clGlobal.previewMenuPilotModels.idleAnim = ""
+	//
 	UpdateCharacterModelDisplay( file.playCharacter, false )
 	UpdateCharacterModelDisplay( file.customizeCharacter, false )
 }
@@ -1374,6 +1393,15 @@ void function SetPresentationTypeThread( entity player, int desiredPresentationT
 	while ( !file.initializedMenuModels )
 		WaitFrame()
 
+	if ( GetCurrentPlaylistVarBool( "workaround_r5dev_68883_2019_02_04", true ) )
+	{
+		//
+		player = GetLocalClientPlayer()
+		Assert( IsValid( player ) )
+		if ( IsValid( player ) )
+			SetMenuCamera( player, desiredPresentationType, interpolate )
+	}
+
 	if ( file.presentationTypeInitialized && desiredPresentationType == file.currentPresentationType )
 		return
 
@@ -1388,8 +1416,16 @@ void function SetPresentationTypeThread( entity player, int desiredPresentationT
 	if ( file.presentationData[ desiredPresentationType ].startFunc != null )
 		file.presentationData[ desiredPresentationType ].startFunc()
 
-	if ( IsValid( player ) )
+	if ( GetCurrentPlaylistVarBool( "workaround_r5dev_68883_2019_02_04", true ) )
+	{
+		player = GetLocalClientPlayer()
 		SetMenuCamera( player, desiredPresentationType, interpolate )
+	}
+	else
+	{
+		if ( IsValid( player ) )
+			SetMenuCamera( player, desiredPresentationType, interpolate )
+	}
 
 	MenuModelData ornull lastActiveModelData = file.activeModelData
 	file.activeModelData = file.presentationData[ desiredPresentationType ].modelData
@@ -1428,44 +1464,46 @@ void function SetMenuCamera( entity player, int presentationType, bool interpola
 		cameraTarget = file.closeCharacterCameraTarget
 	else if ( presentationType == ePresentationType.CHARACTER_SKIN || presentationType == ePresentationType.CHARACTER_CARD )
 		cameraTarget = file.customizeCharacterCameraTarget
+	else if ( presentationType == ePresentationType.BATTLE_PASS )
+		cameraTarget = file.battlepassCameraTarget
 	clGlobal.menuCamera.SetTarget( cameraTarget, fov, interpolate, EASING_CUBIC_INOUT, TRANSITION_DURATION )
 
-	//EASING_LINEAR
-	//EASING_SINE_IN
-	//EASING_SINE_OUT
-	//EASING_SINE_INOUT
-	//EASING_CIRC_IN
-	//EASING_CIRC_OUT
-	//EASING_CIRC_INOUT
-	//EASING_CUBIC_IN
-	//EASING_CUBIC_OUT
-	//EASING_CUBIC_INOUT
-	//EASING_BACK_IN
-	//EASING_BACK_OUT
-	//EASING_BACK_INOUT
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
-	// TEMP: Disabled DOF until background is more final. It was causing visual artifacts with gladiator cards.
-	//float dofNearStart 	= file.presentationData[ presentationType ].dofNearStart
-	//float dofNearEnd 	= file.presentationData[ presentationType ].dofNearEnd
-	//float dofFarStart 	= file.presentationData[ presentationType ].dofFarStart
-	//float dofFarEnd 	= file.presentationData[ presentationType ].dofFarEnd
+	//
+	//
+	//
+	//
+	//
 
 	if ( interpolate )
 	{
 		printt( "Interpolating menu camera to:", GetEnumString( "ePresentationType", presentationType ) )
-		//DoF_LerpNearDepth( dofNearStart, dofNearEnd, TRANSITION_DURATION )
-		//DoF_LerpFarDepth( dofFarStart, dofFarEnd, TRANSITION_DURATION )
+		//
+		//
 	}
 	else
 	{
 		printt( "Snapping menu camera to:", GetEnumString( "ePresentationType", presentationType ) )
-		//DoF_SetNearDepth( dofNearStart, dofNearEnd )
-		//DoF_SetFarDepth( dofFarStart, dofFarEnd )
+		//
+		//
 	}
 
-	//DoFSetDilateInfocus( true ) // We want to reduce DoF aliasing around bright edges in the menus.
+	//
 
-	#if CONSOLE_PROG
+	#if(CONSOLE_PROG)
 		const float texelNorm = 2.0
 	#else
 		const float texelNorm = 1.0
@@ -1475,8 +1513,8 @@ void function SetMenuCamera( entity player, int presentationType, bool interpola
 	float csmTexelScale2   = file.presentationData[ presentationType ].csmTexelScale2 * texelNorm
 	float csmStartDistance = file.presentationData[ presentationType ].csmStartDistance
 
-	// Tweaks in order to maximize the shadow space usage for the pilot and/or the titan.
-	// Used the convar csm_debug_2d to find the best values on PC.
+	//
+	//
 	SetMapSetting_CsmTexelScale( csmTexelScale1, csmTexelScale2 )
 	SetMapSetting_CsmStartDistance( csmStartDistance )
 }
@@ -1542,23 +1580,23 @@ void function UIToClient_ClearMenuMouseWheel()
 
 void function TransitionTest( entity model, vector color, bool doTransitionFX )
 {
-	//WaitEndFrame() // TODO: This is bad. Highlight doesn't show without some delay.
+	//
 
 	if ( file.transitionTest == 5 )
 		MenuModelHighlightBloom( model, color, 100 )
 
-	///-----------DON'T DELETE-------------///
-	// if ( file.DEV_transitionTest == 1 || file.DEV_transitionTest == 3 )
-	// {
-	// 	int attachID = model.LookupAttachment( "CHESTFOCUS" )
-	// 	int index    = GetParticleSystemIndex( MENU_TEST_EFFECT )
-	// 	int fxID     = StartParticleEffectOnEntity( model, index, FX_PATTACH_POINT_FOLLOW, attachID )
-	// 	EffectSetDontKillForReplay( fxID )
-	// }
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	if ( file.transitionTest == 2 || file.transitionTest == 3 )
 	{
-		// PROTO_HighlightTest( model, ItemFlavor_GetQualityColor( expect ItemFlavor( clGlobal.previewMenuPilotModels.characterSkin ) ) )
+		//
 		float fillIntensityScalar    = 10
 		float outlineIntensityScalar = 300
 		float fadeInTime             = 0.01
@@ -1571,7 +1609,7 @@ void function TransitionTest( entity model, vector color, bool doTransitionFX )
 	}
 }
 
-#if DEV
+#if(DEV)
 void function DEV_TweakPlayCamera( vector origin, vector angles, float fov )
 {
 	file.playCameraTarget.SetOrigin( origin )
@@ -1620,10 +1658,10 @@ void function DEV_ScaleModel( float scale )
 	model.SetLocalAngles( angleOffset )
 	model.Anim_SetPaused( true )
 }
-#endif // DEV
-#endif // CLIENT
+#endif //
+#endif //
 
-#if UI
+#if(UI)
 void function RunMenuClientFunction( string func, var arg1 = null, var arg2 = null, var arg3 = null )
 {
 	if ( !CanRunClientScript() )
@@ -1641,27 +1679,27 @@ void function RunMenuClientFunction( string func, var arg1 = null, var arg2 = nu
 
 void function UI_SetPresentationType( int newPresentationType )
 {
-	//if ( !IsFullyConnected() )
-	//	return
+	//
+	//
 
-	// When loading the lobby we don't want any interpolation
+	//
 	file.interpolateCameraMoves = false
-	/*if ( uiGlobal.lobbyFromLoadingScreen )
-	{
-		file.interpolateCameraMoves = false
-		uiGlobal.lobbyFromLoadingScreen	= false
-	}
-	else if ( file.activePresentationType == ePresentationType.NO_MODELS || newPresentationType == ePresentationType.NO_MODELS ||
-		 file.activePresentationType == ePresentationType.PLAY || newPresentationType == ePresentationType.PLAY ||
-		 file.activePresentationType == ePresentationType.WEAPON || newPresentationType == ePresentationType.WEAPON ||
-		 file.activePresentationType == ePresentationType.INACTIVE )
-	{
-		file.interpolateCameraMoves = false
-	}
-	else
-	{
-		file.interpolateCameraMoves = true
-	}*/
+	/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 	RunClientScript( "SetPresentationType", GetLocalClientPlayer(), newPresentationType, file.interpolateCameraMoves )
 
@@ -1673,11 +1711,11 @@ void function UI_SetPresentationType( int newPresentationType )
 
 void function UICodeCallback_MouseMovementCapture( var capturePanel, int deltaX, int deltaY )
 {
-	float screenScaleXModifier = 1920.0 / GetScreenSize().width // 1920 is base screen width
+	float screenScaleXModifier = 1920.0 / GetScreenSize().width //
 	float mouseXRotateDelta    = deltaX * screenScaleXModifier * MOUSE_ROTATE_MULTIPLIER
-	//printt( "deltaX:", deltaX, "screenScaleXModifier:", screenScaleXModifier, "mouseXRotateDelta:", mouseXRotateDelta )
+	//
 
-	float screenScaleYModifier = 1080.0 / GetScreenSize().height // 1920 is base screen width
+	float screenScaleYModifier = 1080.0 / GetScreenSize().height //
 	float mouseYRotationDelta  = deltaY * screenScaleYModifier * MOUSE_ROTATE_MULTIPLIER
 
 	RunMenuClientFunction( "UpdateMouseRotateDelta", mouseXRotateDelta, mouseYRotationDelta )
@@ -1715,15 +1753,16 @@ void function TrackIsOverScrollBar( var listPanel )
 
 	while ( true )
 	{
-		var focus = GetFocus()
-		bool isFocusedOverList = focus == listPanel || Hud_GetParent( focus ) == listPanel || Hud_GetParent( focus ) == scrollPanel
+		var focus       = GetFocus()
+		var focusParent = focus == null ? null : Hud_GetParent( focus )
+		bool isOverList = focus == listPanel || focusParent == listPanel || focusParent == scrollPanel
 
-		if ( rotationEnabled && isFocusedOverList )
+		if ( rotationEnabled && isOverList )
 		{
 			rotationEnabled = false
 			RunClientScript( "DisableModelTurn" )
 		}
-		else if ( !rotationEnabled && !isFocusedOverList )
+		else if ( !rotationEnabled && !isOverList )
 		{
 			rotationEnabled = true
 			RunClientScript( "EnableModelTurn" )
@@ -1732,20 +1771,20 @@ void function TrackIsOverScrollBar( var listPanel )
 		WaitFrame()
 	}
 }
-#endif // UI
+#endif //
 
 
 
 
-////
-//// PROTO - BEWARE OF DRAGONS
-////
+//
+//
+//
 
-#if CLIENT
+#if(CLIENT)
 string PROTO_localClientUid
 #endif
 
-#if CLIENT
+#if(CLIENT)
 string function PROTO_GetLocalClientUIDFromUIVM()
 {
 	RunUIScript( "ClientToUI_PROTO_UpdateClientWithLocalClientUID" )
@@ -1754,7 +1793,7 @@ string function PROTO_GetLocalClientUIDFromUIVM()
 #endif
 
 
-#if UI
+#if(UI)
 void function ClientToUI_PROTO_UpdateClientWithLocalClientUID()
 {
 	RunClientScript( "UIToClient_PROTO_UpdateClientWithLocalClientUID", GetPlayerUID() )
@@ -1762,7 +1801,7 @@ void function ClientToUI_PROTO_UpdateClientWithLocalClientUID()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function UIToClient_PROTO_UpdateClientWithLocalClientUID( string localClientUid )
 {
 	PROTO_localClientUid = localClientUid
@@ -1770,12 +1809,12 @@ void function UIToClient_PROTO_UpdateClientWithLocalClientUID( string localClien
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function PROTO_HighlightTest( entity model, vector color, float fillIntensityScalar, float outlineIntensityScalar, float fadeInTime, float fadeOutTime, float lifeTime, float ditherDelay, float ditherDuration )
 {
-	//thread PROTO_FadeAlphaOverTimeOnEntityAndChildren( model, ditherDuration, 0, 255, ditherDelay )
+	//
 
-	WaitFrame() // todo(dw): aaaaahhh
+	WaitFrame() //
 
 	if ( !IsValid( model ) )
 		return
@@ -1796,7 +1835,7 @@ void function PROTO_HighlightTest( entity model, vector color, float fillIntensi
 		model.Highlight_SetLifeTime( lifeTime )
 	}
 
-	WaitFrame() // todo(dw): aaaaahhh
+	WaitFrame() //
 
 	if ( !IsValid( model ) )
 		return

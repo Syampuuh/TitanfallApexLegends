@@ -39,8 +39,8 @@ void function InitWeaponSkinsPanel( var panel )
 	AddPanelFooterOption( panel, LEFT, BUTTON_A, false, "#A_BUTTON_SELECT", "", null, CustomizeMenus_IsFocusedItem )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_EQUIP", "#X_BUTTON_EQUIP", null, CustomizeMenus_IsFocusedItemEquippable )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK", "#X_BUTTON_UNLOCK", null, CustomizeMenus_IsFocusedItemLocked )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_DPAD_LEFT, false, "#DPAD_LEFT_RIGHT_SWITCH_CHARACTER", "", PrevButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_DPAD_RIGHT, false, "", "", NextButton_OnActivate )
+	//
+	//
 }
 
 
@@ -56,9 +56,9 @@ void function WeaponSkinsPanel_OnShow( var panel )
 	RunClientScript( "UIToClient_ResetWeaponRotation" )
 	RunClientScript( "EnableModelTurn" )
 
-	// (dw): Customize context is already being used for the category, which is unfortunate.
-	//AddCallback_OnTopLevelCustomizeContextChanged( panel, WeaponSkinsPanel_Update )
-	//SetCustomizeContext( PanelData_Get( panel ).weapon )
+	//
+	//
+	//
 
 	thread TrackIsOverScrollBar( file.panelDataMap[panel].listPanel )
 
@@ -68,7 +68,7 @@ void function WeaponSkinsPanel_OnShow( var panel )
 
 void function WeaponSkinsPanel_OnHide( var panel )
 {
-	//RemoveCallback_OnTopLevelCustomizeContextChanged( panel, WeaponSkinsPanel_Update )
+	//
 	Signal( uiGlobal.signalDummy, "TrackIsOverScrollBar" )
 
 	RunClientScript( "EnableModelTurn" )
@@ -81,7 +81,7 @@ void function WeaponSkinsPanel_Update( var panel )
 	PanelData pd    = file.panelDataMap[panel]
 	var scrollPanel = Hud_GetChild( pd.listPanel, "ScrollPanel" )
 
-	// cleanup
+	//
 	foreach ( int flavIdx, ItemFlavor unused in pd.weaponSkinList)
 	{
 		var button = Hud_GetChild( scrollPanel, "GridButton" + flavIdx )
@@ -91,7 +91,7 @@ void function WeaponSkinsPanel_Update( var panel )
 
 	CustomizeMenus_SetActionButton( null )
 
-	// setup, but only if we're active
+	//
 	if ( IsPanelActive( panel ) && pd.weaponOrNull != null )
 	{
 		ItemFlavor weapon  = expect ItemFlavor(pd.weaponOrNull)
@@ -116,7 +116,7 @@ void function WeaponSkinsPanel_Update( var panel )
 
 void function WeaponSkinsPanel_OnFocusChanged( var panel, var oldFocus, var newFocus )
 {
-	if ( !IsValid( panel ) ) // uiscript_reset
+	if ( !IsValid( panel ) ) //
 		return
 	if ( GetParentMenu( panel ) != GetActiveMenu() )
 		return

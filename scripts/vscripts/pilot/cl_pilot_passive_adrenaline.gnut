@@ -10,7 +10,7 @@ struct
 	int ScreenFxId
 } file
 
-//Passive detects when player is getting shot at and gives player a slight speed boost, passive healing, and reload speed boost.
+//
 void function CLPassiveAdrenaline_Init()
 {
 	file.ScreenFxId = PrecacheParticleSystem( SMOKE_SCREEN_FX )
@@ -57,7 +57,7 @@ void function PassiveAdrenaline_StopVisualEffect( entity ent, int statusEffect, 
 
 void function CreatePassiveAdrenalineRUI()
 {
-	// this rui will self destruct once it's done animating
+	//
 	var rui = CreateTransientCockpitRui( $"ui/passive_bangalore_triggered.rpak", HUD_Z_BASE )
 }
 
@@ -73,8 +73,8 @@ void function PassiveAdrenaline_UpdatePlayerScreenColorCorrection( entity player
 	OnThreadEnd(
 		function() : ( player )
 		{
-			//if ( IsValid( player ) )
-			//	player.SetFOVScale( 1.0, 1 )
+			//
+			//
 
 			ColorCorrection_SetWeight( file.colorCorrection, 0.0 )
 			ColorCorrection_SetExclusive( file.colorCorrection, false )
@@ -85,19 +85,19 @@ void function PassiveAdrenaline_UpdatePlayerScreenColorCorrection( entity player
 	ColorCorrection_SetWeight( file.colorCorrection, 1.0 )
 
 	const FOV_SCALE = 1.2
-	const LERP_IN_TIME = 0.0125	// hack! because statusEffect doesn't seem to have a lerp in feature?
+	const LERP_IN_TIME = 0.0125	//
 	float startTime = Time()
 
 	while ( true )
 	{
-		//printt( "Running Color Correction Update" )
+		//
 		float weight = StatusEffect_GetSeverity( player, eStatusEffect.adrenaline_visuals )
-		//printt( weight )
+		//
 		weight = GraphCapped( Time() - startTime, 0, LERP_IN_TIME, 0, weight )
 		ColorCorrection_SetWeight( file.colorCorrection, weight )
 
 		float fovScale = GraphCapped( weight, 0, 1, 1, FOV_SCALE )
-		//player.SetFOVScale( fovScale, 1 )	// adding a lerp time here increases the total lerp I think
+		//
 
 		WaitFrame()
 	}
@@ -122,7 +122,7 @@ void function PassiveAdreneline_ScreenEffectThread( entity viewPlayer, int fxHan
 	while( true )
 	{
 		float severity = StatusEffect_GetSeverity( viewPlayer, statusEffect )
-		//DebugScreenText( 0.47, 0.68, "severity: " + severity )
+		//
 
 		if ( !EffectDoesExist( fxHandle ) )
 			break

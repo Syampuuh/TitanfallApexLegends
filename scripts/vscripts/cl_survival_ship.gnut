@@ -69,7 +69,9 @@ void function PlayerPlaneStatusChanged( entity statusChangePlayer, bool oldValue
 	var gamestateRui = ClGameState_GetRui()
 	Assert( gamestateRui != null )
 	RuiSetInt( gamestateRui, "playersInPlane", IsPlayerInPlane( player ) ? GetPlayersInPlaneCount() : 0 )
-	RuiSetInt( GetFullmapGamestateRui(), "playersInPlane", IsPlayerInPlane( player ) ? GetPlayersInPlaneCount() : 0 )
+	#if(true)
+		RuiSetInt( GetFullmapGamestateRui(), "playersInPlane", IsPlayerInPlane( player ) ? GetPlayersInPlaneCount() : 0 )
+	#endif //
 
 	if ( statusChangePlayer.GetTeam() != player.GetTeam() )
 		return
@@ -81,7 +83,7 @@ void function PlayerPlaneStatusChanged( entity statusChangePlayer, bool oldValue
 
 	if ( playerInPlane )
 	{
-		// Player in plane
+		//
 		NotifyDropSequence( true )
 		SetSkydiveStartingConvars()
 		CreateSquadLeaderBox( player )
@@ -102,7 +104,7 @@ void function PlayerPlaneStatusChanged( entity statusChangePlayer, bool oldValue
 	}
 	else
 	{
-		// Player not in plane
+		//
 		DestroySquadLeaderBox( player )
 
 		if ( statusChangePlayer == player && file.registeredConCommandCallbacks )
@@ -191,7 +193,7 @@ void function CreateSquadLeaderBox( entity player )
 		RuiSetFloat3( file.sqadLeaderBoxRui, "squadLeaderColor", SrgbToLinear( squadLeaderColor / 255.0 ) )
 	}
 
-	if ( MAX_TEAM_PLAYERS == 1 ) //if ( GetTeamPlayerCount( player.GetTeam() ) == 1 )
+	if ( MAX_TEAM_PLAYERS == 1 ) //
 		RuiSetBool( file.sqadLeaderBoxRui, "isSoloJump", true )
 
 	RuiSetBool( file.sqadLeaderBoxRui, "hasHoldButtonAction", HasHoldButtonAction() )
@@ -234,7 +236,7 @@ void function UpdateDOFForPlayerView()
 		float dist = traceDist * results.fraction
 
 		DoF_SetFarDepth( dist + 3000, 900000 )
-		//DoF_SetNearDepth( 0, dist - (dofDist / 2.0) )
+		//
 
 		WaitFrame()
 	}
@@ -294,17 +296,17 @@ void function PlayerTryRelinquishSquadLeaderOrBreakFromSquad( entity player )
 
 	if ( player.GetPlayerNetBool( "isJumpmaster" ) && player.GetPlayerNetBool( "isJumpingWithSquad" ) )
 	{
-		// Player is jumpmaster - relinquish leadership
+		//
 		thread HoldTryRelinquishSquadLeaderOrBreakFromSquadTimer( player, 1.0, "#SURVIVAL_INTRO_PROMPT_RELINQUISH", "Sur_RelinquishJumpMaster" )
 	}
 	else if ( player.GetPlayerNetBool( "isJumpingWithSquad" ) )
 	{
-		// Player is not jumpmaster - solo jump
+		//
 		thread HoldTryRelinquishSquadLeaderOrBreakFromSquadTimer( player, 1.0, "#SURVIVAL_INTRO_PROMPT_LEAVE","Sur_RemoveFromSquad" )
 	}
 	else if ( IsValid( GetJumpmasterForTeam( player.GetTeam() ) ) )
 	{
-		// Player is in solo jump mode, and squad leader for team is still in the plane - rejoin the jumpmaster
+		//
 		thread HoldTryRelinquishSquadLeaderOrBreakFromSquadTimer( player, 0.5, "#SURVIVAL_INTRO_PROMPT_JOIN","Sur_ReturnToSquad" )
 	}
 }
@@ -357,15 +359,15 @@ bool function HasHoldButtonAction()
 	if ( !player.GetPlayerNetBool( "playerInPlane" ) )
 		return false
 
-	// if jumpmaster, has other squad members that could become jumpmaster
+	//
 	if ( player.GetPlayerNetBool( "isJumpmaster" ) )
 		return GetNumPlayersJumpingWithSquad( team ) > 1
 
-	// if solo jumping, there is a squad to rejoin
+	//
 	if ( !player.GetPlayerNetBool( "isJumpingWithSquad" ) )
 		return GetNumPlayersJumpingWithSquad( team ) > 0 && IsValid( GetJumpmasterForTeam( team ) )
 
-	// if not jumpmaster, you can always change to solo jump
+	//
 	return true
 }
 

@@ -25,14 +25,14 @@ var function OnWeaponPrimaryAttack_cloak( entity weapon, WeaponPrimaryAttackPara
 
 	PlayerUsedOffhand( ownerPlayer, weapon )
 
-	#if SERVER
-		float duration = weapon.GetWeaponSettingFloat( eWeaponVar.fire_duration )
-		EnableCloak( ownerPlayer, duration )
-		#if BATTLECHATTER_ENABLED
-			TryPlayWeaponBattleChatterLine( ownerPlayer, weapon )
-		#endif
-		//ownerPlayer.Signal( "PlayerUsedAbility" )
-	#endif
+	#if(false)
+
+
+
+
+
+//
+#endif
 
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
 }

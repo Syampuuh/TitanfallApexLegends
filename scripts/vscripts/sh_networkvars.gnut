@@ -24,11 +24,11 @@ global function GetNetworkVar
 global function RegisterServerVarChangeCallback
 global function RegisterEntityVarChangeCallback
 
-#if SERVER
-global function ServerVarChangedCallbacks
+#if(false)
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 global function CodeCallback_ServerVarChanged
 #endif
 
@@ -54,8 +54,8 @@ struct
 	table<string, array<void functionref()> > _serverVarChangeCallbacks
 } file
 
-// start at a high index to easily detect inval indices being use as registered strings
-// could also do this by settings a significant bit in the index
+//
+//
 const MIN_REGISTERED_STRING_INDEX = 32768
 int _currentStringIndex = MIN_REGISTERED_STRING_INDEX
 
@@ -155,10 +155,10 @@ void function RegisterEntityVar( string className, string varName, value, bSyncT
 	_nextEntVarIndex++
 
 	_entityClassVars[className][varName] <- value
-	_entityClassVarsIsEnts[className][varName] <- bIsEntities					// means that this variable hold an entity and we should automatically convert eHandles
+	_entityClassVarsIsEnts[className][varName] <- bIsEntities					//
 
 	Assert( bSyncToAllClients || className == "player", "Non-player vars must sync to all clients" )
-	_entityClassVarsSyncToAllClients[className][varName] <- bSyncToAllClients	// only used for vars set on CPlayers
+	_entityClassVarsSyncToAllClients[className][varName] <- bSyncToAllClients	//
 }
 
 void function RegisterServerVar( string varName, value )
@@ -222,22 +222,22 @@ function GetNetworkVar( obj, varName )
 		return GetEntityVar( obj, varName )
 }
 
-#if SERVER
-void function ServerVarChangedCallbacks( string varName )
-{
-	// Run server script change callback if one exists
-	if ( !( varName in file._serverVarChangeCallbacks ) )
-		return
+#if(false)
 
-	foreach ( callbackFunc in file._serverVarChangeCallbacks[varName] )
-	{
-		callbackFunc()
-	}
-}
+
+//
+
+
+
+
+
+
+
+
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function CodeCallback_ServerVarChanged( string varName )
 {
 	if ( !(varName in file._serverVarChangeCallbacks) )
@@ -275,7 +275,7 @@ void function InitEntityVars( entity ent )
 {
 	Assert( "_entityVars" in ent )
 
-	#if CLIENT
+	#if(CLIENT)
 		local className = ent.GetNetworkedClassName()
 		bool foundSelf = false
 
@@ -302,13 +302,13 @@ void function InitEntityVars( entity ent )
 			}
 		}
 
-	#elseif SERVER
+	#elseif(false)
 
-		ent._entityVars = {}
 
-		string className = ent.GetClassName()
 
-		foreach ( varName, value in _entityClassVars[className] )
-			ent._entityVars[varName] <- value
-	#endif
+
+
+
+
+#endif
 }

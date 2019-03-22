@@ -7,19 +7,19 @@ global function SmartAmmo_LockedOntoWarningHUD_Update
 global function SmartAmmo_SetStatusWarning
 global function SmartAmmo_ClearStatusWarning
 
-const SMART_AMMO_VICTIM_LOCKED_SOUND = "Titan_Cockpit_TitanLocking_Warning"  // sound the lockon detector uses to tell players they've been locked
+const SMART_AMMO_VICTIM_LOCKED_SOUND = "Titan_Cockpit_TitanLocking_Warning"  //
 
 
-/******************************************/
-/*				CLIENT FUNCTIONS		  */
-/******************************************/
+/**/
+/**/
+/**/
 
-// lockon detector won't alert until this much of the total lock time has passed
-//const table<string, float> SmartAmmo_DetectorStartFracOverrides = {
-	//[ "mp_weapon_smart_pistol" ] <- (SMART_AMMO_PLAYER_MAX_LOCKS - 1) * 0.25,
-	// HAX; make smart pistol not display lock indicator
-	//[ "mp_weapon_smart_pistol" ] <- 1200.0,
-//}
+//
+//
+	//
+	//
+	//
+//
 
 struct
 {
@@ -113,7 +113,7 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 	if ( foundMissile != null && IsValid( file.lockonHudForceWeapon ) )
 	{
 		activeLockingWeapon = file.lockonHudForceWeapon
-		highestLockSource = foundMissile // activeLockingWeapon.GetWeaponOwner()
+		highestLockSource = foundMissile //
 		lockingEnemies.append( highestLockSource )
 		lockedFraction = 1.0
 	}
@@ -124,7 +124,7 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 	}
 	else
 	{
-		//entity soul = GetSoulFromPlayer( player )
+		//
 		vector borderColor = <1,1,1>
 
 		if ( file.statusWarning != "" )
@@ -149,16 +149,16 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			RuiSetBool( file.lockon_hud, "eastLock", false )
 			RuiSetFloat3( file.lockon_hud, "borderColor", borderColor )
 		}
-		//else if ( StatusEffect_GetSeverity( player, eStatusEffect.lockon_detected_titan) || (soul != null && StatusEffect_GetSeverity( soul, eStatusEffect.lockon_detected_titan) && player.IsTitan() ))
-		//{
-		//	RuiSetString( file.lockon_hud, "lockMessage", "#LOCKON_WARNING_TITAN" )
-		//	RuiSetGameTime( file.lockon_hud, "lockEndTime", RUI_BADGAMETIME )
-		//	RuiSetBool( file.lockon_hud, "isVisible", true )
-		//	RuiSetBool( file.lockon_hud, "northLock", false )
-		//	RuiSetBool( file.lockon_hud, "southLock", false )
-		//	RuiSetBool( file.lockon_hud, "westLock", false )
-		//	RuiSetBool( file.lockon_hud, "eastLock", false )
-		//}
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
 		else if ( (StatusEffect_GetSeverity( player, eStatusEffect.maphack_detected ) || StatusEffect_GetSeverity( player, eStatusEffect.sonar_detected )) && !player.IsCloaked( true ) )
 		{
 			if ( StatusEffect_GetSeverity( player, eStatusEffect.damage_received_multiplier ) )
@@ -175,6 +175,18 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			RuiSetBool( file.lockon_hud, "eastLock", false )
 			RuiSetFloat3( file.lockon_hud, "borderColor", borderColor )
 		}
+#if(false)
+
+
+
+
+
+
+
+
+
+
+#endif
 		else if ( StatusEffect_GetSeverity( player, eStatusEffect.sonar_blocked ) )
 		{
 			RuiSetString( file.lockon_hud, "lockMessage", "#SONAR_WARNING_BLOCKED" )
@@ -188,8 +200,8 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 		}
 		else if ( StatusEffect_GetSeverity( player, eStatusEffect.placing_phase_tunnel ) > 0.0 )
 		{
-			//RuiSetString( file.lockon_hud, "lockMessage", "#PHASE_TUNNEL_STATUS" )
-			//RuiSetGameTime( file.lockon_hud, "lockEndTime", Time() + ( PHASE_TUNNEL_PLACEMENT_DURATION * StatusEffect_GetSeverity( player, eStatusEffect.placing_phase_tunnel ) ) )
+			//
+			//
 			RuiSetString( file.lockon_hud, "lockMessage", "#PHASE_TUNNEL_STATUS_DISTANCE" )
 			RuiSetGameTime( file.lockon_hud, "lockEndTime", Time() + ( 100 * StatusEffect_GetSeverity( player, eStatusEffect.placing_phase_tunnel ) ) )
 			RuiSetBool( file.lockon_hud, "isVisible", true )
@@ -198,7 +210,7 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			RuiSetBool( file.lockon_hud, "westLock", false )
 			RuiSetBool( file.lockon_hud, "eastLock", false )
 
-			//SrgbToLinear( <255,237,76> / 255.0 ) // can't get the ultimate highlight color from bakery becase it takes way too long to do every frame.
+			//
 			RuiSetFloat3( file.lockon_hud, "borderColor", <1, 0.846873462, 0.0722718611> )
 		}
 		else if ( StatusEffect_GetSeverity( player, eStatusEffect.tethered) )
@@ -212,16 +224,16 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			RuiSetBool( file.lockon_hud, "eastLock", false )
 			RuiSetFloat3( file.lockon_hud, "borderColor", borderColor )
 		}
-		//else if ( player.GetActiveWeapon( eActiveInventorySlot.mainHand ) != null && player.GetActiveWeapon( eActiveInventorySlot.mainHand ).GetScriptFlags0() & WEAPONFLAG_AMPED && Time() < player.GetActiveWeapon( eActiveInventorySlot.mainHand ).GetScriptTime0() )
-		//{
-		//	RuiSetString( file.lockon_hud, "lockMessage", "#AMPED_STATUS" )
-		//	RuiSetGameTime( file.lockon_hud, "lockEndTime", player.GetActiveWeapon( eActiveInventorySlot.mainHand ).GetScriptTime0() )
-		//	RuiSetBool( file.lockon_hud, "isVisible", true )
-		//	RuiSetBool( file.lockon_hud, "northLock", false )
-		//	RuiSetBool( file.lockon_hud, "southLock", false )
-		//	RuiSetBool( file.lockon_hud, "westLock", false )
-		//	RuiSetBool( file.lockon_hud, "eastLock", false )
-		//}
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
 		else if ( StatusEffect_GetSeverity( player, eStatusEffect.hunt_mode ) > 0.0 )
 		{
 			RuiSetString( file.lockon_hud, "lockMessage", "#HUNT_MODE_STATUS" )
@@ -232,15 +244,52 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			RuiSetBool( file.lockon_hud, "westLock", false )
 			RuiSetBool( file.lockon_hud, "eastLock", false )
 
-			//SrgbToLinear( <255,237,76> / 255.0 ) // can't get the ultimate highlight color from bakery becase it takes way too long to do every frame.
+			//
 			RuiSetFloat3( file.lockon_hud, "borderColor", <1, 0.846873462, 0.0722718611> )
 		}
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#endif
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 		else if ( StatusEffect_GetSeverity( player, eStatusEffect.device_blocked ) )
 		{
 			float blockWeight = StatusEffect_GetSeverity( player, eStatusEffect.device_blocked )
 			float deviceBlockedCount = RoundToNearestInt( ( ( blockWeight ) * 100 ) - 1 )
 
-			//We have both detected and blocked one or more devices.
+			//
 			if ( deviceBlockedCount > 0 )
 			{
 
@@ -259,17 +308,30 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			}
 			RuiSetFloat3( file.lockon_hud, "borderColor", borderColor )
 		}
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#endif
 		else if ( StatusEffect_GetSeverity( player, eStatusEffect.device_detected ) )
 		{
 			float detectWeight = StatusEffect_GetSeverity( player, eStatusEffect.device_detected )
 			float deviceDetectCount = RoundToNearestInt( ( ( detectWeight ) * 100 ) - 2 )
 
-			//Detected only
+			//
 
 			if ( deviceDetectCount == -1 )
 			{
 				RuiSetBool( file.lockon_hud, "isVisible", false )
-				//RuiSetString( file.lockon_hud, "lockMessage", "#DEVICE_DETECTED_WARNING_NONE" )
+				//
 				return
 			}
 			else if ( deviceDetectCount == 0 )
@@ -301,6 +363,19 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 			RuiSetBool( file.lockon_hud, "eastLock", false )
 			RuiSetFloat3( file.lockon_hud, "borderColor", borderColor )
 		}
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#endif
 		else
 		{
 			RuiSetBool( file.lockon_hud, "isVisible", false )
@@ -309,7 +384,7 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 		return
 	}
 
-	//printt( lockedFraction, highestLockSource, activeLockingWeapon )
+	//
 
 	float reqFracForDetection = TARGET_SET_FRACTION
 	if ( lockedFraction > TARGET_SET_FRACTION && IsValid( highestLockSource ) )
@@ -322,10 +397,10 @@ void function SmartAmmo_LockedOntoWarningHUD_Update()
 		else
 		{
 			string weaponclass = expect string( activeLockingWeapon.GetNetworkedClassName() )
-			//if ( weaponclass in SmartAmmo_DetectorStartFracOverrides )
-			//{
-				//reqFracForDetection = SmartAmmo_DetectorStartFracOverrides[ weaponclass ]
-			//}
+			//
+			//
+				//
+			//
 		}
 
 		Assert( activeLockingWeapon != null )
@@ -418,20 +493,20 @@ table function GetActiveLockQuadrants( entity player, array<entity> lockingEnemi
 
 		float dotRight = DotProduct( right2D, orgDiff )
 
-		//printt( "deg:", deg )
+		//
 
-		// key: top down, first, separate into four primary quadrants (foursquare style)
-		//   - q1 upperleft, q2 upperright, q3 lowerright, q4 lowerleft
-		// Second: to map to the arrows we split each foursquare quadrant in half and check the degrees; half means one arrow, half means the other
+		//
+		//
+		//
 
 		string dir
-		if ( dotForward >= 0 && dotRight >= 0 )			// q2
+		if ( dotForward >= 0 && dotRight >= 0 )			//
 			dir = deg <= 45 ? "forward" : "right"
-		else if ( dotForward > 0 && dotRight < 0 )		// q1
+		else if ( dotForward > 0 && dotRight < 0 )		//
 			dir = deg <= 45 ? "forward" : "left"
-		else if ( dotForward <= 0 && dotRight >= 0 )	// q3
+		else if ( dotForward <= 0 && dotRight >= 0 )	//
 			dir = deg <= 135 ? "right" : "back"
-		else 											// q4
+		else 											//
 			dir = deg <= 135 ? "left" : "back"
 
 		if ( !arrows[ dir ] )
@@ -469,7 +544,7 @@ string function MakeLockingOnWarningDisplayString( array<entity> lockingEnemies,
 	unreachable
 }
 
-//Almost entirely the same as MakeLockingOnWarningDisplayString.
+//
 string function MakeLockedOnWarningDisplayString( array<entity> lockingEnemies, entity activeLockingWeapon )
 {
 	if ( lockingEnemies.len() > 1 )

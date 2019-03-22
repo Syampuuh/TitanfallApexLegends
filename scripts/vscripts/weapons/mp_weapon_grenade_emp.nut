@@ -21,9 +21,9 @@ void function OnProjectileCollision_weapon_grenade_emp( entity projectile, vecto
 
 	projectile.GrenadeIgnite()
 
-	#if SERVER
-		thread ArcCookSound( projectile )
-	#endif
+	#if(false)
+
+#endif
 }
 
 void function ArcCookSound( entity projectile )
@@ -34,7 +34,7 @@ void function ArcCookSound( entity projectile )
 	float ignitionTime = expect float( projectile.ProjectileGetWeaponInfoFileKeyField( "grenade_ignition_time" ) )
 
 	float stickTime = 0.2
-	wait stickTime  // let it make a stick sound before alarm starts
+	wait stickTime  //
 
 	EmitSoundOnEntity( projectile, cookSound )
 }

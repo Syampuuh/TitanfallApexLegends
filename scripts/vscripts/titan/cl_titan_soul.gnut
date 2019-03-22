@@ -63,7 +63,7 @@ void function ClientCodeCallback_TitanVarChanged( entity soul )
 
 void function ClientCodeCallback_DoomedStateChanged( entity soul )
 {
-	//Defensive fix temporarily. Code probably shouldn't just pass us null. Remove when bug 36591 is resolved. Should also get this function renamed to CodeClientCallback_ClientCallback_DoomedStateChanged for consistency
+	//
 	if ( !IsValid( soul ) )
 		return
 
@@ -89,7 +89,7 @@ void function ClientCodeCallback_DoomedStateChanged( entity soul )
 	if ( titan == localPlayer )
 	{
 		HandleDoomedState( localPlayer, titan )
-		//UpdateTitanModeHUD( localPlayer )
+		//
 		if ( !soul.IsDoomed() )
 		{
 			localPlayer.Signal( "TitanUnDoomed" )
@@ -97,8 +97,8 @@ void function ClientCodeCallback_DoomedStateChanged( entity soul )
 			entity cockpit = localPlayer.GetCockpit()
 			if ( cockpit != null )
 			{
-				// If we just destroy the cockpit, it will reinitialize itself!
-				// cockpit.Destroy()
+				//
+				//
 				cockpit.Signal( "TitanUnDoomed" )
 				thread TitanCockpitDoomedThink( cockpit, localPlayer )
 				thread TitanCockpit_WarningAudio( cockpit, localPlayer )
@@ -149,7 +149,7 @@ void function FirstPersonEnded_UpdateTitanHealthFX( entity spectatingPlayer, ent
 	if ( !IsValid( titanSoul ) )
 		return
 
-	#if DEV
+	#if(DEV)
 	if ( !ModelHasFXGroup( spectatorTarget.GetModelName() ) )
 		return
 	#endif

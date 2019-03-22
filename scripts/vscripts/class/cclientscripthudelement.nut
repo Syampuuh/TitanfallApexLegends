@@ -2,18 +2,18 @@ untyped
 
 global function CodeCallback_RegisterClass_CClientScriptHudElement
 
-// This is a weird situation where the script name CClientHudElement doesn't match the code name CClientScriptHudElement, but they are the same class
+//
 var function CodeCallback_RegisterClass_CClientScriptHudElement()
 {
 	CClientHudElement.ClassName <- "CClientHudElement"
 
-	CClientHudElement._name <- null // TMP: should be code
+	CClientHudElement._name <- null //
 	CClientHudElement._displayName <- null
 	CClientHudElement.s <- null
 	CClientHudElement.childElements <- null
 	CClientHudElement.classElements <- null
 	CClientHudElement.loadoutID <- null
-	CClientHudElement._parentMenu <- null // TMP: should be code
+	CClientHudElement._parentMenu <- null //
 	CClientHudElement._panelAlpha <- null
 	CClientHudElement._type <- null
 
@@ -36,8 +36,8 @@ var function CodeCallback_RegisterClass_CClientScriptHudElement()
 		return this._type
 	}
 
-	CClientHudElement.__CodeGetName <- CClientHudElement.GetHudName // TMP: should be code
-	function CClientHudElement::GetHudName() // TMP: should be code
+	CClientHudElement.__CodeGetName <- CClientHudElement.GetHudName //
+	function CClientHudElement::GetHudName() //
 	{
 		if ( this._name == null )
 			return this.__CodeGetName()
@@ -45,7 +45,7 @@ var function CodeCallback_RegisterClass_CClientScriptHudElement()
 		return this._name
 	}
 
-	function CClientHudElement::SetHudName( elemName ) // TMP: should be code
+	function CClientHudElement::SetHudName( elemName ) //
 	{
 		this._name = elemName
 	}

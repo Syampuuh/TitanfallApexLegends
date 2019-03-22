@@ -103,7 +103,7 @@ void function CinematicIntroScreen_SetTeamLogoFadeTimes( int team, float fadeinD
 
 void function CinematicIntroScreen_SetQuickIntro( int team )
 {
-	//CinematicIntroScreen_SetTextFadeTimes( team, 1.25, 2.5, 1.25 )
+	//
 	CinematicIntroScreen_SetTextSpacingTimes( team, 0, 0.5, 0, 0, 0 )
 }
 
@@ -134,33 +134,33 @@ void function CinematicIntroScreen( bool forced = false )
 
 	if ( !forced )
 	{
-		//wait here instead of later - give time for flags to be set
+		//
 		wait 0.4
 	}
 
-	// Cinematics must be turned on for this player
+	//
 	if ( !forced && !( player.GetCinematicEventFlags() & CE_FLAG_INTRO ) )
 	{
-		//printt( "Returning from GetCinematicEventFlags" )
+		//
 		return
 	}
 
 	array<string> textLines = file.introScreen[ team ].text
 	Assert( textLines.len() <= 5 )
 
-	// Make sure intro screen isn't over with
+	//
 	float roughTotalTimeRequired = file.introScreen[ team ].textDisplayDuration + file.introScreen[ team ].textFadeInTime + file.introScreen[ team ].textFadeOutTime + file.introScreen[ team ].teamLogoFadeInDelay + file.introScreen[ team ].teamLogoFadeInTime + file.introScreen[ team ].teamLogoDisplayDuration + file.introScreen[ team ].teamLogoFadeOutTime
-	//float introScreenEndTime = Time() + roughTotalTimeRequired
+	//
 
-	//printt( "CinematicIntroScreen" + "forced:" + forced + "Time()" + Time() + "time check greater than: " + (level.nv.gameStateChangeTime + roughTotalTimeRequired) )
+	//
 
 
 	if ( !forced && ( Time() >= level.nv.gameStateChangeTime + roughTotalTimeRequired ) )
 		return
 
-	//##################
-	// Do Intro Screen!
-	//##################
+	//
+	//
+	//
 
 	local allElems = HudElementGroup( "IntroScreen" )
 
@@ -183,66 +183,66 @@ void function CinematicIntroScreen( bool forced = false )
 			textLineElems.append( line )
 		}
 
-		// Once all text is displayed, we show it for the specified duration
+		//
 		wait fadeInDelay + file.introScreen[ team ].textDisplayDuration
 
-		// Fade out the text
+		//
 		foreach ( textLine in textLineElems )
 			textLine.ColorOverTime( 0, 0, 0, 0, file.introScreen[ team ].textFadeOutTime, INTERPOLATOR_LINEAR )
-		//	textLine.FadeOverTime( 0, file.introScreen[ team ].textFadeOutTime )
+		//
 	}
 
 	if ( file.introScreen[ team ].teamLogoFadeInDelay > 0 )
 		wait file.introScreen[ team ].teamLogoFadeInDelay
 
-	//if ( !file.introScreen_doLoadingIcon )
-	//{
-	//	local factionLogo = allElems.CreateElement( "IntroScreenFactionLogo" )
-	//	factionLogo.Hide()
-	//}
-	//else
-	//{
-	//	local factionLogo = allElems.CreateElement( "IntroScreenFactionLogo" )
 	//
-	//	if ( player.GetTeam() == TEAM_IMC )
-	//	{
-	//		factionLogo.SetImage( $"ui/scoreboard_imc_logo" )
-	//	}
-	//	else
-	//	{
-	//		factionLogo.SetImage( $"ui/scoreboard_mcorp_logo" )
-	//	}
-	//	local factionLogoFlare = allElems.CreateElement( "IntroScreenFactionLogoFlare" )
 	//
-	//	// Fade in the faction logo
-	//	factionLogo.SetAlpha( 0 )
-	//	factionLogoFlare.SetColor( 0, 0, 0, 0 )
-	//	factionLogo.Show()
-	//	factionLogoFlare.Show()
-	//	factionLogo.ColorOverTime( 255, 255, 255, 255, file.introScreen[ team ].teamLogoFadeInTime, INTERPOLATOR_ACCEL )
 	//
-	//	// Bling the logo with the flare material
-	//	factionLogoFlare.ColorOverTime( 100, 100, 100, 50, file.introScreen[ team ].teamLogoFadeInTime, INTERPOLATOR_ACCEL )
-	//	wait file.introScreen[ team ].teamLogoFadeInTime
 	//
-	//	// Fade out bling
-	//	factionLogoFlare.ColorOverTime( 0, 0, 0, 0, file.introScreen[ team ].teamLogoFadeInTime, INTERPOLATOR_LINEAR )
 	//
-	//	// Show the logo for specified amount of time
-	//	wait file.introScreen[ team ].teamLogoDisplayDuration
 	//
-	//	// Fade out logo
-	//	factionLogo.ColorOverTime( 0, 0, 0, 0, file.introScreen[ team ].teamLogoFadeOutTime, INTERPOLATOR_LINEAR )
 	//
-	//	// Wait till faded out completely
-	//	wait file.introScreen[ team ].teamLogoFadeOutTime
-	//}
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	wait 5
 
-	// Nothing visible anymore ( all alphas at 0 ), hide all elems
+	//
 	allElems.Hide()
 
-	// Flicker Logo
-	//factionLogo.RunAnimationCommand( "FgColor", 0, 2.5, 0.5, INTERPOLATOR_FLICKER, 0.15 )
+	//
+	//
 }

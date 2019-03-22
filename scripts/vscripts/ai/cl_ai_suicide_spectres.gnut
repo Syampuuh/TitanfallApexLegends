@@ -13,7 +13,7 @@ void function ClSuicideSpectres_Init()
 	AI_GENERATED_TICK_WARNING_BEAMS_FX = PrecacheParticleSystem( $"P_drone_frag_warn_beams" )
 }
 
-void function PlayWarningFXOnMPFragDrone( entity drone ) //Moved from server script to client because of way too many fx handles.
+void function PlayWarningFXOnMPFragDrone( entity drone ) //
 {
 	array<int> fxEnts
 	int attachementIndex = drone.LookupAttachment( "head_base" )
@@ -33,16 +33,16 @@ void function PlayWarningFXOnMPFragDrone( entity drone ) //Moved from server scr
 	WaitForever()
 }
 
-void function PlayWarningFXOnSPTick( entity tick ) //Moved from server script to client because of way too many fx handles.
+void function PlayWarningFXOnSPTick( entity tick ) //
 {
 	array<int> fxEnts
 
-	//First play the warning FX on the head base
+	//
 	int headBaseAttachmentIndex = tick.LookupAttachment( "head_base" )
 	int headBaseFXEnt = StartParticleEffectOnEntity( tick, AI_GENERATED_TICK_WARNING_FX, FX_PATTACH_POINT_FOLLOW, headBaseAttachmentIndex )
 	fxEnts.append( headBaseFXEnt )
 
-	//Then play warn_beams on head_light attachments
+	//
 	for ( int i = 1; i < 26; ++i )
 	{
 		string attachmentName = "head_light_" + i

@@ -3,23 +3,23 @@ untyped
 global function NetworkMarkerShared_Init
 global function RegisterMarker
 
-#if SERVER
-	global function SetMarker
-	global function ClearMarker
+#if(false)
+
+
 #else
 	global function AddMarkerChangeCallback
 	global function ServerCallback_UpdateMarker
 #endif
 global function NetworkMarkerIsValid
 
-//list of specific markers for gamemodes or levels
+//
 global const MARKER_TOWERDEFENSEGENERATOR = "TowerDefenseGeneratorEnt"
 
 
 
-/************************************************************************************\
-							DO NOT EDIT BELOW THIS LINE
-\************************************************************************************/
+/*
+
+*/
 global const MARKER_ENT_CLASSNAME = "script_ref"
 global const MARKET_ENT_MARKED_NAME = "mfd_marked"
 global const MARKET_ENT_PENDING_MARKED_NAME = "mfd_pending_marked"
@@ -47,9 +47,9 @@ void function NetworkMarkerShared_Init()
 	level.NetworkMarkedEnts <- {}
 	level.MarkerRegistryIndex <- 0
 
-	#if SERVER
-		level.RegisteredServerMarkers <- {}
-	#else
+	#if(false)
+
+#else
 		AddCreateCallback( MARKER_ENT_CLASSNAME, __OnMarkerCreated )
 
 		level.RegisteredClientMarkers <- {}
@@ -59,66 +59,66 @@ void function NetworkMarkerShared_Init()
 	RegisterNetworkMarkers()
 }
 
-#if SERVER
-	void function SetMarker( string name, entity ent )
-	{
-		if ( !__MarkerExists( name ) )
-		{
-			__CreateMarker( name, ent )
-			return
-		}
+#if(false)
 
-		__UpdateMarker( name, ent )
-	}
 
-	void function ClearMarker( string name )
-	{
-		if ( !__MarkerExists( name ) )
-			return
 
-		__UpdateMarker( name, null )
-	}
 
-	void function __UpdateMarker( string name, entity ent )
-	{
-		entity marker = __GetMarker( name )
-		marker.SetOwner( ent )
-		__UpdateMarkerForClients( name )
-	}
 
-	entity function __CreateMarker( string name, entity ent )
-	{
-		Assert( name != "" )
-		entity marker = CreateEntity( MARKER_ENT_CLASSNAME )
-		marker.SetOrigin( <0,0,0> )
-		SetTargetName( marker, name )
-		marker.kv.spawnflags = SF_INFOTARGET_ALWAYS_TRANSMIT_TO_CLIENT
-		marker.s.IsSCMarker <- true
 
-		marker.SetOwner( ent )
 
-		__AddMarkerToList( marker )
-		DispatchSpawn( marker )
 
-		return marker
-	}
 
-	void function __UpdateMarkerForClients( string name )
-	{
-		array<entity> players = GetPlayerArray()
-		int index = GetRegisteredIndexFromMarkerName( name )
 
-		foreach ( player in players )
-			Remote_CallFunction_NonReplay( player, "ServerCallback_UpdateMarker", index )
-	}
 
-	int function GetRegisteredIndexFromMarkerName( string name )
-	{
-		Assert( name in level.RegisteredServerMarkers )
-		return expect int( level.RegisteredServerMarkers[ name ] )
-	}
 
-#else /* CLIENT */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#else /**/
 
 	string function GetRegisteredNameFromMarkerIndex( int index )
 	{
@@ -141,7 +141,7 @@ void function NetworkMarkerShared_Init()
 		if ( name == "" )
 			return
 
-		__AddMarkerToList( marker )	//this will be bloated for now - but when __IsMarker() is a real function instead of just checking for "script_ref", this will be streamlined
+		__AddMarkerToList( marker )	//
 		__UpdateMarkerOnClient( name )
 	}
 
@@ -162,22 +162,22 @@ void function NetworkMarkerShared_Init()
 	}
 #endif
 
-/* SHARED */
+/**/
 bool function __IsMarker( entity marker )
 {
-	#if SERVER
-		return marker.GetClassName() == MARKER_ENT_CLASSNAME
-	#elseif CLIENT
+	#if(false)
+
+#elseif(CLIENT)
 		return marker.GetNetworkedClassName() == MARKER_ENT_CLASSNAME
 	#endif
 }
 
 void function RegisterMarker( string name )
 {
-	#if SERVER
-		level.RegisteredServerMarkers[ name ] <- level.MarkerRegistryIndex
-		level.MarkerRegistryIndex++
-	#elseif CLIENT
+	#if(false)
+
+
+#elseif(CLIENT)
 		level.RegisteredClientMarkers[ level.MarkerRegistryIndex ] <- name
 		level.MarkerRegistryIndex++
 	#endif
@@ -226,7 +226,7 @@ void function __AddMarkerToList( entity marker )
 	string name = marker.GetTargetName()
 	Assert( name != "" )
 
-	//this allows overwrites of the same intended marked ent
+	//
 	if ( !__MarkerExists( name ) )
 		level.NetworkMarkedEnts[ name ] <- null
 

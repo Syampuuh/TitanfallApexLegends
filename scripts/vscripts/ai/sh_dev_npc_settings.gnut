@@ -1,4 +1,6 @@
-#if DEV
+//
+
+#if(DEV)
 global function SetupChangeSurvivalCharacterClass
 global function SetupOverrideSpawnSurvivalCharacter
 global function SetupSurvival
@@ -7,7 +9,7 @@ global function SetupSurvivalIncapShieldBot
 
 void function SetupChangeSurvivalCharacterClass()
 {
-	#if UI
+	#if(UI)
 		array<ItemFlavor> characters = clone GetAllCharacters()
 		characters.sort( int function( ItemFlavor a, ItemFlavor b ) {
 			if ( Localize( ItemFlavor_GetLongName( a ) ) < Localize( ItemFlavor_GetLongName( b ) ) )
@@ -27,7 +29,7 @@ void function SetupChangeSurvivalCharacterClass()
 
 void function SetupOverrideSpawnSurvivalCharacter()
 {
-	#if UI
+	#if(UI)
 		SetupDevCommand( "Random (default)", "dev_sur_force_spawn_character random" )
 		SetupDevCommand( "Shipping only", "dev_sur_force_spawn_character special" )
 		array<ItemFlavor> characters = clone GetAllCharacters()
@@ -47,7 +49,7 @@ void function SetupOverrideSpawnSurvivalCharacter()
 
 void function SetupSurvival()
 {
-	#if UI
+	#if(UI)
 		SetupDevCommand( "Enable Survival Dev Mode", "playlist survival_dev" )
 		SetupDevCommand( "Disable Match Ending", "mp_enablematchending 0" )
 		SetupDevCommand( "Drop Care Package R1", "script thread AirdropForRound( gp()[0].GetOrigin(), gp()[0].GetAngles(), 0, null )" )
@@ -65,14 +67,14 @@ void function SetupSurvival()
 
 void function SetupSurvivalLoot( var categories )
 {
-	#if UI
+	#if(UI)
 		RunClientScript( "SetupSurvivalLoot", categories )
 	#endif
 }
 
 void function SetupSurvivalIncapShieldBot()
 {
-	#if UI
+	#if(UI)
 	SetupDevCommand( "Spawn Bot with Lv 1 Incap Shield", "script Dev_SpawnBotWithIncapShieldToView( 1 )" )
 	SetupDevCommand( "Spawn Bot with Lv 2 Incap Shield", "script Dev_SpawnBotWithIncapShieldToView( 2 )" )
 	SetupDevCommand( "Spawn Bot with Lv 3 Incap Shield", "script Dev_SpawnBotWithIncapShieldToView( 3 )" )

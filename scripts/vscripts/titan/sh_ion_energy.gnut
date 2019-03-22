@@ -1,6 +1,6 @@
 
 global function IonEnergy_Init
-#if CLIENT
+#if(CLIENT)
 global function Ion_CreateEnergyBar
 global function Ion_DestroyEnergyBar
 #endif
@@ -8,7 +8,7 @@ global function Ion_DestroyEnergyBar
 global const float ION_ENERGY_REGEN_INTERVAL = 0.1
 global const int ION_ENERGY_MAX = 1000
 
-#if CLIENT
+#if(CLIENT)
 global function FlashEnergyNeeded_Bar
 
 struct
@@ -19,13 +19,13 @@ struct
 
 void function IonEnergy_Init()
 {
-	#if CLIENT
+	#if(CLIENT)
 		AddLocalPlayerDidDamageCallback( Ion_CritHitIndicator )
 		AddTitanCockpitManagedRUI( Ion_CreateEnergyBar, Ion_DestroyEnergyBar, Ion_ShouldCreateEnergyBar, RUI_DRAW_COCKPIT )
 	#endif
 }
 
-#if CLIENT
+#if(CLIENT)
 var function Ion_CreateEnergyBar()
 {
 	Assert( file.ionEnergyBarRui == null )

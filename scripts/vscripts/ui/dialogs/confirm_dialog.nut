@@ -82,28 +82,28 @@ void function OpenConfirmDialogFromData( ConfirmDialogData dialogData )
 	AdvanceMenu( GetMenu( "ConfirmDialog" ) )
 
 	/*
-	var                    menu
-	string                 header
-	string                 message
-	DialogMessageRuiData & ruiMessage
-	array                  messageColor = [161, 161, 161, 255]
-	asset                  image
-	asset                  rightImage = $""
-	bool                   forceChoice = false
-	bool                   noChoice = false
-	bool                   noChoiceWithNavigateBack = false
-	bool                   showSpinner = false
-	bool                   showPCBackButton = false
-	float                  inputDisableTime = 0
-	table<int, bool>       coloredButton
-	bool                   darkenBackground = false
-	bool                   useFullMessageHeight = false
-	float                  timeoutDuration = -1
-	int                    magicNumber = 0
 
-	array<DialogButtonData> buttonData
-	array<DialogFooterData> footerData
-	*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 }
 
 
@@ -167,7 +167,7 @@ void function ConfirmDialog_OnNavigateBack()
 
 void function ConfirmDialog_Yes( var button )
 {
-	// todo(bm): AddMenuFooterOption registers the inputs, and it seems flakey.
+	//
 	if ( file.showDialogData == null )
 		return
 
@@ -182,7 +182,7 @@ void function ConfirmDialog_Yes( var button )
 
 void function ConfirmDialog_No( var button )
 {
-	// todo(bm): AddMenuFooterOption registers the inputs, and it seems flakey.
+	//
 	if ( file.showDialogData == null )
 		return
 

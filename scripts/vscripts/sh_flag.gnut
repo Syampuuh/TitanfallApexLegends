@@ -24,13 +24,13 @@ global function FlagSetOnFlag
 global function FlagClearOnFlag
 global function GetTriggerEnabled
 
-#if SERVER
-	global function SetupFlagKilledForNPC
+#if(false)
 
-	struct
-	{
-		table flagOnKilled
-	} file
+
+
+
+
+
 #endif
 
 
@@ -41,20 +41,20 @@ struct
 
 void function Flags_Init()
 {
-	#if DEV
-		//level.flagHistory <- {}
+	#if(DEV)
+		//
 	#endif
 
-	#if SERVER
-	AddSpawnCallback( "func_brush", FuncBrushMoveFlag )
-	#endif
+	#if(false)
+
+#endif
 
 	RegisterSignal( "deathflag" )
 }
 
 void function FlagInit( string msg, bool isSet = false )
 {
-	// gets init'd from the map too, so not an assert
+	//
 	if ( msg in shFile.flags )
 		return
 
@@ -67,9 +67,9 @@ void function FlagSet( string msg )
 {
 	Assert( msg in shFile.flags, "flag " + msg + " not initialized yet" )
 
-	#if DEV
-		//if ( !Flag( msg ) )
-		//	level.flagHistory[ msg ] <- true
+	#if(DEV)
+		//
+		//
 	#endif
 
 	__FlagSetValue( msg, true )
@@ -117,7 +117,7 @@ void function FlagToggle( string msg )
 	}
 }
 
-//this function only works in threaded functions
+//
 void function FlagWait( string msg )
 {
 		Assert( msg in shFile.flags, "flag " + msg + " not initialized yet" )
@@ -128,7 +128,7 @@ void function FlagWait( string msg )
 	}
 }
 
-//this function only works in threaded functions
+//
 void function FlagWaitAll( ... )
 {
 	array<string> args
@@ -148,7 +148,7 @@ void function FlagWaitAll( ... )
 
 		loop = false
 
-		//extra check to make sure one didn't get cleared after a wait
+		//
 		foreach ( i, msg in args )
 		{
 			if ( Flag( msg ) )
@@ -160,7 +160,7 @@ void function FlagWaitAll( ... )
 	}
 }
 
-//this function only works in threaded functions
+//
 void function FlagWaitWithTimeout( string flag, float timeout )
 {
 	string newFlag = "FlagWaitAny" + UniqueString()
@@ -190,7 +190,7 @@ void function __FlagWaitTime( float timeout, string newFlag )
 	FlagSet( newFlag )
 }
 
-//this function only works in threaded functions
+//
 void function FlagWaitAny( ... )
 {
 	string newFlag = "FlagWaitAny" + UniqueString()
@@ -210,7 +210,7 @@ void function FlagWaitAny( ... )
 	FlagWait( newFlag )
 }
 
-//this function only works in threaded functions
+//
 void function FlagWaitClear( string msg )
 {
 	Assert( msg in shFile.flags, "flag " + msg + " not initialized yet" )
@@ -221,7 +221,7 @@ void function FlagWaitClear( string msg )
 	}
 }
 
-//this function only works in threaded functions
+//
 void function FlagWaitClearAll( ... )
 {
 	array<string> args
@@ -245,7 +245,7 @@ void function FlagWaitClearAllArray( array<string> flags )
 
 		loop = false
 
-		//extra check to make sure one didn't get cleared after a wait
+		//
 		foreach ( flag in flags )
 		{
 			if ( !Flag( flag ) )
@@ -257,7 +257,7 @@ void function FlagWaitClearAllArray( array<string> flags )
 	}
 }
 
-//this function only works in threaded functions
+//
 void function FlagWaitClearAny( ... )
 {
 	string newFlag = "FlagWaitAny" + UniqueString()
@@ -277,7 +277,7 @@ void function FlagWaitClearAny( ... )
 	FlagWait( newFlag )
 }
 
-// this is terrible, don't use global namespace for local functionality
+//
 void function __FlagWaitAny( string msg, string newFlag )
 {
 	EndSignal( level, newFlag )
@@ -287,7 +287,7 @@ void function __FlagWaitAny( string msg, string newFlag )
 	FlagSet( newFlag )
 }
 
-// this is terrible, don't use global namespace for local functionality
+//
 void function __FlagWaitClearAny( string msg, string newFlag )
 {
 	EndSignal( level, newFlag )
@@ -304,11 +304,11 @@ void function __FlagSetValue( string msg, bool val )
 
 	shFile.flags[ msg ] = val
 
- 	#if SERVER
-	UpdateTriggerStatusFromFlagChange( msg )
-	#endif
+ 	#if(false)
 
-	// WARNING: Use FlagEnd instead of end signalling directly on this signal
+#endif
+
+	//
 	Signal( level, msg )
 }
 
@@ -403,86 +403,86 @@ array<string> function GetFlagsFromField( entity ent, string field )
 	return split( ent.kv[ field ], " " )
 }
 
-#if SERVER
-void function FuncBrushMoveFlag( entity brush )
-{
-	if ( !brush.HasKey( "script_flag" ) )
-		return
+#if(false)
 
-	if ( GetEditorClass( brush ) != "" )
-		return
 
-	thread FuncBrushMoveFlag_Thread( brush )
-}
 
-void function FuncBrushMoveFlag_Thread( entity brush )
-{
-	brush.EndSignal( "OnDestroy" )
-	Assert( brush.HasKey( "move_time" ), "No move_time set on brush mover" )
-	Assert( brush.HasKey( "movedirection" ), "No movedirection set on brush mover" )
 
-	string flag = string( brush.kv.script_flag )
-	FlagInit( flag )
-	FlagWait( flag )
-	BrushMoves( brush )
-}
 
-void function SetupFlagKilledForNPC( entity ent )
-{
-	// ent could be a spawner or npc
 
-	string flag
-	vector origin
-	if ( IsSpawner( ent ) )
-	{
-		table spawnerKVs = ent.GetSpawnEntityKeyValues()
-		Assert( "script_flag_killed" in spawnerKVs )
-		flag = string( spawnerKVs.script_flag_killed )
-		origin = StringToVector( string( spawnerKVs.origin ) )
-	}
-	else
-	{
-		Assert( ent.HasKey( "script_flag_killed" ) )
-		flag = ent.GetValueForKey( "script_flag_killed" )
-		origin = ent.GetOrigin()
-	}
-	Assert( flag != "", "Entity " + ent + " at " + origin + " has empty script_flag_killed key" )
-	FlagInit( flag )
 
-	if ( !( flag in file.flagOnKilled ) )
-		file.flagOnKilled[ flag ] <- []
 
-	// Add the entity (spawner or npc) to the list of things that must die for flag to be set
-	file.flagOnKilled[ flag ].append( ent )
 
-	// Wait wait for spawners to die. When those spawners spawn a npc that npc will run this function and we will wait for it to die there
-	if ( IsSpawner( ent ) )
-		return
 
-	// If this npc has a spawner in the array already, remove it if the spawner has spawned once. If the spawner had a repeat counter only remove it when it's reached the counter.
-	entity spawner = ent.GetSpawner()
-	if ( IsValid( spawner ) && file.flagOnKilled[ flag ].contains( spawner ) && spawner.GetSpawnCount() >= spawner.e.repeatSpawnCount )
-		file.flagOnKilled[ flag ].fastremovebyvalue( spawner )
 
-	// Wait for the NPC to die, delete, or get leeched, then remove the npc from the array
-	WaitSignal( ent, "OnDeath", "OnDestroy", "OnLeeched" )
-	file.flagOnKilled[ flag ].fastremovebyvalue( ent )
 
-	//printt( "NPC with script_flag_killed", flag, "died.", file.flagOnKilled[ flag ].len(), "remaining." )
 
-	// Set the flag if everything in the array has been killed or spawned and killed
-	if ( file.flagOnKilled[ flag ].len() == 0 )
-	{
-		//printt( "Setting script_flag_killed:", flag )
-		FlagSet( flag )
-	}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+//
+
+
+
+
+//
+
+
+
+//
+
+//
+
+
+//
+
+
+
 #endif
 
 
 bool function FlagExists( string msg )
 {
-	// gets init'd from the map too, so not an assert
+	//
 	if ( msg in shFile.flags )
 		return true
 

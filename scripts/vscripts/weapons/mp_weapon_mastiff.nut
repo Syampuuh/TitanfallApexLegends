@@ -1,8 +1,8 @@
 global function OnWeaponPrimaryAttack_weapon_mastiff
 
-#if SERVER
-global function OnWeaponNpcPrimaryAttack_weapon_mastiff
-#endif // #if SERVER
+#if(false)
+
+#endif //
 
 const MASTIFF_BLAST_PATTERN_LEN = 8
 
@@ -18,16 +18,16 @@ struct {
 		[0.0, -0.15], //
 	]
 
-	/*array boltOffsets = [
-		[0.0, 0.0], // center
-		[1.0, 0.0], // top
-		[0.0, 1.0], // right
-		[0.0, -1.0], // left
-		[0.5, 0.5],
-		[0.5, -0.5],
-		[-0.5, 0.5],
-		[-0.5, -0.5]
-	]*/
+	/*
+
+
+
+
+
+
+
+
+*/
 } file
 
 var function OnWeaponPrimaryAttack_weapon_mastiff( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -35,12 +35,12 @@ var function OnWeaponPrimaryAttack_weapon_mastiff( entity weapon, WeaponPrimaryA
 	return FireMastiff( attackParams, true, weapon )
 }
 
-#if SERVER
-var function OnWeaponNpcPrimaryAttack_weapon_mastiff( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	return FireMastiff( attackParams, false, weapon )
-}
-#endif // #if SERVER
+#if(false)
+
+
+
+
+#endif //
 
 int function FireMastiff( WeaponPrimaryAttackParams attackParams, bool playerFired, entity weapon )
 {
@@ -48,7 +48,7 @@ int function FireMastiff( WeaponPrimaryAttackParams attackParams, bool playerFir
 	bool shouldCreateProjectile = false
 	if ( IsServer() || weapon.ShouldPredictProjectiles() )
 		shouldCreateProjectile = true
-	#if CLIENT
+	#if(CLIENT)
 		if ( !playerFired )
 			shouldCreateProjectile = false
 	#endif
@@ -78,7 +78,7 @@ int function FireMastiff( WeaponPrimaryAttackParams attackParams, bool playerFir
 			vector rightVec = baseRightVec * file.boltOffsets[index][1] * spreadFrac
 			vector attackDir = attackParams.dir + upVec + rightVec
 
-			bool ignoreSpread = true  // don't use the normal code spread for this weapon (ie, slightly adjusting outgoing round angle within spread cone)
+			bool ignoreSpread = true  //
 			bool deferred = index > (boltsPerShot / 2)
 			entity bolt = FireBallisticRoundWithDrop( weapon, attackParams.pos, attackDir, playerFired, ignoreSpread, index, deferred )
 
@@ -86,7 +86,7 @@ int function FireMastiff( WeaponPrimaryAttackParams attackParams, bool playerFir
 			{
 				if ( owner.IsPlayer() )
 				{
-#if CLIENT
+#if(CLIENT)
 					EmitSoundOnEntity( bolt, "weapon_mastiff_projectile_crackle" )
 #else //
 					EmitSoundOnEntityExceptToPlayer( bolt, owner, "weapon_mastiff_projectile_crackle" )

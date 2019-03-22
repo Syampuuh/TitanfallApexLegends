@@ -75,7 +75,7 @@ void function DebugDrawSphere( vector origin, float radius, int r, int g, int b,
 	}
 }
 
-//this draws an actual arrow like this --->, the function below draws an x,y,z axis
+//
 void function DebugDrawArrow( vector start, vector end, float arrowSize, int r, int g, int b, bool throughGeo, float time )
 {
 	DebugDrawLine( start, end, r, g, b, true, time )
@@ -83,7 +83,7 @@ void function DebugDrawArrow( vector start, vector end, float arrowSize, int r, 
 	DebugDrawCircle( end, angles, arrowSize, r, g, b, true, time, 3 )
 }
 
-//this draws an x,y,z axis
+//
 void function DebugDrawAxis( vector origin, vector angles = <0,0,0>, float time = 5.0, float scale = 50, vector rgb = <0,0,0> )
 {
 	vector forward = AnglesToForward( angles )
@@ -191,7 +191,7 @@ void function DebugDrawRotatedBox( vector origin, vector mins, vector maxs, vect
 	vector right = -AnglesToRight( angles )
 	vector up = AnglesToUp( angles )
 
-	// Bottom
+	//
 	vector corner0 = origin + (forward * maxs.x) + (right * maxs.y) + (up * mins.z)
 	vector corner1 = origin + (forward * maxs.x) + (right * mins.y) + (up * mins.z)
 	vector corner2 = origin + (forward * mins.x) + (right * mins.y) + (up * mins.z)
@@ -621,18 +621,18 @@ void function DebugDrawWeapon( entity weapon )
 	vector nearPos 		= barrelPos + ( barrelVec * nearDist )
 	vector farPos 		= barrelPos + ( barrelVec * farDist )
 
-	// Straight line for center cone
+	//
 	DebugDrawLine( barrelPos, nearPos, 255, 0, 0, true, drawTime )
 	DebugDrawLine( nearPos, farPos, 255, 255, 0, true, drawTime )
 
-	// Circle representing spread at near distance
+	//
 	radius = spreadSin * nearDist
 	array<vector> pointsOnCircleNear = DebugDrawCircle( nearPos, circleAng, radius, 255, 0, 0, true, drawTime )
 	for ( int i = 0; i < pointsOnCircleNear.len(); i++ )
 		DebugDrawLine( barrelPos, pointsOnCircleNear[i], 255, 0, 0, true, drawTime )
 	DebugDrawText( nearPos + <0, 0, radius + 15>, string( nearDmg ), true, drawTime )
 
-	// Circle representing spread at far distance
+	//
 	radius = spreadSin * farDist
 	array<vector> pointsOnCircleFar = DebugDrawCircle( farPos, circleAng, radius, 255, 255, 0, true, drawTime )
 	for ( int i = 0; i < pointsOnCircleFar.len(); i++ )

@@ -5,7 +5,7 @@ void function GamemodeTdmShared_Init()
 {
 	SetScoreEventOverrideFunc( TDM_SetScoreEventOverride )
 
-	#if CLIENT
+	#if(CLIENT)
 	SetGameModeSuddenDeathAnnouncementSubtext( "#GAMEMODE_ANNOUNCEMENT_SUDDEN_DEATH_TDM" )
 	#endif
 }

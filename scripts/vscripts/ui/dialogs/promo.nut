@@ -16,7 +16,7 @@ struct PageContent
 
 enum eTransType
 {
-	// must match TRANSTYPE_* in promo.rui
+	//
 	NONE = 0,
 	SLIDE_LEFT = 1,
 	SLIDE_RIGHT = 2,
@@ -53,10 +53,10 @@ void function UICodeCallback_MainMenuPromosUpdated()
 {
 	printt( "Promos updated" )
 
-	#if DEV
+	#if(DEV)
 		if ( GetConVarInt( "mainMenuPromos_preview" ) == 1 )
 			file.promoData = GetMainMenuPromos()
-	#endif // DEV
+	#endif //
 }
 
 
@@ -106,7 +106,7 @@ void function InitPromoDialog()
 	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_CLOSE", "#B_BUTTON_CLOSE" )
 	AddMenuFooterOption( menu, LEFT, BUTTON_X, true, "#X_BUTTON_BUY", "#BUY", GoToStoreItem, PageHasBuyOption )
 
-	RequestMainMenuPromos() // This will be ignored if there was a recent request. "infoblock_requestInterval"
+	RequestMainMenuPromos() //
 
 	var dataTable = GetDataTable( $"datatable/promo_images.rpak" )
 	for ( int i = 0; i < GetDatatableRowCount( dataTable ); i++ )
@@ -137,15 +137,15 @@ void function PromoDialog_OnOpen()
 	else
 		content = file.promoData.layout
 
-	if ( content.find( "<" ) != 0 ) // plain text
+	if ( content.find( "<" ) != 0 ) //
 		content = "<p|0| |" + content + ">"
 
-	// Test content
-	//			"<page|imageIndex|Title text|Message text>"
-	//content = "<p|1|Playable Characters|Gibraltar / Mirage / Caustic\nhello world>"
-	//content += "<p|0|Bleedout Bug Fixed|Please bug it if you continue to see the issue.>"
-	//content += "<p|2|hello|world>"
-	//content += "<p|3|Page 4|Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. Lorem Ipsum is simply dummy text of the printing and typesetting industry.>"
+	//
+	//
+	//
+	//
+	//
+	//
 
 	file.pages = InitPages( content )
 	file.activePageIndex = 0
@@ -189,7 +189,7 @@ void function UserClosedPromoDialog( var button )
 
 void function GoToStoreItem( var button )
 {
-	// TODO
+	//
 }
 
 
@@ -203,11 +203,11 @@ array<PageContent> function InitPages( string content )
 	{
 		array<string> vals = split( element, "|" )
 
-		//printt( element )
-		//foreach ( val in vals )
-		//	printt( "val:", val )
+		//
+		//
+		//
 
-		if ( vals[0] == "p" ) // page
+		if ( vals[0] == "p" ) //
 		{
 			if ( vals.len() != 4 && vals.len() != 3 )
 				continue
@@ -222,8 +222,8 @@ array<PageContent> function InitPages( string content )
 
 			newPage.title = vals[2]
 			newPage.desc = vals.len() == 3 ? "" : vals[3]
-			//if ( vals[1] == "1" ) // Testing buy button
-			//	newPage.link = "buy:test"
+			//
+			//
 
 			pages.append( newPage )
 		}
@@ -244,9 +244,12 @@ void function RegisterPageChangeInput()
 
 	RegisterButtonPressedCallback( BUTTON_SHOULDER_LEFT, Page_NavLeft )
 	RegisterButtonPressedCallback( BUTTON_DPAD_LEFT, Page_NavLeft )
+	RegisterButtonPressedCallback( KEY_LEFT, Page_NavLeft )
 
 	RegisterButtonPressedCallback( BUTTON_SHOULDER_RIGHT, Page_NavRight )
 	RegisterButtonPressedCallback( BUTTON_DPAD_RIGHT, Page_NavRight )
+	RegisterButtonPressedCallback( KEY_RIGHT, Page_NavRight )
+
 
 	file.pageChangeInputsRegistered = true
 
@@ -261,9 +264,11 @@ void function DeregisterPageChangeInput()
 
 	DeregisterButtonPressedCallback( BUTTON_SHOULDER_LEFT, Page_NavLeft )
 	DeregisterButtonPressedCallback( BUTTON_DPAD_LEFT, Page_NavLeft )
+	DeregisterButtonPressedCallback( KEY_LEFT, Page_NavLeft )
 
 	DeregisterButtonPressedCallback( BUTTON_SHOULDER_RIGHT, Page_NavRight )
 	DeregisterButtonPressedCallback( BUTTON_DPAD_RIGHT, Page_NavRight )
+	DeregisterButtonPressedCallback( KEY_RIGHT, Page_NavRight )
 
 	file.pageChangeInputsRegistered = false
 }

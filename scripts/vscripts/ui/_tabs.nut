@@ -30,6 +30,8 @@ global function Tab_GetTabDefByBodyName
 global function SetTabNavigationEnabled
 global function SetTabNavigationEndCallback
 
+global function GetTabBodyParent
+
 global function GetPanelTabs
 global function SetTabDefEnabled
 
@@ -70,7 +72,7 @@ global enum eTabDirection
 	NEXT
 }
 
-// TODO: Move to be a single call per menu in standard init for all menus (also, apply the same organization to InitFooterOptions())
+//
 void function InitTabs()
 {
 	foreach ( menu in uiGlobal.allMenus )
@@ -143,6 +145,7 @@ TabDef function AddTab( var parentPanel, var panel, string tabTitle )
 	data.button = tabData.tabButtons[tabData.tabDefs.len()]
 	data.panel = panel
 	data.title = tabTitle
+	data.parentPanel = parentPanel
 
 	file.tabBodyDefMap[data.panel] <- data
 
@@ -213,9 +216,9 @@ bool function IsTabActive( TabData tabData )
 	return uiGlobal.panelData[panel].isActive
 }
 
-// TODO: Need this to cause open/close and footer update
-// AddMenuEventHandler() and AddMenuFooterOption() has to be different for tab panels
-// AddPanelFooterOption()? This needs more thought. The panel needs to affect the footer options of it's parent, so these setup functions need to work differently for panels.
+//
+//
+//
 void function ActivateTab( TabData tabData, int tabIndex )
 {
 	if ( !CanNavigateFromActiveTab( tabData, tabIndex ) )
@@ -326,7 +329,7 @@ void function HidePanelInternal( var panel )
 
 void function ShutdownAllPanels()
 {
-	uiGlobal.activePanels.clear() // todo(dw): aaaaaahhhhh
+	uiGlobal.activePanels.clear() //
 
 	foreach ( var panel, PanelDef panelDef in uiGlobal.panelData )
 		HidePanel( panel )
@@ -388,16 +391,16 @@ void function UpdateMenuTabs()
 			string leftText
 			string rightText
 
-			//if ( Tab_IsRootLevel( tabData ) )
+			//
 			{
 				leftText = IsGamepadPS4() ? "L1" : "LB"
 				rightText = IsGamepadPS4() ? "R1" : "RB"
 			}
-			//else
-			//{
-			//	leftText = "LT"
-			//	rightText = "RT"
-			//}
+			//
+			//
+			//
+			//
+			//
 
 			SetLabelRuiText( leftShoulder, leftText )
 			Hud_SetVisible( leftShoulder, !isNestedTabActive || !Tab_IsRootLevel( tabData ) )
@@ -417,7 +420,7 @@ void function UpdateMenuTabs()
 			Hud_SetVisible( rightShoulder, false )
 		}
 
-		// Disable empty tabs
+		//
 		while ( tabIndex < MAX_TABS )
 		{
 			var tab = tabButtons[ tabIndex ]
@@ -489,13 +492,13 @@ void function OnTab_Activate( var button )
 	else if ( tabIndex > tabData.tabIndex )
 		animPrefix = "MoveLeft_"
 	else
-		return // Already on this tab
+		return //
 
-	//printt( "tabIndex was:", tabIndex, "menu:", Hud_GetHudName( tabsData[ tabIndex ].panel ) )
+	//
 
 	ActivateTab( tabData, tabIndex )
 
-	//printt( "tabIndex now:", tabIndex, "menu:", Hud_GetHudName( tabsData[ tabIndex ].panel ) )
+	//
 }
 
 
@@ -521,7 +524,7 @@ void function OnMenuTab_NavLeft( var unusedNull )
 
 	if ( tabData.tabNavigationDisabled )
 	{
-		// allow us to back out even when tabs are disabled
+		//
 		if ( tabData.tabNavigationEndCallbacks[eTabDirection.PREV] != null )
 			tabData.tabNavigationEndCallbacks[eTabDirection.PREV]()
 
@@ -819,7 +822,13 @@ bool function IsTabIndexEnabled( TabData tabData, int tabIndex )
 bool function IsTabPanelActive( var tabPanel )
 {
 	if ( !IsPanelTabbed( GetActiveMenu() ) )
+	{
+		if ( IsTabBody( tabPanel ) )
+		{
+			return _GetActiveTabPanel( GetTabForTabBody( tabPanel ).parentPanel ) == tabPanel
+		}
 		return false
+	}
 
 	return _GetActiveTabPanel( GetActiveMenu() ) == tabPanel
 }
@@ -831,12 +840,12 @@ void function RegisterTabNavigationInput()
 	{
 		RegisterButtonPressedCallback( BUTTON_SHOULDER_LEFT, OnMenuTab_NavLeft )
 		RegisterButtonPressedCallback( BUTTON_SHOULDER_RIGHT, OnMenuTab_NavRight )
-		//RegisterButtonPressedCallback( BUTTON_TRIGGER_LEFT, OnNestedTab_NavLeft )
-		//RegisterButtonPressedCallback( BUTTON_TRIGGER_RIGHT, OnNestedTab_NavRight )
+		//
+		//
 		RegisterButtonPressedCallback( BUTTON_DPAD_UP, OnTab_DPadUp )
 		RegisterButtonPressedCallback( BUTTON_DPAD_DOWN, OnTab_DPadDown )
 
-		RegisterButtonPressedCallback( BUTTON_Y, OnTab_ButtonY ) // TODO: code should be passing the input index to the registered function
+		RegisterButtonPressedCallback( BUTTON_Y, OnTab_ButtonY ) //
 
 		uiGlobal.tabButtonsRegistered = true
 	}
@@ -849,8 +858,8 @@ void function DeregisterTabNavigationInput()
 	{
 		DeregisterButtonPressedCallback( BUTTON_SHOULDER_LEFT, OnMenuTab_NavLeft )
 		DeregisterButtonPressedCallback( BUTTON_SHOULDER_RIGHT, OnMenuTab_NavRight )
-		//DeregisterButtonPressedCallback( BUTTON_TRIGGER_LEFT, OnNestedTab_NavLeft )
-		//DeregisterButtonPressedCallback( BUTTON_TRIGGER_RIGHT, OnNestedTab_NavRight )
+		//
+		//
 		DeregisterButtonPressedCallback( BUTTON_DPAD_UP, OnTab_DPadUp )
 		DeregisterButtonPressedCallback( BUTTON_DPAD_DOWN, OnTab_DPadDown )
 
@@ -870,4 +879,17 @@ void function SetTabRightSound( var panel, string sound )
 void function SetTabLeftSound( var panel, string sound )
 {
 	GetTabDataForPanel( panel ).tabLeftSound = sound
+}
+
+
+bool function IsTabBody( var panel )
+{
+	return panel in file.tabBodyDefMap
+}
+
+TabData function GetTabBodyParent( var panel )
+{
+	Assert( IsTabBody( panel ) )
+	TabDef def = GetTabForTabBody( panel )
+	return GetTabDataForPanel( def.parentPanel )
 }

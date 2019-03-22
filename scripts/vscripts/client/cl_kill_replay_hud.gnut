@@ -21,7 +21,7 @@ void function ClKillReplayHud_Init()
 
 void function EntitiesDidLoad()
 {
-	if ( !IsRoundWinningKillReplayEnabled() ) //Need to check in EntitiesDidLoad as opposed to main() since the .nv isn't set yet in main()
+	if ( !IsRoundWinningKillReplayEnabled() ) //
 		return
 
 	AddCallback_KillReplayStarted( RoundWinningKillReplayClientHud_Activate )
@@ -59,17 +59,17 @@ void function KillReplayHud_Activate()
 	if ( IsReplayRoundWinning() )
 		return
 
-	//printt( "KillReplayHud_Activate, replay not roundwinning" )
+	//
 
 	var rui = RuiCreate( $"ui/kill_replay_overlay.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 900 )
-	//var rui = CreateCockpitRui( $"ui/kill_replay_overlay.rpak", 0 )
+	//
 	file.killReplayOverlayRui = rui
 
 	RuiSetString( rui, "killReplayTitleText", "#KILL_REPLAY" )
 
 	AttackerDisplayNameStruct nameOfLastKiller = clGlobal.nameOfLastKiller
 
-	if ( nameOfLastKiller.attackerName != "" /*|| nameOfLastKiller.attackerPetName != ""*/ )
+	if ( nameOfLastKiller.attackerName != "" /**/ )
 	{
 		entity player = GetLocalClientPlayer()
 
@@ -114,13 +114,13 @@ void function KillReplayHud_Deactivate()
 	if ( IsReplayRoundWinning() )
 		return
 
-	//printt( "FIX THIS PLEASE WHYKillReplayHud_Deactivate, replay not roundwinning" )
+	//
 
 	RuiDestroy( file.killReplayOverlayRui )
 
 	entity player = GetLocalClientPlayer()
 
-	//player.cv.vignette.Hide()
+	//
 
 	player.Signal( "DeactivateKillReplayHud" )
 }
@@ -135,7 +135,7 @@ void function RoundWinningKillReplayClientHud_Activate()
 
 	entity clientPlayer = GetLocalClientPlayer()
 
-	StopLocal1PDeathSound() //Don't want this sound playing in RoundWinningKillReplay
+	StopLocal1PDeathSound() //
 
 	clientPlayer.EndSignal( "OnDestroy" )
 
@@ -152,10 +152,10 @@ void function RoundWinningKillReplayClientHud_Activate()
 
 	RuiSetString( file.killReplayOverlayRui, "killReplayTitleText", announcementText )
 
-	ClearAnnouncements() //Clear the "ROUND WON" announcement from end of round
+	ClearAnnouncements() //
 
 	entity viewEntity = GetViewEntity()
-	if ( viewEntity == null ) //Sometimes this can be null, e.g. we went back in time on the client before the entity existed. See Bug 112390
+	if ( viewEntity == null ) //
 		return
 
 	AttackerDisplayNameStruct names = GetAttackerDisplayNamesFromClassname( viewEntity, true )
@@ -169,7 +169,7 @@ void function RoundWinningKillReplayClientHud_Activate()
 	else
 		killerName = attackerName
 
-	RuiSetString( file.killReplayOverlayRui, "killerName", killerName ) //TODO: See if this works for ctf!
+	RuiSetString( file.killReplayOverlayRui, "killerName", killerName ) //
 
 	if ( !viewEntity.IsPlayer() )
 		return
@@ -178,14 +178,14 @@ void function RoundWinningKillReplayClientHud_Activate()
 	RuiSetFloat( file.killReplayOverlayRui, "killerHealthFrac", expect float( level.nv.roundWinningKillReplayEntHealthFrac ) )
 }
 
-void function RoundWinningKillReplayClientHud_Deactivate() //Not doing screen fade in here, but might need to?
+void function RoundWinningKillReplayClientHud_Deactivate() //
 {
 	if ( IsRoundWinningKillReplayEnabled() == false )
 		return
 
 	if ( IsReplayRoundWinning() )
 	{
-		//printt( "RoundWinningKillReplayClientHud_Deactivate, IsReplayRoundWinning()" )
+		//
 		RuiDestroy( file.killReplayOverlayRui )
 
 		entity player = GetLocalClientPlayer()

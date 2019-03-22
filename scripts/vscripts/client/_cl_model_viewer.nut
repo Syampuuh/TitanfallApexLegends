@@ -1,4 +1,6 @@
-#if DEV
+//
+
+#if(DEV)
 untyped
 #endif
 
@@ -6,7 +8,7 @@ global function ServerCallback_MVUpdateModelBounds
 global function ServerCallback_MVEnable
 global function ServerCallback_MVDisable
 
-#if DEV
+#if(DEV)
 global function ClModelViewInit
 global function ModelViewerSpawnModel
 global function SelectNextModel
@@ -70,8 +72,8 @@ struct {
 	entity bestModelToSelect = null
 	bool modelSelectionBoundsVisible = false
 	float modelSelectionBoundsHideTime = -1.0
-	float modelSectionBoundsShowTime = 7.5 // time to show bounds on all models to be selected
-	float modelNewSectionBoundsShowTime = 2.0 // time to show bounds after selection has been made
+	float modelSectionBoundsShowTime = 7.5 //
+	float modelNewSectionBoundsShowTime = 2.0 //
 
 	vector colorSelected = <160,160,0>
 	vector colorUnselected = <60,0,0>
@@ -236,11 +238,11 @@ void function RefreshHudLabels()
 		file.hudDPad.SetText( "Move X/Y" )
 	}
 }
-#endif // DEV
+#endif //
 
 void function ServerCallback_MVUpdateModelBounds( int index, float minX, float minY, float minZ, float maxX, float maxY, float maxZ )
 {
-	#if DEV
+	#if(DEV)
 		table<string, vector> tab = { mins = <minX,minY,minZ>, maxs = <maxX,maxY,maxZ> }
 
 		if ( index < file.modelBounds.len() )
@@ -256,12 +258,12 @@ void function ServerCallback_MVUpdateModelBounds( int index, float minX, float m
 
 			file.modelBounds.append( tab )
 		}
-	#endif // DEV
+	#endif //
 }
 
 void function ServerCallback_MVEnable()
 {
-	#if DEV
+	#if(DEV)
 		if ( !SetModelViewerMode( MODELVIEWERMODE_GAMEPAD ) )
 			return
 
@@ -310,12 +312,12 @@ void function ServerCallback_MVEnable()
 		GetLocalClientPlayer().ClientCommand( "mp_enabletimelimit 0" )
 
 		ModelViewerModeEnabled()
-	#endif // DEV
+	#endif //
 }
 
 void function ServerCallback_MVDisable()
 {
-	#if DEV
+	#if(DEV)
 		file.modelViewerMode = MODELVIEWERMODE_INACTIVE
 
 		UpdateMainHudVisibility( GetLocalViewPlayer() )
@@ -352,14 +354,14 @@ void function ServerCallback_MVDisable()
 		DeregisterButtonReleasedCallback( BUTTON_STICK_LEFT, ControlsStickLeftReleased )
 		DeregisterButtonReleasedCallback( BUTTON_STICK_RIGHT, ControlsStickRightReleased )
 
-		delaythread( 0.5 ) RestoreNoclip() // buttons don't seem to always deregister immediately
+		delaythread( 0.5 ) RestoreNoclip() //
 
 		GetLocalClientPlayer().ClientCommand( "mp_enablematchending " + file.lastEnablematchending )
 		GetLocalClientPlayer().ClientCommand( "mp_enabletimelimit " + file.lastEnabletimelimit )
-	#endif // DEV
+	#endif //
 }
 
-#if DEV
+#if(DEV)
 void function ReloadShared()
 {
 	file.modelViewerModels = GetModelViewerList()
@@ -866,7 +868,7 @@ void function ShowModelSectionBounds()
 
 			float dot = diff.Dot( player.GetViewVector() )
 
-			if ( /*dot > 0.95 &&*/ dot > bestDot )
+			if ( /**/ dot > bestDot )
 			{
 				bestDot = dot
 				file.bestModelToSelect = model
@@ -1169,7 +1171,7 @@ void function SelectNextModel()
 		nextIndex = 0
 
 	SelectModel( file.spawnedModels[ nextIndex ] )
-	//thread ShowModelSectionBounds()
+	//
 
 	SnapViewToModel( file.selectedModels[ 0 ] )
 }
@@ -1187,7 +1189,7 @@ void function SelectPreviousModel()
 		previousIndex = file.spawnedModels.len() - 1
 
 	SelectModel( file.spawnedModels[ previousIndex ] )
-	//thread ShowModelSectionBounds()
+	//
 
 	SnapViewToModel( file.selectedModels[ 0 ] )
 }
@@ -1224,11 +1226,11 @@ void function SnapViewToModel( entity model )
 		playerPos = modelOrg + viewOffsets[i]
 		playerEyePos = playerPos + <0,0,60>
 
-		// position down to ground
+		//
 		TraceResults trace = TraceLineHighDetail( playerPos, playerPos - <0,0,256>, player, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 		scores[i] = ( 1 - trace.fraction ) * 2.0
 
-		// eye to model origin
+		//
 		trace = TraceLineHighDetail( playerEyePos, modelOrg + <0,0,16>, player, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 		if ( trace.fractionLeftSolid != 1 )
 			scores[i] += 0.25
@@ -1238,7 +1240,7 @@ void function SnapViewToModel( entity model )
 			scores[i] += 0.25
 		scores[i] += trace.fraction * 0.25
 
-		// eye to model center
+		//
 		trace = TraceLineHighDetail( playerEyePos, modelCenter, player, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 		if ( trace.fractionLeftSolid != 1 )
 			scores[i] += 0.25
@@ -1321,7 +1323,7 @@ void function ClientCodeCallback_LevelEd_SetPositionThread( string script_name, 
 	if ( !SetModelViewerMode( MODELVIEWERMODE_LEVELED ) )
 		return
 
-	wait 0.05 // let set model callbacks run first
+	wait 0.05 //
 
 	file.leveled_positionReceived = true
 	file.leveled_origin = origin
@@ -1329,7 +1331,7 @@ void function ClientCodeCallback_LevelEd_SetPositionThread( string script_name, 
 
 	if ( script_name != "model_viewer" )
 	{
-		// try to find the ent in the level
+		//
 		array<entity> ents = GetEntArrayByScriptName( script_name )
 		if ( ents.len() == 1 )
 		{
@@ -1373,7 +1375,7 @@ void function ClientCodeCallback_HLMV_ModelChanged_Thread( asset modelName )
 		file.hlmv_modelData[ modelName ] <- data
 		data.precaching = true
 
-		// add the model to the model list
+		//
 		DisablePrecacheErrors()
 		wait 0.25
 
@@ -1395,7 +1397,7 @@ void function ClientCodeCallback_HLMV_ModelChanged_Thread( asset modelName )
 
 	if ( file.leveled_positionReceived )
 	{
-		//data.model.SetParent( data.parentEnt, "", false, 0 )
+		//
 		data.model.SetOrigin( file.leveled_origin )
 		data.model.SetAngles( file.leveled_angles )
 		data.parentEnt.SetOrigin( file.leveled_origin )
@@ -1457,7 +1459,7 @@ void function DisplayPreviewModelAtCursor( HlmvModelData data )
 		vector previewAngles = GetFreecamAngles()
 		previewAngles.x = 0
 		previewAngles.z = 0
-		//previewAngles = AnglesCompose( previewAngles, <0,180,0> )
+		//
 
 		vector dest = ClampToMap( result.endPos )
 		data.parentEnt.SetOrigin( dest )
@@ -1477,11 +1479,11 @@ void function ClientCodeCallback_HLMV_SequenceChanged( string sequence )
 
 	printl( "HLMV CALLBACK sequence: " + sequence )
 
-	// no model set
+	//
 	if ( file.hlmv_lastModel == $"" )
 		return
 
-	// cant actually play this one
+	//
 	if ( sequence == "ref" )
 		return
 
@@ -1517,15 +1519,15 @@ void function ClientCodeCallback_HLMV_SequenceChanged_Thread( HlmvModelData data
 	vector origin = model.GetOrigin()
 	vector angles = model.GetAngles()
 
-	// can't animate
+	//
 	if ( model.LookupAttachment( "ref" ) == 0 )
 	{
 		Warning( "Can't animate without ref attachment: " + model.GetModelName() )
 		return
 	}
 
-	//var animStartPos = model.Anim_GetStartForRefPoint_Old( sequence, <0,0,0>, <0,0,0> )
-	thread MapLimitsProtection( model )
+	//
+	thread MapLimitsProtect( model )
 
 	for ( ;; )
 	{
@@ -1593,7 +1595,7 @@ void function ClientCodeCallback_HLMV_SetCycle( float cycle )
 	}
 }
 
-void function MapLimitsProtection( entity model )
+void function MapLimitsProtect( entity model )
 {
 	model.EndSignal( "OnDestroy" )
 	for ( ;; )
@@ -1619,4 +1621,4 @@ void function ClientCodeCallback_LevelEd_ClearPreviewEntity()
 	file.hlmv_modelData = {}
 	file.hlmv_lastModel = $""
 }
-#endif // DEV
+#endif //

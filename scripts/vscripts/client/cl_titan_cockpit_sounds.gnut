@@ -33,13 +33,13 @@ void function ClTitanCockpitSounds_OnPlayerClassChanged( entity player )
 	if ( player != GetLocalViewPlayer() )
 		return
 
-	//printt( "ClTitanCockpitSounds_OnPlayerClassChanged, player: " + player )
+	//
 
 	string newClass = player.GetPlayerClass()
 
 	if ( newClass == "titan" )
 	{
-		StopTitanCockpitSounds( player ) //Stop existing sounds first, because you can go from titan to titan during grace period
+		StopTitanCockpitSounds( player ) //
 		PlayTitanCockpitSounds( player )
 	}
 	else
@@ -52,7 +52,7 @@ void function SCB_PlayTitanCockpitSounds()
 {
 	entity player = GetLocalViewPlayer()
 
-	if ( !player.IsTitan() ) //By the time player gets this from server he might not be Titan anymore. See bug 194727
+	if ( !player.IsTitan() ) //
 		return
 	PlayTitanCockpitSounds( player )
 }
@@ -71,15 +71,15 @@ void function OnPlayerDeath_StopTitanCockpitSounds( entity player )
 	StopTitanCockpitSounds( player )
 }
 
-void function PlayTitanCockpitSounds( entity player ) //Note that the "powerup" sounds don't play here, they play from the titan embark animations, which means if you spawn in as a titan you don't get them, but you get the ambient sounds
+void function PlayTitanCockpitSounds( entity player ) //
 {
-	if ( !IsValid( player ) ) //GetLocalViewPlayer() can return null sometimes, and script needs to handle it
+	if ( !IsValid( player ) ) //
 		return
 
 	EmitSoundOnEntity( player, "sse_titancockpit_enter" )
 
-	string titanName = "Charlie"//GetTitanCharacterName( player )
-	//TEMP: To remove when OS has stubs.
+	string titanName = "Charlie"//
+	//
 	if ( titanName == "stealth" )
 		titanName = "ronin"
 	else if ( titanName == "rocket" )
@@ -89,7 +89,7 @@ void function PlayTitanCockpitSounds( entity player ) //Note that the "powerup" 
 
 	string soundName = "titan_" + titanName + "_int_engine"
 
-	//printt( " Playing titan cockpit sound: " + soundName )
+	//
 
 	var soundHandle = EmitSoundOnEntity( player, soundName )
 	file.playerToTitanCockpitSound[ player.GetEntIndex() ] <- soundHandle
@@ -97,7 +97,7 @@ void function PlayTitanCockpitSounds( entity player ) //Note that the "powerup" 
 
 void function StopTitanCockpitSounds( entity player )
 {
-	if ( !IsValid( player ) ) //GetLocalViewPlayer() can return null sometimes, and script needs to handle it
+	if ( !IsValid( player ) ) //
 		return
 
 	int playerEntIndex = player.GetEntIndex()
@@ -114,8 +114,8 @@ void function UpdateCockpitSoundsForViewPlayer( entity target )
 	entity localViewPlayer = GetLocalViewPlayer()
 	if ( target.IsTitan() )
 	{
-		StopTitanCockpitSounds( localViewPlayer ) //Stop existing sounds first, because you can go from titan to titan during grace period
-		if ( !target.ContextAction_IsMeleeExecution() ) //JFS: Melee shouldn't be playing titan cockpit sounds. This seems like a a terrible way to do this...
+		StopTitanCockpitSounds( localViewPlayer ) //
+		if ( !target.ContextAction_IsMeleeExecution() ) //
 			PlayTitanCockpitSounds( localViewPlayer )
 	}
 	else

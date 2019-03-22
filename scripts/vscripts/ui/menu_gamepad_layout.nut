@@ -9,7 +9,7 @@ global function InitGamepadLayoutMenu
 global function GetGamepadButtonLayoutName
 global function RefreshButtonBinds
 
-//script_ui AdvanceMenu( GetMenu( "GamepadLayoutMenu" ) )
+//
 
 
 struct ButtonVars
@@ -160,7 +160,7 @@ void function InitGamepadLayoutMenu()
 	InitButtonRCP( Hud_GetChild( file.menu, "DialogFrame" ) )
 
 
-	// Preset binds:
+	//
 	for ( int idx = 0; idx < PRESETS_COUNT; ++idx )
 	{
 		string btnName = "BtnPreset" + format( "%d", idx )
@@ -175,10 +175,10 @@ void function InitGamepadLayoutMenu()
 		SetButtonRuiText( button, PRESET_NAMES[idx] )
 	}
 
-	////
+	//
 	file.description = Hud_GetChild( menu, "lblControllerDescription" )
 
-	////
+	//
 	file.customBackgroundPilot = Hud_GetChild( menu, "PilotControlsBG" )
 	for ( int idx = 0; idx < GAMEPAD_CUSTOM_BUTTONS_COUNT; ++idx )
 	{
@@ -198,13 +198,13 @@ void function InitGamepadLayoutMenu()
 		if ( idx > 13 )
 		{
 			RuiSetBool( buttonRui, "isBindable", false )
-			//AddButtonEventHandler( bindButton, UIE_GET_FOCUS, UnbindableButtonPilot_FocusedOn )
-			//AddButtonEventHandler( bindButton, UIE_LOSE_FOCUS, UnbindableButtonPilot_FocusedOff )
+			//
+			//
 		}
 		else
 		{
-			//AddButtonEventHandler( bindButton, UIE_GET_FOCUS, BindButtonPilot_FocusedOn )
-			//AddButtonEventHandler( bindButton, UIE_LOSE_FOCUS, BindButtonPilot_FocusedOff )
+			//
+			//
 			RuiSetBool( buttonRui, "isBindable", true )
 		}
 	}
@@ -231,9 +231,18 @@ void function InitGamepadLayoutMenu()
 	AddMenuEventHandler( menu, eUIEvent.MENU_NAVIGATE_BACK, OnNavigateBackMenu )
 
 	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK", null, ShouldShowBackButton )
-	//AddMenuFooterOption( menu, LEFT, BUTTON_BACK, true, "#BACKBUTTON_RESTORE_DEFAULTS", "#RESTORE_DEFAULTS", RestoreDefaultsButton ) //ShouldShowRestoreDefaultsButton
+	AddMenuFooterOption( menu, LEFT, BUTTON_X, true, "#X_BUTTON_SWAPTRIGGERS", "#SWAPTRIGGERS", SwapTriggersAndShoulders )
+	//
 }
 
+void function SwapTriggersAndShoulders( var button )
+{
+	GamepadSwapShoulderAndTriggerBinds( "gamepad_custom_pilot" )
+
+	RefreshButtonBinds()
+	EmitUISound( "menu_email_sent" )
+	UpdatePresetButtons()
+}
 
 void function RegisterButtonData( int buttonEnum, string ruiArg, bool isLeft )
 {
@@ -322,21 +331,21 @@ void function OnPresetButton_FocusedOff( var button )
 	RefreshButtonBinds()
 }
 
-//void function OnBackButton_FocusedOn( var button )
-//{
-//	SetInfoText( "" );
-//}
-//void function OnDefaultsButton_FocusedOn( var button )
-//{
-//	SetInfoText( "" );
-//}
+//
+//
+//
+//
+//
+//
+//
+//
 
 bool function AnyBindButtonHasFocus()
 {
 	if ( file.pilotBindFocusIndex >= 0 )
 		return true
-	//if ( file.titanBindFocusIndex >= 0 )
-	//	return true
+	//
+	//
 
 	return false
 }
@@ -365,10 +374,10 @@ void function OnOpenGamepadLayoutMenu()
 	UpdateCustomButtonsVisibility( false )
 
 	file.pilotBindFocusIndex = -1
-	//file.titanBindFocusIndex = -1
+	//
 	RegisterBindCallbacks()
 
-	// Update bind text. Some can change if toggle or hold settings change.
+	//
 	foreach ( idx, button in file.customBindButtonsPilot )
 	{
 		var buttonRui = Hud_GetRui( button )
@@ -421,7 +430,7 @@ void function SetBindPromptForPilot( var button )
 	int buttonID       = int( Hud_GetScriptID( button ) )
 	ButtonVars bv      = GetBindDisplayName( GetBindString( CUSTOM_BIND_ALIASES_PILOT[buttonID] ) )
 	string displayName = (bv.pilot == "") ? bv.common : bv.pilot
-	//SetInfoText( Localize( "#GAMEPAD_BUTTON_ASSIGN_PROMPT_PILOT", Localize( displayName ) ) );
+	//
 }
 
 
@@ -430,7 +439,7 @@ void function SetUnbindablePromptForPilot( var button )
 	int buttonID       = int( Hud_GetScriptID( button ) )
 	ButtonVars bv      = GetBindDisplayName( GetBindString( CUSTOM_BIND_ALIASES_PILOT[buttonID] ) )
 	string displayName = (bv.pilot == "") ? bv.common : bv.pilot
-	//SetInfoText( Localize( "#GAMEPAD_BUTTON_CANNOT_ASSIGN_PROMPT", Localize( displayName ) ) );
+	//
 }
 
 
@@ -510,7 +519,7 @@ ButtonVars function GetBindDisplayName( string bind )
 
 		case "scriptcommand4":
 			displayName.common = ""
-			displayName.pilot = "#USE_HEALTH_KIT"        //"#ACTIVATE_BOOST"
+			displayName.pilot = "#USE_HEALTH_KIT"        //
 			displayName.titan = ""
 			break
 
@@ -611,8 +620,8 @@ ButtonVars function GetBindDisplayName( string bind )
 
 		case "offhand3":
 			displayName.common = ""
-			displayName.pilot = "Team Comms"        // "#TITANFALL_TITAN_AI_MODE"
-			displayName.titan = "Team Comms"        // "#TITAN_CORE_CONTROLS"
+			displayName.pilot = "Team Comms"        //
+			displayName.titan = "Team Comms"        //
 			break
 
 		case "offhand4":
@@ -922,19 +931,19 @@ void function BindCatchCommon( int buttonEnum )
 		return
 	}
 
-	//if ( file.titanBindFocusIndex >= 0 )
-	//{
-	//	int buttonIndex = GetButtonIndexForButtonEnum( buttonEnum )
-	//	bool didAnything = ChangeCustomGamepadButtonIndexToCommandIndex_Titan( buttonIndex, file.titanBindFocusIndex )
-	//	if ( didAnything )
-	//	{
-	//		RefreshButtonBinds()
-	//		if ( buttonEnum != BUTTON_A )
-	//			EmitUISound( "menu_accept" )
-	//	}
 	//
-	//	return
-	//}
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 }
 
 

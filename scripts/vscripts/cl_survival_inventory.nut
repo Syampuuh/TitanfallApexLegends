@@ -269,14 +269,14 @@ void function BackpackAction( int lootAction, string slotIndexString )
 			Survival_DropInventoryItem( lootData.ref, playerInventory[foundIndex].count )
 			break
 
-			// TODO: attach to stowed actually goes to stowed
+			//
 		case eLootAction.ATTACH_TO_ACTIVE:
 		case eLootAction.ATTACH_TO_STOWED:
-			//#if HAS_WEAPON_ATTACH_ANIMS
-			//	player.ClientCommand( "weapon_mod " + lootData.ref )
-			//#else
+			//
+			//
+			//
 				player.ClientCommand( "Sur_EquipAttachment " + lootData.ref )
-			//#endif
+			//
 			break
 
 		case eLootAction.EQUIP:
@@ -772,9 +772,9 @@ int function GetCommsActionForBackpackItem( var button, int position )
 {
 	entity player = GetLocalClientPlayer()
 
-	//array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
-	//if ( playerInventory.len() <= position )
-	//	return eCommsAction.INVENTORY_NEED_HEALTH
+	//
+	//
+	//
 
 	return eCommsAction.BLANK
 }
@@ -951,7 +951,7 @@ void function PopulateTooltipWithTitleAndDesc( LootData lootData, ToolTipData dt
 	{
 		passiveName = PASSIVE_NAME_MAP[lootData.passive]
 		passiveDesc = PASSIVE_DESCRIPTION_SHORT_MAP[lootData.passive]
-		//combinedTitle = Localize( "#HUD_LOOT_WITH_PASSIVE", Localize( lootData.pickupString ), Localize( passiveName ) )
+		//
 		combinedDesc = Localize( "#HUD_LOOT_WITH_PASSIVE_DESC", Localize( lootData.desc ), Localize( passiveName ).toupper(), Localize( passiveDesc ) )
 	}
 	dt.tooltipFlags = eToolTipFlag.SOLID
@@ -1577,6 +1577,10 @@ void function GroundItemUpdate( entity player, array<entity> loot )
 	}
 
 	RunUIScript( "SurvivalGroundItem_SetGroundItemCount", file.filteredGroundItems.len() )
+	foreach ( index, item in file.filteredGroundItems )
+	{
+		RunUIScript( "SurvivalGroundItem_SetGroundItemHeader", index, item.isHeader )
+	}
 	RunUIScript( "SurvivalGroundItem_EndUpdate" )
 }
 
@@ -1937,11 +1941,11 @@ void function EquipAttachment( entity player, string item, string weaponName )
 	if ( Bleedout_IsBleedingOut( player ) )
 		return
 
-	//#if HAS_WEAPON_ATTACH_ANIMS
-	//	player.ClientCommand( "weapon_mod " + item )
-	//#else
+	//
+	//
+	//
 		player.ClientCommand( "Sur_EquipAttachment " + item )
-	//#endif
+	//
 
 	ServerCallback_ClearHints()
 }
@@ -2063,7 +2067,7 @@ void function UICallback_GetMouseDragAllowedFromButton( var button, int position
 	RunUIScript( "ClientCallback_SetTempBoolMouseDragAllowed", allowed )
 }
 
-// TODO: This function is gnarly and needs to be made to be more data-driven
+//
 void function UICallback_OnInventoryMouseDrop( var dropButton, var sourcePanel, var sourceButton, int sourceIndex, bool initOnly )
 {
 	if ( initOnly )
@@ -2088,7 +2092,7 @@ void function UICallback_OnInventoryMouseDrop( var dropButton, var sourcePanel, 
 		}
 	}
 
-	// dropped it back where it started
+	//
 	if ( dropEquipmentSlot == sourceEquipmentSlot || dropEquipmentSlot == sourceEquipmentWeaponSlot )
 		return
 
@@ -2117,7 +2121,7 @@ void function UICallback_OnInventoryMouseDrop( var dropButton, var sourcePanel, 
 		data = EquipmentSlot_GetEquippedLootDataForSlot( player, equipmentSlot )
 	}
 
-	// main weapon
+	//
 	if ( EquipmentSlot_IsValidEquipmentSlot( dropEquipmentSlot ) )
 	{
 		if ( EquipmentSlot_IsMainWeaponSlot( dropEquipmentSlot ) )
@@ -2312,7 +2316,7 @@ void function TEMP_UpdateUltimateInfo( var rui, entity player )
 
 void function UpdateInventoryUltimateRui( var rui, entity player, entity weapon )
 {
-	// does about the same as InitOffhandRui() in cl_weapon_status.gnut, except for the tracking part.
+	//
 	Assert ( IsNewThread(), "Must be threaded off." )
 
 	RuiSetGameTime( rui, "hintTime", Time() )
@@ -2327,12 +2331,12 @@ void function UpdateInventoryUltimateRui( var rui, entity player, entity weapon 
 	RuiSetFloat( rui, "chargeMaxFrac", 1.0 )
 	RuiSetFloat( rui, "minFireFrac", 1.0 )
 	RuiSetInt( rui, "segments", 1 )
-	RuiSetFloat( rui, "refillRate", 1 ) // default to 1 to preserve default behavior. some abilities draw the refillRecharge, even without a rate setting
+	RuiSetFloat( rui, "refillRate", 1 ) //
 
 	RuiSetImage( rui, "hudIcon", weapon.GetWeaponSettingAsset( eWeaponVar.hud_icon ) )
 
 	RuiSetFloat( rui, "readyFrac", weapon.GetWeaponReadyToFireProgress() )
-	//RuiSetFloat( rui, "dryfireFrac", weapon, RUI_TRACK_WEAPON_DRYFIRE_FRACTION )
+	//
 
 	RuiSetFloat( rui, "chargeFracCaution", 0.0 )
 	RuiSetFloat( rui, "chargeFracAlert", 0.0 )
@@ -2394,7 +2398,7 @@ void function TEMP_UpdatePlayerRui( var rui, entity player )
 	asset classIcon = CharacterClass_GetGalleryPortrait( character )
 	RuiSetImage( rui, "playerIcon", classIcon )
 
-	RuiSetInt( rui, "micStatus", player.HasMic() ? 3 : -1 ) // 3 mic connected, -1 disabled
+	RuiSetInt( rui, "micStatus", player.HasMic() ? 3 : -1 ) //
 
 	while ( 1 )
 	{
@@ -2438,7 +2442,7 @@ void function TEMP_UpdateTeammateRui( var rui, entity ent )
 	asset classIcon = CharacterClass_GetGalleryPortrait( character )
 	RuiSetImage( rui, "icon", classIcon )
 
-	RuiSetInt( rui, "micStatus", ent.HasMic() ? 3 : -1 ) // 3 mic connected, -1 disabled
+	RuiSetInt( rui, "micStatus", ent.HasMic() ? 3 : -1 ) //
 
 	bool weaponDrivenConsumables = WeaponDrivenConsumablesEnabled()
 
@@ -2513,6 +2517,9 @@ int function GetCountForLootType( int lootType )
 
 	foreach ( data in allLootData )
 	{
+		if ( !IsLootTypeValid( data.lootType ) )
+			continue
+
 		if ( data.lootType != lootType )
 			continue
 

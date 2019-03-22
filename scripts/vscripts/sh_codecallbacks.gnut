@@ -8,7 +8,7 @@ global function SetCallback_CanUseEntityCallback
 global function CodeCallback_CanUseZipline
 global function CodeCallback_PlayerClassChanged
 global function CodeCallback_OnUseEntity
-//global function CodeCallback_OnUseStart
+//
 global function CodeCallback_OnUseEnd
 global function CodeCallback_OnUseButtonPressed
 global function CodeCallback_OnUseButtonReleased
@@ -24,7 +24,7 @@ global function AddCallback_PlayerCanUseZipline
 
 global function CodeCallback_CanPlayerReload
 
-#if CLIENT
+#if(CLIENT)
 global function CodeCallback_OnTurretCancelPressed
 global function CodeCallback_OnWeaponDisable
 global function ClientCodeCallback_PartyUpdated
@@ -35,11 +35,11 @@ global function AddCallback_OnPartyUpdated
 global function RemoveCallback_OnPartyUpdated
 #endif
 
-#if SERVER
-global function CodeCallback_OnWeaponReload
-global function SetCallback_OnPlayerReload
-global function CodeCallback_OnReloadButtonPressed
-global function SetCallback_OnReloadButtonPressed
+#if(false)
+
+
+
+
 #endif
 
 global function AddCallback_OnVehicleLaunch
@@ -54,7 +54,7 @@ global function AddCallback_OnPlayerZoomOut
 global function AddCallback_CheckPlayerCanUse
 global function RemoveCallback_CheckPlayerCanUse
 
-#if CLIENT
+#if(CLIENT)
 global function ServerCallback_PlayerChangedTeams
 #endif
 
@@ -66,12 +66,12 @@ global function AddCallback_CanStartCustomWeaponActivity
 
 struct
 {
-	#if SERVER
-		void functionref( entity ) Callback_OnPlayerReload
-		void functionref( entity ) Callback_OnPlayerReloadPressed
-		table<entity, int>         currentPlayerTeamMap
-	#endif
-	#if CLIENT
+	#if(false)
+
+
+
+#endif
+	#if(CLIENT)
 		var disembarkRUI
 
 		array< void functionref() > partyUpdatedCallbacks
@@ -88,28 +88,28 @@ void function CodeCallbacksShared_Init()
 	RegisterSignal( "SettingsChanged" )
 	RegisterSignal( "OnPrimaryAttack" )
 
-	// these signals get sent to an entity when a player uses that entity
+	//
 	RegisterSignal( "OnPlayerUse" )
 	RegisterSignal( "OnPlayerUseLong" )
 	RegisterSignal( "OnPlayerUseAlt" )
 
-	// this signal gets sent to a player when that player presses a use button
+	//
 	RegisterSignal( "PlayerPressedUse" )
 
-	#if CLIENT
+	#if(CLIENT)
 		RegisterConCommandTriggeredCallback( "-useAndReload", CancelDisembark )
 		RegisterConCommandTriggeredCallback( "-use", CancelDisembark )
 	#endif
 
-	#if SERVER
-		SetCallback_OnPlayerReload( PlayerReloadGamemodeLogic_Default )
-	#endif
+	#if(false)
 
-	#if SERVER
-		AddCallback_EntityChangedTeam( "player", OnPlayerEntityChangedTeam )
-		AddCallback_OnClientConnected( OnClientConnected )
-		AddCallback_OnClientDisconnected( OnClientDisconnected )
-	#endif
+#endif
+
+	#if(false)
+
+
+
+#endif
 }
 
 
@@ -124,7 +124,7 @@ void function CodeCallback_AnimationInterrupted( entity ent )
 	Signal( ent, "OnAnimationInterrupted" )
 }
 
-// better to not define these than just return true. Otherwise code will call these function for no reason
+//
 
 void function ClearCallback_CanUseEntityCallback( entity ent )
 {
@@ -145,47 +145,26 @@ bool function CodeCallback_CanUseEntity( entity player, entity ent )
 		return false
 
 	if ( player.IsPhaseShifted() )
-		// it's not really there!
 		return false
 
 	if ( GetGameState() >= eGameState.WinnerDetermined )
 		return false
 
 	if ( ent == player )
-	{
 		return false
-	}
 
 	if ( ent.IsNPC() )
 	{
-		// handle leeching separately
+		//
 		if ( Leech_IsLeechable( ent ) )
 			return false
 	}
 
 	if ( player.IsTitan() )
-	{
-		return !ent.IsTitan()
-	}
+		return false
 
-	if ( ent.IsTitan() )
-	{
-		return PlayerCanEmbarkTitan( player, ent )
-	}
-
-	if ( ent.IsNPC() )
-	{
-		// player titan can't use NPCs
-		if ( !player.IsTitan() )
-		{
-			// not titan NPCs are not usable
-			//if ( !( ent.IsTitan() || IsTurret( ent ) ) )
-			//	return false
-
-			if ( !IsAlive( ent ) )
-				return false
-		}
-	}
+	if ( ent.IsNPC() && !IsAlive( ent ) )
+		return false
 
 	if ( ent.e.canUseEntityCallback != null )
 		return ent.e.canUseEntityCallback( player, ent )
@@ -219,13 +198,13 @@ bool function CodeCallback_CanUseZipline( entity player, entity zipline, vector 
 	if ( GetGameState() >= eGameState.WinnerDetermined )
 		return false
 
-	#if SERVER
-		foreach ( func in svGlobal.canUseZiplineCallbacks )
-		{
-			if ( !func( player, zipline, ziplineClosestPoint ) )
-				return false
-		}
-	#else
+	#if(false)
+
+
+
+
+
+#else
 		foreach ( func in clGlobal.canUseZiplineCallbacks )
 		{
 			if ( !func( player, zipline, ziplineClosestPoint ) )
@@ -239,9 +218,9 @@ bool function CodeCallback_CanUseZipline( entity player, entity zipline, vector 
 
 void function AddCallback_PlayerCanUseZipline( bool functionref( entity, entity, vector ) callbackFunc )
 {
-	#if SERVER
-		svGlobal.canUseZiplineCallbacks.append( callbackFunc )
-	#else
+	#if(false)
+
+#else
 		clGlobal.canUseZiplineCallbacks.append( callbackFunc )
 	#endif
 }
@@ -257,9 +236,9 @@ bool function CodeCallback_CanPlayerReload( entity player )
 
 void function AddCallback_PlayerClassChanged( void functionref( entity ) callbackFunc )
 {
-	#if SERVER
-		svGlobal.onPlayerClassChangedCallbacks.append( callbackFunc )
-	#else
+	#if(false)
+
+#else
 		clGlobal.onPlayerClassChangedCallbacks.append( callbackFunc )
 	#endif
 }
@@ -276,101 +255,101 @@ void function CodeCallback_PlayerClassChanged( entity player, bool actualSetting
 	player.Signal( "SettingsChanged" )
 	string newClass = player.GetPlayerClass()
 
-	#if SERVER
-		foreach ( callbackFunc in svGlobal.onPlayerClassChangedCallbacks )
-		{
-			callbackFunc( player )
-		}
-		if ( IsAlive( player ) && !player.IsTitan() && GetCurrentPlaylistVarFloat( "pilot_health_multiplier", 0.0 ) != 0.0 )
-		{
-			float pilotHealthMultiplier = GetCurrentPlaylistVarFloat( "pilot_health_multiplier", 1.0 )
-			int pilotMaxHealth          = int( player.GetMaxHealth() * pilotHealthMultiplier )
-			player.SetMaxHealth( pilotMaxHealth )
-			player.SetHealth( pilotMaxHealth )
-		}
-	#else
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#else
 		foreach ( callbackFunc in clGlobal.onPlayerClassChangedCallbacks )
 		{
 			callbackFunc( player )
 		}
 	#endif
 
-	#if CLIENT
+	#if(CLIENT)
 		player.classChanged = true
-		// Force titan to cast shadows in first person
-		//player.ForceShadowVisible( newClass == "titan" )
+		//
+		//
 
 		UpdatePlayerStatusCounts()
 
-		/*if ( IsWatchingReplay() )
-			UpdateKillReplayIconPosition()*/
+		/*
+*/
 	#else
 		player.kv.renderColor = "255 255 255 255"
 
 		InitDamageStates( player )
 	#endif
 
-	//if ( IsClient() && !player.IsTitan() )
-	//	HideRodeoAlert()
+	//
+	//
 
-	//if ( IsPilot( player ) )
-	//	thread PilotHardLandingThink( player )
+	//
+	//
 
-	#if SERVER
-		player.Signal( "OnChangedPlayerClass" )
+	#if(false)
 
-		UpdatePlayerMinimapMaterials( player )
-	#endif
-}
 
-#if SERVER
-void function CodeCallback_OnWeaponReload( entity weapon )
-{
-	entity weaponOwner = weapon.GetWeaponOwner()
-	if ( !IsAlive( weaponOwner ) )
-		return
 
-	if ( !weaponOwner.IsPlayer() )
-		return
-
-	if ( !IsPilot( weaponOwner ) )
-		return
-
-	//This calls a function that can be set per gamemode. Runs an empty function by default.
-	file.Callback_OnPlayerReload( weaponOwner )
-
-	#if GRUNTCHATTER_ENABLED
-		if ( NPC_GruntChatterSPEnabled( weaponOwner ) )
-			GruntChatter_TryPlayerPilotReloading( weaponOwner )
-	#endif
-}
-
-void function SetCallback_OnPlayerReload( void functionref( entity ) rules )
-{
-	file.Callback_OnPlayerReload = rules
-}
-
-void function SetCallback_OnReloadButtonPressed( void functionref( entity ) callback )
-{
-	file.Callback_OnPlayerReloadPressed = callback
-}
-
-#if SERVER
-void function CodeCallback_OnReloadButtonPressed( entity player )
-{
-	if ( file.Callback_OnPlayerReloadPressed != null )
-		file.Callback_OnPlayerReloadPressed( player )
-}
 #endif
-
-void function PlayerReloadGamemodeLogic_Default( entity player )
-{
 }
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 
 bool function CodeCallback_OnUseEntity( entity player, entity ent, int useInputFlags )
 {
-	// use AddCallback_OnUseEntity( ent, callbackFunc ) to add a on use callback function
+	//
 	foreach ( callbackFunc in ent.e.onUseEntityCallbacks )
 	{
 		callbackFunc( ent, player, useInputFlags )
@@ -383,15 +362,15 @@ bool function CodeCallback_OnUseEntity( entity player, entity ent, int useInputF
 	if ( useInputFlags & USE_INPUT_ALT )
 		Signal( ent, "OnPlayerUseAlt", { player = player } )
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( IsFirstTimePredicted() )
 		{
 			if ( useInputFlags & USE_INPUT_DEFAULT && ent.e.predictedUseSuccess )
 				ent.e.predictedUseCount += 1
 		}
-	#endif // SERVER
+	#endif //
 
-	// return true to tell code to run its code to use the entity
+	//
 	return true
 }
 
@@ -410,7 +389,7 @@ void function RemoveCallback_CheckPlayerCanUse( bool functionref( entity, entity
 }
 
 
-#if CLIENT
+#if(CLIENT)
 void function CancelDisembark( entity player )
 {
 	if ( file.disembarkRUI != null )
@@ -422,9 +401,9 @@ void function CancelDisembark( entity player )
 #endif
 
 /*
-void function CodeCallback_OnUseStart( entity player )
-{
-}
+
+
+
 */
 
 void function CodeCallback_OnUseEnd( entity player )
@@ -454,7 +433,7 @@ void function RemoveCallback_OnUseButtonPressed( entity player, void functionref
 void function CodeCallback_OnUseButtonPressed( entity player )
 {
 	player.Signal( "PlayerPressedUse" )
-	// use AddCallback_OnUseButtonPressed( ent, callbackFunc ) to add a on push callback function
+	//
 	foreach ( callbackFunc in player.e.onPlayerUseButtonPressed )
 	{
 		callbackFunc( player )
@@ -481,14 +460,14 @@ void function RemoveCallback_OnUseButtonReleased( entity player, void functionre
 
 void function CodeCallback_OnUseButtonReleased( entity player )
 {
-	// use AddCallback_OnUseButtonReleased( ent, callbackFunc ) to add a on push callback function
+	//
 	foreach ( callbackFunc in player.e.onPlayerUseButtonReleased )
 	{
 		callbackFunc( player )
 	}
 }
 
-#if CLIENT
+#if(CLIENT)
 void function CodeCallback_OnTurretCancelPressed( entity player )
 {
 	if ( InPrediction() && !IsFirstTimePredicted() )
@@ -496,9 +475,9 @@ void function CodeCallback_OnTurretCancelPressed( entity player )
 
 	ScreenFade( player, 0, 0, 0, 255, 0.1, 1.0, FFADE_OUT )
 }
-#endif // #if CLIENT
+#endif //
 
-// code triggering script error with useful message
+//
 void function CodeCallback_ForceScriptError( entity ent, string errorMsg )
 {
 	Assert( 0, errorMsg )
@@ -515,7 +494,7 @@ void function AddCallback_OnVehicleLaunch( entity ent, void functionref( entity 
 
 void function CodeCallback_OnVehicleLaunch( entity vehicle )
 {
-	// use AddCallback_OnVehicleLaunch( ent, callbackFunc ) to add a on push callback function
+	//
 	foreach ( callbackFunc in vehicle.e.onVehicleLaunchCallbacks )
 	{
 		callbackFunc( vehicle )
@@ -533,7 +512,7 @@ void function AddCallback_OnVehicleCollide( entity ent, void functionref( entity
 
 void function CodeCallback_OnVehicleCollide( entity vehicle )
 {
-	// use AddCallback_OnVehicleCollide( ent, callbackFunc ) to add a on push callback function
+	//
 	foreach ( callbackFunc in vehicle.e.onVehicleCollideCallbacks )
 	{
 		callbackFunc( vehicle )
@@ -571,45 +550,45 @@ void function AddCallback_CanStartCustomWeaponActivity( int activity, bool funct
 	s_callbacksCanStartCustomWeaponActivity[activity].append( func )
 }
 
-#if SERVER
-void function OnClientConnected( entity player )
-{
-	file.currentPlayerTeamMap[player] <- player.GetTeam()
-}
+#if(false)
 
 
-void function OnClientDisconnected( entity player )
-{
-	if ( player in file.currentPlayerTeamMap )
-		delete file.currentPlayerTeamMap[player]
-}
 
-void function OnPlayerEntityChangedTeam( entity player )
-{
-	// Assert( player.GetClassName() == "player" )
-	int oldTeam = (player in file.currentPlayerTeamMap ? file.currentPlayerTeamMap[player] : TEAM_INVALID)
-	int newTeam = player.GetTeam()
 
-	foreach( void functionref(entity, int, int) callbackFunc in s_callbacksOnPlayerChangedTeam )
-		callbackFunc( player, oldTeam, newTeam )
 
-	foreach ( ent in GetPlayerArray() )
-		Remote_CallFunction_Replay( ent, "ServerCallback_PlayerChangedTeams", player, oldTeam, newTeam )
-}
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 void function ServerCallback_PlayerChangedTeams( entity player, int oldTeam, int newTeam )
 {
 	if ( !IsValid( player ) )
-		return // todo(dw)
+		return //
 
 	ShEHI_OnPlayerChangedTeam( player, oldTeam, newTeam )
 
 	foreach( void functionref(entity, int, int) callbackFunc in s_callbacksOnPlayerChangedTeam )
 		callbackFunc( player, oldTeam, newTeam )
 
-	#if DEV
+	#if(DEV)
 		if ( oldTeam == TEAM_INVALID || newTeam == TEAM_INVALID )
 			return
 
@@ -628,13 +607,13 @@ void function ServerCallback_PlayerChangedTeams( entity player, int oldTeam, int
 		else if ( newTeam == GetLocalViewPlayer().GetTeam() )
 		{
 			playerNameColor = OBITUARY_COLOR_FRIENDLY
-			//teamString = "FRIENDLY"
+			//
 		}
 
-		//if ( !IsRecruitMode() )
-		//	Obituary_Print( playerName, "CHANGED TEAMS TO", teamString, playerNameColor, OBITUARY_COLOR_WEAPON, playerNameColor )
+		//
+		//
 	#endif
-	//"Switching " + player.GetPlayerNameWithClanTag() + " from " + GetTeamStr( team1 ) + " to " + GetTeamStr( team2 )
+	//
 }
 #endif
 
@@ -670,7 +649,7 @@ bool function CodeCallback_CanStartCustomWeaponActivity( entity player, int acti
 	return true
 }
 
-#if CLIENT
+#if(CLIENT)
 void function CodeCallback_OnWeaponDisable( entity weapon )
 {
 	entity weaponOwner = weapon.GetWeaponOwner()

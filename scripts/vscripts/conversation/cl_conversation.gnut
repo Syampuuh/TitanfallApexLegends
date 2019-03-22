@@ -2,7 +2,7 @@ untyped
 
 global function ClDialogue_Init
 
-// call to attempt to start playing a conversation. will return false if it doesn't play, not that we can do anything about it.
+//
 global function ServerCallback_PlayConversation
 global function ServerCallback_PlayTitanConversation
 global function ServerCallback_PlaySquadConversation
@@ -25,22 +25,19 @@ global function DestroyWaveform_Immediate
 global function PlayConversationToLocalClient
 global function ResetSquadConversationDebounceTimers
 
-global function PlayOneLinerConversationOnEntWithPriority //R2 MP style dialogue ( one liner, sound alias needs to be dynamically generated on the client ) should use this function
-global function PlayAnnouncerLineThroughDeathWithPriority //Faction Leader announcers are an exception since sometimes they need to persist through death ( e.g. win announcement shouldn't cancel when you die )
+global function PlayOneLinerConversationOnEntWithPriority //
+global function PlayAnnouncerLineThroughDeathWithPriority //
 
 /*
-	ServerCallback_PlayConversation( conversationType, priority )
+
 */
 
 const WAVEFORM_FADE_DURATION = 1.0
-const RADIO_SPEECH_DELAY = 0.4
-const PLAYER_HEARS_RADIO = false
-//const FRIENDLY_GRUNT_MINIMAP_MATERIAL = $"vgui/HUD/threathud_friendly_soldier"
 
 struct
 {
 	int nextVoiceIndex = 0
-	int DebugLevel = 0  // no debug = 0
+	int DebugLevel = 0  //
 
 	table squadConversationDebounceTimers
 	array squadConversationPriorities
@@ -81,8 +78,8 @@ void function ClDialogue_Init()
 
 	AddCreateCallback( "npc_soldier", AI_Dialogue_General_Init )
 
-	//Debug stuff for QA
-	#document( "ClDebugPlayConversation", " Play conversation specified on this client." )
+	//
+	#document("ClDebugPlayConversation"," Play conversation specified on this client.")
 	AddCallback_KillReplayStarted( ResetSquadConversationDebounceTimers )
 	AddCallback_KillReplayEnded( ResetSquadConversationDebounceTimers )
 
@@ -120,7 +117,7 @@ void function EntitiesDidLoad()
 void function AI_Dialogue_General_Init( entity guy )
 {
 	int team = guy.GetTeam()
-	guy.s.spawnTeam <- team // so they use native tongue if they switch teams
+	guy.s.spawnTeam <- team //
 
 	if ( !( team in file.aiTalkers ) )
 		return
@@ -132,7 +129,7 @@ void function AI_Dialogue_General_Init( entity guy )
 	dialogue.enabled <- true
 
 	dialogue.hasBeenAlerted <- false
-	dialogue.currentConversationPriority <- 0 // track priority of current conversation for this ai
+	dialogue.currentConversationPriority <- 0 //
 
 	guy.s.dialogue <- dialogue
 
@@ -149,9 +146,9 @@ void function InitGlobals()
 	level.AnnouncementPriority		<- 1000
 	level.debugType					<- ""
 
-	level.DefaultLineInterval		<- 0.45	// default interval between lines in a conversations
+	level.DefaultLineInterval		<- 0.45	//
 
-	level.ConversationIntervalMin	<- 0.5	// interval between conversations in the form of delay before last vdu will close
+	level.ConversationIntervalMin	<- 0.5	//
 	level.ConversationIntervalMax	<- 1.0
 
 	level.speakerBlacklist          <- {}
@@ -177,9 +174,9 @@ int function GetTeamForConversation( entity player )
 
 void function PlayConversationToLocalClient( string convAlias )
 {
-	#if FACTION_DIALOGUE_ENABLED
-		return
-	#endif
+	#if(false)
+
+#endif
 
 	if ( IsWatchingReplay() )
 	{
@@ -192,7 +189,7 @@ void function PlayConversationToLocalClient( string convAlias )
 	int priority = GetConversationPriority( convAlias )
 	entity player = GetLocalClientPlayer()
 
-	if ( IsLobby() ) // TEMP: Too many MP assumptions that fail in lobby so just play directly
+	if ( IsLobby() ) //
 		thread ClRunConversation( player, convAlias )
 	else
 		thread ClAttemptConversation( convAlias, player, priority )
@@ -214,9 +211,9 @@ void function ServerCallback_PlayConversation( int conversationIndex )
 
 void function ServerCallback_PlaySquadConversation( int conversationIndex, int eHandle1, int eHandle2, int eHandle3, int eHandle4 )
 {
-	#if GRUNT_CHATTER_MP_ENABLED
-		return
-	#endif
+	#if(false)
+
+#endif
 
 	entity ai = GetEntityFromEncodedEHandle( eHandle1 )
 	if ( !IsAlive( ai ) )
@@ -269,11 +266,11 @@ void function ServerCallback_PlaySquadConversation( int conversationIndex, int e
 		{
 			printt( "Soldier is " + expect string( soldier.GetNetworkedClassName() ) )
 		}
-		//Assert( 0, "See above, found non soldier in conversation" )
+		//
 		return
 	}
 
-	if ( dialogueNotInitialized ) //JFS. Kill replay shenenigans with create callback not being run
+	if ( dialogueNotInitialized ) //
 	{
 		printt( "ABORTING CONVERSATION: .s.dialogue not initialized: " + conversationType )
 		return
@@ -290,7 +287,7 @@ void function ServerCallback_PlaySquadConversation( int conversationIndex, int e
 
 	int currentConversationPriority = GetSquadConversationPriority( squad )
 
-	if ( priority <= currentConversationPriority ) // cancel if squad conversation is higher priority
+	if ( priority <= currentConversationPriority ) //
 	{
 		if ( file.DebugLevel > 1 )
 			printt( "Priority of conversationType " + conversationType + " is " + priority + ", which is not higher than CurrentConversationPriority of " + currentConversationPriority + ", cancelling squad conversation " )
@@ -307,7 +304,7 @@ void function ServerCallback_PlaySquadConversation( int conversationIndex, int e
 		return
 	}
 
-	// if currently running a conversation, cancel because we have determined this is higher priority
+	//
     if ( currentConversationPriority )
 	{
 		CancelSquadConversation( squad )
@@ -350,7 +347,7 @@ int function GetSquadConversationPriority( array<entity> squad )
 	int highest = 0
 	foreach ( guy in squad )
 	{
-		// handle deletion
+		//
 		if ( !IsValid( guy ) )
 			continue
 
@@ -370,7 +367,7 @@ void function ClDebugPlayConversation( string conversationType )
 
 void function ClAttemptConversation( string conversationType, entity player, int priority )
 {
-	// no conversations during scripted VDUs
+	//
 	if ( IsLockedVDU() )
 		return
 
@@ -379,7 +376,7 @@ void function ClAttemptConversation( string conversationType, entity player, int
 		printt( "Attempting conversation " + conversationType )
 	}
 
-	// compare new priority to current priority
+	//
 	if ( AbortConversationDueToPriority( priority ) )
 	{
 		if ( file.DebugLevel > 1 )
@@ -390,14 +387,14 @@ void function ClAttemptConversation( string conversationType, entity player, int
 		return
 	}
 
-	//if ( IsLockedVDU() )
-	//{
-	//	if ( file.DebugLevel > 1 )
-	//		printt( "VDU is locked on player " + player + ", discarding conversation " + conversationType )
-	//	return
-	//}
+	//
+	//
+	//
+	//
+	//
+	//
 
-	// cancel any playing conversation
+	//
 	CancelConversation( player )
 
 	level.CurrentPriority = priority
@@ -437,20 +434,20 @@ void function CancelConversation( entity speakingEnt )
 	}
 
 	clGlobal.levelEnt.Signal( "CancelConversation" )
-	speakingEnt.Signal( "CancelConversation" ) //Speaking Ent can be different from listening player, i.e. clientPlayer
+	speakingEnt.Signal( "CancelConversation" ) //
 
-	// signaling "CancelConversation" to the player should cause him to be clear level.CurrentPriority.
-	// This happend in the OnThreadEnd for RunConversation(...)
+	//
+	//
 	Assert( !level.CurrentPriority )
 }
 
 bool function AbortConversationDueToPriority( int priority )
 {
-	// will return true if the conversation should not play
+	//
 	if ( priority > level.CurrentPriority )
 		return false
 
-	// conversations above level.AnnouncementPriority interupt conversations of the same priority level
+	//
 	if ( priority < level.AnnouncementPriority )
 		return true
 
@@ -483,12 +480,12 @@ void function ClRunConversation( entity player, string conversationType )
 	clGlobal.levelEnt.EndSignal( "CancelConversation" )
 	player.EndSignal( "OnDestroy" )
 
-	// returns a pseudo random conversation for this team
+	//
 	local conversation = ClSelectRandomConversation( conversationType, GetTeamForConversation( player ) )
-	// removes all but one alias choice in the conversation
+	//
 	conversation = RemoveChoicesFromConversation( conversation )
 
-	// temp debug print
+	//
 	int numRadio = 0
 	foreach ( elem in conversation )
 	{
@@ -496,9 +493,9 @@ void function ClRunConversation( entity player, string conversationType )
 			numRadio++
 	}
 
-	//printt( " Starting conversation " + conversationType + " with " + numRadio + " lines for " + player.GetPlayerName() )
+	//
 
-	//Dump( conversation, 2 )
+	//
 	foreach ( index, elem in conversation )
 	{
 		if ( file.DebugLevel > 1 )
@@ -506,7 +503,7 @@ void function ClRunConversation( entity player, string conversationType )
 			printt( " Running elem " + elem )
 		}
 
-		ClRunConversationElement( player, elem )	// in the future indexed NPC speakers need to be passed as well for AI dialogue
+		ClRunConversationElement( player, elem )	//
 
 		if ( file.DebugLevel > 1 )
 		{
@@ -517,19 +514,19 @@ void function ClRunConversation( entity player, string conversationType )
 
 void function RandomizeSquadVoices( array<entity> squad )
 {
-	//local squadCopy = clone squad
-	//squadCopy.randomize()
-	//for ( int i = 0; i < squadCopy.len(); i++ )
-	//{
-	//	squadCopy[i].s.dialogue.voiceIndex = i % VOICE_COUNT
-	//	printt( "index is " + squadCopy[i].s.dialogue.voiceIndex )
-	//}
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	int offset = RandomInt( VOICE_COUNT )
 	for ( int i = 0; i < squad.len(); i++ )
 	{
 		squad[i].s.dialogue.voiceIndex = ( i + offset ) % VOICE_COUNT
-		//printt( "index is " + squadCopy[i].s.dialogue.voiceIndex )
+		//
 	}
 }
 
@@ -542,7 +539,7 @@ void function ClRunSquadConversation( entity player, string conversationType, ar
 		}
 	)
 
-	// so the squad members each has a different voice
+	//
 	RandomizeSquadVoices( squad )
 
 	squad[0].EndSignal( "CancelConversation" )
@@ -553,9 +550,9 @@ void function ClRunSquadConversation( entity player, string conversationType, ar
 
 	level.debugType = conversationType
 
-	// returns a pseudo random conversation for this team
+	//
 	local conversation = ClSelectRandomConversation( conversationType, GetTeamForConversationFromSquad( player, squad ) )
-	// removes all but one alias choice in the conversation
+	//
 	conversation = RemoveChoicesFromConversation( conversation )
 
 	foreach ( index, elem in conversation )
@@ -565,7 +562,7 @@ void function ClRunSquadConversation( entity player, string conversationType, ar
 			printt( " Running elem " + elem )
 		}
 
-		ClRunSquadConversationElement( player, elem, squad )	// in the future indexed NPC speakers need to be passed as well for AI dialogue
+		ClRunSquadConversationElement( player, elem, squad )	//
 
 		if ( file.DebugLevel > 1 )
 		{
@@ -590,29 +587,29 @@ function ClSelectRandomConversation( string conversationType, int team )
 
 	Assert( IsArray( conversationArray ) )
 
-	// we cycle through a permutation of the conversations.
+	//
 
-	// level.ConversationIndices is a map from array to index.
-	// Thus it is actually indexed by the array itself.
+	//
+	//
 	if ( !( conversationArray in level.ConversationIndices ) || level.ConversationIndices[ conversationArray ] >= conversationArray.len() )
 	{
-		// randomize it each time we use up all choices in the conversation
+		//
 		conversationArray.randomize()
 		level.ConversationIndices[ conversationArray ] <- 0
 	}
 
 	local conversation = conversationArray[ level.ConversationIndices[ conversationArray ] ]
 
-	// next time we'll play the next conversation in the system
+	//
 	level.ConversationIndices[ conversationArray ]++
 
 	return conversation
 }
 
-// TODO: Return array<table>
+//
 function RemoveChoicesFromConversation( conversation )
 {
-	// removes all but one alias choice, per team, in the conversation
+	//
 	local _conversation = []
 	foreach ( elem in conversation )
 	{
@@ -631,7 +628,7 @@ table function RemoveChoicesFromElem( table elem )
 	switch ( elem.dialogType )
 	{
 		case "radio":
-			// elem.choices should be an array of lines to choose from randomly
+			//
 			Assert( IsArray( elem.choices ) )
 
 			if ( elem.choices.len() )
@@ -671,7 +668,7 @@ table function RemoveChoicesFromElem( table elem )
 			if ( elem.randomize )
 				elem.choices.randomize()
 
-			local _choices // TODO: should be array<table> but can't because of _elem.choices <- _choices below
+			local _choices //
 			for ( int i = 0; i < count; i++ )
 			{
 				table subelem = RemoveChoicesFromElem( expect table( elem.choices[i] ) )
@@ -741,52 +738,52 @@ void function ClRunConversationElement( entity player, elem )
 			break
 
 		case "dispatch":
-			Assert( false ) // Can't run this script because "squad" is undefined
+			Assert( false ) //
 			/*
-			Assert( squad != null, "Can't do a speech conversation without using PlaySquadConversation" )
-			// choose an AI to say this
-			local guy = squad[0]
 
-			//SpeakingGuy = guy
 
-			if ( !IsAlive( guy ) )
-			{
-				// We failed to find a guy to speak. Could be that guys have died or walked too far away since the conversation started.
-				// for now just bail.
 
-				if ( file.DebugLevel > 1 )
-					printl( " Bailing: no guy left to talk" )
 
-				CancelConversation( player )
-				break
-			}
 
-			// elem.choices should be an array of lines to choose from randomly
-			Assert( IsArray( elem.choices ) )
 
-			local dialogueChoice = elem.choices.getrandom()
-			local startTime = Time()
 
-			if ( typeof dialogueChoice == "string" )
-			{
-				waitthread DoGuySound( guy, guy, dialogueChoice, 0 )
-			}
-			else
-			{
-				AssertVoiceAliasDataIsValid( dialogueChoice )
 
-				if ( file.DebugLevel > 1 )
-					printt( "Speaking ai: " + guy.GetEntIndex() + " voice index " + guy.s.dialogue.voiceIndex )
-				table aliases = GetAliases( guy, dialogueChoice )
-				DoGuySpeechLine( guy, aliases )
-			}
 
-			//printt( "time passed in dialogue " + ( Time() - startTime ) )
-			wait 0.3 // delay between speech lines
 
-			//if ( IsAlive( guy ) )
-			//	guy.Signal( "FinishedLine", { alias = aliases.radioAlias } )
-			*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 			break
 
 
@@ -831,16 +828,16 @@ void function ClRunConversationElement( entity player, elem )
 			thread func()
 			break
 
-		#if HAS_BOSS_AI
-		case "boss_titan_conversation":
-			RunBossConversation( player, expect string( elem.speaker ), expect string( elem.event ) )
-			break
-		#endif
+		#if(false)
+
+
+
+#endif
 
 		case "multiple":
 			foreach ( subelem in elem.choices )
 			{
-				// choices and randomization etc removed in RemoveChoicesFromElem( ... )
+				//
 				ClRunConversationElement( player, subelem )
 			}
 			break
@@ -858,15 +855,15 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 	{
 		case "speech":
 			Assert( squad.len() > 0, "Can't do a speech conversation without using PlaySquadConversation" )
-			// choose an AI to say this
+			//
 			entity guy = ChooseSpeakingAI( squad, expect int( elem.speakerIndex ) )
 
-			//SpeakingGuy = guy
+			//
 
 			if ( !guy )
 			{
-				// We failed to find a guy to speak. Could be that guys have died or walked too far away since the conversation started.
-				// for now just bail.
+				//
+				//
 
 				if ( file.DebugLevel > 1 )
 					printl( " Bailing: no guy left to talk" )
@@ -877,8 +874,8 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 
 			if ( !IsAlive( guy ) || guy.ContextAction_IsMeleeExecution() )
 			{
-				// this guy is dead. we should wait a moment and then start an "are you there?" dialogType conversation.
-				// for now just bail.
+				//
+				//
 
 				if ( file.DebugLevel > 1 )
 					printl( " Bailing: next guy is dead" )
@@ -887,10 +884,10 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				break
 			}
 
-			// elem.choices should be an array of lines to choose from randomly
+			//
 			Assert( IsArray( elem.choices ) )
 
-			local dialogueChoice = elem.choices.getrandom() //Seems like this is unnecessary since we remove other choices earlier in ClRunSquadConversation, but it's too late in the project to chance changing this...
+			local dialogueChoice = elem.choices.getrandom() //
 
 			AssertVoiceAliasDataIsValid( dialogueChoice )
 
@@ -898,20 +895,20 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				printt( "Speaking ai: " + guy.GetEntIndex() + " voice index " + guy.s.dialogue.voiceIndex )
 			table aliases = GetAliases( guy, dialogueChoice )
 			DoGuySpeechLine( guy, aliases )
-			//wait RandomFloatRange( 0.1, 0.2 )// delay between speech lines. Taking out for now, might bring back later.
+			//
 			break
 
 		case "dispatch":
 			Assert( squad.len() > 0, "Can't do a speech conversation without using PlaySquadConversation" )
-			// choose an AI to say this
+			//
 			entity guy = squad[0]
 
-			//SpeakingGuy = guy
+			//
 
 			if ( !IsAlive( guy ) )
 			{
-				// We failed to find a guy to speak. Could be that guys have died or walked too far away since the conversation started.
-				// for now just bail.
+				//
+				//
 
 				if ( file.DebugLevel > 1 )
 					printl( " Bailing: no guy left to talk" )
@@ -920,11 +917,11 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				break
 			}
 
-			// elem.choices should be an array of lines to choose from randomly
+			//
 			Assert( IsArray( elem.choices ) )
 
-			local dialogueChoice = elem.choices.getrandom() //Seems like this is unnecessary since we remove other choices earlier in ClRunSquadConversation, but it's too late in the project to chance changing this...
-			//float startTime = Time()
+			local dialogueChoice = elem.choices.getrandom() //
+			//
 
 			if ( typeof dialogueChoice == "string" )
 			{
@@ -940,18 +937,18 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				DoGuySpeechLine( guy, aliases )
 			}
 
-			//printt( "time passed in dialogue " + ( Time() - startTime ) )
-			wait 0.3 // delay between speech lines
+			//
+			wait 0.3 //
 
-			//if ( IsAlive( guy ) )
-			//	guy.Signal( "FinishedLine", { alias = aliases.radioAlias } )
+			//
+			//
 
 			break
 
 		case "multiple":
 			foreach ( subelem in elem.choices )
 			{
-				// choices and randomization etc removed in RemoveChoicesFromElem( ... )
+				//
 				ClRunSquadConversationElement( player, subelem, squad )
 			}
 			break
@@ -968,7 +965,7 @@ float function DoGeneralRadioSound( string alias, entity sourceGuy, entity playe
 		printt( "Playing radio sound alias: " + alias + " to " + player.GetPlayerName() )
 	}
 
-	//printt( "playing alias: " + alias + " to " + player.GetPlayerName() )
+	//
 	float duration = GetSoundDuration( alias )
 	EmitSoundOnEntity( player, alias )
 	thread EndPlayerSound( player, sourceGuy, alias, duration )
@@ -978,7 +975,7 @@ float function DoGeneralRadioSound( string alias, entity sourceGuy, entity playe
 
 void function EndPlayerSound( entity player, entity sourceGuy, string alias, float delay = 0 )
 {
-	// this function is threaded but it needs to end with the conversation
+	//
 	player.EndSignal( "ConversationOver" )
 	player.EndSignal( "OnDestroy" )
 
@@ -993,8 +990,8 @@ void function EndPlayerSound( entity player, entity sourceGuy, string alias, flo
 		}
 	)
 
-	// necessary because of the OnThreadEnd
-	wait delay	// this is for delayed radio playback of AI dialogue
+	//
+	wait delay	//
 }
 
 float function DoPlayerMusic( entity player, string alias )
@@ -1009,35 +1006,35 @@ float function DoPlayerMusic( entity player, string alias )
 	return duration
 }
 
-/*function GetAvailableTalkers( int team )
-{
-	local Array = []
-	local ai = file.aiTalkers[ team ]
+/*
 
-	foreach ( ent in clone ai )
-	{
-		if ( IsValid( ent ) )
-		{
-			Array.append( ent )
-			continue
-		}
 
-		delete ai[ ent ]
-	}
 
-	return Array
-}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 entity function ChooseSpeakingAI( array<entity> squad, int speakerIndex )
 {
-	// originator has to be alive
+	//
 	if ( !IsAlive( squad[0] ) )
 		return null
 
 	if ( speakerIndex >= squad.len() )
 	{
-		// find some other dude in the squad
-		for ( int i = squad.len() - 1; i > 0; i-- ) //Dont' want to pick squad[0] since he originated the conversation
+		//
+		for ( int i = squad.len() - 1; i > 0; i-- ) //
 		{
 			if ( IsAlive( squad[i] ) )
 				return squad[i]
@@ -1052,59 +1049,59 @@ entity function ChooseSpeakingAI( array<entity> squad, int speakerIndex )
 	return squad[ speakerIndex ]
 
 /*
-	entity player = GetLocalViewPlayer()
-	local guys = GetAvailableTalkers( squad[0].GetTeam() )
 
-	if ( RandomInt( 3 ) == 0 )
-		guys.randomize()
-	else
-		guys = ArrayClosest( guys, player.GetOrigin() )
 
-	local bestOptions = []
-	local options = []
 
-	// get two nearest AI not already in speakerIndexChoices
-	foreach ( guy in guys )
-	{
-		if ( !GuyIsEligibleForDialogue( guy ) )
-			continue
 
-		bool alreadyUsed = false
-		bool sameVoice = false
-		foreach ( otherguy in speakerIndexChoices )
-		{
-			if ( guy == otherguy )
-			{
-				alreadyUsed = true
-				break
-			}
-			if ( guy.s.dialogue.voiceIndex == otherguy.s.dialogue.voiceIndex )
-				sameVoice = true
-		}
 
-		if ( alreadyUsed )
-			continue
 
-		if ( !sameVoice )
-			bestOptions.append( guy )
 
-		options.append( guy )
-		if ( options.len() >= 2 )
-			break
-	}
 
-	if ( bestOptions.len() >= 2 )
-		options = bestOptions
 
-	if ( options.len() <= 0 )
-		return null
 
-	local guy = options.getrandom()
 
-	speakerIndexChoices[speakerIndex] <- guy
 
-	return guy
-	*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 }
 
 void function DoGuySound( entity guy, entity sourceGuy, string alias, float delay )
@@ -1117,7 +1114,7 @@ void function DoGuySound( entity guy, entity sourceGuy, string alias, float dela
 			if ( !IsValid( guy ) )
 				return
 
-			//Let the AI have a chance to finish speaking
+			//
 			if ( !IsAlive( guy ) || guy.ContextAction_IsMeleeExecution() )
 				StopSoundOnEntity( guy, alias )
 		}
@@ -1170,38 +1167,38 @@ void function DoGuySpeechLine( entity guy, table aliases )
 }
 
 /*
-function DoGeneralRadioSound_Nonblocking( alias, sourceGuy, delay )
-{
-	if ( PLAYER_HEARS_RADIO )
-	{
-		thread DoPlayerSound( GetLocalViewPlayer(), sourceGuy, alias, delay )
-	}
-	else
-	{
-		local guys = GetAvailableEnemyTalkers()
-		local playerOrigin = GetLocalViewPlayer().GetOrigin()
-		guys = ArrayClosest( guys, playerOrigin )
 
-		local guyCount = 0
-		foreach ( guy in guys )
-		{
-			if ( guyCount >= MaxRadioPlayGuys )
-				break
 
-			if ( DistanceSqr( guy.GetOrigin(), playerOrigin ) > RadioPlayDistance * RadioPlayDistance )
-				break
 
-			if ( guy == sourceGuy )
-				continue
 
-			if ( !GuyIsEligibleForDialogue( guy ) )
-				continue
 
-			thread DoGuyRadioSound( guy, sourceGuy, alias, delay )
-			guyCount++
-		}
-	}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
 
 bool function GuyIsEligibleForDialogue( entity guy )
@@ -1223,11 +1220,11 @@ bool function GuyIsEligibleForDialogue( entity guy )
 
 void function AssertVoiceAliasDataIsValid( aliasData )
 {
-	// NONE OF THE FOLLOWING ASSERTS SHOULD HIT IF YOU USE AI_Dialogue_AliasAllVoices OR AI_Dialogue_AliasSingleVoice for aliasData.
+	//
 
 	Assert( IsArray( aliasData ) )
 	Assert( aliasData.len() == VOICE_COUNT )
-	// each voice should have a soundalias for the radio sound
+	//
 	Assert( IsString( aliasData[0] ) )
 }
 
@@ -1426,7 +1423,7 @@ var function WaveformVideoSwitchTest()
 var function CreateWaveformVideo( string title, int team, float duration, entity speaker = null, bool radioIntercept = false )
 {
 	var waveformVideoRUI = file.waveformVideoRUI
-	float timeExtension = 0.2 // FADEIN_TIME in waveform.rui
+	float timeExtension = 0.2 //
 
 	if ( title != file.lastWaveformTalker || file.waveformVideoRUI == null )
 	{
@@ -1483,7 +1480,7 @@ var function CreateWaveformVideo( string title, int team, float duration, entity
 		RuiTrackFloat3( waveformVideoRUI, "connectingLineWorldPos", speaker, RUI_TRACK_POINT_FOLLOW, attachment )
 	}
 
-	//printt( "RUI TRACKING SOUND METER!" )
+	//
 	RuiTrackFloat( waveformVideoRUI, "level", null, RUI_TRACK_SOUND_METER, 0 )
 
 	file.waveformVideoRUI = waveformVideoRUI
@@ -1493,7 +1490,7 @@ var function CreateWaveformVideo( string title, int team, float duration, entity
 var function CreateWaveform( string title, int team, float duration, entity speaker = null, bool radioIntercept = false )
 {
 	var waveformRUI = file.waveformRUI
-	float timeExtension = 0.2 // FADEIN_TIME in waveform.rui
+	float timeExtension = 0.2 //
 
 	if ( title != file.lastWaveformTalker || file.waveformRUI == null )
 	{
@@ -1550,7 +1547,7 @@ var function CreateWaveform( string title, int team, float duration, entity spea
 		RuiTrackFloat3( waveformRUI, "connectingLineWorldPos", speaker, RUI_TRACK_POINT_FOLLOW, attachment )
 	}
 
-	//printt( "RUI TRACKING SOUND METER!" )
+	//
 	RuiTrackFloat( waveformRUI, "level", null, RUI_TRACK_SOUND_METER, 0 )
 
 	file.waveformRUI = waveformRUI
@@ -1566,7 +1563,7 @@ void function DestroyWaveform( var rui, bool doWait = true )
 {
 	EndSignal( clGlobal.levelEnt, "WaveformRuiExtended" )
 
-	// usually wait before destroying so waveform can die down; otherwise just kill it
+	//
 	if ( doWait )
 		wait WAVEFORM_FADE_DURATION
 
@@ -1576,9 +1573,9 @@ void function DestroyWaveform( var rui, bool doWait = true )
 	StopVideoOnChannel( 0 )
 }
 
-//Battle Chatter, Grunt Chatter_MP, Spectre Chatter_MP and TitanOS dialogue should go into this. They all fall into the
-//"One liner, exact sound alias needs to be generated dynamically on the client" category of dialogue.
-//Faction Leader stuff used to use this, but since we need some of them to persist through death they now call PlayAnnouncerLineThroughDeathWithPriority() instead
+//
+//
+//
 void function PlayOneLinerConversationOnEntWithPriority( string conversationName, string soundAlias, entity ent, int priority )
 {
 	bool printDebug = GetDialogueDebugLevel() > 0
@@ -1596,7 +1593,7 @@ void function PlayOneLinerConversationOnEntWithPriority( string conversationName
 
 	SetConversationLastPlayedTime( conversationName, Time() )
 
-	thread PlayOneLinerConversationOnEntWithPriority_internal( soundAlias, ent, priority ) //Only thread this off once we've done the priority check since threading is expensive
+	thread PlayOneLinerConversationOnEntWithPriority_internal( soundAlias, ent, priority ) //
 }
 
 void function PlayOneLinerConversationOnEntWithPriority_internal( string soundAlias, entity ent, int priority )
@@ -1609,7 +1606,7 @@ void function PlayOneLinerConversationOnEntWithPriority_internal( string soundAl
 	OnThreadEnd(
 	function() : ( soundAlias, ent )
 		{
-			//printt( "OnThreadEnd of PlayOneLinerConversationOnEntWithPriority_internal, should try to end " + soundAlias + " onEnt: " + ent )
+			//
 			level.CurrentPriority = 0
 			if ( IsValid( ent ) )
 				StopSoundOnEntity( ent, soundAlias )
@@ -1627,7 +1624,7 @@ void function PlayOneLinerConversationOnEntWithPriority_internal( string soundAl
 	WaitSignal( handle, "OnSoundFinished" )
 }
 
-void function PlayAnnouncerLineThroughDeathWithPriority( string conversationName, string soundAlias, int priority, string waveformName = "" ) //Used primarily with Faction Leader announcements that might need to go through death, e.g. win announcement
+void function PlayAnnouncerLineThroughDeathWithPriority( string conversationName, string soundAlias, int priority, string waveformName = "" ) //
 {
 	bool printDebug = GetDialogueDebugLevel() > 0
 	if ( printDebug )
@@ -1646,7 +1643,7 @@ void function PlayAnnouncerLineThroughDeathWithPriority( string conversationName
 
 	SetConversationLastPlayedTime( conversationName, Time() )
 
-	thread PlayAnnouncerLineThroughDeathWithPriority_internal( soundAlias, localClientPlayer, priority, waveformName ) //Only thread this off once we've done the priority check since threading is expensive
+	thread PlayAnnouncerLineThroughDeathWithPriority_internal( soundAlias, localClientPlayer, priority, waveformName ) //
 }
 
 void function PlayAnnouncerLineThroughDeathWithPriority_internal( string soundAlias, entity localClientPlayer, int priority, string waveformName )
@@ -1662,7 +1659,7 @@ void function PlayAnnouncerLineThroughDeathWithPriority_internal( string soundAl
 	OnThreadEnd(
 	function() : ( rui, soundAlias, localClientPlayer )
 		{
-			//printt( "OnThreadEnd of PlayAnnouncerLineThroughDeathWithPriority_internal, should try to end " + soundAlias + " onLocalClientPlayer: " + localClientPlayer )
+			//
 			level.CurrentPriority = 0
 			if ( IsValid( localClientPlayer ) )
 				StopSoundOnEntity( localClientPlayer, soundAlias )

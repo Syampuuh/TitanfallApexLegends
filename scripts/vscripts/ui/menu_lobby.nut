@@ -33,12 +33,12 @@ void function InitLobbyMenu()
 
 	AddMenuVarChangeHandler( "isFullyConnected", UpdateFooterOptions )
 	AddMenuVarChangeHandler( "isPartyLeader", UpdateFooterOptions )
-	#if DURANGO_PROG
+	#if(DURANGO_PROG)
 		AddMenuVarChangeHandler( "DURANGO_canInviteFriends", UpdateFooterOptions )
 		AddMenuVarChangeHandler( "DURANGO_isJoinable", UpdateFooterOptions )
-	#elseif PS4_PROG
+	#elseif(PS4_PROG)
 		AddMenuVarChangeHandler( "PS4_canInviteFriends", UpdateFooterOptions )
-	#elseif PC_PROG
+	#elseif(PC_PROG)
 		AddMenuVarChangeHandler( "ORIGIN_isEnabled", UpdateFooterOptions )
 		AddMenuVarChangeHandler( "ORIGIN_isJoinable", UpdateFooterOptions )
 	#endif
@@ -83,7 +83,7 @@ void function InitLobbyMenu()
 
 void function OnLobbyMenu_Open()
 {
-	//ClientCommand( "gameCursor_ModeActive 1" )
+	//
 
 	if ( !file.tabsInitialized )
 	{
@@ -111,6 +111,12 @@ void function OnLobbyMenu_Open()
 
 	Lobby_UpdatePlayPanelPlaylists()
 
+	#if(false)
+//
+
+
+#endif
+
 	AddCallbackAndCallNow_OnGRXOffersRefreshed( OnGRXStateChanged )
 	AddCallbackAndCallNow_OnGRXInventoryStateChanged( OnGRXStateChanged )
 }
@@ -120,8 +126,9 @@ void function OnLobbyMenu_Show()
 {
 	thread LobbyMenuUpdate()
 	RegisterInputs()
-}
 
+	Chroma_Lobby()
+}
 
 
 void function OnLobbyMenu_Hide()
@@ -148,7 +155,7 @@ void function OnGRXStateChanged()
 	array<var> panels = [
 		GetPanel( "CharactersPanel" ),
 		GetPanel( "ArmoryPanel" ),
-		//GetPanel( "PassPanel" ),
+		GetPanel( "PassPanel" ),
 		GetPanel( "StorePanel" ),
 		GetPanel( "LootPanel" ),
 		GetPanel( "ECPanel" ),
@@ -160,7 +167,10 @@ void function OnGRXStateChanged()
 	{
 		if ( !Hud_IsVisible( panel ) )
 		{
-			SetPanelTabEnabled( panel, ready )
+			if ( panel == GetPanel( "PassPanel" ) )
+				SetPanelTabEnabled( panel, ready && IsBattlePassEnabled() && (GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) ) != null) )
+			else
+				SetPanelTabEnabled( panel, ready )
 		}
 	}
 
@@ -259,7 +269,8 @@ void function UpdateTabs()
 {
 	if ( IsFullyConnected() )
 	{
-	} // todo(dw)
+		//
+	} //
 }
 
 
@@ -313,7 +324,7 @@ void function SocialButton_OnActivate( var button )
 	if ( !IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
 		return
 
-	#if PC_PROG
+	#if(PC_PROG)
 		if ( !MeetsAgeRequirements() )
 		{
 			ConfirmDialogData dialogData
@@ -332,7 +343,7 @@ void function SocialButton_OnActivate( var button )
 
 void function GameMenuButton_OnActivate( var button )
 {
-	if ( InputIsButtonDown( BUTTON_STICK_LEFT ) ) // Avoid bug report shortcut
+	if ( InputIsButtonDown( BUTTON_STICK_LEFT ) ) //
 		return
 
 	if ( IsDialog( GetActiveMenu() ) )
@@ -372,7 +383,7 @@ void function OnLobbyMenu_PostGameOrChat( var button )
 {
 	var savedMenu = GetActiveMenu()
 
-	#if CONSOLE_PROG
+	#if(CONSOLE_PROG)
 	const float HOLD_FOR_CHAT_DELAY = 1.0
 	float startTime = Time()
 	while ( InputIsButtonDown( BUTTON_BACK ) || InputIsButtonDown( KEY_TAB ) && GetConVarInt( "hud_setting_accessibleChat" ) != 0 )
@@ -406,7 +417,7 @@ void function OnLobbyMenu_PostGameOrChat( var button )
 
 void function OnLobbyMenu_FocusChat( var panel )
 {
-#if PC_PROG
+#if(PC_PROG)
 	if ( IsDialog( GetActiveMenu() ) )
 		return
 

@@ -1,8 +1,10 @@
-#if SERVER || CLIENT
+//
+
+#if(CLIENT)
 global function ShGamepad_LevelInit
 #endif
 
-#if CLIENT
+#if(CLIENT)
 global function RefreshCustomGamepadBinds
 
 global function AddCallback_OnRefreshCustomGamepadBinds
@@ -11,7 +13,7 @@ global function GetButtonBoundTo
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 global function SetABBind
 global function GetABBind
 global function GetAbilityBinding
@@ -27,7 +29,7 @@ global function BuildABBindSet
 global function GetAbilityABind
 #endif
 
-#if UI
+#if(UI)
 global function GetCustomBindCommandForButtonIndexPilot
 global function GetCustomBindCommandForButtonIndexTitan
 global function GetCustomButtonIndexForCommandIndexPilot
@@ -37,6 +39,8 @@ global function ChangeCustomGamepadButtonIndexToCommandIndex_Pilot
 global function ChangeCustomGamepadButtonIndexToCommandIndex_Titan
 global function GetButtonIndexForButtonEnum
 global function RefreshCustomGamepadBinds_UI
+
+global function GamepadSwapShoulderAndTriggerBinds
 #endif
 
 global enum eGamepadUseSchemeType
@@ -48,14 +52,14 @@ global enum eGamepadUseSchemeType
 
 struct
 {
-	#if CLIENT || UI
+	#if CLIENT || UI 
 		array<void functionref(entity)> onRefreshCustomGamepadBinds
 
 		string[24]               temp_storedBindings
 		string[24]               temp_storedHeldBindings
 		array< array< string > > key_tappedHeldBindingPairs =
 		[
-			// [ TAPPED, HELD ],
+			//
 			["weaponcycle", "use_alt"],
 			["reload", "use; use_long"],
 			["use", "reload; use_long"],
@@ -70,45 +74,70 @@ struct
 
 global const int GAMEPAD_CUSTOM_BUTTONS_COUNT = 15
 
+#if(false)
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+#else
 global const array<string> CUSTOM_BIND_ALIASES_PILOT =
 [
-	//					 					Default:
-	"jump",							// "+jump"				bind "A_BUTTON"		"+ability 0"
-	"toggle_duck",					// "+toggle_duck"		bind "B_BUTTON"		"+ability 1"
-	"useandreload",					// "+useandreload"		bind "X_BUTTON"		"+ability 2"
-	"weaponcycle",					// "+weaponcycle"		bind "Y_BUTTON"		"+ability 3"
-	"zoom",							// "+zoom"				bind "L_TRIGGER"	"+ability 4"
-	"attack",						// "+attack"			bind "R_TRIGGER"	"+ability 5"
-	"offhand1",						// "+offhand1"			bind "L_SHOULDER"	"+ability 6"
-	"ping",							// "+ping"				bind "R_SHOULDER"	"+ability 7"
-	"speed",						// "+speed"				bind "STICK1" 		"+ability 8"
-	"melee",						// "+melee"				bind "STICK2" 		"+ability 9"
-	"scriptCommand4",				// "+offhand4"			bind "UP" 			"+ability 10"
-	"scriptCommand5",				// "+offhand3"			bind "DOWN" 		"+ability 11"
-	"scriptCommand3",				// "+offhand0"			bind "LEFT" 		"+ability 12"
-	"weaponselectordnance"			// "+scriptCommand4"	bind "RIGHT" 		"+ability 13"
-	"toggle_map"					// "toggle_map"			bind "BACK"			"+ability 14"
+	//
+	"jump",							//
+	"toggle_duck",					//
+	"useandreload",					//
+	"weaponcycle",					//
+	"zoom",							//
+	"attack",						//
+	"offhand1",						//
+	"ping",							//
+	"speed",						//
+	"melee",						//
+	"scriptCommand4",				//
+	"scriptCommand5",				//
+	"scriptCommand3",				//
+	"weaponselectordnance"			//
+	"toggle_map"					//
 ]
 
 global const array<string> CUSTOM_BIND_ALIASES_TITAN =
 [
-	//					 					Default:
-	"jump",							// "+jump"				bind "A_BUTTON"		"+ability 0"
-	"toggle_duck",					// "+toggle_duck"		bind "B_BUTTON"		"+ability 1"
-	"useandreload",					// "+useandreload"		bind "X_BUTTON"		"+ability 2"
-	"weaponcycle",					// "+weaponcycle"		bind "Y_BUTTON"		"+ability 3"
-	"zoom",							// "+zoom"				bind "L_TRIGGER"	"+ability 4"
-	"attack",						// "+attack"			bind "R_TRIGGER"	"+ability 5"
-	"offhand1",						// "+offhand1"			bind "L_SHOULDER"	"+ability 6"
-	"ping",							// "+ping"				bind "R_SHOULDER"	"+ability 7"
-	"speed",						// "+speed"				bind "STICK1" 		"+ability 8"
-	"melee",						// "+melee"				bind "STICK2" 		"+ability 9"
-	"scriptCommand4",				// "+offhand4"			bind "UP" 			"+ability 10"
-	"scriptCommand5",				// "+offhand3"			bind "DOWN" 		"+ability 11"
-	"scriptCommand3",				// "+offhand0"			bind "LEFT" 		"+ability 12"
-	"weaponselectordnance"			// "+scriptCommand4"	bind "RIGHT" 		"+ability 13"
-	"toggle_map"					// "toggle_map"			bind "BACK"			"+ability 14"
 ]
+#endif
 
 global struct ABBind
 {
@@ -116,7 +145,7 @@ global struct ABBind
 	string holdBind
 }
 
-#if CLIENT || UI
+#if CLIENT || UI 
 const table<int, int> GAMEPAD_BUTTON_INDECES =
 {
 	[ BUTTON_A ] =					0,
@@ -137,7 +166,7 @@ const table<int, int> GAMEPAD_BUTTON_INDECES =
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function ShGamepad_LevelInit()
 {
 	//
@@ -145,23 +174,23 @@ void function ShGamepad_LevelInit()
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 void function SetStandardAbilityBindingsForPilot( entity player )
 {
-	// Keyboard:
-	SetAbilityBinding( player, 15, "+jump", "-jump", KBT_TAPPED )						// 				"+ability 15"
-	SetAbilityBinding( player, 20, "+speed", "-speed", KBT_TAPPED )						// 				"+ability 20"
+	//
+	SetAbilityBinding( player, 15, "+jump", "-jump", KBT_TAPPED )						//
+	SetAbilityBinding( player, 20, "+speed", "-speed", KBT_TAPPED )						//
 
 	SetCustomGamepadBindsForPilot( player )
 }
 #endif
 
-#if CLIENT || UI
+#if CLIENT || UI 
 void function SetStandardAbilityBindingsForTitan( entity player )
 {
-	// Keyboard:
-	SetAbilityBinding( player, 15, "+dodge", "-dodge", KBT_TAPPED )						// 				"+ability 15"
-	SetAbilityBinding( player, 20, "+speed", "-speed", KBT_TAPPED )						// 				"+ability 20"
+	//
+	SetAbilityBinding( player, 15, "+dodge", "-dodge", KBT_TAPPED )						//
+	SetAbilityBinding( player, 20, "+speed", "-speed", KBT_TAPPED )						//
 
 	SetCustomGamepadBindsForTitan( player )
 }
@@ -179,7 +208,7 @@ int function ClampForCmd( string str )
 }
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 array<int> function BuildCommandForButtonArrayFromString( string csvStr )
 {
 	array<string> arr = split( csvStr, "," )
@@ -213,7 +242,7 @@ array<int> function BuildCommandForButtonArrayFromConVar( string convarName )
 
 	array<string> arr = split( csvStr, "," )
 
-	//HACK: I need code to update gamepad_custom_pilot
+	//
 	if ( ((convarName == "gamepad_custom_pilot") || (convarName == "gamepad_custom_titan")) && (arr.len() == (GAMEPAD_CUSTOM_BUTTONS_COUNT - 1)) )
 		arr.append( "14" )
 
@@ -248,8 +277,25 @@ array<int> function BuildCommandForButtonArrayFromConVar( string convarName )
 }
 #endif
 
+#if(UI)
+void function GamepadSwapShoulderAndTriggerBinds( string convarName )
+{
+	array<int> arr = BuildCommandForButtonArrayFromConVar( convarName )
 
-#if CLIENT || UI
+	int old4 = arr[4]
+	arr[4] = arr[6]
+	arr[6] = old4
+
+	int old5 = arr[5]
+	arr[5] = arr[7]
+	arr[7] = old5
+
+	string newValue = IntArrayToCSS( arr )
+	SetConVarString( convarName, newValue )
+}
+#endif //
+
+#if CLIENT || UI 
 string function GetCustomBindCommandForButtonIndex_( int buttonIndex, string convarName, array<string> bindAliases )
 {
 	Assert( (buttonIndex >= 0) && (buttonIndex < GAMEPAD_CUSTOM_BUTTONS_COUNT) )
@@ -265,7 +311,7 @@ string function GetCustomBindCommandForButtonIndex_( int buttonIndex, string con
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 string function GetCustomBindCommandForButtonIndexPilot( int buttonIndex )
 {
 	return GetCustomBindCommandForButtonIndex_( buttonIndex, "gamepad_custom_pilot", CUSTOM_BIND_ALIASES_PILOT )
@@ -273,7 +319,7 @@ string function GetCustomBindCommandForButtonIndexPilot( int buttonIndex )
 #endif
 
 
-#if UI
+#if(UI)
 string function GetCustomBindCommandForButtonIndexTitan( int buttonIndex )
 {
 	return GetCustomBindCommandForButtonIndex_( buttonIndex, "gamepad_custom_titan", CUSTOM_BIND_ALIASES_TITAN )
@@ -281,7 +327,7 @@ string function GetCustomBindCommandForButtonIndexTitan( int buttonIndex )
 #endif
 
 
-#if UI
+#if(UI)
 int function GetCustomButtonIndexForCommandIndex_( int commandIndex, string convarName )
 {
 	Assert( (commandIndex >= 0) && (commandIndex < GAMEPAD_CUSTOM_BUTTONS_COUNT) )
@@ -297,7 +343,7 @@ int function GetCustomButtonIndexForCommandIndex_( int commandIndex, string conv
 #endif
 
 
-#if UI
+#if(UI)
 int function GetCustomButtonIndexForCommandIndexPilot( int commandIndex )
 {
 	return GetCustomButtonIndexForCommandIndex_( commandIndex, "gamepad_custom_pilot" )
@@ -305,7 +351,7 @@ int function GetCustomButtonIndexForCommandIndexPilot( int commandIndex )
 #endif
 
 
-#if UI
+#if(UI)
 int function GetCustomButtonIndexForCommandIndexTitan( int commandIndex )
 {
 	return GetCustomButtonIndexForCommandIndex_( commandIndex, "gamepad_custom_titan" )
@@ -335,7 +381,7 @@ string function IntArrayToCSS( array<int> srcArray )
 }
 
 
-#if UI
+#if(UI)
 bool function ChangeCustomGamepadButtonIndexToCommandIndex_( int newButtonIndex, int newCommandIndex, string convarName )
 {
 	array<int> arr = BuildCommandForButtonArrayFromConVar( convarName )
@@ -365,7 +411,7 @@ bool function ChangeCustomGamepadButtonIndexToCommandIndex_( int newButtonIndex,
 #endif
 
 
-#if UI
+#if(UI)
 bool function ChangeCustomGamepadButtonIndexToCommandIndex_Pilot( int newButtonIndex, int newCommandIndex )
 {
 	return ChangeCustomGamepadButtonIndexToCommandIndex_( newButtonIndex, newCommandIndex, "gamepad_custom_pilot" )
@@ -373,7 +419,7 @@ bool function ChangeCustomGamepadButtonIndexToCommandIndex_Pilot( int newButtonI
 #endif
 
 
-#if UI
+#if(UI)
 bool function ChangeCustomGamepadButtonIndexToCommandIndex_Titan( int newButtonIndex, int newCommandIndex )
 {
 	return ChangeCustomGamepadButtonIndexToCommandIndex_( newButtonIndex, newCommandIndex, "gamepad_custom_titan" )
@@ -381,7 +427,7 @@ bool function ChangeCustomGamepadButtonIndexToCommandIndex_Titan( int newButtonI
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 string function FindCorrespondingHeldCommandForTappedCommand( string tappedCommand )
 {
 	for ( int i = 0; i < file.key_tappedHeldBindingPairs.len(); ++i )
@@ -395,7 +441,7 @@ string function FindCorrespondingHeldCommandForTappedCommand( string tappedComma
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 array<ABBind> function BuildABBindSet( array<int> bindIdxArray )
 {
 	Assert( bindIdxArray.len() == GAMEPAD_CUSTOM_BUTTONS_COUNT )
@@ -461,7 +507,7 @@ void function SetABBind( entity player, int index, string baseCmd )
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 array<string> function GetABBindsForBaseBind( string baseBind )
 {
 	switch ( baseBind )
@@ -494,7 +540,7 @@ array<string> function GetABBindsForBaseBind( string baseBind )
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 string function GetAbilityBinding( entity player, int index )
 {
 	return file.temp_storedBindings[index]
@@ -517,31 +563,32 @@ ABBind function GetAbilityABind( int index )
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 void function SetCustomGamepadBindsFor_( entity player, string convarName, array<string> bindAliases )
 {
+	bindAliases.resize( CUSTOM_BIND_ALIASES_PILOT.len() )
 	array<int> arr = BuildCommandForButtonArrayFromConVar( convarName )
 
-	SetABBind( player, 0, bindAliases[arr[0]] )		// A
-	SetABBind( player, 1, bindAliases[arr[1]] )		// B
-	SetABBind( player, 2, bindAliases[arr[2]] )		// X
-	SetABBind( player, 3, bindAliases[arr[3]] )		// Y
-	SetABBind( player, 4, bindAliases[arr[4]] )		// LT
-	SetABBind( player, 5, bindAliases[arr[5]] )		// RT
-	SetABBind( player, 6, bindAliases[arr[6]] )		// LS
-	SetABBind( player, 7, bindAliases[arr[7]] )		// RS
-	SetABBind( player, 8, bindAliases[arr[8]] )		// AS1
-	SetABBind( player, 9, bindAliases[arr[9]] )		// AS2
-	SetABBind( player, 10, bindAliases[arr[10]] )	// DP-UP
-	SetABBind( player, 11, bindAliases[arr[11]] )	// DP-DOWN
-	SetABBind( player, 12, bindAliases[arr[12]] )	// DP-LEFT
-	SetABBind( player, 13, bindAliases[arr[13]] )	// DP-RIGHT
-	SetABBind( player, 14, bindAliases[arr[14]] )	// BACK
+	SetABBind( player, 0, bindAliases[arr[0]] )		//
+	SetABBind( player, 1, bindAliases[arr[1]] )		//
+	SetABBind( player, 2, bindAliases[arr[2]] )		//
+	SetABBind( player, 3, bindAliases[arr[3]] )		//
+	SetABBind( player, 4, bindAliases[arr[4]] )		//
+	SetABBind( player, 5, bindAliases[arr[5]] )		//
+	SetABBind( player, 6, bindAliases[arr[6]] )		//
+	SetABBind( player, 7, bindAliases[arr[7]] )		//
+	SetABBind( player, 8, bindAliases[arr[8]] )		//
+	SetABBind( player, 9, bindAliases[arr[9]] )		//
+	SetABBind( player, 10, bindAliases[arr[10]] )	//
+	SetABBind( player, 11, bindAliases[arr[11]] )	//
+	SetABBind( player, 12, bindAliases[arr[12]] )	//
+	SetABBind( player, 13, bindAliases[arr[13]] )	//
+	SetABBind( player, 14, bindAliases[arr[14]] )	//
 }
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 void function SetCustomGamepadBindsForPilot( entity player )
 {
 	SetCustomGamepadBindsFor_( player, "gamepad_custom_pilot", CUSTOM_BIND_ALIASES_PILOT )
@@ -549,7 +596,7 @@ void function SetCustomGamepadBindsForPilot( entity player )
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 void function SetCustomGamepadBindsForTitan( entity player )
 {
 	SetCustomGamepadBindsFor_( player, "gamepad_custom_titan", CUSTOM_BIND_ALIASES_TITAN )
@@ -557,7 +604,7 @@ void function SetCustomGamepadBindsForTitan( entity player )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function RefreshCustomGamepadBinds()
 {
 	entity player = GetLocalClientPlayer()
@@ -607,7 +654,7 @@ int function GetButtonBoundTo( string command )
 #endif
 
 
-#if UI
+#if(UI)
 void function RefreshCustomGamepadBinds_UI()
 {
 	if ( !IsFullyConnected() )
@@ -621,7 +668,7 @@ void function RefreshCustomGamepadBinds_UI()
 #endif
 
 
-#if UI || UI
+#if UI || UI 
 int function GetButtonIndexForButtonEnum( int buttonEnum )
 {
 	if ( buttonEnum in GAMEPAD_BUTTON_INDECES )
@@ -634,7 +681,7 @@ int function GetButtonIndexForButtonEnum( int buttonEnum )
 
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 string function GetGamepadButtonStringForIndex( int buttonIndex )
 {
 	switch ( buttonIndex )
@@ -688,7 +735,7 @@ int function GetButtonEnumForIndex( int index )
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 string function GetEffectiveButtonBinding( int buttonID )
 {
 	string binding = GetKeyTappedBinding( buttonID )

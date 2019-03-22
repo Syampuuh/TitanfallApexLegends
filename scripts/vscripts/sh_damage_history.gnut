@@ -1,89 +1,112 @@
-
 global function DamageHistoryInit
 global function StoreDamageHistoryAndUpdate
-global function WasRecentlyHitForDamage
-global function WasRecentlyHitByEntity
+//
+//
 global function WasRecentlyHitByEntityWithDamagetype
-global function WasRecentlyHitByDamageSourceId
+//
 global function GetLatestAssistingPlayerInfo
 global function GetLatestAssistingPlayerFromSameTeam
-global function GetTotalDamageTakenInTime
 global function GetTotalDamageTaken
-global function GetTotalDamageTakenByPlayer
-global function GetDamageSortedByAttacker
-global function GetTitansHitMeInTime
-global function GetLastDamageTime
+global function DamageHistory_GetDamageFromEntity
+//
 global function GetDamageEventsForTime
 global function WasRecentlyHitForDamageType
-global function GetRodeoAttacksByPlayer
+//
 global function GetLastDamageSourceStringForAttacker
-global function TotalDamageOverTime_BlendedOut
+//
 global function ClearRecentDamageHistory
-global function AttackerDamagesSort
+//
 global function PrintDamageEventsForTime
+
+const DEATH_RECAP_DAMAGE_HISTORY_TIME = 30    //
+
+global enum eDamageHistorySet
+{
+	DEFAULT, //
+	HEALTH,
+	SHIELD,
+	BLEEDOUT, //
+	ALL,
+}
 
 global struct AttackerDamage
 {
-	entity attacker
-	string attackerName
-	float totalDamage
-	table<int,float> damageBySource
+	entity            attacker
+	string            attackerName
+	float             totalDamage
+	float             eventCount
+	table<int, float> damageBySource
 }
 
 global struct DamageHistoryStruct
 {
-	string attackerName
-	string attackerPetName
-	vector origin
-	float damage
-	int damageType
-	int damageSourceId
-	entity attacker
-	int attackerEHandle
-	float attackerHealthPercent
-	float time
-	array<string> weaponMods
-	bool victimIsTitan
-	bool rodeoDamage
+	string        attackerName
+	string        attackerPetName
+	vector        origin
+	float         damage
+	int           damageType
+	int           damageSourceId
+	entity        attacker
+	int           attackerEHandle
+	float         attackerHealthPercent
+	float         time
+	//
+	bool          victimIsTitan
+	bool          rodeoDamage
+
+	bool wasBleedingOut
+
+	float healthFrac
+	float shieldFrac
 }
 
 global struct AssistingPlayerStruct
 {
 	entity player
-	int damageSourceId
-	float assistTime
+	int    damageSourceId
+	float  assistTime
 }
 
 void function DamageHistoryInit()
 {
+	#if(false)
+
+
+#endif //
 }
+
 
 void function ClearRecentDamageHistory( entity player )
 {
 	player.e.recentDamageHistory.clear()
+	#if(false)
+//
+
+#endif //
 }
 
-DamageHistoryStruct function StoreDamageHistoryAndUpdate( entity storeEnt, float maxTime, float damage, vector damageOrigin, int damageType, int damageSourceId, entity attacker = null, array<string> weaponMods = [] )
+
+DamageHistoryStruct function StoreDamageHistoryAndUpdate( entity storeEnt, float maxTime, float damage, vector damageOrigin, int damageType, int damageSourceId, entity attacker = null )
 {
 	DamageHistoryStruct damageHistory
 
 	float time = Time()
 
-	#if SERVER
-		if ( !attacker.IsPlayer() )
-		{
-			entity newAttacker = GetPlayerFromEntity( attacker )
-			if ( IsValid_ThisFrame( newAttacker ) )
-				attacker = newAttacker
-		}
-	#endif
+	#if(false)
+
+
+
+
+
+
+#endif
 
 	if ( damageType & DF_VORTEX_REFIRE )
 		damageSourceId = eDamageSourceId.damagedef_unknownBugIt
 
 	if ( IsValid( attacker ) )
 	{
-		#if CLIENT
+		#if(CLIENT)
 			AttackerDisplayNameStruct names = GetAttackerDisplayNamesFromClassname( attacker, true )
 			damageHistory.attackerName = names.attackerName
 			damageHistory.attackerPetName = names.attackerPetName
@@ -98,29 +121,37 @@ DamageHistoryStruct function StoreDamageHistoryAndUpdate( entity storeEnt, float
 	damageHistory.damageSourceId = damageSourceId
 	damageHistory.attacker = attacker
 	damageHistory.time = time
-	damageHistory.weaponMods = weaponMods
+	//
 
-	// clear the damage history
-	if ( GetHealthFrac( storeEnt ) == 1.0 )
-		maxTime = 0
+	damageHistory.healthFrac = GetHealthFrac( storeEnt )
+	damageHistory.shieldFrac = GetShieldHealthFrac( storeEnt )
 
-	damageHistory.victimIsTitan = false
+	if ( storeEnt.IsPlayer() )
+	{
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+		//
+	}
+	else
+	{
+		if ( GetHealthFrac( storeEnt ) == 1.0 )
+			maxTime = 0
+	}
 
-	if ( maxTime >= 0 )
-		UpdateDamageHistory( storeEnt, maxTime, time )
+
+	Assert( maxTime >= 0 )
+	PurgeDamageHistory( storeEnt, maxTime, time )
 
 	storeEnt.e.recentDamageHistory.insert( 0, damageHistory )
 
 	return damageHistory
 }
 
-float function GetLastDamageTime( entity player )
-{
-	if ( !player.e.recentDamageHistory.len() )
-		return -1.0
-
-	return player.e.recentDamageHistory[ 0 ].time
-}
 
 array<DamageHistoryStruct> function GetDamageEventsForTime( entity player, float hitTime )
 {
@@ -139,24 +170,27 @@ array<DamageHistoryStruct> function GetDamageEventsForTime( entity player, float
 	return events
 }
 
+
 void function PrintDamageEventsForTime( entity player, float time = 20.0 )
 {
 	array<DamageHistoryStruct> events = GetDamageEventsForTime( player, time )
 
+	float runningTotal
 	foreach ( event in events )
 	{
-		printt( "event:", event.damage, event.damageType, event.damageSourceId, event.attacker )
+		runningTotal += event.damage
+		printt( "event:", event.damage, runningTotal, event.damageType & DF_SHIELD_DAMAGE, event.wasBleedingOut, event.attacker )
 	}
 }
 
 
-void function UpdateDamageHistory( entity player, float maxTime, float time )
+void function PurgeDamageHistory( entity player, float maxTime, float time )
 {
-	// remove old damage history entries
+	//
 	int i
 	float removeTime = time - maxTime
 
-	for ( i = player.e.recentDamageHistory.len() - 1; i >= 0; i-- )
+	for ( i = player.e.recentDamageHistory.len() - 1 ; i >= 0; i-- )
 	{
 		DamageHistoryStruct history = player.e.recentDamageHistory[ i ]
 
@@ -167,19 +201,22 @@ void function UpdateDamageHistory( entity player, float maxTime, float time )
 	}
 }
 
-bool function WasRecentlyHitByEntity( entity player, entity ent, float hitTime )
-{
-	float time = Time() - hitTime
-	foreach ( DamageHistoryStruct history in player.e.recentDamageHistory )
-	{
-		if ( history.time < time )
-			continue
-		if ( history.attacker == ent )
-			return true
-	}
+/*
 
-	return false
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 bool function WasRecentlyHitByEntityWithDamagetype( entity player, entity ent, int damageType, float hitTime )
 {
@@ -198,29 +235,31 @@ bool function WasRecentlyHitByEntityWithDamagetype( entity player, entity ent, i
 
 	return false
 }
+/*
 
-bool function WasRecentlyHitForDamage( entity player, float damageAmount, float hitTime )
-{
-	float time = Time() - hitTime
-	// remove old damage history entries
-	int i
 
-	foreach ( history in player.e.recentDamageHistory )
-	{
-		if ( history.time < time )
-			continue
 
-		if ( history.damage >= damageAmount )
-			return true
-	}
 
-	return false
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 bool function WasRecentlyHitForDamageType( entity player, int damageType, float hitTime )
 {
 	float time = Time() - hitTime
-	// remove old damage history entries
+	//
 	int i
 
 	foreach ( history in player.e.recentDamageHistory )
@@ -234,6 +273,7 @@ bool function WasRecentlyHitForDamageType( entity player, int damageType, float 
 	return false
 }
 
+
 float function GetTotalDamageTaken( entity player )
 {
 	float total = 0
@@ -245,53 +285,31 @@ float function GetTotalDamageTaken( entity player )
 	return total
 }
 
-float function GetTotalDamageTakenInTime( entity player, float hitTime )
-{
-	float time = Time() - hitTime
-	// remove old damage history entries
-	int i
 
-	float total = 0
-	foreach ( history in player.e.recentDamageHistory )
-	{
-		if ( history.time < time )
-			continue
+/*
 
-		total += history.damage
-	}
 
-	return total
-}
 
-array<entity> function GetTitansHitMeInTime( entity player, float hitTime )
-{
-	float time = Time() - hitTime
-	// remove old damage history entries
-	array<entity> titans
 
-	foreach ( history in player.e.recentDamageHistory )
-	{
-		if ( history.time < time )
-			continue
 
-		if ( !IsValid( history.attacker ) )
-			continue
-		if ( !history.attacker.IsTitan() )
-			continue
-		if ( titans.contains( history.attacker ) )
-			continue
 
-		titans.append( history.attacker )
-	}
 
-	return titans
-}
 
-float function GetTotalDamageTakenByPlayer( entity player, entity attacker )
+
+
+
+
+
+
+
+
+
+*/
+
+
+float function DamageHistory_GetDamageFromEntity( entity player, entity attacker, int damageHistorySet = eDamageHistorySet.HEALTH )
 {
 	Assert( IsValid( attacker ) )
-	// remove old damage history entries
-	int i
 
 	float total = 0
 	foreach ( history in player.e.recentDamageHistory )
@@ -299,87 +317,121 @@ float function GetTotalDamageTakenByPlayer( entity player, entity attacker )
 		if ( history.attacker != attacker )
 			continue
 
+		bool useDamage = false
+		switch ( damageHistorySet )
+		{
+			case eDamageHistorySet.DEFAULT:
+				useDamage = !history.wasBleedingOut
+				break
+
+			case eDamageHistorySet.HEALTH:
+				useDamage = (history.damageType & DF_SHIELD_DAMAGE) == 0 && !history.wasBleedingOut
+				break
+
+			case eDamageHistorySet.SHIELD:
+				useDamage = (history.damageType & DF_SHIELD_DAMAGE) != 0
+				break
+
+			case eDamageHistorySet.BLEEDOUT:
+				useDamage = history.wasBleedingOut
+				break
+
+			case eDamageHistorySet.ALL:
+			default:
+				useDamage = true
+				break
+		}
+
+		if ( !useDamage )
+			continue
+
 		total += history.damage
 	}
 
 	return total
 }
 
-array<AttackerDamage> function GetDamageSortedByAttacker( entity ent, float totalTime )
-{
-	Assert( !ent.IsTitan(), "Pass titan soul, not titan itself" )
-
-	float firstCheckTime = Time() - totalTime
-	table<entity,AttackerDamage> attackerDamagesTable
-	array<AttackerDamage> attackerDamages
-
-	foreach ( history in ent.e.recentDamageHistory )
-	{
-		if ( history.attacker == null )
-			continue
-
-		if ( history.time < firstCheckTime )
-			continue
-
-		AttackerDamage attackerDamage
-		if ( history.attacker in attackerDamagesTable )
-		{
-			attackerDamage = attackerDamagesTable[ history.attacker ]
-		}
-		else
-		{
-			attackerDamagesTable[ history.attacker ] <- attackerDamage
-
-			attackerDamage.attacker = history.attacker
-			attackerDamages.append( attackerDamage )
-		}
-
-		if ( !( history.damageSourceId in attackerDamage.damageBySource ) )
-		{
-			attackerDamage.damageBySource[ history.damageSourceId ] <- 0
-		}
-
-		attackerDamage.damageBySource[ history.damageSourceId ] += history.damage
-		attackerDamage.totalDamage += history.damage
-	}
-
-	attackerDamages.sort( AttackerDamagesSort )
-
-	return attackerDamages
-}
-
-int function AttackerDamagesSort( AttackerDamage a, AttackerDamage b )
-{
-	if ( a.totalDamage > b.totalDamage )
-		return -1
-	if ( b.totalDamage > a.totalDamage )
-		return 1
-	return 0
-}
-
-bool function WasRecentlyHitByDamageSourceId( entity player, int damageSourceId, float hitTime )
-{
-	float time = Time() - hitTime
-
-	// remove old damage history entries
-	foreach ( DamageHistoryStruct history in player.e.recentDamageHistory )
-	{
-		if ( history.time < time )
-			continue
-
-		if ( history.damageSourceId == damageSourceId )
-			return true
-	}
-
-	return false
-}
+/*
 
 
-// Used to get the player that did the last damage in cases where an NPC, not associated with a player, gives the killing blow.
-// at this point not every entity uses e.recentDamageHistory so some entities won't give assist points when they die ( soldiers, turrets etc. )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+/*
+
+
+
+
+
+
+
+
+
+*/
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+//
+//
 AssistingPlayerStruct function GetLatestAssistingPlayerInfo( entity ent )
 {
-	float lastTime = 0.0
+	float lastTime    = 0.0
 	float currentTime = Time()
 	AssistingPlayerStruct assistingPlayerInfo
 
@@ -403,9 +455,10 @@ AssistingPlayerStruct function GetLatestAssistingPlayerInfo( entity ent )
 	return assistingPlayerInfo
 }
 
+
 array<entity> function GetLatestAssistingPlayerFromSameTeam( entity victim, entity attacker )
 {
-	float lastTime = 0.0
+	float lastTime    = 0.0
 	float currentTime = Time()
 	array<entity> assistingPlayerArray
 
@@ -432,41 +485,42 @@ array<entity> function GetLatestAssistingPlayerFromSameTeam( entity victim, enti
 	return assistingPlayerArray
 }
 
+/*
 
-array<DamageHistoryStruct> function GetRodeoAttacksByPlayer( entity player, entity attacker, float time )
-{
-	float validTime = Time() - time
-	array<DamageHistoryStruct> events
 
-	if ( !IsValid( player ) )
-		return events
 
-	if ( !player.IsTitan() )
-		return events
 
-	if ( !IsValid( attacker ) )
-		return events
 
-	entity soul = player.GetTitanSoul()
-	if ( !IsValid( soul ) )
-		return events
 
-	foreach ( history in soul.e.recentDamageHistory )
-	{
-		if ( history.time < validTime )
-			continue
 
-		if ( history.attacker != attacker )
-			continue
 
-		if ( !(history.damageType & DF_RODEO) )
-			continue
 
-		events.append( history )
-	}
 
-	return events
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 string function GetLastDamageSourceStringForAttacker( entity victim, entity attacker )
 {
@@ -488,33 +542,206 @@ string function GetLastDamageSourceStringForAttacker( entity victim, entity atta
 
 	return ""
 }
+/*
 
-float function TotalDamageOverTime_BlendedOut( entity soul, float start, float end )
-{
-	// rev 3 with damage history
-	float totalAcquiredDamage = 0
-	float time = Time()
-	float ignoreTime = time - end
-	float blendOutStarts = time - start
 
-	foreach ( history in soul.e.recentDamageHistory )
-	{
-		// dont care about the history past this point
-		if ( history.time < ignoreTime )
-			break
 
-		float newDamage
-		if ( history.damage < 0 )
-		{
-			newDamage = history.damage
-		}
-		else
-		{
-			newDamage = GraphCapped( history.time, blendOutStarts, ignoreTime, history.damage, 0 )
-		}
 
-		totalAcquiredDamage += newDamage
-	}
 
-	return totalAcquiredDamage
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+//
+//
+//
+
+
+
+//
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //

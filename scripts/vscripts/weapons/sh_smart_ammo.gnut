@@ -2,37 +2,37 @@ untyped
 
 global function SmartAmmo_Init
 
-/****************************************************/
-/*				Mega Weapon Functions				*/
-/****************************************************/
+/**/
+/**/
+/**/
 
-// Called from mega weapon script callbacks
+//
 global function SmartAmmo_FireWeapon
 
-/********************************/
-/*	 Global Utility Functions	*/
-/*	Call these from any script	*/
-/********************************/
+/**/
+/**/
+/**/
+/**/
 
-// Behavior Option Functions
+//
 global function SmartAmmo_SetAllowUnlockedFiring
-global function SmartAmmo_SetAimAttachment				// Set a custom attachment name for target lockon
-global function SmartAmmo_SetMissileSpeed					// Set the speed the missile will travel when it is first created
-global function SmartAmmo_SetMissileSpeedLimit		// Sets the max speed for the missile. After being created it will accelerate up to this speed
-global function SmartAmmo_SetMissileHomingSpeed		// Set the turning 'homing' rate of the missile
+global function SmartAmmo_SetAimAttachment				//
+global function SmartAmmo_SetMissileSpeed					//
+global function SmartAmmo_SetMissileSpeedLimit		//
+global function SmartAmmo_SetMissileHomingSpeed		//
 global function SmartAmmo_SetMissileShouldDropKick
-global function SmartAmmo_SetUnlockAfterBurst			// Makes the targets get cleared after the burst fire is complete. Default is false
-global function SmartAmmo_SetMissileAimAtCursor				// Makes missiles fly towards where the crosshair is aimed, instead of parallel to the crosshair direction. Default is false.
+global function SmartAmmo_SetUnlockAfterBurst			//
+global function SmartAmmo_SetMissileAimAtCursor				//
 global function SmartAmmo_SetWarningIndicatorDelay
 global function SmartAmmo_SetDisplayKeybinding
 global function SmartAmmo_SetExpandContract
 global function SmartAmmo_EntHasEnoughTrackedMarks
 global function SmartAmmo_SetShouldTrackPosition
 
-/****************************************************/
-/*				Interal Get/Set Functions			*/
-/*	( not meant to be called outside smart script )	*/
-/****************************************************/
+/**/
+/**/
+/**/
+/**/
 global function SmartAmmo_GetUseAltAmmoFunc
 global function SmartAmmo_GetAllowUnlockedFiring
 global function SmartAmmo_SetWeaponFireFailedTime
@@ -56,14 +56,14 @@ global function SmartAmmo_CanWeaponBeFired
 global function SmartAmmo_WeaponRequiresTrackedMarks
 global function SmartAmmo_GetWeaponTargets
 
-#if CLIENT
-//	global function ClientCodeCallback_OnPredictedEntityRemove
+#if(CLIENT)
+//
 #endif
 
 global const SMART_AMMO_DEFAULT_AIM_ATTACHMENT = "CHESTFOCUS"
 global const SMART_AMMO_AI_AIM_ATTACHMENT = "HEADSHOT"
-global const SMART_AMMO_GRENADE_AIM_ATTACHMENT = "LIGHT" //Satchels have LIGHT others grenades default to worldspace.
-global const TARGET_SET_FRACTION = 0.0001 //This target.fraction is set so the target is not seen as new.
+global const SMART_AMMO_GRENADE_AIM_ATTACHMENT = "LIGHT" //
+global const TARGET_SET_FRACTION = 0.0001 //
 global const HOMING_SFX_LOOP	= "Weapon_Sidwinder_Projectile"
 global const SMART_AMMO_PLAYER_MAX_LOCKS			= 3
 
@@ -84,13 +84,13 @@ FireWeaponCallback function GetFireWeaponCallbackForWeaponType( int wt )
 
 void function SmartAmmo_Init()
 {
-#if SERVER
+#if(false)
 #endif
 }
 
-/******************************************/
-/* 	GLOBAL - CALLED ON CLIENT AND SERVER  */
-/******************************************/
+/**/
+/**/
+/**/
 
 int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams attackParams, int damageType, int explosionDamageType )
 {
@@ -106,9 +106,9 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 		}
 	}
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( IsWatchingReplay() )
-			return 0 // temp fix for SmartAmmo_GetStoredTargets not returning the same list during kill replay
+			return 0 //
 	#endif
 
 	array<entity> storedTargets = weapon.SmartAmmo_GetStoredTargets()
@@ -116,7 +116,7 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 	if ( weaponRequiresTrackedMarks )
 		RemovePartiallyTrackedEnts( weapon, storedTargets )
 	array< SmartAmmoTarget > targets = weapon.SmartAmmo_GetTargets()
-	//TODO: Update with cleaner tracking count method.
+	//
 	table targetFracs
 	table targetActiveShots
 
@@ -131,18 +131,18 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 
 	if ( attackParams.burstIndex == 0 )
 	{
-		// The first time we fire the weapon we store off all targets we are locked onto so we can iterate through them with each burst shot.
-		// The reason we have to store them off is because if burst bullet 1 kills the first target they will be removed from the smart targets array
-		// when the second burst bullet is fired, and when we try to shoot target '2' we will actually be shooting target '3' becuase index 0 is removed
-		// and all targets shift in the array
+		//
+		//
+		//
+		//
 
 		weapon.SmartAmmo_StoreTargets()
-		//printt( "Storing", weapon.SmartAmmo_GetStoredTargets().len(), "targets" )
-		//PrintTable( weapon.SmartAmmo_GetStoredTargets() )
+		//
+		//
 		storedTargets = weapon.SmartAmmo_GetStoredTargets()
 		if ( weaponRequiresTrackedMarks )
 			RemovePartiallyTrackedEnts( weapon, storedTargets )
-		// figure out how many targets to hit with one pull of the trigger
+		//
 		int maxTargetedBurst = SmartAmmo_GetMaxTargetedBurst( weapon )
 
 		bool alwaysDoBurst = weapon.GetWeaponSettingBool( eWeaponVar.smart_ammo_always_do_burst )
@@ -177,7 +177,7 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 		weapon.SetWeaponBurstFireCount( burstCount )
 	}
 
-	// We don't have any targets locked. Should we do unlocked fire?
+	//
 	if ( storedTargets.len() == 0 && !SmartAmmo_GetAllowUnlockedFiring( weapon ) )
 	{
 		SmartAmmo_SetWeaponFireFailedTime( weapon )
@@ -201,7 +201,7 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 		}
 	}
 
-	// Figure out the target we should be shooting this round
+	//
 	entity target = null
 	if ( expandedStoredTargets.len() > 0 )
 	{
@@ -209,7 +209,7 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 		target = expandedStoredTargets[index]
 	}
 
-	// Tried to shoot at a target but it's no longer valid. Don't do anything
+	//
 	if ( target != null && !IsValid( target ) )
 		return 0
 
@@ -224,7 +224,7 @@ int function SmartAmmo_FireWeapon( entity weapon, WeaponPrimaryAttackParams atta
 		}
 	}
 
-	// Fire the weapon
+	//
 	FireWeaponCallback fireWeapFunc = GetFireWeaponCallbackForWeaponType( weapon.GetWeaponSettingEnum( eWeaponVar.smart_ammo_weapon_type, eSmartAmmoWeaponType ) )
 	int shotsFired = fireWeapFunc( weapon, attackParams, damageType, explosionDamageType, activeShot, target )
 	bool isLastShot = (attackParams.burstIndex + 1 == weapon.GetWeaponBurstFireCount())
@@ -251,7 +251,7 @@ int function SmartAmmo_FireWeapon_Bullet( entity weapon, WeaponPrimaryAttackPara
 {
 	if ( target )
 	{
-		// Shoot at the specified target
+		//
 		Assert( IsValid( target ) )
 		vector dir = weapon.SmartAmmo_GetFirePosition( target, attackParams.burstIndex ) - attackParams.pos
 
@@ -271,7 +271,7 @@ int function SmartAmmo_FireWeapon_Bullet( entity weapon, WeaponPrimaryAttackPara
 	}
 	else
 	{
-		// Not trying to shoot at a target, so just shoot straight
+		//
 		weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, damageType )
 	}
 
@@ -282,7 +282,7 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 {
 	bool shouldPredict = weapon.ShouldPredictProjectiles()
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( !shouldPredict )
 			return 1
 	#endif
@@ -319,7 +319,7 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 		entity missile = weapon.FireWeaponMissile( fireMissileParams )
 		if ( missile )
 		{
-			//InitMissileForRandomDrift( missile, attackPos, attackDir )
+			//
 			missile.InitMissileForRandomDriftFromWeaponSettings( attackPos, attackDir )
 			firedMissiles.append( missile )
 		}
@@ -329,10 +329,10 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 	{
 		missile.kv.lifetime = 10
 
-		#if SERVER
-			missile.SetOwner( player )
-			EmitSoundOnEntity( missile, HOMING_SFX_LOOP )
-		#endif
+		#if(false)
+
+
+#endif
 
 		missile.SetProjectileSpeed( missileSpeed )
 		missile.SetHomingSpeeds( homingSpeed, homingSpeed )
@@ -353,9 +353,9 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 	return firedMissiles.len()
 }
 
-/******************************************/
-/* 	 GLOBAL - WEAPON SETTINGS OVERRIDES   */
-/******************************************/
+/**/
+/**/
+/**/
 
 void function SmartAmmo_SetWeaponSettingOverride( entity weapon, string setting, value )
 {
@@ -544,19 +544,19 @@ table function SmartAmmo_GetExpandContract( entity weapon )
 	return data
 }
 
-/*******************************/
-/* 	 GLOBAL UTILITY FUNCTION   */
-/*******************************/
+/**/
+/**/
+/**/
 
 void function SmartAmmo_SetMissileTarget( entity missile, entity target )
 {
 	if ( !IsValid( missile ) || !IsValid( target ) )
 		return
 
-	// Set the missile locking offset
-	//local missileTargetOffset = target.IsTitan() ? <0,0,-25> : <0,0,-25>
+	//
+	//
 
-	// Set the missile target and homing speed
+	//
 	missile.SetMissileTarget( target, <0,0,0> )
 }
 
@@ -565,10 +565,10 @@ void function SmartAmmo_SetMissileTargetPosition( entity missile, entity target 
 	if ( !IsValid( missile ) || !IsValid( target ) )
 		return
 
-	// Set the missile locking offset
-	//local missileTargetOffset = target.IsTitan() ? <0,0,-25> : <0,0,-25>
+	//
+	//
 
-	// Set the missile target and homing speed
+	//
 	missile.SetMissileTargetPosition( target.EyePosition() )
 }
 
@@ -596,8 +596,8 @@ bool function SmartAmmo_CanWeaponBeFired( entity weapon )
 	if ( !weapon.IsReadyToFire() || weapon.IsReloading() )
 		return false
 
-	// Weapon is ready to fire but it's a smart weapon so we have some additional checks.
-	// If the weapon requires a lock to be fired then we make sure the weapon has a full lock
+	//
+	//
 	if ( SmartAmmo_GetAllowUnlockedFiring( weapon ) == true )
 		return true
 
@@ -618,38 +618,38 @@ bool function SmartAmmo_CanWeaponBeFired( entity weapon )
 	return highestFraction == 1.0
 }
 
-/*************************/
-/* 	 INTERNAL FUNCTION   */
-/*************************/
+/**/
+/**/
+/**/
 
-#if CLIENT
+#if(CLIENT)
 /*
-void function ClientCodeCallback_OnPredictedEntityRemove( entity serverEntity, entity predictedEntity )
-{
-}
+
+
+
 */
-#endif // CLIENT
+#endif //
 
-#if SERVER
-void function SmartPistol_DamagedPlayerOrNPC( entity ent, var damageInfo )
-{
-	if ( !IsValid( ent ) )
-		return
+#if(false)
 
-	int maxHealth = ent.GetMaxHealth()
-	float damage = DamageInfo_GetDamage( damageInfo )
 
-	if ( IsSpectre( ent ) )
-	{
-		DamageInfo_SetDamage( damageInfo, (maxHealth / 2) + 1 )
-	}
-	else if ( IsGrunt( ent ) )
-	{
-		if ( damage < maxHealth )
-			DamageInfo_SetDamage( damageInfo, maxHealth )
-	}
-}
-#endif // SERVER
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 
 void function RemovePartiallyTrackedEnts( entity weapon, array<entity> targets )
 {

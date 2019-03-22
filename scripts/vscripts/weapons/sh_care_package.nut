@@ -1,16 +1,16 @@
 global function ShCarePackage_Init
 global function GetCarePackagePlacementInfo
-//global function OnWeaponPrimaryAttack_care_package
+//
 global function OnWeaponActivate_care_package
 global function OnWeaponDeactivate_care_package
 global function GetSkinForCarePackageModel
 
-#if CLIENT
+#if(CLIENT)
 global function SetCarePackageDeployed
-#endif //CLIENT
-#if SERVER
-global function CreateCarePackageAirdrop
-#endif //SERVER
+#endif //
+#if(false)
+
+#endif //
 
 global const asset CARE_PACKAGE_AIRDROP_MODEL = $"mdl/vehicle/droppod_loot/droppod_loot_animated.rmdl"
 global const string CARE_PACKAGE_IDLE = "droppod_loot_closed_idle"
@@ -25,83 +25,83 @@ global struct CarePackagePlacementInfo
 
 struct
 {
-#if CLIENT
+#if(CLIENT)
 	bool carePackageDeployed
 #endif
 } file
 
-/* USE THIS AS A TEMPLATE FOR FUTURE WEAPONS
-var function OnWeaponPrimaryAttack_care_package( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	entity ownerPlayer = weapon.GetWeaponOwner()
-	Assert( ownerPlayer.IsPlayer() )
+/*
 
-	CarePackagePlacementInfo placementInfo = GetCarePackagePlacementInfo( ownerPlayer )
 
-	if ( placementInfo.failed )
-		return 0
 
-	#if SERVER
-		vector origin = placementInfo.origin
-		vector angles = placementInfo.angles
 
-		thread CreateCarePackageAirdrop( origin, angles, ["medic_super", "medic_super_side", "top_tier_inventory" ], null, "droppod_loot_drop_lifeline", ownerPlayer )
-	#else
-		SetCarePackageDeployed( true )
-		ownerPlayer.Signal( "DeployableCarePackagePlacement" )
-	#endif
 
-	int ammoReq = weapon.GetAmmoPerShot()
-	return ammoReq
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
 
 void function ShCarePackage_Init()
 {
 	PrecacheModel( CARE_PACKAGE_AIRDROP_MODEL )
 
-	#if CLIENT
+	#if(CLIENT)
 		RegisterSignal( "DeployableCarePackagePlacement" )
 
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.placing_care_package, OnBeginPlacingCarePackage )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.placing_care_package, OnEndPlacingCarePackage )
 	#endif
 
-	#if SERVER
-		AddCallback_OnClientConnected( MpAbilityCarePackage_ClientConnected )
-	#endif
+	#if(false)
+
+#endif
 
 	RegisterSignal( "DeploySentryTurret" )
 }
 
-#if SERVER
-void function MpAbilityCarePackage_ClientConnected( entity player )
-{
-}
+#if(false)
 
-void function CreateCarePackageAirdrop( vector origin, vector angles, array<string> contents, entity fxToStop = null, string animationName = "droppod_loot_drop", entity owner = null, string sourceWeaponClassName = "" )
-{
-	int skin = GetSkinForCarePackageModel( owner )
-	thread AirdropItems( origin, angles, contents, fxToStop, animationName, owner, skin, sourceWeaponClassName )
-}
-#endif // SERVER
+
+
+
+
+
+
+
+
+#endif //
 
 void function OnWeaponActivate_care_package( entity weapon )
 {
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	Assert( ownerPlayer.IsPlayer() )
 
-	#if CLIENT
+	#if(CLIENT)
 		SetCarePackageDeployed( false )
-		if ( !InPrediction() ) //Stopgap fix for Bug 146443
+		if ( !InPrediction() ) //
 			return
 	#endif
 
 
-	#if SERVER
-		StatusEffect_AddEndless( ownerPlayer, eStatusEffect.placing_care_package, 1.0 )
-		//ownerPlayer.Server_TurnOffhandWeaponsDisabledOn()
-	#endif
+	#if(false)
+
+//
+#endif
 }
 
 
@@ -110,15 +110,15 @@ void function OnWeaponDeactivate_care_package( entity weapon )
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	Assert( ownerPlayer.IsPlayer() )
 
-	#if CLIENT
-		if ( !InPrediction() ) //Stopgap fix for Bug 146443
+	#if(CLIENT)
+		if ( !InPrediction() ) //
 			return
 	#endif
 
-	#if SERVER
-		StatusEffect_StopAllOfType( ownerPlayer, eStatusEffect.placing_care_package )
-		//ownerPlayer.Server_TurnOffhandWeaponsDisabledOff()
-	#endif
+	#if(false)
+
+//
+#endif
 }
 
 CarePackagePlacementInfo function GetCarePackagePlacementInfo( entity player )
@@ -180,8 +180,8 @@ CarePackagePlacementInfo function GetCarePackagePlacementInfo( entity player )
 
 float function PlacementEasing( float frac )
 {
-	// used to manipulate the placement throw vector such that the destination is fairly stable infront of the player,
-	// but still possible to deploy at a steep downwards angle from on top of a building.
+	//
+	//
 
 	Assert( frac >= 0.0 && frac <= 1.0 )
 
@@ -199,7 +199,7 @@ int function GetSkinForCarePackageModel( entity player )
 {
 	LoadoutEntry characterSlot = Loadout_CharacterClass()
 
-	#if DEV
+	#if(DEV)
 		if ( !LoadoutSlot_IsReady( ToEHI( player ), characterSlot ) )
 			printt( "Need to get character for player, but the data is not available" )
 	#endif
@@ -207,22 +207,27 @@ int function GetSkinForCarePackageModel( entity player )
 	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( player ), characterSlot )
 	string characterRef = ItemFlavor_GetHumanReadableRef( character )
 
-	#if DEV
+	#if(DEV)
 		printt( "got character", characterRef )
 	#endif
 
 	switch( characterRef )
 	{
+		#if(false)
+
+
+#endif
+
 		case "character_lifeline":
 		default:
 			return 1
 	}
-	//Assert( false, "Tried to get skin for CarePackage with unsupported character" )
+	//
 
 	unreachable
 }
 
-#if CLIENT
+#if(CLIENT)
 void function OnBeginPlacingCarePackage( entity player, int statusEffect, bool actuallyChanged )
 {
 	if ( player != GetLocalViewPlayer() )
@@ -283,7 +288,7 @@ void function DeployableCarePackagePlacement( entity player, asset carePackageMo
 	}
 }
 
-entity function CreateCarePackageProxy( asset modelName ) //TODO: Needs work if we do different turret models
+entity function CreateCarePackageProxy( asset modelName ) //
 {
 	entity carePackage = CreateClientSidePropDynamic( <0,0,0>, <0,0,0>, modelName )
 	carePackage.kv.renderamt = 255

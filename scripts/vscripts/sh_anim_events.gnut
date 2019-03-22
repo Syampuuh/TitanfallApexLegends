@@ -11,13 +11,13 @@ global function AnimEvents_Init
 global function AddGlobalAnimEvent
 global function AddGlobalAnimEventTokenize
 
-#if SERVER
-global function GlobalAnimEventWithStringParameter_WorldSound
-global function SendSignalFromTokens
-global function GlobalAnimEventWithStringParameter_FlagSet
+#if(false)
+
+
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 global function ClientCodeCallback_HandleClientAnimEvent
 #endif
 
@@ -52,6 +52,8 @@ struct
 void function AnimEvents_Init()
 {
 	RegisterImpactTable( "pilot_bodyslam" )
+	RegisterImpactTable( "pilot_bodyslam_small" )
+	RegisterImpactTable( "exp_medium" )
 	RegisterImpactTable( "default" )
 	RegisterImpactTable( "default_nosound" )
 
@@ -83,8 +85,8 @@ var function GetOptionalAnimEventVar( entity ent, string eventName )
 	return animEventData.optionalVar
 }
 
-// when the ent animates and hits an AE_SV_VSCRIPT_CALLBACK event, he will
-// call the function registered to the given eventName
+//
+//
 void function AddAnimEvent( entity ent, string eventName, void functionref( entity ent ) func, var optionalVar = null )
 {
 	Assert( !HasAnimEvent( ent, eventName ), "Already added anim event " + eventName + " for " + ent )
@@ -113,63 +115,63 @@ void function RunAnimEventCallbacks( entity ent, string eventName )
 	ent.e.animEventDataForEntity[ eventName ].callback( ent )
 }
 
-// when this guy animates and hits an AE_SV_VSCRIPT_CALLBACK or AE_CL_VSCRIPT_CALLBACK event, he will
-// call the function registered to the given name
+//
+//
 void function AddGlobalAnimEvent( string name, void functionref(entity) func )
 {
-#if SERVER
-	Assert( !( name in svGlobal.globalAnimEventCallbacks ), "Already created global anim event " + name )
-	svGlobal.globalAnimEventCallbacks[ name ] <- func
-#elseif CLIENT
+#if(false)
+
+
+#elseif(CLIENT)
 	Assert( !( name in clGlobal.globalAnimEventCallbacks ), "Already created global anim event " + name )
 	clGlobal.globalAnimEventCallbacks[ name ] <- func
 #endif
 }
 
-// use this when the callback name should be tokenised ex: "set_skin:1"
-// AddGlobalAnimEventTokenize( "set_skin", GlobalAnimEvent_SetSkin ). Add an anim event like "set_skin:1" and a tokenized array will be passed to the function as ["set_skin","1"]
+//
+//
 void function AddGlobalAnimEventTokenize( string name, void functionref(entity,array<string>) func )
 {
-	#if SERVER
-		Assert( !( name in svGlobal.globalAnimEventTokenizeCallbacks ), "Already created global anim event " + name )
-		svGlobal.globalAnimEventTokenizeCallbacks[ name ] <- func
-	#elseif CLIENT
+	#if(false)
+
+
+#elseif(CLIENT)
 		Assert( !( name in clGlobal.clGlobalAnimEventTokenizeCallbacks ), "Already created global anim event " + name )
 		clGlobal.clGlobalAnimEventTokenizeCallbacks[ name ] <- func
 	#endif
 }
 
-#if SERVER
-void function GlobalAnimEventWithStringParameter_Signal( entity guy, string msg )
-{
-	guy.Signal( msg, { signal = msg } )
-}
+#if(false)
 
-void function GlobalAnimEventWithStringParameter_WorldSound( entity guy, string msg )
-{
-	array<string> tokens = split( msg, " " )
-	string sound = tokens[0]
-	vector origin
-	if ( tokens.len() == 1 )
-	{
-		origin = guy.GetOrigin()
-	}
-	else
-	{
-		string tag = tokens[1]
-		int index = guy.LookupAttachment( tag )
-		origin = guy.GetAttachmentOrigin( index )
-	}
 
-	EmitSoundAtPosition( guy.GetTeam(), origin, sound )
-}
 
-void function GlobalAnimEventWithStringParameter_FlagSet( entity guy, string msg )
-{
-	//printl( "FLAG SET " + msg )
-	FlagSet( msg )
-}
-#endif // server
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+#endif //
 
 void function SendSignalFromTokens( entity self, array<string> tokens )
 {
@@ -183,7 +185,7 @@ void function SendSignalFromTokens( entity self, array<string> tokens )
 	}
 }
 
-#if CLIENT
+#if(CLIENT)
 void function ClientCodeCallback_HandleClientAnimEvent( entity self, string eventString )
 {
 	if ( HasAnimEvent( self, eventString ) )
@@ -204,7 +206,7 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 		return
 	}
 
-	// TODO: turn these into callbacks
+	//
 	switch ( eventName )
 	{
 		case "signal":
@@ -247,8 +249,8 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			entity player = GetLocalViewPlayer()
 			if ( self.GetBossPlayerName() == player.GetPlayerName() )
 			{
-				//printt( "local player is boss player!" )
-				//printt( "Emit sound: " + tokens[1] + " on " + self )
+				//
+				//
 				EmitSoundOnEntity( self, tokens[1] )
 			}
 			break
@@ -259,8 +261,8 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			entity player = GetLocalViewPlayer()
 			if ( self.GetBossPlayerName() != player.GetPlayerName() )
 			{
-				//printt( "local player is not boss player!" )
-				//printt( "Emit sound: " + tokens[1] + " on " + self )
+				//
+				//
 				EmitSoundOnEntity( self, tokens[1] )
 			}
 			break
@@ -284,12 +286,12 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			Assert( tokens.len() == 2 )
 			entity player = GetLocalViewPlayer()
 			float fadetime = float( tokens[1] ) / 30
-			ScreenFade( player, 0, 0, 0, 255, fadetime, 0.1, FFADE_IN | FFADE_PURGE ) //0.1 hold to fix issue with lerp
-			//	ScreenFade( player, 0, 0, 0, 255, fadetime, 0.0, FFADE_IN | FFADE_PURGE )
+			ScreenFade( player, 0, 0, 0, 255, fadetime, 0.1, FFADE_IN | FFADE_PURGE ) //
+			//
 			break
 
 		case "screenshake":
-			// ex: "screenshake:5:20:3: // amplitude = 5,  frequency = 20, duration 3
+			//
 			Assert( tokens.len() == 4 )
 			ClientScreenShake( float( tokens[1] ), float( tokens[2] ), float( tokens[3] ), <0,0,0> )
 			break
@@ -303,9 +305,9 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			break
 		}
 
-		//Best to do it like this instead of using the signalling functionality above
-		//since the above functionality is for signalling the animating entity,
-		//i.e. the prop dynamic animating instead of the player seeing the animation
+		//
+		//
+		//
 		case "close_vdu":
 		{
 			entity player = GetLocalViewPlayer()
@@ -328,11 +330,11 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			break
 		}
 
-		case "screen_blackout" :
-		{
-			printt( "We got screen blackout event!" )
-			break
-		}
+		//
+		//
+		//
+		//
+		//
 
 		case "vdu_close" :
 		{
@@ -341,23 +343,23 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 
 		case "mp_frag_drone_fx":
 		{
-			thread PlayWarningFXOnMPFragDrone( self ) //Can't just do AE_CL_CREATE_PARTICLE_EFFECT because those effects are only stopped when the entity is destroyed as opposed to killed. See bug 159462
+			thread PlayWarningFXOnMPFragDrone( self ) //
 			break
 		}
 
-	/*	Want to print error warning message but other valid animevents are causing a warnings. Such as HMN_Jump_Jet
-		default:
-		{
-			Warning( "Unhandled AE_SV_VSCRIPT_CALLBACK event: " + eventString )
-		}
-	*/
+	/*
+
+
+
+
+*/
 	}
 }
-#endif // client
+#endif //
 
 void function GlobalAnimEvent_Hide( entity guy )
 {
-	#if CLIENT
+	#if(CLIENT)
 	if ( !guy.IsClientOnly() )
 		return
 	#endif
@@ -367,7 +369,7 @@ void function GlobalAnimEvent_Hide( entity guy )
 
 void function GlobalAnimEvent_Show( entity guy )
 {
-	#if CLIENT
+	#if(CLIENT)
 		if ( !guy.IsClientOnly() )
 			return
 	#endif
@@ -378,7 +380,7 @@ void function GlobalAnimEvent_Show( entity guy )
 
 void function GlobalAnimEvent_HideReliable( entity ent )
 {
-	#if CLIENT
+	#if(CLIENT)
 		if ( !ent.IsClientOnly() )
 			return
 	#endif
@@ -422,7 +424,7 @@ void function GlobalAnimEvent_FadeOverTime( entity ent, array<string> tokens )
 
 void function GlobalAnimEvent_SetSkin( entity model, array<string> tokens )
 {
-	// ex: "set_skin:1"
+	//
 	Assert( tokens.len() == 2 )
 	int skin = int( tokens[1] )
 	model.SetSkin( skin )

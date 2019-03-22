@@ -1,5 +1,6 @@
+//
 
-#if SERVER || CLIENT
+#if(CLIENT)
 global function GamemodeSurvivalShared_Init
 
 global function Survival_CanUseHealthPack
@@ -114,10 +115,10 @@ struct
 	VictoryPlatformModelData &victorySequencePlatforData
 } file
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function GamemodeSurvivalShared_Init()
 {
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		BleedoutShared_Init()
 		ShApexScreens_Init()
 		Sh_RespawnBeacon_Init()
@@ -133,17 +134,20 @@ void function GamemodeSurvivalShared_Init()
 		AddCallback_CanStartCustomWeaponActivity( ACT_VM_WEAPON_INSPECT, CanWeaponInspect )
 	#endif
 
-	#if SERVER
-	#elseif CLIENT
+	#if(false)
+
+
+
+#elseif(CLIENT)
 		AddCreateCallback( "prop_dynamic", OnPropDynamicCreated )
 	#endif
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 bool function Survival_CanUseTitanItem( entity player )
 {
-	#if CLIENT
+	#if(CLIENT)
 		if ( IsWatchingReplay() )
 			return false
 
@@ -185,8 +189,8 @@ bool function Survival_PlayerCanDrop( entity player )
 	if ( !IsAlive( player ) )
 		return false
 
-	//if ( !GamePlaying() )
-	//	return false
+	//
+	//
 
 	if ( player.ContextAction_IsActive() && !player.ContextAction_IsRodeo() )
 		return false
@@ -229,19 +233,19 @@ bool function Survival_CanUseHealthPack( entity player, int itemType, bool check
 		}
 	}
 
-#if CLIENT
+#if(CLIENT)
 	if ( printReason )
 	{
 		switch( canUseResult )
 		{
 			case eUseHealthKitResult.DENY_NONE:
-				// no announcement
+				//
 				break
 			case eUseHealthKitResult.DENY_NO_HEALTH_KIT:
 			case eUseHealthKitResult.DENY_NO_KITS:
 			case eUseHealthKitResult.DENY_NO_SHIELD_KIT:
 				player.ClientCommand( "ClientCommand_Quickchat " + eCommsAction.INVENTORY_NEED_HEALTH )
-				// falls through to announcement
+				//
 			default:
 				AnnouncementMessageRight( player, healthKitResultStrings[canUseResult] )
 				break
@@ -252,103 +256,103 @@ bool function Survival_CanUseHealthPack( entity player, int itemType, bool check
 	return false
 
 	/*
-	#if CLIENT
-		if ( player != GetLocalClientPlayer() )
-			return false
 
-		if ( player != GetLocalViewPlayer() )
-			return false
 
-		if ( IsWatchingReplay() )
-			return false
-	#elseif SERVER
-		if ( Bleedout_IsPlayerGivingFirstAid( player ) )
-			return false
-	#endif
 
-	if ( player.ContextAction_IsActive() && !player.ContextAction_IsRodeo() )
-		return false
 
-	if ( Bleedout_IsBleedingOut( player ) )
-		return false
 
-	if ( !IsAlive( player ) )
-		return false
 
-	if ( player.IsPhaseShifted() )
-		return false
 
-	if ( StatusEffect_GetSeverity( player, eStatusEffect.placing_phase_tunnel ) )
-		return false
 
-	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
-		return false
 
-	if ( player.IsTitan() )
-		return false
 
-	if ( itemType == eHealthPickupType.ULTIMATE )
-	{
-		entity ultimateAbility = player.GetOffhandWeapon( OFFHAND_INVENTORY )
-		int ammo = ultimateAbility.GetWeaponPrimaryClipCount()
-		int maxAmmo = ultimateAbility.GetWeaponPrimaryClipCountMax()
 
-		if( ammo >= maxAmmo )
-			return false
-	}
-	else if ( GetCurrentPlaylistVarInt( "survival_shields", 1 ) > 0 )
-	{
-		int currentHealth = player.GetHealth()
-		int currentShields = player.GetShieldHealth()
-		bool canHeal = false
-		bool canShield = false
 
-		HealthPickup pickup = SURVIVAL_Loot_GetHealthKitDataFromStruct( itemType )
 
-		if ( pickup.healAmount > 0 && currentHealth < pickup.healCap )
-			canHeal = true
 
-		if ( pickup.healAmount > 0 && pickup.healTime > 0 )
-			canHeal = true
 
-		if ( pickup.shieldAmount > 0 && currentShields < player.GetShieldHealthMax() )
-			canShield = true
 
-		if ( pickup.healAmount > 0 && pickup.healCap > 100 )
-		{
-			int targetHealth = int( currentHealth + pickup.healAmount )
-			int overHeal = targetHealth - player.GetMaxHealth()
-			if ( overHeal && currentShields < player.GetShieldHealthMax() )
-				canShield = true
-		}
 
-		if ( !canHeal && !canShield )
-			return false
-	}
-	else
-	{
-		HealthPickup pickup = SURVIVAL_Loot_GetHealthKitDataFromStruct( itemType )
-		if ( GetCurrentPlaylistVarInt( "survival_shields", 1 ) && pickup.shieldAmount > 0 )
-		{
-			if ( player.GetShieldHealthMax() > 0.0 && GetHealthFrac( player ) >= 1.0 && GetShieldHealthFrac( player ) >= 1.0 )
-				return false
-			else if ( GetHealthFrac( player ) >= 1.0 )
-				return false
-		}
-		else
-		{
-			if ( GetHealthFrac( player ) >= 1.0 )
-				return false
-		}
-	}
 
-	return true
-	*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 }
 
 int function Survival_TryUseHealthPack( entity player, int itemType )
 {
-	#if CLIENT
+	#if(CLIENT)
 		if ( player != GetLocalClientPlayer() )
 			return eUseHealthKitResult.DENY_NONE
 
@@ -357,10 +361,10 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 
 		if ( IsWatchingReplay() )
 			return eUseHealthKitResult.DENY_NONE
-	#elseif SERVER
-		if ( Bleedout_IsPlayerGivingFirstAid( player ) )
-			return eUseHealthKitResult.DENY_NONE
-	#endif
+	#elseif(false)
+
+
+#endif
 
 	if ( player.ContextAction_IsActive() && !player.ContextAction_IsRodeo() )
 		return eUseHealthKitResult.DENY_NONE
@@ -469,7 +473,7 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 float function Survival_GetCharacterSelectDuration( int pickIndex )
 {
 	float min = GetCurrentPlaylistVarFloat( "character_select_time_min", 6.0 )
@@ -478,21 +482,24 @@ float function Survival_GetCharacterSelectDuration( int pickIndex )
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 bool function Survival_CharacterSelectEnabled()
 {
 	return Survival_GetCharacterSelectDuration(0) > 0.0
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 bool function Sur_CanUseZipline( entity player, entity zipline, vector ziplineClosestPoint )
 {
+	if ( player.IsGrapplingZipline() )
+		return true
+
 	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
 		return false
 
-	//if ( IsValid( player.GetActiveWeapon( eActiveInventorySlot.mainHand ) ) && player.GetActiveWeapon( eActiveInventorySlot.mainHand ).IsWeaponOffhand() )
-	//	return false
+	//
+	//
 
 	if ( Bleedout_IsBleedingOut( player ) )
 		return false
@@ -501,39 +508,89 @@ bool function Sur_CanUseZipline( entity player, entity zipline, vector ziplineCl
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function Sur_SetPlaneCenterEnt( entity ent )
 {
 	file.planeCenterEnt = ent
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function Sur_SetPlaneEnt( entity ent )
 {
 	file.planeEnt = ent
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function Sur_GetPlaneCenterEnt()
 {
 	return file.planeCenterEnt
 }
 #endif
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function Sur_GetPlaneEnt()
 {
 	return file.planeEnt
 }
 #endif
 
-#if !UI
+#if(!UI)
 void function OnPropDynamicCreated( entity prop )
 {
-	//
+	#if(false)
+
+
+#endif
 }
+
+#if(false)
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 
 TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPickup itemData )
@@ -564,7 +621,7 @@ TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPicku
 
 		Assert( currentShields + shieldsToApply <= shieldHealthMax, "Bad math: " + currentShields + " + " + shieldsToApply + " > " + shieldHealthMax )
 
-		if ( healthToApply || itemData.healTime > 0 ) // healTime items can exceed the cap
+		if ( healthToApply || itemData.healTime > 0 ) //
 			targetValues.targetHealth = (currentHealth + healthToApply + resourceHealthRemaining) / 100.0
 
 		if ( shieldsToApply && shieldHealthMax > 0 )
@@ -579,7 +636,7 @@ TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPicku
 
 
 #endif
-#if SERVER || CLIENT
+#if(CLIENT)
 bool function CanWeaponInspect( entity player, int activity )
 {
 	if ( Bleedout_IsBleedingOut( player ) )
@@ -595,12 +652,12 @@ int function Survival_GetCurrentRank( entity player )
 	int numLivingSquadMembers = GetPlayerArrayOfTeam_AliveConnected( team ).len()
 	if ( numLivingSquadMembers <= 0 )
 	{
-		#if SERVER
-			int squadRank = _GetSquadRank( player )
-			if ( squadRank == 0 )
-				squadRank = GetNumTeamsRemaining() + 1 //player disconnected before his squad was eliminated.
-			return squadRank
-		#else
+		#if(false)
+
+
+//
+
+#else
 			return player.GetPersistentVarAsInt( "lastGameRank" )
 		#endif
 	}

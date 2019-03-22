@@ -1,7 +1,12 @@
 global function ShCommsMenu_Init
 
-#if CLIENT
+#if(CLIENT)
 global function CommsMenu_HandleKeyInput
+#if(false)
+
+
+
+#endif
 global function AddCallback_OnCommsMenuStateChanged
 global function IsCommsMenuActive
 
@@ -14,10 +19,13 @@ global function CommsMenu_HasValidSelection
 global function CommsMenu_ExecuteSelection
 global function CommsMenu_GetCurrentCommsMenu
 
+#if(false)
 
 #endif
 
-#if CLIENT
+#endif
+
+#if(CLIENT)
 global enum eWheelInputType
 {
 	NONE,
@@ -36,7 +44,7 @@ global enum eCommsMenuStyle
 
 	_count
 }
-Assert( eCommsMenuStyle._count == 5 )    // update comms_menu.rui
+Assert( eCommsMenuStyle._count == 5 )    //
 
 global enum eChatPage
 {
@@ -72,33 +80,43 @@ const string WHEEL_SOUND_ON_DENIED = "menu_deny"
 
 global const int WHEEL_HEAL_AUTO = -1
 
-//---------------------
+//
 
 struct
 {
-	#if CLIENT
+	#if(CLIENT)
 		var menuRui
 		var menuRuiLastShutdown
-		int commsMenuStyle    // eCommsMenuStyle
+		int commsMenuStyle    //
+
+		#if(false)
+
+
+
+
+
+#endif
 
 		array< void functionref(bool menuOpen) > onCommsMenuStateChangedCallbacks
-	#endif // CLIENT
+	#endif //
 } file
 
-//---------------------
-// Client commands
-//---------------------
+//
+//
+//
 
 const string CHAT_MENU_BIND_COMMAND = "+scriptCommand5"
 
 void function ShCommsMenu_Init()
 {
-	#if SERVER
-		AddClientCommandCallbackNew( "SetSelectedHealthPickupType", ClientCommand_SetSelectedHealthPickupType )
-		AddClientCommandCallbackNew( "ClientCommand_Quip", ClientCommand_Quip )
-	#endif // SERVER
+	#if(false)
 
-	#if CLIENT
+
+
+
+#endif //
+
+	#if(CLIENT)
 		AddOnDeathCallback( "player", OnDeathCallback )
 		AddScoreboardShowCallback( DestroyCommsMenu )
 		AddCallback_KillReplayStarted( DestroyCommsMenu )
@@ -112,10 +130,10 @@ void function ShCommsMenu_Init()
 
 		RegisterConCommandTriggeredCallback( CHAT_MENU_BIND_COMMAND, ChatMenuButton_Down )
 		RegisterConCommandTriggeredCallback( "-" + CHAT_MENU_BIND_COMMAND.slice( 1 ), ChatMenuButton_Up )
-	#endif // CLIENT
+	#endif //
 }
 
-#if CLIENT
+#if(CLIENT)
 bool function PingSecondPageIsEnabled()
 {
 	return GetCurrentPlaylistVarBool( "ping_second_page_enabled", false )
@@ -243,14 +261,14 @@ void function CommsMenu_OpenMenuForPingReply( entity player, entity wp )
 
 void function CommsMenu_OpenMenuTo( entity player, int chatPage, int commsMenuStyle )
 {
-	// Kill any running instance:
+	//
 	CommsMenu_Shutdown( true )
 
 	file.commsMenuStyle = commsMenuStyle
 
 	ResetViewInput()
 
-	// Force cleanup of any prev menu that might still be politely fading away:
+	//
 	if ( file.menuRuiLastShutdown != null )
 	{
 		RuiDestroyIfAlive( file.menuRuiLastShutdown )
@@ -291,9 +309,9 @@ bool function CommsMenu_HasValidSelection()
 	if ( (choice < 0) || (choice >= s_currentMenuOptions.len()) )
 		return false
 
-	//CommsMenuOptionData op = s_currentMenuOptions[choice]
-	//if ( op.optionType == eOptionType.DO_NOTHING )
-	//	return false
+	//
+	//
+	//
 
 	return true
 }
@@ -315,6 +333,9 @@ enum eOptionType
 	COMMSACTION,
 	NEW_PING,
 	PING_REPLY,
+	#if(false)
+
+#endif
 	QUIP,
 	HEALTHITEM_USE,
 	ORDNANCE_EQUIP,
@@ -332,6 +353,10 @@ struct CommsMenuOptionData
 	int pingReply
 
 	int healType
+
+	#if(false)
+
+#endif
 }
 
 CommsMenuOptionData function MakeOption_NoOp()
@@ -356,6 +381,16 @@ CommsMenuOptionData function MakeOption_Quip( int commsAction )
 	op.commsAction = commsAction
 	return op
 }
+
+#if(false)
+
+
+
+
+
+
+
+#endif
 
 CommsMenuOptionData function MakeOption_PingReply( int pingReply )
 {
@@ -389,6 +424,9 @@ CommsMenuOptionData function MakeOption_Ping( int pingType )
 	return op
 }
 
+#if(false)
+
+#endif
 array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 {
 	array<CommsMenuOptionData> results
@@ -399,21 +437,38 @@ array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 		{
 			entity viewPlayer = GetLocalViewPlayer()
 			//
+			//
+			//
+			//
 			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_NICE ) )
 			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_WAIT ) )
-			//results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_READY ) )
-			//results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_STICK_TOGETHER ) )
-			//results.append( MakeOption_Quip( eCommsAction.QUICKCHAT_INTRO_QUIP ) )
+			//
+			//
+			//
 			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_THANKS ) )
-			//results.append( MakeOption_Quip( eCommsAction.QUICKCHAT_KILL_QUIP ) )
-			//results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_COVER_ME ) )
+			//
+			//
+			//
 		}
 			break
 
 		case eChatPage.PREMATCH:
 		{
-			results.append( MakeOption_NoOp() )
-			results.append( MakeOption_NoOp() )
+#if(false)
+
+
+
+
+
+
+
+
+
+#endif
+			{
+				results.append( MakeOption_NoOp() )
+				results.append( MakeOption_NoOp() )
+			}
 		}
 			break
 
@@ -422,7 +477,7 @@ array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_BLEEDOUT_HELP ) )
 			results.append( MakeOption_Ping( ePingType.I_GO ) )
 			results.append( MakeOption_Ping( ePingType.ENEMY_GENERAL ) )
-			//results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_BLEEDOUT_ITS_OVER ) )
+			//
 		}
 			break
 
@@ -441,9 +496,18 @@ array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 
 		case eChatPage.PING_MAIN_2:
 		{
-			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_THANKS ) )
 			results.append( MakeOption_Ping( ePingType.NEED_HEALTH ) )
 			results.append( MakeOption_Ping( ePingType.HOLD_ON ) )
+			results.append( MakeOption_NoOp() )
+			results.append( MakeOption_CommsAction( eCommsAction.REPLY_YES ) )
+			results.append( MakeOption_CommsAction( eCommsAction.QUICKCHAT_THANKS ) )
+			results.append( MakeOption_CommsAction( eCommsAction.REPLY_NO ) )
+			results.append( MakeOption_NoOp() )
+			results.append( MakeOption_Ping( ePingType.ENEMY_SUSPECTED ) )
+
+			//
+			//
+			//
 		}
 			break
 
@@ -451,7 +515,7 @@ array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 		{
 			results.append( MakeOption_Ping( ePingType.ENEMY_GENERAL ) )
 			results.append( MakeOption_Ping( ePingType.I_GO ) )
-			//			results.append( MakeOption_Ping( ePingType.WE_GO ) )
+			//
 		}
 			break
 
@@ -478,8 +542,18 @@ array<CommsMenuOptionData> function BuildMenuOptions( int chatPage )
 
 			foreach ( data in allLootData )
 			{
+				if ( !IsLootTypeValid( data.lootType ) )
+					continue
+
 				if ( data.lootType != eLootType.ORDNANCE )
 					continue
+
+				//
+				if ( data.conditional )
+				{
+					if ( !SURVIVAL_Loot_RunConditionalCheck( data.ref, player ) )
+						continue
+				}
 
 				if ( data.isDynamic && SURVIVAL_CountItemsInInventory( player, data.ref ) == 0 )
 					continue
@@ -539,6 +613,15 @@ string[2] function GetPromptsForMenuOption( int index )
 			promptTexts[0] = GetMenuOptionTextForCommsAction( caInfo.commsAction )
 			break
 
+#if(false)
+
+
+
+
+
+
+#endif
+
 		case eOptionType.HEALTHITEM_USE:
 			promptTexts[0] = GetNameForHealthItem( op.healType )
 			promptTexts[1] = GetDescForHealthItem( op.healType )
@@ -592,6 +675,13 @@ asset function GetIconForMenuOption( int index )
 			ReplyCommsActionInfo caInfo = Ping_GetCommsActionForWaypointReply( player, wp, op.pingReply )
 			return GetDefaultIconForCommsAction( caInfo.commsAction )
 		}
+
+#if(false)
+
+
+
+
+#endif
 
 		case eOptionType.HEALTHITEM_USE:
 		{
@@ -778,7 +868,7 @@ void function SetRuiOptionsForChatPage( var rui, int chatPage )
 		case eChatPage.BLEEDING_OUT:
 			labelText = "#COMMS_QUICK_CHAT"
 			promptText = " "
-			backText = (PingSecondPageIsEnabled() ? "#COMMS_NEXT_AND_BACK" : "#COMMS_BACK")
+			backText = "#COMMS_BACK"
 			outerCircleColor = <25,0,15>
 			break
 
@@ -793,7 +883,7 @@ void function SetRuiOptionsForChatPage( var rui, int chatPage )
 		case eChatPage.PING_MAIN_2:
 			labelText = "#COMMS_PING"
 			promptText = " "
-			backText = "#COMMS_BACK"
+			backText = "#COMMS_PREV_AND_BACK"
 			shouldShowLine = true
 			outerCircleColor = <25,32,25>
 			break
@@ -813,9 +903,9 @@ void function SetRuiOptionsForChatPage( var rui, int chatPage )
 
 		case eChatPage.INVENTORY_HEALTH:
 			labelText = "#COMMS_HEALTH_KITS"
-			//if ( HealthWheelUseOnRelease() )
-			//	promptText = "#LOOT_EQUIP"
-			//else
+			//
+			//
+			//
 			promptText = "#LOOT_USE"
 			outerCircleColor = <25,0,15>
 			break
@@ -829,7 +919,7 @@ void function SetRuiOptionsForChatPage( var rui, int chatPage )
 	RuiSetString( rui, "promptText", promptText )
 	RuiSetString( rui, "backText", backText )
 	RuiSetBool( rui, "shouldShowLine", shouldShowLine )
-	RuiSetFloat3( rui, "outerCircleColor", SrgbToLinear( outerCircleColor / 255.0 ) ) // the rui isn't actually using this color. It's just black with alpha 0.5
+	RuiSetFloat3( rui, "outerCircleColor", SrgbToLinear( outerCircleColor / 255.0 ) ) //
 }
 
 const int MAX_COMMS_MENU_OPTIONS = 9
@@ -864,9 +954,9 @@ void function ShowCommsMenu( int chatPage )
 				int itemCount = GetCountForHealthItem( GetLocalViewPlayer(), options[idx].healType )
 				if ( itemCount > 0 )
 				{
-					//if ( options[idx].healType != -1 )
-					//	tier = SURVIVAL_Loot_GetHealthKitDataFromStruct( options[idx].healType ).lootData.tier
-					//else
+					//
+					//
+					//
 					tier = 0
 				}
 
@@ -953,7 +1043,7 @@ bool function CommsMenu_HandleKeyInput( int key )
 {
 	Assert( IsCommsMenuActive() )
 
-	if ( PingSecondPageIsEnabled() && ((key == BUTTON_SHOULDER_LEFT) || (key == KEY_SPACE)) )
+	if ( PingSecondPageIsEnabled() && ButtonIsBoundToAction( key, "+offhand1" ) )
 	{
 		float timeSinceLastPageSwitch = (Time() - s_pageSwitchTime)
 		if ( (timeSinceLastPageSwitch > 0.1) && (file.commsMenuStyle == eCommsMenuStyle.PING_MENU) )
@@ -974,48 +1064,41 @@ bool function CommsMenu_HandleKeyInput( int key )
 
 	bool shouldExecute    = false
 	bool shouldCancelMenu = false
+	int choice = -1
 
 	int executeType = eWheelInputType.NONE
 	switch ( key )
 	{
 		case KEY_1:
-			SetCurrentChoice( 0 )
-			executeType = eWheelInputType.USE
+			choice = 0
 			break
 
 		case KEY_2:
-			SetCurrentChoice( 1 )
-			executeType = eWheelInputType.USE
+			choice = 1
 			break
 
 		case KEY_3:
-			SetCurrentChoice( 2 )
-			executeType = eWheelInputType.USE
+			choice = 2
 			break
 
 		case KEY_4:
-			SetCurrentChoice( 3 )
-			executeType = eWheelInputType.USE
+			choice = 3
 			break
 
 		case KEY_5:
-			SetCurrentChoice( 4 )
-			executeType = eWheelInputType.USE
+			choice = 4
 			break
 
 		case KEY_6:
-			SetCurrentChoice( 5 )
-			executeType = eWheelInputType.USE
+			choice = 5
 			break
 
 		case KEY_7:
-			SetCurrentChoice( 6 )
-			executeType = eWheelInputType.USE
+			choice = 6
 			break
 
 		case KEY_8:
-			SetCurrentChoice( 7 )
-			executeType = eWheelInputType.USE
+			choice = 7
 			break
 
 		case BUTTON_A:
@@ -1037,6 +1120,12 @@ bool function CommsMenu_HandleKeyInput( int key )
 	if ( ButtonIsBoundToPing( key ) )
 	{
 		executeType = eWheelInputType.REQUEST
+	}
+
+	if ( IsValidChoice( choice ) && executeType == eWheelInputType.NONE )
+	{
+		SetCurrentChoice( choice )
+		executeType = eWheelInputType.USE
 	}
 
 	shouldExecute = executeType != eWheelInputType.NONE
@@ -1142,6 +1231,11 @@ void function SetCurrentChoice( int choice )
 		}
 	}
 }
+bool function IsValidChoice( int choice )
+{
+	//
+	return choice >= 0 && choice < s_currentMenuOptions.len()
+}
 
 
 vector s_mousePad
@@ -1155,7 +1249,7 @@ vector function ProcessMouseInput( float deltaX, float deltaY )
 
 	s_mousePad = <s_mousePad.x + deltaX, s_mousePad.y + deltaY, 0.0>
 
-	// clamp to circle:
+	//
 	{
 		float lenRaw = Length( s_mousePad )
 		if ( lenRaw > MAX_BOUNDS )
@@ -1165,18 +1259,18 @@ vector function ProcessMouseInput( float deltaX, float deltaY )
 	float lenNow = Length( s_mousePad )
 	if ( lenNow < 25.0 )
 	{
-		//DebugScreenText( 0.25, 0.25, format( "lenNow:%.2f", lenNow ) )
+		//
 		return <0, 0, 0>
 	}
 
 	vector result = (s_mousePad / Length( s_mousePad ))
-	//DebugScreenText( 0.25, 0.25, format( "result:(%.1f, %.1f)  posNow:(%.1f, %.1f)  lenNow:%.2f", result.x, result.y, s_mousePad.x, s_mousePad.y, lenNow ) )
+	//
 	return result
 }
 
 bool function CommsMenu_HandleViewInput( float x, float y )
 {
-	//printt( format( "x: %.1f  y: %.1f", x, y ) )
+	//
 	{
 		float lockoutTime            = IsControllerModeActive() ? 0.0 : 0.01
 		float deltaSinceInputStarted = (Time() - s_latestViewInputResetTime)
@@ -1187,7 +1281,7 @@ bool function CommsMenu_HandleViewInput( float x, float y )
 	int optionCount = s_currentMenuOptions.len()
 	int choice      = -1
 
-	//float lenCutoff = IsControllerModeActive() ? ((s_currentChoice < 0) ? 0.8 : 0.4) : 15.0
+	//
 	float lenCutoff = IsControllerModeActive() ? ((s_currentChoice < 0) ? 0.8 : 0.4) : ((s_currentChoice < 0) ? 0.8 : 0.4)
 
 	RuiSetFloat2( file.menuRui, "inputVec", <0, 0, 0> )
@@ -1200,7 +1294,7 @@ bool function CommsMenu_HandleViewInput( float x, float y )
 	else if ( inputLen > lenCutoff )
 	{
 		float circle = 2.0 * PI
-		float angle  = atan2( inputVec.x, inputVec.y )        // center of index 0 is always <0,1>
+		float angle  = atan2( inputVec.x, inputVec.y )        //
 		if ( angle < 0.0 )
 			angle += circle
 
@@ -1209,7 +1303,7 @@ bool function CommsMenu_HandleViewInput( float x, float y )
 
 		choice = (int( (angle / circle) * optionCount ) % optionCount)
 
-		//DebugScreenText( 0.25, 0.30, format( "inputVec:%s", string( inputVec ) ) )
+		//
 
 		vector ruiInputVec = IsControllerModeActive() ? Normalize( inputVec ) : inputVec
 		RuiSetFloat2( file.menuRui, "inputVec", Normalize( inputVec ) )
@@ -1217,7 +1311,7 @@ bool function CommsMenu_HandleViewInput( float x, float y )
 	else
 	{
 		if ( IsControllerModeActive() )
-			choice = s_currentChoice // -1
+			choice = s_currentChoice //
 		else
 			choice = s_currentChoice
 	}
@@ -1261,6 +1355,14 @@ bool function MakeCommMenuSelection( int choice, int wheelInputType )
 			return true
 		}
 
+#if(false)
+
+
+
+
+
+#endif
+
 		case eOptionType.HEALTHITEM_USE:
 		{
 			if ( wheelInputType == eWheelInputType.USE )
@@ -1284,7 +1386,7 @@ bool function MakeCommMenuSelection( int choice, int wheelInputType )
 				else
 					Quickchat( GetLocalViewPlayer(), eCommsAction.INVENTORY_NEED_HEALTH )
 
-				return false // don't close the menu
+				return false //
 			}
 			else if ( wheelInputType == eWheelInputType.NONE && HealthkitWheelUseOnRelease() )
 			{
@@ -1304,6 +1406,29 @@ bool function MakeCommMenuSelection( int choice, int wheelInputType )
 
 	return false
 }
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 void function HandleQuipPick( int commsAction, int directionIndex )
 {
@@ -1470,6 +1595,16 @@ bool function IsCommsMenuActive()
 	return (s_currentChatPage != eChatPage.INVALID)
 }
 
+#if(false)
+
+
+
+
+
+
+
+#endif
+
 bool function CommsMenu_CanUseMenu( entity player )
 {
 	if ( IsWatchingReplay() )
@@ -1481,6 +1616,11 @@ bool function CommsMenu_CanUseMenu( entity player )
 	if ( IsScoreboardShown() )
 		return false
 
+	#if(false)
+
+
+#endif
+
 	if ( IsCommsMenuActive() )
 		return false
 
@@ -1491,46 +1631,130 @@ int function CommsMenu_GetCurrentCommsMenu()
 {
 	return file.commsMenuStyle
 }
-#endif // CLIENT
-#if SERVER
-void function ClientCommand_SetSelectedHealthPickupType( entity player, array<string> args )
-{
-	if ( args.len() == 0 )
-		return
 
-	int healthPickupType = int( args[0] )
+#if(false)
 
-	switch( healthPickupType )
-	{
-		case eHealthPickupType.COMBO_FULL:
-		case eHealthPickupType.SHIELD_LARGE:
-		case eHealthPickupType.SHIELD_SMALL:
-		case eHealthPickupType.HEALTH_LARGE:
-		case eHealthPickupType.HEALTH_SMALL:
-			player.SetPlayerNetInt( "selectedHealthPickupType", healthPickupType )
-			return
 
-		case WHEEL_HEAL_AUTO:
-			player.SetPlayerNetInt( "selectedHealthPickupType", -1 )
-			return
 
-		default:
-			Assert( 0, "tried to set an unsupported Health Pickup Type" )
-			return
-	}
 
-	unreachable
-}
+#endif
 
-void function ClientCommand_Quip( entity player, array<string> args )
-{
-	if ( args.len() == 0 )
-		return
+#if(false)
 
-	int commsAction = int( args[0] )
 
-	PlayQuip( player, commsAction )
-}
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 void function PlayQuip( entity player, int commsAction )
 {

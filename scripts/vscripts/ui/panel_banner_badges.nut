@@ -18,14 +18,14 @@ void function InitCardBadgesPanel( var panel )
 	AddPanelEventHandler_FocusChanged( panel, CardBadgesPanel_OnFocusChanged )
 
 	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_A, false, "#A_BUTTON_SELECT", "", null, CustomizeMenus_IsFocusedItem )
+	//
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK_LEGEND", "#X_BUTTON_UNLOCK_LEGEND", null, CustomizeMenus_IsFocusedItemParentItemLocked )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_EQUIP", "#X_BUTTON_EQUIP", null, CustomizeMenus_IsFocusedItemEquippable )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK", "#X_BUTTON_UNLOCK", null, CustomizeMenus_IsFocusedItemLocked )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_DPAD_LEFT, false, "#TRIGGERS_CHANGE_LEGEND", "", CustomizeCharacterMenu_PrevButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_DPAD_RIGHT, false, "", "", CustomizeCharacterMenu_NextButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_TRIGGER_LEFT, false, "", "", CustomizeCharacterMenu_PrevButton_OnActivate )
-	//AddPanelFooterOption( panel, LEFT, BUTTON_TRIGGER_RIGHT, false, "", "", CustomizeCharacterMenu_NextButton_OnActivate )
+	//
+	//
+	//
+	//
 
 	RegisterSignal( "StopCycleBadgePreviewImageThread" )
 }
@@ -47,7 +47,7 @@ void function CardBadgesPanel_Update( var panel )
 {
 	var scrollPanel = Hud_GetChild( file.listPanel, "ScrollPanel" )
 
-	// cleanup
+	//
 	foreach ( int flavIdx, ItemFlavor unused in file.cardBadgeList )
 	{
 		var button = Hud_GetChild( scrollPanel, "GridButton" + flavIdx )
@@ -58,7 +58,7 @@ void function CardBadgesPanel_Update( var panel )
 	for ( int badgeIndex = 0; badgeIndex < GLADIATOR_CARDS_NUM_BADGES; badgeIndex++ )
 		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.BADGE, badgeIndex, null )
 
-	// setup, but only if we're active
+	//
 	if ( IsPanelActive( file.panel ) )
 	{
 		ItemFlavor character = GetTopLevelCustomizeContext()
@@ -76,7 +76,7 @@ void function CardBadgesPanel_Update( var panel )
 			var rui = Hud_GetRui( button )
 			RuiDestroyNestedIfAlive( rui, "badge" )
 			CreateNestedGladiatorCardBadge( rui, "badge", LocalClientEHI(), flav, badgeIndex, character )
-			//RuiSetImage( rui, "buttonImage", buttonImage )
+			//
 
 			ToolTipData toolTipData
 			toolTipData.titleText = Localize( ItemFlavor_GetLongName( flav ) )
@@ -148,7 +148,7 @@ void function CardBadgesPanel_Update( var panel )
 
 void function CardBadgesPanel_OnFocusChanged( var panel, var oldFocus, var newFocus )
 {
-	if ( !IsValid( panel ) ) // uiscript_reset
+	if ( !IsValid( panel ) ) //
 		return
 	if ( GetParentMenu( panel ) != GetActiveMenu() )
 		return
@@ -258,7 +258,7 @@ bool function ShouldDisplayBadge( ItemFlavor badge, table<ItemFlavor, int> equip
 {
 	if ( GladiatorCardBadge_ShouldHideIfLocked( badge ) )
 	{
-		if ( !IsItemFlavorUnlockedForLoadoutSlot( LocalClientEHI(), Loadout_GladiatorCardBadge( character, badgeIndex ), badge ) )//todo: verify with dw the difference between GetPlayerBadgeDataInteger( LocalClientEHI(), badge, badgeIndex, character ) == -1 ) //Checking for lock status
+		if ( !IsItemFlavorUnlockedForLoadoutSlot( LocalClientEHI(), Loadout_GladiatorCardBadge( character, badgeIndex ), badge ) )//
 			return false
 	}
 

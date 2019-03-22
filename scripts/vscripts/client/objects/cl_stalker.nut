@@ -37,13 +37,13 @@ void function CreateCallback_Stalker( entity npc )
 	file.fxInitialized = true
 
 	asset model = npc.GetModelName()
-	//------------------------------
-	//DAMAGE FX - REGULAR STALKERS
-	//------------------------------
+	//
+	//
+	//
 	ModelFX_BeginData( "stalkerHealth", model, "all", true )
-		//ModelFX_AddTagHealthFX( 0.75, "chest", $"P_spectre_dmg_smk", false )
+		//
 		ModelFX_AddTagHealthFX( 0.5, "chest", $"P_spectre_dmg_elec", false )
-		//ModelFX_AddTagHealthFX( 0.25, "chest", $"P_spectre_dmg_fire", false )
+		//
 	ModelFX_EndData()
 
 	const float MIN_VELO = 150
@@ -64,9 +64,9 @@ void function CreateCallback_Stalker( entity npc )
 	ModelFX_EndData()
 
 
-	//----------------------
-	// Light FX - REGULAR STALKERS
-	//----------------------
+	//
+	//
+	//
 	ModelFX_BeginData( "friend_lights", model, "friend", true )
 		ModelFX_HideFromLocalPlayer()
 		ModelFX_AddTagSpawnFX( "FX_C_EYE",		$"P_stalker_eye_friend" )
@@ -105,7 +105,7 @@ void function OnTitanCockpitCreated_AddStalkers( entity cockpit, entity player )
 {
 	array<entity> stalkers = GetNPCArrayByClass( "npc_stalker" )
 	foreach ( stalker in stalkers )
-		OnNPCStalkerCreated( stalker ) // recreate grenade arrows since they would have gotten destroyed when the pilot cockpit was destroyed
+		OnNPCStalkerCreated( stalker ) //
 }
 
 

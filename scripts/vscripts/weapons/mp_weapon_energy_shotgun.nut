@@ -3,26 +3,26 @@ global function OnWeaponPrimaryAttack_weapon_energy_shotgun
 global function OnWeaponChargeLevelIncreased_weapon_energy_shotgun
 global function OnWeaponChargeEnd_weapon_energy_shotgun
 
-#if SERVER
-global function OnWeaponNpcPrimaryAttack_weapon_energy_shotgun
+#if(false)
+
 #endif
 
-// Set up the pattern and default scale to match desired spread_stand_hip
-// we only use the xy here
+//
+//
 array<vector> BLAST_PATTERN_ENERGY_SHOTGUN = [
-	// 5-pointed star pattern
-	// arranged so the first 6 still make a star pattern (for NPCs)
-	< 0.0, 0.0, 	0 >, // center
-	< 0.0, 13.75, 	0 >, // head
-	< -9.4, 5.4, 	0 >, // left arm top
-	< 9.4, 5.4, 	0 >, // right arm top
-	< -8.75, -9.4, 	0 >, // left leg bottom
-	< 8.75, -9.4, 	0 >, // right leg bottom
-	< 0.0, 7.5, 	0 >, // neck
-	< -4.35, 3.75, 	0 >, // left arm middle
-	< 4.35, 3.75, 	0 >, // right arm middle
-	< -4.35, -4.3, 	0 >, // left leg middle
-	< 4.35, -4.35, 	0 >, // right leg middle
+	//
+	//
+	< 0.0, 0.0, 	0 >, //
+	< 0.0, 13.75, 	0 >, //
+	< -9.4, 5.4, 	0 >, //
+	< 9.4, 5.4, 	0 >, //
+	< -8.75, -9.4, 	0 >, //
+	< 8.75, -9.4, 	0 >, //
+	< 0.0, 7.5, 	0 >, //
+	< -4.35, 3.75, 	0 >, //
+	< 4.35, 3.75, 	0 >, //
+	< -4.35, -4.3, 	0 >, //
+	< 4.35, -4.35, 	0 >, //
 ]
 
 struct
@@ -42,12 +42,12 @@ var function OnWeaponPrimaryAttack_weapon_energy_shotgun( entity weapon, WeaponP
 	return Fire_EnergyShotgun( weapon, attackParams, playerFired )
 }
 
-#if SERVER
-var function OnWeaponNpcPrimaryAttack_weapon_energy_shotgun( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	bool playerFired = false
-	return Fire_EnergyShotgun( weapon, attackParams, playerFired )
-}
+#if(false)
+
+
+
+
+
 #endif
 
 int function Fire_EnergyShotgun( entity weapon, WeaponPrimaryAttackParams attackParams, bool playerFired )

@@ -1,6 +1,6 @@
 global function PIN_Init
 
-#if UI
+#if(UI)
 global function UICodeCallback_PINEvent
 global function PIN_Shutdown
 global function PIN_PageView
@@ -28,7 +28,7 @@ table function PIN_StandardHeader()
 		pidt			= "persona",
 		game_type		= "online",
 		mode_type		= "multiplayer",
-		#if CLIENT
+		#if(CLIENT)
 			game_mode	= GAMETYPE,
 			map			= GetMapName(),
 		#endif
@@ -43,21 +43,21 @@ void function PIN_Init()
 {
 	file.startupTime = Time()
 
-	#if UI
-		CreatePINTelemetryHeader( 2,0, // version 2.0
+	#if(UI)
+		CreatePINTelemetryHeader( 2,0, //
 			{
 			}
 		)
 
-//		thread PIN_PageView_Think()
+//
 	#endif
 }
 
-#if UI
+#if(UI)
 void function UICodeCallback_PINEvent( string eventName, table params )
 {
 	if ( eventName == "boot_start" )
-		file.startupTime = Time() // "All session specific timers should be reset when boot_start is triggered"
+		file.startupTime = Time() //
 
 	AddPINTelemetryEvent( eventName, PIN_StandardHeader(), params )
 }
@@ -72,9 +72,9 @@ void function PIN_Shutdown()
 		}
 	)
 }
-#endif //UI
+#endif //
 
-#if UI
+#if(UI)
 void function PIN_PageView( string menuName, float openDuration, string fromId, bool isDialog )
 {
 	if ( openDuration < 1.0 )
@@ -94,7 +94,7 @@ void function PIN_PageView( string menuName, float openDuration, string fromId, 
 #endif
 
 
-#if UI
+#if(UI)
 void function PIN_Message( string titleText, string messageText )
 {
 	string msg_idString = titleText.len() > 128 ? titleText.tolower().slice( 0, 128 ) : titleText.tolower()
@@ -111,7 +111,7 @@ void function PIN_Message( string titleText, string messageText )
 }
 #endif
 
-#if UI
+#if(UI)
 void function PIN_Settings( table settingsTable )
 {
 	AddPINTelemetryEvent( "settings",
@@ -125,7 +125,7 @@ void function PIN_Settings( table settingsTable )
 }
 #endif
 
-#if UI
+#if(UI)
 void function PIN_Customization( ItemFlavor context, LoadoutEntry loadoutEntry, ItemFlavor itemFlavor )
 {
 	string customizeTarget
@@ -148,7 +148,7 @@ void function PIN_Customization( ItemFlavor context, LoadoutEntry loadoutEntry, 
 		case eItemType.weapon_skin:
 			customizeTarget = "weapon"
 			customizeType = "skin"
-			//customizeClass = ItemFlavor_GetHumanReadableRef( context ) // would be nice if this were the weapon itself
+			//
 			break
 
 		case eItemType.gladiator_card_stat_tracker:
@@ -194,12 +194,12 @@ void function PIN_Customization( ItemFlavor context, LoadoutEntry loadoutEntry, 
 		selection3_rarity = customizeQuality.tolower()
 			}
 
-	//printt( index )
-	//printt( customizeQuality )
-	//printt( ItemFlavor_GetHumanReadableRef( context ) )
-	//printt( ItemFlavor_GetHumanReadableRef( itemFlavor ) )
-	//printt( customizeTarget )
-	//printt( customizeType )
+	//
+	//
+	//
+	//
+	//
+	//
 
 	AddPINTelemetryEvent( "customization",
 		PIN_StandardHeader(),

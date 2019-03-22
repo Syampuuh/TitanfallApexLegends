@@ -17,7 +17,11 @@ struct {
 
 void function ShGruntChatter_MP_Init()
 {
+#if(false)
+
+#else //
 	var dataTable = GetDataTable( $"datatable/grunt_chatter_mp.rpak" )
+#endif //
 
 	int numRows = GetDatatableRowCount( dataTable )
 	for ( int i = 0; i < numRows; i++ )
@@ -54,16 +58,16 @@ bool function ShouldPlayGruntChatterMPLine( string conversationType, entity play
 
 	if ( IsForcedDialogueOnly( player ) )
 	{
-		//printt( "ForcedDialogueOnly, not playing Grunt Chatter MP:"  + conversationType )
+		//
 		return false
 	}
 
-	#if CLIENT
+	#if(CLIENT)
 		float debounceTime = GetConversationDebounce( conversationType )
 		float lastPlayedTime = GetConversationLastPlayedTime( conversationType )
 		if ( lastPlayedTime > 0 && lastPlayedTime + debounceTime > Time() )
 		{
-			//printt( "lastPlayedTime: " + lastPlayedTime + " debounce time: " + debounceTime + ", not playing Grunt Chatter MP:"  + conversationType )
+			//
 			return false
 		}
 	#endif
@@ -72,7 +76,7 @@ bool function ShouldPlayGruntChatterMPLine( string conversationType, entity play
 
 	if ( distSqr > GRUNT_CHATTER_MP_RANGE_SQUARED )
 	{
-		//printt( "DistanceSqr: " + distSqr + " larger than GRUNT_CHATTER_MP_RANGE_SQUARED: " + Grunt_CHATTER_MP_RANGE_SQUARED + ", not playing Battle Chatter:"  + conversationType )
+		//
 		return false
 	}
 

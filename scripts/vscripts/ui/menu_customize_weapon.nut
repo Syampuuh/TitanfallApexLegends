@@ -44,7 +44,7 @@ void function InitCustomizeWeaponMenu()
 
 void function CustomizeWeaponMenu_OnOpen()
 {
-	// (dw): the customize context should not change while this menu is up
+	//
 
 	RuiSetGameTime( file.decorationRui, "initTime", Time() )
 	RuiSetString( file.titleRui, "title", Localize( ItemFlavor_GetLongName( GetTopLevelCustomizeContext() ) ).toupper() )
@@ -57,8 +57,8 @@ void function CustomizeWeaponMenu_OnOpen()
 		TabData tabData = GetTabDataForPanel( file.menu )
 		ActivateTab( tabData, 0 )
 	}
-	//else
-	//	ActivateTab( file.menu, GetMenuActiveTabIndex( file.menu ) )
+	//
+	//
 
 	int numTabs = GetMenuNumTabs( file.menu )
 	var tabButtonPanel = Hud_GetChild( file.menu, "TabsCommon" )
@@ -108,7 +108,7 @@ void function CustomizeWeaponMenu_Update( var menu )
 
 	ClearTabs( menu )
 
-	// set up, but only if we're active
+	//
 	if ( GetActiveMenu() == menu )
 	{
 		ItemFlavor category = GetTopLevelCustomizeContext()

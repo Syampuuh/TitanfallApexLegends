@@ -30,7 +30,7 @@ const FX_SHIELD_FULL = $"P_armor_FP_charged_full_CP"
 const bool HAS_RUI_HEALTH_OVERLAY = true
 struct
 {
-	//var colorCorrection
+	//
 	var healthFX
 	var shieldFX
 	var shieldBreakFX
@@ -48,8 +48,8 @@ struct
 
 void function ClHealthHud_Init()
 {
-	//file.colorCorrection = ColorCorrection_Register_WRAPPER( "materials/correction/bw_super_constrast.raw" )
-	//ColorCorrection_SetExclusive( file.colorCorrection, false )
+	//
+	//
 
 	PrecacheParticleSystem( FX_HEALTH )
 	file.healthFX = GetParticleSystemIndex( FX_HEALTH )
@@ -74,7 +74,7 @@ void function ClHealthHud_Init()
 	file.healthDisplayMin = DEFAULT_HEALTH_DISPLAY_MIN
 	file.healthDisplayMax = DEFAULT_HEALTH_DISPLAY_MAX
 
-	#if HAS_RUI_HEALTH_OVERLAY
+	#if(true)
 		file.healthOverlay = RuiCreate( $"ui/hurt_overlay.rpak", clGlobal.topoFullscreenHudPermanent, RUI_DRAW_HUD, 0 )
 		RuiSetResolutionToScreenSize( file.healthOverlay )
 		UISize screenSize = GetVirtualScreenSize( GetScreenSize().width, GetScreenSize().height )
@@ -83,14 +83,14 @@ void function ClHealthHud_Init()
 
 	AddClientCallback_OnResolutionChanged( HealthOverlaySetSize )
 
-	//AddLocalPlayerFunc( HealthHUD_AddPlayer )
+	//
 	AddCallback_OnViewPlayerChanged( HealthHUD_ViewPlayerChanged )
 }
 
 
 void function HealthOverlaySetSize()
 {
-#if HAS_RUI_HEALTH_OVERLAY
+#if(true)
 	RuiSetResolutionToScreenSize( file.healthOverlay )
 	UISize screenSize = GetVirtualScreenSize( GetScreenSize().width, GetScreenSize().height )
 	RuiSetFloat2( file.healthOverlay, "actualRes", <float( screenSize.width ), float( screenSize.height ), 0> )
@@ -122,7 +122,7 @@ void function InitHealthDisplayRange( entity player )
 {
 	float rangeScaler
 
-	// use the overridden scalar if it has been specified
+	//
 	if ( clGlobal.pilotRedDamageWarningScalar != 1.0 )
 	{
 		rangeScaler = clGlobal.pilotRedDamageWarningScalar
@@ -211,25 +211,27 @@ void function HealthHUD_Update( entity player )
 	OnThreadEnd(
 		function() : (  )
 		{
-			#if HAS_RUI_HEALTH_OVERLAY
+			#if(true)
 				RuiSetFloat( file.healthOverlay, "healthFrac", 1.0 )
 				RuiSetFloat2( file.healthOverlay, "overlayRange", <file.healthDisplayMax * 0.25, file.healthDisplayMax, 0.0> )
 			#endif
 		}
 	)
 
-	#if HAS_RUI_HEALTH_OVERLAY
+	#if(true)
 		RuiTrackFloat( file.healthOverlay, "healthFrac", player, RUI_TRACK_HEALTH )
 		RuiSetFloat2( file.healthOverlay, "overlayRange", <file.healthDisplayMax * 0.25, file.healthDisplayMax, 0.0> )
 	#endif
 
 	float healthFrac = GetHealthFrac( player )
 	float shieldFrac = GetShieldHealthFrac( player )
+	int shieldTier = EquipmentSlot_GetEquipmentTier( player, "armor" )
 	if ( healthFrac < 1.0 )
 		DamageOverlayUpdate( player, healthFrac, 0.99 )
 
 	float lastHealthFrac = healthFrac
 	float lastShieldFrac = shieldFrac
+	int lastShieldTier = shieldTier
 
 	while ( true )
 	{
@@ -243,7 +245,7 @@ void function HealthHUD_Update( entity player )
 
 		if ( !IsAlive( player ) )
 		{
-			//KillReplayHealthUpdate()
+			//
 		}
 		else
 		{
@@ -252,11 +254,13 @@ void function HealthHUD_Update( entity player )
 				DamageOverlayUpdate( player, healthFrac, lastHealthFrac )
 
 			shieldFrac = GetShieldHealthFrac( player )
-			if ( shieldFrac != lastShieldFrac )
+			shieldTier = EquipmentSlot_GetEquipmentTier( player, "armor" )
+			if ( shieldFrac != lastShieldFrac || shieldTier != lastShieldTier )
 				ShieldOverlayUpdate( player, shieldFrac, lastShieldFrac, player.GetShieldHealthMax() )
 
 			lastHealthFrac = healthFrac
 			lastShieldFrac = shieldFrac
+			lastShieldTier = shieldTier
 		}
 	}
 }
@@ -341,7 +345,7 @@ void function DamageOverlayUpdate( entity player, float healthFrac, float lastHe
 	}
 }
 
-#if MP
+#if(true)
 void function ShieldOverlayUpdate( entity player, float shieldFrac, float lastShieldFrac, int shieldDisplayMax )
 {
 	if ( GetCurrentPlaylistVarInt( "health_overlay_enabled", 1 ) == 0 )

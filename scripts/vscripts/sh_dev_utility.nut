@@ -16,22 +16,22 @@ TestVars function TV()
 	return s_testVars
 }
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 void function ShDevUtility_Init()
 {
 	RegisterSignal( "DevSignal1" )
 	RegisterSignal( "DevSignal2" )
 
-	#if SERVER || CLIENT
-		PrecacheModel( $"mdl/Humans/class/medium/pilot_medium_empty.rmdl" ) // for spectator players
+	#if(CLIENT)
+		PrecacheModel( $"mdl/Humans/class/medium/pilot_medium_empty.rmdl" ) //
 	#endif
 
-	#if SERVER
-		AddClientCommandCallback( "respawn", ClientCommand_Respawn )
-		AddClientCommandCallback( "set_respawn_override", ClientCommand_SetRespawnOverride )
-	#endif
+	#if(false)
 
-	#if CLIENT
+
+#endif
+
+	#if(CLIENT)
 		RegisterSignal( "DEV_PreviewScreenRUI" )
 		RegisterSignal( "DEV_PreviewWorldRUI" )
 	#endif
@@ -39,7 +39,7 @@ void function ShDevUtility_Init()
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function GEBI( int entIndex )
 {
 	return GetEntByIndex( entIndex )
@@ -47,7 +47,7 @@ entity function GEBI( int entIndex )
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function GP( int playerIndex = 0 )
 {
 	array<entity> players = GetPlayerArray()
@@ -59,7 +59,7 @@ entity function GP( int playerIndex = 0 )
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function GPAW( int playerIndex = 0 )
 {
 	entity player = GP( playerIndex )
@@ -69,7 +69,7 @@ entity function GPAW( int playerIndex = 0 )
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function GBOT( int botIndex = 0 )
 {
 	array<entity> bots
@@ -88,19 +88,19 @@ entity function GBOT( int botIndex = 0 )
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function PrintEntArray( array<entity> arr )
 {
 	printf( "%s() - len:%d  %s", FUNC_NAME(), arr.len(), string( arr ) )
 	foreach( int index, entity ent in arr )
-		printf( " [%d] - %s", index, string( arr[index] ) )
+		printf( " [%d] - %s %s", index, string( arr[index] ), string( arr[index].GetOrigin() ) )
 }
 #endif
 
 
-// short cut for the console
-// script gp()[0].Die( gp()[1] )
-#if SERVER || CLIENT
+//
+//
+#if(CLIENT)
 array<entity> function gp()
 {
 	return GetPlayerArray()
@@ -108,7 +108,7 @@ array<entity> function gp()
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 entity function ge( int ornull index = null )
 {
 	if ( index != null )
@@ -127,7 +127,7 @@ entity function ge( int ornull index = null )
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 vector function EyeTraceVec( entity player = null )
 {
 	if ( player == null )
@@ -144,23 +144,23 @@ vector function EyeTraceVec( entity player = null )
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function PrintLoc()
 {
 	vector origin    = GetPlayerArray()[0].GetOrigin()
-	//vector origin = GetPlayerCrosshairOriginRaw( GetPlayerArray()[0] )
+	//
 	vector eyeAngles = GetPlayerArray()[0].EyeAngles()
 	eyeAngles.x = 0
 	printt( "xxx: " + origin + ", " + eyeAngles + "" )
 }
 #endif
 
-//////////////////////////
-//////////////////////////
-//// Random Dev Stuff ////
-//////////////////////////
-//////////////////////////
-#if CLIENT
+//
+//
+//
+//
+//
+#if(CLIENT)
 void function BatchClientsideExecutionTest( vector refPoint, vector ang, array<ItemFlavor> characterPool )
 {
 	int count = 0
@@ -171,7 +171,7 @@ void function BatchClientsideExecutionTest( vector refPoint, vector ang, array<I
 		{
 			ItemFlavor victimCharacter = characterPool.getrandom()
 			ItemFlavor victimSkin      = GetValidItemFlavorsForLoadoutSlot( EHI_null, Loadout_CharacterSkin( victimCharacter ) ).getrandom()
-			//delaythread(1.0 + count * 0.15)
+			//
 			delaythread(1.1) ClientsideExecutionTest( refPoint + count * AnglesToForward( ang ) * 180, attackerCharacter, attackerSkin, victimCharacter, victimSkin, execution )
 			count++
 		}
@@ -237,7 +237,7 @@ void function ClientsideExecutionTest(
 		case "orbit":
 		{
 			camera = CreateClientSidePointCamera( attacker.GetOrigin(), attacker.GetAngles(), fov )
-			//camera.SetParent( attacker, "ref", false, 0.0 )
+			//
 			break
 		}
 	}
@@ -274,7 +274,7 @@ void function ClientsideExecutionTest(
 		GetLocalClientPlayer().SetMenuCameraEntity( camera )
 	}
 
-	if ( whichCamera == "delay" ) // lol
+	if ( whichCamera == "delay" ) //
 		wait 2.2
 
 	attacker.Anim_PlayWithRefPoint( attackerAnimSeq, refPoint, <0, 0, 0>, 0.0 )
@@ -318,293 +318,294 @@ void function ClientsideExecutionTest(
 #endif
 
 
-#if SERVER
-void function DEV_TestAnim( entity player, float rate, float cycle )
-{
-	player.Anim_Play( "pt_rodeo_ride_L_return_battery" )
-	//player.Anim_SetInitialTime( 0.0 )
-	//player.Anim_SetPlaybackRate( rate )
-	thread blah1( player, cycle )
-}
+#if(false)
 
-void function blah1( entity player, float cycle )
-{
-	EndSignal( player, "DevSignal1" )
 
-	OnThreadEnd( function() {
-		printt( "### blah1 OnThreadEnd" )
-	} )
 
-	PlayAnim( player, "ACT_MP_MENU_READYUP_INTRO" )
-	PlayAnim( player, "ACT_MP_MENU_READYUP_IDLE" )
+//
+//
 
-	//waitthread blah2( player, cycle )
 
-	//thread blah2( player, cycle )
-	//wait 5.0
-	//player.Signal( "DevSignal1" )
-	//player.Anim_Stop()
-}
-void function blah2( entity player, float cycle )
-{
-	OnThreadEnd( function() {
-		printt( "### blah2 OnThreadEnd" )
-	} )
-	//player.EndSignal( "DevSignal1" )
-	//while( true )
-	//{
-	//	player.SetCycle( cycle )
-	//	WaitFrame()
-	//}
-	WaitForever()
-}
 
-void function DEV_ModelScaleTest()
-{
-	entity ent = CreateEntity( "prop_physics" )
-	ent.SetValueForModelKey( $"mdl/weapons/grenades/m20_f_grenade_projectile.rmdl" )
-	ent.SetModelScale( 10.0 )
-	ent.SetOrigin( gp()[0].GetOrigin() + <0, 0, 300> )
-	DispatchSpawn( ent )
-	ent.SetModelScale( 10.0 )
-}
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+//
+//
+//
+
+
+
+
+
+
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 
-//////////////////////////////
-//////////////////////////////
-//// Dev Respawn Commands ////
-//////////////////////////////
-//////////////////////////////
-#if SERVER
-struct {
-	string behaviourOverride = "off"
-} devRespawnState
+//
+//
+//
+//
+//
+#if(false)
 
-bool ornull function DevRespawnGetPlayerEliminationOverride( entity player )
-{
-	switch( devRespawnState.behaviourOverride )
-	{
-		case "allow":
-			return false // not eliminated
 
-		case "deny":
-			return true // eliminated
 
-		case "bots":
-			if ( player.IsBot() )
-			{
-				return false // not eliminated
-			}
-			break
-	}
-	return null // don't override
-}
 
-void function DevRespawnPlayer( entity player, bool shouldForce, void functionref( entity, int ) devCallbackFunc = null, int devIndex = -1 )
-{
-	if ( shouldForce && IsAlive( player ) )
-	{
-		player.SetHealth( 0 )
-		wait 1.0
-	}
-	if ( !IsAlive( player ) )
-	{
-		player.p.respawnPodLanded = true // pretend this is a valid survival respawn
-		thread _DelayUnsetRespawnPodLanded( player )
-		player.p.hasMatchParticipationEnded = false // they're still going!
-		player.p.lastDeathTime = -1.0
-		ClearPlayerEliminated( player )
-		if ( shouldForce )
-		{
-			RespawnTitanPilot( player )
-		}
-		else
-		{
-			DecideRespawnPlayer( player )
-		}
-	}
-	if ( devCallbackFunc != null )
-	{
-		devCallbackFunc( player, devIndex )
-	}
-}
 
-void function _DelayUnsetRespawnPodLanded( entity player )
-{
-	player.EndSignal( "OnDestroy" )
-	WaitEndFrame()
-	player.p.respawnPodLanded = false
-}
 
-void function DEV_RespawnPlayersBySpecifiers( array<string> specifiers, entity primaryPlayer = null, void functionref( entity, int ) devCallbackFunc = null )
-{
-	if ( specifiers.len() == 0 )
-	{
-		specifiers.append( "me" )
-	}
-	if ( primaryPlayer == null )
-		primaryPlayer = GetPlayerArray()[0]
 
-	array<entity> playersToRespawnList = []
-	foreach ( string specifier in specifiers )
-	{
-		switch( specifier )
-		{
-			case "me":
-				playersToRespawnList.append( primaryPlayer )
-				break
 
-			case "all":
-				foreach( entity player in GetPlayerArray() )
-				{
-					playersToRespawnList.append( player )
-				}
-				break
 
-			case "alldead":
-				foreach( entity player in GetPlayerArray() )
-				{
-					if ( !IsAlive( player ) )
-					{
-						playersToRespawnList.append( player )
-					}
-				}
-				break
+//
 
-			case "random":
-				array<entity> randomCandidates = []
-				foreach( entity player in GetPlayerArray() )
-				{
-					if ( !playersToRespawnList.contains( player ) )
-					{
-						randomCandidates.append( player )
-					}
-				}
-				if ( randomCandidates.len() > 0 )
-				{
-					playersToRespawnList.append( randomCandidates[ RandomInt( randomCandidates.len() ) ] )
-				}
-				break
 
-			case "randomdead":
-				array<entity> randomCandidates = []
-				foreach( entity player in GetPlayerArray() )
-				{
-					if ( !IsAlive( player ) && !playersToRespawnList.contains( player ) )
-					{
-						randomCandidates.append( player )
-					}
-				}
-				if ( randomCandidates.len() > 0 )
-				{
-					playersToRespawnList.append( randomCandidates[ RandomInt( randomCandidates.len() ) ] )
-				}
-				break
+//
 
-			case "bots":
-				foreach( entity player in GetPlayerArray() )
-				{
-					if ( player.IsBot() )
-					{
-						playersToRespawnList.append( player )
-					}
-				}
-				break
 
-			case "deadbots":
-				foreach( entity player in GetPlayerArray() )
-				{
-					if ( !IsAlive( player ) && player.IsBot() )
-					{
-						playersToRespawnList.append( player )
-					}
-				}
-				break
 
-			case "allies":
-				foreach( entity player in GetPlayerArrayOfTeam( primaryPlayer.GetTeam() ) )
-				{
-					playersToRespawnList.append( player )
-				}
-				break
 
-			case "enemies":
-				foreach( entity player in GetPlayerArrayOfEnemies( primaryPlayer.GetTeam() ) )
-				{
-					playersToRespawnList.append( player )
-				}
-				break
+//
 
-			default:
-				Dev_PrintMessage( primaryPlayer, "Invalid usage of respawn", "Please specify zero or more of: me, all, alldead, random, randomdead, bots, deadbots, allies, enemies" )
-		}
-	}
-	array<entity> uniquePlayersToRespawnList = []
-	table<entity, bool> playersAlreadyRespawned
-	foreach( entity player in playersToRespawnList )
-	{
-		if ( !(player in playersAlreadyRespawned) )
-		{
-			playersAlreadyRespawned[player] <- true
-			uniquePlayersToRespawnList.append( player )
-			thread DevRespawnPlayer( player, true, devCallbackFunc, uniquePlayersToRespawnList.len() )
-		}
-	}
-	//return uniquePlayersToRespawnList
-}
-void function DEV_RespawnAllPlayersAndPutThemInALineAndGiveRandomSurvivalStuff( bool circle = false )
-{
-	entity primaryPlayer = GetPlayerArray()[0]
-	vector pos           = primaryPlayer.GetOrigin()
-	vector dir           = AnglesToForward( primaryPlayer.EyeAngles() )
-	dir.z = 0
-	dir = Normalize( dir )
-	DEV_RespawnPlayersBySpecifiers( [ "all" ], null, void function( entity ply, int i ) : ( pos, dir, circle ) {
-		svGlobal.levelEnt.Signal( "SlowMo" )
-		if ( circle )
-		{
-			float r = float(i) / float(GetPlayerArray().len()) * 2 * PI
-			ply.SetOrigin( pos + 500.0 * <sin( r ), cos( r ), 0.0> )
-		}
-		else
-		{
-			ply.SetOrigin( pos + 120.0 * i * dir )
-		}
-		//GiveSurvivalClass( ply, RandomIntRange( 0, GetNumPilotLoadouts() ) )
-		// todo(dw): give random survival class
-		// todo(dw): give random weapon with random mods with appropriate ammo
-	} )
-}
 
-bool function ClientCommand_Respawn( entity commandPlayer, array<string> argList )
-{
-	thread DEV_RespawnPlayersBySpecifiers( argList, commandPlayer )
-	return true
-}
 
-bool function ClientCommand_SetRespawnOverride( entity commandPlayer, array<string> al )
-{
-	if ( al.len() != 1 || !(al[0] == "off" || al[0] == "allow" || al[0] == "deny" || al[0] == "bots") )
-	{
-		Dev_PrintMessage( commandPlayer, "Invalid usage of set_respawn_override", "Please pass one of: off, allow, deny, bots" )
-		return false
-	}
-	devRespawnState.behaviourOverride = al[0]
-	foreach( entity player in GetPlayerArray() )
-	{
-		thread DevRespawnPlayer( player, false ) // check to see if dead players should be respawned using new rules
-	}
-	return true
-}
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
 #endif
 
 
-///////////////////////////////
-///////////////////////////////
-//// Screen Alignment Tool ////
-///////////////////////////////
-///////////////////////////////
-#if CLIENT
+//
+//
+//
+//
+//
+#if(CLIENT)
 var DEV_screenAlignmentTopo = null
 var DEV_screenAlignmentRui = null
 var function DEV_ToggleScreenAlignmentTool()
@@ -632,16 +633,16 @@ var function DEV_ToggleScreenAlignmentTool()
 
 
 
-///////////////////////////
-///////////////////////////
-//// RUI Preview Setup ////
-///////////////////////////
-///////////////////////////
-// Usage:
-//     script_client thread DEV_PreviewScreenRUI( $"ui/gcard_badge_warlord.rpak", [255,255,255,125] )
-//     script_client DEV_HidePreviewRUIs()
+//
+//
+//
+//
+//
+//
+//
+//
 
-#if CLIENT
+#if(CLIENT)
 void function DEV_HidePreviewRUIs()
 {
 	Signal( clGlobal.levelEnt, "DEV_PreviewScreenRUI" )
@@ -649,7 +650,7 @@ void function DEV_HidePreviewRUIs()
 }
 #endif
 
-#if CLIENT
+#if(CLIENT)
 void function DEV_PreviewScreenRUI( asset ruiAsset, array<int> bgCol )
 {
 	Signal( clGlobal.levelEnt, "DEV_PreviewScreenRUI" )
@@ -675,13 +676,13 @@ void function DEV_PreviewScreenRUI( asset ruiAsset, array<int> bgCol )
 	}
 	try
 	{
-		//	RuiCreateNested( nestedRui, "doubleNestedInstance", $"ui/double_nested_instance.rpak" )
+		//
 	}
 	catch ( e2 )
 	{
 		//
 	}
-	//RuiSetResolution( rui, float( screenSize.width ), float( screenSize.height ) )
+	//
 
 	OnThreadEnd( function() : ( topo, rui, nestedRui ) {
 		RuiDestroyNestedIfAlive( rui, "instance" )
@@ -693,7 +694,7 @@ void function DEV_PreviewScreenRUI( asset ruiAsset, array<int> bgCol )
 }
 #endif
 
-#if CLIENT
+#if(CLIENT)
 void function DEV_PreviewWorldRUI( asset ruiAsset, float width = 100, float height = 100 )
 {
 	Signal( clGlobal.levelEnt, "DEV_PreviewWorldRUI" )
@@ -760,7 +761,7 @@ void function DEV_PreviewWorldRUI( asset ruiAsset, float width = 100, float heig
 }
 #endif
 
-#if CLIENT
+#if(CLIENT)
 void function DEV_PreviewCurvedRUI( asset ruiAsset )
 {
 	Signal( clGlobal.levelEnt, "DEV_PreviewScreenRUI" )
@@ -794,7 +795,7 @@ void function DEV_PreviewCurvedRUI( asset ruiAsset )
 		Announcement_SetPurge( announcement, true )
 		AnnouncementFromClass( GetLocalClientPlayer(), announcement )
 	}
-	//RuiSetResolution( rui, float( screenSize.width ), float( screenSize.height ) )
+	//
 
 	OnThreadEnd( function() : ( topo, rui, nestedRui ) {
 		RuiDestroyNestedIfAlive( rui, "instance" )
@@ -810,12 +811,12 @@ void function DEV_PreviewCurvedRUI( asset ruiAsset )
 
 
 
-/////////////////////////////////
-/////////////////////////////////
-//// Player Debug Lines Tool ////
-/////////////////////////////////
-/////////////////////////////////
-#if CLIENT
+//
+//
+//
+//
+//
+#if(CLIENT)
 bool isPlayerDebugLinesToolRunning = false
 void function DEV_TogglePlayerDebugLinesTool()
 {
@@ -850,7 +851,7 @@ void function DEV_PlayerDebugLinesTool_Thread( entity localClientPlayer )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function DEV_DumpItems()
 {
 	string fmtStr = "%s,%s,%s,%s,\"%s\",\"%s\"\n"

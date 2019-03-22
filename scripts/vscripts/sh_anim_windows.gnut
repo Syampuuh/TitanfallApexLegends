@@ -1,6 +1,6 @@
 global function ShAnimWindows_LevelInit
 
-#if CLIENT
+#if(CLIENT)
 global function ShowEntityAndChildren
 global function HideEntityAndChildren
 
@@ -10,15 +10,15 @@ global function ClientCodeCallback_AnimWindowStop
 global function ClientCodeCallback_AnimWindowPrecache
 #endif
 
-#if SERVER
-global function CodeCallback_AnimWindowPrecache
+#if(false)
+
 #endif
 
-////////////////
-////////////////
-//// Consts ////
-////////////////
-////////////////
+//
+//
+//
+//
+//
 const bool SCRIPT_ANIM_WINDOWS_DEBUG = false
 
 const MIRAGE_HOLO_FLASH_FX = $"P_mirage_holo_flash"
@@ -42,26 +42,26 @@ struct {
 } file
 
 
-/////////////////////////
-/////////////////////////
-//// Initialiszation ////
-/////////////////////////
-/////////////////////////
+//
+//
+//
+//
+//
 void function ShAnimWindows_LevelInit()
 {
 	const bool BOTH = SERVER || CLIENT
 
-	#if CLIENT
+	#if(CLIENT)
 		RegisterAnimWindowScriptCallback( "add_glad_card_rui", AddGladCardRUIToProp )
 	#endif
 
-	#if SERVER || CLIENT
-		// Generic window types
+	#if(CLIENT)
+		//
 		RegisterAnimWindowType( BOTH, "CreateProp", null, AnimWindow_CreateProp_Precache, AnimWindow_CreateProp_Start, AnimWindow_CreateProp_Transition, AnimWindow_CreateProp_Stop )
 		RegisterAnimWindowType( CLIENT, "PlaySound", null, AnimWindow_PlaySound_Precache, AnimWindow_PlaySound_Start, AnimWindow_PlaySound_Transition, AnimWindow_PlaySound_Stop )
 		RegisterAnimWindowType( BOTH, "PlayFX", null, AnimWindow_PlayFX_Precache, AnimWindow_PlayFX_Start, AnimWindow_PlayFX_Transition, AnimWindow_PlayFX_Stop )
 
-		// Window types are pretty darn specific
+		//
 		RegisterAnimWindowType( CLIENT, "MirageHoloFX", AnimWindow_MirageHoloFX_Init, AnimWindow_MirageHoloFX_Precache, AnimWindow_MirageHoloFX_Start, AnimWindow_MirageHoloFX_Transition, AnimWindow_MirageHoloFX_Stop )
 		RegisterAnimWindowType( CLIENT, "LifelineDroneCommonFX", AnimWindow_LifelineDroneCommonFX_Init, AnimWindow_LifelineDroneCommonFX_Precache, AnimWindow_LifelineDroneCommonFX_Start, AnimWindow_LifelineDroneCommonFX_Transition, AnimWindow_LifelineDroneCommonFX_Stop )
 	#endif
@@ -73,11 +73,11 @@ void function RegisterAnimWindowScriptCallback( string ref, void functionref(Scr
 	file.createPropScriptCallbackMap[ ref ] <- func
 }
 
-////////////////////
-////////////////////
-//// CreateProp ////
-////////////////////
-////////////////////
+//
+//
+//
+//
+//
 table<string, entity> windowPropMap = {}
 
 enum eAnimWindowCreatePropModelSelectionStrategy
@@ -87,14 +87,14 @@ enum eAnimWindowCreatePropModelSelectionStrategy
 	SCRIPT_KEY,
 }
 
-#if CLIENT
+#if(CLIENT)
 void function AddGladCardRUIToProp( ScriptAnimWindow window, var settingsBlock, entity prop )
 {
 	thread CreateGladCardRui( prop )
 }
 #endif
 
-#if CLIENT
+#if(CLIENT)
 void function CreateGladCardRui( entity prop )
 {
 	prop.EndSignal( "OnDestroy" )
@@ -171,12 +171,12 @@ void function AnimWindow_CreateProp_Start( ScriptAnimWindow window, var settings
 		model = window.ent.GetModelName()
 	}
 
-	#if SERVER
-		entity prop = null
-		Assert( false ) // todo(dw)
-	#elseif CLIENT
+	#if(false)
+
+//
+#elseif(CLIENT)
 		entity prop = CreateClientSidePropDynamic( window.ent.GetOrigin(), window.ent.GetAngles(), model )
-		// if ( window.ent.IsSafeForUIScriptHack() ) // todo(dw)
+		//
 		prop.MakeSafeForUIScriptHack()
 
 		if ( selectModelFrom == eAnimWindowCreatePropModelSelectionStrategy.SCRIPT_KEY )
@@ -184,9 +184,9 @@ void function AnimWindow_CreateProp_Start( ScriptAnimWindow window, var settings
 			SetModelOnPropByScriptKey( prop, GetSettingsBlockString( settingsBlock, "modelScriptKey" ), window.ent )
 		}
 
-		//#if SCRIPT_ANIM_WINDOWS_DEBUG
-		//	printt ( "><><><><><><>" + FUNC_NAME() + ": WAT " + string(window.ent.kv.renderamt) + " " + string(window.ent.IsHidden()) )
-		//#endif
+		//
+		//
+		//
 
 		prop.kv.renderamt = window.ent.kv.renderamt
 		prop.CopyHighlightState( window.ent )
@@ -207,7 +207,7 @@ void function AnimWindow_CreateProp_Start( ScriptAnimWindow window, var settings
 		file.createPropScriptCallbackMap[scriptCallbackKey]( window, settingsBlock, prop )
 	}
 
-	#if DEV
+	#if(DEV)
 		disableoverwrite( windowPropMap )
 	#endif
 	windowPropMap[window.stringID] <- prop
@@ -226,10 +226,10 @@ void function AnimWindow_CreateProp_Transition( ScriptAnimWindow window, var set
 	entity prop = windowPropMap[window.stringID]
 
 	prop.SetParent( window.ent, attachmentName, false )
-	//prop.RenderWithViewModels( true )
+	//
 	prop.SetModelScale( scale * window.ent.GetModelScale() )
-	//if ( !window.ent.IsVisible() )
-	//	prop.Hide()
+	//
+	//
 
 	if ( animSeq != $"" )
 	{
@@ -256,7 +256,7 @@ void function AnimWindow_CreateProp_Stop( ScriptAnimWindow window, var settingsB
 
 void function SetModelOnPropByScriptKey( entity propEnt, string key, entity parentEnt )
 {
-	// todo(dw): not hard-code this
+	//
 	switch( key )
 	{
 		case "bloodhound_raven":
@@ -276,12 +276,12 @@ void function SetModelOnPropByScriptKey( entity propEnt, string key, entity pare
 
 
 
-///////////////////
-///////////////////
-//// PlaySound ////
-///////////////////
-///////////////////
-#if CLIENT
+//
+//
+//
+//
+//
+#if(CLIENT)
 table<string, var> windowSoundHandleMap = {}
 #endif
 
@@ -296,9 +296,9 @@ void function AnimWindow_PlaySound_Start( ScriptAnimWindow window, var settingsB
 {
 	string soundEventName = GetSettingsBlockString( settingsBlock, "soundEventName" )
 
-	#if SERVER
-		Assert( 0, "Not Yet Implemented" )
-	#elseif CLIENT
+	#if(false)
+
+#elseif(CLIENT)
 		entity viewPlayer = GetLocalViewPlayer()
 		if ( IsValid( viewPlayer ) && !viewPlayer.DoesShareRealms( window.ent ) )
 		{
@@ -307,7 +307,7 @@ void function AnimWindow_PlaySound_Start( ScriptAnimWindow window, var settingsB
 		}
 		var soundHandle = EmitSoundOnEntity( window.ent, soundEventName )
 
-		#if DEV
+		#if(DEV)
 			disableoverwrite( windowSoundHandleMap )
 		#endif
 		windowSoundHandleMap[window.stringID] <- soundHandle
@@ -323,27 +323,25 @@ void function AnimWindow_PlaySound_Transition( ScriptAnimWindow window, var sett
 
 void function AnimWindow_PlaySound_Stop( ScriptAnimWindow window, var settingsBlock )
 {
-	#if SERVER
-		Assert( 0, "NYI" )
-	#elseif CLIENT
-		entity viewPlayer = GetLocalViewPlayer()
-		if ( !windowSoundHandleMap[window.stringID] )
-			return
+	#if(false)
 
-		StopSound( windowSoundHandleMap[window.stringID] )
+#elseif(CLIENT)
+		entity viewPlayer = GetLocalViewPlayer()
+		if ( windowSoundHandleMap[window.stringID] )
+			StopSound( windowSoundHandleMap[window.stringID] )
 		delete windowSoundHandleMap[window.stringID]
 	#endif
 }
 
 
-////////////////
-////////////////
-//// PlayFX ////
-////////////////
-////////////////
-#if SERVER
-typedef AnimWindow_PlayFX_HandleOrNull entity
-#elseif CLIENT
+//
+//
+//
+//
+//
+#if(false)
+
+#elseif(CLIENT)
 typedef AnimWindow_PlayFX_HandleOrNull int ornull
 #endif
 table<string, AnimWindow_PlayFX_HandleOrNull> windowFXHandleMap = {}
@@ -381,18 +379,18 @@ void function AnimWindow_PlayFX_Start( ScriptAnimWindow window, var settingsBloc
 		{
 			if ( attachID > 0 )
 			{
-				#if SERVER
-					fxHandleOrNull = StartParticleEffectOnEntity_ReturnEntity( window.ent, particleSystemIndex, FX_PATTACH_POINT_FOLLOW, attachID )
-				#elseif CLIENT
+				#if(false)
+
+#elseif(CLIENT)
 					fxHandleOrNull = StartParticleEffectOnEntity( window.ent, particleSystemIndex, FX_PATTACH_POINT_FOLLOW, attachID )
 				#endif
 			}
 		}
 		else
 		{
-			#if SERVER
-				fxHandleOrNull = StartParticleEffectOnEntityWithPos_ReturnEntity( window.ent, particleSystemIndex, FX_PATTACH_CUSTOMORIGIN_FOLLOW, -1, <0, 0, 0>, <0, 0, 0> )
-			#elseif CLIENT
+			#if(false)
+
+#elseif(CLIENT)
 				fxHandleOrNull = StartParticleEffectOnEntityWithPos( window.ent, particleSystemIndex, FX_PATTACH_CUSTOMORIGIN_FOLLOW, -1, <0, 0, 0>, <0, 0, 0> )
 			#endif
 		}
@@ -405,9 +403,9 @@ void function AnimWindow_PlayFX_Start( ScriptAnimWindow window, var settingsBloc
 			{
 				vector origin = window.ent.GetAttachmentOrigin( attachID )
 				vector angles = window.ent.GetAttachmentAngles( attachID )
-				#if SERVER
-					fxHandleOrNull = StartParticleEffectInWorld_ReturnEntity( particleSystemIndex, origin, angles )
-				#elseif CLIENT
+				#if(false)
+
+#elseif(CLIENT)
 					fxHandleOrNull = StartParticleEffectInWorldWithHandle( particleSystemIndex, origin, angles )
 				#endif
 			}
@@ -416,15 +414,15 @@ void function AnimWindow_PlayFX_Start( ScriptAnimWindow window, var settingsBloc
 		{
 			vector origin = window.ent.GetOrigin()
 			vector angles = window.ent.GetAngles()
-			#if SERVER
-				fxHandleOrNull = StartParticleEffectInWorld_ReturnEntity( particleSystemIndex, origin, angles )
-			#elseif CLIENT
+			#if(false)
+
+#elseif(CLIENT)
 				fxHandleOrNull = StartParticleEffectInWorldWithHandle( particleSystemIndex, origin, angles )
 			#endif
 		}
 	}
 
-	#if DEV
+	#if(DEV)
 		disableoverwrite( windowFXHandleMap )
 	#endif
 
@@ -447,12 +445,12 @@ void function AnimWindow_PlayFX_Stop( ScriptAnimWindow window, var settingsBlock
 	{
 		bool shouldPlayEndCap = GetSettingsBlockBool( settingsBlock, "playEndCap" )
 
-		#if SERVER
-			if ( shouldPlayEndCap )
-				EffectStop( fxHandleOrNull )
-			else
-				fxHandleOrNull.Destroy()
-		#elseif CLIENT
+		#if(false)
+
+
+
+
+#elseif(CLIENT)
 			if ( shouldPlayEndCap )
 				EffectStop( expect int( fxHandleOrNull ), false, true )
 			else
@@ -463,16 +461,16 @@ void function AnimWindow_PlayFX_Stop( ScriptAnimWindow window, var settingsBlock
 
 
 
-//////////////////////
-//////////////////////
-//// MirageHoloFX ////
-//////////////////////
-//////////////////////
+//
+//
+//
+//
+//
 void function AnimWindow_MirageHoloFX_Init()
 {
 	PrecacheParticleSystem( MIRAGE_HOLO_FLASH_FX )
 	PrecacheParticleSystem( MIRAGE_HOLO_TRAIL_FX )
-	#if CLIENT
+	#if(CLIENT)
 		RegisterSignal( "StopMirageHoloFX" )
 	#endif
 }
@@ -486,9 +484,9 @@ void function AnimWindow_MirageHoloFX_Precache( var settingsBlock )
 
 void function AnimWindow_MirageHoloFX_Start( ScriptAnimWindow window, var settingsBlock )
 {
-	#if SERVER
-		Assert( false )
-	#elseif CLIENT
+	#if(false)
+
+#elseif(CLIENT)
 		Assert( !window.ent.IsPlayer(), "The \"MirageHoloFX\" script anim window type should not be used on players because it would reset their highlight. Work is required if this is needed." )
 
 		string attachmentName = GetSettingsBlockString( settingsBlock, "attachPoint" )
@@ -502,20 +500,20 @@ void function AnimWindow_MirageHoloFX_Start( ScriptAnimWindow window, var settin
 }
 
 
-#if CLIENT
+#if(CLIENT)
 void function AnimWindow_MirageHoloFX_Thread( entity ent, int attachIndex, float fadeInDuration, float fadeOutDuration )
 {
 	EndSignal( ent, "OnDestroy" )
 
 	thread PROTO_FadeModelAlphaOverTime( ent, fadeInDuration, 0, 255 )
 
-	// flash FX
+	//
 	StartParticleEffectOnEntity( ent, GetParticleSystemIndex( MIRAGE_HOLO_FLASH_FX ), FX_PATTACH_POINT, attachIndex )
 
-	// trail FX
+	//
 	int trailFXHandle = StartParticleEffectOnEntity( ent, GetParticleSystemIndex( MIRAGE_HOLO_TRAIL_FX ), FX_PATTACH_POINT_FOLLOW, attachIndex )
 
-	// highlight
+	//
 	ent.Highlight_ResetFlags()
 	ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
 	Highlight_SetNeutralHighlight( ent, "decoy_prop" )
@@ -548,23 +546,23 @@ void function AnimWindow_MirageHoloFX_Transition( ScriptAnimWindow window, var s
 
 void function AnimWindow_MirageHoloFX_Stop( ScriptAnimWindow window, var settingsBlock )
 {
-	#if CLIENT
+	#if(CLIENT)
 		Signal( window.ent, "StopMirageHoloFX" )
 	#endif
 }
 
 
-///////////////////////////////
-///////////////////////////////
-//// LifelineDroneCommonFX ////
-///////////////////////////////
-///////////////////////////////
+//
+//
+//
+//
+//
 void function AnimWindow_LifelineDroneCommonFX_Init()
 {
 	LIFELINE_DRONE_JET_FX_IDX = PrecacheParticleSystem( LIFELINE_DRONE_JET_FX )
 	LIFELINE_DRONE_VENT_FX_IDX = PrecacheParticleSystem( LIFELINE_DRONE_VENT_FX )
 	LIFELINE_DRONE_EYEGLOW_FX_IDX = PrecacheParticleSystem( LIFELINE_DRONE_EYEGLOW_FX )
-	#if CLIENT
+	#if(CLIENT)
 		RegisterSignal( "StopLifelineDroneCommonFX" )
 	#endif
 }
@@ -578,15 +576,15 @@ void function AnimWindow_LifelineDroneCommonFX_Precache( var settingsBlock )
 
 void function AnimWindow_LifelineDroneCommonFX_Start( ScriptAnimWindow window, var settingsBlock )
 {
-	#if SERVER
-		Assert( false )
-	#elseif CLIENT
+	#if(false)
+
+#elseif(CLIENT)
 		thread AnimWindow_LifelineDroneCommonFX_Thread( window.ent )
 	#endif
 }
 
 
-#if CLIENT
+#if(CLIENT)
 void function AnimWindow_LifelineDroneCommonFX_Thread( entity ent )
 {
 	EndSignal( ent, "OnDestroy" )
@@ -629,18 +627,18 @@ void function AnimWindow_LifelineDroneCommonFX_Transition( ScriptAnimWindow wind
 
 void function AnimWindow_LifelineDroneCommonFX_Stop( ScriptAnimWindow window, var settingsBlock )
 {
-	#if CLIENT
+	#if(CLIENT)
 		Signal( window.ent, "StopLifelineDroneCommonFX" )
 	#endif
 }
 
 
 
-/////////////////////////
-/////////////////////////
-//// Internals       ////
-/////////////////////////
-/////////////////////////
+//
+//
+//
+//
+//
 struct AnimWindowTypeInfo
 {
 	bool isForThisVM
@@ -656,12 +654,12 @@ struct
 	table<string, AnimWindowTypeInfo> animWindowTypeNameInfoMap
 } fileLevel
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function RegisterAnimWindowType( bool isForThisVM, string type,
-		void functionref() initFunc, // can be null
-		void functionref( var ) precacheFunc, // can be null
+		void functionref() initFunc, //
+		void functionref( var ) precacheFunc, //
 		void functionref( ScriptAnimWindow, var ) startFunc,
-		void functionref( ScriptAnimWindow, var ) transitionFunc, // can be null
+		void functionref( ScriptAnimWindow, var ) transitionFunc, //
 		void functionref( ScriptAnimWindow, var ) stopFunc )
 {
 	Assert( !(type in fileLevel.animWindowTypeNameInfoMap) )
@@ -673,7 +671,7 @@ void function RegisterAnimWindowType( bool isForThisVM, string type,
 	awti.startFunc = startFunc
 	awti.transitionFunc = transitionFunc
 	awti.stopFunc = stopFunc
-	#if DEV
+	#if(DEV)
 		disableoverwrite( fileLevel.animWindowTypeNameInfoMap )
 	#endif
 	fileLevel.animWindowTypeNameInfoMap[type] <- awti
@@ -684,23 +682,23 @@ void function RegisterAnimWindowType( bool isForThisVM, string type,
 #endif
 
 
-#if SERVER
-void function CodeCallback_AnimWindowPrecache( asset windowSettingsAsset )
-{
-	var block = GetSettingsBlockForAsset( windowSettingsAsset )
+#if(false)
 
-	string windowType = GetSettingsBlockString( block, "type" )
-	Assert( windowType in fileLevel.animWindowTypeNameInfoMap, "Unknown script anim window type on \"" + string(windowSettingsAsset) + "\": " + windowType )
 
-	#if SCRIPT_ANIM_WINDOWS_DEBUG
-		printt ( "><><><><><><>" + FUNC_NAME() + ": asset :" + string(windowSettingsAsset) + "; type: " + windowType )
-	#endif
 
-	AnimWindowTypeInfo awti = fileLevel.animWindowTypeNameInfoMap[windowType]
-	if ( awti.precacheFunc != null )
-		awti.precacheFunc( block )
-}
-#elseif CLIENT
+
+
+
+
+
+
+
+
+
+
+
+
+#elseif(CLIENT)
 void function ClientCodeCallback_AnimWindowPrecache( asset windowSettingsAsset )
 {
 	var block = GetSettingsBlockForAsset( windowSettingsAsset )
@@ -708,9 +706,9 @@ void function ClientCodeCallback_AnimWindowPrecache( asset windowSettingsAsset )
 	string windowType = GetSettingsBlockString( block, "type" )
 	Assert( windowType in fileLevel.animWindowTypeNameInfoMap, "Unknown script anim window type on \"" + string(windowSettingsAsset) + "\": " + windowType )
 
-	#if SCRIPT_ANIM_WINDOWS_DEBUG
-		printt ( "><><><><><><>" + FUNC_NAME() + ": asset :" + string(windowSettingsAsset) + "; type: " + windowType )
-	#endif
+	#if(false)
+
+#endif
 
 	AnimWindowTypeInfo awti = fileLevel.animWindowTypeNameInfoMap[windowType]
 	if ( awti.precacheFunc != null )
@@ -719,7 +717,7 @@ void function ClientCodeCallback_AnimWindowPrecache( asset windowSettingsAsset )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClientCodeCallback_AnimWindowStart( ScriptAnimWindow window )
 {
 	Assert( IsValid( window.ent ) )
@@ -729,9 +727,9 @@ void function ClientCodeCallback_AnimWindowStart( ScriptAnimWindow window )
 	string windowType = GetSettingsBlockString( block, "type" )
 	Assert( windowType in fileLevel.animWindowTypeNameInfoMap, "Unknown script anim window type on animseq \"" + window.ent.GetCurrentSequenceName() + "\": " + windowType )
 
-	#if SCRIPT_ANIM_WINDOWS_DEBUG
-		printt ( "><><><><><><>" + FUNC_NAME() + ": id : " + window.stringID + "; type: " + windowType + "; name: " + window.windowName + "; startCycle: " + window.startCycle + "><><><><><><><><><><" )
-	#endif
+	#if(false)
+
+#endif
 
 	AnimWindowTypeInfo awti = fileLevel.animWindowTypeNameInfoMap[windowType]
 	Assert( awti.isForThisVM, "Script anim window \"" + window.windowName + "\" on animseq \"" + window.ent.GetCurrentSequenceName() + "\" is marked as " + (SERVER ? "SERVER" : "CLIENT") + " but its type (\"" + windowType + "\") is " + (SERVER ? "CLIENT" : "SERVER") + " only." )
@@ -740,7 +738,7 @@ void function ClientCodeCallback_AnimWindowStart( ScriptAnimWindow window )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClientCodeCallback_AnimWindowTransition( ScriptAnimWindow window )
 {
 	Assert( IsValid( window.ent ) )
@@ -750,9 +748,9 @@ void function ClientCodeCallback_AnimWindowTransition( ScriptAnimWindow window )
 	string windowType = GetSettingsBlockString( block, "type" )
 	Assert( windowType in fileLevel.animWindowTypeNameInfoMap, "Unknown script anim window type on animseq \"" + window.ent.GetCurrentSequenceName() + "\": " + windowType )
 
-	#if SCRIPT_ANIM_WINDOWS_DEBUG
-		printt ( "><><><><><><>" + FUNC_NAME() + ": id : " + window.stringID + "; type: " + windowType + "; name: " + window.windowName )
-	#endif
+	#if(false)
+
+#endif
 
 	AnimWindowTypeInfo awti = fileLevel.animWindowTypeNameInfoMap[windowType]
 	Assert( awti.isForThisVM, "Script anim window \"" + window.windowName + "\" on animseq \"" + window.ent.GetCurrentSequenceName() + "\" is marked as " + (SERVER ? "SERVER" : "CLIENT") + " but its type (\"" + windowType + "\") is " + (SERVER ? "CLIENT" : "SERVER") + " only." )
@@ -762,7 +760,7 @@ void function ClientCodeCallback_AnimWindowTransition( ScriptAnimWindow window )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClientCodeCallback_AnimWindowStop( ScriptAnimWindow window )
 {
 	Assert( IsValid( window.ent ) )
@@ -772,9 +770,9 @@ void function ClientCodeCallback_AnimWindowStop( ScriptAnimWindow window )
 	string windowType = GetSettingsBlockString( block, "type" )
 	Assert( windowType in fileLevel.animWindowTypeNameInfoMap, "Unknown script anim window type on animseq \"" + window.ent.GetCurrentSequenceName() + "\": " + windowType )
 
-	#if SCRIPT_ANIM_WINDOWS_DEBUG
-		printt ( "><><><><><><>" + FUNC_NAME() + ": id : " + window.stringID + "; type: " + windowType + "; name: " + window.windowName )
-	#endif
+	#if(false)
+
+#endif
 
 	AnimWindowTypeInfo awti = fileLevel.animWindowTypeNameInfoMap[windowType]
 	Assert( awti.isForThisVM, "Script anim window \"" + window.windowName + "\" on animseq \"" + window.ent.GetCurrentSequenceName() + "\" is marked as " + (SERVER ? "SERVER" : "CLIENT") + " but its type (\"" + windowType + "\") is " + (SERVER ? "CLIENT" : "SERVER") + " only." )
@@ -785,7 +783,7 @@ void function ClientCodeCallback_AnimWindowStop( ScriptAnimWindow window )
 
 
 
-#if CLIENT
+#if(CLIENT)
 
 void function ShowEntityAndChildren( entity ent )
 {

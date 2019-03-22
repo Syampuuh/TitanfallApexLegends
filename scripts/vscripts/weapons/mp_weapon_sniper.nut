@@ -4,9 +4,9 @@ global function MpWeaponSniper_Init
 global function OnWeaponActivate_weapon_sniper
 global function OnProjectileCollision_weapon_sniper
 
-#if CLIENT
+#if(CLIENT)
 global function OnClientAnimEvent_weapon_sniper
-#endif // #if CLIENT
+#endif //
 
 void function MpWeaponSniper_Init()
 {
@@ -21,12 +21,12 @@ void function SniperPrecache()
 
 void function OnWeaponActivate_weapon_sniper( entity weapon )
 {
-#if CLIENT
+#if(CLIENT)
 	UpdateViewmodelAmmo( false, weapon )
-#endif // #if CLIENT
+#endif //
 }
 
-#if CLIENT
+#if(CLIENT)
 void function OnClientAnimEvent_weapon_sniper( entity weapon, string name )
 {
 	GlobalClientEventHandler( weapon, name )
@@ -48,7 +48,7 @@ int function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams at
 	if ( IsServer() || weapon.ShouldPredictProjectiles() )
 		shouldCreateProjectile = true
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( !playerFired )
 			shouldCreateProjectile = false
 	#endif
@@ -61,11 +61,11 @@ int function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams at
 
 void function OnProjectileCollision_weapon_sniper( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	#if SERVER
-		int bounceCount = projectile.GetProjectileWeaponSettingInt( eWeaponVar.projectile_ricochet_max_count )
-		if ( projectile.proj.projectileBounceCount >= bounceCount )
-			return
+	#if(false)
 
-		projectile.proj.projectileBounceCount++
-	#endif
+
+
+
+
+#endif
 }

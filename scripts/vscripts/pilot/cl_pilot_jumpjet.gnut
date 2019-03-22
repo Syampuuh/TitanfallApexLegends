@@ -6,7 +6,7 @@ global function OnHumanMeleeTrails
 global function SetupPlayerJumpJetAnimEvents
 global function GetJumpJetFXData
 
-global function CodeCallback_PlayerDecoyStateChange //Client version is here as opposed to in the weapon file since most of the functionality deals with killing the jumpjet effects
+global function CodeCallback_PlayerDecoyStateChange //
 
 const STEALTH_TEAM_JUMPJET_ON = $"P_jump_jet_stealth"
 const STEALTH_TEAM_JUMPJET_DBL = $"P_jump_jet_stealth_DBL"
@@ -64,7 +64,7 @@ struct {
 
 void function ClPilotJumpjet_Init()
 {
-	//Jumpjets
+	//
 	PrecacheParticleSystem( PENEMY_JUMPJET_ON )
 	PrecacheParticleSystem( TEAM_JUMPJET_ON )
 	PrecacheParticleSystem( PENEMY_JUMPJET_RT )
@@ -74,7 +74,7 @@ void function ClPilotJumpjet_Init()
 	PrecacheParticleSystem( PENEMY_JUMPJET_WR )
 	PrecacheParticleSystem( TEAM_JUMPJET_WR )
 
-	//Class Jump Jets
+	//
 	PrecacheParticleSystem( TEAM_JUMPJET_ON_ENGINEER )
 	PrecacheParticleSystem( TEAM_JUMPJET_DBL_ENGINEER )
 	PrecacheParticleSystem( PENEMY_JUMPJET_ON_ENGINEER )
@@ -85,7 +85,7 @@ void function ClPilotJumpjet_Init()
 	PrecacheParticleSystem( PENEMY_JUMPJET_ON_SCOUT )
 	PrecacheParticleSystem( PENEMY_JUMPJET_WR_SCOUT )
 
-	//Stealth Jumpjets
+	//
 	PrecacheParticleSystem( STEALTH_PENEMY_JUMPJET_ON )
 	PrecacheParticleSystem( STEALTH_TEAM_JUMPJET_ON )
 	PrecacheParticleSystem( STEALTH_PENEMY_JUMPJET_DBL )
@@ -95,7 +95,7 @@ void function ClPilotJumpjet_Init()
 
 	CreateWallRunJumpJetData()
 
-	foreach ( key, value in eJumpJetType ) //Enums are really just a table<string, int> anyway
+	foreach ( key, value in eJumpJetType ) //
 		RegisterSignal( "eJumpJetType." +  key )
 
 	AddOnDeathOrDestroyCallback( "player_decoy", CleanUpDecoyFXHandles )
@@ -103,7 +103,7 @@ void function ClPilotJumpjet_Init()
 
 void function CreateWallRunJumpJetData()
 {
-	//Structure is set up so that it's still easy to bring back mutiple pilot subclasses if need be.
+	//
 	file.jumpJetFXData.friendlyJumpJets.stealthJumpJets[ eJumpJetType.ON ] = STEALTH_TEAM_JUMPJET_ON
 	file.jumpJetFXData.friendlyJumpJets.stealthJumpJets[ eJumpJetType.DBL ] = STEALTH_TEAM_JUMPJET_DBL
 	file.jumpJetFXData.friendlyJumpJets.stealthJumpJets[ eJumpJetType.WR ] = STEALTH_TEAM_JUMPJET_WR
@@ -133,12 +133,12 @@ int function GetJumpjetFXForPlayer( entity playerOrDecoy, int jumpjetType )
 		namesStruct = dataStruct.friendlyJumpJets
 
 	asset[ 4 ] names = namesStruct.regularJumpJets
-	if ( ShouldDoStealthJumpJetFX( playerOrDecoy ) ) //Has to be here as opposed to in SetupPlayerAnimEvent because playerOrDecoys can switch classes/get the Stealth Movement Mod mid game
+	if ( ShouldDoStealthJumpJetFX( playerOrDecoy ) ) //
 		names = namesStruct.stealthJumpJets
 
 	asset fxString = names[ jumpjetType ]
 
-	int fxID = GetParticleSystemIndex( fxString ) //If there's no particle system associated with it, it'll return 0. Dealt with in PlayJumpJetFX
+	int fxID = GetParticleSystemIndex( fxString ) //
 
 	return fxID
 }
@@ -165,8 +165,8 @@ array<int> function PlayJumpjetFX( entity playerOrDecoy, int jumpjetType, array<
 	foreach ( attachment in attachments )
 	{
 		int jumpJet = StartParticleEffectOnEntity( playerOrDecoy, fxID, FX_PATTACH_POINT_FOLLOW, playerOrDecoy.LookupAttachment( attachment ) )
-		//if ( jumpjetType != 1 )
-		//	printt( "jumpjet start " + jumpJet + " " + fxID + " " + attachment + " " + jumpjetType )
+		//
+		//
 		particleEffects.append( jumpJet )
 	}
 
@@ -213,7 +213,7 @@ void function OnHumanJumpJetOneSide( entity playerOrDecoy, string attachment )
 	int lightFX = PlayJumpjetLight( playerOrDecoy )
 	if ( lightFX != 0 )
 	{
-		//printt( "jumpjet light start " + lightFX + " " + attachment + " " )
+		//
 		particleEffects.append( lightFX )
 	}
 
@@ -258,18 +258,18 @@ void function CleanUpJumpJetParticleEffect( entity player, array<int> particleEf
 {
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "OnDestroy" )
-	player.Signal( stopSignalName ) //Kill previous thread. Ensures Jumpjet effects don't keep piling on to each other.
+	player.Signal( stopSignalName ) //
 	player.EndSignal( stopSignalName )
 
 	OnThreadEnd
 	(
-		function() : ( player, particleEffects /*, stopSignalName*/ )
+		function() : ( player, particleEffects /**/ )
 		{
 			bool playEndCap = !IsValid( player ) || !player.IsPhaseShifted()
 			foreach ( particle in particleEffects )
 			{
-				//string exists = ( EffectDoesExist( particle ) ? "exists" : "Not exists" )
-				//printt( "jumpjet stop " + particle + " " + stopSignalName + " " + exists )
+				//
+				//
 
 				if ( EffectDoesExist( particle ) )
 					EffectStop( particle, false, playEndCap )
@@ -277,9 +277,9 @@ void function CleanUpJumpJetParticleEffect( entity player, array<int> particleEf
 		}
 	)
 
-	if ( player.IsWallRunning() ) //When wallrunning player.IsOnGround() is true
+	if ( player.IsWallRunning() ) //
 	{
-		for ( ;; ) //Bad since we are polling, but clWaitTillAnimDone() doesn't seem to work :/
+		for ( ;; ) //
 		{
 			WaitFrame()
 			if ( !player.IsWallRunning() || player.IsPhaseShifted() )
@@ -288,7 +288,7 @@ void function CleanUpJumpJetParticleEffect( entity player, array<int> particleEf
 	}
 	else
 	{
-		for ( ;; ) //Bad since we are polling, but clWaitTillAnimDone() doesn't seem to work :/
+		for ( ;; ) //
 		{
 			WaitFrame()
 			if ( player.IsOnGround() || (player.GetParent() != null) || player.IsPhaseShifted() )
@@ -297,7 +297,7 @@ void function CleanUpJumpJetParticleEffect( entity player, array<int> particleEf
 	}
 }
 
-void function OnHumanMeleeTrails( entity player ) //Decoy doesn't melee, so not adding it for now
+void function OnHumanMeleeTrails( entity player ) //
 {
 	int fxID
 	if ( IsFriendlyTeam( player.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
@@ -340,21 +340,21 @@ bool function ShouldDoJumpjetEffects( entity playerOrDecoy )
 {
 	return false
 	/*
-	if ( playerOrDecoy.IsPlayerDecoy() ) //Assume decoy can't ever be phase-shifted...
-		return true
-	entity player = playerOrDecoy
 
-	if ( player.IsPhaseShifted() )
-		return false
 
-	if ( player.IsClassModAvailableForPlayerSetting( string( player.GetPlayerSettings() ), "jumpkit_none" ) )
-	{
-		if ( player.HasClassMod( "jumpkit_none" ) )
-			return false
-	}
 
-	return true
-	*/
+
+
+
+
+
+
+
+
+
+
+
+*/
 }
 
 void function CleanUpDecoyFXHandles( entity decoy )
@@ -370,16 +370,16 @@ void function CleanUpDecoyFXHandles( entity decoy )
 
 void function CodeCallback_PlayerDecoyStateChange( entity decoy, int previousState, int currentState )
 {
-	//printt( "Current State: " + currentState + ", previous State: " + previousState )
+	//
 
 	if ( previousState == PLAYER_DECOY_STATE_NONE )
 	{
-		//printt( "Setting up player anim jump events for decoy: " + decoy )
+		//
 
-		//Essentially this is "OnPlayerDecoyCreate_Init"
+		//
 		SetupPlayerJumpJetAnimEvents( decoy )
 		entity bossPlayer = decoy.GetBossPlayer()
-		if ( IsValid( bossPlayer ) ) //Could theoretically be not valid when the bossPlayer disconnects as another player connects in. In that case the decoy takes some time to clean up as it does the dissolve effect. Also the decoy by default has stealthpassive set to false anyway.
+		if ( IsValid( bossPlayer ) ) //
 			decoy.decoy.decoyHasStealthPassive = PlayerHasStealthMovement( bossPlayer )
 	}
 	else if ( currentState != PLAYER_DECOY_STATE_AIRBORNE )
@@ -393,7 +393,7 @@ void function HandleFXCleanUp( entity playerOrDecoy, array<int> particleEffects,
 	if ( particleEffects.len() == 0 )
 		return
 
-	if ( playerOrDecoy.IsPlayer() ) //Players use a polling thread ( bad ), decoys use the CodeCallback_PlayerDecoyStateChange to clean it up
+	if ( playerOrDecoy.IsPlayer() ) //
 		thread CleanUpJumpJetParticleEffect( playerOrDecoy, particleEffects, stopSignalName )
 	else
 		playerOrDecoy.decoy.particleIndexes.extend( particleEffects )
@@ -404,16 +404,16 @@ JumpJetDataStruct function GetJumpJetFXData()
 	return file.jumpJetFXData
 }
 
-/*Player decoy states: defined in player_decoy_shared.h
-	PLAYER_DECOY_STATE_NONE,
-	PLAYER_DECOY_STATE_IDLE,
-	PLAYER_DECOY_STATE_CROUCH_IDLE,
-	PLAYER_DECOY_STATE_CROUCH_WALK,
-	PLAYER_DECOY_STATE_WALLHANG,
-	PLAYER_DECOY_STATE_AIRBORNE,
-	PLAYER_DECOY_STATE_WALK,
-	PLAYER_DECOY_STATE_RUN,
-	PLAYER_DECOY_STATE_SPRINT,
-	PLAYER_DECOY_STATE_DYING,
-	PLAYER_DECOY_STATE_COUNT
+/*
+
+
+
+
+
+
+
+
+
+
+
 */

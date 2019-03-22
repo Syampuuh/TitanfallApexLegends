@@ -31,7 +31,11 @@ global function ClientCodeCallback_PingSpecificType
 global function SetCallback_PingSpecificType
 global function RemoveCallback_PingSpecificType
 
-#if HAS_WEAPON_PICKUP_HIGHLIGHT
+global function ClientCodeCallback_UseConsumable
+global function SetCallback_UseConsumable
+global function RemoveCallback_UseConsumable
+
+#if(true)
 global function ServerCallback_RefreshWeaponHighlights
 #endif
 
@@ -42,6 +46,7 @@ struct
 	entity focusedEnt
 	table<string, asset> modImages
 	void functionref( entity, string ) pingCallback = null
+	void functionref( entity, string ) useConsumableCallback = null
 } file
 
 void function ClientCodeCallback_PingSpecificType( entity player, string pingType )
@@ -64,6 +69,26 @@ void function RemoveCallback_PingSpecificType()
 	file.pingCallback = null
 }
 
+void function ClientCodeCallback_UseConsumable( entity player, string consumableType )
+{
+	if ( file.useConsumableCallback != null )
+		file.useConsumableCallback( player, consumableType )
+}
+
+void function SetCallback_UseConsumable( void functionref( entity, string ) callback )
+{
+	Assert( file.useConsumableCallback == null, "Consumable callback already exists! Cannot have more than 1 Consumable callback" )
+	file.useConsumableCallback = callback
+}
+
+void function RemoveCallback_UseConsumable()
+{
+	if( file.useConsumableCallback == null )
+		Warning( "Attempted to remove consumable callback when nothing has been set" )
+
+	file.useConsumableCallback = null
+}
+
 void function ClDroppedWeaponFlyout_Init()
 {
 	RegisterSignal( "PetTitanChanged" )
@@ -81,14 +106,14 @@ void function ClDroppedWeaponFlyout_Init()
 
 	AddCinematicEventFlagChangedCallback( CE_FLAG_HIDE_MAIN_HUD, WeaponPickupFlyout_UpdateVisibility )
 
-	#if HAS_WEAPON_PICKUP_HIGHLIGHT
+	#if(true)
 	AddCreateCallback( "weaponx", ClWeaponCreationCallback )
 	#endif
 }
 
 void function ClientCodeCallback_BodyGroupChanged( entity ent, int bodyGroupIndex, int oldState, int newState )
 {
-//	PrintFunc( "entity " + ent + " index " + bodyGroupIndex + "newstate " + newState )
+//
 
 	if ( IsSpectre( ent ) || IsStalker( ent ) )
 	{
@@ -144,12 +169,12 @@ void function ClientCodeCallback_UseEntGainedFocus( entity ent )
 		DestroyWeaponFlyout()
 	}
 
-#if HAS_AMMO_FULL_FLYOUT
-	if ( IsAmmoFullWeapon( ent ) )
-		HideAmmoFullFlyout()
+#if(false)
+
+
 #endif
 
-#if HAS_WEAPON_PICKUP_HIGHLIGHT
+#if(true)
 	ManageHighlightEntity( ent )
 #endif
 }
@@ -209,7 +234,7 @@ void function ClientCodeCallback_UseEntLostFocus( entity ent )
 		file.focusedEnt = null
 	}
 
-#if HAS_WEAPON_PICKUP_HIGHLIGHT
+#if(true)
 	if ( IsValid( ent ) )
 		ManageHighlightEntity( ent )
 #endif
@@ -278,7 +303,7 @@ void function WeaponPickupFlyout_UpdateVisibility( entity player )
 	RuiSetBool( file.flyoutRUI, "inCinematic", hideHud )
 }
 
-#if HAS_WEAPON_PICKUP_HIGHLIGHT
+#if(true)
 void function ServerCallback_RefreshWeaponHighlights( int eHandle )
 {
 	entity weapon = GetEntityFromEncodedEHandle( eHandle )
@@ -306,12 +331,12 @@ void function ClientCodeCallback_OnPetTitanModeChanged( entity player )
 	if ( !IsValid( player ) || player != GetLocalViewPlayer() )
 		return
 
-	if ( !IsValid( player.GetPetTitan() ) ) // should be an assert...
+	if ( !IsValid( player.GetPetTitan() ) ) //
 		return
 
 	player.Signal( "PetTitanModeChanged" )
 
-	// Added via AddCallback_OnPetTitanModeChanged
+	//
 	foreach ( callbackFunc in clGlobal.onPetTitanModeChangedCallbacks )
 	{
 		callbackFunc( player )
@@ -331,7 +356,7 @@ void function ClientCodeCallback_OnPlayerConsumableInventoryChanged( entity play
 	if ( !IsValid( player ) || player != GetLocalViewPlayer() )
 		return
 
-	// Added via AddCallback_OnPlayerConsumableInventoryChanged
+	//
 	foreach ( callbackFunc in clGlobal.consumableInventoryChangedCallbacks )
 	{
 		callbackFunc( player )

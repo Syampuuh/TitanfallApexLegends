@@ -37,7 +37,7 @@ void function OpenCharacterSkillsDialog( ItemFlavor character )
 
 void function CharacterSkillsDialog_OnOpen()
 {
-	//printt( Time() )
+	//
 	EmitUISound( "UI_Menu_Legend_Details" )
 
 	if ( LoadoutSlot_IsReady( ToEHI( GetUIPlayer() ), Loadout_CharacterClass() ) )

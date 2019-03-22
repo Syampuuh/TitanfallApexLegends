@@ -82,6 +82,17 @@ struct
 } s_loot
 
 
+struct SeasonalStoreData
+{
+	string seasonTag = ""
+	asset tallImage = $""
+	asset squareImage = $""
+	asset topImage = $""
+	asset tallFrameOverlayImage = $""
+	asset squareFrameOverlayImage = $""
+}
+
+
 struct
 {
 	var offersPanel
@@ -95,8 +106,10 @@ struct
 
 	array<var> shopButtons
 
-	// meh.
+	//
 	table< var, GRXScriptOffer > buttonToOfferData
+
+	table< string, SeasonalStoreData > seasonalDataMap
 } s_offers
 
 void function InitDummyPanel( var panel )
@@ -120,25 +133,25 @@ void function InitStorePanel( var panel )
 
 	int buttonNum = 0
 
-	// Offers
+	//
 	{
 		var tabBody = Hud_GetChild( panel, "ECPanel" )
 		AddTab( panel, tabBody, "#MENU_STORE_PANEL_SHOP" )
 	}
 
-	// Loot
+	//
 	{
 		var tabBody = Hud_GetChild( panel, "LootPanel" )
 		AddTab( panel, tabBody, "#MENU_STORE_PANEL_LOOT" )
 	}
 
-	// Characters
+	//
 	{
 		var tabBody = Hud_GetChild( panel, "CharacterPanel" )
 		AddTab( panel, tabBody, "#MENU_STORE_PANEL_CHARACTERS" )
 	}
 
-	// Virtual Currency
+	//
 	{
 		var tabBody = Hud_GetChild( panel, "VCPanel" )
 		AddTab( panel, tabBody, "#MENU_STORE_PANEL_CURRENCY" )
@@ -156,7 +169,7 @@ void function OnStorePanel_Show( var panel )
 		file.tabsInitialized = true
 	}
 
-	// Start disabled, only enable when store updates are complete
+	//
 	DeactivateTab( tabData )
 	SetTabNavigationEnabled( file.storePanel, false )
 	tabData.tabIndex = 0
@@ -188,7 +201,7 @@ void function TabNavigateToLobby()
 {
 	TabData lobbyTabData = GetTabDataForPanel( GetMenu( "LobbyMenu" ) )
 
-	//TODO: assert we're the active tab
+	//
 	ActivateTabPrev( lobbyTabData )
 }
 
@@ -275,12 +288,12 @@ void function UpdateLootTickTabNewness()
 
 /*
 
-��+   ��+��+������+ ��������+��+   ��+ �����+ ��+          ������+��+   ��+������+ ������+ �������+���+   ��+ ������+��+   ��+
-���   ��������+--��++--��+--+���   �����+--��+���         ��+----+���   �����+--��+��+--��+��+----+����+  �����+----++��+ ��++
-���   ������������++   ���   ���   ��������������         ���     ���   ���������++������++�����+  ��+��+ ������      +����++
-+��+ ��++�����+--��+   ���   ���   �����+--������         ���     ���   �����+--��+��+--��+��+--+  ���+��+������       +��++
- +����++ ������  ���   ���   +������++���  ����������+    +������++������++���  ������  ����������+��� +�����+������+   ���
-  +---+  +-++-+  +-+   +-+    +-----+ +-+  +-++------+     +-----+ +-----+ +-+  +-++-+  +-++------++-+  +---+ +-----+   +-+
+
+
+
+
+
+
 
 
 */
@@ -340,7 +353,7 @@ void function VCPanel_Think( var panel )
 
 		var discountPanel = Hud_GetChild( panel, "DiscountPanel" )
 		Hud_SetVisible( discountPanel, Script_UserHasEAAccess() )
-		#if PC_PROG
+		#if(PC_PROG)
 			HudElem_SetRuiArg( discountPanel, "discountImage", $"rui/menu/common/ea_access_pc", eRuiArgType.IMAGE )
 		#else
 			HudElem_SetRuiArg( discountPanel, "discountImage", $"rui/menu/common/ea_access", eRuiArgType.IMAGE )
@@ -389,8 +402,8 @@ void function InitVCPacks( var panel )
 
 		RuiSetImage( vcRui, "vcImage", GetVCPackImage( vcPackIndex ) )
 
-		//Hud_SetEnabled( vcButton, vcPack.valid )
-		//Hud_SetLocked( vcButton, !vcPack.valid )
+		//
+		//
 		Hud_SetEnabled( vcButton, true )
 		Hud_SetLocked( vcButton, false )
 	}
@@ -407,7 +420,7 @@ void function OnVCButtonActivate( var button )
 		return
 	}
 
-	#if PC_PROG
+	#if(PC_PROG)
 		if ( !Origin_IsOverlayAvailable() )
 		{
 			ConfirmDialogData dialogData
@@ -467,8 +480,8 @@ string function GetVCPackTotalString( int vcPackIndex )
 
 string function GetVCPackBonusBaseString( int vcPackIndex )
 {
-	//if ( !s_vc.vcPacks[vcPackIndex].bonus )
-	//	return ""
+	//
+	//
 
 	return Localize( "#STORE_VC_BONUS_BASE", ShortenNumber( string( s_vc.vcPacks[vcPackIndex].base ) ) )
 }
@@ -515,12 +528,12 @@ asset function GetVCPackImage( int vcPackIndex )
 
 /*
 
- ������+��+  ��+ �����+ ������+  �����+  ������+��������+�������+������+
-��+----+���  �����+--��+��+--��+��+--��+��+----++--��+--+��+----+��+--��+
-���     ����������������������++�����������        ���   �����+  ������++
-���     ��+--�����+--�����+--��+��+--������        ���   ��+--+  ��+--��+
-+������+���  ������  ������  ������  ���+������+   ���   �������+���  ���
- +-----++-+  +-++-+  +-++-+  +-++-+  +-+ +-----+   +-+   +------++-+  +-+
+
+
+
+
+
+
 */
 
 
@@ -676,8 +689,8 @@ void function CharacterButton_OnActivate( var button )
 	}
 
 	ItemFlavor character = s_characters.buttonToCharacter[button]
-	//array<GRXScriptOffer> offers = GRX_GetItemDedicatedStoreOffers( character, "character" )
-	//Assert( offers.len() == 1 )
+	//
+	//
 	PurchaseDialog( character, 1, true, null, null )
 }
 
@@ -698,20 +711,20 @@ void function CharacterButton_OnGetFocus( var button )
 	foreach ( characterButton in s_characters.buttons )
 		Hud_SetSelected( characterButton, false )
 
-	//Hud_SetSelected( button, true )
+	//
 
 	bool grxReady = GRX_IsInventoryReady() && GRX_AreOffersReady()
 
 	ItemFlavor character     = s_characters.buttonToCharacter[button]
 	ItemFlavor characterSkin = LoadoutSlot_GetItemFlavor( LocalClientEHI(), Loadout_CharacterSkin( character ) )
 
-	//RuiSetBool( s_characters.characterSelectInfoRui, "showInfo", true )
+	//
 	RuiSetString( s_characters.characterSelectInfoRui, "nameText", Localize( ItemFlavor_GetLongName( character ) ).toupper() )
 	RuiSetString( s_characters.characterSelectInfoRui, "subtitleText", Localize( CharacterClass_GetCharacterSelectSubtitle( character ) ) )
-	//RuiSetString( s_characters.characterSelectInfoRui, "descText", Localize( ItemFlavor_GetShortDescription( character ) ) )
+	//
 	if ( s_characters.buttonWithFocus != button )
 		RuiSetGameTime( s_characters.characterSelectInfoRui, "initTime", Time() )
-	//RuiSetImage( s_characters.characterSelectInfoRui, "roleImage", CharacterClass_GetCharacterRoleImage( character ) )
+	//
 
 	s_characters.buttonWithFocus = button
 
@@ -763,12 +776,12 @@ void function CharacterButton_OnGetFocus( var button )
 
 /*
 
-��+      ������+  ������+ ��������+    ��������+��+ ������+��+  ��+
-���     ��+---��+��+---��++--��+--+    +--��+--+�����+----+��� ��++
-���     ���   ������   ���   ���          ���   ������     �����++
-���     ���   ������   ���   ���          ���   ������     ��+-��+
-�������++������+++������++   ���          ���   ���+������+���  ��+
-+------+ +-----+  +-----+    +-+          +-+   +-+ +-----++-+  +-+
+
+
+
+
+
+
 
 
 */
@@ -776,9 +789,9 @@ void function CharacterButton_OnGetFocus( var button )
 void function InitLootPanel( var panel )
 {
 	var lootPanelA = Hud_GetChild( panel, "LootPanelA" )
-	//	var rui = Hud_GetRui( Hud_GetChild( lootPanelA, "LootFrame" ) )
-	//	RuiSetImage( rui, "basicImage", $"rui/menu/store/loot_tick_temp" )
-	//HudElem_SetRuiArg( Hud_GetChild( lootPanelA, "LootFrame" ), "lootImage", $"rui/menu/store/loot_tick_temp" )
+	//
+	//
+	//
 
 	s_loot.lootPanel = Hud_GetChild( lootPanelA, "PanelContent" )
 	HudElem_SetRuiArg( s_loot.lootPanel, "titleText", Localize( "#RARE_LOOT_TICK" ) )
@@ -882,9 +895,9 @@ void function UpdateLootTickButton( var button, int quantity )
 		{
 			expect GRXScriptOffer( offer )
 			purchaseDesc = Localize( "#STORE_PURCHASE_N_FOR_N", quantity, GRX_GetFormattedPrice( offer.prices[0], quantity ) )
-			ItemFlavor lootTickFlavor = offer.output.flavors[0] // this is kind of silly
+			ItemFlavor lootTickFlavor = offer.output.flavors[0] //
 
-			purchaseLock = false//!GRX_CanAfford( offer.prices[0], quantity )
+			purchaseLock = false//
 		}
 		else
 		{
@@ -918,7 +931,7 @@ void function LootTickPurchaseButton_Activate( var button )
 		{
 			foreach ( GRXScriptOffer locationOffer in locationOfferList )
 			{
-				// TODO; quantity becomes what a player can afford, and this gets moved to sh_grx
+				//
 			}
 		}
 
@@ -941,7 +954,7 @@ void function OnLootTickPurchaseResult( bool wasSuccessful )
 
 /*
 
-EC SHOP
+
 
 */
 
@@ -1035,15 +1048,38 @@ void function InitOffers()
 	int featuredWidth = 0
 
 	int exclusiveWidth = 0
-	int exclusiveX
+	int exclusiveX	   = 0
 
-	//array<int> fakeOfferCounts = [2, 1, 0, 2, 2]
+	var dataTable = GetDataTable( $"datatable/seasonal_store_data.rpak" )
+	for ( int i = 0; i < GetDatatableRowCount( dataTable ); i++ )
+	{
+		string seasonTag = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "seasonTag" ) ).tolower()
+		asset tallImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "tallImage" ) )
+		asset squareImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "squareImage" ) )
+		asset tallFrameOverlayImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "tallFrameOverlay" ) )
+		asset squareFrameOverlayImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "squareFrameOverlay" ) )
+		asset topImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "topImage" ) )
+
+		SeasonalStoreData seasonalStoreData
+		seasonalStoreData.seasonTag = seasonTag
+		seasonalStoreData.tallImage = tallImage
+		seasonalStoreData.squareImage = squareImage
+		seasonalStoreData.tallFrameOverlayImage = tallFrameOverlayImage
+		seasonalStoreData.squareFrameOverlayImage = squareFrameOverlayImage
+		seasonalStoreData.topImage = topImage
+
+		s_offers.seasonalDataMap[seasonTag] <- seasonalStoreData
+	}
+	//
+
+	int featuredColumns = 0
+	int exclusiveColumns = 0
 
 	for ( int col = 0; col < 5; col++ )
 	{
-		//array<GRXScriptOffer> fakeOffers
-		//fakeOffers.resize( fakeOfferCounts[col] )
-		//array<GRXScriptOffer> columnOffers = fakeOffers//GRX_GetStoreOfferColumn( col )
+		//
+		//
+		//
 
 		array<GRXScriptOffer> columnOffers = GRX_GetStoreOfferColumn( col )
 
@@ -1074,6 +1110,11 @@ void function InitOffers()
 			if ( featuredWidth != 0 && exclusiveX == 0 )
 			{
 				exclusiveX = totalWidth + Hud_GetX( s_offers.fullOfferButtons[col] )
+				exclusiveColumns++
+			}
+			else
+			{
+				featuredColumns++
 			}
 
 			Hud_ReturnToBaseSize( s_offers.fullOfferButtons[col] )
@@ -1084,7 +1125,7 @@ void function InitOffers()
 			Hud_SetVisible( s_offers.topOfferButtons[col], false )
 			Hud_SetVisible( s_offers.bottomOfferButtons[col], false )
 
-			InitOfferButton( s_offers.fullOfferButtons[col], columnOffers[0] )
+			InitOfferButton( s_offers.fullOfferButtons[col], columnOffers[0], true )
 
 			if ( columnOffers[0].prereq != null && col > 0  )
 				InitSpacerButton( s_offers.fullOfferButtons[col - 1], columnOffers[0] )
@@ -1094,6 +1135,11 @@ void function InitOffers()
 			if ( featuredWidth != 0 && exclusiveX == 0 )
 			{
 				exclusiveX = totalWidth + Hud_GetX( s_offers.fullOfferButtons[col] )
+				exclusiveColumns++
+			}
+			else
+			{
+				featuredColumns++
 			}
 
 			Hud_ReturnToBaseSize( s_offers.fullOfferButtons[col] )
@@ -1104,8 +1150,8 @@ void function InitOffers()
 			Hud_SetVisible( s_offers.topOfferButtons[col], true )
 			Hud_SetVisible( s_offers.bottomOfferButtons[col], true )
 
-			InitOfferButton( s_offers.topOfferButtons[col], columnOffers[0] )
-			InitOfferButton( s_offers.bottomOfferButtons[col], columnOffers[1] )
+			InitOfferButton( s_offers.topOfferButtons[col], columnOffers[0], false )
+			InitOfferButton( s_offers.bottomOfferButtons[col], columnOffers[1], false )
 
 			if ( columnOffers[0].prereq != null && col > 0 )
 				InitSpacerButton( s_offers.topOfferButtons[col - 1], columnOffers[0] )
@@ -1121,6 +1167,7 @@ void function InitOffers()
 
 	Hud_SetX( s_offers.exclusiveHeader, exclusiveX )
 	Hud_SetWidth( s_offers.exclusiveHeader, exclusiveWidth > 0 ? exclusiveWidth : totalWidth - exclusiveX )
+	Hud_SetVisible( s_offers.exclusiveHeader, exclusiveColumns > 0 )
 }
 
 
@@ -1167,14 +1214,27 @@ void function OfferButton_Activate( var button )
 }
 
 
-void function InitOfferButton( var button, GRXScriptOffer offerData )
+void function InitOfferButton( var button, GRXScriptOffer offerData, bool isTall )
 {
 	var rui = Hud_GetRui( button )
 
 	RuiSetImage( rui, "ecImage", offerData.image )
 	RuiSetString( rui, "ecTitle", offerData.titleText )
-	RuiSetString( rui, "ecDesc", ""/*offerData.descText*/ )
+	RuiSetString( rui, "ecDesc", ""/**/ )
 	RuiSetString( rui, "tagText", offerData.tagText )
+
+	asset topImage
+	asset backgroundImage
+	asset frameOverlayImage
+	string seasonTag = offerData.seasonTag in s_offers.seasonalDataMap ? offerData.seasonTag : "default"
+
+	topImage = s_offers.seasonalDataMap[seasonTag].topImage
+	backgroundImage = isTall ? s_offers.seasonalDataMap[seasonTag].tallImage : s_offers.seasonalDataMap[seasonTag].squareImage
+	frameOverlayImage = isTall ? s_offers.seasonalDataMap[seasonTag].tallFrameOverlayImage : s_offers.seasonalDataMap[seasonTag].squareFrameOverlayImage
+
+	RuiSetImage( rui, "topSlotImg", topImage )
+	RuiSetImage( rui, "backgroundImg", backgroundImage )
+	RuiSetImage( rui, "frameOverlayImg", frameOverlayImage )
 
 	bool isPurchasableByLocalPlayer = false
 	string priceText                = ""
@@ -1196,7 +1256,7 @@ void function InitOfferButton( var button, GRXScriptOffer offerData )
 			break
 	}
 	RuiSetFloat( rui, "vertAlign", vertAlign )
-	//printt( ItemFlavor_GetHumanReadableRef( itemFlav ) )
+	//
 
 	asset containerImage = $""
 	if ( GRX_IsItemOwnedByPlayer( itemFlav ) )
@@ -1230,7 +1290,7 @@ void function InitOfferButton( var button, GRXScriptOffer offerData )
 	RuiSetString( rui, "ecPrice", priceText )
 	RuiSetInt( rui, "rarity", ItemFlavor_GetQuality( itemFlav ) )
 	RuiSetString( rui, "rarityName", ItemFlavor_GetQualityName( itemFlav ) )
-	//RuiSetString( rui, "rarityName", "" )
+	//
 	RuiSetString( rui, "ecDesc", "" )
 
 	int remainingTime = offerData.expireTime - GetUnixTimestamp()
@@ -1239,7 +1299,7 @@ void function InitOfferButton( var button, GRXScriptOffer offerData )
 	else
 		RuiSetGameTime( rui, "expireTime", RUI_BADGAMETIME )
 
-	//Hud_SetEnabled( button, isPurchasableByLocalPlayer )
+	//
 	Hud_SetEnabled( button, true )
 
 	if ( offerData.prereq != null )
@@ -1260,7 +1320,7 @@ void function JumpToStoreCharacter( ItemFlavor character )
 	while ( GetActiveMenu() != GetMenu( "LobbyMenu" ) )
 		CloseActiveMenu( true, true )
 
-	//printt( "Jumping to:", ItemFlavor_GetHumanReadableRef( character ) )
+	//
 	TabData lobbyTabData = GetTabDataForPanel( GetMenu( "LobbyMenu" ) )
 	ActivateTab( lobbyTabData, Tab_GetTabIndexByBodyName( lobbyTabData, "StorePanel" ) )
 
@@ -1280,7 +1340,7 @@ void function JumpToStoreCharacter( ItemFlavor character )
 
 void function CharactersPanel_OnFocusChanged( var panel, var oldFocus, var newFocus )
 {
-	if ( !IsValid( panel ) ) // uiscript_reset
+	if ( !IsValid( panel ) ) //
 		return
 	if ( GetParentMenu( panel ) != GetActiveMenu() )
 		return

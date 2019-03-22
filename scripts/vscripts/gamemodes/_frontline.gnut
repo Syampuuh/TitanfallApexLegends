@@ -2,7 +2,7 @@ global function GetFrontline
 global function SetFrontline
 global function AddCalculateFrontlineCallback
 
-const DEBUG_FRONTLINE = false
+const bool DEBUG_FRONTLINE = false
 
 global struct Frontline
 {
@@ -45,8 +45,8 @@ Frontline function GetFrontline( int team )
 
 void function AddCalculateFrontlineCallback( void functionref( int ) callbackFunc )
 {
-	// Check if this function has already been added
-	#if DEV
+	//
+	#if(DEV)
 		foreach ( func in file.calculateFrontlineCallbacks )
 		{
 			Assert( func != callbackFunc )
@@ -58,7 +58,7 @@ void function AddCalculateFrontlineCallback( void functionref( int ) callbackFun
 
 void function CalculateFrontline( int team )
 {
-	#if DEV
+	#if(DEV)
 		float debugTime = 0.2
 	#endif
 
@@ -74,14 +74,14 @@ void function CalculateFrontline( int team )
 		vector militiaCenter = CalculateWeightedTeamCenter( TEAM_MILITIA )
 		vector imcCenter = CalculateWeightedTeamCenter( TEAM_IMC )
 
-		file.frontline.friendlyCenter = imcCenter // friendlyCenter is for TEAM_IMC by default
+		file.frontline.friendlyCenter = imcCenter //
 		file.frontline.enemyCenter = militiaCenter
 
 		file.frontline.origin = ( militiaCenter + imcCenter ) * 0.5
-		file.frontline.combatDir = Normalize( militiaCenter - imcCenter ) // combatDir is for TEAM_IMC by default
+		file.frontline.combatDir = Normalize( militiaCenter - imcCenter ) //
 		file.frontline.line = CrossProduct( file.frontline.combatDir, <0,0,1> )
 
-		#if DEV
+		#if(DEV)
 			if ( DEBUG_FRONTLINE )
 			{
 				DrawBox( militiaCenter, <-8,-8,-8>, <8,8,8>, 255, 102, 0, true, debugTime )
@@ -91,7 +91,7 @@ void function CalculateFrontline( int team )
 		#endif
 	}
 
-	#if DEV
+	#if(DEV)
 		if ( DEBUG_FRONTLINE )
 		{
 			DrawBox( file.frontline.origin, <-32,-32,-32>, <32,32,32>, 255, 0, 0, true, debugTime )
@@ -116,8 +116,8 @@ vector function CalculateWeightedTeamCenter( int team )
 	if ( teamPlayersCount == 0 )
 		return <0,0,0>
 
-	// find minimum distances between teammates
-	array<float> minTeammateDistances// = arrayofsize( teamPlayersCount, 99999.0 )
+	//
+	array<float> minTeammateDistances//
 	minTeammateDistances.resize( teamPlayersCount, 99999.0 )
 
 	for ( int i = 0; i < teamPlayersCount; i++ )
@@ -140,15 +140,15 @@ vector function CalculateWeightedTeamCenter( int team )
 	vector weightedOrgSum = <0,0,0>
 	float weightSum = 0.0
 	float weight = 0.0
-	float halfPi = 1.57 // passing a fraction of this value into sin which gives us the first part of a sin wave from 0 - 1
+	float halfPi = 1.57 //
 	float maxPossibleDistance = MAX_WORLD_RANGE
-	float magicNumber = 14.0 // magic number gives the desired falloff
+	float magicNumber = 14.0 //
 
-	// calculate a weighted origin based on how close players are to teammates
+	//
 	foreach ( index, player in teamPlayers )
 	{
-		float radians = halfPi * ( minTeammateDistances[ index ] / maxPossibleDistance ) // radians will be a value between 0 - halfPi
-		weight = pow( ( 1.0 - sin( radians ) ), magicNumber ) // pow squashes the result so the curve has the falloff that's desired
+		float radians = halfPi * ( minTeammateDistances[ index ] / maxPossibleDistance ) //
+		weight = pow( ( 1.0 - sin( radians ) ), magicNumber ) //
 
 		weightedOrgSum += player.GetOrigin() * weight
 		weightSum += weight

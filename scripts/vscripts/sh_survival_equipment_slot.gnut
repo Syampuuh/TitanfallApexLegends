@@ -39,7 +39,7 @@ global const table<string, asset> emptyAttachmentSlotImages = {
 	hopup_skullpiercer	= $"rui/pilot_loadout/mods/empty_hopup_skullpiercer"
 }
 
-#if CLIENT
+#if(CLIENT)
 global function AddCallback_OnEquipSlotTrackingIntChanged
 #endif
 
@@ -49,19 +49,19 @@ global struct EquipmentSlot
 	asset emptyImage = $""
 	string title = ""
 
-	#if SERVER
-		bool functionref( entity player, string slot, vector origin, vector velocity ) specialCaseDropFunc
-		void functionref( entity player, string ref ) specialCaseEquipFunc
-	#endif
+	#if(false)
 
-	#if SERVER || CLIENT
+
+#endif
+
+	#if(CLIENT)
 		string functionref( entity player, string slot ) getEquippedRefFunc
 		int trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP
 		int trackingVisionExchangePOI = -1
 		int trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP
 	#endif
 
-	#if CLIENT
+	#if(CLIENT)
 		array<void functionref( entity player, string equipSlot, int index )> onTrackingIntChangedCallbacks
 	#endif
 
@@ -84,7 +84,7 @@ struct
 	table<string, EquipmentSlot> equipSlotData
 } file
 
-// TODO: these should be turned into Bakery assets
+//
 void function SURVIVAL_EquipmentSlot_InitShared()
 {
 	EquipmentSlot e
@@ -96,15 +96,15 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.trackingNetInt = "equipedItemLootIndex_Backpack"
 	e.unitFrameTierVar = e.ref + "Tier"
 	e.unitFrameImageVar = e.ref + "Icon"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_BACKPACK
 		e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_BACKPACK
 		e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_BACKPACK
 		e.getEquippedRefFunc = GetEquippedRefBasedOnTrackingNetInt
 	#endif
-	#if SERVER
-		e.specialCaseEquipFunc = Equipment_ApplyBackpack
-	#endif
+	#if(false)
+
+#endif
 
 	e = RegisterEquipslot( "helmet" )
 	e.title = "#SURVIVAL_HELMET"
@@ -113,15 +113,15 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.trackingNetInt = "equipedItemLootIndex_Helmet"
 	e.unitFrameTierVar = e.ref + "Tier"
 	e.unitFrameImageVar = e.ref + "Icon"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_HELMET
 		e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_HELMET
 		e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_HELMET
 		e.getEquippedRefFunc = GetEquippedRefBasedOnTrackingNetInt
 	#endif
-	#if SERVER
-		e.specialCaseEquipFunc = Equipment_ApplyHelmetMod
-	#endif
+	#if(false)
+
+#endif
 
 	e = RegisterEquipslot( "armor" )
 	e.title = "#SURVIVAL_ARMOR"
@@ -130,15 +130,15 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.trackingNetInt = "equipedItemLootIndex_Armor"
 	e.unitFrameTierVar = e.ref + "Tier"
 	e.unitFrameImageVar = e.ref + "Icon"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_ARMOR
 		e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_ARMOR
 		e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_ARMOR
 		e.getEquippedRefFunc = GetEquippedRefBasedOnTrackingNetInt
 	#endif
-	#if SERVER
-		e.specialCaseEquipFunc = Equipment_ApplyArmorMod
-	#endif
+	#if(false)
+
+#endif
 
 	e = RegisterEquipslot( "incapshield" )
 	e.title = "#SURVIVAL_INCAPSHIELD"
@@ -147,7 +147,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.trackingNetInt = "equipedItemLootIndex_IncapShield"
 	e.unitFrameTierVar = e.ref + "Tier"
 	e.unitFrameImageVar = e.ref + "Icon"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_INCAPSHIELD
 		e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_INCAPSHIELD
 		e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_INCAPSHIELD
@@ -159,17 +159,17 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyCommsAction = eCommsAction.INVENTORY_NEED_FIRST_WEAPON
 	e.emptyImage = $"rui/hud/loot/loot_weapon_none"
 	e.filledCommsActionFunc = FilledCommsAction_Weapon
-	e.weaponSlot = 0 // WEAPON_INVENTORY_SLOT_PRIMARY_0
+	e.weaponSlot = 0 //
 	e.nextWeaponSlot = "main_weapon1"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_WEAPON
 		e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_WEAPON
 		e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_WEAPON
 		e.getEquippedRefFunc = GetEquippedWeaponForPlayer
 	#endif
-	#if SERVER
-		e.specialCaseDropFunc = SURVIVAL_DropMainWeapon
-	#endif
+	#if(false)
+
+#endif
 
 	e = RegisterEquipslot( "main_weapon0_sight" )
 	e.title = "#INVENTORY_SLOT_SIGHT"
@@ -177,7 +177,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_sight"
 	e.attachmentPoint = "sight"
 	e.attachmentWeaponSlot = "main_weapon0"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -187,7 +187,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_mag"
 	e.attachmentPoint = "mag"
 	e.attachmentWeaponSlot = "main_weapon0"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -197,7 +197,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_stock"
 	e.attachmentPoint = "grip"
 	e.attachmentWeaponSlot = "main_weapon0"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -207,7 +207,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_barrel"
 	e.attachmentPoint = "barrel"
 	e.attachmentWeaponSlot = "main_weapon0"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -217,7 +217,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_hopup"
 	e.attachmentPoint = "hopup"
 	e.attachmentWeaponSlot = "main_weapon0"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -226,17 +226,17 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyCommsAction = eCommsAction.INVENTORY_NEED_ANOTHER_WEAPON
 	e.emptyImage = $"rui/hud/loot/loot_weapon_none"
 	e.filledCommsActionFunc = FilledCommsAction_Weapon
-	e.weaponSlot = 1 // WEAPON_INVENTORY_SLOT_PRIMARY_1
+	e.weaponSlot = 1 //
 	e.nextWeaponSlot = "main_weapon0"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.trackingVisionPickupPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_PICKUP_WEAPON
 		e.trackingVisionExchangePOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_EXCHANGE_WEAPON
 		e.trackingVisionDropPOI = eTrackingVisionNetworkedPOITypes.PLAYER_LOOT_DROP_WEAPON
 		e.getEquippedRefFunc = GetEquippedWeaponForPlayer
 	#endif
-	#if SERVER
-		e.specialCaseDropFunc = SURVIVAL_DropMainWeapon
-	#endif
+	#if(false)
+
+#endif
 
 	e = RegisterEquipslot( "main_weapon1_sight" )
 	e.title = "#INVENTORY_SLOT_SIGHT"
@@ -244,7 +244,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_sight"
 	e.attachmentPoint = "sight"
 	e.attachmentWeaponSlot = "main_weapon1"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -254,7 +254,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_mag"
 	e.attachmentPoint = "mag"
 	e.attachmentWeaponSlot = "main_weapon1"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -264,7 +264,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_stock"
 	e.attachmentPoint = "grip"
 	e.attachmentWeaponSlot = "main_weapon1"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -274,7 +274,7 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_barrel"
 	e.attachmentPoint = "barrel"
 	e.attachmentWeaponSlot = "main_weapon1"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
@@ -284,16 +284,16 @@ void function SURVIVAL_EquipmentSlot_InitShared()
 	e.emptyImage = $"rui/pilot_loadout/mods/empty_hopup"
 	e.attachmentPoint = "hopup"
 	e.attachmentWeaponSlot = "main_weapon1"
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		e.getEquippedRefFunc = GetEquippedAttachmentOnWeaponForPlayer
 	#endif
 
-	#if SERVER || CLIENT
+	#if(CLIENT)
 	EquipmentSlots_RegisterNetworkTrackingInts()
 	#endif
 }
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function EquipmentSlots_RegisterNetworkTrackingInts()
 {
 	foreach ( slot,slotData in EquipmentSlot_GetAllEquipmentSlots() )
@@ -302,7 +302,7 @@ void function EquipmentSlots_RegisterNetworkTrackingInts()
 		{
 			RegisterNetworkedVariable( slotData.trackingNetInt, SNDC_PLAYER_GLOBAL, SNVT_INT, -1 )
 
-			#if CLIENT
+			#if(CLIENT)
 				RegisterNetworkedVariableChangeCallback_int( slotData.trackingNetInt, CreateTrackingNetVarFunction( slot ) )
 			#endif
 		}
@@ -327,7 +327,7 @@ EquipmentSlot function RegisterEquipslot( string ref )
 
 int function EmptyCommsAction_AttachmentForParent( string equipmentSlot, string equipmentRef, EquipmentSlot es )
 {
-#if CLIENT
+#if(CLIENT)
 	LootData weaponData = EquipmentSlot_GetEquippedLootDataForSlot( GetLocalClientPlayer(), es.attachmentWeaponSlot )
 	switch( es.attachmentPoint )
 	{
@@ -363,7 +363,7 @@ int function EmptyCommsAction_AttachmentForParent( string equipmentSlot, string 
 			else if ( weaponData.lootTags.contains( "sniper" ) )
 				return eCommsAction.INVENTORY_NEED_ATTACHMENT_SIGHT_SNIPER
 
-			//Assert( 0, "why" )
+			//
 			Warning( format( "%s() - Couldn't determine '%s' type for weapon '%s'.", FUNC_NAME(), es.attachmentPoint, weaponData.ref ) )
 			return eCommsAction.BLANK
 		}
@@ -406,7 +406,7 @@ int function EmptyCommsAction_AttachmentForParent( string equipmentSlot, string 
 		default:
 			Warning( format( "%s() - Unhandled attachmentPoint: '%s'.", FUNC_NAME(), es.attachmentPoint ) )
 	}
-#endif // #if CLIENT
+#endif //
 
 	return eCommsAction.QUICKCHAT_READY
 }
@@ -569,7 +569,7 @@ int function EquipmentSlot_GetWeaponSlotForEquipmentSlot( string equipmentSlot )
 	return esWeapon.weaponSlot
 }
 
-#if CLIENT || SERVER
+#if(CLIENT)
 string function GetEquippedRefBasedOnTrackingNetInt( entity player, string equipmentSlot )
 {
 	EquipmentSlot es = Survival_GetEquipmentSlotDataByRef( equipmentSlot )
@@ -616,39 +616,39 @@ string function GetEquippedAttachmentOnWeaponForPlayer( entity player, string eq
 #endif
 
 
-#if SERVER
-void function Equipment_ApplyHelmetMod( entity player, string helmet )
-{
-	int tier = SURVIVAL_Loot_IsRefValid( helmet ) ? SURVIVAL_Loot_GetLootDataByRef( helmet ).tier : 0
-	player.SetSurvivalHelmetType( tier )
-}
+#if(false)
 
-void function Equipment_ApplyArmorMod( entity player, string armor )
-{
-	int tier = SURVIVAL_Loot_IsRefValid( armor ) ? SURVIVAL_Loot_GetLootDataByRef( armor ).tier : 0
-	player.SetSurvivalArmorType( tier )
 
-}
 
-void function Equipment_ApplyBackpack( entity player, string backpack )
-{
-	int limit = SURVIVAL_GetInventoryLimit( player )
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
-	int backPackCount = playerInventory.len()
 
-	if ( backPackCount > limit )
-	{
-		for ( int i=backPackCount-1; i>=limit; i-- )
-		{
-			ConsumableInventoryItem invItem = playerInventory[i]
-			LootData data = SURVIVAL_Loot_GetLootDataByIndex( invItem.type )
-			SURVIVAL_DropBackpackItem( player, data.ref, invItem.count )
-		}
-	}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 void function AddCallback_OnEquipSlotTrackingIntChanged( string equipSlot, void functionref(entity,string,int) func )
 {
 	file.equipSlotData[equipSlot].onTrackingIntChangedCallbacks.append( func )
@@ -695,7 +695,7 @@ void function SetUnitFrameHudImageIfValid( string imageVarName, string tierVarNa
 }
 #endif
 
-// TODO: Make this data driven
+//
 string function GetAttachmentPointName( string attachmentPoint )
 {
 	switch ( attachmentPoint )

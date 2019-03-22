@@ -1,22 +1,22 @@
 
 global function OnWeaponPrimaryAttack_weapon_shotgun
 
-#if SERVER
-global function OnWeaponNpcPrimaryAttack_weapon_shotgun
-#endif // #if SERVER
+#if(false)
+
+#endif //
 
 
-// Set up the pattern and default scale to match desired spread_stand_hip
-// we only use the xy here
+//
+//
 const array<vector> BLAST_PATTERN_EVA_SHOTGUN = [
-	// "Squished 3x3" pattern
-	< -7.0, 7.0, 	0 >, // top row
+	//
+	< -7.0, 7.0, 	0 >, //
 	< 0.0, 11.0, 	0 >,
 	< 7.0, 7.0, 	0 >,
-	< -6.0, 0.0, 	0 >, // middle row
+	< -6.0, 0.0, 	0 >, //
 	< 0.0, 0.0, 	0 >,
 	< 6.0, 0.0, 	0 >,
-	< -7.0, -7.0, 	0 >, // bottom row
+	< -7.0, -7.0, 	0 >, //
 	< 0.0, -11.0, 	0 >,
 	< 7.0, -7.0, 	0 >,
 ]
@@ -28,13 +28,13 @@ var function OnWeaponPrimaryAttack_weapon_shotgun( entity weapon, WeaponPrimaryA
 	Fire_EVA_Shotgun( weapon, attackParams, playerFired )
 }
 
-#if SERVER
-var function OnWeaponNpcPrimaryAttack_weapon_shotgun( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	bool playerFired = false
-	Fire_EVA_Shotgun( weapon, attackParams, playerFired )
-}
-#endif // #if SERVER
+#if(false)
+
+
+
+
+
+#endif //
 
 int function Fire_EVA_Shotgun( entity weapon, WeaponPrimaryAttackParams attackParams, bool playerFired = true )
 {
@@ -44,7 +44,7 @@ int function Fire_EVA_Shotgun( entity weapon, WeaponPrimaryAttackParams attackPa
 	if ( IsServer() || weapon.ShouldPredictProjectiles() )
 		shouldCreateProjectile = true
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( !playerFired )
 			shouldCreateProjectile = false
 	#endif

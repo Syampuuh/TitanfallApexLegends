@@ -76,7 +76,7 @@ bool function IsRoundWinningKillReplayPlaying()
 	return expect bool( level.nv.roundWinningKillReplayPlaying )
 }
 
-bool function HasRoundScoreLimitBeenReached() //Different from RoundScoreLimit_Complete in that it only checks to see if the score required has been reached. Allows us to use it on the client to cover 90% of the cases we want
+bool function HasRoundScoreLimitBeenReached() //
 {
 	if ( !IsRoundBased() )
 		return false
@@ -141,11 +141,11 @@ bool function IsRespawnAvailable( entity player )
 
 bool function IsPrivateMatchSpectator( entity player )
 {
-	// JFS
-	#if SERVER
-	if ( !player.p.clientScriptInitialized )
-		return false
-	#endif
+	//
+	#if(false)
+
+
+#endif
 
 	if ( IsPrivateMatch() && player.GetPersistentVarAsInt( "privateMatchState" ) == 1 )
 		return true
@@ -153,16 +153,16 @@ bool function IsPrivateMatchSpectator( entity player )
 	return false
 }
 
-#if CLIENT
+#if(CLIENT)
 void function SendFPSToServer()
 {
-	//printt( "######################" )
-	//printt( "ReportFPS ON CLIENT!!!" )
-	//printt( "Direction:", direction )
+	//
+	//
+	//
 	int frameRate = int( GetClientFPS() + 0.5 )
-	//int frameRate = RandomInt(60)
-	//printt( "FrameRate:", frameRate )
-	//printt( "######################" )
+	//
+	//
+	//
 
 	entity player = GetLocalClientPlayer()
 	player.ClientCommand( "CurrentFPS " + frameRate )

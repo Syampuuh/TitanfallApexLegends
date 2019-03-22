@@ -1,6 +1,7 @@
 global function InitConfirmPurchaseDialog
 
 global function PurchaseDialog
+global function PurchaseDialog_SetPurchaseOverrideSound
 
 global enum ePurchaseDialogStatus
 {
@@ -34,15 +35,16 @@ struct
 	table<var, ItemFlavorBag>              purchaseButtonPriceMap
 	void functionref()                     onPurchaseStartCallback
 	void functionref( bool wasSuccessful ) onPurchaseResultCallback
+	string								   purchaseSoundOverride = ""
 } file
 
 void function InitConfirmPurchaseDialog()
 {
 	var menu = GetMenu( "ConfirmPurchaseDialog" )
 	file.menu = menu
-	//file.contentRui = Hud_GetRui( Hud_GetChild( file.menu, "ContentRui" ) )
-	//file.processingButton = Hud_GetChild( menu, "ProcessingButton" )
-	//file.buttonsPanel = Hud_GetChild( menu, "FooterButtons" )
+	//
+	//
+	//
 
 	file.cancelButton = Hud_GetChild( menu, "CancelButton" )
 	HudElem_SetRuiArg( file.cancelButton, "buttonText", "#B_BUTTON_CANCEL" )
@@ -65,14 +67,14 @@ void function InitConfirmPurchaseDialog()
 
 	SetDialog( menu, true )
 	SetClearBlur( menu, false )
-	//SetGamepadCursorEnabled( menu, false )
+	//
 
 	AddMenuEventHandler( menu, eUIEvent.MENU_OPEN, ConfirmPurchaseDialog_OnOpen )
 	AddMenuEventHandler( menu, eUIEvent.MENU_CLOSE, ConfirmPurchaseDialog_OnClose )
 	AddMenuEventHandler( menu, eUIEvent.MENU_NAVIGATE_BACK, ConfirmPurchaseDialog_OnNavigateBack )
 
-	//AddMenuFooterOption( menu, LEFT, BUTTON_A, true, "#A_BUTTON_PURCHASE", "#PURCHASE", ConfirmPurchase )
-	//AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_CANCEL", "#CANCEL" )
+	//
+	//
 
 	RegisterSignal( "ConfirmPurchaseClosed" )
 }
@@ -82,6 +84,8 @@ void function PurchaseDialog( ItemFlavor flav, int quantity, bool markAsNew,
 		void functionref() onPurchaseStartCallback,
 		void functionref( bool wasSuccessful ) onPurchaseResultCallback )
 {
+	printt( "PurchaseDialog", ItemFlavor_GetAsset( flav ) )
+
 	Assert( GRX_IsInventoryReady() )
 	Assert( file.purchaseStatus == ePurchaseDialogStatus.INACTIVE )
 	Assert( ItemFlavor_GetGRXMode( flav ) != GRX_ITEMFLAVORMODE_NONE )
@@ -105,6 +109,7 @@ void function PurchaseDialog( ItemFlavor flav, int quantity, bool markAsNew,
 	file.purchaseMarkAsNew = markAsNew
 	file.onPurchaseStartCallback = onPurchaseStartCallback
 	file.onPurchaseResultCallback = onPurchaseResultCallback
+	file.purchaseSoundOverride = ""
 
 	ItemFlavorPurchasabilityInfo ifpi = GRX_GetItemPurchasabilityInfo( flav )
 	Assert( ifpi.isPurchasableAtAll )
@@ -116,10 +121,16 @@ void function PurchaseDialog( ItemFlavor flav, int quantity, bool markAsNew,
 		foreach ( GRXScriptOffer locationOffer in locationOfferList )
 			file.purchaseOfferList.append( locationOffer )
 
-	// todo(dw): locationToBundledStoreOffersMap
+	//
 
 	EmitUISound( "UI_Menu_Cosmetic_Unlock" )
 	AdvanceMenu( file.menu )
+}
+
+
+void function PurchaseDialog_SetPurchaseOverrideSound( string overrideSound )
+{
+	file.purchaseSoundOverride = overrideSound
 }
 
 
@@ -214,8 +225,8 @@ void function UpdateProcessingElements()
 {
 	bool isWorking = (file.purchaseStatus == ePurchaseDialogStatus.WORKING)
 
-	//Hud_Hide( file.buttonsPanel )
-	//Hud_Show( file.processingButton )
+	//
+	//
 	Hud_SetEnabled( file.cancelButton, !isWorking )
 	HudElem_SetRuiArg( file.cancelButton, "isProcessing", isWorking )
 	HudElem_SetRuiArg( file.cancelButton, "processingState", file.purchaseStatus )
@@ -249,6 +260,8 @@ void function OnPurchaseOperationFinished( int status, ItemFlavorBag price )
 	}
 	if ( wasSuccessful )
 	{
+		if ( file.purchaseSoundOverride != "" )
+			EmitUISound( file.purchaseSoundOverride )
 		if ( wasPremium )
 			EmitUISound( "UI_Menu_Purchase_Coins" )
 		else if ( wasCredits )
@@ -306,7 +319,7 @@ void function UpdatePurchaseDialog()
 
 	ItemFlavor purchaseItem = expect ItemFlavor(file.purchaseItemFlavOrNull)
 	string purchaseItemName = Localize( ItemFlavor_GetLongName( purchaseItem ) )
-	int quality             = ItemFlavor_GetQuality( purchaseItem )
+	int quality             = ItemFlavor_HasQuality( purchaseItem ) ? ItemFlavor_GetQuality( purchaseItem ) : 0
 
 	string messageText
 	switch ( ItemFlavor_GetType( purchaseItem ) )
@@ -320,15 +333,18 @@ void function UpdatePurchaseDialog()
 			messageText = purchaseItemName
 			break
 
+		case eItemType.battlepass_purchased_xp:
+			if ( file.purchaseQuantity > 1 )
+				messageText = Localize( "#STORE_ITEM_X_N", purchaseItemName, file.purchaseQuantity )
+			else
+				messageText = purchaseItemName
+			break
+
 		default:
 			if ( file.purchaseQuantity > 1 )
-			{
 				messageText = Localize( "#STORE_ITEM_X_N", purchaseItemName, file.purchaseQuantity ) + "\n`1" + Localize( ItemFlavor_GetQualityName( purchaseItem ) )
-			}
 			else
-			{
 				messageText = purchaseItemName + "\n`1" + Localize( ItemFlavor_GetQualityName( purchaseItem ) )
-			}
 			break
 	}
 
@@ -338,11 +354,11 @@ void function UpdatePurchaseDialog()
 	file.purchaseButtonPriceMap.clear()
 
 	array<GRXScriptOffer> offerList = clone file.purchaseOfferList
-	offerList.reverse() // reverse because the purchase buttons are set up from bottom to top
+	offerList.reverse() //
 	foreach ( GRXScriptOffer offer in offerList )
 	{
 		array<ItemFlavorBag> priceList = clone offer.prices
-		priceList.reverse() // same thing
+		priceList.reverse() //
 		foreach ( ItemFlavorBag price in priceList )
 		{
 			Assert( purchaseButtonIdx < file.purchaseButtonBottomToTopList.len(), format( "Item %s had more than %d prices, failed to show purchase dialog", ItemFlavor_GetHumanReadableRef( purchaseItem ), file.purchaseButtonBottomToTopList.len() ) )

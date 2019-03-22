@@ -71,8 +71,8 @@ void function CustomizeCharacterMenu_OnOpen()
 		TabData tabData = GetTabDataForPanel( file.menu )
 		ActivateTab( tabData, 0 )
 	}
-	//else
-	//	ActivateTab( file.menu, GetMenuActiveTabIndex( file.menu ) )
+	//
+	//
 
 	RuiSetString( file.titleRui, "title", Localize( ItemFlavor_GetLongName( character ) ).toupper() )
 	RuiSetGameTime( file.decorationRui, "initTime", Time() )

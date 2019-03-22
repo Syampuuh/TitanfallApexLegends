@@ -1,35 +1,35 @@
 global function ShApexScreens_Init
 
-#if SERVER
-global function SvApexScreens_ShowCircleState
-global function SvApexScreens_ForceShowSquad
-global function SvApexScreens_HighlightPlayerForImpressiveKill
-global function SvApexScreens_HighlightPlayerForKillSpree
+#if(false)
+
+
+
+
 #endif
 
-#if SERVER && DEV
-global function DEV_ApexScreens_SetMode
-global function DEV_ApexScreens_TogglePreviewMode
-global function DEV_ApexScreens_GladCardPreviewMode
-global function ApexScreenMasterThink
+#if(false)
+
+
+
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 global function ClApexScreens_DisableAllScreens
 global function ClApexScreens_EnableAllScreens
 global function ServerToClient_ApexScreenKillDataChanged
-//global function ClApexScreens_Lobby_SetMode
-//global function ClApexScreens_Lobby_SetCardOwner
+//
+//
 global function ClApexScreens_OnStaticPropRuiVisibilityChange
 #endif
 
-#if CLIENT && DEV
+#if CLIENT && DEV 
 global function DEV_CreatePerfectApexScreen
 global function DEV_ToggleActiveApexScreenDebug
 global function DEV_ToggleFloatyBitsPrototype
 #endif
 
-const float APEX_SCREEN_TRANSITION_IN_DURATION = 0.7 // must stay in sync with apex_screens.rui
+const float APEX_SCREEN_TRANSITION_IN_DURATION = 0.7 //
 
 const float APEX_SCREEN_RANDOM_TINT_INTENSITY_MIN = 0.4
 const float APEX_SCREEN_RANDOM_TINT_INTENSITY_MAX = 0.6
@@ -40,13 +40,13 @@ const vector[3] APEX_SCREEN_RANDOM_TINT_PALETTE = [
 ]
 
 
-// "Apex Screen" = really big flex screen (not an entity)
-// "Apex Screen state" = what's showing on a particular screen, in particular "mode index" where mode means "show logo", "show blisk's face", "show a gladiator card", etc
+//
+//
 
 
 enum eApexScreenPosition
 {
-	// must match APEX_SCREEN_POSITION_* in apex_screens.rui
+	//
 	L = 0,
 	C = 1,
 	R = 2,
@@ -57,7 +57,7 @@ enum eApexScreenPosition
 
 global enum eApexScreenMode
 {
-	// must match APEX_SCREEN_MODE_* in apex_screens.rui
+	//
 	OFF = 0,
 	LOGO = 1,
 	PLAYER_NAME_CHAMPION = 2,
@@ -78,7 +78,7 @@ global enum eApexScreenMode
 
 global enum eApexScreenTransitionStyle
 {
-	// must match APEX_SCREEN_TRANSITION_STYLE_* in apex_screens.rui
+	//
 	NONE = 0,
 	SLIDE = 1,
 	FADE_TO_BLACK = 2,
@@ -91,7 +91,7 @@ global enum eApexScreenMods
 }
 
 
-#if CLIENT
+#if(CLIENT)
 struct ApexScreenState
 {
 	var    rui
@@ -131,7 +131,7 @@ struct ApexScreenState
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 struct ApexScreenPositionMasterState
 {
 	float commenceTime = -1
@@ -142,21 +142,21 @@ struct ApexScreenPositionMasterState
 #endif
 
 
-#if SERVER
-struct ApexScreenJob
-{
-	int mode = eApexScreenMode.INVALID
+#if(false)
 
-}
+
+
+
+
 #endif
 
 
 struct {
-	#if SERVER && DEV
-		bool DEV_inDebugPreviewMode = false
-	#endif
+	#if(false)
 
-	#if CLIENT
+#endif
+
+	#if(CLIENT)
 		ApexScreenPositionMasterState[eApexScreenPosition._COUNT] screenPositionMasterStates
 
 		bool                        forceDisableScreens = false
@@ -176,11 +176,11 @@ struct {
 } file
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function ShApexScreens_Init()
 {
-	#if SERVER
-	#elseif CLIENT
+	#if(false)
+#elseif(CLIENT)
 		AddCallback_OnEnumStaticPropRui( OnEnumStaticPropRui )
 	#endif
 
@@ -196,7 +196,7 @@ void function ShApexScreens_Init()
 		RegisterNetworkedVariable( format( "ApexScreensMasterState_Pos%d_TransitionStyle", screenPosition ), SNDC_GLOBAL, SNVT_INT, -1 )
 		RegisterNetworkedVariable( format( "ApexScreensMasterState_Pos%d_Player", screenPosition ), SNDC_GLOBAL, SNVT_BIG_INT, -1 )
 
-		#if CLIENT
+		#if(CLIENT)
 			RegisterNetworkedVariableChangeCallback_time( format( "ApexScreensMasterState_Pos%d_CommenceTime", screenPosition ), void function( entity unused, float old, float new, bool ac ) : (screenPosition) {
 				file.screenPositionMasterStates[screenPosition].commenceTime = new
 				UpdateAllScreensContent()
@@ -216,383 +216,383 @@ void function ShApexScreens_Init()
 		#endif
 	}
 
-	#if SERVER
-		RegisterSignal( "ApexScreenMasterThink" )
+	#if(false)
 
-		AddCallback_GameStatePostEnter( eGameState.PickLoadout, OnGameStatePostEnter_PickLoadout )
-		AddCallback_GameStatePostEnter( eGameState.Prematch, OnGameStatePostEnter_Prematch )
 
-		AddCallback_EntitiesDidLoad( EntitiesDidLoadSv )
-	#elseif CLIENT
+
+
+
+
+#elseif(CLIENT)
 		RegisterSignal( "UpdateScreenCards" )
 		RegisterSignal( "ScreenOff" )
 
 		AddCallback_OnStaticPropRUICreated( ClientStaticPropRUICreated )
 	#endif
 
-	//AddCallback_OnSurvivalDeathFieldStageChanged( OnSurvivalDeathFieldStageChanged )
+	//
 }
 #endif
 
 
 
-////
-////
-//// Server-side screen scheduler
-////
-////
-
-#if SERVER
-void function SvApexScreens_ForceShowSquad( EncodedEHandle ply0, EncodedEHandle ply1, EncodedEHandle ply2 )
-{
-	#if DEV
-		if ( file.DEV_inDebugPreviewMode )
-			return
-	#endif
-
-	ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, ply0 )
-	ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, ply1 )
-	ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, ply2 )
-	thread ApexScreenMasterThink()
-}
-#endif
-
-
-#if SERVER
-void function SvApexScreens_ShowCircleState()
-{
-	#if DEV
-		if ( file.DEV_inDebugPreviewMode )
-			return
-	#endif
-	// todo(dw): re-enable
-	//ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.CIRCLE_STATE, null )
-	//ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.CIRCLE_STATE, null )
-	//ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.CIRCLE_STATE, null )
-	//thread ApexScreenMasterThink()
-}
-#endif
-
-
-#if SERVER
-void function SvApexScreens_HighlightPlayerForImpressiveKill( entity player, int damageSourceID, float distanceBetweenPlayers, int killedPlayerGrade, entity killedPlayer )
-{
-	#if DEV
-		if ( file.DEV_inDebugPreviewMode )
-			return
-	#endif
-	foreach ( entity playerToInform in GetPlayerArray() )
-		Remote_CallFunction_Replay( playerToInform, "ServerToClient_ApexScreenKillDataChanged", damageSourceID, distanceBetweenPlayers, killedPlayerGrade, killedPlayer )
-
-	// todo(dw): re-enable
-	//ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, null )
-	//ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, null )
-	//ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, null )
-	//thread ApexScreenMasterThink()
-}
-#endif
-
-
-#if SERVER
-void function SvApexScreens_HighlightPlayerForKillSpree()
-{
-	#if DEV
-		if ( file.DEV_inDebugPreviewMode )
-			return
-	#endif
-	// todo(dw)
-}
-#endif
-
-
-#if SERVER
-void function ShowModeInternal( int screenPosition, int transitionStyle, int mode, EncodedEHandle playerEEH )
-{
-	if ( !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
-		return
-
-	SetGlobalNetTime( format( "ApexScreensMasterState_Pos%d_CommenceTime", screenPosition ), Time() )
-	SetGlobalNetInt( format( "ApexScreensMasterState_Pos%d_ModeIndex", screenPosition ), mode )
-	SetGlobalNetInt( format( "ApexScreensMasterState_Pos%d_TransitionStyle", screenPosition ), transitionStyle )
-	SetGlobalNetInt( format( "ApexScreensMasterState_Pos%d_Player", screenPosition ), playerEEH ) // todo(dw)
-}
-#endif
-
-
-#if SERVER
-void function EntitiesDidLoadSv()
-{
-	if ( IsLobby() )
-		return
-
-	foreach ( entity targetInfo in GetEntArrayByScriptName( "apex_screen" ) )
-	{
-		// (dw): These are not needed now but may be in the future. Either way, we should destroy them after load to
-		// save on edicts.
-		targetInfo.Destroy()
-	}
-
-	thread ApexScreenMasterThink()
-}
-#endif
-
-
-#if SERVER
-void function OnGameStatePostEnter_PickLoadout()
-{
-	thread ApexScreenMasterThink()
-}
-#endif
-
-
-#if SERVER
-void function OnGameStatePostEnter_Prematch()
-{
-	thread ApexScreenMasterThink()
-}
-#endif
-
-
-#if SERVER
-void function HaltApexScreenMasterThink()
-{
-	svGlobal.levelEnt.Signal( "ApexScreenMasterThink" )
-}
-void function ApexScreenMasterThink()
-{
-	// todo(dw): this kind of think function with arbitrary waits is temp
-
-	HaltApexScreenMasterThink()
-	svGlobal.levelEnt.EndSignal( "ApexScreenMasterThink" )
-
-	if ( !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
-		return
-
-	#if DEV
-		if ( file.DEV_inDebugPreviewMode )
-			return
-	#endif
-
-	Assert( !IsLobby() )
-
-	table<ItemFlavor, bool> previousChosenCharacterSet
-
-	if ( GetGameState() != eGameState.WaitingForPlayers )
-		wait 21.0 // let whatever screen is on there play
-
-	while ( true )
-	{
-		switch ( GetGameState() )
-		{
-			case eGameState.WaitingForPlayers:
-			{
-				ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-				ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-				ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-				wait 2.5
-
-				array<entity> allPlayers = GetPlayerArray()
-				if ( allPlayers.len() == 0 )
-					continue
-				LoadoutEntry characterSlot = Loadout_CharacterClass()
-
-				array<EncodedEHandle> randomPlayerOrNullList
-				table<ItemFlavor, bool> chosenCharacterSet
-				for ( int tries = 0; randomPlayerOrNullList.len() < 3 && tries < 200; tries++ )
-				{
-					entity candidate = allPlayers.getrandom()
-
-					if ( LoadoutSlot_IsReady( ToEHI( candidate ), characterSlot ) )
-					{
-						ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( candidate ), characterSlot )
-
-						if ( character in chosenCharacterSet )
-							continue
-
-						if ( character in previousChosenCharacterSet )
-							continue
-
-						chosenCharacterSet[character] <- true
-						randomPlayerOrNullList.append( candidate.GetEncodedEHandle() )
-					}
-				}
-				randomPlayerOrNullList.resize( 3, EncodedEHandle_null )
-				previousChosenCharacterSet = chosenCharacterSet
-
-				ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, randomPlayerOrNullList[0] )
-				ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, randomPlayerOrNullList[1] )
-				ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, randomPlayerOrNullList[2] )
-				wait 18.0
-
-				break
-			}
-
-			case eGameState.Playing:
-			{
-				array<EncodedEHandle> squad
-				while ( true )
-				{
-					EncodedEHandle championEEH = SurvivalCommentary_GetChampionEEH()
-					if ( championEEH != EncodedEHandle_null )
-					{
-						squad = GetPlayerSquadSafe( championEEH, 3 ) // todo(dw): hard-coded squad size?
-
-						ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.PLAYER_NAME_CHAMPION, championEEH )
-						ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_CLEAN, championEEH )
-						ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_BACK, championEEH )
-						wait 20.0
-
-						if ( squad[1] != EncodedEHandle_null || squad[2] != EncodedEHandle_null )
-						{
-							ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.FADE_TO_BLACK, eApexScreenMode.GCARD_FRONT_DETAILS, squad[1] )
-							ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.NONE, eApexScreenMode.GCARD_FRONT_DETAILS, championEEH )
-							ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.FADE_TO_BLACK, eApexScreenMode.GCARD_FRONT_DETAILS, squad[2] )
-						}
-						wait 20.0
-					}
-					else
-					{
-						ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-						ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-						ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-						wait 4.5
-					}
-
-					EncodedEHandle killLeaderEEH = SurvivalCommentary_GetKillLeaderEEH()
-					if ( killLeaderEEH != EncodedEHandle_null )
-					{
-						squad = GetPlayerSquadSafe( killLeaderEEH, 3 ) // todo(dw): hard-coded squad size?
-
-						ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.PLAYER_NAME_KILLLEADER, killLeaderEEH )
-						ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_CLEAN, killLeaderEEH )
-						ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_BACK, killLeaderEEH )
-						wait 20.0
-
-						if ( squad[1] != EncodedEHandle_null || squad[2] != EncodedEHandle_null )
-						{
-							ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.FADE_TO_BLACK, eApexScreenMode.GCARD_FRONT_DETAILS, squad[1] )
-							ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.NONE, eApexScreenMode.GCARD_FRONT_DETAILS, killLeaderEEH )
-							ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.FADE_TO_BLACK, eApexScreenMode.GCARD_FRONT_DETAILS, squad[2] )
-						}
-						wait 20.0
-					}
-					else
-					{
-						ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-						ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-						ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.LOGO, EncodedEHandle_null )
-						wait 4.5
-					}
-				}
-				break
-			}
-
-			default:
-			{
-				wait 0.3
-				break
-			}
-		}
-	}
-}
-#endif
-
-
-#if SERVER && DEV
-void function DEV_ApexScreens_TogglePreviewMode()
-{
-	file.DEV_inDebugPreviewMode = !file.DEV_inDebugPreviewMode
-	printt( "Apex Screen Preview Mode: " + (file.DEV_inDebugPreviewMode ? "ON" : "OFF") )
-}
-#endif
-
-
-#if SERVER && DEV
-void function DEV_ApexScreens_GladCardPreviewMode()
-{
-	file.DEV_inDebugPreviewMode = true
-
-	array<entity> testArray = GetPlayerArray()
-
-	HaltApexScreenMasterThink()
-
-	//ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, testArray[RandomIntRange( 0, testArray.len() )] )
-	//ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, gp()[0] )
-	//ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_DETAILS, testArray[RandomIntRange( 0, testArray.len() )] )
-
-	ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.PLAYER_NAME_KILLLEADER, gp()[0].GetEncodedEHandle() )
-	ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_FRONT_CLEAN, gp()[0].GetEncodedEHandle() )
-	ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, eApexScreenMode.GCARD_BACK, gp()[0].GetEncodedEHandle() )
-}
-#endif
-
-
-#if SERVER && DEV
-void function DEV_ApexScreens_SetMode( var opt = "random" )
-{
-	int currentMode = GetGlobalNetInt( "ApexScreensMasterState_Pos1_ModeIndex" ) // just use center screen
-	int nextMode
-	if ( opt == "random" )
-		nextMode = RandomIntRange( 0, eApexScreenMode._COUNT )
-	else if ( opt == "next" )
-		nextMode = modint( currentMode + 1, eApexScreenMode._COUNT )
-	else if ( opt == "prev" )
-		nextMode = modint( currentMode - 1, eApexScreenMode._COUNT )
-	else if ( type( opt ) == "string" )
-		nextMode = eApexScreenMode[string(opt).toupper()]
-	else
-		nextMode = int(opt)
-
-	array<entity> testArray = GetPlayerArray()
-	testArray.append( null )
-
-	HaltApexScreenMasterThink()
-	ShowModeInternal( eApexScreenPosition.L, eApexScreenTransitionStyle.SLIDE, nextMode, EHIToEncodedEHandle( testArray[RandomIntRange( 0, testArray.len() )] ) )
-	ShowModeInternal( eApexScreenPosition.C, eApexScreenTransitionStyle.NONE, nextMode, EHIToEncodedEHandle( gp()[0] ) )
-	ShowModeInternal( eApexScreenPosition.R, eApexScreenTransitionStyle.SLIDE, nextMode, EHIToEncodedEHandle( testArray[RandomIntRange( 0, testArray.len() )] ) )
-
-	printt( "Apex Screen Mode: " + GetEnumString( "eApexScreenMode", nextMode ) )
-}
-#endif
-
-
-
-////
-////
-//// Client-side screen state management
-////
-////
-
-//#if CLIENT
-//void function ClApexScreens_Lobby_SetMode( int modeIndex )
-//{
-//	Assert( IsLobby() )
-//
-//	file.masterState.modeIndex = modeIndex
-//	UpdateAllScreensContent()
-//}
-//#endif
 //
 //
-//#if CLIENT
-//void function ClApexScreens_Lobby_SetCardOwner( int index, entity owner )
-//{
-//	Assert( IsLobby() )
 //
-//	switch ( index )
-//	{
-//		case 0: file.masterState.player0 = owner; break
 //
-//		case 1: file.masterState.player1 = owner; break
 //
-//		case 2: file.masterState.player2 = owner; break
-//	}
-//	UpdateAllScreensContent()
-//}
-//#endif
+
+#if(false)
 
 
-#if CLIENT
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+//
+//
+//
+//
+//
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+//
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+//
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+//
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+//
+//
+//
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+#if(CLIENT)
 void function ClApexScreens_DisableAllScreens()
 {
 	Assert( !file.forceDisableScreens )
@@ -602,7 +602,7 @@ void function ClApexScreens_DisableAllScreens()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClApexScreens_EnableAllScreens()
 {
 	Assert( file.forceDisableScreens )
@@ -612,16 +612,16 @@ void function ClApexScreens_EnableAllScreens()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function UpdateAllScreensContent()
 {
 	if ( !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
 		return
 
-	// todo(dw): make this run when switching spectator targets
+	//
 
 	if ( !IsValid( clGlobal.levelEnt ) )
-		return // this can be called before scripts have finished initializing
+		return //
 
 	if ( file.allScreenUpdateQueued )
 		return
@@ -638,7 +638,7 @@ void function UpdateAllScreensContentThread()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClApexScreens_OnStaticPropRuiVisibilityChange( array<int> newlyVisible, array<int> newlyHidden )
 {
 	array<ApexScreenState> screensToUpdate = []
@@ -646,7 +646,7 @@ void function ClApexScreens_OnStaticPropRuiVisibilityChange( array<int> newlyVis
 	foreach( int magicId in newlyHidden )
 	{
 		if ( !(magicId in file.magicIdScreenStateMap) )
-			continue // not an apex screen
+			continue //
 
 		ApexScreenState screen = file.magicIdScreenStateMap[magicId]
 
@@ -659,7 +659,7 @@ void function ClApexScreens_OnStaticPropRuiVisibilityChange( array<int> newlyVis
 	foreach( int magicId in newlyVisible )
 	{
 		if ( !(magicId in file.magicIdScreenStateMap) )
-			continue // not an apex screen
+			continue //
 
 		ApexScreenState screen = file.magicIdScreenStateMap[magicId]
 
@@ -674,7 +674,7 @@ void function ClApexScreens_OnStaticPropRuiVisibilityChange( array<int> newlyVis
 #endif
 
 
-#if CLIENT && DEV
+#if CLIENT && DEV 
 void function DEV_ToggleActiveApexScreenDebug()
 {
 	file.DEV_activeScreenDebug = !file.DEV_activeScreenDebug
@@ -713,7 +713,7 @@ void function DEV_ActiveApexScreenDebugThread()
 #endif
 
 
-#if CLIENT && DEV
+#if CLIENT && DEV 
 void function DEV_ToggleFloatyBitsPrototype()
 {
 	file.DEV_isFloatyBitsPrototypeEnabled = !file.DEV_isFloatyBitsPrototypeEnabled
@@ -722,7 +722,7 @@ void function DEV_ToggleFloatyBitsPrototype()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function UpdateScreensContent( array<ApexScreenState> screenList )
 {
 	foreach( ApexScreenState screen in screenList )
@@ -756,7 +756,7 @@ void function UpdateScreensContent( array<ApexScreenState> screenList )
 		else if ( screen.rui != null )
 		{
 			screen.commenceTime = -1.0
-			Signal( screen, "ScreenOff" ) // to clean up any threads expecting the RUI to exist
+			Signal( screen, "ScreenOff" ) //
 
 			CleanupNestedGladiatorCard( screen.nestedGladiatorCard0Handle )
 			RuiDestroyIfAlive( screen.rui )
@@ -771,12 +771,12 @@ void function UpdateScreensContent( array<ApexScreenState> screenList )
 				float ruiWidth  = 800.0, ruiHeight = 800.0
 				float ruiAspect = ruiWidth / ruiHeight
 
-				float downOffset = 520.0//575.0
+				float downOffset = 520.0//
 				float gap        = 50.0
 
-				vector floatyForward = screen.spawnRight // todo(dw): aaaahhh
-				vector floatyRight   = screen.spawnForward // todo(dw): aaaahhh
-				vector floatyUp      = -screen.spawnUp // todo(dw): aaaahhh
+				vector floatyForward = screen.spawnRight //
+				vector floatyRight   = screen.spawnForward //
+				vector floatyUp      = -screen.spawnUp //
 				vector floatyCenter  = screen.spawnOrigin
 				floatyCenter += -downOffset * screen.spawnUp * screen.spawnScale
 				floatyCenter += gap * floatyForward * screen.spawnScale
@@ -791,20 +791,20 @@ void function UpdateScreensContent( array<ApexScreenState> screenList )
 							floatyRight * floatyWidth, floatyUp * floatyHeight, false
 				)
 
-				//vector sphereOrigin = floatyCenter
-				//vector sphereRight  = -floatyRight
-				//vector sphereDown   = -floatyUp
-				//float sphereBuldge  = 30.0
-				//float sphereRadius  = Length( floatyForward ) * (sphereBuldge * sphereBuldge + (floatyWidth / 2.0) * (floatyWidth / 2.0)) / (2 * sphereBuldge)
-				//sphereOrigin -= floatyForward * (sphereRadius - sphereBuldge)
-				//float horzDegSize   = RAD_TO_DEG * 2.0 * asin( (floatyWidth / 2.0) / sphereRadius )
 				//
-				////float horzDegSize = 155.0
-				//float vertDegSize = horzDegSize / ruiAspect, subdivDeg = horzDegSize / 5
-				//screen.floatingTopo = RuiTopology_CreateSphere(
-				//	sphereOrigin, sphereRight, sphereDown,
-				//	-sphereRadius, horzDegSize, vertDegSize, subdivDeg
-				//)
+				//
+				//
+				//
+				//
+				//
+				//
+				//
+				//
+				//
+				//
+				//
+				//
+				//
 
 				screen.floatingRui = RuiCreate( $"ui/apex_screen_floaty_thing.rpak", screen.floatingTopo, RUI_DRAW_WORLD, 0 )
 				RuiKeepSortKeyUpdated( screen.floatingRui, true, "pos" )
@@ -917,7 +917,7 @@ void function UpdateScreensContent( array<ApexScreenState> screenList )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function UpdateScreenDetails( ApexScreenState screen, int transitionStyle, int gcardPresentation, EHI playerEHI, int lifestateOverride )
 {
 	Signal( screen, "UpdateScreenCards" )
@@ -931,21 +931,21 @@ void function UpdateScreenDetails( ApexScreenState screen, int transitionStyle, 
 	if ( modeChangeTime - Time() > 0.02 )
 		wait (modeChangeTime - Time())
 
-	//RuiSetBool( screen.rui, "isCardValid", IsValid( player ) )
+	//
 
 	string playerName = ""
 	if ( EHIHasValidScriptStruct( playerEHI ) )
 		playerName = EHI_GetName( playerEHI )
-	//for ( int ci = 0; ci < 16; ci++ )
-	//{
-	//	string c = (ci < playerName.len() ? playerName.slice( ci, ci + 1 ) : "")
-	//	c = RegexpReplace( c, "_", "-" )
-	//	RuiSetString( screen.rui, format( "playerNameChar%02d", ci ), c )
-	//}
-	//playerName = RepeatString( " ", 16 - playerName.len() ) + playerName
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 	RuiSetString( screen.rui, "playerName", playerName )
 
-	entity player = FromEHI( playerEHI ) // todo(dw): cache kills
+	entity player = FromEHI( playerEHI ) //
 	if ( IsValid( player ) )
 		RuiTrackInt( screen.rui, "playerKillCount", player, RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "kills" ) )
 
@@ -954,69 +954,69 @@ void function UpdateScreenDetails( ApexScreenState screen, int transitionStyle, 
 	ChangeNestedGladiatorCardPresentation( screen.nestedGladiatorCard0Handle, gcardPresentation )
 	ChangeNestedGladiatorCardOwner( screen.nestedGladiatorCard0Handle, playerEHI, modeChangeTime, lifestateOverride )
 
-	//if ( screen.floatingRui != null )
-	//{
-	//	ItemFlavor character = LoadoutSlot_GetItemFlavor( playerEHI, Loadout_CharacterClass() )
 	//
-	//	// todo(dw): aaaaaaaaa
-	//	// todo(dw): aaaaaaaaa
-	//	// todo(dw): aaaaaaaaa
-	//	// todo(dw): aaaaaaaaa
-	//	for ( int badgeIndex = 0; badgeIndex < GLADIATOR_CARDS_NUM_BADGES; badgeIndex++ )
-	//	{
-	//		if ( screen.floatingNestedBadgeRuiList[badgeIndex] != null )
-	//		{
-	//			RuiDestroyNested( screen.floatingRui, "badge" + badgeIndex + "Instance" )
-	//			screen.floatingNestedBadgeRuiList[badgeIndex] = null
-	//		}
 	//
-	//		LoadoutEntry badgeSlot        = Loadout_GladiatorCardBadge( character, badgeIndex )
-	//		ItemFlavor ornull badgeOrNull = LoadoutSlot_GetItemFlavorOrNull( playerEHI, badgeSlot )
 	//
-	//		if ( badgeOrNull != null )
-	//		{
-	//			ItemFlavor badge = expect ItemFlavor(badgeOrNull)
 	//
-	//			// todo(dw): tier override
-	//			int tierIndex = -1
 	//
-	//			//LoadoutEntry badgeTierSlot = Loadout_GladiatorCardBadgeTier( character, badgeIndex )
-	//			//if ( tierIndex == -1 && LoadoutSlot_IsReady( playerEHI, badgeTierSlot ) )
-	//			//{
-	//			//	ItemFlavor tierDummy = LoadoutSlot_GetItemFlavor( playerEHI, badgeTierSlot )
-	//			//	tierIndex = DummyItemFlavor_GetDummyIndex( tierDummy )
-	//			//}
 	//
-	//			if ( tierIndex == -1 )
-	//				tierIndex = 0
 	//
-	//			asset badgeRuiAsset, badgeImageAsset
-	//			array<GladCardBadgeTierData> tierDataList = GladiatorCardBadge_GetTierDataList( badge )
-	//			if ( GladiatorCardBadge_HasOwnRUI( badge ) )
-	//			{
-	//				badgeRuiAsset = tierDataList[tierIndex].ruiAsset
-	//			}
-	//			else
-	//			{
-	//				badgeRuiAsset = $"ui/gcard_badge_basic.rpak"
-	//				badgeImageAsset = tierDataList[tierIndex].imageAsset
-	//			}
 	//
-	//			var badgeRui = RuiCreateNested( screen.floatingRui, "badge" + badgeIndex + "Instance", badgeRuiAsset )
-	//			screen.floatingNestedBadgeRuiList[badgeIndex] = badgeRui
 	//
-	//			RuiSetInt( badgeRui, "tier", tierIndex )
 	//
-	//			if ( badgeImageAsset != $"" )
-	//				RuiSetImage( badgeRui, "img", badgeImageAsset )
-	//		}
-	//	}
-	//}
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 }
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ClientStaticPropRUICreated( StaticPropRui propRui, var ruiInstance )
 {
 	if ( !(propRui.magicId in file.environmentalRUIListMapByMagicId) )
@@ -1028,12 +1028,12 @@ void function ClientStaticPropRUICreated( StaticPropRui propRui, var ruiInstance
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 bool function OnEnumStaticPropRui( StaticPropRui staticPropRuiInfo )
 {
 	if ( !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
 		return (staticPropRuiInfo.mockupName.find( "apex_screen" ) != -1)
-	//printt( "STATIC RUI", staticPropRuiInfo.magicId, "SCRIPTNAME:" + staticPropRuiInfo.scriptName, "MOCKUP:" + staticPropRuiInfo.mockupName, "MODEL:" + staticPropRuiInfo.modelName, "RUI:" + staticPropRuiInfo.ruiName )
+	//
 
 	ApexScreenState apexScreen
 	apexScreen.magicId = staticPropRuiInfo.magicId
@@ -1045,7 +1045,7 @@ bool function OnEnumStaticPropRui( StaticPropRui staticPropRuiInfo )
 	apexScreen.spawnScale = Length( staticPropRuiInfo.spawnForward )
 	apexScreen.spawnMins = staticPropRuiInfo.spawnMins
 	apexScreen.spawnMaxs = staticPropRuiInfo.spawnMaxs
-	apexScreen.ruiToCreate = $"ui/apex_screen.rpak" //$"ui/apex_screen_vertical.rpak"
+	apexScreen.ruiToCreate = $"ui/apex_screen.rpak" //
 	apexScreen.mockup = staticPropRuiInfo.mockupName
 	apexScreen.diagonalSize = Distance( staticPropRuiInfo.spawnMins, staticPropRuiInfo.spawnMaxs )
 
@@ -1091,11 +1091,11 @@ bool function OnEnumStaticPropRui( StaticPropRui staticPropRuiInfo )
 			break
 
 		default:
-			return false // don't block default, we're not going to put any apex screen stuff on this prop
-			//apexScreen.sharesPropWithEnvironmentalRUI = true
-			//apexScreen.isVideoOnly = true
-			//apexScreen.uvMin = <0.0, 0.0, 0.0>
-			//apexScreen.uvMax = <1.0, 1.0, 0.0>
+			return false //
+			//
+			//
+			//
+			//
 			break
 	}
 
@@ -1105,7 +1105,7 @@ bool function OnEnumStaticPropRui( StaticPropRui staticPropRuiInfo )
 	bool isVertical         = (screenAspectRatio < 1.1)
 	if ( !isVertical )
 	{
-		//apexScreen.screenPosition = eApexScreenPosition.TV_LIKE
+		//
 		apexScreen.position = eApexScreenPosition.DISABLED
 	}
 	else
@@ -1132,24 +1132,24 @@ bool function OnEnumStaticPropRui( StaticPropRui staticPropRuiInfo )
 	file.magicIdScreenStateMap[apexScreen.magicId] <- apexScreen
 
 	if ( apexScreen.sharesPropWithEnvironmentalRUI )
-		return false // don't block default if the model is not an "apex-only" model (it could be showing an ad or a sushi menu, etc)
+		return false //
 
 	return true
 }
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 var function CreateApexScreenRUIElement( ApexScreenState screen )
 {
 	var rui
 	if ( screen.magicId == -1 )
 	{
-		#if DEV
-			float aspectRatio = 1.0//0.38
+		#if(DEV)
+			float aspectRatio = 1.0//
 			float height      = screen.diagonalSize / sqrt( 1.0 + pow( aspectRatio, 2.0 ) )
 			float width       = aspectRatio * height
-			vector origin     = screen.spawnOrigin// + <0, 0, -height>
+			vector origin     = screen.spawnOrigin//
 			var topo          = RuiTopology_CreatePlane( origin, <0, width, 0>, <0, 0, -height>, false )
 
 			rui = RuiCreate( screen.ruiToCreate, topo, RUI_DRAW_WORLD, 32767 )
@@ -1167,7 +1167,7 @@ var function CreateApexScreenRUIElement( ApexScreenState screen )
 
 	vector basePos = screen.spawnOrigin
 	basePos.z -= (screen.spawnMaxs.z - screen.spawnMins.z)
-	//DebugDrawAxis( basePos, VectorToAngles( screen.spawnForward ), 25, 5 )
+	//
 	RuiSetFloat3( rui, "screenWorldPos", basePos )
 	RuiSetFloat( rui, "screenScale", screen.spawnScale )
 	RuiSetFloat2( rui, "uvMin", screen.uvMin )
@@ -1180,15 +1180,15 @@ var function CreateApexScreenRUIElement( ApexScreenState screen )
 	if ( screen.sharesPropWithEnvironmentalRUI )
 		RuiSetBool( rui, "sharesPropWithEnvironmentalRUI", true )
 
-	//RuiTrackInt( rui, "playersRemainingCount", null, RUI_TRACK_SCRIPT_NETWORK_VAR_GLOBAL_INT, GetNetworkedVariableIndex( "livingPlayerCount" ) )
-	//RuiTrackInt( rui, "squadsRemainingCount", null, RUI_TRACK_SCRIPT_NETWORK_VAR_GLOBAL_INT, GetNetworkedVariableIndex( "squadsRemainingCount" ) )
+	//
+	//
 
 	return rui
 }
 #endif
 
 
-#if CLIENT && DEV
+#if CLIENT && DEV 
 void function DEV_CreatePerfectApexScreen( vector origin, float diagonalSize, int screenPosition )
 {
 	ApexScreenState apexScreen
@@ -1209,13 +1209,13 @@ void function DEV_CreatePerfectApexScreen( vector origin, float diagonalSize, in
 
 
 
-////
-////
-//// Kill event data
-////
-////
+//
+//
+//
+//
+//
 
-#if CLIENT
+#if(CLIENT)
 void function ServerToClient_ApexScreenKillDataChanged( int damageSourceID, float distanceBetweenPlayers, int killedPlayerGrade, entity killedPlayer )
 {
 	file.killScreenDamageSourceID = damageSourceID
@@ -1233,78 +1233,78 @@ void function ServerToClient_ApexScreenKillDataChanged( int damageSourceID, floa
 
 
 
-////
-////
-//// Work-in-progress scheduler
-////
-////
+//
+//
+//
+//
+//
 
-//#if CLIENT
-//struct ApexScreenSituation
-//{
-//	bool  required = false
-//	float earliestStart = -1.0
-//	float latestStart = -1.0
-//	float minimumDuration = 0.0
-//	float earliestFinish = -1.0
-//	float latestFinish = -1.0
 //
-//	int    mode = eApexScreenMode.INVALID
-//	entity player0 = null
-//	entity player1 = null
-//	entity player2 = null
-//}
-//#endif
 //
-//void function OnSurvivalDeathFieldStageChanged( int stage, float nextCircleStartTime )
-//{
-//	// todo(dw): first circle
-//	// todo(dw): last circle
 //
-//	#if CLIENT
-//		ApexScreenSituation sit
-//		sit.onlyOnce = false
-//		sit.required = true
-//		sit.earliestStart = nextCircleStartTime - 30.0
-//		sit.latestStart = nextCircleStartTime - 8.0
-//		sit.minimumDuration = 0.0
-//		sit.earliestFinish = nextCircleStartTime + 5.0
-//		sit.latestFinish = nextCircleStartTime + 120.0
-//		sit.mode = eApexScreenMode.CIRCLE_STATE
-//		file.circleWillCloseSituationOrNull = sit
 //
-//		ApexScreenSituation sit
-//		sit.onlyOnce = false
-//		sit.required = true
-//		sit.earliestStart = nextCircleStartTime - 30.0
-//		sit.latestStart = nextCircleStartTime - 8.0
-//		sit.minimumDuration = 0.0
-//		sit.earliestFinish = nextCircleStartTime + 5.0
-//		sit.latestFinish = nextCircleStartTime + 120.0
-//		sit.mode = eApexScreenMode.CIRCLE_STATE
-//		file.circleWillCloseSituationOrNull = sit
-//	#endif
-//}
 //
-//#if SERVER
-//ApexScreenSituation function GetScreenSituation( ApexScreenState screenState )
-//{
-//	array<ApexScreenSituation> choices = []
 //
-//	{
-//		// circle state -- about to close & just closed
-//		float nextCircleStartTime = GetGlobalNetTime( "nextCircleStartTime" )
-//	}
 //
-//	// impressive kill
 //
-//	// players remaining
-//	// squads remaining
 //
-//	// champion squad
 //
-//	// logo
-//}
-//#endif
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 

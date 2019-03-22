@@ -1,9 +1,9 @@
 untyped
 
-//********************************************************************************************
-//	_cl_mapspawn.nut
-//  Called on newgame or transitions, BEFORE entities have been created and initialized
-//********************************************************************************************
+//
+//
+//
+//
 
 global function ClientCodeCallback_MapSpawn
 global function ClientCodeCallback_RunClientConnectScripts
@@ -46,7 +46,7 @@ float function GetNearestAspectRatio( int width, int height )
 	else if ( fabs( ASPECT_RATIO_16_BY_9 - aspectRatio ) < 0.1 )
 		return aspectRatio
 	else if ( fabs( ASPECT_RATIO_21_BY_9 - aspectRatio ) < 0.1 )
-		return aspectRatio // since 21:9 could be a few different resolutions, lets use the one that we passed in since it will perfectly match the screen
+		return aspectRatio //
 	else if ( fabs( (16.0 * 3 / 9.0) - aspectRatio ) < 0.1 )
 		return ASPECT_RATIO_16_BY_9
 	else if ( fabs( (16.0 * 3 / 10.0) - aspectRatio ) < 0.1 )
@@ -60,10 +60,10 @@ UISize function GetCurrentVirtualScreenSize( bool isHud )
 {
 	UISize screenSize = GetScreenSize()
 
-	// Clamp the HUD elements to a max 21:9 screen, for 3x monitor setups
+	//
 	if ( isHud )
 	{
-		float clampedAspectRatio = GetNearestAspectRatio( screenSize.width, screenSize.height )//GraphCapped( 1.0, 0.0, 1.0, ASPECT_RATIO_16_BY_9, ASPECT_RATIO_21_BY_9 )
+		float clampedAspectRatio = GetNearestAspectRatio( screenSize.width, screenSize.height )//
 		float aspectRatio        = screenSize.width / float( screenSize.height )
 		if ( aspectRatio != clampedAspectRatio )
 			screenSize.width = int( screenSize.height * clampedAspectRatio )
@@ -109,7 +109,7 @@ void function ClientCodeCallback_MapSpawn()
 
 	PrecacheResFiles()
 
-	#if DEV
+	#if(DEV)
 		ClModelViewInit()
 	#endif
 
@@ -119,9 +119,9 @@ void function ClientCodeCallback_MapSpawn()
 
 	if ( IsLobby() )
 	{
-		//PakHandle unusedHandle1 = RequestPakFile( "lobby" ) // Contains images for promo dialogue and store.
-		// (dw): The pak request is cleaned up when the lobby client VM is destroyed, so there is no need for script
-		// to keep the handle around.
+		//
+		//
+		//
 	}
 }
 
@@ -210,7 +210,7 @@ void function CreateHUDRuiTopologies()
 
 	RuiTopology_ShareWithCode( clGlobal.topoFullscreenHudPermanent, RUI_CODE_TOPO_PERMANENT_HUD )
 
-	// titans:
+	//
 	{
 		clGlobal.topoTitanCockpitHud = RuiTopology_CreateSphere( <-120, 0, -TITAN_COCKPIT_TOPO_RADIUS * deg_sin( TITAN_COCKPIT_ROTATION_ANGLE )>, <0, -1, 0>, <deg_sin( TITAN_COCKPIT_ROTATION_ANGLE ), 0, -deg_cos( TITAN_COCKPIT_ROTATION_ANGLE )>, TITAN_COCKPIT_TOPO_RADIUS, TITAN_COCKPIT_RUI_SCREEN_WIDTH, TITAN_COCKPIT_RUI_SCREEN_WIDTH / 1.7665, TITAN_COCKPIT_RUI_SUBDIV )
 		clGlobal.topoTitanCockpitLowerHud = RuiTopology_CreatePlane( <0, 0, 0>, <0, -TITAN_COCKPIT_LOWER_RUI_SCREEN_SQUARE_SIZE, 0>, <0, 0, -TITAN_COCKPIT_LOWER_RUI_SCREEN_SQUARE_SIZE * TITAN_COCKPIT_LOWER_RUI_SCREEN_HEIGHT_SCALE>, true )
@@ -229,7 +229,7 @@ void function ClientCodeCallback_OnResolutionChanged()
 	UpdateMainHudVisibility( GetLocalViewPlayer() )
 	UpdateFullscreenTopology( clGlobal.topoFullScreen, false )
 	UpdateFullscreenTopology( clGlobal.topoFullscreenFullMap, true )
-	InitChatHUD()    // sets the size of the vgui chat widow, if we donn't do this it will revert back to the default values set in the res file.
+	InitChatHUD()    //
 
 	if ( !IsLobby() )
 		FullMap_UpdateTopologies()
@@ -309,7 +309,7 @@ void function Init_ClientScripts( entity player )
 		player.ClientCommand( "ClientStatus " + (IsPartyMember( player ) ? "1" : "0") )
 	}
 
-	// Added via AddCallback_OnClientScriptInit
+	//
 	foreach ( callbackFunc in clGlobal.onClientScriptInitCallback )
 	{
 		callbackFunc( player )
@@ -366,34 +366,34 @@ void function CodeCallback_EntityVarChanged( entity ent, varName, newValue, oldV
 	}
 }
 
-// called from _base_gametype::ClientCommand_ClientScriptInitialized()
+//
 void function ServerCallback_ClientInitComplete()
 {
 	FlagSet( "ClientInitComplete" )
 }
 
-/*string function StripPrefix( string stringName, string prefix )
-{
-	int index = stringName.find( prefix )
+/*
 
-	if ( index != 0 )
-		return stringName
 
-	return stringName.slice( prefix.len(), stringName.len() )
-}
 
-function GetTableNumContents( Table, contents )
-{
-	foreach ( k, v in Table )
-	{
-		contents.num++
 
-		if ( typeof v == "table" )
-		{
-			GetTableNumContents( v, contents )
-		}
-	}
-}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 void function PerfInitLabels()
 {

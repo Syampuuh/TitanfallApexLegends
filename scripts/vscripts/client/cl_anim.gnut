@@ -23,7 +23,7 @@ void function ClAnim_Init()
 	PrecacheParticleSystem( $"P_screenfx_concusion" )
 }
 
-// anim teleport
+//
 void function PlayAnimTeleport( entity guy, string animation_name, reference = null, optionalTag = null, float initialTime = -1.0 )
 {
 	if ( !reference )
@@ -36,7 +36,7 @@ void function PlayAnimTeleport( entity guy, string animation_name, reference = n
 	WaittillAnimDone( guy )
 }
 
-// play the anim
+//
 void function PlayAnim( entity guy, string animation_name, reference = null, optionalTag = null, float blendTime = DEFAULT_SCRIPTED_ANIMATION_BLEND_TIME, float initialTime = -1.0 )
 {
 	__PlayAnim( guy, animation_name, reference, optionalTag, blendTime )
@@ -100,13 +100,13 @@ table function GetRefPosition( entity reference )
 	return position
 }
 
-// play the anim
+//
 void function __PlayAnim( entity guy, string animation_name, reference = null, optionalTag = null, float blendTime = DEFAULT_SCRIPTED_ANIMATION_BLEND_TIME )
 {
 	Assert( IsValid_ThisFrame( guy ), "Invalid ent sent to PlayAnim " + animation_name )
 	string animation = GetAnim( guy, animation_name )
 
-	//guy.SetNextThinkNow()	<- SetNextThinkNow() doesn't exist on the client
+	//
 
 	if ( reference )
 	{
@@ -145,9 +145,9 @@ void function __PlayAnim( entity guy, string animation_name, reference = null, o
 				vector origin = reference.GetAttachmentOrigin( attachIndex )
 				vector angles = reference.GetAttachmentAngles( attachIndex )
 
-				//table animStartPos = guy.Anim_GetStartForRefEntity_Old( animation, reference, optionalTag )
-				//local origin = animStartPos.origin
-				//local angles = animStartPos.angles
+				//
+				//
+				//
 
 				guy.Anim_PlayWithRefPoint( animation, origin, angles, blendTime )
 			}
@@ -179,7 +179,7 @@ void function __PlayAnim( entity guy, string animation_name, reference = null, o
 
 void function TeleportToAnimStart( entity guy, string animation_name, reference, optionalTag = null )
 {
-	return //<- need code feature because Anim_GetStartForRefEntity_Old doesn't exist on client
+	return //
 
 	expect entity( reference )
 
@@ -189,20 +189,20 @@ void function TeleportToAnimStart( entity guy, string animation_name, reference,
 
 	if ( optionalTag )
 	{
-		// this command doesnt exist yet
+		//
 		animStartPos = guy.Anim_GetStartForRefEntity_Old( animation, reference, optionalTag )
 	}
 	else
 	{
-		//printt( "Reference is " + reference )
-		//printt( "guy is " + guy )
-		//printt( "animation is " + animation )
+		//
+		//
+		//
 		vector origin = reference.GetOrigin()
 		vector angles = reference.GetAngles()
 		animStartPos = guy.Anim_GetStartForRefPoint_Old( animation, origin, angles )
 	}
 
-	// hack! shouldn't need to do this
+	//
 	animStartPos.origin = ClampToWorldspace( expect vector( animStartPos.origin ) )
 
 	guy.SetOrigin( animStartPos.origin )
@@ -211,7 +211,7 @@ void function TeleportToAnimStart( entity guy, string animation_name, reference,
 
 void function ClGlobalAnimEvent_EnableFxGroup( entity model, array<string> tokens )
 {
-	// ex: "enable_fx_group:thrusters"
+	//
 	Assert( tokens.len() == 2 )
 	string fxGroup = tokens[1]
 	ModelFX_EnableGroup( model, fxGroup )
@@ -219,13 +219,13 @@ void function ClGlobalAnimEvent_EnableFxGroup( entity model, array<string> token
 
 void function ClGlobalAnimEvent_DisableFxGroup( entity model, array<string> tokens )
 {
-	// ex: "disable_fx_group:thrusters"
+	//
 	Assert( tokens.len() == 2 )
 	string fxGroup = tokens[1]
 	ModelFX_DisableGroup( model, fxGroup )
 }
 
-//playImpactFXTable:impacTableString:AttachmentName
+//
 void function ClGlobalAnimEvent_playImpactFXTable( entity model, array<string> tokens)
 {
 	Assert( tokens.len() == 3 )
@@ -240,7 +240,7 @@ void function ClGlobalAnimEvent_playImpactFXTable( entity model, array<string> t
 	entity ent = model
 	int impactTableIndex = GetImpactTableIndex( TableString )
 
-	//printt( "PlayImpactFXTable " + TableString + " on attachment " + AttachmentString + " Of model " + model )
+	//
 
 	Assert( impactTableIndex != -1, "Need to set: RegisterImpactTable(" + TableString + ") in sh_anim_events.nut"  )
 
@@ -248,12 +248,12 @@ void function ClGlobalAnimEvent_playImpactFXTable( entity model, array<string> t
 	vector startPos = origin
 	vector endPos = origin + (fwd*64)
 	TraceResults trace = TraceLine( startPos, endPos, ent, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
-	//DebugDrawLine( startPos, endPos, 0, 255, 0, true, 5.0 )
+	//
 
 	if ( IsValid( trace.hitEnt ) )
 	{
-		//DebugDrawLine( startPos, trace.endPos, 255, 0, 0, true, 5.0 )
-		//printt( "PlayImpactFXTable event collided with surfaceProp " + trace.surfaceProp + " on " + trace.hitEnt )
+		//
+		//
 		ent.DispatchImpactEffects( trace.hitEnt, startPos, trace.endPos, trace.surfaceNormal, trace.surfaceProp, 0, DMG_MELEE_ATTACK, impactTableIndex, ent, 0 )
 
 	}
@@ -261,7 +261,7 @@ void function ClGlobalAnimEvent_playImpactFXTable( entity model, array<string> t
 
 void function ClGlobalAnimEvent_playScreenFx_concussion( entity player, array<string> tokens )
 {
-	// ex: "playScreenFX_on_owner:$P_screenfx_concusion"
+	//
 	Assert( tokens.len() == 1 )
 
 	if ( !player.IsPlayer() )
@@ -275,10 +275,10 @@ void function ClGlobalAnimEvent_playScreenFx_concussion( entity player, array<st
 
 	if ( IsValid( localViewPlayer.GetCockpit() ) )
 	{
-		//Creates the particle effect
+		//
 		int fxID1 = StartParticleEffectOnEntity( localViewPlayer, index, FX_PATTACH_POINT_FOLLOW, localViewPlayer.GetCockpit().LookupAttachment( "CAMERA" ) )
 
-		//Draw over view model
+		//
 		EffectSetIsWithCockpit( fxID1, true )
 	}
 }

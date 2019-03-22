@@ -7,7 +7,7 @@ global function GetTorpedoOffset
 
 void function CarrierTorpedoPoints_Init()
 {
-	// verified at run time
+	//
 	level.carrierTorpedoPoints <- []
 	level.redeyeTorpedoPoints  <- []
 
@@ -38,7 +38,7 @@ table function GetTorpedoOffset( vector origin, vector angles, int indexStart, t
 
 void function AddCarrierTorpedoPoint( vector origin, vector angles )
 {
-	origin.z -= 880 // 830?
+	origin.z -= 880 //
 	angles = GetAdjustedTorpedoAngles( angles )
 	level.carrierTorpedoPoints.append( { origin = origin, angles = angles } )
 }
@@ -52,8 +52,8 @@ void function AddRedeyeTorpedoPoint( vector origin, vector angles )
 
 vector function GetAdjustedTorpedoAngles( vector angles )
 {
-	angles.y -= 180 // face it outwards
-	angles.y = angles.y % 360 // clamp to legal range cause getfreecamangles is wacky
+	angles.y -= 180 //
+	angles.y = angles.y % 360 //
 	return angles
 }
 

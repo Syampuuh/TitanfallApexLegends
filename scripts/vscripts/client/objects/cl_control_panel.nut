@@ -99,17 +99,17 @@ void function ControlPanelInit( entity panel )
 
 void function RegisterWithPanel( entity ent )
 {
-	//printt( "RegisterWithPanel", ent.GetTargetName() )
+	//
 	ent.EndSignal( "OnDestroy" )
 	entity panel = ent.GetControlPanel()
 
 	Assert( IsValid( panel ) )
 	Assert( "initiated" in panel.s )
-	/*while ( !IsValid( panel ) || !( "initiated" in panel.s ) ) //Need to wait till panel has finished initializing
-	{
-		panel = turret.GetControlPanel() //Don't think is actually necessary, but better safe than sorry...
-		WaitFrame()
-	}*/
+	/*
+
+
+
+*/
 
 	if ( !panel.s.targetArray.contains( ent ) )
 		panel.s.targetArray.append( ent )
@@ -150,7 +150,7 @@ void function ControlPanelRefresh( entity panel )
 
 	if ( CanUpdateVGUI( panel ) )
 	{
-		panel.s.VGUIFunc( panel )	// Update the panel vgui screen to match the state of the target(s)
+		panel.s.VGUIFunc( panel )	//
 		UpdateParticleSystem( panel )
 	}
 }
@@ -163,8 +163,8 @@ bool function CanUpdateVGUI( entity panel )
 	if ( panel.s.HudVGUI == null )
 		return false
 
-	// if ( panel.s.targetArray.len() == 0 )
-	// 	return false
+	//
+	//
 
 	return true
 }
@@ -177,22 +177,22 @@ void function Create_Display( entity panel )
 		panel.s.HudVGUI = null
 	}
 
-	//int bottomLeftID = panel.LookupAttachment( "PANEL_SCREEN_BL" )
-	//int topRightID = panel.LookupAttachment( "PANEL_SCREEN_TR" )
+	//
+	//
 
-	//float[2] size = ComputeSizeForAttachments( panel, bottomLeftID, topRightID, false )
+	//
 
-	//vector origin = panel.GetAttachmentOrigin( bottomLeftID )
-	//vector angles = panel.GetAttachmentAngles( bottomLeftID )
+	//
+	//
 
-	// push the origin "out" slightly, since the tags are coplanar with the geo
-	//origin += AnglesToUp( angles ) * 0.05
+	//
+	//
 
-	//panel.s.HudVGUI = CreateClientsideVGuiScreen( panel.s.resfile, VGUI_SCREEN_PASS_WORLD, origin, angles, size[0], size[1] )
-	//panel.s.HudVGUI.s.panel <- panel.s.HudVGUI.GetPanel() // This is a different panel than the Control Panel
-	//panel.s.HudVGUI.SetParent( panel, "PANEL_SCREEN_BL" )
+	//
+	//
+	//
 
-	//panel.s.VGUISetupFunc( panel )
+	//
 }
 
 void function VGUIUpdateSpectre( panel )
@@ -202,7 +202,7 @@ void function VGUIUpdateSpectre( panel )
 	controlledItem.SetText( "Spectre Drop" )
 	stateElement.SetText( "[READY]" )
 
-	// alternate on and off
+	//
 	int show = int( Time() * 4 ) % 2
 	if ( show )
 		stateElement.Show()
@@ -222,7 +222,7 @@ function VGUIUpdateGeneric( panel )
 	expect entity( panel )
 	local state = panel.s.HudVGUI.s.state
 
-	// alternate on and off
+	//
 	int show = int( Time() ) % 2
 	if ( show )
 		state.Show()
@@ -270,14 +270,14 @@ void function UpdateParticleSystem( entity panel )
 
 	if ( panel.s.particleEffect != null )
 	{
-		// Return if don't need to update panel particle effect
+		//
 		if ( playerSameTeamAsPanel && panel.s.particleFlashingBlueToPlayer )
 			return
 
 		if ( !playerSameTeamAsPanel && !panel.s.particleFlashingBlueToPlayer )
 			return
 
-		// We need to change the effect of the panel now, so stop existing one
+		//
 		if ( EffectDoesExist( panel.s.particleEffect ) )
 			EffectStop( panel.s.particleEffect, true, false )
 	}

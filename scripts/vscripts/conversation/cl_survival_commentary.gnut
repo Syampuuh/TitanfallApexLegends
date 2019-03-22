@@ -44,16 +44,16 @@ bool function SurvivalCommentary_IsEnabled()
 {
 	return file.isEnabled
 }
-/////////////////////////////////////////////////////////////////////////////////////////////
 //
-//	███████╗███████╗████████╗██╗   ██╗██████╗     ███████╗████████╗██╗   ██╗███████╗███████╗
-//	██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗    ██╔════╝╚══██╔══╝██║   ██║██╔════╝██╔════╝
-//	███████╗█████╗     ██║   ██║   ██║██████╔╝    ███████╗   ██║   ██║   ██║█████╗  █████╗
-//	╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝     ╚════██║   ██║   ██║   ██║██╔══╝  ██╔══╝
-//	███████║███████╗   ██║   ╚██████╔╝██║         ███████║   ██║   ╚██████╔╝██║     ██║
-//	╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝         ╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝
 //
-/////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+//
 
 void function ClSurvivalCommentary_Init()
 {
@@ -75,16 +75,16 @@ void function ClSurvivalCommentary_Init()
 	file.isEnabled = true
 }
 
-///////////////////////////////////////////////////////////////////////////////////
 //
-//	██████╗ ██╗      █████╗ ██╗   ██╗
-//	██╔══██╗██║     ██╔══██╗╚██╗ ██╔╝
-//	██████╔╝██║     ███████║ ╚████╔╝
-//	██╔═══╝ ██║     ██╔══██║  ╚██╔╝
-//	██║     ███████╗██║  ██║   ██║
-//	╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝
 //
-///////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+//
 
 void function PlaySoundWithDelay(vector origin, string alias, float delay = 0.0)
 {
@@ -92,16 +92,16 @@ void function PlaySoundWithDelay(vector origin, string alias, float delay = 0.0)
 	EmitSoundAtPosition( TEAM_BOTH, origin, alias )
 }
 
-////////////////////////////////////////////////////////////////
 //
-//	 ██████╗██████╗  ██████╗ ██╗    ██╗██████╗ ███████╗
-//	██╔════╝██╔══██╗██╔═══██╗██║    ██║██╔══██╗██╔════╝
-//	██║     ██████╔╝██║   ██║██║ █╗ ██║██║  ██║███████╗
-//	██║     ██╔══██╗██║   ██║██║███╗██║██║  ██║╚════██║
-//	╚██████╗██║  ██║╚██████╔╝╚███╔███╔╝██████╔╝███████║
-//	 ╚═════╝╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚═════╝ ╚══════╝
 //
-////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+//
 
 void function ServerCallback_Survival_PlayCrowdEvent( vector eventOrigin, int eventType)
 {
@@ -121,126 +121,126 @@ void function ServerCallback_Survival_PlayCrowdEvent( vector eventOrigin, int ev
 			}
 			break
 		case eSurvivalEventType.PILOT_WOUNDED:
-	/*		string alias
-			string debugText = ""
+	/*
 
-			if (file.endCircleChantStarted)
-				return
 
-			float randomDelay = RandomFloatRange(0.25, 1.5)
 
-			array<int> speakerInRangeIndexes = GetSpeakersInRange(eventOrigin)
-			bool shouldChant = RandomFloatRange(0, 99) < CHANCE_FOR_CHANTING
 
-			foreach( index in speakerInRangeIndexes)
-			{
-				CommentaryDebugSphere(file.speakers[index].origin, 50, 50, 200, STANDARD_CROWD_CHEER_TIME)
 
-				if (file.speakers[index].crowdQuietAlias == "" && file.speakers[index].crowdActiveAlias == "" && file.speakers[index].crowdCheerAlias == "")
-				{
-					alias = SelecRandomQuietAlias()
 
-					thread PlaySoundWithDelay(eventOrigin, alias, randomDelay)
-					file.speakers[index].crowdQuietAlias = alias
-					//file.speakers[index].quietLoopSecondsToTimeout = STANDARD_CROWD_QUIET_TIME + RandomFloatRange(0.25, 2.0)
-					file.speakers[index].speakerEnt.Signal( "SoundStartingQuiet" )
-					thread SpeakerTrackingTowardsQuietShutdown(index)
-					CommentaryDebugText(eventOrigin, "Quiet Loop Start", STANDARD_CROWD_QUIET_TIME)
-				}
-				else if (file.speakers[index].crowdActiveAlias == "" && file.speakers[index].crowdCheerAlias == "")
-				{
-					alias = SelecRandomActiveAlias()
 
-					thread PlaySoundWithDelay(eventOrigin, alias, randomDelay)
-					file.speakers[index].crowdActiveAlias = alias
-					//file.speakers[index].activeLoopSecondsToTimeout = STANDARD_CROWD_ACTIVE_TIME + RandomFloatRange(0.25, 2.0)
-					file.speakers[index].speakerEnt.Signal( "SoundStartingActive" )
-					thread SpeakerTrackingTowardsActiveShutdown(index)
-					CommentaryDebugText(eventOrigin, "Active Loop Start", STANDARD_CROWD_ACTIVE_TIME)
-				}
-				else if (file.speakers[index].crowdCheerAlias == "")
-				{
-					if(shouldChant)
-					{
-						alias = SelecRandomChantAlias()
-						debugText = "Chant Loop Start"
-					}
-					else
-					{
-						alias = SelecRandomCheerAlias()
-						debugText = "Cheer Loop Start"
-					}
 
-					thread PlaySoundWithDelay(eventOrigin, alias, randomDelay)
-					file.speakers[index].crowdCheerAlias = alias
-					//file.speakers[index].cheerLoopSecondsToTimeout = STANDARD_CROWD_CHEER_TIME + RandomFloatRange(0.25, 2.0)
-					file.speakers[index].speakerEnt.Signal( "SoundStartingCheer" )
-					thread SpeakerTrackingTowardsCheerShutdown(index)
-					CommentaryDebugText(eventOrigin, debugText, STANDARD_CROWD_CHEER_TIME)
-				}
-				else
-				{
-					//reset the time because the action has continued
-					file.speakers[index].cheerLoopSecondsToTimeout = STANDARD_CROWD_CHEER_TIME + RandomFloatRange(0.25, 2.0)
-					CommentaryDebugText(eventOrigin, "Cheer/Chant Loop Refresh", STANDARD_CROWD_CHEER_TIME)
-				}
 
-			}
 
-			CommentaryDebugSphere(eventOrigin, 200, 50, 50, STANDARD_CROWD_CHEER_TIME)*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 			break
 
 		case eSurvivalEventType.PILOT_KILL:
-/*			string alias = SelecRandomCrowdOneshot()
-			string ovationAlias = SelecRandomOvationAlias()
-			float randomDelay = RandomFloatRange(0.25, 0.5)
+/*
 
-			array<int> speakerInRangeIndexes = GetSpeakersInRange(eventOrigin)
 
-			foreach(index in speakerInRangeIndexes)
-			{
-				CommentaryDebugSphere(file.speakers[index].origin, 50, 50, 200, 5)
 
-				if (file.speakers[index].crowdRoarAlias == "")
-				{
-					thread PlaySoundWithDelay(eventOrigin, alias, randomDelay)
-					file.speakers[index].crowdRoarAlias = alias
-					file.speakers[index].oneShotDelayBetweenReuse = STANDARD_DELAY_BETWEEN_SPEAKER_ONESHOTS
-					thread SpeakerTrackingOneShotTimeOut(index)
-					CommentaryDebugText(eventOrigin, "Roar/Boo One Shot", STANDARD_CROWD_CHEER_TIME)
 
-					//start cheering loop as well
-					if (file.speakers[index].crowdCheerAlias == "")
-					{
-						alias = SelecRandomActiveAlias()
 
-						thread PlaySoundWithDelay(eventOrigin, alias, randomDelay)
-						file.speakers[index].crowdCheerAlias = alias
-						//file.speakers[index].cheerLoopSecondsToTimeout = STANDARD_CROWD_CHEER_TIME + RandomFloatRange(0.25, 2.0)
-						file.speakers[index].speakerEnt.Signal( "SoundStartingCheer" )
-						thread SpeakerTrackingTowardsCheerShutdown(index)
-					}
-					else
-					{
-						file.speakers[index].cheerLoopSecondsToTimeout = STANDARD_CROWD_CHEER_TIME + RandomFloatRange(0.25, 2.0)
-					}
-				}
-				else if (file.speakers[index].crowdOvationAlias == "")
-				{
-					thread PlaySoundWithDelay(eventOrigin, ovationAlias, randomDelay)
-					file.speakers[index].crowdOvationAlias = ovationAlias
-					//file.speakers[index].ovationLoopSecondsToTimeout = STANDARD_CROWD_OVATION_TIME + RandomFloatRange(0.25, 0.5)
-					file.speakers[index].speakerEnt.Signal( "SoundStartingOvation" )
-					thread SpeakerTrackingTowardsOvationShutdown(index)
-					CommentaryDebugText(eventOrigin, "Ovation One Shot", STANDARD_CROWD_CHEER_TIME)
-				}
-			}
 
-			CommentaryDebugSphere(eventOrigin, 200, 50, 50, 5)*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 			break
 		case eSurvivalEventType.CIRCLE_MOVES_1MIN:
-			//if (file.endCircleChantStarted)
-			//	return
+			//
+			//
 
 			entity localViewPlayer = GetLocalViewPlayer()
 
@@ -250,7 +250,7 @@ void function ServerCallback_Survival_PlayCrowdEvent( vector eventOrigin, int ev
 			array<int> speakerInRangeIndexes = GetSpeakersInRange(localViewPlayer.GetOrigin())
 
 			string alias = "music_survival_circleclosing_60sec"
-			//file.endCircleChantStarted = true
+			//
 			float randomDelay = RandomFloatRange(2.0, 3.0)
 
 			foreach(index in speakerInRangeIndexes)
@@ -295,13 +295,13 @@ void function SpeakerTrackingTowardsQuietShutdown(int index )
 
 	wait STANDARD_CROWD_QUIET_TIME + RandomFloatRange(0.25, 2.0)
 
-	/*float tickTime = 0.1
+	/*
 
-	while (file.speakers[index].quietLoopSecondsToTimeout > 0)
-	{
-		wait tickTime
-		file.speakers[index].quietLoopSecondsToTimeout = file.speakers[index].quietLoopSecondsToTimeout - tickTime
-	}*/
+
+
+
+
+*/
 
 	EmitSoundAtPosition( TEAM_BOTH, file.speakers[index].origin, file.speakers[index].crowdQuietAlias + "_stop" )
 	WaitFrame()
@@ -314,13 +314,13 @@ void function SpeakerTrackingTowardsActiveShutdown(int index )
 
 	wait STANDARD_CROWD_ACTIVE_TIME + RandomFloatRange(0.25, 2.0)
 
-/*	float tickTime = 0.1
+/*
 
-	while (file.speakers[index].activeLoopSecondsToTimeout > 0)
-	{
-		wait tickTime
-		file.speakers[index].activeLoopSecondsToTimeout = file.speakers[index].activeLoopSecondsToTimeout - tickTime
-	}*/
+
+
+
+
+*/
 
 	EmitSoundAtPosition( TEAM_BOTH, file.speakers[index].origin, file.speakers[index].crowdActiveAlias + "_stop" )
 	WaitFrame()
@@ -333,13 +333,13 @@ void function SpeakerTrackingTowardsCheerShutdown(int index )
 
 	wait STANDARD_CROWD_CHEER_TIME + RandomFloatRange(0.25, 2.0)
 
-	/*float tickTime = 0.1
+	/*
 
-	while (file.speakers[index].cheerLoopSecondsToTimeout > 0)
-	{
-		wait tickTime
-		file.speakers[index].cheerLoopSecondsToTimeout = file.speakers[index].cheerLoopSecondsToTimeout - tickTime
-	}*/
+
+
+
+
+*/
 
 	EmitSoundAtPosition( TEAM_BOTH, file.speakers[index].origin, file.speakers[index].crowdCheerAlias + "_stop" )
 	WaitFrame()
@@ -352,13 +352,13 @@ void function SpeakerTrackingTowardsOvationShutdown(int index )
 
 	wait STANDARD_CROWD_OVATION_TIME + RandomFloatRange(0.25, 2.0)
 
-/*	float tickTime = 0.1
+/*
 
-	while (file.speakers[index].ovationLoopSecondsToTimeout > 0)
-	{
-		wait tickTime
-		file.speakers[index].ovationLoopSecondsToTimeout = file.speakers[index].ovationLoopSecondsToTimeout - tickTime
-	}*/
+
+
+
+
+*/
 
 	EmitSoundAtPosition( TEAM_BOTH, file.speakers[index].origin, file.speakers[index].crowdOvationAlias + "_stop" )
 	wait STANDARD_DELAY_BETWEEN_SPEAKER_OVATIONS
@@ -371,15 +371,15 @@ void function SpeakerTrackingTowardsChantShutdown(int index )
 
 	wait STANDARD_CROWD_CHANT_BEFORE_CIRCLE_CLOSE_TIME
 
-	/*float tickTime = 0.1
+	/*
 
-	while (file.speakers[index].cheerLoopSecondsToTimeout > 0)
-	{
-		wait tickTime
-		file.speakers[index].cheerLoopSecondsToTimeout = file.speakers[index].cheerLoopSecondsToTimeout - tickTime
-	}*/
 
-	//EmitSoundAtPosition( TEAM_BOTH, file.speakers[index].origin, file.speakers[index].crowdChantAlias + "_stop" )
+
+
+
+*/
+
+	//
 	WaitFrame()
 	file.speakers[index].crowdChantAlias = ""
 }
@@ -447,20 +447,21 @@ string function SelecRandomCrowdOneshot()
 	unreachable
 }
 
-///////////////////////////////////////////////////////////////////////////////////
 //
-//███╗   ███╗███████╗███████╗███████╗ █████╗  ██████╗ ███████╗███████╗
-//████╗ ████║██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝ ██╔════╝██╔════╝
-//██╔████╔██║█████╗  ███████╗███████╗███████║██║  ███╗█████╗  ███████╗
-//██║╚██╔╝██║██╔══╝  ╚════██║╚════██║██╔══██║██║   ██║██╔══╝  ╚════██║
-//██║ ╚═╝ ██║███████╗███████║███████║██║  ██║╚██████╔╝███████╗███████║
-//╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝
 //
-///////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+//
 
 void function ServerCallback_Survival_NewKillLeader( entity killLeader, int numKills )
 {
-	string playerName = killLeader.GetPlayerName()
+	EHI playerEHI = ToEHI( killLeader )
+	string playerName = GetPlayerName( playerEHI )
 	vector playerNameColor = killLeader.GetTeam() == GetLocalViewPlayer().GetTeam() ? GetKeyColor( COLORID_MEMBER_COLOR0, killLeader.GetTeamMemberIndex() ) : GetKeyColor( COLORID_ENEMY )
 
 	Obituary_Print_Localized( Localize( "#SURVIVAL_NEWKILLLEADER_OBIT", playerName, numKills ), playerNameColor )
@@ -477,7 +478,8 @@ void function ServerCallback_Survival_HighlightedPlayerKilled(entity killedPlaye
 
 	if(IsValid(killedPlayer))
 	{
-		playerName = killedPlayer.GetPlayerName()
+		EHI playerEHI = ToEHI( killedPlayer )
+		playerName = GetPlayerName( playerEHI )
 		playerNameColor = killedPlayer.GetTeam() == GetLocalViewPlayer().GetTeam() ? GetKeyColor( COLORID_MEMBER_COLOR0, killedPlayer.GetTeamMemberIndex() ) : <255, 255, 255>
 
 		entity localClientPlayer = GetLocalClientPlayer()
@@ -539,16 +541,16 @@ void function EmitSoundToPlayer_IfValid( entity player, string alias)
 		EmitSoundOnEntity( player, alias)
 }
 
-///////////////////////////////////////////////////////////////////////////////////
 //
-//	██╗   ██╗████████╗██╗██╗     ██╗████████╗██╗   ██╗
-//	██║   ██║╚══██╔══╝██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
-//	██║   ██║   ██║   ██║██║     ██║   ██║    ╚████╔╝
-//	██║   ██║   ██║   ██║██║     ██║   ██║     ╚██╔╝
-//	╚██████╔╝   ██║   ██║███████╗██║   ██║      ██║
-//	 ╚═════╝    ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝      ╚═╝
 //
-///////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+//
 
 array<int> function GetSpeakersInRange( vector origin, float maxDistance = MAX_SPEAKER_DISTANCE_FROM_EVENT_FOR_CROWD )
 {

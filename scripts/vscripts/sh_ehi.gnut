@@ -1,30 +1,30 @@
 /*
-(dw): Ideally, this file would not exist, but script needs to do things that code does not currently provided.
 
-1) Store data about disconnected players in the server, client & UI VMs.
-2) Handle full updates, which destroy and recreate all of the player entities in the client VM.
-3) Use player entities in the UI VM.
 
-The functions in this file work by using an integer to represent entities, when appropriate.
-This integer is known as the "encoded entity handle."
 
-This file uses two types:
- - EncodedEHandle
- - EHI
 
-E.H.I. = Entity Handle, Improper
 
-On the server VM, "EHI" is just an alias for "entity".
 
-On the client and UI VMs, "EHI" is an integer equal to ent.GetEncodedEHandle() .
 
-If you always want the integer, use EncodedEHandle.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 */
 
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 global function ToEHI
 global function FromEHI
 global function EHIToEncodedEHandle
@@ -43,21 +43,21 @@ global function GetPlayerSquadSafe
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 global function IsLocalClientEHIValid
 global function LocalClientEHI
 global function WaitForLocalClientEHI
 #endif
 
-// internal global functions
-#if SERVER || CLIENT || UI
+//
+#if CLIENT || UI 
 global function ShEHI_LevelInit_Begin
 global function ShEHI_LevelInit_End
 #endif
-#if SERVER
-global function ShEHI_OnClientConnectionCompleted
+#if(false)
+
 #endif
-#if CLIENT
+#if(CLIENT)
 global function ShEHI_OnPlayerCreated
 global function ShEHI_OnPlayerChangedTeam
 global function ShEHI_OnPlayerDisconnected
@@ -66,72 +66,72 @@ global function UIToClient_UIVMJustStarted
 global function GetPlayerName
 global function GetKillerName
 #endif
-#if UI
+#if(UI)
 global function ShEHI_VMShutdown
 global function ClientToUI_OnPlayerCreatedOrUpdated
 #endif
 
 
 
-////////////////////////////////
-////////////////////////////////
-//// Global & Private Types ////
-////////////////////////////////
-////////////////////////////////
-#if SERVER || CLIENT || UI
+//
+//
+//
+//
+//
+#if CLIENT || UI 
 struct FileStruct_LifetimeLevel
 {
 	table<EncodedEHandle, EHIScriptStruct> eehScriptStructMap = {}
 
-	#if CLIENT || UI
+	#if CLIENT || UI 
 		EHI                   localClientEHI = EHI_null
 		table<string, string> obfuscatedNameMap
 	#endif
 
-	#if CLIENT
+	#if(CLIENT)
 		bool uiVMIsResetting = false
 	#endif
 
 	table signalDummy
 }
 #endif
-#if SERVER || CLIENT
+#if(CLIENT)
 FileStruct_LifetimeLevel fileLevel
-#elseif UI
+#elseif(UI)
 FileStruct_LifetimeLevel& fileLevel
 #endif
 
 
 
-/////////////////////////
-/////////////////////////
-//// Initialiszation ////
-/////////////////////////
-/////////////////////////
-#if SERVER || CLIENT || UI
+//
+//
+//
+//
+//
+#if CLIENT || UI 
 void function ShEHI_LevelInit_Begin()
 {
-	#if CLIENT || UI
+	#if CLIENT || UI 
 		RegisterSignal( "LocalClientEHI" )
 		RegisterSignal( "EHISignalDummyCreated" )
 	#endif
 
-	#if UI
+	#if(UI)
 		FileStruct_LifetimeLevel newFileLevel
 		fileLevel = newFileLevel
 	#endif
 
-	#if CLIENT
+	#if(CLIENT)
 		AddCallback_GameStateEnter( eGameState.Playing, EHI_GameStatePlaying )
 	#endif
 }
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 void function ShEHI_LevelInit_End()
 {
-	#if UI
+	#if(UI)
 		if ( CanRunClientScript() )
 			RunClientScript( "UIToClient_UIVMJustStarted" )
 	#endif
@@ -139,7 +139,7 @@ void function ShEHI_LevelInit_End()
 #endif
 
 
-#if UI
+#if(UI)
 void function ShEHI_VMShutdown()
 {
 	if ( CanRunClientScript() )
@@ -149,22 +149,22 @@ void function ShEHI_VMShutdown()
 
 
 
-//////////////////////////
-//////////////////////////
-//// Global functions ////
-//////////////////////////
-//////////////////////////
-#if SERVER || CLIENT || UI
+//
+//
+//
+//
+//
+#if CLIENT || UI 
 EHI function ToEHI( entity ent )
 {
-	#if SERVER
-		return ent
-	#elseif CLIENT
+	#if(false)
+
+#elseif(CLIENT)
 		if ( !IsValid( ent ) )
 			return EHI_null
 
 		return ent.GetEncodedEHandle()
-	#elseif UI
+	#elseif(UI)
 		Assert( ent == GetUIPlayer() )
 		Assert( fileLevel.localClientEHI != EHI_null )
 		return fileLevel.localClientEHI
@@ -173,17 +173,17 @@ EHI function ToEHI( entity ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 entity function FromEHI( EHI ent )
 {
-	#if SERVER
-		return ent
-	#elseif CLIENT
+	#if(false)
+
+#elseif(CLIENT)
 		if ( ent == EHI_null )
 			return null
 
 		return GetEntityFromEncodedEHandle( ent )
-	#elseif UI
+	#elseif(UI)
 		Assert( fileLevel.localClientEHI != EHI_null )
 		Assert( ent == fileLevel.localClientEHI )
 		return GetUIPlayer()
@@ -192,54 +192,54 @@ entity function FromEHI( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 EncodedEHandle function EHIToEncodedEHandle( EHI ent )
 {
-	#if SERVER
-		if ( ent == null )
-			return EncodedEHandle_null
-		return ent.GetEncodedEHandle()
-	#elseif CLIENT || UI
+	#if(false)
+
+
+
+#elseif CLIENT || UI 
 		return ent
 	#endif
 }
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 EHI function EncodedEHandleToEHI( EncodedEHandle eeh )
 {
-	#if SERVER
-		return GetEntityFromEncodedEHandle( eeh )
-	#elseif CLIENT || UI
+	#if(false)
+
+#elseif CLIENT || UI 
 		return eeh
 	#endif
 }
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 bool function EHIHasValidScriptStruct( EHI ent )
 {
-	// dw(): This should only return false if a player disconnected and then we connected afterwards. We never saw them,
-	// so we don't have any data about them.
+	//
+	//
 
-	#if SERVER
-		return IsValid( ent )
-	#elseif CLIENT || UI
+	#if(false)
+
+#elseif CLIENT || UI 
 		return (ent != EHI_null && ent in fileLevel.eehScriptStructMap)
 	#endif
 }
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 EHIScriptStruct function GetEHIScriptStruct( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return ent.e.ehiss
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 		return fileLevel.eehScriptStructMap[ent]
 	#endif
@@ -247,7 +247,7 @@ EHIScriptStruct function GetEHIScriptStruct( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 bool function EEHHasValidScriptStruct( EncodedEHandle ent )
 {
 	return (ent != EncodedEHandle_null && ent in fileLevel.eehScriptStructMap)
@@ -255,7 +255,7 @@ bool function EEHHasValidScriptStruct( EncodedEHandle ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 EHIScriptStruct function GetEHIScriptStructFromEncodedEHandle( EncodedEHandle ent )
 {
 	Assert( ent != EncodedEHandle_null )
@@ -264,13 +264,13 @@ EHIScriptStruct function GetEHIScriptStructFromEncodedEHandle( EncodedEHandle en
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 EHISignalDummy function GetEHISignalDummy( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return ent
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 		return fileLevel.eehScriptStructMap[ent]
 	#endif
@@ -278,13 +278,13 @@ EHISignalDummy function GetEHISignalDummy( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 EHISignalDummy function WaitForEHISignalDummy( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return ent
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 
 		while ( !(ent in fileLevel.eehScriptStructMap) )
@@ -296,13 +296,13 @@ EHISignalDummy function WaitForEHISignalDummy( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 bool function EHI_IsConnected( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return true
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 		return GetEHIScriptStruct( ent ).isConnected
 	#endif
@@ -310,13 +310,13 @@ bool function EHI_IsConnected( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 string function EHI_GetName( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return ent.GetPlayerName()
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 		return GetEHIScriptStruct( ent ).name
 	#endif
@@ -324,13 +324,13 @@ string function EHI_GetName( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 int function EHI_GetTeam( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return ent.GetTeam()
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 		return GetEHIScriptStruct( ent ).team
 	#endif
@@ -338,13 +338,13 @@ int function EHI_GetTeam( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 int function EHI_GetTeamMemberIndex( EHI ent )
 {
-	#if SERVER
-		Assert( IsValid( ent ) )
-		return ent.GetTeamMemberIndex()
-	#elseif CLIENT || UI
+	#if(false)
+
+
+#elseif CLIENT || UI 
 		Assert( ent != EHI_null )
 		return GetEHIScriptStruct( ent ).teamMemberIndex
 	#endif
@@ -352,12 +352,12 @@ int function EHI_GetTeamMemberIndex( EHI ent )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 array<EHI> function GetPlayerEHIArrayOfTeam( int team )
 {
-	#if SERVER
-		return GetPlayerArrayOfTeam( team )
-	#elseif CLIENT || UI
+	#if(false)
+
+#elseif CLIENT || UI 
 		array<EHI> out = []
 		foreach ( EHI ehi, EHIScriptStruct ehiss in fileLevel.eehScriptStructMap )
 		{
@@ -375,10 +375,10 @@ array<EHI> function GetPlayerEHIArrayOfTeam( int team )
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 array<EncodedEHandle> function GetPlayerSquadSafe( EncodedEHandle playerEEH, int squadSize )
 {
-	array<EncodedEHandle> out = [playerEEH] // passed player is always first
+	array<EncodedEHandle> out = [playerEEH] //
 	if ( EEHHasValidScriptStruct( playerEEH ) )
 	{
 		int team = GetEHIScriptStructFromEncodedEHandle( playerEEH ).team
@@ -402,7 +402,7 @@ array<EncodedEHandle> function GetPlayerSquadSafe( EncodedEHandle playerEEH, int
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 bool function IsLocalClientEHIValid()
 {
 	return (fileLevel.localClientEHI != EHI_null)
@@ -410,12 +410,12 @@ bool function IsLocalClientEHIValid()
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 EHI function LocalClientEHI()
 {
-	#if CLIENT
+	#if(CLIENT)
 		Assert( fileLevel.localClientEHI != EHI_null, "LocalClientEHI called too early. The client VM doesn't have the local client player yet." )
-	#elseif UI
+	#elseif(UI)
 		Assert( fileLevel.localClientEHI != EHI_null, "LocalClientEHI called too early. The UI VM hasn't been told about the local player yet." )
 	#endif
 	return fileLevel.localClientEHI
@@ -423,14 +423,14 @@ EHI function LocalClientEHI()
 #endif
 
 
-#if CLIENT || UI
+#if CLIENT || UI 
 EHI function WaitForLocalClientEHI()
 {
 	while ( fileLevel.localClientEHI == EHI_null )
 	{
-		#if CLIENT
+		#if(CLIENT)
 			WaitSignal( clGlobal.signalDummy, "LocalClientEHI" )
-		#elseif UI
+		#elseif(UI)
 			WaitSignal( uiGlobal.signalDummy, "LocalClientEHI" )
 		#endif
 	}
@@ -440,43 +440,43 @@ EHI function WaitForLocalClientEHI()
 
 
 
-///////////////////
-///////////////////
-//// Internals ////
-///////////////////
-///////////////////
-#if SERVER
-void function ShEHI_OnClientConnectionCompleted( entity player )
-{
-	player.e.ehiss.isPlayer = true
-	player.e.ehiss.isConnected = true
+//
+//
+//
+//
+//
+#if(false)
 
-	ShEHI_OnPlayerCreated( player )
-}
+
+
+
+
+
+
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function ShEHI_OnPlayerCreated( entity ent )
 {
-	// may be called multiple times on the client VM because of full updates
+	//
 
 	EHI ehi            = ToEHI( ent )
 	EncodedEHandle eeh = EHIToEncodedEHandle( ehi )
 
 	EHIScriptStruct ehiss
 
-	#if SERVER
-		Assert( !(eeh in fileLevel.eehScriptStructMap) )
-		ehiss = ent.e.ehiss
+	#if(false)
 
-		if ( IsLobby() )
-		{
-			AddEntityDestroyedCallback( ent, void function( entity ent ) : ( eeh ) {
-				delete fileLevel.eehScriptStructMap[eeh]
-			} )
-		}
-	#elseif CLIENT
+
+
+
+
+
+
+
+
+#elseif(CLIENT)
 		if ( eeh in fileLevel.eehScriptStructMap )
 			ehiss = fileLevel.eehScriptStructMap[eeh]
 		ent.e.ehiss = ehiss
@@ -489,7 +489,7 @@ void function ShEHI_OnPlayerCreated( entity ent )
 	ehiss.isConnected = true
 	ehiss.team = ent.GetTeam()
 	ehiss.teamMemberIndex = ent.GetTeamMemberIndex()
-	#if CLIENT
+	#if(CLIENT)
 		ehiss.isLocalClientPlayer = IsLocalClientPlayer( ent )
 		ehiss.name = ent.GetPlayerName()
 
@@ -502,10 +502,10 @@ void function ShEHI_OnPlayerCreated( entity ent )
 		Signal( fileLevel.signalDummy, "EHISignalDummyCreated" )
 	#endif
 
-	// callbacks
+	//
 	ShLoadouts_OnPlayerEHICreated( ehi )
 
-	#if CLIENT
+	#if(CLIENT)
 		Assert( ehi != EHI_null )
 		RunUIScript( "ClientToUI_OnPlayerCreatedOrUpdated", ehi,
 			ehiss.isLocalClientPlayer,
@@ -516,7 +516,7 @@ void function ShEHI_OnPlayerCreated( entity ent )
 		)
 	#endif
 }
-#elseif UI
+#elseif(UI)
 void function ClientToUI_OnPlayerCreatedOrUpdated( EHI ehi,
 		bool isLocalClientPlayer,
 		bool isConnected,
@@ -546,18 +546,18 @@ void function ClientToUI_OnPlayerCreatedOrUpdated( EHI ehi,
 
 	Signal( fileLevel.signalDummy, "EHISignalDummyCreated" )
 
-	// callbacks
+	//
 	ShLoadouts_OnPlayerEHICreated( ehi )
 }
 #endif
 
 
-#if SERVER || CLIENT
+#if(CLIENT)
 void function ShEHI_OnPlayerChangedTeam( entity player, int oldTeam, int newTeam )
 {
 	player.e.ehiss.team = newTeam
 
-	#if CLIENT
+	#if(CLIENT)
 		Assert( player.e.ehiss.ehi != EHI_null )
 		RunUIScript( "ClientToUI_OnPlayerCreatedOrUpdated", player.e.ehiss.ehi,
 			player.e.ehiss.isLocalClientPlayer,
@@ -571,7 +571,7 @@ void function ShEHI_OnPlayerChangedTeam( entity player, int oldTeam, int newTeam
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function ShEHI_OnPlayerDisconnected( entity player )
 {
 	if ( player.e.ehiss.ehi == EHI_null )
@@ -593,7 +593,7 @@ void function ShEHI_OnPlayerDisconnected( entity player )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function UIToClient_UIVMIsShuttingDown()
 {
 	fileLevel.uiVMIsResetting = true
@@ -622,7 +622,7 @@ void function UIToClient_UIVMJustStarted()
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 string function GetObsfuscatedName( EHI playerEHI )
 {
 	string playerName = EHI_GetName( playerEHI )
@@ -651,7 +651,7 @@ string function GetObsfuscatedName( EHI playerEHI )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 string function GetKillerName( EHI playerEHI )
 {
 	string playerName = EHI_GetName( playerEHI )
@@ -663,7 +663,7 @@ string function GetKillerName( EHI playerEHI )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 string function GetPlayerName( EHI playerEHI )
 {
 	string playerName = EHI_GetName( playerEHI )
@@ -675,7 +675,7 @@ string function GetPlayerName( EHI playerEHI )
 #endif
 
 
-#if CLIENT
+#if(CLIENT)
 void function EHI_GameStatePlaying()
 {
 	fileLevel.obfuscatedNameMap.clear()

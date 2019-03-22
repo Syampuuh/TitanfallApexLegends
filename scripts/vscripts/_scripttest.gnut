@@ -1,13 +1,13 @@
 
 global function ScriptCompilerTest
 
-#if DEV
-// This script is for testing the script compiler.
+#if(DEV)
+//
 
 global typedef GlobalTypedefTest int
 
 
-//const array<array<int> > fsdaf = [[],[],[],[],[3,2],[]]
+//
 
 
 global struct testGlobalStruct2
@@ -28,8 +28,8 @@ global struct testGlobalStruct
 	string e
 	void functionref() wtfunc
 
-	//testGlobalStruct q
-	//testGlobalStruct& w
+	//
+	//
 	testGlobalStruct ornull f
 }
 
@@ -41,33 +41,33 @@ global const struct{ bool b } ___teststruct = {b = false,}
 
 const int binops = ((1 | 2) & ~3)
 
-#if 0
-	#if 0
-		global int testvar = 4
-		Assert( false )
-	#endif
-	global int testvar = 6
-	Assert( false )
-#elseif 0
-	#if 0
-		global int testvar = 5
-		Assert( false )
-	#elseif 1
-	#endif
-	global int testvar = 1
-	Assert( false )
-#elseif 0
-	Assert( false )
-	#if 0
-		Assert( false )
-		#if 1
-		#elseif 1
-		#elseif 1
-		#elseif 1
-		#endif
-		global int testvar = 2
-	#endif
-	global int testvar = 7
+#if(false)
+
+
+
+
+
+
+#elseif(false)
+
+
+
+
+
+
+
+#elseif(false)
+
+
+
+
+
+
+
+
+
+
+
 #else
 	global int testvar = 3
 #endif
@@ -75,7 +75,7 @@ const int binops = ((1 | 2) & ~3)
 
 void function testprintt( var str )
 {
-	// printt( str )
+	//
 }
 
 float[5][5] testfloatarray = [[1,2,3,...],[5,4,3,2,1],[...],[4,5,6,...],[...],]
@@ -91,9 +91,9 @@ void function ScriptCompilerTestDev()
 
 	TestFunctionTypes()
 
-	//array<int> intarraytest
-	//intarraytest.resize( 4 )
-	//intarraytest.append( false )
+	//
+	//
+	//
 
 	TestOptimizations()
 
@@ -101,12 +101,12 @@ void function ScriptCompilerTestDev()
 	TestTableTypes()
 	TestTypes()
 
-	#if SERVER
-		thread EntRuntimeTest()
-	#endif
+	#if(false)
 
-	//TestDefaultArrayArg()
-	//TestDefaultArrayArg()
+#endif
+
+	//
+	//
 }
 
 
@@ -198,20 +198,20 @@ void function ArithmeticOptimizationTest()
 	test = 1 | 2 | arithtestfunc() | 4
 
 	var hello = 1 + arithtestfunc1() + 2 + (-arithtestfunc2() - 1) - (3 + arithtestfunc3() + 4 - (-arithtestfunc4() - 3.25 + 2 - 1) - 2.0 + 1) - (3 + 2) + "hi" + 6
-	// (1+1+2+1 - (3+1+4-(1+3+2-1)-2+1) - (3+2) + 5)
-	// (5 - (3+1+4-5-2+1) - 5 + 6)
-	// (5 - 2 - 5 + 6)
-	// 4
+	//
+	//
+	//
+	//
 	Assert( hello == "-13.25hi6" )
 
 	vector hello2 = <1,1,1> + (<1,2,3> - arithtestfuncvec() - (<3,2,1> + <0,0,1>)) + <3,4,5>
-	// <1,1,1> + (<1,2,3> - (2,3,1) - (<3,2,1> + <0,0,1>)) + <3,4,5>
-	// <1,1,1> + (<1,2,3> - (2,3,1) - (3,2,2)) + <3,4,5>
-	// <1,1,1> + (<1,2,3> - (5,5,3)) + <3,4,5>
-	// <1,1,1> + (-4,-3,0) + <3,4,5>
-	// (-3,-2,1) + <3,4,5>
-	// (0,2,6)
-	//local hello2 = 5 - arithtestfunc5()
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 	Assert( hello2 == <0,2,6> )
 
 	vector testtest = arithtestfuncvec() - <1,1,1> - <1,2,3>
@@ -219,7 +219,7 @@ void function ArithmeticOptimizationTest()
 	vector testtest2 = arithtestfuncvec() - <1,1,1> * 3 / 2.0
 	Assert( testtest2 == <.5,1.5,-.5> )
 
-	//local hello3 = 4 * 1 * arithtestfunc1() / 3 * (arithtestfunc2() / 4.0 * 5 ) / (arithtestfunc3() / 0.5 / 2 / 1) * arithtestfunc4()
+	//
 	float hello3 = -((4 * 1) / 3 * (-arithtestfunc2() / 4.0 * 5 ) / (-arithtestfunc3() / 0.5 / 2 / 1) * -arithtestfunc4())
 	Assert( hello3 == 1.25 )
 
@@ -236,7 +236,7 @@ void function ArithmeticOptimizationTest()
 	var hello8 = !!!arithtestfunc1()
 	Assert( hello8 == false )
 	var hello9 = !(!arithtestfunc1() && !arithtestfunc1())
-	Assert( hello9 == 1 ) // actually that's kinda weird
+	Assert( hello9 == 1 ) //
 	var hello10 = !(!arithtestfunc1() || arithtestfunc1())
 	Assert( hello10 == false )
 
@@ -335,17 +335,17 @@ TestStruct function GetNewTestStruct()
 	return res
 }
 
-/*var function OldStyleObject()
-{
-	table<string,array<int> > res = {}
-	res.a <- []
-	res.a.resize( 3 )
-	res.a[0] = 0
-	res.a[1] = 1
-	res.a[2] = 2
-	//res.b <- false
-	return res
-}*/
+/*
+
+
+
+
+
+
+
+
+
+*/
 
 void function TestPassInt3( int[3] inttime )
 {
@@ -419,8 +419,8 @@ void function TestStructStuff()
 	testfunc( testarr )
 	Assert( testarr[3]["hi"] == 4 )
 
-	// test error
-	//testGlobal.nestedStruct = blork
+	//
+	//
 
 	vector vectest
 	vectest *= 3.5
@@ -457,7 +457,7 @@ void function TestFunctionTypes()
 		Assert( twofloats[0] + float( test ) == 4.5 )
 	}
 
-	Assert( TestFunctionTypes == TestFunctionTypes ) // ensure the conversion to closure produces the same object every time a function is evaluated as an expression
+	Assert( TestFunctionTypes == TestFunctionTypes ) //
 
 	outervartest()
 
@@ -498,49 +498,49 @@ void function TestOptimizations( array<entity> testEmptyTypedArray = [] )
 	testEmptyArrayAssignment = []
 
 	int zero = 0
-	int notnottest = !!zero // because of optimizations, !! cancels out and we get the input instead of a bool.
+	int notnottest = !!zero //
 }
 
-#if SERVER
-void function EntCompileTest( entity ent )
-{
-	vector mins = ent.GetBoundingMins()
-	vector maxs = ent.GetBoundingMaxs()
+#if(false)
 
-	float height = maxs.z - mins.z
 
-	// This function never actually runs
-}
 
-void function EntRuntimeTest()
-{
-	wait 3
-	array<entity> ents = GetPlayerArray()
-	if ( ents.len() )
-		Assert( 0 in ents ) // testing "in"
-	//printt( "ENTITY TIME" )
-	foreach ( ent in ents )
-	{
-		//printt( "ITS AN ENT" + ent )
-		vector vec = ent.GetOrigin()
-		//ent.SetOrigin( vec )
-	}
 
-	foreach ( index, ent in ents )
-	{
-	}
 
-	array<entity> noents
-	foreach ( ent in noents )
-	{
-		//ent++
-	}
-}
 
-bool function testboolfunc( entity player )
-{
-	return player.HasPassive( 0 )
-}
+
+//
+
+
+
+
+
+
+
+//
+//
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
 #endif
 
 struct footData {
@@ -573,7 +573,7 @@ int function TestArrayTypes()
 	array<int functionref()> funcarray
 	funcarray = [TestArrayTypes]
 	funcarray.append( TestArrayTypes )
-	//funcarray.resize( 3 )
+	//
 
 	arrint.remove( 3 )
 	Assert( arrint.len() == 13 )
@@ -633,11 +633,11 @@ void function TestTableTypes()
 
 	array<string> a = ["first", "second", "third"]
 
-	// creates a weakref to the array and assigns it to the table
-	/*var thearray = a.weakref()
-	Assert( thearray.ref()[0] == "first" )
-	a = []
-	Assert( thearray.ref() == null )*/
+	//
+	/*
+
+
+*/
 
 	var functionref()[10] funcs
 
@@ -685,11 +685,11 @@ void function TestTypes()
 	Assert( "" == $"" )
 }
 
-#endif // DEV
+#endif //
 
 void function ScriptCompilerTest()
 {
-	#if DEV
+	#if(DEV)
 		ScriptCompilerTestDev()
 		if ( Dev_CommandLineHasParm( "-scriptdocs" ) )
 			DumpConstTable( expect table( getroottable().originalConstTable ) )
@@ -701,7 +701,7 @@ void function ScriptCompilerTest()
 
 
 
-#if DEV
+#if(DEV)
 
 
 struct ConstTableEntry
@@ -736,13 +736,13 @@ void function DumpConstTable( table constTable )
 	DevTextBufferClear()
 	string constFileName = ""
 
-	#if CLIENT
+	#if(CLIENT)
 		constFileName = "scripts/codeconsts_CLIENT.txt"
 		DevTextBufferWrite( "\n// [CLIENT] generated file: do not modify\n\n" )
-	#elseif SERVER
-		constFileName = "scripts/codeconsts_SERVER.txt"
-		DevTextBufferWrite( "\n// [SERVER] generated file: do not modify\n\n" )
-	#elseif UI
+	#elseif(false)
+
+
+#elseif(UI)
 		constFileName = "scripts/codeconsts_UI.txt"
 		DevTextBufferWrite( "\n// [UI] generated file: do not modify\n\n" )
 	#endif
@@ -778,7 +778,7 @@ void function DumpConstTable( table constTable )
 				keyEntry.k = key
 				keyEntry.v = val
 				enumKeys.append( keyEntry )
-				// DevTextBufferWrite( "\t" + key + " = " + val )
+				//
 			}
 
 			enumKeys.sort( SortEnumKeyEntries )
@@ -794,7 +794,7 @@ void function DumpConstTable( table constTable )
 		}
 		else if ( type( v ) == "array" )
 		{
-			//			DevTextBufferWrite( "array? " + k )
+			//
 		}
 		else
 		{

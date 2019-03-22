@@ -100,7 +100,7 @@ void function InitSocialMenu()
 
 	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
 
-	#if PC_PROG
+	#if(PC_PROG)
 		s_socialFile.steamButton = Hud_GetChild( s_socialFile.menu, "SteamLink" )
 		HudElem_SetRuiArg( s_socialFile.steamButton, "icon", $"rui/menu/common/steam_link" )
 		Hud_AddEventHandler( s_socialFile.steamButton, UIE_CLICK, OnSteamLinkButton_Activate )
@@ -112,13 +112,20 @@ void function InitSocialMenu()
 
 	var buttonSizer = Hud_GetChild( s_socialFile.friendGrid, "GridButton0x0" )
 	int baseWidth   = Hud_GetBaseWidth( buttonSizer )
-	GridPanel_InitStatic( s_socialFile.friendGrid, baseWidth, int( baseWidth * 0.2 ) ) // TODO: * 0.2 because Hud_GetHeight is returning the same value as get width...
+	GridPanel_InitStatic( s_socialFile.friendGrid, baseWidth, int( baseWidth * 0.2 ) ) //
 
 	GridPanel_SetButtonHandler( s_socialFile.friendGrid, UIE_CLICK, FriendButton_OnActivate )
 	GridPanel_SetButtonHandler( s_socialFile.friendGrid, UIE_CLICKRIGHT, FriendButton_OnJoin )
 	GridPanel_SetKeyPressHandler( s_socialFile.friendGrid, FriendButton_OnKeyPress )
-	//GridPanel_SetButtonHandler( s_socialFile.friendGrid, UIE_CLICKRIGHT, FriendButton_OnInspect )
+	//
 	GridPanel_SetButtonHandler( s_socialFile.friendGrid, UIE_GET_FOCUS, FriendButton_OnGetFocus )
+
+	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton0x0" ), s_socialFile.myGridButton )
+	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton1x0" ), s_socialFile.partyPrivacyButton )
+	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton2x0" ), s_socialFile.leavePartyButton )
+	#if(PC_PROG)
+		Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton5x0" ), s_socialFile.steamButton )
+	#endif
 
 	RuiSetString( s_socialFile.menuHeaderRui, "menuName", "#MENU_TITLE_FRIENDS" )
 
@@ -147,7 +154,7 @@ void function SocialMenuThink( var menu )
 		s_socialFile.nextFriendsListUpdate = Time() + 1.0
 	}
 
-	#if PC_PROG
+	#if(PC_PROG)
 		UpdateSteamButton()
 	#endif
 
@@ -207,6 +214,25 @@ void function UpdateMyFriendButton()
 	FriendButton_Init( s_socialFile.myGridButton, friend )
 }
 
+void function UpdateDpadNav()
+{
+	if( CurrentlyInParty() )
+	{
+		Hud_SetNavDown( s_socialFile.partyPrivacyButton, s_socialFile.leavePartyButton )
+		Hud_SetNavUp( s_socialFile.leavePartyButton, s_socialFile.partyPrivacyButton )
+		#if(PC_PROG)
+			Hud_SetNavUp( s_socialFile.steamButton, s_socialFile.leavePartyButton )
+			Hud_SetNavDown( s_socialFile.leavePartyButton, s_socialFile.steamButton )
+		#endif
+	}
+	else
+	{
+		#if(PC_PROG)
+			Hud_SetNavUp( s_socialFile.steamButton, s_socialFile.partyPrivacyButton )
+			Hud_SetNavDown( s_socialFile.partyPrivacyButton, s_socialFile.steamButton )
+		#endif
+	}
+}
 
 void function FriendButtonInit( var button )
 {
@@ -216,6 +242,14 @@ void function FriendButtonInit( var button )
 void function SocialMenu_OnOpen()
 {
 	RuiSetGameTime( s_socialFile.decorationRui, "initTime", Time() )
+	AddCallback_OnPartyUpdated( UpdateDpadNav )
+	UpdateDpadNav()
+
+	if ( !_IsMenuThinkActive() )
+	{
+		//
+		thread UpdateActiveMenuThink()
+	}
 }
 
 
@@ -235,7 +269,7 @@ void function SocialMenu_Update()
 		Hud_Show( s_socialFile.gridSpinner )
 
 	if ( !s_socialFile.friendsData.isValid )
-		return // TEMP HACK
+		return //
 
 	s_socialFile.friends.clear()
 	s_socialFile.friends.extend( s_socialFile.friendsData.friends )
@@ -300,13 +334,13 @@ void function BindPageButtons( int numItems, int currentPageIdx )
 	int numButtons = s_socialFile.pageButtons.len()
 
 	int numItemsForRegularPage = numButtons - 2
-	// -2 buttons because most pages have the first and last button taken by arrows
+	//
 
-	//numItems = 3 * numItemsForRegularPage + 2
+	//
 
 	int pageCount = int(ceil( float(numItems - 1 - 1) / float(numItemsForRegularPage) ))
-	// -1 item for first page being able to have an extra
-	// -1 item for last page being able to have an extra
+	//
+	//
 
 	int firstNonArrowButtonIdx
 	int firstItemIdx
@@ -315,7 +349,7 @@ void function BindPageButtons( int numItems, int currentPageIdx )
 	{
 		firstNonArrowButtonIdx = 0
 		firstItemIdx = currentPageIdx * numItemsForRegularPage
-		lastItemIdx = firstItemIdx + numItemsForRegularPage + 1  // we can show an extra on first page
+		lastItemIdx = firstItemIdx + numItemsForRegularPage + 1  //
 	}
 	else if ( currentPageIdx == pageCount - 1 )
 	{
@@ -326,7 +360,7 @@ void function BindPageButtons( int numItems, int currentPageIdx )
 	else
 	{
 		firstNonArrowButtonIdx = 1
-		firstItemIdx = currentPageIdx * numItemsForRegularPage + 1 // first page had an extra, account for that shift
+		firstItemIdx = currentPageIdx * numItemsForRegularPage + 1 //
 		lastItemIdx = firstItemIdx + numItemsForRegularPage
 	}
 
@@ -394,6 +428,7 @@ void function BindPageButtons( int numItems, int currentPageIdx )
 void function SocialMenu_OnClose()
 {
 	RunMenuClientFunction( "ClearAllCharacterPreview" )
+	RemoveCallback_OnPartyUpdated( UpdateDpadNav )
 }
 
 
@@ -714,18 +749,18 @@ void function OnPartyPrivacyButton_Activate( var button )
 
 	if ( GetConVarString( "party_privacy" ) == "open" )
 	{
-		//HudElem_SetRuiArg( s_socialFile.partyPrivacyButton, "buttonText", Localize( "#PARTY_PRIVACY_N", Localize( "#SETTING_INVITE") ) )
+		//
 		ClientCommand( "party_privacy invite" )
 	}
 	else
 	{
-		//HudElem_SetRuiArg( s_socialFile.partyPrivacyButton, "buttonText", Localize( "#PARTY_PRIVACY_N", Localize( "#SETTING_OPEN") ) )
+		//
 		ClientCommand( "party_privacy open" )
 	}
 }
 
 
-#if PC_PROG
+#if(PC_PROG)
 void function UpdateSteamButton()
 {
 	var button = s_socialFile.steamButton
@@ -740,14 +775,14 @@ void function UpdateSteamButton()
 	}
 	else if ( linkStatus == 0 )
 	{
-		// printt( "account unlinked - prompting to log in!" )
+		//
 		Hud_SetLocked( button, false )
 		Hud_Show( button )
 		HudElem_SetRuiArg( s_socialFile.steamButton, "buttonText", "LINK_STEAM_BUTTON" )
 	}
 	else if ( linkStatus == 1 )
 	{
-		// printt( "account linked - prompting to log out! setting button text to " + GetConVarString( "steam_name" ) )
+		//
 		Hud_SetLocked( button, false )
 		Hud_Show( button )
 		HudElem_SetRuiArg( s_socialFile.steamButton, "buttonText", Localize( "#STEAM_ACCOUNT_LINKED", GetConVarString( "steam_name" ) ) )
@@ -755,7 +790,7 @@ void function UpdateSteamButton()
 }
 #endif
 
-#if PC_PROG
+#if(PC_PROG)
 void function OnSteamLinkButton_Activate( var button )
 {
 	int linkStatus = GetSteamAccountStatus();
@@ -814,58 +849,42 @@ void function PreviewFriendCosmetics( bool isForLocalPlayer, CommunityUserInfo o
 	else
 	{
 		CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
-		#if DEV
+		#if(DEV)
 			DEV_PrintUserInfo( userInfo )
 		#endif
 
 		SendMenuGladCardPreviewString( eGladCardPreviewCommandType.NAME, 0, userInfo.name )
 
-		ItemFlavor ornull character = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.CHARACTER], eItemType.character )
-		if ( character == null )
-			character = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_CharacterClass() )
-		expect ItemFlavor( character )
+		ItemFlavor character = GetItemFlavorForCommunityUserInfo( userInfo, ePlayerStryderCharDataArraySlots.CHARACTER, eItemType.character  )
 		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.CHARACTER, 0, character )
 
-		ItemFlavor ornull skin = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.CHARACTER_SKIN], eItemType.character_skin )
-		if ( skin == null )
-			skin = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_CharacterSkin( character ) )
-		expect ItemFlavor(skin)
+		ItemFlavor skin = GetItemFlavorForCommunityUserInfo( userInfo, ePlayerStryderCharDataArraySlots.CHARACTER_SKIN, eItemType.character_skin )
 		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.SKIN, 0, skin )
 
 		RunClientScript( "UIToClient_PreviewCharacterSkin", ItemFlavor_GetNetworkIndex_DEPRECATED( skin ), ItemFlavor_GetNetworkIndex_DEPRECATED( character ) )
 
-		ItemFlavor ornull frame = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_FRAME], eItemType.gladiator_card_frame )
-		if ( frame == null )
-			frame = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_GladiatorCardFrame( character ) )
-		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.FRAME, 0, expect ItemFlavor(frame) )
+		ItemFlavor frame = GetItemFlavorForCommunityUserInfo( userInfo, ePlayerStryderCharDataArraySlots.BANNER_FRAME, eItemType.gladiator_card_frame )
+		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.FRAME, 0, frame )
 
-		ItemFlavor ornull stance = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_STANCE], eItemType.gladiator_card_stance )
-		if ( stance == null )
-			stance = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_GladiatorCardStance( character ) )
-		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.STANCE, 0, expect ItemFlavor(stance) )
+		ItemFlavor stance = GetItemFlavorForCommunityUserInfo( userInfo, ePlayerStryderCharDataArraySlots.BANNER_STANCE, eItemType.gladiator_card_stance )
+		SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.STANCE, 0, stance )
 
 		for ( int badgeIndex = 0; badgeIndex < GLADIATOR_CARDS_NUM_BADGES; badgeIndex++ )
 		{
-			ItemFlavor ornull badge = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_BADGE1 + 2 * badgeIndex], eItemType.gladiator_card_badge )
-			if ( badge == null )
-				badge = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_GladiatorCardBadge( character, badgeIndex ) )
-			int dataInteger = maxint( 0, userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_BADGE1_TIER + 2 * badgeIndex] - 2 ) // todo(dw): fix
-			SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.BADGE, badgeIndex, expect ItemFlavor( badge ), dataInteger )
+			ItemFlavor badge = GetBadgeItemFlavorForCommunityUserInfo( userInfo, character, badgeIndex )
+			int dataInteger = GetBadgeDataIntegerFromCommunityUserInfo( userInfo, badgeIndex )
+			SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.BADGE, badgeIndex, badge , dataInteger )
 		}
 
 		for ( int trackerIndex = 0; trackerIndex < GLADIATOR_CARDS_NUM_TRACKERS; trackerIndex++ )
 		{
-			ItemFlavor ornull tracker = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_TRACKER1 + 2 * trackerIndex], eItemType.gladiator_card_stat_tracker )
-			if ( tracker == null )
-				tracker = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_GladiatorCardStatTracker( character, trackerIndex ) )
-			int dataInteger = maxint( 0, userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_TRACKER1_VALUE + 2 * trackerIndex] - 2 ) // todo(dw): fix
-			SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.TRACKER, trackerIndex, expect ItemFlavor( tracker ) )
+			ItemFlavor tracker = GetTrackerItemFlavorForCommunityUserInfo( userInfo, character, trackerIndex )
+			int dataInteger = GetTrackerDataIntegerFromCommunityUserInfo( userInfo, trackerIndex )
+			SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.TRACKER, trackerIndex, tracker )
 		}
 
-		ItemFlavor ornull introQuip = GetItemFlavorOrNullByGUID( userInfo.charData[ePlayerStryderCharDataArraySlots.CHARACTER_INTRO_QUIP], eItemType.gladiator_card_intro_quip )
-		if ( introQuip == null )
-			introQuip = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_CharacterIntroQuip( character ) )
-		introQuipSoundEventName = CharacterIntroQuip_GetVoiceSoundEvent( expect ItemFlavor(introQuip) )
+		ItemFlavor introQuip = GetItemFlavorForCommunityUserInfo( userInfo, ePlayerStryderCharDataArraySlots.CHARACTER_INTRO_QUIP, eItemType.gladiator_card_intro_quip )
+		introQuipSoundEventName = CharacterIntroQuip_GetVoiceSoundEvent( introQuip )
 	}
 
 	OnThreadEnd( void function() : ( introQuipSoundEventName ) {
@@ -938,7 +957,7 @@ void function OnUserInfoUpdated( string hardware, string id )
 	{
 		userInfoOrNull = GetCommunityUserInfo( s_socialFile.actionFriend.hardware, s_socialFile.actionFriend.id )
 		if ( userInfoOrNull == null )
-			return // todo(bm): display spinner
+			return //
 	}
 
 	thread PreviewFriendCosmetics( isForLocalPlayer, userInfoOrNull )
@@ -957,7 +976,7 @@ void function InspectMenu_OnClose()
 
 void function OnViewProfile( var button )
 {
-	#if PC_PROG
+	#if(PC_PROG)
 		if ( !Origin_IsOverlayAvailable() )
 		{
 			ConfirmDialogData dialogData

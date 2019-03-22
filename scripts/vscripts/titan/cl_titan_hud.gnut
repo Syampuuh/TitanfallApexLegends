@@ -32,8 +32,8 @@ void function TitanCockpitHudInit_Internal( entity cockpit )
 	EndSignal( cockpit, "OnDestroy" )
 	entity player = GetLocalViewPlayer()
 
-	// for now, delay hud element creation to sync with cockpit monitors turning on.  Ideally these would fade in,
-	// but there is no good way to fade an entire vgui at once.
+	//
+	//
 	SetCrosshairPriorityState( crosshairPriorityLevel.TITANHUD, CROSSHAIR_STATE_HIT_INDICATORS_ONLY )
 	while ( IsValid( cockpit ) && TitanCockpit_IsBooting( cockpit ) )
 	{
@@ -45,32 +45,32 @@ void function TitanCockpitHudInit_Internal( entity cockpit )
 
 	ClearCrosshairPriority( crosshairPriorityLevel.TITANHUD )
 
-	// todo(dw): re-add this
-	//if ( ShouldDrawRodeoVGUI( player ) )
-	//{
-	//	TitanCockpitDialog_RodeoAnnounce( player )
 	//
-	//	thread DrawRodeoAlertIcons( player.GetTitanSoul() )
-	//}
+	//
+	//
+	//
+	//
+	//
+	//
 
 	thread TitanCockpitThink( cockpit )
 }
 
-//bool function ShouldDrawRodeoVGUI( entity player )
-//{
-//	if ( !IsAlive( player ) )
-//		return false
 //
-//	if ( !player.IsTitan() )
-//		return false
 //
-//	entity soul = player.GetTitanSoul()
-//	entity titan = soul.GetTitan()
-//	if ( IsValid( GetFriendlyRodeoPilot( titan ) ) )
-//		return true
 //
-//	return soul.GetLastRodeoHitTime() > 0
-//}
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 void function TitanCockpitThink( entity cockpit )
 {
@@ -88,7 +88,7 @@ void function TitanCockpitThink( entity cockpit )
 	if ( "vduVGUI" in cockpit.s )
 		cockpit.s.vduVGUI.Destroy()
 
-	// Clear these since next time we get into the titan they get recreated
+	//
 	level.EMP_vguis = []
 }
 
@@ -158,7 +158,7 @@ void function TitanCockpit_WarningAudio( entity cockpit, entity player )
 					TitanCockpit_PlayDialog( player, "halfDoomState" )
 
 				if ( PROTO_AlternateDoomedState() )
-					break // so it doesn't spam you
+					break //
 			}
 		}
 
@@ -168,7 +168,7 @@ void function TitanCockpit_WarningAudio( entity cockpit, entity player )
 
 void function UpdateHudEMPState( entity player, entity cockpit )
 {
-	// Get Alpha
+	//
 	int alpha = 255
 	if ( cockpit.s.empInfo.startTime != 0 )
 		alpha = int( ( 1.0 - TitanCockpit_EMPFadeScale( cockpit ) ) * 255 )
@@ -178,7 +178,7 @@ void function UpdateHudEMPState( entity player, entity cockpit )
 
 	level.lastHudEMPStateAlpha = alpha
 
-	// Update Alpha
+	//
 	for ( int i = 0; i < level.EMP_vguis.len(); i++ )
 	{
 		entity vgui = expect entity( level.EMP_vguis[i] )

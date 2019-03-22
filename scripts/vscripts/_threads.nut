@@ -1,8 +1,8 @@
 untyped
 
-//********************************************************************************************
-// _threads.nut
-//********************************************************************************************
+//
+//
+//
 
 global table<string,var> level
 
@@ -15,6 +15,8 @@ global function IsDeadCoroutine
 
 global function VM_NAME
 global function FUNC_NAME
+global function FILE_NAME
+global function DBG_INFO
 
 global function printt
 global function PrintFunc
@@ -27,7 +29,7 @@ global function LevelVarInit
 global bool reloadingScripts = false
 global bool reloadedScripts = false
 
-#if DEV
+#if(DEV)
 global function __serialize_state
 global function __evalBreakpoint
 #endif
@@ -83,10 +85,10 @@ void function PrintFunc( var val = null )
 
 string function VM_NAME()
 {
-	#if SERVER
-		return "Server"
-	#elseif CLIENT
-		return "Client"
+	#if(false)
+
+#elseif(CLIENT)
+		return "CL"
 	#else
 		Assert( UI )
 		return "UI"
@@ -96,6 +98,21 @@ string function VM_NAME()
 string function FUNC_NAME( int up = 0 )
 {
 	return string( getstackinfos( 2 + up ).func )
+}
+
+string function FILE_NAME( int up = 0 )
+{
+	return string( getstackinfos( 2 + up ).src )
+}
+
+string function DBG_INFO()
+{
+	string vmName   = VM_NAME()
+	var stackInfos  = getstackinfos( 2 )
+	string fileName = expect string(stackInfos.src)
+	int lineNum  = expect int(stackInfos.line)
+	string funcName = expect string(stackInfos.func)
+	return "[" + VM_NAME() + ":" + fileName + ":" + lineNum + ":" + funcName + "]"
 }
 
 void function printt_spamLog( ... )
@@ -129,12 +146,12 @@ void function LevelVarInit()
 }
 
 
-#if DEV
+#if(DEV)
 
-//********************************************************************************************
-// _vscript_code.nut
-// NOTE: you should not edit this file.
-//********************************************************************************************
+//
+//
+//
+//
 
 var function __evalBreakpoint( string evalString )
 {
@@ -147,7 +164,7 @@ var function __evalBreakpoint( string evalString )
 	local first = 1
 	foreach ( i, v in stackInfos.locals )
 	{
-		if ( i != "this" && i[0] != '@' ) //foreach iterators start with @
+		if ( i != "this" && i[0] != '@' ) //
 		{
 			if ( !first )
 			{
@@ -179,13 +196,13 @@ var function __evalBreakpoint( string evalString )
 void function __serialize_state()
 {
 	/*
-		see copyright notice in sqrdbg.h
-	*/
+
+*/
 	try
 	{
 		function evaluate_watch( stackframe, stacklevel, expression )
 		{
-			// add 1 to stackLevel because this function counts as 1
+			//
 			local res = compilewatch( expression, stacklevel + 1, stackframe.src )
 			if ( typeof( res ) == "int" )
 				return { status = "ok", val = res }
@@ -194,15 +211,15 @@ void function __serialize_state()
 		}
 		local evaluate_watch = this.evaluate_watch
 
-		/////////////////////////////////////////////////////////////////////////////
-		/////////////////////////////////////////////////////////////////////////////
+		//
+		//
 		{
 			local stack = []
 			int baseStackFrameIndex = 2
 			int level = baseStackFrameIndex
 			local si
 
-			//ENUMERATE THE STACK WATCHES
+			//
 			for ( ;; )
 			{
 				si = getstackinfos( level )
@@ -212,7 +229,7 @@ void function __serialize_state()
 				level++
 			}
 
-			//EVALUATE ALL WATCHES
+			//
 			foreach ( stackFrameIndex, stackFrame in stack )
 			{
 				if ( stackFrame.src != "NATIVE" )
@@ -224,7 +241,7 @@ void function __serialize_state()
 						{
 							if ( stackFrame.src != "NATIVE" )
 							{
-								// adds the watch result to the debugger object collection and returns its index
+								//
 								stackFrame.watches[i] <- evaluate_watch( stackFrame, stackFrameIndex + baseStackFrameIndex, watch )
 							}
 							else
@@ -323,4 +340,4 @@ void function __serialize_state()
 	}
 }
 
-#endif // DEV
+#endif //

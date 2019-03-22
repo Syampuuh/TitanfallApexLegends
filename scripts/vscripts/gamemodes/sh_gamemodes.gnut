@@ -15,6 +15,9 @@ global function GameMode_SetDefaultTimeLimits
 global function GameMode_SetDesc
 global function GameMode_SetColor
 global function GameMode_SetSuddenDeath
+#if(false)
+
+#endif
 
 global function GameMode_GetScoreLimit
 global function GameMode_GetRoundScoreLimit
@@ -34,6 +37,9 @@ global function GameMode_GetTitanSpawnpointsRatingFunc
 global function GameMode_GetScoreCompareFunc
 global function GameMode_GetSuddenDeathEnabled
 global function GameMode_GetEvacEnabled
+#if(false)
+
+#endif
 global function GameMode_GetGameEndingWarning
 global function GameMode_GetGameEndingConversation
 global function GameMode_GetScoreboardColumnTitles
@@ -82,6 +88,9 @@ global struct GamemodeSettings
 	int defaultRoundScoreLimit = 5
 	float defaultRoundTimeLimit = 5.0
 	bool evacEnabled = true
+	#if(false)
+
+#endif
 	string gameModeEndingWarning = "#GAMEMODE_END_IN_N_SECONDS"
 	string gameModeEndingConversation = ""
 	bool suddenDeathEnabled = false
@@ -93,21 +102,28 @@ global struct GamemodeSettings
 
 
 
-// Don't remove items from this list once the game is in production
-// Durango online analytics needs the numbers for each mode to stay the same
-// DO NOT CHANGE THESE VALUES AFTER THEY HAVE GONE LIVE
+//
+//
+//
 global enum eGameModes
 {
 	invalid =							-1,
 
 	SURVIVAL_ID =						0,
 	TEAM_DEATHMATCH_ID =				1,
-	//GAMEMODE_SP_ID =					2,
+	//
+	#if(false)
+
+#endif
+	_count,
 }
 
 const table<string, int> gameModesStringToIdMap = {
 	[ TEAM_DEATHMATCH ] 					= eGameModes.TEAM_DEATHMATCH_ID,
-	[ SURVIVAL ]							= eGameModes.SURVIVAL_ID,
+	[ SURVIVAL ]							= eGameModes.SURVIVAL_ID
+#if(false)
+
+#endif
 }
 
 struct
@@ -143,23 +159,38 @@ void function GameModes_Init()
 	GameMode_AddScoreboardColumnData( gameMode, "#SCOREBOARD_PILOT_KILLS", PGS_PILOT_KILLS, 2 )
 	GameMode_SetColor( gameMode, [147, 204, 57, 255] )
 
-	#if DEVSCRIPTS
-	DevGameModes_Init()
-	#endif
+	#if(false)
 
-	#if SERVER || CLIENT
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+	#if(false)
+
+#endif
+
+	#if(CLIENT)
 	GameModes_Init_SV_CL()
 	#endif
 
-	////
+	//
 	GameMode_VerifyModes()
 }
 
-// TODO: scoreboards
+//
 
-/*************************************************************
-	Setters
-*************************************************************/
+/*
+
+*/
 
 GamemodeSettings function GameMode_Create( string gameModeName )
 {
@@ -177,13 +208,13 @@ void function GameMode_SetName( string gameModeName, string nameText )
 	file.gameModeDefs[gameModeName].name_localized = nameText
 }
 
-void function GameMode_SetGameModeAnnouncement( string gameModeName, string gameModeAnnoucement ) //Note: Still need to register the conversation
+void function GameMode_SetGameModeAnnouncement( string gameModeName, string gameModeAnnoucement ) //
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	file.gameModeDefs[gameModeName].gameModeAnnoucement = gameModeAnnoucement
 }
 
-void function GameMode_SetGameModeAttackAnnouncement( string gameModeName, string gameModeAttackAnnoucement ) //Note: Still need to register the conversation
+void function GameMode_SetGameModeAttackAnnouncement( string gameModeName, string gameModeAttackAnnoucement ) //
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	file.gameModeDefs[gameModeName].gameModeAttackAnnoucement = gameModeAttackAnnoucement
@@ -191,7 +222,7 @@ void function GameMode_SetGameModeAttackAnnouncement( string gameModeName, strin
 
 void function GameMode_SetGameModeDefendAnnouncement( string gameModeName, string gameModeDefendAnnoucement )
 {
-	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" ) //Note: Still need to register the conversation
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" ) //
 	file.gameModeDefs[gameModeName].gameModeDefendAnnoucement = gameModeDefendAnnoucement
 }
 
@@ -295,6 +326,14 @@ void function GameMode_SetEvacEnabled( string gameModeName, bool value )
 	file.gameModeDefs[gameModeName].evacEnabled = value
 }
 
+#if(false)
+
+
+
+
+
+#endif
+
 void function GameMode_SetGameEndingWarning( string gameModeName, string warning )
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
@@ -313,9 +352,9 @@ void function GameMode_SetCustomIntroAnnouncement( string gameModeName, void fun
 	file.gameModeDefs[gameModeName].customIntroAnnouncementFunc = func
 }
 
-/*************************************************************
-	Getters
-*************************************************************/
+/*
+
+*/
 
 int function GameMode_GetScoreLimit( string gameModeName )
 {
@@ -421,11 +460,19 @@ bool function GameMode_GetSuddenDeathEnabled( string gameModeName )
 	return file.gameModeDefs[gameModeName].suddenDeathEnabled
 }
 
-bool function GameMode_GetEvacEnabled( string gameModeName ) //TODO: get rid of this or fold into EvacEnabled() function
+bool function GameMode_GetEvacEnabled( string gameModeName ) //
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	return file.gameModeDefs[gameModeName].evacEnabled
 }
+
+#if(false)
+
+
+
+
+
+#endif
 
 string function GameMode_GetGameEndingWarning( string gameModeName )
 {
@@ -463,9 +510,9 @@ void functionref(entity) function GameMode_GetCustomIntroAnnouncement( string ga
 	return file.gameModeDefs[gameModeName].customIntroAnnouncementFunc
 }
 
-/*************************************************************
+/*
 
-*************************************************************/
+*/
 void function GameMode_RunServerInits()
 {
 	Assert( GAMETYPE in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
@@ -514,11 +561,11 @@ void function GameMode_VerifyModes()
 
 		GAMETYPE_TEXT[gameModeName] <- gameModeData.name_localized
 		GAMETYPE_DESC[gameModeName] <- gameModeData.desc_localized
-		//GAMETYPE_ICON[gameModeName] <- gameModeData.icon
+		//
 		GAMETYPE_COLOR[gameModeName] <- gameModeData.color
-		//#if CLIENT
-		//	PrecacheHUDMaterial( GAMETYPE_ICON[gameModeName] )
-		//#endif
+		//
+		//
+		//
 	}
 }
 

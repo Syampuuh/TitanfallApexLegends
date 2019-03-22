@@ -1,8 +1,8 @@
 global function ShShellShock_Init
 
-#if SERVER
-global function ShellShock_ApplyForDuration
-#endif //SERVER
+#if(false)
+
+#endif //
 
 const float SHELLSHOCK_DOF_FAR_INNER = 32.0
 const float SHELLSHOCK_DOF_FAR_OUTER = 1024.0
@@ -21,17 +21,17 @@ global int COCKPIT_SHELLSHOCK_SCREEN_FX
 
 struct
 {
-	#if CLIENT
+	#if(CLIENT)
 	int colorCorrection
 	float lastDOFLerpTime
-	#endif //CLIENT
+	#endif //
 } file
 
 void function ShShellShock_Init()
 {
 	COCKPIT_SHELLSHOCK_SCREEN_FX = PrecacheParticleSystem( SHELLSHOCK_SCREEN_FX )
 
-	#if CLIENT
+	#if(CLIENT)
 		file.colorCorrection = ColorCorrection_Register( "materials/correction/shell_shock.raw_hdr" )
 		file.lastDOFLerpTime = Time()
 		RegisterSignal( "ShellShock_StopColorCorrection" )
@@ -39,49 +39,49 @@ void function ShShellShock_Init()
 		RegisterSignal( "ShellShock_StopScreenEffect" )
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.shellshock, ShellShock_StartVisualEffect )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.shellshock, ShellShock_StopVisualEffect )
-	#endif //CLIENT
+	#endif //
 }
 
-#if SERVER
-void function ShellShock_ApplyForDuration( entity player, float duration )
-{
-	StatusEffect_AddTimed( player, eStatusEffect.shellshock, 1.0, duration, 0.5 )
-	StatusEffect_AddTimed( player, eStatusEffect.move_slow, SHELLSHOCK_MOVE_SLOW_EFFECT_WEIGHT, duration, SHELLSHOCK_FADE_TIME )
-	//StatusEffect_AddTimed( player, eStatusEffect.turn_slow, SHELLSHOCK_TURN_SLOW_EFFECT_WEIGHT, duration, SHELLSHOCK_FADE_TIME )
-}
+#if(false)
+
+
+
+
+//
+
 #endif
 
-#if CLIENT
+#if(CLIENT)
 /*
-void function UpdatePlayerScreenColorCorrection( entity player, int statusEffect, int ccID )
-{
-	Assert ( IsNewThread(), "Must be threaded off." )
-	Assert ( player == GetLocalViewPlayer() )
 
-	player.EndSignal( "OnDeath" )
-	player.EndSignal( "OnDestroy" )
-	player.EndSignal( "GasCloud_StopColorCorrection" )
 
-	OnThreadEnd(
-	function() : ( ccID )
-		{
-			ColorCorrection_SetWeight( ccID, 0.0 )
-			ColorCorrection_SetExclusive( ccID, false )
-		}
-	)
 
-	ColorCorrection_SetExclusive( ccID, true )
-	const LERP_IN_TIME = 0.25	// hack! because statusEffect doesn't seem to have a lerp in feature?
-	float startTime = Time()
 
-	while ( true )
-	{
-		float weight = StatusEffect_GetSeverity( player, statusEffect )
-		weight = GraphCapped( Time() - startTime, 0, LERP_IN_TIME, 0, weight )
-		ColorCorrection_SetWeight( ccID, weight )
-		WaitFrame()
-	}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
 
 void function ShellShock_UpdatePlayerDOF( entity player, int statusEffect )
@@ -107,7 +107,7 @@ void function ShellShock_UpdatePlayerDOF( entity player, int statusEffect )
 	if ( Time() - file.lastDOFLerpTime < 1.0 )
 	{
 		Wait( 1.0 - ( Time() - file.lastDOFLerpTime ) )
-		//wait 0.25
+		//
 	}
 
 	while ( true )
@@ -116,7 +116,7 @@ void function ShellShock_UpdatePlayerDOF( entity player, int statusEffect )
 		float sinVal = sin( Time() * 6 )
 		float sinClamp = GraphCapped( sinVal, -1, 1, weight * 0.25, weight )
 
-		float innerFarDOF = SHELLSHOCK_DOF_FAR_INNER / ( sinClamp ) //oscillate dof based on sin wave.
+		float innerFarDOF = SHELLSHOCK_DOF_FAR_INNER / ( sinClamp ) //
 		float outerFarDOF = SHELLSHOCK_DOF_FAR_OUTER / ( sinClamp )
 
 		float innerNearDOF = SHELLSHOCK_DOF_NEAR_INNER / ( weight )
@@ -125,7 +125,7 @@ void function ShellShock_UpdatePlayerDOF( entity player, int statusEffect )
 		DoF_SetFarDepth( innerFarDOF, outerFarDOF )
 		DoF_SetNearDepth( innerNearDOF, outerNearDOF )
 
-		//printt( "DOF", innerFarDOF, outerFarDOF, innerNearDOF, outerNearDOF )
+		//
 		WaitFrame()
 	}
 }
@@ -141,7 +141,7 @@ void function ShellShock_StartVisualEffect( entity ent, int statusEffect, bool a
 	ent.Signal( "ShellShock_StopColorCorrection" )
 	thread ShellShock_ColorCorrection( ent )
 
-	//Gas does not blur titan view.
+	//
 	entity viewPlayer = GetLocalViewPlayer()
 	if ( !viewPlayer.IsTitan() )
 	{
@@ -232,4 +232,4 @@ void function ColorCorrection_LerpWeight( int colorCorrection, float startWeight
 
 	ColorCorrection_SetWeight( colorCorrection, endWeight )
 }
-#endif //CLIENT
+#endif //

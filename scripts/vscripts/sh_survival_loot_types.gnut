@@ -1,5 +1,6 @@
 global function SURVIVAL_LootTypes_InitShared
 
+global function IsLootTypeValid
 global function GetLootTypeData
 
 global const bool AUTOEQUIP_ATTACHMENTS = true
@@ -12,9 +13,9 @@ global struct LootTypeData
 	int backpackAction = eLootAction.NONE
 	int backpackAltAction = eLootAction.DROP
 
-	#if SERVER
-		entity functionref(string, vector) specialCaseSpawnFunction
-	#endif
+	#if(false)
+
+#endif
 
 	LootActionStruct functionref( entity player, LootRef lootRef ) groundActionFunc
 	LootActionStruct functionref( entity player, LootRef lootRef ) groundUseLongActionFunc
@@ -30,7 +31,7 @@ struct
 	table<int, LootTypeData> lootTypeData
 } file
 
-// TODO: these should be turned into Bakery assets
+//
 void function SURVIVAL_LootTypes_InitShared()
 {
 	LootTypeData lt
@@ -40,10 +41,10 @@ void function SURVIVAL_LootTypes_InitShared()
 	lt.equipmentSlot = ""
 	lt.groundActionFunc = GroundAction_ForWeapons
 	lt.groundUseLongActionFunc = GroundLongAction_ForWeapons
-	lt.groundAltActionFunc = GroundAltAction_None// GroundAltAction_ForWeapons
-	#if SERVER
-		lt.specialCaseSpawnFunction = SpawnWeaponAndAmmo
-	#endif
+	lt.groundAltActionFunc = GroundAltAction_None//
+	#if(false)
+
+#endif
 
 	lt = RegisterLootType( eLootType.AMMO )
 	lt.equipmentSlot = ""
@@ -57,9 +58,9 @@ void function SURVIVAL_LootTypes_InitShared()
 	lt.equipmentSlot = "armor"
 	lt.groundActionFunc = GroundAction_ForEquipment
 	lt.groundAltActionFunc = GroundAltAction_ForEquipment
-	#if SERVER
-		lt.specialCaseSpawnFunction = SpawnArmor
-	#endif
+	#if(false)
+
+#endif
 
 	lt = RegisterLootType( eLootType.INCAPSHIELD )
 	lt.equipmentSlot = "incapshield"
@@ -110,9 +111,20 @@ void function SURVIVAL_LootTypes_InitShared()
 	lt.equipmentSlot = ""
 	lt.groundActionFunc = GroundAltAction_None
 	lt.groundAltActionFunc = GroundAltAction_None
-	#if SERVER
-		lt.specialCaseSpawnFunction = SpawnNothing
-	#endif
+	#if(false)
+
+#endif
+
+	#if(false)
+
+
+
+
+
+
+
+
+#endif
 
 	lt = RegisterLootType( eLootType.CUSTOMPICKUP )
 	lt.equipmentSlot = ""
@@ -121,12 +133,29 @@ void function SURVIVAL_LootTypes_InitShared()
 	lt.groundAltActionFunc = GroundAltAction_None
 
 
-	lt = RegisterLootType( eLootType.RESOURCE )
+	lt = RegisterLootType( eLootType.RESOURCE ) //
 	lt.equipmentSlot = ""
 	lt.equipmentAction = eLootAction.EQUIP
 	lt.backpackAction = eLootAction.NONE
 	lt.groundActionFunc = GroundAction_ForResource
 	lt.groundAltActionFunc = GroundAltAction_None
+
+	#if(false)
+
+
+
+
+
+#endif
+
+	#if(false)
+
+
+
+
+
+
+#endif
 }
 
 LootTypeData function RegisterLootType( int lootType )
@@ -136,6 +165,11 @@ LootTypeData function RegisterLootType( int lootType )
 	file.lootTypeData[ lootType ] <- lt
 
 	return lt
+}
+
+bool function IsLootTypeValid( int lootType )
+{
+	return (lootType in file.lootTypeData)
 }
 
 LootTypeData function GetLootTypeData( int lootType )
@@ -228,7 +262,7 @@ LootActionStruct function GroundAction_ForEquipment( entity player, LootRef loot
 			as.displayString = "#REASON_YOU_HAVE_BETTER"
 		else
 			as.displayString = "#REASON_YOU_HAVE_A_BETTER"
-		#if CLIENT
+		#if(CLIENT)
 			as.displayString = Localize( as.displayString, Localize( es.title ) )
 		#endif
 	}
@@ -293,7 +327,7 @@ LootActionStruct function GroundAction_ForAttachments( entity player, LootRef lo
 
 	LootActionStruct as = SURVIVAL_GetActionForAttachment( player, lootData, false, true, true )
 
-	// regular pick up
+	//
 	if ( as.action == eLootAction.NONE )
 		return GroundAction_ForBackpackItem( player, lootRef )
 
@@ -308,7 +342,7 @@ LootActionStruct function GroundLongAction_ForAttachments( entity player, LootRe
 
 	LootActionStruct as = SURVIVAL_GetActionForAttachment( player, lootData, false, true, true )
 
-	// regular pick up
+	//
 	if ( as.action == eLootAction.NONE )
 		return GroundLongAction_ForBackpackItem( player, lootRef )
 
@@ -367,6 +401,22 @@ LootActionStruct function GroundAltAction_ForAmmo( entity player, LootRef lootRe
 	as.action = eLootAction.NONE
 	return as
 }
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 bool function AlwaysTrue( entity player, entity prop )
 {

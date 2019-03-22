@@ -9,7 +9,7 @@ global function GetGrenadeProjectileSound
 global function Grenade_OnWeaponToss
 
 const DEFAULT_FUSE_TIME = 2.25
-global const float DEFAULT_MAX_COOK_TIME = 99999.9 //Longer than an entire day. Really just an arbitrarily large number
+global const float DEFAULT_MAX_COOK_TIME = 99999.9 //
 
 global function Grenade_OnWeaponTossReleaseAnimEvent
 global function Grenade_OnWeaponTossCancelDrop
@@ -17,11 +17,11 @@ global function Grenade_OnWeaponDeactivate
 global function Grenade_OnWeaponTossPrep
 global function Grenade_OnProjectileIgnite
 
-#if SERVER
-	global function Grenade_OnPlayerNPCTossGrenade_Common
-	global function EnableTrapWarningSound
-	global function AddToProximityTargets
-	global function ProximityMineThink
+#if(false)
+
+
+
+
 #endif
 global function Grenade_Init
 global function Grenade_Launch
@@ -29,7 +29,7 @@ global function Grenade_Launch
 const EMP_MAGNETIC_FORCE = 1600
 const MAG_FLIGHT_SFX_LOOP = "Explo_MGL_MagneticAttract"
 
-//Proximity Mine Settings
+//
 global const PROXIMITY_MINE_EXPLOSION_DELAY = 1.2
 global const PROXIMITY_MINE_ARMING_DELAY = 1.0
 const TRIGGERED_ALARM_SFX = "Weapon_ProximityMine_CloseWarning"
@@ -69,23 +69,23 @@ void function Grenade_FileInit()
 	RegisterSignal( "StopGrenadeClientEffects" )
 	RegisterSignal( "DisableTrapWarningSound" )
 
-	//Globalize( MagneticFlight )
+	//
 
-	#if CLIENT
+	#if(CLIENT)
 		AddDestroyCallback( "grenade_frag", ClientDestroyCallback_GrenadeDestroyed )
 	#endif
 
-	#if SERVER
-		level._empForcedCallbacks <- {}
-		level._proximityTargetArrayID <- CreateScriptManagedEntArray()
+	#if(false)
 
-		AddDamageCallbackSourceID( eDamageSourceId.mp_weapon_thermite_grenade, Thermite_DamagedPlayerOrNPC )
-		AddDamageCallbackSourceID( eDamageSourceId.mp_weapon_frag_grenade, Frag_DamagedPlayerOrNPC )
 
-		level._empForcedCallbacks[eDamageSourceId.mp_weapon_grenade_emp] <- true
 
-		PrecacheParticleSystem( THERMITE_GRENADE_FX )
-	#endif
+
+
+
+
+
+
+#endif
 }
 
 void function Grenade_OnWeaponTossPrep( entity weapon, WeaponTossPrepParams prepParams )
@@ -95,10 +95,10 @@ void function Grenade_OnWeaponTossPrep( entity weapon, WeaponTossPrepParams prep
 	entity weaponOwner = weapon.GetWeaponOwner()
 	weapon.EmitWeaponSound_1p3p( GetGrenadeDeploySound_1p( weapon ), GetGrenadeDeploySound_3p( weapon ) )
 
-	#if SERVER
-		thread HACK_CookGrenade( weapon, weaponOwner )
-		thread HACK_DropGrenadeOnDeath( weapon, weaponOwner )
-	#elseif CLIENT
+	#if(false)
+
+
+#elseif(CLIENT)
 		if ( weaponOwner.IsPlayer() )
 		{
 			weaponOwner.p.grenadePulloutTime = Time()
@@ -122,9 +122,9 @@ void function Grenade_Init( entity grenade, entity weapon )
 	if ( IsValid( weaponOwner ) )
 		SetTeam( grenade, weaponOwner.GetTeam() )
 
-	// JFS: this is because I don't know if the above line should be
-	// weapon.GetOwner() or it's a typo and should really be weapon.GetWeaponOwner()
-	// and it's too close to ship and who knows what effect that will have
+	//
+	//
+	//
 	entity owner = weapon.GetWeaponOwner()
 	if ( IsValid( owner ) && owner.IsNPC() )
 		SetTeam( grenade, owner.GetTeam() )
@@ -136,24 +136,24 @@ void function Grenade_Init( entity grenade, entity weapon )
 		grenade.InitMagnetic( magnetic_force, "Explo_MGL_MagneticAttract" )
 	}
 
-	#if SERVER
-		bool smartPistolVisible = weapon.GetWeaponSettingBool( eWeaponVar.projectile_visible_to_smart_ammo )
-		if ( smartPistolVisible )
-		{
-			grenade.SetDamageNotifications( true )
-			grenade.SetTakeDamageType( DAMAGE_EVENTS_ONLY )
-			grenade.proj.onlyAllowSmartPistolDamage = true
+	#if(false)
 
-			if ( !grenade.GetProjectileWeaponSettingBool( eWeaponVar.projectile_damages_owner ) && !grenade.GetProjectileWeaponSettingBool( eWeaponVar.explosion_damages_owner ) )
-				SetCustomSmartAmmoTarget( grenade, true ) // prevent friendly target lockon
-		}
-		else
-		{
-			grenade.SetTakeDamageType( DAMAGE_NO )
-		}
-	#endif
+
+
+
+
+
+
+
+//
+
+
+
+
+
+#endif
 	if ( IsValid( weaponOwner ) )
-		grenade.s.originalOwner <- weaponOwner  // for later in damage callbacks, to skip damage vs friendlies but not for og owner or his enemies
+		grenade.s.originalOwner <- weaponOwner  //
 }
 
 
@@ -162,27 +162,27 @@ int function Grenade_OnWeaponToss( entity weapon, WeaponPrimaryAttackParams atta
 	weapon.EmitWeaponSound_1p3p( GetGrenadeThrowSound_1p( weapon ), GetGrenadeThrowSound_3p( weapon ) )
 	bool projectilePredicted = PROJECTILE_PREDICTED
 	bool projectileLagCompensated = PROJECTILE_LAG_COMPENSATED
-#if SERVER
-	if ( weapon.IsForceReleaseFromServer() )
-	{
-		projectilePredicted = false
-		projectileLagCompensated = false
-	}
+#if(false)
+
+
+
+
+
 #endif
 	entity grenade = Grenade_Launch( weapon, attackParams.pos, (attackParams.dir * directionScale), projectilePredicted, projectileLagCompensated )
 	entity weaponOwner = weapon.GetWeaponOwner()
 	weaponOwner.Signal( "ThrowGrenade" )
 
-	PlayerUsedOffhand( weaponOwner, weapon, true, grenade ) // intentionally here and in Hack_DropGrenadeOnDeath - accurate for when cooldown actually begins
+	PlayerUsedOffhand( weaponOwner, weapon, true, grenade ) //
 
 	if ( IsValid( grenade ) )
 		grenade.proj.savedDir = weaponOwner.GetViewForward()
 
-#if SERVER
+#if(false)
 
-	#if BATTLECHATTER_ENABLED
-		TryPlayWeaponBattleChatterLine( weaponOwner, weapon )
-	#endif
+
+
+
 
 #endif
 
@@ -200,22 +200,22 @@ var function Grenade_OnWeaponTossCancelDrop( entity weapon, WeaponPrimaryAttackP
 	return 0
 }
 
-// Can return entity or nothing
+//
 entity function Grenade_Launch( entity weapon, vector attackPos, vector throwVelocity, bool isPredicted, bool isLagCompensated )
 {
-	#if CLIENT
+	#if(CLIENT)
 		if ( !weapon.ShouldPredictProjectiles() || !isPredicted )
 			return null
 	#endif
 
 	var discThrow = weapon.GetWeaponInfoFileKeyField( "grenade_disc_throw" )
 
-	//TEMP FIX while Deploy anim is added to sprint
+	//
 	float currentTime = Time()
 	if ( weapon.w.startChargeTime == 0.0 )
 		weapon.w.startChargeTime = currentTime
 
-	// Note that fuse time of 0 means the grenade won't explode on its own, instead it depends on OnProjectileCollision() functions to be defined and explode there.
+	//
 	float fuseTime = weapon.GetGrenadeFuseTime()
 	bool startFuseOnLaunch = bool( weapon.GetWeaponInfoFileKeyField( "start_fuse_on_launch" ) )
 
@@ -226,8 +226,8 @@ entity function Grenade_Launch( entity weapon, vector attackPos, vector throwVel
 			fuseTime = 0.001
 	}
 
-	// NOTE: DO NOT apply randomness to angularVelocity, it messes up lag compensation
-	// KNOWN ISSUE: angularVelocity is applied relative to the world, so currently the projectile spins differently based on facing angle
+	//
+	//
 	vector angularVelocity = <10, -1600, 10>
 	if ( discThrow == 1 )
 		angularVelocity = <0, 30, -2200>
@@ -238,7 +238,7 @@ entity function Grenade_Launch( entity weapon, vector attackPos, vector throwVel
 	fireGrenadeParams.vel = throwVelocity
 	fireGrenadeParams.angVel = angularVelocity
 	fireGrenadeParams.fuseTime = fuseTime
-	fireGrenadeParams.scriptTouchDamageType = (damageFlags & ~DF_EXPLOSION) // when a grenade "bonks" something, that shouldn't count as explosive.explosive
+	fireGrenadeParams.scriptTouchDamageType = (damageFlags & ~DF_EXPLOSION) //
 	fireGrenadeParams.scriptExplosionDamageType = damageFlags
 	fireGrenadeParams.clientPredicted = isPredicted
 	fireGrenadeParams.lagCompensated = isLagCompensated
@@ -247,27 +247,27 @@ entity function Grenade_Launch( entity weapon, vector attackPos, vector throwVel
 	if ( frag == null )
 		return null
 
-	#if SERVER
-		entity owner = weapon.GetWeaponOwner()
-		if ( IsValid( owner ) )
-		{
-			if ( IsWeaponOffhand( weapon ) )
-			{
-				AddToUltimateRealm( owner, frag )
-			}
-			else
-			{
-				frag.RemoveFromAllRealms()
-				frag.AddToOtherEntitysRealms( owner )
-			}
-		}
-	#endif
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 
 	if ( discThrow == 1 )
 	{
 		Assert( !frag.IsMarkedForDeletion(), "Frag before .SetAngles() is marked for deletion." )
 
-		frag.SetAngles( <8,0,0> )  // pitch the disc slightly for more visible flight
+		frag.SetAngles( <8,0,0> )  //
 
 		if ( frag.IsMarkedForDeletion() )
 		{
@@ -284,19 +284,19 @@ entity function Grenade_Launch( entity weapon, vector attackPos, vector throwVel
 void function Grenade_OnPlayerNPCTossGrenade_Common( entity weapon, entity frag )
 {
 	Grenade_Init( frag, weapon )
-	#if SERVER
-		thread TrapExplodeOnDamage( frag, 20, 0.0, 0.0 )
+	#if(false)
 
-		string projectileSound = GetGrenadeProjectileSound( weapon )
-		if ( projectileSound != "" )
-			EmitSoundOnEntity( frag, projectileSound )
-	#endif
+
+
+
+
+#endif
 
 	if ( weapon.HasMod( "burn_mod_emp_grenade" ) )
 		frag.InitMagnetic( EMP_MAGNETIC_FORCE, MAG_FLIGHT_SFX_LOOP )
 }
 
-struct CookGrenadeStruct //Really just a convenience struct so we can read the changed value of a bool in an OnThreadEnd
+struct CookGrenadeStruct //
 {
 	bool shouldOverrideFuseTime = false
 }
@@ -312,31 +312,31 @@ void function HACK_CookGrenade( entity weapon, entity weaponOwner )
 	weapon.EndSignal( "WeaponDeactivateEvent" )
 	weapon.EndSignal( "OnDestroy" )
 
-	/*CookGrenadeStruct grenadeStruct
+	/*
 
-	OnThreadEnd(
-	function() : ( weapon, grenadeStruct )
-		{
-			if ( grenadeStruct.shouldOverrideFuseTime )
-			{
-				var minFuseTime = weapon.GetWeaponInfoFileKeyField( "min_fuse_time" )
-				printt( "minFuseTime: " + minFuseTime )
-				if ( minFuseTime != null )
-				{
-					expect float( minFuseTime )
-					printt( "Setting overrideFuseTime to : " + weapon.GetWeaponInfoFileKeyField( "min_fuse_time" ) )
-					weapon.w.overrideFuseTime =  minFuseTime
-				}
-			}
-		}
-	)*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 	wait( maxCookTime )
 
 	if ( !IsValid( weapon.GetWeaponOwner() ) )
 		return
 
-	weaponOwner.Signal( "ThrowGrenade" ) // Only necessary to end HACK_DropGrenadeOnDeath
+	weaponOwner.Signal( "ThrowGrenade" ) //
 }
 
 
@@ -350,7 +350,7 @@ void function HACK_WaitForGrenadeDropEvent( entity weapon, entity weaponOwner )
 
 void function HACK_DropGrenadeOnDeath( entity weapon, entity weaponOwner )
 {
-	if ( weapon.HasMod( "burn_card_weapon_mod" ) ) //JFS: Primarily to stop boost grenade weapons (e.g. frag_drone ) not doing TryUsingBurnCardWeapon() when dropped through this function.
+	if ( weapon.HasMod( "burn_card_weapon_mod" ) ) //
 		return
 
 	weaponOwner.EndSignal( "ThrowGrenade" )
@@ -380,153 +380,140 @@ void function HACK_DropGrenadeOnDeath( entity weapon, entity weaponOwner )
 			weapon.SetWeaponPrimaryClipCountAbsolute( maxint( 0, primaryClipCount - ammoPerShot ) )
 		}
 
-		PlayerUsedOffhand( weaponOwner, weapon ) // intentionally here and in ReleaseAnimEvent - for cases where grenade is dropped on death
+		PlayerUsedOffhand( weaponOwner, weapon ) //
 
 		entity grenade = Grenade_Launch( weapon, weaponOwner.GetOrigin(), velocity, PROJECTILE_NOT_PREDICTED, PROJECTILE_NOT_LAG_COMPENSATED )
 	}
 }
 
 
-#if SERVER
-
-/*
-function ProxMine_ShowOnMinimapTimed( ent, teamToDisplayEntTo, duration )
-{
-	ent.Minimap_AlwaysShow( teamToDisplayEntTo, null )
-	Minimap_CreatePingForTeam( teamToDisplayEntTo, ent.GetOrigin(), $"vgui/HUD/titanFiringPing", 1.0 )
-
-	wait duration
-
-	if ( IsValid( ent ) && ent.IsPlayer() )
-		ent.Minimap_DisplayDefault( teamToDisplayEntTo, ent )
-}
-*/
-
-void function Thermite_DamagedPlayerOrNPC( entity ent, var damageInfo )
-{
-	if ( !IsValid( ent ) )
-		return
-
-	Thermite_DamagePlayerOrNPCSounds( ent )
-}
-
-void function Frag_DamagedPlayerOrNPC( entity ent, var damageInfo )
-{
-	if ( !IsValid( ent ) || ent.IsPlayer() || ent.IsTitan() )
-		return
-
-	if ( ent.IsMechanical() )
-		DamageInfo_ScaleDamage( damageInfo, 0.5 )
-}
-#endif // SERVER
+#if(false)
 
 
-#if CLIENT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+
+
+#if(CLIENT)
 void function ClientDestroyCallback_GrenadeDestroyed( entity grenade )
 {
 }
-#endif // CLIENT
+#endif //
 
-#if SERVER
-void function EnableTrapWarningSound( entity trap, float delay = 0, string warningSound = DEFAULT_WARNING_SFX )
-{
-	trap.EndSignal( "OnDestroy" )
-	trap.EndSignal( "DisableTrapWarningSound" )
+#if(false)
 
-	if ( delay > 0 )
-		wait delay
 
-	  while ( IsValid( trap ) )
-	  {
-		  EmitSoundOnEntity( trap, warningSound )
-		  wait 1.0
-	  }
-}
 
-void function AddToProximityTargets( entity ent )
-{
-	AddToScriptManagedEntArray( level._proximityTargetArrayID, ent )
-}
 
-void function ProximityMineThink( entity proximityMine, entity owner )
-{
-	proximityMine.EndSignal( "OnDestroy" )
 
-	OnThreadEnd(
-		function() : ( proximityMine )
-		{
-			if ( IsValid( proximityMine ) )
-				proximityMine.Destroy()
-		}
-	)
-	thread TrapExplodeOnDamage( proximityMine, 50 )
 
-	wait PROXIMITY_MINE_ARMING_DELAY
 
-	int teamNum = proximityMine.GetTeam()
-	float explodeRadius = proximityMine.GetDamageRadius()
-	float triggerRadius = ( ( explodeRadius * 0.75 ) + 0.5 )
-	float lastTimeNPCsChecked = 0
-	float NPCTickRate = 0.5
-	float PlayerTickRate = 0.2
 
-	// Wait for someone to enter proximity
-	while ( IsValid( proximityMine ) && IsValid( owner ) )
-	{
-		if ( lastTimeNPCsChecked + NPCTickRate <= Time() )
-		{
-			array<entity> nearbyNPCs = GetNPCArrayEx( "any", TEAM_ANY, teamNum, proximityMine.GetOrigin(), triggerRadius )
-			foreach ( ent in nearbyNPCs )
-			{
-				if ( ShouldSetOffProximityMine( proximityMine, ent ) )
-				{
-					ProximityMine_Explode( proximityMine )
-					return
-				}
-			}
-			lastTimeNPCsChecked = Time()
-		}
 
-		array<entity> nearbyPlayers = GetPlayerArrayEx( "any", TEAM_ANY, teamNum, proximityMine.GetOrigin(), triggerRadius )
-		foreach ( ent in nearbyPlayers )
-		{
-			if ( ShouldSetOffProximityMine( proximityMine, ent ) )
-			{
-				ProximityMine_Explode( proximityMine )
-				return
-			}
-		}
 
-		wait PlayerTickRate
-	}
-}
 
-void function ProximityMine_Explode( entity proximityMine )
-{
-	float explodeTime = Time() + PROXIMITY_MINE_EXPLOSION_DELAY
-	EmitSoundOnEntity( proximityMine, TRIGGERED_ALARM_SFX )
 
-	wait PROXIMITY_MINE_EXPLOSION_DELAY
 
-	if ( IsValid( proximityMine ) )
-		proximityMine.GrenadeExplode( proximityMine.GetForwardVector() )
-}
 
-bool function ShouldSetOffProximityMine( entity proximityMine, entity ent )
-{
-	if ( !IsAlive( ent ) )
-		return false
 
-	if ( ent.IsPhaseShifted() )
-		return false
 
-	TraceResults results = TraceLine( proximityMine.GetOrigin(), ent.EyePosition(), proximityMine, (TRACE_MASK_SHOT | CONTENTS_BLOCKLOS), TRACE_COLLISION_GROUP_NONE )
-	if ( results.fraction >= 1 || results.hitEnt == ent )
-		return true
 
-	return false
-}
-#endif // SERVER
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 
 
 float function GetMaxCookTime( entity weapon )

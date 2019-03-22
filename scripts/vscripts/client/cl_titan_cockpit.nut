@@ -7,12 +7,12 @@ global function ServerCallback_TitanCockpitBoot
 global function TitanCockpit_DamageFeedback
 global function TitanCockpit_AddPlayer
 global function RegisterTitanBindings
-//global function GetTitanBindings
+//
 global function DeregisterTitanBindings
 global function ServerCallback_TitanEmbark
 global function ServerCallback_TitanDisembark
-//global function PlayerPressed_EjectEnable // so can be called directly for debugging
-//global function PlayerPressed_Eject // so can be called directly for debugging
+//
+//
 global function TitanCockpit_IsBooting
 global function ServerCallback_TitanCockpitEMP
 global function TitanCockpit_EMPFadeScale
@@ -26,7 +26,7 @@ global function UpdateTitanCockpitVisibility
 global function TitanCockpitDestroyRui
 global function TitanCockpitDoomedThink
 global function PlayerEjects
-//global function IsDisplayingEjectInterface
+//
 global function FlashCockpitLight
 global function PlayCockpitSparkFX
 
@@ -115,13 +115,13 @@ void function UpdateLastPlayerSettings( entity player )
 		file.lastPilotSettings = player.GetPlayerSettings()
 }
 
-//TitanBindings function GetTitanBindings()
-//{
-//	TitanBindings Table
-//	Table.PlayerPressed_Eject = PlayerPressed_Eject
-//	Table.PlayerPressed_EjectEnable = PlayerPressed_EjectEnable
-//	return Table
-//}
+//
+//
+//
+//
+//
+//
+//
 
 bool function RegisterTitanBindings( entity player, TitanBindings bind )
 {
@@ -133,7 +133,7 @@ bool function RegisterTitanBindings( entity player, TitanBindings bind )
 
 	AddCallback_OnUseButtonPressed( player, bind.PlayerPressed_Eject )
 
-	//RegisterConCommandTriggeredCallback( "+offhand4", bind.PlayerPressed_EjectEnable )
+	//
 
 	return true
 }
@@ -144,7 +144,7 @@ void function DeregisterTitanBindings( TitanBindings bind )
 
 	if ( GetMapName() != "" )
 	{
-		//DeregisterConCommandTriggeredCallback( "+offhand4", bind.PlayerPressed_EjectEnable )
+		//
 	}
 }
 
@@ -168,7 +168,7 @@ void function TitanCockpitInit( entity cockpit )
 	entity player = GetLocalViewPlayer()
 	Assert( player.GetCockpit() == cockpit )
 
-	cockpit.s.ejectStartTime <- 0 // placed here to fix 156786
+	cockpit.s.ejectStartTime <- 0 //
 
 	if ( !IsAlive( player ) )
 		return
@@ -184,10 +184,10 @@ void function TitanCockpitInit( entity cockpit )
 
 	player.s.inTitanCockpit = true
 
-	// code aint callin this currently
+	//
 	CodeCallback_PlayerInTitanCockpit( GetLocalViewPlayer(), GetLocalViewPlayer() )
 
-	// move this
+	//
 	array<entity> targets = GetClientEntArrayBySignifier( "info_target" )
 	foreach ( target in targets )
 	{
@@ -220,17 +220,17 @@ void function TitanCockpitInit( entity cockpit )
 
 	thread TitanCockpitAnimThink( cockpit, cockpit.e.body )
 
-	if ( player.IsTitan() && IsAlive( player ) ) // pilot with titan cockpit gets thrown from titan
+	if ( player.IsTitan() && IsAlive( player ) ) //
 		thread TitanCockpitDoomedThink( cockpit, player )
 
 	SetCockpitLightingEnabled( 0, true )
 	ShowRUIHUD( cockpit )
 }
 
-//bind r "script_client ReloadScripts();script_client GetLocalViewPlayer().GetCockpit().Destroy()"
+//
 void function ShowRUIHUD( entity cockpit )
 {
-	// update topo positions
+	//
 	int cameraAttachId = cockpit.LookupAttachment( "CAMERA" )
 	vector cameraOrigin = cockpit.GetAttachmentOrigin( cameraAttachId )
 
@@ -253,7 +253,7 @@ void function ShowRUIHUD( entity cockpit )
 	RuiTopology_UpdatePos( clGlobal.topoTitanCockpitLowerHud, lowerScreenPosition, <0, -TITAN_COCKPIT_LOWER_RUI_SCREEN_SQUARE_SIZE, 0>, <0, 0, -(TITAN_COCKPIT_LOWER_RUI_SCREEN_SQUARE_SIZE * TITAN_COCKPIT_LOWER_RUI_SCREEN_HEIGHT_SCALE)> )
 	RuiTopology_UpdatePos( clGlobal.topoTitanCockpitInstrument1, instrument1Position - (instrument1RightVector *  TITAN_COCKPIT_INSTRUMENT1_RUI_SCREEN_SQUARE_SIZE * 0.5) - (instrument1DownVector * TITAN_COCKPIT_INSTRUMENT1_RUI_SCREEN_SQUARE_SIZE * 0.5), instrument1RightVector * TITAN_COCKPIT_INSTRUMENT1_RUI_SCREEN_SQUARE_SIZE, instrument1DownVector * TITAN_COCKPIT_INSTRUMENT1_RUI_SCREEN_SQUARE_SIZE )
 
-	// create ruis
+	//
 	entity player = GetLocalViewPlayer()
 
 	file.cockpitRui = CreateTitanCockpitRui( $"ui/ajax_cockpit_base.rpak" )
@@ -263,21 +263,21 @@ void function ShowRUIHUD( entity cockpit )
 	RuiTrackFloat( file.cockpitRui, "shieldFrac", player, RUI_TRACK_SHIELD_FRACTION )
 	RuiTrackFloat( file.cockpitRui, "dashFrac", player, RUI_TRACK_PLAYER_SUIT_POWER )
 	RuiSetFloat( file.cockpitRui, "ejectManualTimeOut", EJECT_FADE_TIME )
-	RuiSetFloat( file.cockpitRui, "ejectButtonTimeOut", TITAN_EJECT_MAX_PRESS_DELAY )
+	//
 	RuiSetGameTime( file.cockpitRui, "ejectManualStartTime", -60.0 )
 	RuiSetGameTime( file.cockpitRui, "ejectButtonPressTime", -60.0 )
-	string titanName = "Bob"//GetTitanCharacterName( player )
-	//if ( titanName == "vanguard" )
-	//{
-	//	RuiSetString( file.cockpitRui, "titanInfo1", GetVanguardCoreString( player, 1 ) )
-	//	RuiSetString( file.cockpitRui, "titanInfo2", GetVanguardCoreString( player, 2 ) )
-	//	RuiSetString( file.cockpitRui, "titanInfo3", GetVanguardCoreString( player, 3 ) )
-	//	RuiSetString( file.cockpitRui, "titanInfo4", GetVanguardCoreString( player, 4 ) )
-	//}
+	string titanName = "Bob"//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	file.cockpitAdditionalRui = CreateTitanCockpitRui( $"ui/ajax_cockpit_fd.rpak" )
 	RuiSetFloat( file.cockpitAdditionalRui, "ejectManualTimeOut", EJECT_FADE_TIME )
-	RuiSetFloat( file.cockpitAdditionalRui, "ejectButtonTimeOut", TITAN_EJECT_MAX_PRESS_DELAY )
+	//
 	RuiSetGameTime( file.cockpitAdditionalRui, "ejectManualStartTime", -60.0 )
 
 	RuiSetVisible( file.cockpitAdditionalRui, false )
@@ -286,7 +286,7 @@ void function ShowRUIHUD( entity cockpit )
 	RuiSetBool( file.cockpitRui, "ejectIsAllowed", ejectIsAllowed )
 
 	asset playerSettings = GetLocalViewPlayer().GetPlayerSettings()
-	float health = float( player.GetMaxHealth() ) //	float health = GetGlobalSettingsFloat( playerSettings, "health" )
+	float health = float( player.GetMaxHealth() ) //
 	float healthPerSegment = GetGlobalSettingsFloat( playerSettings, "healthPerSegment" )
 	RuiSetInt( file.cockpitRui, "numHealthSegments", int( health / healthPerSegment ) )
 	RuiTrackFloat( file.cockpitRui, "cockpitColor", player, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.cockpitColor )
@@ -341,8 +341,8 @@ void function UpdateEjectHud_SetButtonPressTime( entity player )
 	if ( file.cockpitRui != null )
 		RuiSetGameTime( file.cockpitRui, "ejectButtonPressTime", timeNow )
 
-	//if ( file.cockpitAdditionalRui != null )
-	//	RuiSetGameTime( file.cockpitAdditionalRui, "ejectButtonPressTime", timeNow )
+	//
+	//
 }
 
 void function UpdateEjectHud_SetButtonPressCount( entity player, int buttonCount )
@@ -352,8 +352,8 @@ void function UpdateEjectHud_SetButtonPressCount( entity player, int buttonCount
 	if ( file.cockpitRui != null )
 		RuiSetInt( file.cockpitRui, "ejectButtonCount", buttonCount )
 
-	//if ( file.cockpitAdditionalRui != null )
-	//	RuiSetInt( file.cockpitAdditionalRui, "ejectButtonCount", buttonCount )
+	//
+	//
 }
 
 void function UpdateTitanCockpitVisibility()
@@ -436,14 +436,14 @@ void function CockpitDoomedThink( entity cockpit )
 	while ( IsAlive( player ) )
 	{
 		entity soul = player.GetTitanSoul()
-		if ( !IsValid( soul ) ) //Defensive fix for bug 227087. Assumption is that the cockpit is likely to be destroyed soon if the soul is invalid.
+		if ( !IsValid( soul ) ) //
 			return
 		if ( !soul.IsDoomed() )
 			player.WaitSignal( "Doomed" )
 
 		SetCockpitUIDoomedState( true )
 
-		if ( !IsValid( soul ) ) //Defensive fix for bug 227087. Assumption is that the cockpit is likely to be destroyed soon if the soul is invalid.
+		if ( !IsValid( soul ) ) //
 			return
 		if ( soul.IsDoomed() )
 			player.WaitSignal( "TitanUnDoomed" )
@@ -547,13 +547,13 @@ void function CockpitBodyThink( entity cockpit, entity cockpitBody )
 entity function CreateCockpitBody( entity cockpit, entity player, entity cockpitParent )
 {
 	asset bodySettings = file.lastPilotSettings
-	//if ( bodySettings == $"" || bodySettings == $"settings/player/mp/spectator.rpak" || bodySettings == $"settings\\player\\mp\\spectator.rpak" )
-	//	bodySettings = Loadouts_GetSetFileForRequestedClass( player )
-	//if ( bodySettings == $"" )
+	//
+	//
+	//
 		bodySettings = DEFAULT_PILOT_SETTINGS
 
 	asset bodyModelName = GetGlobalSettingsAsset( bodySettings, "armsModel" )
-	#if DEV
+	#if(DEV)
 	if ( bodyModelName == $"" )
 	{
 		Warning( "Couldn't find armsmodel for set file: " + bodySettings )
@@ -585,15 +585,15 @@ float function TitanCockpit_EMPFadeScale( entity cockpit, float elapsedMod = 0 )
 	float elapsedTime = expect float( Time() - cockpit.s.empInfo.startTime )
 	elapsedTime += elapsedMod
 
-	// ToDo:
-	// Fade in/out from last frames amount so it doesnt pop
-	// Make strength var to control max fade ( less strength returns max of like 0.5 )
+	//
+	//
+	//
 
-	//------------------------
-	// EMP effect is finished
-	//------------------------
+	//
+	//
+	//
 
-	//printt( "elapsedTime:" + elapsedTime + " cockpit.s.empInfo.duration:" + cockpit.s.empInfo.duration + " fadeOutTime:" + fadeOutTime )
+	//
 	if ( elapsedTime < cockpit.s.empInfo.duration - fadeOutTime )
 	{
 		return 1.0
@@ -605,18 +605,18 @@ float function TitanCockpit_EMPFadeScale( entity cockpit, float elapsedMod = 0 )
 		return 0.0
 	}
 
-	//------------------------
-	// EMP effect is starting
-	//------------------------
+	//
+	//
+	//
 
 	if ( elapsedTime < fadeInTime )
 	{
 		return GraphCapped( elapsedTime, 0.0, fadeInTime, 0.0, 1.0 )
 	}
 
-	//----------------------
-	// EMP effect is ending
-	//----------------------
+	//
+	//
+	//
 
 	if ( elapsedTime > fadeInTime + cockpit.s.empInfo.duration )
 	{
@@ -624,11 +624,11 @@ float function TitanCockpit_EMPFadeScale( entity cockpit, float elapsedMod = 0 )
 		return GraphCapped( elapsedTime, fadeInTime + cockpit.s.empInfo.duration, fadeInTime + cockpit.s.empInfo.duration + fadeOutTime, 1.0, 0.0 )
 	}
 
-	//---------------------
-	// EMP flicker effect
-	//---------------------
+	//
+	//
+	//
 
-	// Time to start a new flicker
+	//
 	if ( cockpit.s.empInfo["sub_start"] == 0 )
 	{
 		cockpit.s.empInfo["sub_start"] 		<- Time()
@@ -642,23 +642,23 @@ float function TitanCockpit_EMPFadeScale( entity cockpit, float elapsedMod = 0 )
 	}
 	float flickerElapsedTime = expect float( Time() - cockpit.s.empInfo["sub_start"] )
 
-	// Start a new flicker if the current one is finished
+	//
 	if ( flickerElapsedTime > cockpit.s.empInfo["sub_pause"] + cockpit.s.empInfo["sub_duration"] )
 		cockpit.s.empInfo["sub_start"] = 0
 
 	if ( flickerElapsedTime < cockpit.s.empInfo["sub_pause"] )
 	{
-		// Pause before the flicker
+		//
 		return 1.0
 	}
 	else if ( flickerElapsedTime < cockpit.s.empInfo["sub_pause"] + ( cockpit.s.empInfo["sub_duration"] / 2.0 ) )
 	{
-		// First half of the flicker
+		//
 		return GraphCapped( flickerElapsedTime, 0.0, cockpit.s.empInfo["sub_duration"] / 2.0, 1.0, cockpit.s.empInfo["sub_alpha"] )
 	}
 	else
 	{
-		// Second half of the flicker
+		//
 		return GraphCapped( flickerElapsedTime, cockpit.s.empInfo["sub_duration"] / 2.0, cockpit.s.empInfo["sub_duration"], cockpit.s.empInfo["sub_alpha"], 1.0 )
 	}
 
@@ -688,12 +688,12 @@ void function TitanCockpit_DoEMP( float duration )
 	EndSignal( player, "EMP" )
 	player.EndSignal( "OnDestroy" )
 
-	// this needs tweaking... looks a bit artificial
-	ClientCockpitShake( 0.25, 3, 1.0, <0,0,1> ) // amplitude, frequency, duration, direction
+	//
+	ClientCockpitShake( 0.25, 3, 1.0, <0,0,1> ) //
 
 	thread PlayCockpitEMPLights( cockpit, duration )
 
-	// Start the screens and vdu power outages
+	//
 	cockpit.s.empInfo.xOffset = RandomFloatRange( 0.5, 0.75 )
 	cockpit.s.empInfo.yOffset = RandomFloatRange( 0.5, 0.75 )
 	if ( CoinFlip() )
@@ -711,13 +711,13 @@ void function TitanCockpit_DoEMP( float duration )
 
 void function PlayCockpitEMPLights( entity cockpit, float duration )
 {
-	duration += 1.5 // blend out
+	duration += 1.5 //
 	int attachID
 	vector origin
 	vector angles
 	array<table> fxLights
 
-	string tagName = "COCKPIT" // SCR_CL_BL"
+	string tagName = "COCKPIT" //
 	attachID = cockpit.LookupAttachment( tagName )
 	origin = cockpit.GetAttachmentOrigin( attachID )
 	origin.z -= 25
@@ -748,15 +748,15 @@ void function PlayCockpitEMPLights( entity cockpit, float duration )
 		float subtractColor = GraphCapped( Time(), endTime - 0.25, endTime, 1.0, 0.0 )
 		float pulseFrac = GetPulseFrac( rate, startTime )
 		pulseFrac *= subtractColor
-		//pulseFrac -= fadeInColor
+		//
 
 		foreach ( index, fxLight in fxLights )
 		{
 			Assert( fxLight.modulate )
 			fxLight.light.SetLightColor( <pulseFrac,0,0> )
 
-			// the case where fxLight.modulate == false used to be handled by this script, which used undefined variable fadeInColor:
-			//	fxLight.light.SetLightColor( <fadeInColor,fadeInColor,fadeInColor> )
+			//
+			//
 		}
 
 		WaitFrame()
@@ -782,51 +782,51 @@ void function TitanCockpitAnimThink( entity cockpit, entity body )
 		body.Anim_NonScriptedPlay( "atpov_cockpit_hatch_close_idle" )
 }
 
-//bool function IsDisplayingEjectInterface( entity player )
-//{
-//	if ( !player.IsTitan() )
-//		return false
 //
-//	if ( player.ContextAction_IsMeleeExecution() ) //Could just check for ContextAction_IsActive() if we need to be more general
-//		return false
 //
-//	if ( !GetDoomedState( player ) && Time() - player.p.ejectEnableTime > EJECT_FADE_TIME )
-//		return false
 //
-//	if ( Riff_TitanExitEnabled() == eTitanExitEnabled.Never || Riff_TitanExitEnabled() == eTitanExitEnabled.DisembarkOnly )
-//		return false
 //
-//	//if ( !CanDisembark( player ) )
-//	//	return false
 //
-//	return true
-//}
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
-//void function PlayerPressed_Eject( entity player )
-//{
-//	if ( !IsDisplayingEjectInterface( player ) )
-//		return
 //
-//	if ( Time() - player.p.ejectPressTime > TITAN_EJECT_MAX_PRESS_DELAY )
-//		UpdateEjectHud_SetButtonPressCount( player, 0 )
 //
-//	if ( !IsAlive( player ) )
-//		return
 //
-//	EmitSoundOnEntity( player, "titan_eject_xbutton" )
-//	EmitSoundOnEntity( player, "hud_boost_card_radar_jammer_redtextbeep_1p" )
-//	UpdateEjectHud_SetButtonPressTime( player )
-//	UpdateEjectHud_SetButtonPressCount( player, (player.p.ejectPressCount + 1) )
 //
-//	player.Signal( "PlayerPressedEject" )
-//	player.ClientCommand( "TitanEject " + player.p.ejectPressCount )
 //
-//	entity cockpit = player.GetCockpit()
-//	if ( player.p.ejectPressCount < 3 || cockpit.s.ejectStartTime )
-//		return
 //
-//	PlayerEjects( player, cockpit )
-//}
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 string function RollRandomEjectString()
 {
@@ -847,9 +847,9 @@ string function RollRandomEjectString()
 	return result
 }
 
-void function PlayerEjects( entity player, entity cockpit ) //Note that this can be run multiple times in a frame, e.g. get damaged by 4 pellets of a shotgun that brings the Titan into a doomed state with auto eject. Not ideal
+void function PlayerEjects( entity player, entity cockpit ) //
 {
-	// prevent animation from playing if player is in the middle of execution
+	//
 	if ( player.ContextAction_IsActive() && !player.ContextAction_IsBusy() )
 		return
 
@@ -895,7 +895,7 @@ void function MonitorPlayerEjectAnimBeingStuck( entity player, float duration )
 	player.EndSignal( "SettingsChanged" )
 
 
-	wait duration + 2.0 // 1s as a buffer
+	wait duration + 2.0 //
 
 	if ( player.IsTitan() )
 	{
@@ -1019,7 +1019,7 @@ void function LightingUpdateAfterOpeningCockpit()
 	SetCockpitLightingEnabled( 0, false )
 }
 
-void function TonemappingUpdateAfterOpeningCockpit() //Deprecated, no longer used
+void function TonemappingUpdateAfterOpeningCockpit() //
 {
 	float duration = 3.0
 	float tonemapMin = 2.0
@@ -1068,9 +1068,9 @@ void function ServerCallback_TitanDisembark()
 
 	thread LightingUpdateAfterOpeningCockpit()
 
-	//HideFriendlyIndicatorAndCrosshairNames()
+	//
 
-	//PlayMusic( "Music_FR_Militia_PilotAction2" )
+	//
 }
 
 void function PlayerPressed_QuickDisembark( entity player )
@@ -1078,46 +1078,46 @@ void function PlayerPressed_QuickDisembark( entity player )
 	player.ClientCommand( "TitanDisembark" )
 }
 
-//void function PlayerPressed_EjectEnable( entity player )
-//{
-//	if ( !player.IsTitan() )
-//		return
 //
-//	if ( !IsAlive( player ) )
-//		return
 //
-//	if ( IsValid( player.GetParent() ) )
-//		return
 //
-//	if ( TitanEjectIsDisabled() )
-//	{
-//		EmitSoundOnEntity( player, "Survival_UI_Ability_NotReady" )
-//		SetTimedEventNotification( 1.5, "" )
-//		SetTimedEventNotification( 1.5, "#NOTIFY_EJECT_DISABLED" )
-//		return
-//	}
 //
-//	if ( Riff_TitanExitEnabled() == eTitanExitEnabled.Never || 	Riff_TitanExitEnabled() == eTitanExitEnabled.DisembarkOnly )
-//		return
 //
-//	//if ( !CanDisembark( player ) )
-//	//	return
 //
-//	if ( player.ContextAction_IsMeleeExecution() ) //Could just check for ContextAction_IsActive() if we need to be more general
-//		return
 //
-//	if ( player.GetHealth() == 1 )
-//	{
-//		{
-//			player.ClientCommand( "TitanEject " + 3 )
-//			return
-//		}
-//	}
 //
-//	EmitSoundOnEntity( player, "titan_eject_dpad" )
-//	UpdateEjectHud_SetManualEjectStartTime( player )
-//	player.Signal( "UpdateRodeoAlert" ) // need this to hide titan stomp hint
-//}
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 float function CalcJoltMagnitude( player, cockpit, joltDir, float damageAmount, damageType, int damageSourceID )
 {
@@ -1133,15 +1133,15 @@ void function JoltCockpit( entity cockpit, entity player, vector joltDir, float 
 	player.CockpitJolt( joltDir, severity )
 }
 
-/*function RandomizeDir( dir, randPitch = 0, randYaw = 0, basePitch = 0, baseYaw = 0 )
-{
-	local pitch = RandomFloatRange( -randPitch, randPitch )
-	local yaw = RandomFloatRange( -randYaw, randYaw )
-	local angles = VectorToAngles( dir )
-	angles = AnglesCompose( angles, <pitch,yaw,0> )
-	angles = AnglesCompose( angles, <basePitch,baseYaw,0> )
-	return AnglesToForward( angles )
-}*/
+/*
+
+
+
+
+
+
+
+*/
 
 void function TitanCockpitDoomedThink( entity cockpit, entity player )
 {
@@ -1180,7 +1180,7 @@ void function TitanCockpitHealthChangedThink( entity cockpit, entity player )
 			RuiSetFloat( rui, "newHealthFrac", newHealthFrac )
 
 			asset playerSettings = GetLocalViewPlayer().GetPlayerSettings()
-			float health = player.GetPlayerModHealth() // float health = GetPlayerSettingsFieldForClassName_Health( playerSettings )
+			float health = player.GetPlayerModHealth() //
 			float healthPerSegment = GetGlobalSettingsFloat( playerSettings, "healthPerSegment" )
 			RuiSetInt( rui, "numHealthSegments", int( health / healthPerSegment ) )
 		}
@@ -1222,7 +1222,7 @@ void function FlashCockpitLight( entity cockpit, vector color, float radius, flo
 
 void function PlayCockpitSparkFX_Internal( entity cockpit, string tagName )
 {
-	// this is called from a delaythread so needs valid check
+	//
 	if ( !IsValid( cockpit ) )
 		return
 
@@ -1274,7 +1274,7 @@ int function CalSparkCountForHit( entity player, float damageAmount, bool became
 	int sparksNow = (healthNow / DAMAGE_PER_SPARK)
 	int sparksPrev = (healthPrev / DAMAGE_PER_SPARK)
 	if ( (healthPrev == healthMax) && !isDoomed )
-		--sparksPrev	// no spark on first damage
+		--sparksPrev	//
 
 	int delta = (sparksPrev - sparksNow)
 	if ( delta < 0 )
@@ -1296,7 +1296,7 @@ void function TitanCockpit_DamageFeedback( entity player, entity cockpit, float 
 		return
 
 	int sparkCount = CalSparkCountForHit( player, damageAmount, doomedNow )
-	//printt( "sparks: " + sparkCount + "  dmg: " + damageAmount + "  - " + player.GetHealth() + " / " + player.GetMaxHealth() )
+	//
 	PlayCockpitSparkFX( cockpit, sparkCount )
 }
 
@@ -1337,8 +1337,8 @@ void function TitanEMP_Internal( float maxValue, float duration, float fadeTime,
 
 	entity empVgui = CreateClientsideVGuiScreen( "vgui_titan_emp", VGUI_SCREEN_PASS_VIEWMODEL, <0,0,0>, <0,0,0>, wide, tall )
 
-	//empVgui.SetParent( player.GetViewModelEntity(), "CAMERA_BASE" )
-	empVgui.SetRefract( true ) // Force refract resolve before drawing vgui. (This can cost GPU!)
+	//
+	empVgui.SetRefract( true ) //
 	empVgui.SetParent( player )
 	empVgui.SetAttachOffsetOrigin( <fovOffset, wide / 2, -tall / 2> )
 	empVgui.SetAttachOffsetAngles( angles )
@@ -1419,14 +1419,14 @@ void function NetworkedVarChangedCallback_UpdateVanguardRUICoreStatus( entity so
 
 	UpdateHealthSegmentCount()
 
-	string titanName = "Alice"//GetTitanCharacterName( player )
-	//if ( titanName == "vanguard" )
-	//{
-	//	RuiSetString( file.cockpitRui, "titanInfo1", GetVanguardCoreString( player, 1 ) )
-	//	RuiSetString( file.cockpitRui, "titanInfo2", GetVanguardCoreString( player, 2 ) )
-	//	RuiSetString( file.cockpitRui, "titanInfo3", GetVanguardCoreString( player, 3 ) )
-	//	RuiSetString( file.cockpitRui, "titanInfo4", GetVanguardCoreString( player, 4 ) )
-	//}
+	string titanName = "Alice"//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 }
 
 void function Scorch_DestroyHotstreakBar()

@@ -38,9 +38,61 @@ const float DEFAULT_FOV = 70.0
 const float MAGIC_DEATHBOX_Z_OFFSET = 1.25
 
 const bool HAS_ITEM_PICKUP_FEEDACK_FX = false
-#if HAS_ITEM_PICKUP_FEEDACK_FX
-const asset PICKUP_FEEDBACK_FX = $"P_impact_amped_shield"
+#if(false)
+
 #endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+#endif
 
 struct VerticalLineStruct
 {
@@ -70,9 +122,14 @@ struct {
 
 	float nextHealthAllowTime = 0
 
-	#if LOOT_GROUND_VERTICAL_LINES
+	#if(true)
 		array<VerticalLineStruct> verticalLines
-	#endif // #if LOOT_GROUND_VERTICAL_LINES
+	#endif //
+
+	#if(false)
+
+
+#endif
 } file
 
 void function Cl_Survival_LootInit()
@@ -108,7 +165,7 @@ void function Cl_Survival_LootInit()
 
 	AddCallback_EntitiesDidLoad( SurvivalLoot_EntitiesDidLoad )
 
-	#if LOOT_GROUND_VERTICAL_LINES
+	#if(true)
 		for ( int i = 0; i < VERTICAL_LINE_COUNT; i++ )
 		{
 			var topo = RuiTopology_CreatePlane( <0, 0, 0>, <VERTICAL_LINE_WIDTH, 0, 0>, <0, 0, VERTICAL_LINE_HEIGHT>, true )
@@ -120,11 +177,11 @@ void function Cl_Survival_LootInit()
 
 			HideVerticalLineStruct( v )
 		}
-	#endif // #if LOOT_GROUND_VERTICAL_LINES
-
-	#if HAS_ITEM_PICKUP_FEEDACK_FX
-		PrecacheParticleSystem( PICKUP_FEEDBACK_FX )
 	#endif //
+
+	#if(false)
+
+#endif //
 
 	RegisterSignal( "TrackLootToPing" )
 	RegisterSignal( "CreateDeathBoxRui" )
@@ -143,6 +200,10 @@ void function Cl_Survival_LootInit()
 	file.lootTypePromptRui[eLootType.MAINWEAPON][eLootPromptStyle.COMPACT] = compactWeaponPromptRui
 
 	AddCallback_OnRefreshCustomGamepadBinds( OnRefreshCustomGamepadBinds )
+
+	#if(false)
+
+#endif
 }
 
 
@@ -155,9 +216,9 @@ var[eLootPromptStyle._COUNT] function _newPromptStyles()
 
 void function SurvivalLoot_EntitiesDidLoad()
 {
-	#if LOOT_GROUND_VERTICAL_LINES
+	#if(true)
 		thread ManageVerticalLines()
-	#endif // LOOT_GROUND_VERTICAL_LINES
+	#endif //
 }
 
 
@@ -171,27 +232,29 @@ void function PlayLootPickupFeedbackFX( entity ent )
 		ent.ClearPredictiveHideForPickup()
 	}()
 
-	#if HAS_ITEM_PICKUP_FEEDACK_FX
-		vector lootOrigin = ent.GetOrigin() + <0, 0, 0.5>
-		entity entParent  = ent.GetParent()
+	Chroma_PredictedLootPickup( ent )
 
-		if ( IsValid( entParent ) )
-		{
-			vector offset = lootOrigin - entParent.GetOrigin()
-			vector angles = <0, 0, 0>
+	#if(false)
 
-			entity mover = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", lootOrigin, angles )
-			mover.SetParent( entParent )
 
-			StartParticleEffectOnEntity( mover, GetParticleSystemIndex( PICKUP_FEEDBACK_FX ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
 
-			thread DelayDestroy( mover )
-		}
-		else
-		{
-			StartParticleEffectInWorld( GetParticleSystemIndex( PICKUP_FEEDBACK_FX ), lootOrigin, <0, 0, 0> )
-		}
-	#endif //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 }
 
 
@@ -269,7 +332,7 @@ void function UseSelectedHealthPickupType( entity player )
 			selectedPickupType = SURVIVAL_GetBestHealthPickupType( player )
 			if ( !Survival_CanUseHealthPack( player, selectedPickupType, true ) )
 			{
-				// We're trying to auto heal, but we can't use the pack it selected.  See what would be ideal, and test against that.
+				//
 				//
 				int idealKitType = SURVIVAL_GetBestHealthPickupType( player, false )
 				Survival_CanUseHealthPack( player, idealKitType, true, true )
@@ -289,10 +352,10 @@ void function UseSelectedHealthPickupType( entity player )
 
 void function Survival_UseHealthPack( entity player, string ref )
 {
-	//if ( Time() < file.nextHealthAllowTime )
-	//	return
+	//
+	//
 
-	//file.nextHealthAllowTime = Time() + waitTime
+	//
 	player.ClientCommand( "Sur_UseHealthPack " + ref )
 }
 
@@ -370,7 +433,7 @@ void function OnDeathBoxCreated( entity ent )
 		AddEntityCallback_GetUseEntOverrideText( ent, DeathBoxTextOverride )
 		ent.SetDoDestroyCallback( true )
 		TEMP_SaveEHI( ent )
-		//thread AttachCoverToDeathBox( ent )
+		//
 
 		if ( ent.GetOwner() == GetLocalClientPlayer() )
 		{
@@ -433,6 +496,13 @@ void function CreateDeathBoxRui( entity deathBox )
 	var rui = RuiCreate( $"ui/gladiator_card_deathbox.rpak", topo, RUI_DRAW_WORLD, MINIMAP_Z_BASE + 10 )
 
 	NestedGladiatorCardHandle nestedGCHandle = CreateNestedGladiatorCard( rui, "card", eGladCardDisplaySituation.DEATH_BOX_STILL, eGladCardPresentation.FRONT_DETAILS )
+
+	//
+	#if(false)
+
+#endif
+
+
 	ChangeNestedGladiatorCardOwner( nestedGCHandle, ehi, null, eGladCardLifestateOverride.ALIVE )
 
 	OnThreadEnd (
@@ -459,7 +529,6 @@ void function CreateDeathBoxRui( entity deathBox )
 
 	WaitForever()
 }
-
 
 string function DeathBoxTextOverride( entity ent )
 {
@@ -627,7 +696,7 @@ void function Sur_OnUseEntLoseFocus( entity ent )
 	HideLootPrompts()
 
 	clGlobal.levelEnt.Signal( "ClearSwapOnUseThread" )
-	//clGlobal.levelEnt.Signal( "CreateDeathBoxRui" )
+	//
 
 	if ( IsValid( ent ) && ent.GetNetworkedClassName() == "prop_survival" )
 		SURVIVAL_Loot_SetHighlightForLoot( ent, false )
@@ -949,7 +1018,7 @@ void function UpdateLootRuiWithData( entity player, var rui, LootData data, int 
 		{
 			LootData ammoData = SURVIVAL_Loot_GetLootDataByRef( attachmentTagData.ammoRef )
 
-			bool hasCompatibleWeapon = true//IsAmmoInUse( player, attachmentTagData.ammoRef )
+			bool hasCompatibleWeapon = true//
 			if ( hasCompatibleWeapon )
 				RuiSetString( rui, "tagText1", Localize( "#LOOT_FIT_AMMO", ammoData.hudIcon ) )
 			else
@@ -962,7 +1031,7 @@ void function UpdateLootRuiWithData( entity player, var rui, LootData data, int 
 			{
 				if ( tagIndex < MAX_ATTACHMENT_TAGS && passiveDesc == "" )
 				{
-					bool hasWeaponForTag = true//HasWeaponForTag( player, tagId )
+					bool hasWeaponForTag = true//
 					if ( hasWeaponForTag )
 						RuiSetString( rui, "tagText" + (tagIndex + 1), GetStringForTagId( tagId ) )
 					else
@@ -980,7 +1049,7 @@ void function UpdateLootRuiWithData( entity player, var rui, LootData data, int 
 					if ( index < attachmentTagData.weaponRefs.len() - 1 )
 						weaponName += ","
 
-					bool hasWeapon = true//HasWeapon( player, weaponRef, [], false )
+					bool hasWeapon = true//
 					if ( hasWeapon )
 						RuiSetString( rui, "tagText" + (tagIndex + 1), weaponName )
 					else
@@ -1037,6 +1106,7 @@ bool function HasWeaponForTag( entity player, int tagId )
 			case eAttachmentTag.LMG:
 			case eAttachmentTag.SNIPER:
 			case eAttachmentTag.SMG:
+			case eAttachmentTag.LAUNCHER:
 				if ( weaponClassToTag[weaponData.lootTags[0]] == tagId )
 					return true
 				break
@@ -1069,6 +1139,16 @@ bool function ShouldLootHintBeVisible( entity prop )
 	if ( prop.e.isBusy )
 		return false
 
+	#if(false)
+
+
+
+
+
+
+
+#endif
+
 	entity player = GetLocalViewPlayer()
 
 	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
@@ -1082,7 +1162,7 @@ bool function ShouldLootHintBeVisible( entity prop )
 	return true
 }
 
-#if LOOT_GROUND_VERTICAL_LINES
+#if(true)
 void function ManageVerticalLines()
 {
 	while ( 1 )
@@ -1220,12 +1300,12 @@ void function ShowVerticalLineStruct( VerticalLineStruct lineStruct, entity ent 
 	RuiSetFloat3( lineStruct.rui, "worldPos", ent.GetOrigin() )
 	RuiSetBool( lineStruct.rui, "isVisible", true )
 
-	#if LINE_COLORS
+	#if(true)
 		LootData data = SURVIVAL_Loot_GetLootDataByIndex( ent.GetSurvivalInt() )
 		RuiSetInt( lineStruct.rui, "tier", data.tier )
 	#else
-		RuiSetInt( lineStruct.rui, "tier", 1 )
-	#endif
+
+#endif
 
 	bool isPinged = Waypoint_LootItemIsBeingPingedByAnyone( ent )
 	RuiSetBool( lineStruct.rui, "isPinged", isPinged )
@@ -1236,7 +1316,7 @@ void function HideVerticalLineStruct( VerticalLineStruct lineStruct )
 	RuiSetBool( lineStruct.rui, "isVisible", false )
 	RuiSetVisible( lineStruct.rui, false )
 }
-#endif // #if LOOT_GROUND_VERTICAL_LINES
+#endif //
 
 bool function TryOpenQuickSwap( entity overrideItem = null )
 {
@@ -1374,7 +1454,7 @@ void function TrackLootToPing( entity player )
 
 					case eLootType.AMMO:
 						e.farRui = CreateFullscreenRui( $"ui/loot_pickup_hint_far.rpak", -1 )
-						//RuiSetInt( e.farRui, "promptFlags", PF_IS_AMMO )
+						//
 						break
 
 					default:
@@ -1453,9 +1533,9 @@ entity function GetEntityPlayerIsLookingAt( entity player, array<entity> ents, f
 		lootItem.playerViewDot = dot
 		finalLootEnts.append( lootItem )
 
-#if DEV
-		//DebugDrawMark( ent.GetWorldSpaceCenter(), 10, [255, 128, 0], true, 10.0 )
-		//DebugDrawText( ent.GetWorldSpaceCenter() + <0,0,16>, format( "%f\n", dot ), false, 0.1 )
+#if(DEV)
+		//
+		//
 #endif
 	}
 
@@ -1532,18 +1612,21 @@ void function SetupSurvivalLoot( var categories )
 	string cats              = expect string( categories )
 	array<string> stringCats = split( cats, " " )
 
-	// turn menu strings into real category enums
+	//
 	array<int> catTypes
 	foreach( string cat in stringCats )
 		catTypes.append( SURVIVAL_Loot_GetLootTypeFromString( cat ) )
 
-	// HACK
+	//
 	if ( catTypes.contains( eLootType.ATTACHMENT ) )
 		RunUIScript( "SetupDevCommand", "Spawn All Optics", "script SpawnAllOptics()" )
 
-	// flip thru all the loot and find the ones that match the cats we want to display
+	//
 	foreach ( ref, data in SURVIVAL_Loot_GetLootDataTable() )
 	{
+		if ( !IsLootTypeValid( data.lootType ) )
+			continue
+
 		if ( !catTypes.contains( data.lootType ) )
 			continue
 
@@ -1587,7 +1670,7 @@ bool function ShouldAppendLootLevel( LootData data )
 	return true
 }
 /*
------ UTILITY -----
+
 */
 
 bool function SURVIVAL_Loot_QuickSwap( entity pickup, entity player, int pickupFlags = 0, entity deathBox = null )
@@ -1706,7 +1789,7 @@ void function TryHolsterWeapon( entity player )
 	if ( file.useAltBind == -1 )
 		return
 
-	// TODO: this should be read in from data
+	//
 	if ( !InputIsButtonDown( file.useAltBind ) )
 		return
 
@@ -1732,19 +1815,19 @@ void function TryHolsterWeapon( entity player )
 		return
 	}
 
-	//ExtendedUseSettings settings
-	//settings.loopSound = ""
-	//settings.successSound = ""
-	//settings.displayRui = $"ui/extended_use_hint.rpak"
-	//settings.displayRuiFunc = DisplayRuiForDeathBox
-	//settings.icon = $""
-	//settings.hint = ""
-	//settings.duration = 0.5
-	//settings.successFunc = ExtendedTryHolster
-	//settings.holdHint = "%use_alt%"
-	//settings.useInputFlag = IN_USE_ALT
 	//
-	//thread ExtendedUse( player, player, settings )
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	player.ClientCommand( "weaponSelectPrimary2" )
 }
@@ -1771,9 +1854,9 @@ float function GetHighlightFillAlphaForLoot( entity lootEnt )
 {
 	int survivalInt = lootEnt.GetSurvivalInt()
 
-	// uncomment for tuning
-	//if ( (survivalInt in s_highlightFillCache) )
-	//	delete s_highlightFillCache[survivalInt]
+	//
+	//
+	//
 
 	if ( !(survivalInt in s_highlightFillCache) )
 	{
@@ -1788,3 +1871,111 @@ float function GetHighlightFillAlphaForLoot( entity lootEnt )
 	return s_highlightFillCache[survivalInt]
 
 }
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif

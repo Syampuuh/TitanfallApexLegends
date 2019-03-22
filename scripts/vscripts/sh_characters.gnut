@@ -9,8 +9,10 @@ global function CharacterClass_GetRole
 global function CharacterClass_GetSortOrdinal
 global function CharacterClass_GetMenuSmokeSkinIndex
 global function CharacterClass_GetMenuBackgroundSkinIndex
+global function CharacterClass_GetMenuButtonIndex
 global function CharacterClass_GetMenuLightData
 global function CharacterClass_GetHudUltimateColorData
+global function CharacterClass_GetChromaGradient
 global function CharacterClass_GetGalleryModelOffset
 global function CharacterClass_GetGalleryPortrait
 global function CharacterClass_GetGalleryPortraitBackground
@@ -19,21 +21,24 @@ global function CharacterClass_GetCharacterLockedPortrait
 global function CharacterClass_GetCharacterRoleImage
 global function CharacterClass_GetCharacterSelectSubtitle
 global function CharacterClass_GetReadyUpVoicelineEventList
-
 global function CharacterClass_IsAvailable
 
-#if SERVER
-global function GetStringArrayAvailableClassesForPlayer
+#if(false)
+
 #endif
 
-//////////////////////
-//////////////////////
-//// Global Types ////
-//////////////////////
-//////////////////////
+#if CLIENT || UI 
+global function GetCharacterButtonMapping
+#endif
+
+//
+//
+//
+//
+//
 
 global enum eCharacterClassRole
-// the order of this enum decides the order of the groups in the UI
+//
 {
 	UNDECIDED,
 	OFFENSE,
@@ -48,7 +53,7 @@ const table<int, asset> CHARACTER_ROLE_ICONS = {
 	[eCharacterClassRole.DEFENSE] = $"rui/menu/character_select/utility/util_role_defense",
 	[eCharacterClassRole.SUPPORT] = $"rui/menu/character_select/utility/util_role_support",
 	[eCharacterClassRole.RECON] = $"rui/menu/character_select/utility/util_role_recon",
-	//	[eCharacterClassRole.BUILDER] = $"rui/menu/character_select/utility/util_role_builder",
+	//
 }
 
 global struct CharacterMenuLightData
@@ -65,11 +70,11 @@ global struct CharacterHudUltimateColorData
 	vector ultimateColorHighlight
 }
 
-///////////////////////
-///////////////////////
-//// Private Types ////
-///////////////////////
-///////////////////////
+//
+//
+//
+//
+//
 struct FileStruct_LifetimeLevel
 {
 	LoadoutEntry& characterSelectionSlot
@@ -79,20 +84,20 @@ struct FileStruct_LifetimeLevel
 FileStruct_LifetimeLevel& fileLevel
 
 
-/////////////////////////
-/////////////////////////
-//// Initialiszation ////
-/////////////////////////
-/////////////////////////
-#if SERVER || CLIENT || UI
+//
+//
+//
+//
+//
+#if CLIENT || UI 
 void function ShCharacters_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileGame
 	fileLevel = newFileGame
 
-	#if SERVER && DEV
-		AddCallback_GeneratePDef( GenerateCharactersPDef )
-	#endif
+	#if(false)
+
+#endif
 
 	AddCallback_RegisterRootItemFlavors( OnRegisterRootItemFlavors )
 	AddCallback_OnItemFlavorRegistered( eItemType.character, OnItemFlavorRegistered_Character )
@@ -100,7 +105,7 @@ void function ShCharacters_LevelInit()
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 void function OnRegisterRootItemFlavors()
 {
 	LoadoutEntry entry = RegisterLoadoutSlot( eLoadoutEntryType.ITEM_FLAVOR, "character_selection" )
@@ -111,18 +116,22 @@ void function OnRegisterRootItemFlavors()
 		return CharacterClass_IsAvailable( playerEHI, flavor )
 	}
 	entry.isSlotLocked = bool function( EHI playerEHI ) {
-		#if SERVER
-			return SURVIVAL_IsCharacterClassLocked( FromEHI( playerEHI ) )
-		#elseif CLIENT || UI
-			return true // todo(dw): fix this
+		#if(false)
+
+#elseif CLIENT || UI 
+			return true //
 		#endif
 	}
 	fileLevel.characterSelectionSlot = entry
 
 	array<ItemFlavor> characterList = []
-	foreach( var block in IterateSettingsAssetArray( $"settings/itemflavlist/gamemode_survival/all_characters.rpak", "list" ) )
+	//
+	foreach( asset characterAsset in WORKAROUND_GetAllCharacterFlavorAssets() )
 	{
-		ItemFlavor ornull characterOrNull = RegisterItemFlavorFromSettingsAsset( GetSettingsBlockAsset( block, "flavor" ) )
+		if ( characterAsset == $"" )
+			continue
+
+		ItemFlavor ornull characterOrNull = RegisterItemFlavorFromSettingsAsset( characterAsset )
 		if ( characterOrNull == null )
 			continue
 		characterList.append( expect ItemFlavor(characterOrNull) )
@@ -133,7 +142,7 @@ void function OnRegisterRootItemFlavors()
 	entry.validItemFlavorList = characterList
 	entry.defaultItemFlavor = characterList.getrandom()
 
-	#if CLIENT
+	#if(CLIENT)
 		if ( IsLobby() )
 		{
 			AddCallback_ItemFlavorLoadoutSlotDidChange_AnyPlayer( entry, void function( EHI playerEHI, ItemFlavor character ) {
@@ -145,35 +154,39 @@ void function OnRegisterRootItemFlavors()
 #endif
 
 
-#if SERVER || CLIENT || UI
+#if CLIENT || UI 
 void function OnItemFlavorRegistered_Character( ItemFlavor character )
 {
-	#if SERVER || CLIENT
+	#if(CLIENT)
 		PrecacheModel( GetGlobalSettingsAsset( CharacterClass_GetSetFile( character ), "bodyModel" ) )
 		PrecacheModel( GetGlobalSettingsAsset( CharacterClass_GetSetFile( character ), "armsModel" ) )
 	#endif
+
+	#if(false)
+//
+#endif
 }
 #endif
 
 
-#if SERVER && DEV
-void function GenerateCharactersPDef()
-{
-	// this persistent data enum is required by sh_xp.gnut
-	array<string> allCharacterRefs = []
-	foreach( ItemFlavor character in GetAllCharacters() )
-		allCharacterRefs.append( ItemFlavor_GetGUIDString( character ) )
-	DEV_PDefGen_AddEnum( "eCharacterFlavor", allCharacterRefs, "All the character item flavors from Bakery that are registered in the game." )
-}
+#if(false)
+
+
+//
+
+
+
+
+
 #endif
 
 
 
-//////////////////////////
-//////////////////////////
-//// Global functions ////
-//////////////////////////
-//////////////////////////
+//
+//
+//
+//
+//
 LoadoutEntry function Loadout_CharacterClass()
 {
 	return fileLevel.characterSelectionSlot
@@ -240,6 +253,14 @@ int function CharacterClass_GetMenuBackgroundSkinIndex( ItemFlavor flavor )
 }
 
 
+int function CharacterClass_GetMenuButtonIndex( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.character )
+
+	return GetGlobalSettingsInt( ItemFlavor_GetAsset( flavor ), "characterMenuButtonIndex" )
+}
+
+
 CharacterMenuLightData function CharacterClass_GetMenuLightData( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.character )
@@ -260,6 +281,16 @@ CharacterHudUltimateColorData function CharacterClass_GetHudUltimateColorData( I
 	data.ultimateColor = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "hudUltimateColor" )
 	data.ultimateColorHighlight = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "hudUltimateColorHighlight" )
 	return data
+}
+
+table< float, vector > function CharacterClass_GetChromaGradient( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.character )
+
+	return {
+		[0.1] = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "chromaColor0" ),
+		[0.9] = GetGlobalSettingsVector( ItemFlavor_GetAsset( flavor ), "chromaColor1" ),
+	}
 }
 
 
@@ -349,24 +380,71 @@ bool function CharacterClass_IsAvailable( EHI playerEHI, ItemFlavor desiredChara
 }
 
 
-#if SERVER
-array<string> function GetStringArrayAvailableClassesForPlayer( entity player )
-{
-	array<string> classes
-	foreach( ItemFlavor itemFlav in GetAllCharacters() )
-	{
-		if ( IsItemFlavorUnlockedForLoadoutSlot( ToEHI( player ), Loadout_CharacterClass(), itemFlav ) )
-			classes.append( ItemFlavor_GetHumanReadableRef( itemFlav ) )
-	}
-	return classes
-}
+#if(false)
+
+
+
+
+
+
+
+
+
+
 #endif
 
+#if CLIENT || UI 
+table<int,ItemFlavor> function GetCharacterButtonMapping( array<ItemFlavor> allCharacters, int totalButtons )
+{
+	table<int,ItemFlavor> mappingTable
+	array<int> freeButtonMappings
+	for ( int i = 0 ; i < totalButtons ; i++ )
+		freeButtonMappings.append( i )
 
-///////////////////
-///////////////////
-//// Internals ////
-///////////////////
-///////////////////
+	//
+	for ( int i = 0 ; i < allCharacters.len() ; i++ )
+	{
+		ItemFlavor itemFlav = allCharacters[i]
+		int index = CharacterClass_GetMenuButtonIndex( itemFlav )
+		Assert( index >= -1 && index < totalButtons, "Invalid characterMenuButtonIndex value for character " + ItemFlavor_GetHumanReadableRef( itemFlav ) )
+
+		if ( index < 0 )
+			continue
+
+		Assert( !( index in mappingTable ), "Character " + ItemFlavor_GetHumanReadableRef( itemFlav ) + " characterMenuButtonIndex " + index + " is already used. It must be unique" )
+
+		//
+		mappingTable[ index ] <- itemFlav
+		freeButtonMappings.removebyvalue( index )
+	}
+
+	//
+	for ( int i = 0 ; i < allCharacters.len() ; i++ )
+	{
+		ItemFlavor itemFlav = allCharacters[i]
+		int index = CharacterClass_GetMenuButtonIndex( itemFlav )
+
+		if ( index != -1 )
+			continue
+
+		index = freeButtonMappings[0]
+		Assert( !( index in mappingTable ) )
+
+		//
+		mappingTable[ index ] <- itemFlav
+		freeButtonMappings.removebyvalue( index )
+	}
+
+	Assert( mappingTable.len() == allCharacters.len() )
+	return mappingTable
+
+}
+#endif //
+
+//
+//
+//
+//
+//
 
 

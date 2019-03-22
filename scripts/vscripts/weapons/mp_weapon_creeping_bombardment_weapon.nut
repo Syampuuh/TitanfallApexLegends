@@ -16,12 +16,12 @@ global const CREEPING_BOMBARDMENT_TARGETNAME = "creeping_bombardment_projectile"
 
 void function MpWeaponGrenadeCreepingBombardmentWeapon_Init()
 {
-	#if SERVER
-		PrecacheImpactEffectTable( CREEPING_BOMBARDMENT_WEAPON_BOMB_IMPACT_TABLE )
-	#endif //SERVER
-	#if CLIENT
+	#if(false)
+
+#endif //
+	#if(CLIENT)
 		AddTargetNameCreateCallback( CREEPING_BOMBARDMENT_TARGETNAME, AddThreatIndicator )
-	#endif //CLIENT
+	#endif //
 
 	PrecacheParticleSystem( CREEPING_BOMBARDMENT_WEAPON_SMOKESCREEN_FX )
 	PrecacheParticleSystem( CREEPING_BOMBARDMENT_SMOKE_FX )
@@ -47,63 +47,65 @@ void function OnProjectileCollision_WeaponCreepingBombardmentWeapon( entity proj
 	if ( !LegalOrigin( pos ) )
 		return
 
-	#if SERVER
-		//JFS HACK!!!: We need this to hit loot tanks ( needs to be cleaned up to support other moving geo ).
-		array<string> lootTankParts = [
-			"_hover_tank_interior"
-			"_hover_tank_mover"
-		]
+	#if(false)
+//
 
-		bool isLootTank = lootTankParts.contains( hitEnt.GetScriptName() )
 
-		if ( IsValid( hitEnt ) && ( hitEnt.IsWorld() || isLootTank ) )
-		{
-			thread CreepingBombardmentWeapon_Detonation( pos, -projectile.GetAngles(), normal, hitEnt, player, projectile )
-		}
-	#endif
+
+
+
+
+
+
+
+
+
+#endif
 }
 
-#if SERVER
-void function CreepingBombardmentWeapon_Detonation( vector origin, vector angles, vector normal, entity hitEnt, entity owner, entity projectile )
-{
-	owner.EndSignal( "OnDestroy" )
+#if(false)
 
-	entity bombModel = CreatePropDynamic( CREEPING_BOMBARDMENT_WEAPON_BOMB_MODEL, origin, angles, 0, 4096 )
-	entity smokeFX = StartParticleEffectOnEntityWithPos_ReturnEntity( bombModel, GetParticleSystemIndex( CREEPING_BOMBARDMENT_SMOKE_FX ), FX_PATTACH_POINT_FOLLOW_NOROTATE, bombModel.LookupAttachment( "exhaust" ), <0,0,0>, <0,0,0> )
 
-	bombModel.RemoveFromAllRealms()
-	bombModel.AddToOtherEntitysRealms( projectile )
 
-	bombModel.SetForwardVector( -normal )
-	bombModel.SetParent( hitEnt, "", true )
-	SetTargetName( bombModel, CREEPING_BOMBARDMENT_TARGETNAME )
 
-	OnThreadEnd(
-		function() : ( bombModel, smokeFX )
-		{
-			if ( IsValid( bombModel ) )
-				bombModel.Destroy()
 
-			if ( IsValid( smokeFX ) )
-				EffectStop( smokeFX )
-		}
-	)
 
-	wait CREEPING_BOMBARDMENT_WEAPON_DETONATION_DELAY
 
-	Explosion_DamageDefSimple( damagedef_creeping_bombardment_detcord_explosion, bombModel.GetOrigin(), owner, owner, bombModel.GetOrigin() )
-	entity shake = CreateShake( origin, 5, 150, 1, 1028 )
-	shake.RemoveFromAllRealms()
-	shake.AddToOtherEntitysRealms( bombModel )
-	shake.kv.spawnflags = 4 // SF_SHAKE_INAIR
-}
-#endif //SERVER
 
-#if CLIENT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+#endif //
+
+#if(CLIENT)
 void function AddThreatIndicator( entity bomb )
 {
-	// is there a non dev way to get the radius of the damageDef
+	//
 	entity player = GetLocalViewPlayer()
 	ShowGrenadeArrow( player, bomb, 350, 0.0 )
 }
-#endif //CLIENT
+#endif //
