@@ -27,14 +27,14 @@
 	SectionButton0
 	{
 		ControlName			RuiButton
-		xpos			    165 // 24
-		ypos			    121
+		xpos			    123
+		ypos			    96
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 	}
 
@@ -42,13 +42,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    4
+		ypos			    3
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton0
@@ -60,13 +60,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    32
+		ypos			    45
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton1
@@ -78,13 +78,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    4
+		ypos			    3
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton2
@@ -96,13 +96,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    4
+		ypos			    3
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton3
@@ -114,13 +114,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    32
+		ypos			    45
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton4
@@ -132,13 +132,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    4
+		ypos			    3
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton5
@@ -150,13 +150,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		ypos			    4
+		ypos			    3
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton6
@@ -169,44 +169,48 @@
     CardFramesPanel
     {
         ControlName				CNestedPanel
-        xpos					435
-        ypos					121
+        xpos					491
+        ypos					96
         wide					1408
         tall					840
         visible					1
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/card_frames.res"
     }
 
     CardPosesPanel
     {
         ControlName				CNestedPanel
-        xpos					435
-        ypos					121
+        xpos					491
+        ypos					96
         wide					1408
         tall					840
         visible					1
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/card_poses.res"
     }
 
     CardBadgesPanel
     {
         ControlName				CNestedPanel
-        xpos					435
-        ypos					121
+        xpos					491
+        ypos					96
         wide					1408
         tall					840
         visible					1
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/card_badges.res"
     }
 
     CardTrackersPanel
     {
         ControlName				CNestedPanel
-        xpos					435
-        ypos					121
+        xpos					491
+        ypos					96
         wide					1408
         tall					840
         visible					1
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/card_trackers.res"
     }
 
@@ -229,8 +233,8 @@
     CombinedCard
     {
         ControlName				RuiPanel
-        xpos                    -888 //-910
-        ypos                    -36 //-38
+        xpos                    -930
+        ypos                    -16
         wide					850 //800
         tall					850 //800
         rui                     "ui/combined_card.rpak"

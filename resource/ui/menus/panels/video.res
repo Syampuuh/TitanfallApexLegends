@@ -24,10 +24,9 @@
         xpos                    16
         ypos                    0
         tall                    50
-        wide                    800
+        wide                    900
         wrap					1
         visible                 1
-        labelText				"#TEXTURE_STREAM_BUDGET_EXCEEDED_WARNING"
         textAlignment			"west"
         fgcolor_override		"255 45 45 255"
     }
@@ -70,11 +69,11 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchAspectRatio
-        navDown					SldBrightness
+        navDown					SldFOV
         // list is populated by code
         childGroupAlways        MultiChoiceButtonAlways
     }
-    SldBrightness // On PC // This option is not currently stored or applied by code
+    SldBrightness
     {
         ControlName				SliderControl
         InheritProperties		SliderControl
@@ -89,19 +88,19 @@
         stepSize				0.05
         inverseFill				0
         showLabel               3
-        visible                 0
+        visible                 1
     }
     SldFOV
     {
         ControlName				SliderControl
         InheritProperties		SliderControl
         classname 				"AdvancedVideoButtonClass"
-//        pin_to_sibling			SldBrightness
-        pin_to_sibling          SwchResolution
+
+        pin_to_sibling          SldBrightness
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SldBrightness
-        navDown					SwchColorBlindMode
+        navDown					SwchSprintCameraSmoothing
         minValue				1.0
         maxValue				1.55
         stepSize				0.0275
@@ -130,6 +129,7 @@
         navDown					SwchSprintCameraSmoothing
         // list is populated by code
         childGroupAlways        MultiChoiceButtonAlways
+        visible                 0
     }
 
     SwchSprintCameraSmoothing
@@ -138,16 +138,15 @@
         InheritProperties		SwitchButton
         //classname				"AdvancedVideoButtonClass"
         style					DialogListButton
-        pin_to_sibling			SwchColorBlindMode
+        pin_to_sibling			SldFOV
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchColorBlindMode
+        navUp					SldFOV
         navDown					SwchVSync
         // list is populated by code
         childGroupAlways        ChoiceButtonAlways
-        visible                 0
+        visible                 1
     }
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ImgAdvVideoSubheaderBackground
@@ -157,6 +156,7 @@
         xpos					0
         ypos					6
         pin_to_sibling			SwchColorBlindMode
+        //pin_to_sibling			SldFOV
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
     }
@@ -404,7 +404,7 @@
 	PanelBottom
 	{
 		ControlName				Label
-		labeText                ""
+		labelText               ""
 
 		zpos                    0
 		wide					1

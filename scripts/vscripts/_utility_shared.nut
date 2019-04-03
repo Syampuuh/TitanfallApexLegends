@@ -174,8 +174,8 @@ void function InitWeaponScripts()
 
 #endif
 	MpWeaponPhaseTunnel_Init()
+	MpWeaponTeslaTrap_Init()
 	#if(false)
-
 
 #endif
 	#if(false)

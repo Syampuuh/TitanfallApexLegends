@@ -1016,7 +1016,7 @@ void function UICallback_PingEquipmentItem( var button )
 	EmitSoundOnEntity( player, PING_SOUND_DEFAULT )
 	RunUIScript( "SurvivalQuickInventory_MarkInventoryButtonPinged", button )
 
-	player.ClientCommand( "ClientCommand_Quickchat " + commsAction + " " + equipSlot )
+	player.ClientCommand( "ClientCommand_Quickchat " + commsAction + " 0 " + equipSlot )
 }
 
 int function GetCommsActionForEquipmentSlot( string equipSlot )
@@ -1256,6 +1256,9 @@ void function UICallback_GroundItemAction( var button, int position, bool fromEx
 	if ( IsLobby() )
 		return
 
+	if ( position >= file.filteredGroundItems.len() )
+		return
+
 	GroundLootData groundLootData = file.filteredGroundItems[position]
 
 	if ( groundLootData.guids.len() == 0 )
@@ -1288,6 +1291,9 @@ void function UICallback_GroundItemAction( var button, int position, bool fromEx
 void function UICallback_GroundItemAltAction( var button, int position )
 {
 	if ( IsLobby() )
+		return
+
+	if ( position >= file.filteredGroundItems.len() )
 		return
 
 	entity player = GetLocalClientPlayer()
@@ -1323,6 +1329,9 @@ void function UICallback_PingGroundListItem( var button, int position )
 	entity player = GetLocalClientPlayer()
 
 	if ( IsLobby() )
+		return
+
+	if ( position >= file.filteredGroundItems.len() )
 		return
 
 	GroundLootData groundLootData = file.filteredGroundItems[position]
@@ -1596,6 +1605,9 @@ void function GroundItemsDiff( entity player, array<entity> loot )
 		int currentCount = 0
 		foreach ( item in loot )
 		{
+			if ( item.GetNetworkedClassName() != "prop_survival" )
+				continue
+
 			if ( gd.lootData.index == item.GetSurvivalInt() )
 			{
 				currentCount += item.GetClipCount()
@@ -1612,6 +1624,9 @@ void function GroundItemsDiff( entity player, array<entity> loot )
 
 	foreach ( item in loot )
 	{
+		if ( item.GetNetworkedClassName() != "prop_survival" )
+			continue
+
 		if ( !indecesInList.contains( item.GetSurvivalInt() ) )
 		{
 			LootData data = SURVIVAL_Loot_GetLootDataByIndex( item.GetSurvivalInt() )
@@ -1648,6 +1663,10 @@ void function GroundItemsInit( entity player, array<entity> loot )
 	for ( int groundIndex = 0; groundIndex < loot.len(); groundIndex++ )
 	{
 		entity item   = loot[groundIndex]
+
+		if ( item.GetNetworkedClassName() != "prop_survival" )
+			continue
+
 		LootData data = SURVIVAL_Loot_GetLootDataByIndex( item.GetSurvivalInt() )
 
 		GroundLootData gd

@@ -29,6 +29,7 @@ global struct MenuCharacterDef
 
 global struct MenuModelData
 {
+	entity	 poseEnt
 	entity   model
 	entity   mover
 	vector   baseOrigin
@@ -85,8 +86,26 @@ struct PresentationDef
 	float csmTexelScale2 = 1.0
 	float csmStartDistance = 0.0
 
+	array<entity> lights
+
 	void functionref() startFunc
 	void functionref() endFunc
+}
+
+struct LightDef
+{
+	vector origin = <0, 0, 0>
+	vector angles = <0, 0, 0>
+	vector color = <1, 1, 1>
+	float  brightness = 2.0
+	float  distance = 300.0
+	float  innerCone = 10.0
+	float  outerCone = 30.0
+	float  halfBrightFrac = 0.75
+	float  specularIntensity = 1.0
+	float  emitterRadius = 0
+	bool   castShadows = true
+	bool   pbrFalloff = true
 }
 #endif //
 
@@ -129,6 +148,8 @@ struct
 		int                                      desiredPresentationType = ePresentationType.INACTIVE
 		bool                                     presentationTypeInitialized = false
 		PresentationDef[ePresentationType.COUNT] presentationData
+
+		table< string, array<LightDef> >  lightingConfigs
 
 		table signalDummy
 
@@ -224,18 +245,10 @@ void function ClMenuModels_Init()
 	RegisterSignal( "UpdateMenuCharacterModelInternal" )
 	RegisterSignal( "TrackPartyMembersAndDisplayModelsThread" )
 	RegisterSignal( "StopDisplayPartyMemberModelThread" )
+	RegisterSignal( "ApplyLightingConfig" )
 
-	InitPresentationData()
-
-	//
 	AddCallback_OnClientScriptInit( OnClientScriptInit )
 	AddCallback_FullUpdate( OnFullUpdate )
-}
-
-void function EntitiesDidLoad()
-{
-	thread InitMenuEntities()
-	thread ModelRotationThread()
 }
 
 void function OnClientScriptInit( entity player )
@@ -445,22 +458,22 @@ void function InitPresentationData()
 {
 	//
 
-	SetPresentationData( ePresentationType.INACTIVE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0 )
-	SetPresentationData( ePresentationType.PLAY, file.playCharacter, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_PLAY, EndPresentation_PLAY )
-	SetPresentationData( ePresentationType.CHARACTER_SELECT, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_CHARACTER_SELECT )
-	SetPresentationData( ePresentationType.CHARACTER_SKIN, file.customizeCharacter, false, 360, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_CHARACTER_SKIN, EndPresentation_CHARACTER_SKIN )
-	SetPresentationData( ePresentationType.CHARACTER_CARD, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_CHARACTER_CARD )
-	SetPresentationData( ePresentationType.CHARACTER_QUIPS, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_CHARACTER_SELECT )
-	SetPresentationData( ePresentationType.WEAPON_CATEGORY, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0 )
-	SetPresentationData( ePresentationType.WEAPON_SKIN, file.customizeWeapon, false, 80, 80, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, StartPresentation_WEAPON_SKIN, EndPresentation_WEAPON_SKIN )
+	SetPresentationData( ePresentationType.INACTIVE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [] )
+	SetPresentationData( ePresentationType.PLAY, file.playCharacter, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_PLAY, EndPresentation_PLAY )
+	SetPresentationData( ePresentationType.CHARACTER_SELECT, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, GetEntArrayByScriptName( "close_character_light" ), StartPresentation_CHARACTER_SELECT )
+	SetPresentationData( ePresentationType.CHARACTER_SKIN, file.customizeCharacter, false, 360, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_CHARACTER_SKIN, EndPresentation_CHARACTER_SKIN )
+	SetPresentationData( ePresentationType.CHARACTER_CARD, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_CHARACTER_CARD )
+	SetPresentationData( ePresentationType.CHARACTER_QUIPS, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, GetEntArrayByScriptName( "close_character_light" ), StartPresentation_CHARACTER_QUIPS )
+	SetPresentationData( ePresentationType.WEAPON_CATEGORY, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [] )
+	SetPresentationData( ePresentationType.WEAPON_SKIN, file.customizeWeapon, false, 80, 80, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [], StartPresentation_WEAPON_SKIN, EndPresentation_WEAPON_SKIN )
 	//
-	SetPresentationData( ePresentationType.STORE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, 2300.0, 3000.0, 1.0, 1.0, 0.0, StartPresentation_TEMP )
-	SetPresentationData( ePresentationType.NO_MODELS, null, false, 0, 0, 15, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, StartPresentation_TEMP )
-	SetPresentationData( ePresentationType.BATTLE_PASS, null, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, StartPresentation_BATTLE_PASS, EndPresentation_BATTLE_PASS )
+	SetPresentationData( ePresentationType.STORE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, 2300.0, 3000.0, 1.0, 1.0, 0.0, [], StartPresentation_TEMP )
+	SetPresentationData( ePresentationType.NO_MODELS, null, false, 0, 0, 15, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [], StartPresentation_TEMP )
+	SetPresentationData( ePresentationType.BATTLE_PASS, null, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_BATTLE_PASS, EndPresentation_BATTLE_PASS )
 }
 
 //
-void function SetPresentationData( int presentationType, MenuModelData ornull modelData, bool useCharacterOffsets, float maxYawDegrees, float maxPitchDegrees, float fov, float dofNearStart, float dofNearEnd, float dofFarStart, float dofFarEnd, float csmTexelScale1, float csmTexelScale2, float csmStartDistance, void functionref() startFunc = null, void functionref() endFunc = null )
+void function SetPresentationData( int presentationType, MenuModelData ornull modelData, bool useCharacterOffsets, float maxYawDegrees, float maxPitchDegrees, float fov, float dofNearStart, float dofNearEnd, float dofFarStart, float dofFarEnd, float csmTexelScale1, float csmTexelScale2, float csmStartDistance, array<entity> lights, void functionref() startFunc = null, void functionref() endFunc = null )
 {
 	file.presentationData[ presentationType ].modelData = modelData
 	file.presentationData[ presentationType ].useCharacterOffsets = useCharacterOffsets
@@ -474,6 +487,7 @@ void function SetPresentationData( int presentationType, MenuModelData ornull mo
 	file.presentationData[ presentationType ].csmTexelScale1 = csmTexelScale1
 	file.presentationData[ presentationType ].csmTexelScale2 = csmTexelScale2
 	file.presentationData[ presentationType ].csmStartDistance = csmStartDistance
+	file.presentationData[ presentationType ].lights = lights
 	file.presentationData[ presentationType ].startFunc = startFunc
 	file.presentationData[ presentationType ].endFunc = endFunc
 }
@@ -496,9 +510,10 @@ void function EndPresentation_PLAY()
 
 void function StartPresentation_CHARACTER_SELECT()
 {
-	ModelData_GetMover( file.customizeCharacter ).SetOrigin( GetEntByScriptName( "customize_character_ref" ).GetOrigin() )
+	ModelData_SetPoseEntity( file.customizeCharacter, GetEntByScriptName( "customize_character_ref" ) ) //
 	ModelData_SetAnim( file.customizeCharacter, "ACT_MP_MENU_LOBBY_SELECT_IDLE" )
 	UpdateMenuCharacterModel( GetLocalClientPlayer(), -1 )
+	ApplyLightingConfig( "character_close" )
 }
 
 void function StartPresentation_CHARACTER_SKIN()
@@ -525,6 +540,14 @@ void function StartPresentation_CHARACTER_CARD()
 {
 	ModelData_GetMover( file.customizeCharacter ).SetOrigin( GetEntByScriptName( "customize_character_skin_ref" ).GetOrigin() + <0, 0, -500> )
 	UpdateMenuCharacterModel( GetLocalClientPlayer(), -1 )
+}
+
+void function StartPresentation_CHARACTER_QUIPS()
+{
+	ModelData_SetPoseEntity( file.customizeCharacter, GetEntByScriptName( "customize_character_quips_ref" ) ) //
+	ModelData_SetAnim( file.customizeCharacter, "ACT_MP_MENU_LOBBY_SELECT_IDLE" )
+	UpdateMenuCharacterModel( GetLocalClientPlayer(), -1 )
+	ApplyLightingConfig( "character_quip" )
 }
 
 void function StartPresentation_WEAPON_SKIN()
@@ -559,6 +582,8 @@ void function InitMenuEntities()
 	#endif
 
 	Assert( MenuMapEntitiesExist() )
+
+	InitPresentationData()
 
 	for ( int teammateRefEntIndex = 0; true; teammateRefEntIndex++ )
 	{
@@ -630,6 +655,7 @@ void function InitMenuEntities()
 	//
 
 	InitBattlePassLights()
+	InitLightingConfigs()
 
 	file.initializedMenuModels = true
 }
@@ -691,12 +717,12 @@ void function UpdateMenuCharacterModelInternal( int overrideCharacterFlavorNetwo
 
 	if ( file.presentationData[ file.currentPresentationType ].useCharacterOffsets && file.presentationData[ file.currentPresentationType ].modelData != null )
 	{
-		vector base   = GetEntByScriptName( "customize_character_ref" ).GetOrigin()
+		entity refEnt = ModelData_GetPoseEntity( expect MenuModelData( file.presentationData[ file.currentPresentationType ].modelData ) )
+		vector base   = refEnt.GetOrigin()
 		vector offset = CharacterClass_GetGalleryModelOffset( character )
 
 		ModelData_GetMover( expect MenuModelData( file.presentationData[ file.currentPresentationType ].modelData ) ).SetOrigin( base + offset )
 	}
-
 
 	bool doTransitionFX = (file.currentPresentationType == ePresentationType.CHARACTER_SKIN)
 	UpdateCharacterModelDisplay( file.playCharacter, doTransitionFX )
@@ -1290,6 +1316,16 @@ void function ModelData_SetMover( MenuModelData modelData, entity mover )
 	modelData.mover = mover
 }
 
+entity function ModelData_GetPoseEntity( MenuModelData modelData )
+{
+	return modelData.poseEnt
+}
+
+void function ModelData_SetPoseEntity( MenuModelData modelData, entity poseEnt )
+{
+	modelData.poseEnt = poseEnt
+}
+
 vector function ModelData_GetBaseOrigin( MenuModelData modelData )
 {
 	return modelData.baseOrigin
@@ -1878,6 +1914,7 @@ void function MenuModelHighlightBloom( entity model, vector color = HIGHLIGHT_CO
 	model.Highlight_SetLifeTime( lifeTime )
 }
 
+
 void function MenuModelHighlightInMatch( entity model )
 {
 	model.Highlight_ResetFlags()
@@ -1892,4 +1929,198 @@ void function MenuModelHighlightInMatch( entity model )
 	model.Highlight_SetFadeOutTime( 0.0 )
 	model.Highlight_StartOn()
 }
-#endif
+
+
+void function InitLightingConfigs()
+{
+	//
+
+	array<LightDef> closeCharacterLightDefs
+	{
+		LightDef data
+		data.origin = <2853.5, -106.444, 213.794>
+		data.angles = <22.5474, 36.1485, -44.3234>
+		data.color = <1.00, 0.99, 0.98>
+		data.brightness = 8.0
+		data.distance = 400.0
+		data.innerCone = 5.0
+		data.outerCone = 12.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 2.0
+		data.emitterRadius = 150.0
+		data.castShadows = true
+		data.pbrFalloff = true
+		closeCharacterLightDefs.append( data )
+	}
+	{
+		LightDef data
+		data.origin = <3230.5, -58.444, -27.2057>
+		data.angles = <-10.9434, 134.9473, 25.1153>
+		data.color = <0.91, 0.96, 1.00>
+		data.brightness = 0.3
+		data.distance = 300.0
+		data.innerCone = 10.0
+		data.outerCone = 40.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 2.0
+		data.emitterRadius = 20.0
+		data.castShadows = true
+		data.pbrFalloff = true
+		closeCharacterLightDefs.append( data )
+	}
+	{
+		LightDef data
+		data.origin = <3051.5, 109.556, 36.794>
+		data.angles = <-6.39107, -50.033, 142.943>
+		data.color = <0.49, 0.81, 1.00>
+		data.brightness = 2.0
+		data.distance = 600.0
+		data.innerCone = 30.0
+		data.outerCone = 30.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 1.0
+		data.emitterRadius = 0
+		data.castShadows = true
+		data.pbrFalloff = false
+		closeCharacterLightDefs.append( data )
+	}
+	{
+		LightDef data
+		data.origin = <3160.64, 111.607, 20.2458>
+		data.angles = <-6.39107, 217.06, 142.943>
+		data.color = <0.49, 0.81, 1.00>
+		data.brightness = 2.0
+		data.distance = 600.0
+		data.innerCone = 30.0
+		data.outerCone = 30.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 1.0
+		data.emitterRadius = 0
+		data.castShadows = true
+		data.pbrFalloff = false
+		closeCharacterLightDefs.append( data )
+	}
+	CreateLightingConfig( "character_close", closeCharacterLightDefs )
+
+	array<LightDef> quipCharacterLightDefs
+	{
+		LightDef data
+		data.origin = <2861.88, -89.444, 213.794>
+		data.angles = <22.5474, 36.1485, -44.3234>
+		data.color = <1.00, 0.99, 0.98>
+		data.brightness = 8.0
+		data.distance = 400.0
+		data.innerCone = 5.0
+		data.outerCone = 12.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 2.0
+		data.emitterRadius = 150.0
+		data.castShadows = true
+		data.pbrFalloff = true
+		quipCharacterLightDefs.append( data )
+	}
+	{
+		LightDef data
+		data.origin = <3238.88, -41.444, -27.2057>
+		data.angles = <-10.9434, 134.9473, 25.1153>
+		data.color = <0.91, 0.96, 1.00>
+		data.brightness = 0.3
+		data.distance = 300.0
+		data.innerCone = 10.0
+		data.outerCone = 40.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 2.0
+		data.emitterRadius = 20.0
+		data.castShadows = true
+		data.pbrFalloff = true
+		quipCharacterLightDefs.append( data )
+	}
+	{
+		LightDef data
+		data.origin = <3059.88, 126.556, 36.794>
+		data.angles = <-6.39107, -50.033, 142.943>
+		data.color = <0.49, 0.81, 1.00>
+		data.brightness = 2.0
+		data.distance = 600.0
+		data.innerCone = 30.0
+		data.outerCone = 30.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 1.0
+		data.emitterRadius = 0
+		data.castShadows = true
+		data.pbrFalloff = false
+		quipCharacterLightDefs.append( data )
+	}
+	{
+		LightDef data
+		data.origin = <3169.01, 128.607, 20.2458>
+		data.angles = <-6.39107, 217.06, 142.943>
+		data.color = <0.49, 0.81, 1.00>
+		data.brightness = 2.0
+		data.distance = 600.0
+		data.innerCone = 30.0
+		data.outerCone = 30.0
+		data.halfBrightFrac = 0.7
+		data.specularIntensity = 1.0
+		data.emitterRadius = 0
+		data.castShadows = true
+		data.pbrFalloff = false
+		quipCharacterLightDefs.append( data )
+	}
+	CreateLightingConfig( "character_quip", quipCharacterLightDefs )
+}
+
+
+void function CreateLightingConfig( string name, array<LightDef> lightDefs )
+{
+	file.lightingConfigs[ name ] <- lightDefs
+}
+
+
+void function ApplyLightingConfig( string name )
+{
+	thread ApplyLightingConfigThread( name )
+}
+
+void function ApplyLightingConfigThread( string name )
+{
+	Signal( file.signalDummy, "ApplyLightingConfig" )
+	EndSignal( file.signalDummy, "ApplyLightingConfig" )
+
+	while ( !file.initializedMenuModels ) //
+		WaitFrame()
+
+	foreach ( index, light in file.presentationData[ file.currentPresentationType ].lights )
+	{
+		//
+
+		LightDef lightDef = file.lightingConfigs[name][index]
+		#if(DEV)
+			//
+		#endif //
+
+		light.SetTweakLightOrigin( lightDef.origin )
+		light.SetTweakLightAngles( lightDef.angles )
+		light.SetTweakLightColor( lightDef.color )
+		light.SetTweakLightBrightness( lightDef.brightness )
+		light.SetTweakLightDistance( lightDef.distance )
+		light.SetTweakLightInnerCone( lightDef.innerCone )
+		light.SetTweakLightCone( lightDef.outerCone )
+		light.SetTweakLightHalfBrightFrac( lightDef.halfBrightFrac )
+		light.SetTweakLightSpecIntensity( lightDef.specularIntensity )
+		light.SetLightEmitRadius( lightDef.emitterRadius )
+		light.SetTweakLightRealtimeShadows( lightDef.castShadows )
+		light.SetTweakLightPBRFalloff( lightDef.pbrFalloff )
+		light.SetTweakLightUpdateShadowsEveryFrame( true )
+	}
+}
+
+#if(DEV)
+void function DrawLightDebug( vector origin, vector angles, vector color, float dist )
+{
+	vector endOrigin = origin + AnglesToForward( angles ) * dist
+
+	DebugDrawArrow( origin, endOrigin, 4, int(color.x * 255), int(color.y * 255), int(color.z * 255), true, 999999 )
+}
+#endif //
+#endif //

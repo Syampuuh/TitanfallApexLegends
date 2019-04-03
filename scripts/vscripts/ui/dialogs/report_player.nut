@@ -5,6 +5,8 @@ global function ClientToUI_ShowReportPlayerDialog
 struct {
 	var menu
 	var reportReasonButton
+	var reportCheatButton
+	var reportOtherButton
 
 	var reportReasonMenu
 
@@ -31,6 +33,12 @@ void function InitReportPlayerDialog()
 	file.reportReasonButton = Hud_GetChild( menu, "ReportReasonButton" )
 	Hud_AddEventHandler( file.reportReasonButton, UIE_CLICK, ReportReasonButton_OnActivate )
 
+	file.reportCheatButton = Hud_GetChild( menu, "ReportCheatButton" )
+	Hud_AddEventHandler( file.reportCheatButton, UIE_CLICK, ReportCheatButton_OnActivate )
+
+	file.reportOtherButton = Hud_GetChild( menu, "ReportOtherButton" )
+	Hud_AddEventHandler( file.reportOtherButton, UIE_CLICK, ReportOtherButton_OnActivate )
+
 	var panel = Hud_GetChild( file.menu, "FooterButtons" )
 
 	//
@@ -47,6 +55,9 @@ void function InitReportPlayerDialog()
 
 void function ClientToUI_ShowReportPlayerDialog( string playerName, string playerHardware, string playerUID, string friendlyOrEnemy )
 {
+	if ( IsDialog( GetActiveMenu() ) )
+		return
+
 	file.friendlyOrEnemy = friendlyOrEnemy
 	file.reportPlayerName = playerName
 	file.reportPlayerHardware = playerHardware
@@ -70,7 +81,9 @@ void function ReportPlayerDialog_OnOpen()
 	RuiSetString( contentRui, "headerText", "#REPORT_PLAYER" )
 	RuiSetString( contentRui, "messageText", file.reportPlayerName )
 
-	Hud_SetVisible( file.reportReasonButton, GetReportReasons( file.friendlyOrEnemy ).len() > 0 )
+	Hud_SetVisible( file.reportReasonButton, false )
+	Hud_SetVisible( file.reportCheatButton, true )
+	Hud_SetVisible( file.reportOtherButton, true )
 
 	HudElem_SetRuiArg( file.reportReasonButton, "buttonText", Localize( "#SELECT_REPORT_REASON" ) )
 	file.selectedReportReason = ""
@@ -107,6 +120,32 @@ void function ReportReasonButton_OnActivate( var button )
 {
 	AdvanceMenu( GetMenu( "ReportPlayerReasonPopup" ) )
 	Hud_SetSelected( file.reportReasonButton, true )
+}
+
+void function ReportCheatButton_OnActivate( var button )
+{
+	Hud_SetVisible( file.reportReasonButton, GetReportReasons( file.friendlyOrEnemy ).len() > 0 )
+
+	Hud_SetVisible( file.reportCheatButton, false )
+	Hud_SetVisible( file.reportOtherButton, false )
+}
+
+void function ReportOtherButton_OnActivate( var button )
+{
+	CloseAllMenus()
+	#if(PC_PROG)
+	if ( !Origin_IsOverlayAvailable() )
+	{
+		ConfirmDialogData dialogData
+		dialogData.headerText = ""
+		dialogData.messageText = "#ORIGIN_INGAME_REQUIRED"
+		dialogData.contextImage = $"ui/menu/common/dialog_notice"
+
+		OpenOKDialogFromData( dialogData )
+	}
+	#endif
+
+	ShowPlayerProfileCardForUID( file.reportPlayerUID )
 }
 
 array<string> function GetReportReasons( string friendlyOrEnemy )

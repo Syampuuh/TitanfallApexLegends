@@ -151,6 +151,8 @@ global struct GRXScriptOffer
 	asset  image = $""
 	string tagText = ""
 	string seasonTag = ""
+	string tooltipTitle = ""
+	string tooltipDesc = ""
 	int    expireTime = 0
 
 	//
@@ -209,6 +211,7 @@ global struct ScriptGRXOperationInfo
 	void functionref( int status )         onDoneCallback
 
 	int    status = eScriptGRXOperationStatus.INVALID
+	int    _codeQueryState = -1
 	string DEV_culprit = ""
 	float  DEV_queueTime = 0.0
 }
@@ -1195,32 +1198,6 @@ string function GRX_DBG_PREFIX()
 
 
 
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-//
-
-
-
-//
-//
-
-
-
-
-
-//
 
 
 
@@ -1228,15 +1205,6 @@ string function GRX_DBG_PREFIX()
 
 
 //
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1267,25 +1235,19 @@ string function GRX_DBG_PREFIX()
 
 
 
-
-
-
-//
 //
 //
 
 
 
-
-
+//
+//
 
 
 
 
 
 //
-
-
 
 
 
@@ -1303,19 +1265,11 @@ string function GRX_DBG_PREFIX()
 
 
 
-//
 
 
 
 
 
-
-
-
-
-
-//
-//
 //
 
 
@@ -1343,6 +1297,11 @@ string function GRX_DBG_PREFIX()
 
 
 
+//
+//
+//
+
+
 
 
 
@@ -1354,6 +1313,138 @@ string function GRX_DBG_PREFIX()
 
 
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
 
 
 
@@ -1907,6 +1998,8 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 
 	Assert( queryGoal == operationInfo.expectedQueryGoal ) //
 
+	operationInfo._codeQueryState = queryState
+
 	if ( queryState == GRX_HTTPQUERYSTATE_INTERRUPTED )
 	{
 		operationInfo.status = eScriptGRXOperationStatus.DONE_INTERRUPTED
@@ -2106,6 +2199,8 @@ void function HandleGRXOffersRefreshed( int offersState, array< GRXCodeOffer > c
 			scriptOffer.image = ItemFlavor_GetIcon( flav )
 			scriptOffer.tagText = ("tag" in codeOffer.attrs ? codeOffer.attrs.tag : "")
 			scriptOffer.seasonTag = ("seasontag" in codeOffer.attrs ? codeOffer.attrs.seasontag : "")
+			scriptOffer.tooltipDesc = ("tooltiptitle" in codeOffer.attrs ? codeOffer.attrs.tooltiptitle : "")
+			scriptOffer.tooltipTitle = ("tooltipdesc" in codeOffer.attrs ? codeOffer.attrs.tooltipdesc : "")
 			scriptOffer.expireTime = ("expireSeconds" in codeOffer.attrs ? int(codeOffer.attrs.expireSeconds) + GetUnixTimestamp() : 0)
 
 			ifpi.craftingOfferOrNull = scriptOffer
@@ -2176,6 +2271,8 @@ void function HandleGRXOffersRefreshed( int offersState, array< GRXCodeOffer > c
 		scriptOffer.image = ItemFlavor_GetIcon( flav )
 		scriptOffer.tagText = ("tag" in codeOffer.attrs ? codeOffer.attrs.tag : "")
 		scriptOffer.seasonTag = ("seasontag" in codeOffer.attrs ? codeOffer.attrs.seasontag : "")
+		scriptOffer.tooltipDesc = ("tooltiptitle" in codeOffer.attrs ? codeOffer.attrs.tooltiptitle : "")
+		scriptOffer.tooltipTitle = ("tooltipdesc" in codeOffer.attrs ? codeOffer.attrs.tooltipdesc : "")
 		scriptOffer.expireTime = ("expireSeconds" in codeOffer.attrs ? int(codeOffer.attrs.expireSeconds) + GetUnixTimestamp() : 0)
 		if ( scriptOffer.expireTime > 0 )
 		{

@@ -37,7 +37,7 @@ void function InitCharacterCardsPanel( var panel )
 	file.headerRui = Hud_GetRui( Hud_GetChild( panel, "Header" ) )
 
 	SetPanelTabTitle( panel, "#BANNER" )
-	RuiSetString( file.headerRui, "title", Localize( "#BANNER" ).toupper() )
+	RuiSetString( file.headerRui, "title", "" )
 	RuiSetString( file.headerRui, "collected", "" )
 
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, CharacterCardsPanel_OnShow )

@@ -3913,6 +3913,23 @@ Scheme
 			rightClickEvents		1
 		}
 
+		BonusCharacterButton
+		{
+			wide					242
+			tall					158
+			visible					1
+			enabled					1
+//            rui						"ui/lobby_character_button.rpak"
+            rui                     "ui/bonus_character_button.rpak"
+			labelText				""
+			style					RuiButton
+			polyShape               "0.375 0.0 1.0 0.0 0.625 1.0 0.0 1.0"
+			rightClickEvents		1
+			middleClickEvents       1
+			sound_focus             "UI_Menu_Focus"
+			sound_accept			""
+		}
+
 		WeaponCategoryButton
 		{
             wide					572
@@ -5309,6 +5326,8 @@ Scheme
                 enabled					1
                 style					DefaultButton
                 zpos                    4
+
+                sound_accept			""
 
                 command                 "DialogListSelect0"
 

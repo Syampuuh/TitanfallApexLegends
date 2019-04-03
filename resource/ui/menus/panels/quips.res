@@ -27,11 +27,14 @@
         scrollbarSpacing        6
         scrollbarOnLeft         0
         visible					1
+        tabPosition             1
+        selectOnDpadNav         1
+
         ButtonSettings
         {
             rui                     "ui/generic_item_button.rpak"
             clipRui                 1
-            wide					480
+            wide					470
             tall					50
             cursorVelocityModifier  0.7
             rightClickEvents		1

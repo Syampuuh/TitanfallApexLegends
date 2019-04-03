@@ -1398,6 +1398,7 @@ void function InitMenus()
 
 	InitFooterOptions()
 	InitMatchmakingOverlay()
+	InitPromoData()
 
 	RegisterTabNavigationInput()
 	thread UpdateGamepadCursorEnabledThread()

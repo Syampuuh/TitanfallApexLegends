@@ -51,6 +51,7 @@
         wide					1728
         tall					864
         visible					0
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/store_ec.res"
 		proportionalToParent    1
 
@@ -66,6 +67,7 @@
         wide					1728
         tall					%100
         visible					0
+        tabPosition             1
         proportionalToParent    1
         controlSettingsFile		"resource/ui/menus/panels/store_loot.res"
 		proportionalToParent    1
@@ -82,6 +84,7 @@
         wide					1728
         tall					%100
         visible					0
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/store_characters.res"
 		proportionalToParent    1
 
@@ -97,6 +100,7 @@
         wide					1728
         tall					%100
         visible					0
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/store_vc.res"
 		proportionalToParent    1
 

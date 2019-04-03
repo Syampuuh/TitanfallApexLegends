@@ -1,6 +1,7 @@
 global function ShQuickchat_Init
 #if(CLIENT)
 global function Quickchat
+global function QuickchatToLivingAndDead
 global function BroadcastCommsActionToTeam
 global function GetChatTitleColorForPlayer
 global function GetMenuOptionTextForCommsAction
@@ -9,6 +10,7 @@ global function GetDefaultIconForCommsAction
 global function GetPingAssetForCommsAction
 global function ShouldMuteCommsActionForCooldown
 global function SetCommsDialogueEnabled
+global function AddCallback_OnQuickchatEvent
 #endif //
 
 #if(false)
@@ -26,8 +28,9 @@ global enum eCommsFlags
 	FORCE_URGENT = (1 << 0),
 	FORCE_FAR = (1 << 1),
 	SILENCE = (1 << 2),
+	INCLUDE_DEAD = (1 << 3),
 
-	_flagCount = 3
+	_flagCount = 4
 }
 
 struct CommsAction
@@ -56,6 +59,7 @@ struct
 	bool					commsDialogueEnabled = true
 	float 					flavorDebounceTime = 120.0 //
 	float 					flavorGlobalDebounceTime = 30.0 //
+	table< int , array<void functionref( entity player, int eventId )> >	onQuickchatCallbacks
 #endif //
 } file
 
@@ -131,6 +135,13 @@ void function Quickchat( entity player, int index )
 	if ( !file.quickchatInitialized )
 		return
 	player.ClientCommand( "ClientCommand_Quickchat " + index )
+}
+
+void function QuickchatToLivingAndDead( entity player, int index )
+{
+	if ( !file.quickchatInitialized )
+		return
+	player.ClientCommand( "ClientCommand_Quickchat " + index + " " + eCommsFlags.INCLUDE_DEAD )
 }
 
 vector function GetChatTitleColorForPlayer( entity player )
@@ -437,7 +448,8 @@ void function BroadcastCommsActionToTeam( entity player, int commsAction, entity
 {
 	if ( !file.quickchatInitialized )
 		return
-	if ( !IsAlive( player ) )
+
+	if ( !IsAlive( player ) && (commsFlags & eCommsFlags.INCLUDE_DEAD) == 0 )
 		return
 
 	if ( ShouldMuteCommsActionForCooldown( player, commsAction, subjectEnt ) )
@@ -454,6 +466,14 @@ void function BroadcastCommsActionToTeam( entity player, int commsAction, entity
 	opt.isUrgent = PlayerDeliveryShouldBeUrgent( player, subjectPos, commsFlags )
 
 	PlaySoundForCommsAction( player, commsAction, opt )
+
+	if ( commsAction in file.onQuickchatCallbacks )
+	{
+		foreach ( func in file.onQuickchatCallbacks[ commsAction ] )
+		{
+			func( player, commsAction )
+		}
+	}
 
 	string chatText = act.chatText
 	if ( chatText != "" )
@@ -634,9 +654,33 @@ void function SetCommsDialogueEnabled( bool value )
 }
 
 //
+
+void function AddCallback_OnQuickchatEvent( int index, void functionref(entity,int) func )
+{
+	if ( !( index in file.onQuickchatCallbacks ) )
+		file.onQuickchatCallbacks[ index ] <- []
+
+	Assert( !file.onQuickchatCallbacks[ index ].contains( func ) )
+	file.onQuickchatCallbacks[ index ].append( func )
+}
 #endif //
 
 #if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

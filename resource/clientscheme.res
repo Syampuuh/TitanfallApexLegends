@@ -89,7 +89,9 @@ Scheme
 		ScrollBarSlider.Inset				3
 
 		ClosedCaption.RuiFont 				DefaultRegularFont
-	 	ClosedCaption.RuiFontHeight 		28
+	 	ClosedCaption.RuiFontHeight 		32
+	 	ClosedCaption.RuiFontHeightLarge	40
+	 	ClosedCaption.RuiFontHeightHuge		48
 	}
 
 	//////////////////////// FONTS /////////////////////////////

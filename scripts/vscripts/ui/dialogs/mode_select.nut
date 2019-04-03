@@ -60,11 +60,8 @@ void function OnOpenModeSelectDialog()
 			Hud_SetSize( file.modeSelectPopup, ownerSize.width, popupHeight )
 			Hud_SetSize( file.modeList, ownerSize.width, popupHeight )
 
-			if( GetDpadNavigationActive() )
-			{
-				Hud_SetFocused( button )
-				Hud_SetSelected( button, true )
-			}
+			Hud_SetFocused( button )
+			Hud_SetSelected( button, true )
 		}
 
 		ModeButton_Init( button, playlists[i] )
@@ -76,9 +73,7 @@ void function OnCloseModeSelectDialog()
 {
 	var modeSelectButton = GetModeSelectButton()
 	Hud_SetSelected( modeSelectButton, false )
-
-	if( GetDpadNavigationActive() )
-		Hud_SetFocused( modeSelectButton )
+	Hud_SetFocused( modeSelectButton )
 }
 
 

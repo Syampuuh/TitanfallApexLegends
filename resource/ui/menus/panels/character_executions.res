@@ -19,7 +19,7 @@
     {
         ControlName             RuiPanel
         xpos                    194
-        ypos                    64
+        ypos                    50
         zpos                    4
         wide                    550
         tall                    33
@@ -30,13 +30,16 @@
     {
         ControlName				GridButtonListPanel
         xpos                    194
-        ypos                    130
+        ypos                    96
         columns                 1
         rows                    12
         buttonSpacing           6
         scrollbarSpacing        6
         scrollbarOnLeft         0
         visible					1
+        tabPosition             1
+        selectOnDpadNav         1
+
         ButtonSettings
         {
             rui                     "ui/generic_item_button.rpak"
@@ -55,10 +58,10 @@
     Video
     {
         ControlName             RuiPanel
-        xpos					776
-        ypos					136
-        wide                    800
-        tall                    450
+        xpos					576
+        ypos					71
+        wide                    1022
+        tall                    575
         visible                 1
         rui                     "ui/finisher_video.rpak"
     }

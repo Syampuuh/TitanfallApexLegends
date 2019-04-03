@@ -29,6 +29,8 @@ const string SOUND_STOP_MATCHMAKING_1P = "UI_Menu_ReadyUp_Cancel_1P"
 const string SOUND_START_MATCHMAKING_3P = "UI_Menu_ReadyUp_3P"
 const string SOUND_STOP_MATCHMAKING_3P = "UI_Menu_ReadyUp_Cancel_3P"
 
+const float INVITE_LAST_TIMEOUT = 15.0
+const float INVITE_LAST_PANEL_EXPIRATION = 1 * MINUTES_PER_HOUR * SECONDS_PER_MINUTE
 global enum ePlaylistState
 {
 	AVAILABLE,
@@ -59,6 +61,9 @@ struct
 	var trainingButton
 	var inviteFriendsButton0
 	var inviteFriendsButton1
+	var inviteLastPlayedHeader
+	var inviteLastPlayedUnitFrame0
+	var inviteLastPlayedUnitFrame1
 	var friendButton0
 	var friendButton1
 
@@ -68,6 +73,8 @@ struct
 
 	var hdTextureProgress
 
+	int lastExpireTime
+
 	array<string> playlists
 	string        selectedPlaylist
 
@@ -76,6 +83,16 @@ struct
 
 	Friend& friendInLeftSpot
 	Friend& friendInRightSpot
+
+	string lastPlayedPlayerPlatformUid0 = ""
+	string lastPlayedPlayerHardware0 = ""
+	string lastPlayedPlayerPlatformUid1 = ""
+	string lastPlayedPlayerHardware1 = ""
+	int lastPlayedPlayerPersistenceIndex0 = -1
+	int lastPlayedPlayerPersistenceIndex1 = -1
+	float lastPlayedPlayerInviteSentTimestamp0 = -1
+	float lastPlayedPlayerInviteSentTimestamp1 = -1
+
 
 	bool leftWasReady = false
 	bool rightWasReady = false
@@ -108,6 +125,19 @@ void function InitPlayPanel( var panel )
 	file.inviteFriendsButton1 = Hud_GetChild( panel, "InviteFriendsButton1" )
 	Hud_AddEventHandler( file.inviteFriendsButton1, UIE_CLICK, InviteFriendsButton_OnActivate )
 
+	file.inviteLastPlayedHeader = Hud_GetChild( panel, "InviteLastSquadHeader" )
+	Hud_Hide( file.inviteLastPlayedHeader )
+
+	file.inviteLastPlayedUnitFrame0 = Hud_GetChild( panel, "InviteLastPlayedUnitframe0" )
+	Hud_AddEventHandler( file.inviteLastPlayedUnitFrame0, UIE_CLICK, InviteLastPlayedButton_OnActivate )
+	Hud_AddEventHandler( file.inviteLastPlayedUnitFrame0, UIE_CLICKRIGHT, InviteLastPlayedButton_OnRightClick )
+	Hud_Hide( file.inviteLastPlayedUnitFrame0 )
+
+	file.inviteLastPlayedUnitFrame1 = Hud_GetChild( panel, "InviteLastPlayedUnitframe1" )
+	Hud_AddEventHandler( file.inviteLastPlayedUnitFrame1, UIE_CLICK, InviteLastPlayedButton_OnActivate )
+	Hud_AddEventHandler( file.inviteLastPlayedUnitFrame1, UIE_CLICKRIGHT, InviteLastPlayedButton_OnRightClick )
+	Hud_Hide( file.inviteLastPlayedUnitFrame1 )
+
 	file.selfButton = Hud_GetChild( panel, "SelfButton" )
 	Hud_AddEventHandler( file.selfButton, UIE_CLICK, FriendButton_OnActivate )
 
@@ -125,14 +155,88 @@ void function InitPlayPanel( var panel )
 
 	AddMenuVarChangeHandler( "isMatchmaking", UpdateLobbyButtons )
 
-	UpdateFillButtonVisibility();
+	UpdateFillButtonVisibility()
 
 	file.chatBox = Hud_GetChild( panel, "ChatRoomTextChat" )
 	file.hdTextureProgress = Hud_GetChild( panel, "HDTextureProgress" )
 
+	InitMiniPromo( Hud_GetChild( panel, "MiniPromo" ) )
+
 	RegisterSignal( "UpdateFriendButtons" )
 }
 
+void function UpdateLastPlayedPlayerInfo()
+{
+	array<string> curPartyMemberUids
+	file.lastPlayedPlayerPlatformUid0 = ""
+	file.lastPlayedPlayerHardware0 = ""
+	file.lastPlayedPlayerPersistenceIndex0 = -1
+
+	file.lastPlayedPlayerPlatformUid1 = ""
+	file.lastPlayedPlayerHardware1 = ""
+	file.lastPlayedPlayerPersistenceIndex1 = -1
+
+
+	if ( !IsPersistenceAvailable() || !InviteLastPlayedPanelShouldBeVisible() )
+	{
+		return
+	}
+
+	int maxTrackedSquadMembers = PersistenceGetArrayCount( "lastGameSquadStats" )
+	foreach ( index, member in GetParty().members )
+	{
+		curPartyMemberUids.append( member.uid )
+	}
+
+	for( int i = 0; i < maxTrackedSquadMembers; i++ )
+	{
+		string lastPlayedPlayerUid = expect string( GetPersistentVar( "lastGameSquadStats[" + i + "].platformUid" ) )
+		string lastPlayedPlayerHardware = expect string( GetPersistentVar( "lastGameSquadStats[" + i + "].hardware" ) )
+
+		if ( lastPlayedPlayerUid == "" || lastPlayedPlayerHardware == "" )
+		{
+			continue
+		}
+
+		if ( !curPartyMemberUids.contains( lastPlayedPlayerUid ) )
+		{
+			if ( file.lastPlayedPlayerPlatformUid0 == "" )
+			{
+				file.lastPlayedPlayerPlatformUid0 = lastPlayedPlayerUid
+				file.lastPlayedPlayerHardware0 = lastPlayedPlayerHardware
+				file.lastPlayedPlayerPersistenceIndex0 = i
+			}
+			else if ( file.lastPlayedPlayerPlatformUid1 == "" && lastPlayedPlayerUid != file.lastPlayedPlayerPlatformUid0 )
+			{
+				file.lastPlayedPlayerPlatformUid1 = lastPlayedPlayerUid
+				file.lastPlayedPlayerHardware1 = lastPlayedPlayerHardware
+				file.lastPlayedPlayerPersistenceIndex1 = i
+			}
+		}
+	}
+}
+
+bool function InviteLastPlayedPanelShouldBeVisible()
+{
+	if ( GetUnixTimestamp() - GetPersistentVarAsInt( "lastGameTime" ) > INVITE_LAST_PANEL_EXPIRATION )
+		return false
+
+	if ( GetPersistentVarAsInt( "lastGamePlayers" ) == 0 && GetPersistentVarAsInt( "lastGameSquads" ) == 0 )
+		return false
+
+	return true
+}
+
+bool function PlayerIsInMatch( string playerPlatformUid, string playerHardware )
+{
+	CommunityUserInfo ornull userInfoOrNull = GetUserInfo( playerHardware, playerPlatformUid )
+	if ( userInfoOrNull != null )
+	{
+		CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+		return userInfo.charData[ePlayerStryderCharDataArraySlots.PLAYER_IN_MATCH] == 1
+	}
+	return false
+}
 
 var function GetModeSelectButton()
 {
@@ -166,6 +270,8 @@ void function PlayPanel_OnShow( var panel )
 	AddCallbackAndCallNow_RemoteMatchInfoUpdated( OnRemoteMatchInfoUpdated )
 
 	ClientCommand( "ViewingMainLobbyPage" )
+
+	StartMiniPromo()
 }
 
 
@@ -178,6 +284,7 @@ void function UpdateLobbyButtons()
 	UpdateReadyButton()
 	UpdateModeButton()
 	UpdateFriendButtons()
+	UpdateLastPlayedButtons()
 }
 
 
@@ -226,6 +333,42 @@ void function UpdateFillButtonVisibility()
 		Hud_SetNavUp( file.modeButton, file.inviteFriendsButton0 )
 		Hud_SetNavDown( file.inviteFriendsButton0, file.modeButton )
 		Hud_SetNavLeft( file.inviteFriendsButton0, file.modeButton )
+	}
+}
+
+void function UpdateLastSquadDpadNav()
+{
+	var buttonBeneathLastSquadPanel = file.modeButton
+
+	if ( Hud_IsVisible( file.fillButton ) )
+	{
+		buttonBeneathLastSquadPanel = file.fillButton
+	}
+
+	bool isVisibleButton0 = Hud_IsVisible( file.inviteLastPlayedUnitFrame0 )
+	bool isVisibleButton1 = Hud_IsVisible( file.inviteLastPlayedUnitFrame1 )
+
+	if ( isVisibleButton0 )
+	{
+		Hud_SetNavDown( file.inviteLastPlayedUnitFrame0, buttonBeneathLastSquadPanel )
+		Hud_SetNavUp( buttonBeneathLastSquadPanel, file.inviteLastPlayedUnitFrame0 )
+		Hud_SetNavLeft( file.inviteFriendsButton0, file.inviteLastPlayedUnitFrame0 )
+		Hud_SetNavRight( file.inviteLastPlayedUnitFrame0, file.inviteFriendsButton0 )
+
+		if( isVisibleButton1 )
+		{
+			Hud_SetNavDown( file.inviteLastPlayedUnitFrame1, buttonBeneathLastSquadPanel )
+			Hud_SetNavUp( buttonBeneathLastSquadPanel, file.inviteLastPlayedUnitFrame1 )
+
+			Hud_SetNavDown( file.inviteLastPlayedUnitFrame0, file.inviteLastPlayedUnitFrame1 )
+		}
+	}
+	else
+	{
+		Hud_SetNavUp( buttonBeneathLastSquadPanel, file.inviteFriendsButton0 )
+		Hud_SetNavDown( file.inviteFriendsButton0, buttonBeneathLastSquadPanel )
+		Hud_SetNavLeft( file.inviteFriendsButton0, buttonBeneathLastSquadPanel )
+		Hud_SetNavRight( buttonBeneathLastSquadPanel, file.inviteFriendsButton0 )
 	}
 }
 
@@ -296,6 +439,8 @@ void function PlayPanel_OnHide( var panel )
 	Signal( uiGlobal.signalDummy, "UpdateFriendButtons" )
 	RemoveCallback_OnGRXInventoryStateChanged( UpdateLootBoxStatus )
 	RemoveCallback_RemoteMatchInfoUpdated( OnRemoteMatchInfoUpdated )
+
+	StopMiniPromo()
 }
 
 
@@ -307,6 +452,15 @@ void function UpdateFriendButton( var rui, PartyMember info, bool inMatch )
 	RuiSetBool( rui, "isLeader", party.originatorUID == info.uid && GetPartySize() > 1 )
 	RuiSetBool( rui, "isReady", info.ready )
 	RuiSetBool( rui, "inMatch", inMatch )
+	if ( inMatch )
+	{
+		RuiSetString( rui, "footerText", "#PROMPT_IN_MATCH" )
+	}
+	else
+	{
+		RuiSetString( rui, "footerText", "" )
+	}
+
 	thread KeepMicIconUpdated( info, rui )
 
 	CommunityUserInfo ornull userInfo = GetCommunityUserInfo( info.hardware, info.uid )
@@ -436,6 +590,114 @@ void function UpdateFriendButtons()
 	Hud_SetToolTipData( file.inviteFriendsButton1, toolTipData )
 }
 
+void function UpdateLastPlayedButtons()
+{
+	UpdateLastPlayedPlayerInfo()
+
+	bool isVisibleButton0 = file.lastPlayedPlayerPlatformUid0 != "" && !PlayerIsInMatch( file.lastPlayedPlayerHardware0, file.lastPlayedPlayerPlatformUid0 )
+	bool isVisibleButton1 = file.lastPlayedPlayerPlatformUid1 != "" && !PlayerIsInMatch( file.lastPlayedPlayerHardware1, file.lastPlayedPlayerPlatformUid1 )
+
+	bool shouldUpdateDpadNav = false
+
+	if ( isVisibleButton0 != Hud_IsVisible( file.inviteLastPlayedUnitFrame0 ) || isVisibleButton1 != Hud_IsVisible( file.inviteLastPlayedUnitFrame1 ) )
+	{
+		shouldUpdateDpadNav = true
+	}
+
+	isVisibleButton0 = isVisibleButton0 && CanInvite()
+	isVisibleButton1 = isVisibleButton1 && CanInvite()
+
+	if ( isVisibleButton0 )
+	{
+		if ( file.lastPlayedPlayerPersistenceIndex0 == -1 )
+			return
+
+		string namePlayer0 = expect string( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex0 + "].playerName" ) )
+		HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame0, "name", namePlayer0 )
+
+		string characterGUIDString = string( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex0 + "].character" ) )
+		int characterGUID          = ConvertItemFlavorGUIDStringToGUID( characterGUIDString )
+		if ( IsValidItemFlavorGUID( characterGUID ) )
+		{
+			ItemFlavor squadCharacterClass = GetItemFlavorByGUID( characterGUID )
+			HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame0, "icon", CharacterClass_GetGalleryPortrait( squadCharacterClass ), eRuiArgType.IMAGE )
+		}
+
+		if ( Time() - file.lastPlayedPlayerInviteSentTimestamp0 > INVITE_LAST_TIMEOUT )
+		{
+			HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame0, "unitframeFooterText", "#INVITE_PLAYER_UNITFRAME" )
+			Hud_SetLocked( file.inviteLastPlayedUnitFrame0, false )
+		}
+	}
+
+	Hud_SetVisible( file.inviteLastPlayedUnitFrame0, isVisibleButton0 )
+
+
+	if ( isVisibleButton1 )
+	{
+		if ( file.lastPlayedPlayerPersistenceIndex1 == -1 )
+			return
+
+		string namePlayer1 = expect string( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex1 + "].playerName" ) )
+		HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame1, "name", namePlayer1 )
+
+		string characterGUIDString = string( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex1 + "].character" ) )
+		int characterGUID          = ConvertItemFlavorGUIDStringToGUID( characterGUIDString )
+		if ( IsValidItemFlavorGUID( characterGUID ) )
+		{
+			ItemFlavor squadCharacterClass = GetItemFlavorByGUID( characterGUID )
+			HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame1, "icon", CharacterClass_GetGalleryPortrait( squadCharacterClass ), eRuiArgType.IMAGE )
+		}
+
+		if ( Time() - file.lastPlayedPlayerInviteSentTimestamp1 > INVITE_LAST_TIMEOUT )
+		{
+			HudElem_SetRuiArg( file.inviteLastPlayedUnitFrame1, "unitframeFooterText", "#INVITE_PLAYER_UNITFRAME" )
+			Hud_SetLocked( file.inviteLastPlayedUnitFrame1, false )
+		}
+	}
+
+	Hud_SetVisible( file.inviteLastPlayedUnitFrame1, isVisibleButton1 )
+	Hud_SetVisible( file.inviteLastPlayedHeader, isVisibleButton0 || isVisibleButton1 )
+
+	if ( shouldUpdateDpadNav )
+	{
+		UpdateLastSquadDpadNav()
+	}
+
+	//
+
+	ToolTipData toolTipData0
+	toolTipData0.tooltipStyle = eTooltipStyle.BUTTON_PROMPT
+
+	ToolTipData toolTipData1
+	toolTipData1.tooltipStyle = eTooltipStyle.BUTTON_PROMPT
+
+	if ( Time() - file.lastPlayedPlayerInviteSentTimestamp0 > INVITE_LAST_TIMEOUT )
+	{
+		toolTipData0.actionHint1 = "#A_BUTTON_INVITE"
+		toolTipData0.actionHint2 = "#X_BUTTON_INSPECT"
+		Hud_SetToolTipData( file.inviteLastPlayedUnitFrame0, toolTipData0 )
+	}
+	else if ( Time() - file.lastPlayedPlayerInviteSentTimestamp0 <= INVITE_LAST_TIMEOUT )
+	{
+		toolTipData0.actionHint1 = "#X_BUTTON_INSPECT"
+		Hud_SetToolTipData( file.inviteLastPlayedUnitFrame0, toolTipData0 )
+	}
+
+	if ( Time() - file.lastPlayedPlayerInviteSentTimestamp1 > INVITE_LAST_TIMEOUT )
+	{
+		toolTipData1.actionHint1 = "#A_BUTTON_INVITE"
+		toolTipData1.actionHint2 = "#X_BUTTON_INSPECT"
+		Hud_SetToolTipData( file.inviteLastPlayedUnitFrame1, toolTipData1 )
+	}
+	else if ( Time() - file.lastPlayedPlayerInviteSentTimestamp1 <= INVITE_LAST_TIMEOUT )
+	{
+		toolTipData1.actionHint1 = "#X_BUTTON_INSPECT"
+		Hud_SetToolTipData( file.inviteLastPlayedUnitFrame1, toolTipData1 )
+	}
+
+
+}
 
 void function ClientToUI_PartyMemberJoinedOrLeft( string leftSpotUID, string leftSpotHardware, string leftSpotName, bool leftSpotInMatch, string rightSpotUID, string rightSpotHardware, string rightSpotName, bool rightSpotInMatch )
 {
@@ -481,6 +743,9 @@ bool function CanActivateReadyButton()
 	if ( !Lobby_IsPlaylistAvailable( GetSelectedPlaylist() ) )
 		return false
 
+	if ( Player_GetRemainingMatchmakingDelay( GetUIPlayer() ) > 0 )
+		return false
+
 	return true
 }
 
@@ -508,6 +773,11 @@ int function Lobby_GetPlaylistState( string playlistName )
 
 string function Lobby_GetPlaylistStateString( int playlistState )
 {
+	if ( Player_GetRemainingMatchmakingDelay( GetUIPlayer() ) > 0 )
+	{
+		return "#MATCHMAKING_PENALTY_DESC"
+	}
+
 	return playlistStateMap[playlistState]
 }
 
@@ -517,12 +787,28 @@ void function UpdateReadyButton()
 	bool isLeader = IsPartyLeader()
 
 	bool isReady = GetConVarBool( "party_readyToSearch" )
+	int remainingTime = Player_GetRemainingMatchmakingDelay( GetUIPlayer() )
+	bool hasPenalty = remainingTime > 0
 
 	string buttonText
-	if ( isReady )
-		buttonText = IsControllerModeActive() ? "#B_BUTTON_CANCEL" : "#CANCEL"
+	if ( hasPenalty )
+	{
+		buttonText = "#MATCHMAKING_PENALTY"
+		if ( file.lastExpireTime != GetCurrentTimeForPersistence() + remainingTime )
+		{
+			HudElem_SetRuiArg( file.readyButton, "expireTime", float( int( Time() ) + remainingTime ), eRuiArgType.GAMETIME )
+			file.lastExpireTime = GetCurrentTimeForPersistence() + remainingTime
+		}
+	}
 	else
-		buttonText = IsControllerModeActive() ? "#Y_BUTTON_READY" : "#READY"
+	{
+		if ( isReady )
+			buttonText = IsControllerModeActive() ? "#B_BUTTON_CANCEL" : "#CANCEL"
+		else
+			buttonText = IsControllerModeActive() ? "#Y_BUTTON_READY" : "#READY"
+
+		HudElem_SetRuiArg( file.readyButton, "expireTime", RUI_BADGAMETIME, eRuiArgType.GAMETIME )
+	}
 
 	HudElem_SetRuiArg( file.readyButton, "isLeader", isLeader ) //
 	HudElem_SetRuiArg( file.readyButton, "isReady", isReady )
@@ -741,6 +1027,80 @@ void function InviteFriendsButton_OnActivate( var button )
 	#endif
 
 	thread CreatePartyAndInviteFriends()
+}
+
+
+void function InviteLastPlayedButton_OnActivate( var button )
+{
+	if ( Hud_IsLocked( button ) )
+		return
+
+	int scriptID = int( Hud_GetScriptID( button ) )
+
+	#if(PC_PROG)
+		if ( !MeetsAgeRequirements() )
+		{
+			ConfirmDialogData dialogData
+			dialogData.headerText = "#UNAVAILABLE"
+			dialogData.messageText = "#ORIGIN_UNDERAGE_ONLINE"
+			dialogData.contextImage = $"ui/menu/common/dialog_notice"
+
+			OpenOKDialogFromData( dialogData )
+			return
+		}
+	#endif
+
+
+	if ( scriptID == 0 )
+	{
+		InvitePlayerByUID ( file.lastPlayedPlayerPlatformUid0 )
+		file.lastPlayedPlayerInviteSentTimestamp0 = Time()
+		HudElem_SetRuiArg( button, "unitframeFooterText", "#INVITE_PLAYER_INVITED" )
+		Hud_SetLocked( button, true )
+	}
+	else if ( scriptID == 1 )
+	{
+		InvitePlayerByUID ( file.lastPlayedPlayerPlatformUid1 )
+		file.lastPlayedPlayerInviteSentTimestamp1 = Time()
+		HudElem_SetRuiArg( button, "unitframeFooterText", "#INVITE_PLAYER_INVITED" )
+		Hud_SetLocked( button, true )
+	}
+
+}
+
+void function InviteLastPlayedButton_OnRightClick( var button )
+{
+	int scriptID = int( Hud_GetScriptID( button ) )
+
+	Friend friend
+
+	if ( scriptID == 0 )
+	{
+		friend.name = expect string( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex0 + "].playerName" ) )
+		friend.hardware = file.lastPlayedPlayerHardware0
+		friend.id = file.lastPlayedPlayerPlatformUid0
+	}
+
+	if ( scriptID == 1 )
+	{
+		friend.name = expect string( GetPersistentVar( "lastGameSquadStats[" + file.lastPlayedPlayerPersistenceIndex1 + "].playerName" ) )
+		friend.hardware = file.lastPlayedPlayerHardware1
+		friend.id = file.lastPlayedPlayerPlatformUid1
+	}
+
+	if ( friend.id == "" )
+		return
+
+	InspectFriend( friend )
+}
+
+void function InvitePlayerByUID( string platformUID )
+{
+	array<string> ids
+	ids.append( platformUID )
+
+	printt( " InviteFriend id:", ids[0] )
+	DoInviteToParty( ids )
 }
 
 
@@ -1044,5 +1404,4 @@ void function Lobby_UpdatePlayPanelPlaylists()
 			}
 		}
 	}
-
 }

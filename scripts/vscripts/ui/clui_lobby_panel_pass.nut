@@ -100,6 +100,8 @@ struct
 
 		var detailBox
 
+		bool canEquipReward = false
+
 		RewardPanelData[2] rewardPanelGroups
 	#endif
 
@@ -145,6 +147,8 @@ void function InitPassPanel( var panel )
 	foreach ( rewardButton in rewardButtons )
 	{
 		Hud_AddEventHandler( rewardButton, UIE_GET_FOCUS, BattlePass_OnFocusReward )
+		Hud_AddEventHandler( rewardButton, UIE_LOSE_FOCUS, BattlePass_OnRewardLoseFocus )
+		Hud_AddEventHandler( rewardButton, UIE_CLICKRIGHT, BattlePass_OnActivateReward )
 	}
 
 	file.rewardBarFooter = Hud_GetChild( panel, "RewardBarFooter" )
@@ -185,6 +189,7 @@ void function InitPassPanel( var panel )
 	file.detailBox = Hud_GetChild( panel, "DetailsBox" )
 
 	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
+	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_EQUIP", "#X_BUTTON_EQUIP", null, BattlePass_IsFocusedItemEquippable )
 }
 
 
@@ -355,6 +360,7 @@ void function BattlePass_OnPurchase( var button )
 		return
 }
 
+
 void function BattlePass_OnFocusReward( var button )
 {
 	printt( "BattlePass_OnFocusReward" )
@@ -370,7 +376,49 @@ void function BattlePass_OnFocusReward( var button )
 			if ( scriptId == buttonIndex )
 			{
 				BattlePass_UpdateRewardDetails( bpReward )
-				//
+				BattlePass_UpdateEquipStatus( BattlePass_CanEquipReward( bpReward ) )
+				return
+			}
+
+			buttonIndex++
+		}
+	}
+}
+
+
+bool function BattlePass_IsFocusedItemEquippable()
+{
+	return file.canEquipReward
+}
+
+
+void function BattlePass_OnRewardLoseFocus( var button )
+{
+	BattlePass_UpdateEquipStatus( false )
+}
+
+
+void function BattlePass_UpdateEquipStatus( bool state )
+{
+	file.canEquipReward = state
+	UpdateFooterOptions()
+}
+
+
+void function BattlePass_OnActivateReward( var button )
+{
+	int scriptId = int( Hud_GetScriptID( button ) )
+
+	array<RewardGroup> rewardGroups = GetRewardGroupsForPage( file.currentPage )
+
+	int buttonIndex = 0
+	foreach ( groupIndex, rewardGroup in rewardGroups )
+	{
+		foreach ( rewardIndex, bpReward in rewardGroup.rewards )
+		{
+			if ( scriptId == buttonIndex )
+			{
+				BattlePass_EquipReward( bpReward )
 				return
 			}
 
@@ -448,6 +496,101 @@ string function GetBattlePassRewardItemDesc( BattlePassReward reward )
 
 	return itemDesc
 }
+
+
+void function BattlePass_EquipReward( BattlePassReward reward )
+{
+	if ( !BattlePass_CanEquipReward( reward ) )
+		return
+
+	ItemFlavor item			  = reward.flav
+	int itemType              = ItemFlavor_GetType( item )
+	LoadoutEntry ornull entry = GetItemFlavorLoadoutEntry( item )
+
+	if ( entry == null )
+		return
+
+	EmitUISound( "UI_Menu_Equip_Generic" )
+	RequestSetItemFlavorLoadoutSlot( ToEHI( GetUIPlayer() ), expect LoadoutEntry( entry ), item )
+}
+
+
+bool function BattlePass_CanEquipReward( BattlePassReward reward )
+{
+	ItemFlavor item			  = reward.flav
+	int itemType              = ItemFlavor_GetType( item )
+	LoadoutEntry ornull entry = GetItemFlavorLoadoutEntry( item )
+
+	if ( entry == null )
+		return false
+
+	return GRX_IsItemOwnedByPlayer( item )
+}
+
+
+LoadoutEntry ornull function GetItemFlavorLoadoutEntry( ItemFlavor item, bool statTrackerFindExistingEntry = false )
+{
+	int itemType = ItemFlavor_GetType( item )
+	LoadoutEntry entry
+
+	switch ( itemType )
+	{
+		case eItemType.character_skin:
+			entry = Loadout_CharacterSkin( CharacterSkin_GetCharacterFlavor( item ) )
+			break
+
+		case eItemType.weapon_skin:
+			entry = Loadout_WeaponSkin( WeaponSkin_GetWeaponFlavor( item ) )
+			break
+
+		case eItemType.gladiator_card_frame:
+			entry = Loadout_GladiatorCardFrame( GladiatorCardFrame_GetCharacterFlavor( item ) )
+			break
+
+		case eItemType.gladiator_card_stance:
+			entry = Loadout_GladiatorCardStance( GladiatorCardStance_GetCharacterFlavor( item ) )
+			break
+
+		case eItemType.character_execution:
+			entry = Loadout_CharacterExecution( CharacterExecution_GetCharacterFlavor( item ) )
+			break
+
+		case eItemType.gladiator_card_intro_quip:
+			entry = Loadout_CharacterIntroQuip( CharacterIntroQuip_GetCharacterFlavor( item ) )
+			break
+
+		case eItemType.gladiator_card_kill_quip:
+			entry = Loadout_CharacterKillQuip( CharacterKillQuip_GetCharacterFlavor( item ) )
+			break
+
+		case eItemType.gladiator_card_stat_tracker:
+			ItemFlavor character = GladiatorCardStatTracker_GetCharacterFlavor( item )
+			for ( int trackerIndex = 0; trackerIndex < GLADIATOR_CARDS_NUM_TRACKERS; trackerIndex++ )
+			{
+				LoadoutEntry trackerSlot = Loadout_GladiatorCardStatTracker( character, trackerIndex )
+
+				if ( statTrackerFindExistingEntry )
+				{
+					ItemFlavor flavor = LoadoutSlot_GetItemFlavor( LocalClientEHI(), trackerSlot )
+					if ( flavor == item )
+						return trackerSlot
+				}
+				else if ( LoadoutSlot_IsReady( LocalClientEHI(), trackerSlot ) )
+					return trackerSlot
+			}
+			return Loadout_GladiatorCardStatTracker( character, (GLADIATOR_CARDS_NUM_TRACKERS - 1) )
+
+		case eItemType.melee_skin:
+			entry = Loadout_MeleeSkin( MeleeSkin_GetCharacterFlavor( item ) )
+			break
+
+		default:
+			return null
+	}
+
+	return entry
+}
+
 
 void function BattlePass_UpdateRewardDetails( BattlePassReward reward )
 {
@@ -683,7 +826,19 @@ void function BattlePass_SetPageToCurrentLevel()
 void function BattlePass_UpdateRewardDetailsToNextReward( ItemFlavor activeBattlePass, int currentLevel )
 {
 	int levelIndex = currentLevel - 1
-	array<BattlePassReward> rewards = GetBattlePassLevelRewards( activeBattlePass, levelIndex, GetUIPlayer() )
+	array<BattlePassReward> rewards
+	while( true )
+	{
+		if ( levelIndex >= 110 )
+			break
+
+		rewards = GetBattlePassLevelRewards( activeBattlePass, levelIndex, GetUIPlayer() )
+		if ( rewards.len() > 0 )
+			break
+
+		levelIndex++
+	}
+
 	foreach( BattlePassReward reward in rewards )
 	{
 		BattlePass_UpdateRewardDetails( reward )
@@ -792,7 +947,6 @@ void function BattlePass_UpdatePurchaseButton()
 
 		if ( GetPlayerBattlePassPurchasableLevels( ToEHI( GetUIPlayer() ), activeBattlePass ) == 0 )
 		{
-			HudElem_SetRuiArg( file.purchaseButton, "buttonText", "#BATTLE_PASS_BUTTON_PURCHASE_XP" )
 			Hud_SetLocked( file.purchaseButton, true )
 			ToolTipData toolTipData
 			toolTipData.titleText = "#BATTLE_PASS_MAX_PURCHASE_LEVEL"
@@ -803,6 +957,14 @@ void function BattlePass_UpdatePurchaseButton()
 	else
 	{
 		HudElem_SetRuiArg( file.purchaseButton, "buttonText", "#BATTLE_PASS_BUTTON_PURCHASE" )
+
+		if ( GetPlayerBattlePassLevel( GetUIPlayer(), activeBattlePass, false ) > 0 )
+		{
+			ToolTipData toolTipData
+			toolTipData.titleText = "#BATTLE_PASS_BUTTON_PURCHASE"
+			toolTipData.descText = "#BUTTON_BATTLE_PASS_PURCHASE_DESC"
+			Hud_SetToolTipData( file.purchaseButton, toolTipData )
+		}
 	}
 }
 

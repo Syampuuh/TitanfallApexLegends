@@ -66,6 +66,67 @@ resource/ui/menus/panels/squads.res
         pin_to_sibling_corner	RIGHT
     }
 
+    GCardOverlay1
+    {
+        ControlName             RuiButton
+
+        wide					500
+        tall					680
+
+        scriptID                1
+
+        rui                     "ui/basic_image.rpak"
+        ruiArgs
+        {
+
+                basicImageAlpha     0.0
+        }
+
+        xpos                    0
+        ypos                    0
+        zpos                    100
+
+        rightClickEvents        1
+
+        visible                 1
+        enabled                 1
+
+        pin_to_sibling          GCard1
+        pin_corner_to_sibling   CENTER
+        pin_to_sibling_corner   CENTER
+    }
+
+    GCardOverlay2
+    {
+        ControlName             RuiButton
+
+        wide					500
+        tall					680
+
+        scriptID                2
+
+        rui                     "ui/basic_image.rpak"
+        ruiArgs
+        {
+
+                basicImageAlpha     0.0
+        }
+
+
+        xpos                    0
+        ypos                    0
+        zpos                    100
+
+        rightClickEvents        1
+
+        visible                 1
+        enabled                 1
+
+        pin_to_sibling          GCard2
+        pin_corner_to_sibling   CENTER
+        pin_to_sibling_corner   CENTER
+    }
+
     TeammateMute1
     {
         ControlName             RuiButton
@@ -86,7 +147,7 @@ resource/ui/menus/panels/squads.res
         cursorVelocityModifier  0.6
 
         tabPosition             1
-        navLeft                 TeammateMuteChat2
+        navLeft                 TeammateReport2
         navRight                TeammateMutePing1
 
         pin_to_sibling          GCard1
@@ -140,10 +201,63 @@ resource/ui/menus/panels/squads.res
         enabled                 1
         cursorVelocityModifier  0.6
 
-        navLeft                TeammateMutePing1
+        navLeft                 TeammateMutePing1
+        navRight                TeammateReport1
 
         pin_to_sibling          TeammateMutePing1
         pin_corner_to_sibling   BOTTOM_LEFT
+        pin_to_sibling_corner   BOTTOM_RIGHT
+    }
+
+    TeammateReport1
+    {
+        ControlName             RuiButton
+
+        wide					64
+        tall					64
+
+        scriptID                1
+
+        rui                     "ui/mute_button.rpak"
+
+        xpos                    20
+        ypos                    0
+        zpos                    100
+
+        visible                 0
+        enabled                 1
+        cursorVelocityModifier  0.6
+
+        navLeft                 TeammateMuteChat1
+
+        pin_to_sibling          TeammateMuteChat1
+        pin_corner_to_sibling   BOTTOM_LEFT
+        pin_to_sibling_corner   BOTTOM_RIGHT
+    }
+
+    TeammateInvite1
+    {
+        ControlName             RuiButton
+
+        wide					150
+        tall					150
+
+        scriptID                1
+
+        rui                     "ui/invite_button.rpak"
+
+        xpos                    0
+        ypos                    -85
+        zpos                    100
+
+        visible                 0
+        enabled                 1
+        cursorVelocityModifier  0.6
+
+        navLeft                 TeammateReport1
+
+        pin_to_sibling          GCard1
+        pin_corner_to_sibling   CENTER
         pin_to_sibling_corner   BOTTOM_RIGHT
     }
 
@@ -219,7 +333,7 @@ resource/ui/menus/panels/squads.res
         enabled                 1
         cursorVelocityModifier  0.6
 
-        navRight                TeammateMute1
+        navRight                TeammateReport2
         navLeft                 TeammateMutePing2
 
         pin_to_sibling          TeammateMutePing2
@@ -227,4 +341,57 @@ resource/ui/menus/panels/squads.res
         pin_to_sibling_corner   BOTTOM_RIGHT
     }
 
+    TeammateReport2
+    {
+        ControlName             RuiButton
+
+        wide					64
+        tall					64
+
+        scriptID                2
+
+        rui                     "ui/mute_button.rpak"
+
+        xpos                    20
+        ypos                    0
+        zpos                    100
+
+        visible                 0
+        enabled                 1
+        cursorVelocityModifier  0.6
+
+        navLeft                 TeammateMuteChat2
+        navRight                TeammateInvite2
+
+        pin_to_sibling          TeammateMuteChat2
+        pin_corner_to_sibling   BOTTOM_LEFT
+        pin_to_sibling_corner   BOTTOM_RIGHT
+    }
+
+    TeammateInvite2
+    {
+        ControlName             RuiButton
+
+        wide					150
+        tall					150
+
+        scriptID                2
+
+        rui                     "ui/invite_button.rpak"
+
+        xpos                    0
+        ypos                    -85
+        zpos                    100
+
+        visible                 0
+        enabled                 1
+        cursorVelocityModifier  0.6
+
+        navRight                TeammateMute1
+        navLeft                 TeammateReport2
+
+        pin_to_sibling          GCard2
+        pin_corner_to_sibling   CENTER
+        pin_to_sibling_corner   BOTTOM_RIGHT
+    }
 }

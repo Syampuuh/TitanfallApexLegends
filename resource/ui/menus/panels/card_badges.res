@@ -23,16 +23,18 @@
         ypos                    0
         columns                 3
         rows                    4
-        buttonSpacing           10
+        buttonSpacing           6
         scrollbarSpacing        10
         scrollbarOnLeft         0
         visible					1
+        tabPosition             1
+
         ButtonSettings
         {
             rui                     "ui/card_badge_button.rpak"
             clipRui                 1
-            wide					150
-            tall					150
+            wide					168
+            tall					168
             cursorVelocityModifier  0.7
             sound_focus             "UI_Menu_Focus_Small"
             rightClickEvents		1

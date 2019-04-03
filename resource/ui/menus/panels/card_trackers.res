@@ -27,6 +27,8 @@
         scrollbarSpacing        6
         scrollbarOnLeft         0
         visible					1
+        tabPosition             1
+
         ButtonSettings
         {
             rui                     "ui/card_tracker_button.rpak"

@@ -34,6 +34,8 @@ resource/ui/menus/system.res
         cursorVelocityModifier  0.7
         tabPosition             1
 
+        navDown					Button1
+
         pin_to_sibling			ScreenFrame
         pin_corner_to_sibling	CENTER
         pin_to_sibling_corner	CENTER
@@ -52,6 +54,8 @@ resource/ui/menus/system.res
         visible					1
         cursorVelocityModifier  0.7
         tabPosition             2
+
+        navUp					Button0
 
         pin_to_sibling			Button0
         pin_corner_to_sibling	TOP
@@ -72,6 +76,8 @@ resource/ui/menus/system.res
         cursorVelocityModifier  0.7
         tabPosition             3
 
+        navUp					Button1
+
         pin_to_sibling			Button1
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	BOTTOM
@@ -90,6 +96,8 @@ resource/ui/menus/system.res
         visible					1
         cursorVelocityModifier  0.7
         tabPosition             4
+
+        navUp					Button2
 
         pin_to_sibling			Button2
         pin_corner_to_sibling	TOP

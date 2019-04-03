@@ -44,7 +44,7 @@ resource/ui/menus/confirm_dialog.menu
         {
             ControlName				Label
             wide					%100
-            tall					480
+            tall					545
             labelText				""
             bgcolor_override		"0 0 0 255"
             visible					0
@@ -60,7 +60,7 @@ resource/ui/menus/confirm_dialog.menu
             ControlName				RuiPanel
             classname               "MenuButton"
             wide					%100
-            tall					480
+            tall					545
             visible				    1
             rui                     "ui/accessibility_dialog_content.rpak"
 
@@ -81,7 +81,8 @@ resource/ui/menus/confirm_dialog.menu
             InheritProperties       SwitchButton
             style                   DialogListButton
             ypos                    -120
-            navDown                 SwchAccessibility
+            tabPosition             1
+            navDown                 SwchSubtitlesSize
 
             ConVar                  "closecaption"
             list
@@ -98,15 +99,42 @@ resource/ui/menus/confirm_dialog.menu
             pin_to_sibling_corner	TOP
         }
 
-        SwchAccessibility
+        SwchSubtitlesSize
         {
             ControlName             RuiButton
             InheritProperties       SwitchButton
             style                   DialogListButton
             navUp                   SwchSubtitles
-            navDown                 SwchChatTextToSpeech
+            navDown                 SwchAccessibility
 
             pin_to_sibling          SwchSubtitles
+            pin_corner_to_sibling   TOP_LEFT
+            pin_to_sibling_corner   BOTTOM_LEFT
+
+            ConVar                  "cc_text_size"
+            list
+            {
+                "#SETTING_SUBTITLES_NORMAL"      0
+                "#SETTING_SUBTITLES_LARGE"       1
+                "#SETTING_SUBTITLES_HUGE"        2
+            }
+
+            childGroupAlways        MultiChoiceButtonAlways
+
+            pin_to_sibling			DialogFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        SwchAccessibility
+        {
+            ControlName             RuiButton
+            InheritProperties       SwitchButton
+            style                   DialogListButton
+            navUp                   SwchSubtitlesSize
+            navDown                 SwchChatSpeechToText
+
+            pin_to_sibling          SwchSubtitlesSize
             pin_corner_to_sibling   TOP_LEFT
             pin_to_sibling_corner   BOTTOM_LEFT
 

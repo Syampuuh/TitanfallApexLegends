@@ -23,7 +23,7 @@ void function InitCharacterQuipsPanel( var panel )
 	file.headerRui = Hud_GetRui( Hud_GetChild( panel, "Header" ) )
 
 	SetPanelTabTitle( panel, "#QUIPS" )
-	RuiSetString( file.headerRui, "title", Localize( "#QUIPS" ).toupper() )
+	RuiSetString( file.headerRui, "title", "" )
 	RuiSetString( file.headerRui, "collected", "" )
 
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, CharacterQuipsPanel_OnShow )

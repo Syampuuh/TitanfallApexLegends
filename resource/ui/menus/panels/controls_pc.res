@@ -96,20 +96,41 @@
 
     SwchMouseInvertY
     {
-        ControlName				RuiButton
-        InheritProperties		SwitchButton
-        style					DialogListButton
-        pin_to_sibling			SwchMouseAcceleration
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchMouseAcceleration
-        navDown					BtnGamepadLayout
-        ConVar 					"m_invert_pitch"
+        ControlName             RuiButton
+        InheritProperties       SwitchButton
+        style                   DialogListButton
+        pin_to_sibling          SwchMouseAcceleration
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
+        navUp                   SwchMouseAcceleration
+        navDown                 SwchLightingEffects
+        ConVar                  "m_invert_pitch"
 
         list
         {
-            "#SETTING_OFF"		0
-            "#SETTING_ON"		1
+            "#SETTING_OFF"      0
+            "#SETTING_ON"       1
+        }
+
+        childGroupAlways        ChoiceButtonAlways
+    }
+
+    SwchLightingEffects
+    {
+        ControlName             RuiButton
+        InheritProperties       SwitchButton
+        style                   DialogListButton
+        pin_to_sibling          SwchMouseInvertY
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
+        navUp                   SwchMouseInvertY
+        navDown                 BtnGamepadLayout
+        ConVar                  "chroma_enable"
+
+        list
+        {
+            "#SETTING_OFF"      0
+            "#SETTING_ON"       1
         }
 
         childGroupAlways        ChoiceButtonAlways
@@ -160,7 +181,7 @@
         linePadding             4
         fontHeight              30
 
-        pin_to_sibling			SwchMouseInvertY
+        pin_to_sibling			SwchLightingEffects
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
     }

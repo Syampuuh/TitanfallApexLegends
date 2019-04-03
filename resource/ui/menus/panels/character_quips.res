@@ -27,14 +27,14 @@
 	SectionButton0
 	{
 		ControlName			RuiButton
-		xpos			    24
-		ypos			    121
+		xpos			    123
+		ypos			    96
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 	}
 
@@ -42,13 +42,13 @@
 	{
 		ControlName			RuiButton
 		xpos			    0
-		//ypos			    16
+		ypos			    3
 		zpos			    3
-		wide			    236
-		tall			    64
+		wide			    296
+		tall			    56
 		visible			    0
 		labelText           ""
-        rui					"ui/prototype_left_nav_button.rpak"
+        rui					"ui/character_section_button.rpak"
         cursorVelocityModifier  0.7
 
         pin_to_sibling			SectionButton0
@@ -61,22 +61,24 @@
     IntroQuipsPanel
     {
         ControlName				CNestedPanel
-        xpos					294
-        ypos					121
+        xpos					491
+        ypos					96
         wide					1408
         tall					840
         visible					1
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/quips.res"
     }
 
     KillQuipsPanel
     {
         ControlName				CNestedPanel
-        xpos					294
-        ypos					121
+        xpos					491
+        ypos					96
         wide					1408
         tall					840
         visible					1
+        tabPosition             1
         controlSettingsFile		"resource/ui/menus/panels/quips.res"
     }
 }

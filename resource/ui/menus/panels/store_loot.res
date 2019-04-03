@@ -113,6 +113,9 @@
             proportionalToParent	1
             sound_accept            ""
 
+            navRight                PurchaseButtonN
+            navDown                 OpenOwnedButton
+
             pin_to_sibling			PanelContent
             pin_corner_to_sibling	BOTTOM
             pin_to_sibling_corner	BOTTOM_LEFT

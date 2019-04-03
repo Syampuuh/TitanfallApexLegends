@@ -1236,6 +1236,19 @@ void function InitOfferButton( var button, GRXScriptOffer offerData, bool isTall
 	RuiSetImage( rui, "backgroundImg", backgroundImage )
 	RuiSetImage( rui, "frameOverlayImg", frameOverlayImage )
 
+	if ( offerData.tooltipDesc != "" )
+	{
+		ToolTipData tooltipData
+		tooltipData.titleText = offerData.tooltipTitle
+		tooltipData.descText = offerData.tooltipDesc
+
+		Hud_SetToolTipData( button, tooltipData )
+	}
+	else
+	{
+		Hud_ClearToolTipData( button )
+	}
+
 	bool isPurchasableByLocalPlayer = false
 	string priceText                = ""
 

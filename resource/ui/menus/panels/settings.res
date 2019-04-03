@@ -58,6 +58,8 @@
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	TOP
 
+        tabPosition             1
+
         ScrollFrame
         {
             ControlName				ImagePanel
@@ -96,6 +98,8 @@
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	TOP
 
+        tabPosition             1
+
         ScrollFrame
         {
             ControlName				ImagePanel
@@ -116,7 +120,8 @@
         {
             ControlName				CNestedPanel
             InheritProperties       SettingsContentPanel
-            //tall                    905
+            tall                    920
+            tabPosition             1
 
             controlSettingsFile		"resource/ui/menus/panels/controls.res"
         }
@@ -130,6 +135,8 @@
         pin_to_sibling			PanelFrame
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	TOP
+
+        tabPosition             1
 
         ScrollFrame
         {
@@ -170,6 +177,8 @@
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	TOP
 
+        tabPosition             1
+
         ScrollFrame
         {
             ControlName				ImagePanel
@@ -192,6 +201,7 @@
             InheritProperties       SettingsContentPanel
             //tall                    952 [$WINDOWS]
             tall                    882 [$WINDOWS]
+            tabPosition             1
 
             controlSettingsFile		"resource/ui/menus/panels/audio.res" [$WINDOWS]
             controlSettingsFile		"resource/ui/menus/panels/audio_console.res" [$GAMECONSOLE]
@@ -206,6 +216,8 @@
         pin_to_sibling			PanelFrame
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	TOP
+
+        tabPosition             1
 
         ScrollFrame
         {
@@ -227,6 +239,10 @@
         {
             ControlName				CNestedPanel
             InheritProperties       SettingsContentPanel
+            tall                    981 [$WINDOWS]
+            tall                    916 [$GAMECONSOLE]
+
+            tabPosition             1
 
             controlSettingsFile		"resource/ui/menus/panels/hud_options.res"
         }

@@ -16,12 +16,14 @@ const asset BACKGROUND_GEO_MODEL = $"mdl/levels_terrain/mp_lobby/mp_character_se
 
 #if(false)
 
+
 #endif
 
 #if(UI)
 global function UI_InitCharacterSelectNewMenu
 global function UI_RunCharacterSelect
 global function UI_CloseCharacterSelect
+global function ClientToUI_UpdateSquadMute
 #endif
 
 #if(CLIENT)
@@ -37,6 +39,7 @@ global function ServerCallback_CharacterLockRejected
 global function OnLoadoutButton_RightClick
 global function UpdateCharacterDetailsMenu
 global function GetOtherTeammates
+global function SquadMuteLegendSelectEnabled
 
 const string CAMERA_ENT_NAME = "target_char_sel_camera_new"
 const string CHARACTER_ENT_NAME = "target_char_sel_pilot_new"
@@ -181,10 +184,19 @@ void function UI_InitCharacterSelectNewMenu()
 	AddMenuFooterOption( fileForever.menu, RIGHT, BUTTON_X, true, "", "", UI_OnLoadoutButton_RightClick ) //
 	AddMenuFooterOption( fileForever.menu, RIGHT, MOUSE_RIGHT, true, "", "", UI_OnLoadoutButton_RightClick ) //
 
+	if ( SquadMuteLegendSelectEnabled() )
+	{
+		AddMenuFooterOption( fileForever.menu, RIGHT, BUTTON_Y, true, "", "", UI_OnToggleMuteButtonClick ) //
+		AddMenuFooterOption( fileForever.menu, RIGHT, KEY_F, true, "", "", UI_OnToggleMuteButtonClick ) //
+	}
+
 	AddMenuEventHandler( fileForever.menu, eUIEvent.MENU_CLOSE, void function() {
 		RunClientScript( "OnCharacterSelectNewMenuClosed_RemoveCallbacks" )
 	} )
-	AddMenuFooterOption( fileForever.menu, RIGHT, KEY_ENTER, true, "", "", UI_OnLoadoutButton_Enter )
+
+	#if(PC_PROG)
+		AddMenuFooterOption( fileForever.menu, RIGHT, KEY_ENTER, true, "", "", UI_OnLoadoutButton_Enter )
+	#endif
 }
 
 void function UI_OnLoadoutButton_Enter( var button )
@@ -201,6 +213,18 @@ void function UI_OnLoadoutButton_RightClick( var button )
 {
 	if ( CanRunClientScript() )
 		RunClientScript( "OnLoadoutButton_RightClick" )
+}
+
+
+void function UI_OnToggleMuteButtonClick( var button )
+{
+	if ( CanRunClientScript() )
+		RunClientScript( "UIToClient_ToggleMute" )
+}
+
+void function ClientToUI_UpdateSquadMute( bool muteState )
+{
+
 }
 #endif
 
@@ -230,6 +254,8 @@ void function CharacterSelectNewMenu_Init()
 
 		AddCallback_FullUpdate( Client_FullUpdate )
 		AddCallback_UIScriptReset( Client_UIScriptReset )
+		if ( SquadMuteLegendSelectEnabled() )
+			AddCallback_OnSquadMuteChanged( Client_MuteChanged )
 
 		fileLevel.colorCorrection = ColorCorrection_Register( COLOR_CORRECTION )
 	#endif
@@ -272,6 +298,11 @@ void function PanAwayCharacterSelect()
 	EmitSoundOnEntity( GetLocalClientPlayer(), "UI_Survival_Intro_LegendPanLeft" )
 
 	wait CHARACTER_SELECT_SCENE_ROTATE_DURATION / 3.0
+}
+
+void function Client_MuteChanged()
+{
+	UpdateButtonStates()
 }
 
 void function DoSquadCardsPresentation()
@@ -1640,18 +1671,36 @@ void function UpdateButtonStates()
 
 	//
 	RuiSetBool( fileLevel.buttonHintRui, "showingCharacterDetails", fileLevel.detailsPanelVisible )
-	if ( currentLockStepIndex == fileLevel.localClientLockstepIndex )
+
+	string topString
+	string bottomString
+	if ( currentLockStepIndex >= 0 && currentLockStepIndex < MAX_TEAM_PLAYERS )
 	{
-		if ( localPlayerIsLockedIn )
-			RuiSetString( fileLevel.buttonHintRui, "hintString", "#CHAR_SEL_BUTTON_HINT_CANEL_DETAILS" )
+		if ( SquadMuteLegendSelectEnabled() )
+			topString = Localize( IsSquadMuted() ? "#CHAR_SEL_BUTTON_UNMUTE" : "#CHAR_SEL_BUTTON_MUTE" )
+
+		if ( currentLockStepIndex == fileLevel.localClientLockstepIndex )
+		{
+			if ( localPlayerIsLockedIn )
+				bottomString = Localize( "#CHAR_SEL_BUTTON_HINT_CANEL_DETAILS" )
+			else
+				bottomString = Localize( "#CHAR_SEL_BUTTON_HINT_SELECT_DETAILS" )
+		}
 		else
-			RuiSetString( fileLevel.buttonHintRui, "hintString", "#CHAR_SEL_BUTTON_HINT_SELECT_DETAILS" )
+		{
+			bottomString = Localize( "#CHAR_SEL_BUTTON_HINT_DETAILS" )
+		}
 	}
-	else
+	else if ( SquadMuteLegendSelectEnabled() )
 	{
-		RuiSetString( fileLevel.buttonHintRui, "hintString", "#CHAR_SEL_BUTTON_HINT_DETAILS" )
+		bottomString = Localize( IsSquadMuted() ? "#CHAR_SEL_BUTTON_UNMUTE" : "#CHAR_SEL_BUTTON_MUTE" )
 	}
+
+	string finalString = Localize( "#CHAR_SEL_BUTTON_HINT_N_N", topString, bottomString )
+	RuiSetString( fileLevel.buttonHintRui, "hintString", finalString )
+
 	Hud_SetVisible( fileLevel.buttonHintPanel, currentLockStepIndex >= 0 && currentLockStepIndex < MAX_TEAM_PLAYERS )
+	Hud_SetVisible( fileLevel.buttonHintPanel, true )
 }
 
 void function LocalPlayerPickingSounds()
@@ -1928,6 +1977,16 @@ void function DebugMenuThink()
 //
 
 #if(false)
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2275,12 +2334,26 @@ array<entity> function GetOtherTeammates()
 
 entity ornull function GetLastPickingPlayer()
 {
+	entity ornull validPlayer
 	for ( int i = MAX_TEAM_PLAYERS - 1 ; i >= 0 ; i-- )
 	{
 		entity ornull player = GetTeammateForPickingIndex( i )
-		if ( IsValid( player ) )
-			return player
+		if ( !IsValid( player ) )
+			continue
+
+		//
+		if ( validPlayer == null )
+			validPlayer = player
+
+		//
+		//
+		//
+
+		return player
 	}
+
+	if ( validPlayer != null )
+		return validPlayer
 
 	Assert( 0, "GetLastPickingPlayer wasn't able to get the last picking player on local client team" )
 
@@ -2434,3 +2507,24 @@ void function SetCharacterSelectSceneForChampionSquad()
 #endif
 
 
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+bool function SquadMuteLegendSelectEnabled()
+{
+	return GetCurrentPlaylistVarBool( "squad_mute_legend_select_enable", true )
+}

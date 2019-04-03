@@ -10,6 +10,8 @@ global function IsViewingSquadSummary
 global function ServerCallback_DeadHudSetDamageHistory
 global function ServerCallback_DeadHudClearDamageHistory
 
+const string SOUND_KEEP_THE_PARTY_GOING = "ui_ingame_activateburncard"
+
 enum eRuiSort
 {
 	GLAD_CARD = RUI_SORT_GLADCARD
@@ -59,7 +61,10 @@ struct
 	entity currentTarget
 
 	bool isViewingSquadStats = false
+	bool partyInviteSent = false
 	DeadHudDamageHistory				deadHudDamageHistroy
+
+	table<entity,var> 				playerToGladCard
 } file
 
 void function ClSpectatorHud_Init()
@@ -82,13 +87,27 @@ void function ClSpectatorHud_Init()
 	RegisterSignal( "UpdateSpectatorHudCount" )
 	RegisterSignal( "DisplaySpectatorCardSidePane" )
 	RegisterSignal( "ReportPlayerButtonPressed" )
+	RegisterSignal( "ShowRoundEndSquadResults" )
 
 	RegisterButtonPressedCallback( KEY_RSHIFT, TryToggleGladCard )
 	RegisterButtonPressedCallback( KEY_LSHIFT, TryToggleGladCard )
 	RegisterButtonPressedCallback( BUTTON_Y, TryToggleGladCard )
 
+	if ( GetCurrentPlaylistVarBool( "enable_eog_squad_invite", false ) )
+	{
+		RegisterButtonPressedCallback( KEY_SPACE, TryPartyUp )
+		RegisterButtonPressedCallback( BUTTON_X, TryPartyUp )
+	}
+
 	RegisterButtonPressedCallback( BUTTON_STICK_RIGHT, ReportPlayerButtonPressed )
 	RegisterButtonPressedCallback( KEY_R, ReportPlayerButtonPressed )
+
+	if ( GetCurrentPlaylistVarBool( "enable_eog_gg", false ) )
+	{
+		RegisterConCommandTriggeredCallback( "+ping", OnPing )
+		RegisterConCommandTriggeredCallback( "ping_specific_type", OnPing )
+		AddCallback_OnQuickchatEvent( eCommsAction.QUICKCHAT_GG, OnPlayerDoesGG )
+	}
 
 	AddCallback_GameStateEnter( eGameState.Epilogue, SetEpilogueFlag )	//
 
@@ -127,6 +146,9 @@ void function UpdateDeathAndSpectatorHUD( entity player, entity currentTarget )
 {
 	Assert( file.spectatorHud != null )
 	Assert( file.deadHud != null )
+
+	RuiSetBool( file.deadHud, "partyInviteSent", file.partyInviteSent )
+	RuiSetBool( file.deadHud, "canInviteToParty", CanInviteSquadToParty() )
 
 	RuiTrackInt( file.spectatorHud, "numObserverTargets", player, RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "spectatorTargetCount" ) )
 	RuiTrackInt( file.deadHud, "numSpectateTargets", GetLocalClientPlayer(), RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "spectatorTargetCount" ) )
@@ -400,13 +422,13 @@ void function UpdateSpectateButtons( bool allowReturn, bool allowSummary )
 	if ( canBindReturn && !file.lobbyReturnRegistered )
 	{
 		RegisterButtonPressedCallback( BUTTON_B, ReturnToLobby )
-		RegisterButtonPressedCallback( KEY_SPACE, ReturnToLobby )
+		RegisterButtonPressedCallback( KEY_ESCAPE, ReturnToLobby )
 		file.lobbyReturnRegistered = true
 	}
 	else if ( !canBindReturn && file.lobbyReturnRegistered )
 	{
 		DeregisterButtonPressedCallback( BUTTON_B, ReturnToLobby )
-		DeregisterButtonPressedCallback( KEY_SPACE, ReturnToLobby )
+		DeregisterButtonPressedCallback( KEY_ESCAPE, ReturnToLobby )
 		file.lobbyReturnRegistered = false
 	}
 
@@ -531,6 +553,12 @@ void function ShowReportDialogAfterDelay( var button )
 	if ( !CanReport() )
 		return
 
+	entity reportTarget = IsSpectating() ? file.currentTarget : GetSituationPlayer()
+	string reportPlayerName = reportTarget.GetPlayerName()
+	string reportPlayerHardware = reportTarget.GetHardware()
+	string reportPlayerUID = reportTarget.GetPlatformUID()
+	string friendlyOrEnemy = reportTarget.GetTeam() == GetLocalClientPlayer().GetTeam() ? "friendly" : "enemy"
+
 	float endTime = Time() + 0.5
 	while ( ( InputIsButtonDown( BUTTON_STICK_RIGHT ) || InputIsButtonDown( KEY_R ) ) && Time() < endTime )
 		WaitFrame()
@@ -538,10 +566,17 @@ void function ShowReportDialogAfterDelay( var button )
 	if ( Time() < endTime )
 		return
 
-	entity reportTarget = IsSpectating() ? file.currentTarget : GetSituationPlayer()
-	string friendlyOrEnemy = reportTarget.GetTeam() == GetLocalClientPlayer().GetTeam() ? "friendly" : "enemy"
+	entity altReportTarget = IsSpectating() ? file.currentTarget : GetSituationPlayer()
+	if ( altReportTarget != null && altReportTarget != altReportTarget  )
+	{
+		reportTarget = altReportTarget
+		reportPlayerName = reportTarget.GetPlayerName()
+		reportPlayerHardware = reportTarget.GetHardware()
+		reportPlayerUID = reportTarget.GetPlatformUID()
+		friendlyOrEnemy = reportTarget.GetTeam() == GetLocalClientPlayer().GetTeam() ? "friendly" : "enemy"
+	}
 
-	RunUIScript( "ClientToUI_ShowReportPlayerDialog", reportTarget.GetPlayerName(), reportTarget.GetHardware(), reportTarget.GetPlatformUID(), friendlyOrEnemy )
+	RunUIScript( "ClientToUI_ShowReportPlayerDialog", reportPlayerName, reportPlayerHardware, reportPlayerUID, friendlyOrEnemy )
 }
 
 
@@ -586,6 +621,7 @@ void function ShowRoundEndSquadResults( bool show )
 
 	EmitSoundOnEntity( player, "UI_Menu_RoundSummary_Results" )
 
+	Signal( clGlobal.levelEnt, "ShowRoundEndSquadResults" )
 	Signal( clGlobal.levelEnt, "DisplaySpectatorCardSidePane" )
 	Signal( player, "Bleedout_StopBleedoutEffects" )
 
@@ -642,6 +678,20 @@ void function ShowRoundEndSquadResults( bool show )
 			file.squadResultsGladCardHandles.append( nestedGCHandle )
 			ChangeNestedGladiatorCardOwner( nestedGCHandle, data.eHandle, null, eGladCardLifestateOverride.ALIVE )
 			RuiSetFloat( gladCardsRui, "offset", offsets[i] )
+
+			if ( GetCurrentPlaylistVarBool( "enable_disconnected_display", false ) )
+				thread KeepGladCardUpdated( gladCardsRui, data.eHandle )
+
+			entity teammate = GetEntityFromEncodedEHandle( data.eHandle )
+
+			if ( IsValid( teammate ) )
+			{
+				if ( !( teammate in file.playerToGladCard ) )
+				{
+					file.playerToGladCard[ teammate ] <- gladCardsRui
+				}
+				file.playerToGladCard[ teammate ] = gladCardsRui
+			}
 
 			//
 			var playerStatsRui = CreateFullscreenPostFXRui( $"ui/round_end_squad_member_stats.rpak", eRuiSort.SQUADSUMMARY_STATS )
@@ -728,6 +778,17 @@ void function ShowRoundEndSquadResults( bool show )
 	UpdateScoreboardVisibility()
 }
 
+void function KeepGladCardUpdated( var rui, int eHandle )
+{
+	EndSignal( clGlobal.levelEnt, "ShowRoundEndSquadResults" )
+
+	while ( 1 )
+	{
+		bool connected = IsValid( GetEntityFromEncodedEHandle( eHandle ) )
+		RuiSetBool( rui, "isConnected", connected )
+		WaitFrame()
+	}
+}
 
 void function ClearRoundEndSquadResults( entity player )
 {
@@ -764,6 +825,38 @@ bool function IsViewingSquadSummary()
 	return file.viewingSquadSummary
 }
 
+void function TryPartyUp( entity player )
+{
+	if ( file.partyInviteSent )
+	{
+		RuiSetBool( file.deadHud, "partyInviteSent", !file.partyInviteSent )
+		file.partyInviteSent = !file.partyInviteSent
+		return
+	}
+
+	if ( !GetCurrentPlaylistVarBool( "enable_squad_invite", false ) )
+		return
+
+	if ( !IsViewingSquadSummary() )
+		return
+
+	array<string> uids
+	array<entity> players = GetPlayerArrayOfTeam( player.GetTeam() )
+	foreach ( p in players )
+	{
+		if ( p != GetLocalClientPlayer() )
+			uids.append( p.GetPlatformUID() )
+	}
+
+	if ( uids.len() == 0 )
+		return
+
+	file.partyInviteSent = true
+	RuiSetBool( file.deadHud, "partyInviteSent", true )
+	EmitSoundOnEntity( GetLocalClientPlayer(), SOUND_KEEP_THE_PARTY_GOING )
+	QuickchatToLivingAndDead( player, eCommsAction.QUICKCHAT_GG )
+	DoInviteToParty( uids )
+}
 
 void function TryToggleGladCard( entity player )
 {
@@ -861,6 +954,52 @@ bool function ShouldShowDeathRecap( entity player )
 		return false
 
 	if ( player.IsObserver() && player.GetObserverMode() != OBS_MODE_DEATHCAM )
+		return false
+
+	return true
+}
+
+void function OnPlayerDoesGG( entity player, int commsEvent )
+{
+	if ( !( player in file.playerToGladCard ) )
+		return
+
+	RuiSetGameTime( file.playerToGladCard[ player ], "ggStartTime", Time() )
+	RuiSetImage( file.playerToGladCard[ player ], "emoteIcon", GetDefaultIconForCommsAction( commsEvent ) )
+}
+
+void function OnPing( entity player )
+{
+	if ( !file.viewingSquadSummary )
+		return
+
+	QuickchatToLivingAndDead( player, eCommsAction.QUICKCHAT_GG )
+}
+
+
+bool function CanInviteSquadToParty()
+{
+	if ( !GetCurrentPlaylistVarBool( "enable_eog_squad_invite", false ) )
+		return false
+
+	if ( !GetCurrentPlaylistVarBool( "enable_squad_invite", false ) )
+		return false
+
+	if ( GetPlayerArrayOfTeam( GetLocalClientPlayer().GetTeam() ).len() <= 1 )
+		return false
+
+	array<string> uids
+	array<entity> players = GetPlayerArrayOfTeam( GetLocalClientPlayer().GetTeam() )
+	foreach ( p in players )
+	{
+		string uid = p.GetPlatformUID()
+		if ( p != GetLocalClientPlayer() && CanInviteSquadMate( uid ) )
+		{
+			uids.append( uid )
+		}
+	}
+
+	if ( uids.len() == 0 )
 		return false
 
 	return true

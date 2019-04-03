@@ -22,8 +22,6 @@
         ControlName				RuiButton
         InheritProperties		SwitchButton
         style					DialogListButton
-        navUp                   SwitchAnalytics [$GAMECONSOLE]
-        navUp                   SwitchChatMessages [!$GAMECONSOLE]
         navDown					SwitchShotButtonHints
         ConVar					"hud_setting_showMedals"
         list
@@ -186,7 +184,7 @@
         InheritProperties		SwitchButton
         style					DialogListButton
         navUp					SwitchStreamerMode
-        navDown					SwchAccessibility
+        navDown					SwchColorBlindMode
         pin_to_sibling			SwitchStreamerMode
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
@@ -227,15 +225,84 @@
         visible                 0 [!$ENGLISH]
     }
 
+    SwchColorBlindMode
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        classname				"AdvancedVideoButtonClass"
+        style					DialogListButton
+        pin_to_sibling			AccessibilityHeader
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SwitchAnalytics
+        navDown					SwchSubtitles
+        // list is populated by code
+        childGroupAlways        MultiChoiceButtonAlways
+
+        ConVar                  "colorblind_mode"
+        list
+        {
+            "#SETTING_OFF"                  0
+            "#SETTING_PROTANOPIA"           1
+            "#SETTING_DEUTERANOPIA"         2
+            "#SETTING_TRITANOPIA"           3
+        }
+    }
+
+    SwchSubtitles
+    {
+        ControlName             RuiButton
+        InheritProperties       SwitchButton
+        style                   DialogListButton
+        navUp                   SwchColorBlindMode
+        navDown                 SwchSubtitlesSize
+
+        ConVar                  "closecaption"
+        list
+        {
+            // If we enable hearing impaired captions, rather than use "cc_subtitles", "closecaption" should support a 3rd value
+            "#SETTING_OFF"  0
+            "#SETTING_ON"   1
+        }
+
+        pin_to_sibling          SwchColorBlindMode
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
+
+        childGroupAlways        ChoiceButtonAlways
+    }
+
+    SwchSubtitlesSize
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        classname				"AdvancedVideoButtonClass"
+        style					DialogListButton
+        pin_to_sibling			SwchSubtitles
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SwchSubtitles
+        navDown					SwchAccessibility
+        childGroupAlways        MultiChoiceButtonAlways
+
+        ConVar                  "cc_text_size"
+        list
+        {
+            "#SETTING_SUBTITLES_NORMAL"      0
+            "#SETTING_SUBTITLES_LARGE"       1
+            "#SETTING_SUBTITLES_HUGE"        2
+        }
+    }
+
     SwchAccessibility
     {
         ControlName             RuiButton
         InheritProperties       SwitchButton
         style                   DialogListButton
-        navUp                   SwitchAnalytics
+        navUp                   SwchSubtitlesSize
         navDown                 SwchChatSpeechToText
 
-        pin_to_sibling          AccessibilityHeader
+        pin_to_sibling          SwchSubtitlesSize
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
 
@@ -290,7 +357,6 @@
         InheritProperties		SwitchButton
         style					DialogListButton
         navUp					SwchChatSpeechToText
-        navDown					SwitchLootPromptStyle
         ConVar					"hudchat_play_text_to_speech"
         list
         {

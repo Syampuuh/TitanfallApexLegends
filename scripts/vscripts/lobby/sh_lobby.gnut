@@ -227,19 +227,40 @@ bool function PrivateMatch_IsValidMapModeCombo( string mapName, string modeName 
 
 int function Player_GetMaxMatchmakingDelay( entity player )
 {
-	//
-	return 300
+	int leaveCount = player.GetPersistentVarAsInt( PERSISTENCE_LEAVECOUNT_VAR )
+
+	if ( leaveCount == 0 )
+		return 0
+
+	int durationStep = MatchmakingPenalty_GetDurationMin()
+
+	int duration = int( Graph( leaveCount, 1, MatchmakingPenalty_GetThresholdMax(), MatchmakingPenalty_GetDurationMin(), MatchmakingPenalty_GetDurationMax() ) )
+
+	return minint( int( ceil( duration / durationStep ) * durationStep ), MatchmakingPenalty_GetDurationMax() )
 }
+
 
 int function Player_GetRemainingMatchmakingDelay( entity player )
 {
+	//
+	#if(UI)
+		if ( player == null )
+			return 0
+	#endif
+
 	int lastLeaveTime = player.GetPersistentVarAsInt( PERSISTENCE_LAST_LEAVE_TIME )
 
-	return Player_GetMaxMatchmakingDelay( player ) - (GetCurrentTimeForPersistence() - lastLeaveTime)
+	return maxint( Player_GetMaxMatchmakingDelay( player ) - (GetCurrentTimeForPersistence() - lastLeaveTime), 0 )
 }
+
 
 int function Player_NextAvailableMatchmakingTime( entity player )
 {
+	#if(UI)
+		if ( player == null )
+			return 0
+	#endif
+
 	int lastLeaveTime = player.GetPersistentVarAsInt( PERSISTENCE_LAST_LEAVE_TIME )
 	if ( GetCurrentTimeForPersistence() - lastLeaveTime < Player_GetMaxMatchmakingDelay( player ) )
 	{
@@ -249,9 +270,52 @@ int function Player_NextAvailableMatchmakingTime( entity player )
 	return 0
 }
 
+
+int function MatchmakingPenalty_GetThresholdMax()
+{
+	return GetCurrentPlaylistVarInt( "matchmaking_penalty_threshold_max", 5 )
+}
+
+
+int function MatchmakingPenalty_GetDurationMin()
+{
+	return GetCurrentPlaylistVarInt( "matchmaking_penalty_duration_min", SECONDS_PER_MINUTE * 5 )
+}
+
+
+int function MatchmakingPenalty_GetDurationMax()
+{
+	return GetCurrentPlaylistVarInt( "matchmaking_penalty_duration_max", SECONDS_PER_MINUTE * 30 )
+}
+
+
+int function MatchmakingPenalty_GetGraceTimeout()
+{
+	return GetCurrentPlaylistVarInt( "matchmaking_penalty_grace_timeout", SECONDS_PER_DAY * 2 )
+}
+
+
 int function GetCurrentTimeForPersistence()
 {
 	//
 	return GetUnixTimestamp() + DAILY_RESET_TIME_ZONE_OFFSET * SECONDS_PER_HOUR
 }
 
+void function MatchmakingPenalty_DumpStatus( entity inputPlayer = null )
+{
+	#if(UI)
+		printt( "Matchmaking Penalty:", GetPlayerName() )
+		printt( "\tLast Leave Time:", GetCurrentTimeForPersistence() - GetPersistentVarAsInt( PERSISTENCE_LAST_LEAVE_TIME ) )
+		printt( "\tRemaining Time:", Player_GetRemainingMatchmakingDelay( GetUIPlayer() ) )
+		printt( "\tPenalty Count: ", GetPersistentVarAsInt( PERSISTENCE_LEAVECOUNT_VAR ) )
+	#else
+		array<entity> players = (inputPlayer == null) ? GetPlayerArray() : [inputPlayer]
+		foreach ( player in players )
+		{
+			printt( "Matchmaking Penalty:", player.GetPlayerName() )
+			printt( "\tLast Leave Time:", GetCurrentTimeForPersistence() - player.GetPersistentVarAsInt( PERSISTENCE_LAST_LEAVE_TIME ) )
+			printt( "\tRemaining Time:", Player_GetRemainingMatchmakingDelay( player ) )
+			printt( "\tPenalty Count: ", player.GetPersistentVarAsInt( PERSISTENCE_LEAVECOUNT_VAR ) )
+		}
+	#endif
+}

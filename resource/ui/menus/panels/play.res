@@ -54,7 +54,8 @@
         visible					1
         cursorVelocityModifier  0.7
 
-        navRight                   InviteFriendsButton0
+        navUp                   InviteFriendsButton0
+        navRight                InviteFriendsButton0
         navDown                 ModeButton
 
         proportionalToParent    1
@@ -79,6 +80,7 @@
 
         navUp                   FillButton
         navDown                 ReadyButton
+        navRight                InviteFriendsButton0
 
         proportionalToParent    1
 
@@ -125,6 +127,7 @@
         proportionalToParent    1
 
         navLeft                 InviteFriendsButton1
+        navDown                 MiniPromo
 
         pin_to_sibling          PanelFrame
         pin_corner_to_sibling   TOP_RIGHT
@@ -141,8 +144,9 @@
         xpos                    -400
         ypos                    -90
 
+        navUp                   FriendButton0
         navRight                FriendButton0
-        navLeft                 FillButton
+        navLeft                 InviteLastPlayedUnitframe0
 
         pin_to_sibling			PanelFrame
         pin_corner_to_sibling	CENTER
@@ -156,12 +160,73 @@
         xpos                    400
         ypos                    -90
 
+        navDown                 MiniPromo
         navLeft                 FriendButton1
         navRight                OpenLootBoxButton
 
         pin_to_sibling			PanelFrame
         pin_corner_to_sibling	CENTER
         pin_to_sibling_corner	CENTER
+    }
+
+    InviteLastSquadHeader
+	{
+		ControlName				RuiPanel
+		//xpos					-30
+		ypos					-155
+		wide					245
+		tall					24
+		visible					1
+        rui					    "ui/invite_last_squad_header.rpak"
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	LEFT
+	}
+
+    InviteLastPlayedUnitframe0
+    {
+        ControlName             RuiButton
+
+        pin_to_sibling			InviteLastSquadHeader
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        rightClickEvents		1
+
+        ypos                    14
+
+        navRight                InviteFriendsButton0
+        navDown                 InviteLastPlayedUnitframe1
+
+        scriptID                0
+
+        wide                    245
+        tall                    47
+
+        rui					    "ui/unitframe_lobby_invite_last_squad.rpak"
+    }
+
+    InviteLastPlayedUnitframe1
+    {
+        ControlName             RuiButton
+
+        pin_to_sibling			InviteLastPlayedUnitframe0
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        rightClickEvents		1
+
+        ypos                    20
+
+        navUp                   InviteLastPlayedUnitframe0
+        navRight                InviteFriendsButton0
+        navDown                 FillButton
+
+        scriptID                1
+
+        wide                    245
+        tall                    47
+
+        rui					    "ui/unitframe_lobby_invite_last_squad.rpak"
     }
 
     SelfButton
@@ -179,6 +244,7 @@
         rightClickEvents		0
         tabPosition             1
 
+        navDown                 FriendButton0
         navLeft                 FriendButton0
         navRight                FriendButton1
 
@@ -327,5 +393,27 @@
         tall					470
         visible					0
         controlSettingsFile		"resource/ui/menus/panels/match_info.res"
+    }
+
+    MiniPromo
+    {
+        ControlName				RuiButton
+        wide					254
+        tall                    270
+        ypos					-83
+        rui                     "ui/mini_promo.rpak"
+        visible					1
+        cursorVelocityModifier  0.7
+
+        navLeft                 InviteFriendsButton1
+        navUp                   OpenLootBoxButton
+
+        proportionalToParent    1
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	BOTTOM_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+
+        sound_focus             "UI_Menu_Focus_Large"
     }
 }

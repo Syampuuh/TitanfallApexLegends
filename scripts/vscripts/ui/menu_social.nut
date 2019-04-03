@@ -30,6 +30,7 @@ struct
 	var leavePartyButton
 	var addFriendButton
 	var partyPrivacyButton
+	var lastSquadInvitePrivacyButton
 	var steamButton
 	var gridSpinner
 
@@ -39,6 +40,8 @@ struct
 
 	int panePageIndex = 0
 	int pagerPageIndex = 0
+
+	int cachedMatchPreferenceFlags = 0
 
 	var friendGrid
 	var decorationRui
@@ -98,6 +101,13 @@ void function InitSocialMenu()
 	HudElem_SetRuiArg( s_socialFile.partyPrivacyButton, "icon", $"rui/menu/common/party_privacy" )
 	Hud_AddEventHandler( s_socialFile.partyPrivacyButton, UIE_CLICK, OnPartyPrivacyButton_Activate )
 
+	s_socialFile.lastSquadInvitePrivacyButton = Hud_GetChild( menu, "LastSquadInvitePrivacyButton" )
+	HudElem_SetRuiArg( s_socialFile.lastSquadInvitePrivacyButton, "icon", $"rui/menu/common/last_squad" )
+	Hud_AddEventHandler( s_socialFile.lastSquadInvitePrivacyButton, UIE_CLICK, OnLastSquadInvitePrivacyButton_Activate )
+	ToolTipData toolTipData
+	toolTipData.descText = "#LAST_SQUAD_TOOLTIP"
+	Hud_SetToolTipData( s_socialFile.lastSquadInvitePrivacyButton, toolTipData )
+
 	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
 
 	#if(PC_PROG)
@@ -123,6 +133,8 @@ void function InitSocialMenu()
 	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton0x0" ), s_socialFile.myGridButton )
 	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton1x0" ), s_socialFile.partyPrivacyButton )
 	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton2x0" ), s_socialFile.leavePartyButton )
+	Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton3x0" ), s_socialFile.lastSquadInvitePrivacyButton )
+
 	#if(PC_PROG)
 		Hud_SetNavLeft( Hud_GetChild( s_socialFile.friendGrid, "GridButton5x0" ), s_socialFile.steamButton )
 	#endif
@@ -164,6 +176,11 @@ void function SocialMenuThink( var menu )
 		HudElem_SetRuiArg( s_socialFile.partyPrivacyButton, "buttonText", Localize( "#PARTY_PRIVACY_N", Localize( "#SETTING_INVITE" ) ) )
 
 	Hud_SetVisible( s_socialFile.leavePartyButton, AmIPartyMember() || (AmIPartyLeader() && GetPartySize() > 1) )
+
+	if ( s_socialFile.cachedMatchPreferenceFlags & eMatchPreferenceFlags.LAST_SQUAD_INVITE_OPT_OUT )
+		HudElem_SetRuiArg( s_socialFile.lastSquadInvitePrivacyButton, "buttonText", Localize( "#LAST_SQUAD_N", Localize( "#SETTING_OPT_OUT" ) ) )
+	else
+		HudElem_SetRuiArg( s_socialFile.lastSquadInvitePrivacyButton, "buttonText", Localize( "#LAST_SQUAD_N", Localize( "#SETTING_ALLOW_INVITES" ) ) )
 }
 
 
@@ -220,18 +237,18 @@ void function UpdateDpadNav()
 	{
 		Hud_SetNavDown( s_socialFile.partyPrivacyButton, s_socialFile.leavePartyButton )
 		Hud_SetNavUp( s_socialFile.leavePartyButton, s_socialFile.partyPrivacyButton )
-		#if(PC_PROG)
-			Hud_SetNavUp( s_socialFile.steamButton, s_socialFile.leavePartyButton )
-			Hud_SetNavDown( s_socialFile.leavePartyButton, s_socialFile.steamButton )
-		#endif
+		Hud_SetNavDown( s_socialFile.leavePartyButton, s_socialFile.lastSquadInvitePrivacyButton )
 	}
 	else
 	{
-		#if(PC_PROG)
-			Hud_SetNavUp( s_socialFile.steamButton, s_socialFile.partyPrivacyButton )
-			Hud_SetNavDown( s_socialFile.partyPrivacyButton, s_socialFile.steamButton )
-		#endif
+		Hud_SetNavDown( s_socialFile.partyPrivacyButton, s_socialFile.lastSquadInvitePrivacyButton )
+		Hud_SetNavUp( s_socialFile.lastSquadInvitePrivacyButton, s_socialFile.partyPrivacyButton )
 	}
+
+	#if(PC_PROG)
+		Hud_SetNavUp( s_socialFile.steamButton, s_socialFile.lastSquadInvitePrivacyButton )
+		Hud_SetNavDown( s_socialFile.lastSquadInvitePrivacyButton, s_socialFile.steamButton )
+	#endif
 }
 
 void function FriendButtonInit( var button )
@@ -245,6 +262,8 @@ void function SocialMenu_OnOpen()
 	AddCallback_OnPartyUpdated( UpdateDpadNav )
 	UpdateDpadNav()
 
+	thread InitCachedMatchPreferenceFlags()
+
 	if ( !_IsMenuThinkActive() )
 	{
 		//
@@ -252,6 +271,15 @@ void function SocialMenu_OnOpen()
 	}
 }
 
+void function InitCachedMatchPreferenceFlags()
+{
+	while ( !IsPersistenceAvailable() )
+	{
+		WaitFrame()
+	}
+
+	s_socialFile.cachedMatchPreferenceFlags = GetPersistentVarAsInt( "matchPreferences" )
+}
 
 void function SocialMenu_OnShow()
 {
@@ -759,6 +787,23 @@ void function OnPartyPrivacyButton_Activate( var button )
 	}
 }
 
+void function OnLastSquadInvitePrivacyButton_Activate( var button )
+{
+	if ( Hud_IsLocked( button ) )
+		return
+
+
+	if ( s_socialFile.cachedMatchPreferenceFlags & eMatchPreferenceFlags.LAST_SQUAD_INVITE_OPT_OUT )
+	{
+		ClientCommand( "ClearMatchPreferencesFlag " + string( eMatchPreferenceFlags.LAST_SQUAD_INVITE_OPT_OUT ) )
+		s_socialFile.cachedMatchPreferenceFlags = s_socialFile.cachedMatchPreferenceFlags & ~eMatchPreferenceFlags.LAST_SQUAD_INVITE_OPT_OUT
+	}
+	else
+	{
+		ClientCommand( "SetMatchPreferencesFlag " + string( eMatchPreferenceFlags.LAST_SQUAD_INVITE_OPT_OUT ) )
+		s_socialFile.cachedMatchPreferenceFlags = s_socialFile.cachedMatchPreferenceFlags | eMatchPreferenceFlags.LAST_SQUAD_INVITE_OPT_OUT
+	}
+}
 
 #if(PC_PROG)
 void function UpdateSteamButton()

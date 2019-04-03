@@ -241,7 +241,7 @@
 
         navLeft                 TallButton2
         navUp                   SquareButton3x1
-        navRight                TallButton3
+        navRight                SquareButton5x2
 
         pin_to_sibling			TallButton3
         pin_corner_to_sibling	BOTTOM_RIGHT
@@ -315,7 +315,7 @@
         scriptID                4
         classname               "BottomOfferButton"
 
-        navLeft                 TallButton4
+        navLeft                 SquareButton3x2
         navRight                TallButton5
         navUp                   SquareButton5x1
 

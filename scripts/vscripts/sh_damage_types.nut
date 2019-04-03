@@ -148,9 +148,7 @@ global enum eDamageSourceId
 
 
 #endif //
-	#if(false)
-
-#endif //
+	mp_weapon_tesla_trap
 
 	//
 	mp_weapon_super_spectre
@@ -355,6 +353,7 @@ void function DamageTypes_Init()
 		[ eDamageSourceId.melee_pilot_emptyhanded ] 				= "#DEATH_MELEE",
 		[ eDamageSourceId.melee_wraith_kunai ] 						= "#DEATH_MELEE_WRAITH_KUNAI",
 		[ eDamageSourceId.mp_weapon_wraith_kunai_primary ] 			= "#DEATH_MELEE_WRAITH_KUNAI",
+		[ eDamageSourceId.mp_weapon_tesla_trap ]					= "#DEATH_TESLA_TRAP",
 	}
 
 	#if(DEV)

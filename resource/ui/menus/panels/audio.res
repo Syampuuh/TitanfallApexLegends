@@ -60,7 +60,6 @@
     {
         ControlName             SliderControl
         InheritProperties       SliderControl
-        tabPosition             1
         navUp                   SwchPushToTalk
         navDown                 SldVoiceChatVolume
         conCommand              "speex_quiet_threshold"
@@ -200,7 +199,7 @@
         InheritProperties       SwitchButton
         style                   DialogListButton
         navUp                   SldLobbyMusicVolume
-        navDown                 SwchSubtitles
+        navDown                 SwchChatTextToSpeech
         ConVar                  "sound_without_focus"
         list
         {
@@ -214,38 +213,15 @@
         childGroupAlways        ChoiceButtonAlways
     }
 
-    SwchSubtitles
-    {
-        ControlName             RuiButton
-        InheritProperties       SwitchButton
-        style                   DialogListButton
-        navUp                   SwchSoundWithoutFocus
-        navDown                 SwchChatTextToSpeech
-
-        ConVar                  "closecaption"
-        list
-        {
-            // If we enable hearing impaired captions, rather than use "cc_subtitles", "closecaption" should support a 3rd value
-            "#SETTING_OFF"  0
-            "#SETTING_ON"   1
-        }
-
-        pin_to_sibling          SwchSoundWithoutFocus
-        pin_corner_to_sibling   TOP_LEFT
-        pin_to_sibling_corner   BOTTOM_LEFT
-
-        childGroupAlways        ChoiceButtonAlways
-    }
-
     SwchChatTextToSpeech
     {
         ControlName             RuiButton
         InheritProperties       SwitchButton
         style                   DialogListButton
-        navUp                   SwchSubtitles
+        navUp                   SwchSoundWithoutFocus
         navDown                 SwchChatSpeechToText
 
-        pin_to_sibling          SwchSubtitles
+        pin_to_sibling          SwchSoundWithoutFocus
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
 
@@ -273,6 +249,7 @@
         InheritProperties       SwitchButton
         style                   DialogListButton
         navUp                   SwchChatTextToSpeech
+        navDown                 SwchSpeakerConfig
 
         pin_to_sibling          SwchChatTextToSpeech
         pin_corner_to_sibling   TOP_LEFT
@@ -301,6 +278,7 @@
         ControlName             RuiButton
         InheritProperties       SwitchButton
         style                   DialogListButton
+        navUp                   SwchChatSpeechToText
         ypos                    40
         ConVar                  "miles_channels"
         visible                 1

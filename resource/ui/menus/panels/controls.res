@@ -20,7 +20,6 @@
     {
         ControlName				RuiButton
         InheritProperties		SwitchButton
-        navUp					BtnControllerOpenAdvancedMenu
         navDown					SwchStickLayout
         tabPosition				1
         ypos                    0
@@ -94,7 +93,7 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchHoldToCrouch
-        navDown					SwchLookSensitivity
+        navDown					SwchTriggerDeadzone
         ConVar					"gamepad_toggle_ads"
         list
         {
@@ -104,14 +103,35 @@
 
         childGroupAlways        ChoiceButtonAlways
     }
+    SwchTriggerDeadzone
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        pin_to_sibling			SwchToggleGamepadADS
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SwchToggleGamepadADS
+        navDown					SwchLookSensitivity
+        ConVar					"gamepad_trigger_threshold"
+        list
+        {
+            "#SETTING_TRIGGERDEADZONE_NONE"			0
+            "#SETTING_TRIGGERDEADZONE_DEFAULT"		30
+            "#SETTING_TRIGGERDEADZONE_MODERATE"		64
+            "#SETTING_TRIGGERDEADZONE_HIGH"			128
+            "#SETTING_TRIGGERDEADZONE_MAX"			255
+        }
 
+        childGroupAlways        MultiChoiceButtonAlways
+    }
     LookMoveHeader
     {
         ControlName				ImagePanel
         InheritProperties		SubheaderBackgroundWide
         xpos					0
         ypos					6
-        pin_to_sibling			SwchToggleGamepadADS
+        pin_to_sibling			SwchTriggerDeadzone
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
     }
@@ -133,7 +153,7 @@
         pin_to_sibling			LookMoveHeader
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchToggleGamepadADS
+        navUp					SwchTriggerDeadzone
         navDown					SwchLookSensitivityADS
         ConVar					"gamepad_aim_speed"
         list
@@ -153,14 +173,14 @@
     SwchLookSensitivity_AdvLabel
     {
         ControlName				Label
-        InheritProperties		AdvControlsLabel
+        InheritProperties		AdvControlsLabel	//SubheaderText
         pin_to_sibling			SwchLookSensitivity
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	TOP_RIGHT
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
         xpos					0
-        ypos					-8
+        ypos					0
         font					DefaultBold_27_DropShadow
-        labelText				"*"
+        labelText				"#CONTROLS_ADVANCED_LOOK_ENABLED"
         visible                 0
     }
     SwchLookSensitivityADS
@@ -194,12 +214,12 @@
         ControlName				Label
         InheritProperties		AdvControlsLabel
         pin_to_sibling			SwchLookSensitivityADS
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	TOP_RIGHT
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
         xpos					0
-        ypos					-8
+        ypos					0
         font					DefaultBold_27_DropShadow
-        labelText				"*"
+        labelText				"#CONTROLS_ADVANCED_LOOK_ENABLED"
         visible                 0
     }
     SwchLookAiming
@@ -229,12 +249,12 @@
         ControlName				Label
         InheritProperties		AdvControlsLabel
         pin_to_sibling			SwchLookAiming
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	TOP_RIGHT
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
         xpos					0
-        ypos					-8
+        ypos					0
         font					DefaultBold_27_DropShadow
-        labelText				"*"
+        labelText				"#CONTROLS_ADVANCED_LOOK_ENABLED"
         visible                 0
     }
     SwchLookDeadzone
@@ -262,12 +282,12 @@
         ControlName				Label
         InheritProperties		AdvControlsLabel
         pin_to_sibling			SwchLookDeadzone
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	TOP_RIGHT
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
         xpos					0
-        ypos					-8
+        ypos					0
         font					DefaultBold_27_DropShadow
-        labelText				"*"
+        labelText				"#CONTROLS_ADVANCED_LOOK_ENABLED"
         visible                 0
     }
     SwchMoveDeadzone
@@ -331,7 +351,7 @@
 	PanelBottom
 	{
 		ControlName				Label
-		labeText                ""
+		labelText               ""
 
 		zpos                    0
 		wide					1
@@ -353,40 +373,39 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchVibration
-        navDown					BtnGamepadLayout
-        visible                 0
+        visible                 1
     }
-    LblAdvControllerOff
-    {
-        ControlName				Label
-        InheritProperties		AdvControlsLabel
-        pin_to_sibling			BtnControllerOpenAdvancedMenu
-        pin_corner_to_sibling	RIGHT
-        pin_to_sibling_corner	RIGHT
-        xpos					-10
-        zpos					2
-        auto_tall_tocontents	1
-        visible                 0
-
-        fgcolor_override		"255 255 255 127"
-        labelText				"#SETTING_DISABLED"
-        font                    DefaultRegularFont
-        fontHeight              25
-    }
-    LblAdvControllerOn
-    {
-        ControlName				Label
-        InheritProperties		AdvControlsLabel
-        pin_to_sibling			BtnControllerOpenAdvancedMenu
-        pin_corner_to_sibling	RIGHT
-        pin_to_sibling_corner	RIGHT
-        xpos					-10
-        zpos					2
-        auto_tall_tocontents	1
-        visible                 0
-
-        labelText				"#SETTING_ENABLED"
-        font                    DefaultRegularFont
-        fontHeight              26
-    }
+//    LblAdvControllerOff
+//    {
+//        ControlName				Label
+//        InheritProperties		AdvControlsLabel
+//        pin_to_sibling			BtnControllerOpenAdvancedMenu
+//        pin_corner_to_sibling	RIGHT
+//        pin_to_sibling_corner	RIGHT
+//        xpos					-10
+//        zpos					2
+//        auto_tall_tocontents	1
+//        visible                 0
+//
+//        fgcolor_override		"255 255 255 127"
+//        labelText				"#SETTING_DISABLED"
+//        font                    DefaultRegularFont
+//        fontHeight              25
+//    }
+//    LblAdvControllerOn
+//    {
+//        ControlName				Label
+//        InheritProperties		AdvControlsLabel
+//        pin_to_sibling			BtnControllerOpenAdvancedMenu
+//        pin_corner_to_sibling	RIGHT
+//        pin_to_sibling_corner	RIGHT
+//        xpos					-10
+//        zpos					2
+//        auto_tall_tocontents	1
+//        visible                 0
+//
+//        labelText				"#SETTING_ENABLED"
+//        font                    DefaultRegularFont
+//        fontHeight              26
+//    }
 }

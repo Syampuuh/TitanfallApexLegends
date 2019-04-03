@@ -134,7 +134,7 @@
     Button6
     {
         ControlName				RuiButton
-        xpos                    -50
+        xpos                    -124
         ypos                    0
         zpos					14
         wide					194

@@ -324,11 +324,11 @@ void function WORKAROUND_ProcessPakQueues()
 			PakRequestState prs = file.unloadQueue[0] //
 			Assert( prs.status == ePakRequestStatus.QUEUED_TO_UNLOAD )
 
-			float waitTime = Time() - (prs.WORKAROUND_unloadQueueTime + WORKAROUND_UNLOAD_MIN_WAIT_TIME)
+			float waitTime = (prs.WORKAROUND_unloadQueueTime + WORKAROUND_UNLOAD_MIN_WAIT_TIME) - Time()
 			if ( waitTime > 0.0 )
 				wait waitTime
 
-			waitTime = Time() - (prs.WORKAROUND_unloadQueueTime + WORKAROUND_UNLOAD_MIN_WAIT_TIME)
+			waitTime = (prs.WORKAROUND_unloadQueueTime + WORKAROUND_UNLOAD_MIN_WAIT_TIME) - Time()
 			if ( file.unloadQueue.len() == 0 || file.unloadQueue[0] != prs || waitTime > 0.0 )
 				continue //
 

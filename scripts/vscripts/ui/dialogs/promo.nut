@@ -1,12 +1,12 @@
-global function UICodeCallback_MainMenuPromosUpdated
-
 global function InitPromoDialog
 global function OpenPromoDialogIfNew
 global function IsPromoDialogAllowed
 
 global function PromoDialog_OpenHijacked
 
-struct PageContent
+const PROMO_DIALOG_MAX_PAGES = 9
+
+struct PromoDialogPageData
 {
 	asset image = $""
 	string title = ""
@@ -34,50 +34,33 @@ struct
 	string ornull      hijackContent = null
 	void functionref() hijackCloseCallback = null
 
-	MainMenuPromos&      promoData
-	array<asset>         images
-	table<string, asset> imageMap
-	array<PageContent>   pages
-	int                  activePageIndex = 0
-
-
-
+	array<PromoDialogPageData> pages
+	int activePageIndex = 0
 	var lastPageRui
 	var activePageRui
 	int updateID = -1
 } file
 
-const int PROMO_PROTOCOL = 1
-
-void function UICodeCallback_MainMenuPromosUpdated()
-{
-	printt( "Promos updated" )
-
-	#if(DEV)
-		if ( GetConVarInt( "mainMenuPromos_preview" ) == 1 )
-			file.promoData = GetMainMenuPromos()
-	#endif //
-}
-
 
 void function OpenPromoDialogIfNew()
 {
-	entity player = GetUIPlayer()
-	file.promoData = GetMainMenuPromos()
+	UpdatePromoData()
 
+	entity player = GetUIPlayer()
 	if ( player == null || !IsPromoDialogAllowed() )
 		return
 
+	int promoVersion = GetPromoDataVersion()
 	int promoVersionSeen = player.GetPersistentVarAsInt( "promoVersionSeen" )
 
-	if ( file.promoData.version != 0 && file.promoData.version != promoVersionSeen )
+	if ( promoVersion != 0 && promoVersion != promoVersionSeen )
 		AdvanceMenu( file.menu )
 }
 
 
 bool function IsPromoDialogAllowed()
 {
-	return ( file.promoData.prot == PROMO_PROTOCOL && IsLobby() && IsFullyConnected() && GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
+	return ( IsPromoDataProtocolValid() && IsLobby() && IsFullyConnected() && GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
 }
 
 
@@ -105,18 +88,6 @@ void function InitPromoDialog()
 
 	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_CLOSE", "#B_BUTTON_CLOSE" )
 	AddMenuFooterOption( menu, LEFT, BUTTON_X, true, "#X_BUTTON_BUY", "#BUY", GoToStoreItem, PageHasBuyOption )
-
-	RequestMainMenuPromos() //
-
-	var dataTable = GetDataTable( $"datatable/promo_images.rpak" )
-	for ( int i = 0; i < GetDatatableRowCount( dataTable ); i++ )
-	{
-		string name = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "name" ) ).tolower()
-		asset image = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "image" ) )
-		file.images.append( image )
-		if ( name != "" )
-			file.imageMap[name] <- image
-	}
 }
 
 
@@ -130,24 +101,7 @@ void function PromoDialog_OpenHijacked( string content, void functionref() close
 
 void function PromoDialog_OnOpen()
 {
-	string content
-
-	if ( file.hijackContent != null )
-		content = expect string( file.hijackContent )
-	else
-		content = file.promoData.layout
-
-	if ( content.find( "<" ) != 0 ) //
-		content = "<p|0| |" + content + ">"
-
-	//
-	//
-	//
-	//
-	//
-	//
-
-	file.pages = InitPages( content )
+	file.pages = InitPages()
 	file.activePageIndex = 0
 
 	UpdatePageRui( file.activePageRui, 0 )
@@ -181,7 +135,7 @@ void function UserClosedPromoDialog( var button )
 {
 	entity player = GetUIPlayer()
 	if ( player != null && IsFullyConnected() && file.hijackContent == null )
-		ClientCommand( "SetPromoVersionSeen " + string( file.promoData.version ) )
+		ClientCommand( "SetPromoVersionSeen " + string( GetPromoDataVersion() ) )
 
 	CloseActiveMenu()
 }
@@ -193,44 +147,37 @@ void function GoToStoreItem( var button )
 }
 
 
-array<PageContent> function InitPages( string content )
+array<PromoDialogPageData> function InitPages()
 {
-	array<PageContent> pages
-	array<string> elements = RegexpFindSimple( content, "<([^>]+)>" )
-	int pageIndex = 0
+	string content = file.hijackContent != null ? expect string( file.hijackContent ) : GetPromoDataLayout()
+	//
+	//
+	//
+	//
 
-	foreach ( element in elements )
+	if ( content.find( "<" ) != 0 ) //
+		content = "<p|0||" + content + ">"
+
+	//
+	array< array<string> > matches = RegexpFindAll( content, "<p\\|([^>\\|]*)\\|([^>\\|]*)\\|([^>\\|]*)>" )
+	if ( matches.len() > PROMO_DIALOG_MAX_PAGES )
 	{
-		array<string> vals = split( element, "|" )
+		Warning( "Ignoring extra promo dialog pages! Found " + matches.len() + " pages and only " + PROMO_DIALOG_MAX_PAGES + " are supported." )
+		matches.resize( PROMO_DIALOG_MAX_PAGES )
+	}
 
+	array<PromoDialogPageData> pages
+
+	foreach ( vals in matches )
+	{
+		PromoDialogPageData newPage
+		//
+		newPage.image = GetPromoImage( vals[1] )
+		newPage.title = vals[2]
+		newPage.desc = vals[3]
 		//
 		//
-		//
-
-		if ( vals[0] == "p" ) //
-		{
-			if ( vals.len() != 4 && vals.len() != 3 )
-				continue
-
-			PageContent newPage
-
-			string imageVal = vals[1].tolower()
-			if ( imageVal in file.imageMap )
-				newPage.image = file.imageMap[imageVal]
-			else
-				newPage.image = file.images[int(imageVal)]
-
-			newPage.title = vals[2]
-			newPage.desc = vals.len() == 3 ? "" : vals[3]
-			//
-			//
-
-			pages.append( newPage )
-		}
-		else
-		{
-			Warning( "Unrecognized element: " + vals[0] )
-		}
+		pages.append( newPage )
 	}
 
 	return pages
@@ -337,7 +284,7 @@ void function ChangePage( int delta )
 
 void function UpdatePageRui( var rui, int pageIndex )
 {
-	PageContent page = file.pages[pageIndex]
+	PromoDialogPageData page = file.pages[pageIndex]
 
 	RuiSetImage( rui, "imageAsset", page.image )
 	RuiSetString( rui, "titleText", page.title )

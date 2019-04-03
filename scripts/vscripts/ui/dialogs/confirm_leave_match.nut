@@ -7,6 +7,7 @@ struct
 	var menu
 	var contentRui
 	bool playerCanBeRespawned
+	bool penaltyMayBeActive
 	bool hasShownRespawnWarningString
 	float nextAllowCloseTime
 	float nextAllowConfirmTime
@@ -65,9 +66,10 @@ void function ConfirmLeaveMatchDialog_OnClose()
 {
 }
 
-void function ConfirmLeaveMatchDialog_SetPlayerCanBeRespawned( bool value )
+void function ConfirmLeaveMatchDialog_SetPlayerCanBeRespawned( bool playerCanBeRespawned, bool penaltyMayBeActive )
 {
-	file.playerCanBeRespawned = value
+	file.playerCanBeRespawned = playerCanBeRespawned
+	file.penaltyMayBeActive = penaltyMayBeActive
 }
 
 void function SetWarningString( string newStr )
@@ -86,6 +88,10 @@ void function ConfirmLeaveMatchDialog_Open()
 	{
 		data.messageText = "#YOU_CAN_STILL_BE_RESPAWNED"
 		data.contextImage = $"rui/hud/gametype_icons/survival/dna_station"
+	}
+	else if ( file.penaltyMayBeActive )
+	{
+		data.messageText = "#ARE_YOU_SURE_YOU_WANT_TO_LEAVE_PENALTY"
 	}
 	else
 	{
