@@ -133,6 +133,7 @@ global function DevPrintAllStatusEffectsOnEnt
 
 
 
+
 #endif //
 
 #if(CLIENT)
@@ -315,10 +316,6 @@ void function WeaponUtility_Init()
 
 
 
-
-
-
-
 #endif
 
 	HOLO_PILOT_TRAIL_FX = PrecacheParticleSystem( $"P_ar_holopilot_trail" )
@@ -410,20 +407,6 @@ void function OnWeaponActivate_RUIColorSchemeOverrides( entity weapon )
 
 
 //
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
 
 
 #endif
@@ -1091,9 +1074,9 @@ entity function FireBallisticRoundWithDrop( entity weapon, vector pos, vector di
 #endif
 	}
 
-#if(CLIENT)
+	#if(CLIENT)
 	Chroma_FiredWeapon( weapon )
-#endif
+	#endif
 
 	return bolt
 }
@@ -1153,9 +1136,9 @@ int function FireGenericBoltWithDrop( entity weapon, WeaponPrimaryAttackParams a
 		bolt.kv.renderamt = 0
 		bolt.kv.fadedist = 1
 	}
-#if(CLIENT)
+	#if(CLIENT)
 	Chroma_FiredWeapon( weapon )
-#endif
+	#endif
 
 
 	return 1
@@ -1531,6 +1514,15 @@ bool function EntityCanHaveStickyEnts( entity stickyEnt, entity ent )
 	if ( entClassname == null || !(string( entClassname ) in level.stickyClasses) && !ent.IsNPC() )
 		return false
 
+	#if(false)
+
+
+
+
+
+#endif
+
+
 #if(CLIENT)
 	if ( stickyEnt instanceof C_Projectile )
 #else
@@ -1598,6 +1590,7 @@ void function ProximityCharge_PostFired_Init( entity proximityMine, entity playe
 
 #endif
 }
+
 
 void function ExplodePlantedGrenadeAfterDelay( entity grenade, float delay )
 {
@@ -2161,6 +2154,7 @@ void function InitMissileForRandomDriftForVortexLow( entity missile, vector star
 //
 //
 //
+
 
 
 
@@ -3750,20 +3744,6 @@ entity function GetPlayerFromTitanWeapon( entity weapon )
 
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 
@@ -3796,9 +3776,6 @@ entity function GetPlayerFromTitanWeapon( entity weapon )
 
 
 
-
-
-//
 
 
 
@@ -3943,21 +3920,6 @@ entity function GetPlayerFromTitanWeapon( entity weapon )
 
 
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4581,70 +4543,6 @@ void function CodeCallback_OnPlayerRemovedWeaponMod( entity player, entity weapo
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4673,6 +4571,20 @@ void function CodeCallback_OnPlayerRemovedWeaponMod( entity player, entity weapo
 
 
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //
@@ -4707,6 +4619,80 @@ void function CodeCallback_OnPlayerRemovedWeaponMod( entity player, entity weapo
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -4714,18 +4700,6 @@ void function CodeCallback_OnPlayerRemovedWeaponMod( entity player, entity weapo
 
 
 //
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4837,7 +4811,7 @@ bool function IsWeaponInSingleShotMode( entity weapon )
 	if ( weapon.GetWeaponSettingBool( eWeaponVar.attack_button_presses_melee ) )
 		return false
 
-	if ( weapon.GetWeaponSettingEnum( eWeaponVar.fire_mode, eWeaponFireMode ) != eWeaponFireMode.semiauto )
+	if ( !weapon.GetWeaponSettingBool( eWeaponVar.is_semi_auto ) )
 		return false
 
 	return weapon.GetWeaponSettingInt( eWeaponVar.burst_fire_count ) == 0
@@ -4865,9 +4839,8 @@ bool function IsWeaponOffhand( entity weapon )
 
 bool function IsWeaponInAutomaticMode( entity weapon )
 {
-	return weapon.GetWeaponSettingEnum( eWeaponVar.fire_mode, eWeaponFireMode ) == eWeaponFireMode.automatic
+	return !weapon.GetWeaponSettingBool( eWeaponVar.is_semi_auto )
 }
-
 
 bool function OnWeaponAttemptOffhandSwitch_Never( entity weapon )
 {
@@ -4912,6 +4885,7 @@ void function OnWeaponReadyToFire_ability_tactical( entity weapon )
 #endif
 }
 
+
 void function OnWeaponRegenEndGeneric( entity weapon )
 {
 	#if(false)
@@ -4927,6 +4901,7 @@ void function OnWeaponRegenEndGeneric( entity weapon )
 			Chroma_UltimateReady()
 	#endif
 }
+
 
 void function Ultimate_OnWeaponRegenBegin( entity weapon )
 {

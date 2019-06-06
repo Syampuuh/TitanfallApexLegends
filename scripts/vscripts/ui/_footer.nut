@@ -31,7 +31,7 @@ void function InitFooterOptions()
 	thread UpdateFooterSizes()
 }
 
-void function AddMenuFooterOption( var menu, int alignment, int input, bool clickable, string gamepadLabel, string mouseLabel = "", void functionref( var ) activateFunc = null, bool functionref() conditionCheckFunc = null, void functionref( InputDef ) updateFunc = null )
+InputDef function AddMenuFooterOption( var menu, int alignment, int input, bool clickable, string gamepadLabel, string mouseLabel = "", void functionref( var ) activateFunc = null, bool functionref() conditionCheckFunc = null, void functionref( InputDef ) updateFunc = null )
 {
 	//
 	//
@@ -70,14 +70,17 @@ void function AddMenuFooterOption( var menu, int alignment, int input, bool clic
 	data.updateFunc = updateFunc
 
 	footerData.append( data )
+
+	return data
 }
+
 
 void function ClearMenuFooterOptions( var menu )
 {
 	uiGlobal.menuData[ menu ].footerData.clear()
 }
 
-void function AddPanelFooterOption( var panel, int alignment, int input, bool clickable, string gamepadLabel, string mouseLabel = "", void functionref( var ) activateFunc = null, bool functionref() conditionCheckFunc = null, void functionref( InputDef ) updateFunc = null )
+InputDef function AddPanelFooterOption( var panel, int alignment, int input, bool clickable, string gamepadLabel, string mouseLabel = "", void functionref( var ) activateFunc = null, bool functionref() conditionCheckFunc = null, void functionref( InputDef ) updateFunc = null )
 {
 	//
 	//
@@ -116,6 +119,8 @@ void function AddPanelFooterOption( var panel, int alignment, int input, bool cl
 	data.updateFunc = updateFunc
 
 	footerData.append( data )
+
+	return data
 }
 
 void function ClearRegisteredInputs()

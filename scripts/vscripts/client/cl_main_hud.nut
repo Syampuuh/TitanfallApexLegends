@@ -13,14 +13,10 @@ global function ServerCallback_Announcement
 global function ClientCodeCallback_ControllerModeChanged
 global function UpdateMainHudFromCEFlags
 global function UpdatePlayerStatusCounts
-//
 global function UpdateCoreFX
 global function InitCrosshair
 
 global function IsWatchingReplay
-
-global function RodeoAlert_FriendlyGaveBattery
-global function RodeoAlert_YouGaveBattery
 
 global const MAX_ACTIVE_TRAPS_DISPLAYED = 5
 global const VGUI_CLOSED = 0
@@ -55,47 +51,6 @@ void function ClMainHud_Init()
 
 	PrecacheHUDMaterial( TEAM_ICON_IMC )
 	PrecacheHUDMaterial( TEAM_ICON_MILITIA )
-
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
 
 	RegisterSignal( "UpdateTitanCounts" )
 	RegisterSignal( "MainHud_TurnOn" )
@@ -155,7 +110,6 @@ void function MainHud_AddClient( entity player )
 	thread ClientHudInit( player )
 }
 
-
 void function CockpitHudInit( entity cockpit )
 {
 	entity player = GetLocalViewPlayer()
@@ -166,17 +120,11 @@ void function CockpitHudInit( entity cockpit )
 		thread PilotMainHud( cockpit, player )
 		cockpit.SetCaptureScreenBeforeViewmodels( true )
 	}
-	else if ( IsTitanCockpitModelName( cockpitModelName ) )
-	{
-		thread TitanMainHud( cockpit, player )
-		cockpit.SetCaptureScreenBeforeViewmodels( false )
-	}
 	else
 	{
 		cockpit.SetCaptureScreenBeforeViewmodels( false )
 	}
 }
-
 
 void function PilotMainHud( entity cockpit, entity player )
 {
@@ -196,12 +144,6 @@ void function PilotMainHud( entity cockpit, entity player )
 	cockpit.s.pilotDamageAmpFXHandle <- null
 
 	UpdateMainHudVisibility( player )
-	//
-		//
-		//
-
-		//
-	//
 
 	if ( player == GetLocalClientPlayer() )
 	{
@@ -216,83 +158,6 @@ void function PilotMainHud( entity cockpit, entity player )
 	cockpit.WaitSignal( "OnDestroy" )
 
 	mainVGUI.Destroy()
-}
-
-
-void function TitanMainHud( entity cockpit, entity player )
-{
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	{
-		OnThreadEnd(
-			function () : ( cockpit )
-			{
-				cockpit.e.mainVGUI.Destroy()
-			}
-		)
-	}
-
-	entity mainVGUI = Create_Hud( "vgui_fullscreen_titan", cockpit, player )
-	cockpit.e.mainVGUI = mainVGUI
-	var panel = mainVGUI.s.panel
-
-	cockpit.EndSignal( "OnDestroy" )
-	player.EndSignal( "OnDestroy" )
-
-	table warpSettings = expect table( mainVGUI.s.warpSettings )
-	panel.WarpGlobalSettings( expect float( warpSettings.xWarp ), 0.0, expect float( warpSettings.yWarp ), 0.0, expect float( warpSettings.viewDist ) )
-	panel.WarpEnable()
-	mainVGUI.s.enabledState <- VGUI_CLOSED
-	thread MainHud_TurnOff_RUI( true )
-
-	cockpit.s.coreFXHandle <- null
-	cockpit.s.titanDamageAmpFXHandle <- null
-
-	cockpit.s.forceFlash <- false
-
-	//
-
-	local settings = player.GetPlayerSettings()
-	Assert( player.IsTitan() || settings == "pilot_titan_cockpit", "player has titan settings but is not a titan" )
-
-	thread RodeoAlertThink( cockpit, player )
-
-	UpdateCoreFX( player )
-	UpdateTitanDamageAmpFX( player )
-
-	//
-	//
-	//
-
-	if ( IsValid( cockpit ) )
-	{
-		level.EMP_vguis.append( mainVGUI )
-
-		if ( player == GetLocalClientPlayer() )
-		{
-			delaythread( 1.0 ) AnnouncementProcessQueue( player )
-		}
-
-		UpdateMainHudVisibility( player )
-		//
-
-		foreach ( callbackFunc in clGlobal.titanHudCallbacks )
-		{
-			callbackFunc( cockpit, player )
-		}
-
-		WaitForever()
-	}
 }
 
 
@@ -425,19 +290,7 @@ void function UpdateCoreFX( entity player )
 	{
 		EffectStop( cockpit.s.coreFXHandle, false, true ) //
 	}
-
-	if ( PlayerShouldHaveCoreScreenFX( player ) )
-	{
-		cockpit.s.coreFXHandle = StartParticleEffectOnEntity( cockpit, GetParticleSystemIndex( $"P_core_DMG_boost_screen" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
-	}
 }
-
-
-bool function PlayerShouldHaveCoreScreenFX( entity player )
-{
-	return false
-}
-
 
 void function OnRodeoStarting( entity rider, entity vehicle )
 {
@@ -457,300 +310,6 @@ void function OnRodeoEnded( entity rider, entity vehicle )
 		localViewPlayer.Signal( "UpdateRodeoAlert" )
 	}
 }
-
-
-void function RodeoAlertThink( entity cockpit, entity player )
-{
-	cockpit.EndSignal( "OnDestroy" )
-	player.EndSignal( "OnDestroy" )
-
-	var rui = CreateCockpitRui( $"ui/rodeo_display.rpak" )
-	file.rodeoRUI = rui
-	RuiSetVisible( rui, false )
-	RuiSetBool( rui, "isCockpit", true )
-	RuiSetBool( rui, "isUsingLargeMinimap", Minimap_IsUsingLargeMinimap() )
-
-	OnThreadEnd(
-		function() : ( rui )
-		{
-			RuiDestroy( rui )
-			file.rodeoRUI = null
-		}
-	)
-
-	bool currentlyVisible = false
-	for ( ; ; )
-	{
-		entity soul = player.GetTitanSoul()
-		if ( !IsValid( soul ) )
-		{
-			//
-			RuiSetVisible( rui, false )
-			WaitFrame()
-			continue
-		}
-
-		array<entity> riderList = RodeoState_GetPlayersRodeingVehicle( soul.GetTitan() )
-		if ( riderList.len() > 0 )
-		{
-			if ( !currentlyVisible )
-			{
-				//
-				RuiSetFloat( rui, "healthFrac", 0.0 )
-				RuiSetGameTime( rui, "startTime", Time() )
-
-				string allNamesStr = ""
-				foreach ( int riderIndex, entity rider in riderList )
-				{
-					//
-					string riderLabel = rider.IsPlayer() ? rider.GetPlayerName() : rider.GetTitleForUI()
-					allNamesStr += (riderIndex == 0 ? "" : ", ") + riderLabel
-				}
-				RuiSetImage( rui, "statusIcon", $"rui/hud/common/rodeo_icon_friendly" )
-				RuiSetString( rui, "playerName", allNamesStr )
-				RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_PASSENGER" ) )
-				RuiSetBool( rui, "isEnemy", false )
-
-				//
-				//
-				//
-				//
-				//
-				//
-				//
-				//
-
-				RuiSetVisible( rui, true )
-			}
-		}
-		else if ( currentlyVisible )
-		{
-			RuiSetVisible( rui, false )
-			//
-		}
-
-		player.WaitSignal( "UpdateRodeoAlert" )
-	}
-}
-
-
-void function RodeoAlert_FriendlyGaveBattery()
-{
-	if ( file.rodeoRUI == null )
-		return
-
-	RuiSetGameTime( file.rodeoRUI, "batteryGivenStartTime", Time() )
-	RuiSetString( file.rodeoRUI, "pilotGaveBattery", Localize( "#RODEO_PILOT_APPLIED_BATTERY_TO_YOU_RUI_TEXT" ) )
-}
-
-
-void function RodeoAlert_YouGaveBattery()
-{
-	if ( file.rodeoRUI == null )
-		return
-
-	printt( "file.rodeoRui != null, setting stuff" )
-
-	RuiSetGameTime( file.rodeoRUI, "batteryGivenStartTime", Time() )
-	RuiSetString( file.rodeoRUI, "youGaveBattery", Localize( "#RODEO_PILOT_APPLIED_BATTERY_TO_YOU_RUI_TEXT" ) )
-
-	Signal( GetLocalViewPlayer(), "UpdateRodeoAlert" )
-}
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-bool function DidUpdateRodeoRideNameAndIcon( entity cockpit, entity player, var rui )
-{
-	if ( !RodeoState_GetIsPlayerRodeoing( player ) )
-		return false
-
-	entity titan = RodeoState_GetPlayerCurrentRodeoVehicle( player )
-	if ( !titan.IsTitan() )
-		return false
-
-	string name = GetTitanName( titan )
-	string text
-
-	RuiSetBool( rui, "isDoomed", titan.IsTitan() ? titan.GetTitanSoul().IsDoomed() : false )
-	RuiSetInt( rui, "maxHealth", titan.GetMaxHealth() )
-	RuiSetInt( rui, "healthPerSection", HEALTH_PER_HEALTH_BAR_SEGMENT )
-
-	if ( titan.GetMaxHealth() > 25000 )
-	{
-		RuiSetInt( rui, "healthPerSection", int( titan.GetMaxHealth() / 10.0 ) )
-	}
-
-	if ( IsFriendlyTeam( titan.GetTeam(), player.GetTeam() ) )
-	{
-		RuiSetImage( rui, "statusIcon", $"rui/hud/common/rodeo_icon_friendly" )
-		string playerName
-		if ( titan.IsPlayer() )
-			playerName = titan.GetPlayerName()
-		else
-			playerName = titan.GetBossPlayerName()
-
-		RuiSetString( rui, "playerName", playerName )
-		RuiSetBool( rui, "isEnemy", false )
-
-		if ( !titan.IsPlayer() )
-			RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_RIDER_FRIENDLY_AUTO_TITAN" ) )
-		else
-			RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_RIDER_FRIENDLY" ) )
-	}
-	else
-	{
-		RuiSetImage( rui, "statusIcon", $"rui/hud/common/rodeo_icon_enemy" )
-		string playerName
-		if ( titan.IsPlayer() )
-			playerName = titan.GetPlayerName()
-		else
-			playerName = titan.GetBossPlayerName()
-
-		RuiSetString( rui, "playerName", playerName )
-		RuiSetBool( rui, "isEnemy", true )
-
-		if ( !titan.IsPlayer() )
-		{
-			if ( IsPetTitan( titan ) )
-			{
-				RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_RIDER_ENEMY_AUTO_TITAN" ) )
-			}
-			else
-			{
-				if ( titan.GetTitleForUI() == "" )
-				{
-					RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_RIDER_ENEMY" ) )
-				}
-				else
-				{
-					RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_RIDER_ENEMY_TITLE", titan.GetTitleForUI() ) )
-				}
-			}
-		}
-		else
-		{
-			RuiSetString( rui, "statusText", Localize( "#HUD_RODEO_RIDER_ENEMY" ) )
-		}
-	}
-
-	RuiTrackFloat( rui, "healthFrac", titan, RUI_TRACK_HEALTH )
-	RuiTrackFloat( rui, "shieldFrac", titan, RUI_TRACK_SHIELD_FRACTION )
-	RuiSetVisible( rui, true )
-
-	return true
-}
-
-
-string function GetTitanName( entity titan )
-{
-	if ( titan.IsPlayer() )
-		return titan.GetPlayerName()
-
-	if ( IsValid( titan.GetBossPlayer() ) )
-		return titan.GetBossPlayerName()
-
-	return titan.GetTitleForUI()
-}
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
 entity function Create_Hud( string cockpitType, entity cockpit, entity player )
 {
 	string attachment = "CAMERA_BASE"
@@ -1437,5 +996,4 @@ bool function IsWatchingReplay()
 
 	return false
 }
-
 

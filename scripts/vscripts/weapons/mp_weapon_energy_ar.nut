@@ -76,6 +76,12 @@ void function OnWeaponActivate_Energy_AR( entity weapon )
 {
 	OnWeaponActivate_RUIColorSchemeOverrides( weapon )
 	OnWeaponActivate_ReactiveKillEffects( weapon )
+
+	#if(false)
+//
+
+
+#endif
 }
 
 void function OnWeaponDeactivate_Energy_AR( entity weapon )

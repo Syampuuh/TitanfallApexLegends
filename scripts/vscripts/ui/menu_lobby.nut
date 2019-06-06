@@ -12,6 +12,7 @@ struct
 	var newsButton
 	var socialButton
 	var gameMenuButton
+	var datacenterButton
 } file
 
 void function InitLobbyMenu()
@@ -28,6 +29,9 @@ void function InitLobbyMenu()
 
 	AddMenuEventHandler( menu, eUIEvent.MENU_SHOW, OnLobbyMenu_Show )
 	AddMenuEventHandler( menu, eUIEvent.MENU_HIDE, OnLobbyMenu_Hide )
+
+	AddMenuEventHandler( menu, eUIEvent.MENU_GET_TOP_LEVEL, OnLobbyMenu_GetTopLevel )
+	//
 
 	AddMenuEventHandler( menu, eUIEvent.MENU_NAVIGATE_BACK, OnLobbyMenu_NavigateBack )
 
@@ -78,6 +82,14 @@ void function InitLobbyMenu()
 	HudElem_SetRuiArg( gameMenuButton, "icon", $"rui/menu/lobby/settings_icon" )
 	HudElem_SetRuiArg( gameMenuButton, "shortcutText", "%[START|ESCAPE]%" )
 	Hud_AddEventHandler( gameMenuButton, UIE_CLICK, GameMenuButton_OnActivate )
+
+	var datacenterButton = Hud_GetChild( menu, "DatacenterButton" )
+	file.datacenterButton = datacenterButton
+	ToolTipData datacenterTooltip
+	datacenterTooltip.descText = "#LOWPOP_DATACENTER_BUTTON"
+	Hud_SetToolTipData( datacenterButton, datacenterTooltip )
+	HudElem_SetRuiArg( datacenterButton, "icon", $"rui/hud/gamestate/net_latency" )
+	Hud_AddEventHandler( datacenterButton, UIE_CLICK, OpenLowPopDialogFromButton )
 }
 
 
@@ -131,6 +143,12 @@ void function OnLobbyMenu_Show()
 }
 
 
+void function OnLobbyMenu_GetTopLevel()
+{
+	thread TryRunDialogFlowThread()
+}
+
+
 void function OnLobbyMenu_Hide()
 {
 	Signal( uiGlobal.signalDummy, "LobbyMenuUpdate" )
@@ -161,6 +179,9 @@ void function OnGRXStateChanged()
 		GetPanel( "ECPanel" ),
 		GetPanel( "CharacterPanel" ),
 		GetPanel( "VCPanel" ),
+	#if(false)
+
+#endif
 	]
 
 	foreach ( var panel in panels )
@@ -168,7 +189,7 @@ void function OnGRXStateChanged()
 		if ( !Hud_IsVisible( panel ) )
 		{
 			if ( panel == GetPanel( "PassPanel" ) )
-				SetPanelTabEnabled( panel, ready && IsBattlePassEnabled() && (GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) ) != null) )
+				SetPanelTabEnabled( panel, ready && ShouldBattlePassTabBeEnabled() )
 			else
 				SetPanelTabEnabled( panel, ready )
 		}
@@ -236,8 +257,17 @@ void function LobbyMenuUpdate()
 void function UpdateCornerButtons()
 {
 	bool isPlayPanelActive = IsTabPanelActive( GetPanel( "PlayPanel" ) )
-	var postGameButton = Hud_GetChild( file.menu, "PostGameButton" )
-	Hud_SetVisible( postGameButton, isPlayPanelActive && IsPostGameMenuValid() )
+	var postGameButton     = Hud_GetChild( file.menu, "PostGameButton" )
+	bool showPostGameButton = isPlayPanelActive && IsPostGameMenuValid()
+	Hud_SetVisible( postGameButton, showPostGameButton )
+	if ( showPostGameButton )
+	{
+		Hud_SetX( postGameButton, Hud_GetBaseX( postGameButton ) )
+	}
+	else
+	{
+		Hud_SetX( postGameButton, Hud_GetBaseX( postGameButton ) - Hud_GetWidth( postGameButton ) - Hud_GetBaseX( postGameButton ) )
+	}
 
 	var newsButton = Hud_GetChild( file.menu, "NewsButton" )
 	Hud_SetVisible( newsButton, isPlayPanelActive )
@@ -263,7 +293,20 @@ void function UpdateCornerButtons()
 		Hud_ReturnToBaseSize( socialButton )
 		InitButtonRCP( socialButton )
 	}
+
+	{
+		bool datacenterButtonVisible = false
+		if ( Lobby_GetSelectedPlaylist() != "" )
+		{
+			bool lowPop = IsLowPopPlaylist( Lobby_GetSelectedPlaylist() )
+			bool sameDC = GetCurrentMatchmakingDatacenterETA( Lobby_GetSelectedPlaylist() ).datacenterIdx == GetCurrentRankedMatchmakingDatacenterETA( Lobby_GetSelectedPlaylist() ).datacenterIdx
+			datacenterButtonVisible = isPlayPanelActive && lowPop && !sameDC && !AreWeMatchmaking()
+		}
+
+		Hud_SetVisible( file.datacenterButton, datacenterButtonVisible )
+	}
 }
+
 
 void function UpdateTabs()
 {
@@ -379,56 +422,73 @@ void function OnLobbyMenu_NavigateBack()
 	}
 }
 
+
 void function OnLobbyMenu_PostGameOrChat( var button )
 {
 	var savedMenu = GetActiveMenu()
 
 	#if(CONSOLE_PROG)
-	const float HOLD_FOR_CHAT_DELAY = 1.0
-	float startTime = Time()
-	while ( InputIsButtonDown( BUTTON_BACK ) || InputIsButtonDown( KEY_TAB ) && GetConVarInt( "hud_setting_accessibleChat" ) != 0 )
-	{
-		if ( Time() - startTime > HOLD_FOR_CHAT_DELAY )
+		const float HOLD_FOR_CHAT_DELAY = 1.0
+		float startTime = Time()
+		while ( InputIsButtonDown( BUTTON_BACK ) || InputIsButtonDown( KEY_TAB ) && GetConVarInt( "hud_setting_accessibleChat" ) != 0 )
 		{
-			if ( GetPartySize() > 1 )
+			if ( Time() - startTime > HOLD_FOR_CHAT_DELAY )
 			{
-				printt( "starting message mode", Hud_IsEnabled( GetLobbyChatBox() ) )
-				Hud_StartMessageMode( GetLobbyChatBox() )
-			}
-			else
-			{
-				ConfirmDialogData dialogData
-				dialogData.headerText = "#ACCESSIBILITY_NO_CHAT_HEADER"
-				dialogData.messageText = "#ACCESSIBILITY_NO_CHAT_MESSAGE"
-				dialogData.contextImage = $"ui/menu/common/dialog_notice"
+				if ( GetPartySize() > 1 )
+				{
+					printt( "starting message mode", Hud_IsEnabled( GetLobbyChatBox() ) )
+					Hud_StartMessageMode( GetLobbyChatBox() )
+				}
+				else
+				{
+					ConfirmDialogData dialogData
+					dialogData.headerText = "#ACCESSIBILITY_NO_CHAT_HEADER"
+					dialogData.messageText = "#ACCESSIBILITY_NO_CHAT_MESSAGE"
+					dialogData.contextImage = $"ui/menu/common/dialog_notice"
 
-				OpenOKDialogFromData( dialogData )
+					OpenOKDialogFromData( dialogData )
+				}
+				return
 			}
-			return
+
+			WaitFrame()
 		}
-
-		WaitFrame()
-	}
 	#endif
 
 	if ( IsPostGameMenuValid() && savedMenu == GetActiveMenu() )
-		OpenPostGameMenu( button )
+	{
+#if(false)
+
+
+
+
+
+#endif //
+		{
+			#if(false)
+
+
+#endif
+			OpenPostGameMenu( button )
+		}
+	}
 }
+
 
 void function OnLobbyMenu_FocusChat( var panel )
 {
-#if(PC_PROG)
-	if ( IsDialog( GetActiveMenu() ) )
-		return
+	#if(PC_PROG)
+		if ( IsDialog( GetActiveMenu() ) )
+			return
 
-	if ( !IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
-		return
+		if ( !IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
+			return
 
-	if ( GetPartySize() > 1 )
-	{
-		var playPanel = Hud_GetChild( file.menu, "PlayPanel" )
-		var textChat = Hud_GetChild( playPanel, "ChatRoomTextChat" )
-		Hud_SetFocused( Hud_GetChild( textChat, "ChatInputLine" ) )
-	}
-#endif
+		if ( GetPartySize() > 1 )
+		{
+			var playPanel = Hud_GetChild( file.menu, "PlayPanel" )
+			var textChat  = Hud_GetChild( playPanel, "ChatRoomTextChat" )
+			Hud_SetFocused( Hud_GetChild( textChat, "ChatInputLine" ) )
+		}
+	#endif
 }

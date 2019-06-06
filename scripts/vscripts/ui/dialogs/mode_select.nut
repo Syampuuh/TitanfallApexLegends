@@ -53,9 +53,13 @@ void function OnOpenModeSelectDialog()
 	for ( int i = 0; i < playlists.len(); i++ )
 	{
 		var button = Hud_GetChild( scrollPanel, ("GridButton" + i) )
+
 		if ( i == 0 )
 		{
-			int popupHeight = (Hud_GetHeight( button ) * playlists.len())
+			int buttonHeight = Hud_GetHeight( button )
+			//
+			//
+			int popupHeight = buttonHeight * playlists.len()
 			Hud_SetPos( file.modeSelectPopup, ownerPos.x, ownerPos.y - popupHeight )
 			Hud_SetSize( file.modeSelectPopup, ownerSize.width, popupHeight )
 			Hud_SetSize( file.modeList, ownerSize.width, popupHeight )
@@ -80,7 +84,7 @@ void function OnCloseModeSelectDialog()
 void function ModeButton_Init( var button, string playlistName )
 {
 	var lobbyModeSelectButton = GetModeSelectButton()
-	Assert( Hud_GetWidth( lobbyModeSelectButton ) == Hud_GetWidth( button ), "" + Hud_GetWidth( lobbyModeSelectButton ) + " != " + Hud_GetWidth( button ) )
+	//
 
 	InitButtonRCP( button )
 	var rui = Hud_GetRui( button )
@@ -111,6 +115,7 @@ void function ModeButton_Init( var button, string playlistName )
 	Hud_AddEventHandler( button, UIE_CLICK, OnModeButton_Activate )
 	file.buttonToMode[button] <- playlistName
 }
+
 
 void function OnModeButton_Activate( var button )
 {

@@ -92,26 +92,11 @@ void function InitSquadDataDisplay( var squadDataRui )
 		}
 	}
 }
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
 
 array< array< int > > xpDisplayGroups = [
 	[
 		XP_TYPE.WIN_MATCH,
-		XP_TYPE.TOP_THREE,
+		XP_TYPE.TOP_FIVE,
 		XP_TYPE.SURVIVAL_DURATION,
 		XP_TYPE.KILL,
 		XP_TYPE.DOWN,
@@ -133,7 +118,11 @@ array< array< int > > xpDisplayGroups = [
 		XP_TYPE.TOTAL_MATCH,
 		XP_TYPE.BONUS_FRIEND_BOOST,
 		XP_TYPE.BONUS_FIRST_KILL_AS,
+		XP_TYPE.BONUS_FIRST_TOP_FIVE,
 		XP_TYPE.BONUS_RESTED_AS,
+		#if(true)
+			XP_TYPE.CHALLENGE_COMPLETED,
+		#endif
 	],
 ]
 
@@ -492,7 +481,7 @@ var function DisplayPostGameSummary( bool isFirstTime )
 		Hud_SetVisible( Hud_GetChild( file.menu, "XPEarned3" ), true )
 		Hud_SetVisible( Hud_GetChild( file.menu, "XPProgressBarBattlePass" ), true )
 
-		bool isFreePlayer = DoesPlayerOwnBattlePass( GetUIPlayer(), activeBattlePass )
+		bool isFreePlayer = GRX_IsInventoryReady() && DoesPlayerOwnBattlePass( GetUIPlayer(), activeBattlePass )
 		RuiSetFloat( xpEarned3Rui, "startDelay", baseDelay )
 		int numLines = InitXPEarnedDisplay( Hud_GetRui( Hud_GetChild( file.menu, "XPEarned3" ) ), xpDisplayGroups[2], "#EOG_MATCH_BP", "#BATTLE_PASS_SEASON_1", true, COLOR_BP_PREMIUM )
 		RuiSetFloat( xpEarned3Rui, "lineDisplayTime", LINE_DISPLAY_TIME )
@@ -535,6 +524,7 @@ var function DisplayPostGameSummary( bool isFirstTime )
 		//
 		var passProgressRUI = Hud_GetRui( Hud_GetChild( file.menu, "XPProgressBarBattlePass" ) )
 		RuiSetBool( passProgressRUI, "battlePass", true )
+		RuiSetAsset( passProgressRUI, "emptyRewardImage", $"rui/menu/buttons/battlepass/button_bg" )
 
 		RuiSetString( passProgressRUI, "displayName", GetPlayerName() )
 		RuiSetColorAlpha( passProgressRUI, "oldProgressColor", <196 / 255.0, 151 / 255.0, 41 / 255.0>, 1 )

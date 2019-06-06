@@ -171,10 +171,14 @@ global struct CommunityUserInfo
 	string kills
 	int wins
 	int matches
+	int eliteStreak
 	int lastCharIdx
 	bool isLivestreaming
 	bool isOnline
 	bool isJoinable
+	bool partyFull
+	bool partyInMatch
+	float lastServerChangeTime
 	string privacySetting
 	array<int> charData
 
@@ -187,6 +191,7 @@ global struct PartyMember
 	string uid
 	string hardware
 	bool ready
+	bool present
 }
 
 global struct OpenInvite
@@ -243,6 +248,7 @@ global struct RemoteMatchInfo
 	int roundsWonMilitia
 	int timeLimitSecs
 	int timeLeftSecs
+	int teamsLeft
 	int maxScore
 	array<RemoteClientInfoFromMatchInfo> clients
 	array<int> teamScores
@@ -274,6 +280,19 @@ global struct MainMenuPromos
 	int version,
 	string layout
 }
+
+#if(UI)
+global struct MatchmakingDatacenterETA
+{
+	int datacenterIdx
+	string datacenterName
+	int latency
+	int packetLoss
+	int etaSeconds
+	int idealStartUTC
+	int idealEndUTC
+}
+#endif //
 
 #if(UI)
 global struct GRXCodeOffer

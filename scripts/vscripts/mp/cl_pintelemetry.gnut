@@ -126,7 +126,7 @@ void function PIN_Settings( table settingsTable )
 #endif
 
 #if(UI)
-void function PIN_Customization( ItemFlavor context, LoadoutEntry loadoutEntry, ItemFlavor itemFlavor )
+void function PIN_Customization( ItemFlavor ornull context, LoadoutEntry loadoutEntry, ItemFlavor itemFlavor )
 {
 	string customizeTarget
 	string customizeType
@@ -166,7 +166,8 @@ void function PIN_Customization( ItemFlavor context, LoadoutEntry loadoutEntry, 
 		case eItemType.gladiator_card_intro_quip:
 			customizeType = customizeType == "" ? "intro_quip" : customizeType
 			customizeTarget = "gladiator_card"
-			customizeClass = ItemFlavor_GetHumanReadableRef( context )
+			if ( context != null )
+				customizeClass = ItemFlavor_GetHumanReadableRef( expect ItemFlavor( context ) )
 			break
 
 		case eItemType.character_skin:
@@ -174,7 +175,8 @@ void function PIN_Customization( ItemFlavor context, LoadoutEntry loadoutEntry, 
 		case eItemType.character_execution:
 			customizeType = customizeType == "" ? "finisher" : customizeType
 			customizeTarget = "character"
-			customizeClass = ItemFlavor_GetHumanReadableRef( context )
+			if ( context != null )
+				customizeClass = ItemFlavor_GetHumanReadableRef( expect ItemFlavor( context ) )
 			break
 	}
 

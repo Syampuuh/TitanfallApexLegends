@@ -36,7 +36,9 @@ global function GetEHISignalDummy
 global function WaitForEHISignalDummy
 global function EHI_IsConnected
 global function EHI_GetName
+global function EEH_GetTeam
 global function EHI_GetTeam
+global function EEH_GetTeamMemberIndex
 global function EHI_GetTeamMemberIndex
 global function GetPlayerEHIArrayOfTeam
 global function GetPlayerSquadSafe
@@ -67,7 +69,6 @@ global function GetPlayerName
 global function GetKillerName
 #endif
 #if(UI)
-global function ShEHI_VMShutdown
 global function ClientToUI_OnPlayerCreatedOrUpdated
 #endif
 
@@ -119,6 +120,9 @@ void function ShEHI_LevelInit_Begin()
 	#if(UI)
 		FileStruct_LifetimeLevel newFileLevel
 		fileLevel = newFileLevel
+
+		if ( !( uiGlobal.uiShutdownCallbacks.contains(ShEHI_VMShutdown) ) )
+			AddUICallback_UIShutdown( ShEHI_VMShutdown )
 	#endif
 
 	#if(CLIENT)
@@ -325,6 +329,15 @@ string function EHI_GetName( EHI ent )
 
 
 #if CLIENT || UI 
+int function EEH_GetTeam( EncodedEHandle ent )
+{
+	Assert( ent != EncodedEHandle_null )
+	return GetEHIScriptStructFromEncodedEHandle( ent ).team
+}
+#endif
+
+
+#if CLIENT || UI 
 int function EHI_GetTeam( EHI ent )
 {
 	#if(false)
@@ -334,6 +347,15 @@ int function EHI_GetTeam( EHI ent )
 		Assert( ent != EHI_null )
 		return GetEHIScriptStruct( ent ).team
 	#endif
+}
+#endif
+
+
+#if CLIENT || UI 
+int function EEH_GetTeamMemberIndex( EncodedEHandle ent )
+{
+	Assert( ent != EncodedEHandle_null )
+	return GetEHIScriptStructFromEncodedEHandle( ent ).teamMemberIndex
 }
 #endif
 
@@ -467,6 +489,9 @@ void function ShEHI_OnPlayerCreated( entity ent )
 	EHIScriptStruct ehiss
 
 	#if(false)
+
+//
+
 
 
 

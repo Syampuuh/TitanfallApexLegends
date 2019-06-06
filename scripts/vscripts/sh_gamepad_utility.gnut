@@ -39,8 +39,6 @@ global function ChangeCustomGamepadButtonIndexToCommandIndex_Pilot
 global function ChangeCustomGamepadButtonIndexToCommandIndex_Titan
 global function GetButtonIndexForButtonEnum
 global function RefreshCustomGamepadBinds_UI
-
-global function GamepadSwapShoulderAndTriggerBinds
 #endif
 
 global enum eGamepadUseSchemeType
@@ -145,8 +143,20 @@ global struct ABBind
 	string holdBind
 }
 
+global const int PRESETS_COUNT = 6
+
+global const array<string> PRESET_PILOT_BINDS =
+[
+	"0,1,2,3,4,5,6,7,8,9,10,11,12,13,14",
+	"6,1,2,3,4,5,0,7,8,9,10,11,12,13,14",
+	"0,9,2,3,4,5,6,7,8,1,10,11,12,13,14",
+	"6,9,2,3,4,5,0,7,8,1,10,11,12,13,14",
+	"0,1,2,3,4,5,6,13,8,9,7,11,12,10,14",
+	"7,6,2,3,4,5,0,1,8,9,10,11,12,13,14",
+]
+
 #if CLIENT || UI 
-const table<int, int> GAMEPAD_BUTTON_INDECES =
+global const table<int, int> GAMEPAD_BUTTON_INDECES =
 {
 	[ BUTTON_A ] =					0,
 	[ BUTTON_B ] =					1,
@@ -277,23 +287,6 @@ array<int> function BuildCommandForButtonArrayFromConVar( string convarName )
 }
 #endif
 
-#if(UI)
-void function GamepadSwapShoulderAndTriggerBinds( string convarName )
-{
-	array<int> arr = BuildCommandForButtonArrayFromConVar( convarName )
-
-	int old4 = arr[4]
-	arr[4] = arr[6]
-	arr[6] = old4
-
-	int old5 = arr[5]
-	arr[5] = arr[7]
-	arr[7] = old5
-
-	string newValue = IntArrayToCSS( arr )
-	SetConVarString( convarName, newValue )
-}
-#endif //
 
 #if CLIENT || UI 
 string function GetCustomBindCommandForButtonIndex_( int buttonIndex, string convarName, array<string> bindAliases )
@@ -568,6 +561,16 @@ void function SetCustomGamepadBindsFor_( entity player, string convarName, array
 {
 	bindAliases.resize( CUSTOM_BIND_ALIASES_PILOT.len() )
 	array<int> arr = BuildCommandForButtonArrayFromConVar( convarName )
+	int layoutIdx = GetConVarInt( "gamepad_button_layout" )
+
+	if( layoutIdx < PRESETS_COUNT )
+	{
+		arr = BuildCommandForButtonArrayFromString( PRESET_PILOT_BINDS[layoutIdx] )
+	}
+	else //
+	{
+		arr = BuildCommandForButtonArrayFromConVar( convarName )
+	}
 
 	SetABBind( player, 0, bindAliases[arr[0]] )		//
 	SetABBind( player, 1, bindAliases[arr[1]] )		//

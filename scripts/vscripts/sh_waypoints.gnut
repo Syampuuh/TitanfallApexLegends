@@ -18,6 +18,11 @@ global function UpdateWaypointRuiVisibility
 global function PlayerIsPingMuted
 global function WaypointOwnerIsMuted
 global function TogglePlayerWaypointMute
+global function AddLocationPingToMinimapNoClamp
+global function AddLocationPingToFullmap
+global function OnWaypointDelete_SetIsFinished
+global function SetupWaypointForPingInteraction
+global function ShouldWaypointRuiBeVisible
 #endif //
 global function Waypoint_IsPOI
 global function GetPingedEntForLocWaypoint
@@ -46,6 +51,7 @@ global function GetPingedEntForLocWaypoint
 //
 
 //
+
 
 
 
@@ -116,7 +122,6 @@ global enum eWaypoint
 
 
 #endif
-
 	_count
 }
 
@@ -126,6 +131,12 @@ global enum eWaypointNotifyType
 
 	_count
 }
+
+#if(false)
+
+
+
+#endif //
 
 global const asset WAYPOINT_ICON_TARGET = $"rui/hud/common/objective_marker"
 global const asset WAYPOINT_ICON_BATTERY_NEEDED = $"rui/menu/dpad_comms/emoji/battery_need"
@@ -145,6 +156,7 @@ struct
 global const string PLAYER_WAYPOINT_CLASSNAME = "player_waypoint"
 
 const string SIGNAL_WAYPOINT_TIMEOUT_BEGIN = "WaypointTimeoutThreadBegin"
+
 void function PlayerWaypoints_Init()
 {
 	RegisterSignal( SIGNAL_WAYPOINT_TIMEOUT_BEGIN )
@@ -157,6 +169,10 @@ void function PlayerWaypoints_Init()
 
 		//
 		//
+
+		#if(false)
+
+#endif //
 	#endif //
 }
 
@@ -338,6 +354,10 @@ void function PlayerWaypoint_DestroyCallback( entity oldWaypoint )
 	if ( oldWaypoint.GetWaypointType() == eWaypoint.PING_LOCATION )
 		s_activeLocationPings.fastremovebyvalue( oldWaypoint )
 
+	#if(false)
+
+#endif //
+
 	ClearTargetHighlight( oldWaypoint )
 }
 
@@ -417,7 +437,11 @@ bool function ShouldHighlightForPing( entity wp, entity pingedEnt )
 	{
 		case ePingType.ABILITY_DRONEMEDIC:
 		case ePingType.ABILITY_DOMESHIELD:
-			return false
+#if(false)
+
+
+
+#endif
 	}
 
 	return true
@@ -624,6 +648,17 @@ void function InstanceWP_Basic( entity wp )
 	OnWaypointDelete_SetIsFinished( wp, newRui )
 }
 
+void function SetupWaypointForPingInteraction( entity wp, var rui )
+{
+	if ( !IsWatchingReplay() )
+	{
+		wp.WaypointFocusTracking_Register()
+		wp.WaypointFocusTracking_TrackPos( wp, RUI_TRACK_ABSORIGIN_FOLLOW, 0 );
+	}
+	RuiTrackBool( rui, "hasFocus", wp, RUI_TRACK_WAYPOINT_FOCUS_ENT_IS_FOCUSED )
+	RuiTrackInt( rui, "confirmationCount", wp, RUI_TRACK_WAYPOINT_INT, INT_INDEX_PING_LOC_CONFIRMCOUNTER )
+}
+
 //
 #if(false)
 
@@ -649,21 +684,6 @@ void function InstanceWP_Basic( entity wp )
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //
 
@@ -686,15 +706,7 @@ void function InstanceWP_Basic( entity wp )
 
 
 
-
-
-
-
-
-
-
-
-
+//
 
 
 
@@ -731,9 +743,150 @@ void function InstanceWP_Basic( entity wp )
 
 //
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //
 //
+//
+//
 
 
 
@@ -763,7 +916,7 @@ void function InstanceWP_Basic( entity wp )
 
 
 
-
+//
 
 
 
@@ -874,6 +1027,18 @@ void function InstanceWP_Basic( entity wp )
 #endif //
 
 #if(false)
+
+
+
+
+
+
+
+
+//
+
+
+
 
 
 
@@ -1589,7 +1754,7 @@ void function InstanceLocationPing( entity wp )
 	}
 
 	//
-	if ( owner == viewPlayer && ( pingType == ePingType.MAP_WAYPOINT || pingType == ePingType.WE_GO ) )
+	if ( owner == viewPlayer && (pingType == ePingType.MAP_WAYPOINT || pingType == ePingType.WE_GO) )
 		viewPlayer.p.mapPingTicketID = ticketID
 
 	ItemFlavor ornull pingFlavor = Ping_ItemFlavorForPing( viewPlayer, pingType, pingedEnt )
@@ -1603,7 +1768,8 @@ void function InstanceLocationPing( entity wp )
 	string prompt       = Ping_GetLabelForPingType( pingType )
 	string shortPrompt  = Ping_GetShortTextForPing( pingType )
 	vector lineColor    = SrgbToLinear( Ping_LineColorForPing_Hud( pingType ) )
-	int sortKeyAdd		= Ping_GetSortModifier( pingType )
+	bool isSameTeam		= (owner.GetTeam() == viewPlayer.GetTeam())
+	int sortKeyAdd      = Ping_GetSortModifier( pingType, isSameTeam )
 
 	var rui = CreateWaypointRui( ruiAsset, 200 + sortKeyAdd )
 	RuiKeepSortKeyUpdated( rui, true, "targetPos" )
@@ -1636,7 +1802,7 @@ void function InstanceLocationPing( entity wp )
 	}
 	else
 	{
-		iconColor = SrgbToLinear( Ping_IconColorForPing_Hud( pingType ) )
+		iconColor = SrgbToLinear( Ping_IconColorForPing_Hud( pingType, isSameTeam ) )
 		RuiSetImage( rui, "iconImage", hudIcon )
 		RuiSetFloat3( rui, "iconColor", iconColor )
 	}
@@ -1658,21 +1824,34 @@ void function InstanceLocationPing( entity wp )
 	switch ( pingType )
 	{
 		case ePingType.BLEEDOUT:
-			RuiSetString( rui, "topLabelText", Localize("#REVIVE").toupper() )
+			float iconSize = 56.0
+			float iconSizePinned = 72.0
+			bool completeAdsFade = true
+			if ( isSameTeam )
+			{
+				RuiSetImage( rui, "animImage", $"rui/hud/unitframes/frame_status_fill" )
+				RuiSetString( rui, "topLabelText", Localize( "#REVIVE" ).toupper() )
+			}
+			else
+			{
+				iconSize = 45.0
+				iconSizePinned = 50.0
+				completeAdsFade = false
+			}
 
 			endTime = wp.GetWaypointGametime( GAMETIME_INDEX_PING_COMMON_COUNTDOWN )
 			RuiSetGameTime( rui, "startTime", endTime - Bleedout_GetBleedoutTime( owner ) )
 
-			RuiSetFloat( rui, "iconSize", 56.0 )
-			RuiSetFloat( rui, "iconSizePinned", 72.0 )
-			RuiSetBool( rui, "completeADSFade", true )
+			RuiSetFloat( rui, "iconSize", iconSize )
+			RuiSetFloat( rui, "iconSizePinned", iconSizePinned )
+			RuiSetBool( rui, "completeADSFade", completeAdsFade )
 			RuiSetBool( rui, "useInactiveScalar", false )
-			RuiSetImage( rui, "animImage", $"rui/hud/unitframes/frame_status_fill" )
+
 			iconScale = <0.5, 0.5, 0>
 			break
 
 		case ePingType.RESPAWN_BANNER:
-			RuiSetString( rui, "topLabelText", Localize("#BANNER_RECOVER").toupper() )
+			RuiSetString( rui, "topLabelText", Localize( "#BANNER_RECOVER" ).toupper() )
 
 			endTime = wp.GetWaypointGametime( GAMETIME_INDEX_PING_COMMON_COUNTDOWN )
 			RuiSetGameTime( rui, "startTime", endTime - RESPAWN_DNA_LIFETIME )
@@ -1699,7 +1878,7 @@ void function InstanceLocationPing( entity wp )
 
 	RuiSetString( rui, "ownerPlayerName", (((owner != null) && owner.IsPlayer()) ? owner.GetPlayerName() : "") )
 
-	string pingSound = Ping_GetSoundForLocationPing( pingType, (viewPlayer == owner) )
+	string pingSound = Ping_GetSoundForLocationPing( pingType, (viewPlayer == owner), isSameTeam )
 	if ( pingSound != "" )
 		EmitSoundOnEntity( wp, pingSound )
 
@@ -2154,6 +2333,197 @@ array<entity> function Waypoints_GetActiveLootPings()
 
 
 
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
 //
 
 
@@ -2205,168 +2575,8 @@ array<entity> function Waypoints_GetActiveLootPings()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 //
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 
 
 
@@ -2562,10 +2772,18 @@ void function TogglePlayerWaypointMute( entity player )
 
 
 
+
 //
 //
 //
 //
+
+
+
+
+
+
+
 
 
 

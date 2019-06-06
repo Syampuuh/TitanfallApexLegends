@@ -48,6 +48,9 @@ global function IsItemFlavorUnlockedForLoadoutSlot
 global function GetUnlockedItemFlavorsForLoadoutSlot
 global function GetRandomGoodItemFlavorForLoadoutSlot
 global function GetDefaultItemFlavorForLoadoutSlot
+global function ConvertItemFlavorToLoadoutSlotContentsIndex
+global function ConvertLoadoutSlotContentsIndexToItemFlavor
+global function IsValidLoadoutSlotContentsIndex
 
 global function GetAllLoadoutSlots
 global function IsLoadoutSlotActive
@@ -313,14 +316,14 @@ void function ShLoadouts_LevelInit_Finish()
 
 						ehiss.netVarsLastSeenValuesMap[nvInfo.nvIndex] = new
 
-						#if(DEV)
+						#if(ASSERTING)
 							LoadoutEntry ornull found = null
 						#endif
 						foreach( LoadoutEntry entry in nvInfo.usedByEntries )
 						{
 							if ( IsLoadoutSlotCurrentlyNetworked( playerEHI, entry ) )
 							{
-								#if(DEV)
+								#if(ASSERTING)
 									Assert( found == null, "Attempted to network two loadout slots using the same network variable name at the same time"
 											+ " (slot 1: \"" + expect LoadoutEntry(found).id + "\", slot 2: \"" + entry.id + "\")." )
 									if ( found != null )
@@ -328,7 +331,7 @@ void function ShLoadouts_LevelInit_Finish()
 									found = entry
 								#endif
 								HandleLoadoutSlotNetworkVarChanged( playerEHI, entry, old, new, actuallyChanged )
-								#if(!DEV)
+								#if(!ASSERTING)
 									break
 								#endif
 							}
@@ -459,7 +462,7 @@ LoadoutEntry function RegisterLoadoutSlot( int type, string id )
 	Assert( !fileLevel.isInitialized, "Cannot call RegisterLoadoutSlot after initialization has finished." )
 	Assert( type == eLoadoutEntryType.ITEM_FLAVOR || type == eLoadoutEntryType.INTEGER )
 
-	#if(DEV)
+	#if(ASSERTING)
 		foreach( LoadoutEntry otherEntry in fileLevel.loadoutSlotEntries )
 			Assert( id != otherEntry.id, "Found loadout slots with the same id: " + id )
 	#endif
@@ -725,16 +728,15 @@ void function RequestSetItemFlavorLoadoutSlot( EHI playerEHI, LoadoutEntry entry
 	int seqNum            = 0 //
 	int slotContentsIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( entry, itemFlavor )
 
-	string commandString = ("loadouts_set"
-			+ " " + seqNum
-			+ " " + entry._____INTERNAL_entryIndex
-			+ " " + slotContentsIndex)
+	string commandString = format( "loadouts_set %d %d %d", seqNum, entry._____INTERNAL_entryIndex, slotContentsIndex )
 
 	#if(CLIENT)
 		GetLocalClientPlayer().ClientCommand( commandString )
 	#elseif(UI)
 		ClientCommand( commandString ) //
 	#endif
+
+	printf( "loadout change request: %s = %s (%s)", entry.DEV_name, ItemFlavor_GetHumanReadableRef( itemFlavor ), ItemFlavor_GetGUIDString( itemFlavor ) )
 }
 #endif
 
@@ -1037,13 +1039,19 @@ void function HandleLoadoutSlotNetworkVarChanged( EHI playerEHI, LoadoutEntry en
 
 bool function IsValidLoadoutSlotContentsIndex( LoadoutEntry entry, int slotContentsIndex, int validationBehavior = eValidation.DONT_ASSERT )
 {
-	if ( entry.type == eLoadoutEntryType.ITEM_FLAVOR )
-		return (slotContentsIndex in entry._____INTERNAL_networkIndexItemFlavorMap)
+	if ( entry.type == eLoadoutEntryType.ITEM_FLAVOR && slotContentsIndex in entry._____INTERNAL_networkIndexItemFlavorMap )
+	{
+		return true
+	}
+
 
 	if ( entry.type == eLoadoutEntryType.INTEGER )
 	{
 		int value = entry.minInteger + (slotContentsIndex - SLOT_CONTENTS_FIRST_VALID_ITEM)
-		return (value >= entry.minInteger && value <= entry.maxInteger)
+		if ( value >= entry.minInteger && value <= entry.maxInteger )
+		{
+			return true
+		}
 	}
 
 	Assert( validationBehavior != eValidation.ASSERT, "Invalid loadout slot contents index " + slotContentsIndex + " for " + entry.id )

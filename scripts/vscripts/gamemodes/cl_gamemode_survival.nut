@@ -1,16 +1,6 @@
 global function ClGamemodeSurvival_Init
 global function CLSurvival_RegisterNetworkFunctions
 
-global function UICallback_PopulateClientGladCard
-global function UICallback_DestroyClientGladCardData
-global function UICallback_DestroyAllClientGladCardData
-global function UICallback_ToggleMute
-global function UICallback_ToggleMutePing
-global function UICallback_ToggleMuteChat
-global function UICallback_InviteSquadMate
-global function UICallback_ReportSquadMate
-
-global function ServerCallback_SURVIVAL_SetRankValuesForDisplay
 global function ServerCallback_AnnounceCircleClosing
 global function ServerCallback_SUR_PingMinimap
 global function ServerCallback_SurvivalHint
@@ -74,7 +64,6 @@ global function ServerCallback_NessyMessage
 global function ShowChampionVictoryScreen
 
 global function CanReportPlayer
-global function CanInviteSquadMate
 
 global function UIToClient_ToggleMute
 global function SetSquadMuteState
@@ -82,11 +71,32 @@ global function ToggleSquadMute
 global function IsSquadMuted
 global function AddCallback_OnSquadMuteChanged
 
+global function SetNextCircleDisplayCustomStarting
+global function SetNextCircleDisplayCustomClosing
+global function SetNextCircleDisplayCustomClear
 
 #if(DEV)
 global function Dev_ShowVictorySequence
 global function Dev_AdjustVictorySequence
 #endif
+
+global struct NextCircleDisplayCustomData
+{
+	float circleStartTime
+	float circleCloseTime
+	int roundNumber
+	string roundString
+
+	vector deathFieldOrigin
+	vector safeZoneOrigin
+
+	float deathfieldDistance
+	float deathfieldStartRadius
+	float deathfieldEndRadius
+
+	asset altIcon = $""
+	string altIconText
+}
 
 global const FULLMAP_OBJECT_RUI = $"ui/in_world_minimap_object.rpak"
 const FULLMAP_ZOOM_SPEED_MOUSE = 0.5
@@ -136,14 +146,6 @@ global struct SquadSummaryData
 {
 	array<SquadSummaryPlayerData> playerData
 	int squadPlacement = -1
-}
-
-struct PlayerInfo
-{
-	EHI ehi
-	string uid
-	string hardware
-	entity player
 }
 
 struct
@@ -219,16 +221,12 @@ struct
 	SquadSummaryData squadSummaryData
 	SquadSummaryData winnerSquadSummaryData
 
-	table< var, NestedGladiatorCardHandle > elemToGladCardHandle
-
 	var inventoryCountRui
 
 	bool shouldShowButtonHintsLocal
 
 	var waitingForPlayersBlackScreenRui = null
 	float nextAllowToggleFireRateTime = 0.0
-
-	table<EHI, PlayerInfo> teammates
 } file
 
 void function ClGamemodeSurvival_Init()
@@ -244,6 +242,7 @@ void function ClGamemodeSurvival_Init()
 	ClUnitFrames_Init()
 	Cl_Survival_InventoryInit()
 	Cl_Survival_LootInit()
+	Cl_SquadDisplay_Init()
 
 	Bleedout_SetFirstAidStrings( "#SURVIVAL_APPLYING_FIRST_AID", "#SURVIVAL_RECIEVING_FIRST_AID" )
 
@@ -275,7 +274,6 @@ void function ClGamemodeSurvival_Init()
 	AddCreateCallback( "player", OnPlayerCreated )
 	AddDestroyCallback( "player", OnPlayerDestroyed )
 	AddOnDeathCallback( "player", OnPlayerKilled )
-	AddCallback_OnPlayerChangedTeam( OnPlayerTeamChanged )
 
 	AddCreatePilotCockpitCallback( OnPilotCockpitCreated )
 	AddCallback_PlayerClassChanged( Survival_OnPlayerClassChanged )
@@ -441,8 +439,6 @@ void function OnPlayerCreated( entity player )
 			thread TrackSprint( player )
 	}
 
-	OnPlayerTeamChanged( player, TEAM_UNASSIGNED, player.GetTeam() )
-
 	if ( (player.GetTeam() == GetLocalClientPlayer().GetTeam()) && (SquadMuteIntroEnabled() || SquadMuteLegendSelectEnabled()) )
 	{
 		//
@@ -455,29 +451,6 @@ void function OnPlayerCreated( entity player )
 void function OnPlayerDestroyed( entity player )
 {
 
-}
-
-void function OnPlayerTeamChanged( entity player, int oldTeam, int newTeam )
-{
-	EHI ehi = ToEHI( player )
-
-	if ( PlayerShouldHaveUnitFrame( player ) )
-	{
-		if ( !( ehi in file.teammates ) )
-		{
-			PlayerInfo info
-			info.player = player
-			info.uid = player.GetPlatformUID()
-			info.hardware = player.GetHardware()
-			info.ehi = ehi
-			file.teammates[ ehi ] <- info
-		}
-	}
-	else
-	{
-		if ( ehi in file.teammates )
-			delete file.teammates[ ehi ]
-	}
 }
 
 void function TrackSprint( entity player )
@@ -607,20 +580,25 @@ void function Cl_Survival_AddClient( entity player )
 #endif
 
 	file.compassRui = CreatePermanentCockpitRui( $"ui/compass_flat.rpak", HUD_Z_BASE )
-	RuiTrackFloat3( file.compassRui, "playerAngles", player, RUI_TRACK_EYEANGLES_FOLLOW )
+	RuiTrackFloat3( file.compassRui, "playerAngles", player, RUI_TRACK_CAMANGLES_FOLLOW )
+	RuiTrackInt( file.compassRui, "gameState", null, RUI_TRACK_SCRIPT_NETWORK_VAR_GLOBAL_INT, GetNetworkedVariableIndex( "gameState" ) )
 
 	//
-	player.ClientCommand( "c_thirdpersonshoulderaimdist 0" )
-	player.ClientCommand( "c_thirdpersonshoulderdist 0" )
-	player.ClientCommand( "c_thirdpersonshoulderheight 0" )
-	player.ClientCommand( "c_thirdpersonshoulderoffset 0" )
+	SetConVarFloat( "c_thirdpersonshoulderaimdist", 0.0 )
+	SetConVarFloat( "c_thirdpersonshoulderdist", 0.0 )
+	SetConVarFloat( "c_thirdpersonshoulderheight", 0.0 )
+	SetConVarFloat( "c_thirdpersonshoulderoffset", 0.0 )
 
 #if(PC_PROG)
 	if( GetCurrentPlaylistVarBool( "pc_force_pushtotalk", false ) )
 		player.ClientCommand( "+pushtotalk" )
 #endif //
 
-	player.ClientCommand( "dof_variable_blur 0" )
+	SetConVarFloat( "dof_variable_blur", 0.0 )
+
+	#if(false)
+
+#endif //
 
 	#if(true)
 		if ( !GetCurrentPlaylistVarBool( "survival_staging_area_enabled", false ) && !IsTestMap() && player.GetTeam() != TEAM_SPECTATOR )
@@ -636,18 +614,7 @@ void function Cl_Survival_AddClient( entity player )
 
 			RuiSetString( file.waitingForPlayersBlackScreenRui, "squadMuteHint", muteString )
 		}
-	#endif
-}
-
-void function UpdateCompassVisibility()
-{
-	if ( file.compassRui == null )
-		return
-
-	if ( !GetCurrentPlaylistVarBool( "survival_staging_area_enabled", false ) && GetGameState() == eGameState.WaitingForPlayers)
-		RuiSetBool( file.compassRui, "isVisible", false )
-	else
-		RuiSetBool( file.compassRui, "isVisible", true )
+	#endif //
 }
 
 void function InitSurvivalHealthBar()
@@ -724,11 +691,15 @@ void function OverrideMinimapPackages( entity player )
 
 #endif
 	RegisterMinimapPackage( "prop_script", 			eMinimapObject_prop_script.SURVEY_BEACON, 					MINIMAP_OBJECT_RUI, 			MinimapPackage_SurveyBeacon )
+	RegisterMinimapPackage( "prop_script", 			eMinimapObject_prop_script.HOVERTANK, 						MINIMAP_OBJECT_RUI, 			MinimapPackage_HoverTank )
+	RegisterMinimapPackage( "prop_script", 			eMinimapObject_prop_script.HOVERTANK_DESTINATION, 			MINIMAP_OBJECT_RUI, 			MinimapPackage_HoverTankDestination )
 	#if(false)
 
 #endif
-	RegisterMinimapPackage( "prop_script", 			eMinimapObject_prop_script.HOVERTANK, 						MINIMAP_OBJECT_RUI, 			MinimapPackage_HoverTank )
-	RegisterMinimapPackage( "prop_script", 			eMinimapObject_prop_script.HOVERTANK_DESTINATION, 			MINIMAP_OBJECT_RUI, 			MinimapPackage_HoverTankDestination )
+	#if(false)
+
+#endif
+
 }
 
 
@@ -766,17 +737,6 @@ void function MinimapPackage_SurveyBeacon( entity ent, var rui )
 	RuiSetBool( rui, "useTeamColor", false )
 }
 
-
-#if(false)
-
-
-
-
-
-
-#endif
-
-
 void function MinimapPackage_HoverTank( entity ent, var rui )
 {
 	RuiSetImage( rui, "defaultIcon", $"rui/hud/gametype_icons/survival/sur_hovertank_minimap" )
@@ -792,6 +752,14 @@ void function MinimapPackage_HoverTankDestination( entity ent, var rui )
 	RuiSetBool( rui, "useTeamColor", false )
 }
 
+#if(false)
+
+
+
+
+
+
+#endif
 
 #if(false)
 
@@ -841,6 +809,12 @@ void function MinimapPackage_ObjectiveAreaInit( entity ent, var rui )
 			RuiSetBool( rui, "drawLine", true )
 		break
 
+		case "safeZone_noline":
+			//
+			RuiSetColorAlpha( rui, "objColor", SrgbToLinear( SAFE_ZONE_COLOR ), SAFE_ZONE_ALPHA )  //
+			//
+		break
+
 		case "surveyZone":
 			RuiSetBool( rui, "blink", false )
 			RuiSetColorAlpha( rui, "objColor", SrgbToLinear( TEAM_COLOR_PARTY / 255.0 ), 0.05 )  //
@@ -853,6 +827,23 @@ void function MinimapPackage_ObjectiveAreaInit( entity ent, var rui )
 
 #endif
 
+#if(false)
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+#endif
 		case "hotZone":
 			RuiSetColorAlpha( rui, "objColor", SrgbToLinear( <128, 188, 255> / 255.0 ), 0.25 )
 			RuiSetColorAlpha( rui, "objBorderColor", SrgbToLinear( <128, 188, 255> / 255.0 ), 0.5 )
@@ -874,24 +865,16 @@ void function CLSurvival_RegisterNetworkFunctions()
 }
 
 
-void function LinkingTitanChanged( entity player, entity old, entity new, bool actuallyChanged )
-{
-	if ( player != GetLocalClientPlayer() )
-		return
-
-	if ( player != GetLocalViewPlayer() )
-		return
-
-	RuiSetBool( file.titanLinkProgressRui, "isVisible", IsAlive( new ) )
-}
-
-
 void function ScorebarInitTracking( entity player, var statusRui )
 {
 	RuiTrackInt( statusRui, "livingPlayerCount",	null, RUI_TRACK_SCRIPT_NETWORK_VAR_GLOBAL_INT, GetNetworkedVariableIndex( "livingPlayerCount" ) )
 	RuiTrackInt( statusRui, "squadsRemainingCount",	null, RUI_TRACK_SCRIPT_NETWORK_VAR_GLOBAL_INT, GetNetworkedVariableIndex( "squadsRemainingCount" ) )
 	RuiTrackFloat( statusRui, "deathfieldDistance",	player, RUI_TRACK_DEATHFIELD_DISTANCE )
 	RuiTrackInt( statusRui, "teamMemberIndex", player, RUI_TRACK_PLAYER_TEAM_MEMBER_INDEX )
+
+	#if(false)
+
+#endif //
 }
 
 
@@ -956,7 +939,7 @@ void function UpdateDpadHud( entity player  )
 
 	if ( IsValid( ordnanceWeapon ) )
 	{
-		ammo = ordnanceWeapon.GetWeaponPrimaryClipCount()
+		ammo = SURVIVAL_CountItemsInInventory( player, ordnanceWeapon.GetWeaponClassName() )
 		ordnanceIcon = ordnanceWeapon.GetWeaponSettingAsset( eWeaponVar.hud_icon )
 	}
 
@@ -1030,18 +1013,6 @@ void function GameModeScoreBarRules( var gamestateRui )
 	PerfEnd( PerfIndexClient.SUR_ScoreBoardRules_1 )
 }
 
-
-void function ServerCallback_SURVIVAL_SetRankValuesForDisplay( int myRank, int playerCountAtStart )
-{
-#if(true)
-	var rui = ClGameState_GetRui()
-	RuiSetInt( rui, "myRank", myRank )
-	RuiSetInt( rui, "totalPlayers", playerCountAtStart )
-	RuiSetBool( rui, "showRank", true )
-#endif //
-}
-
-
 void function OnIsHealingChanged( entity player, bool old, bool new, bool actuallyChanged )
 {
 	if ( player != GetLocalClientPlayer() )
@@ -1050,6 +1021,57 @@ void function OnIsHealingChanged( entity player, bool old, bool new, bool actual
 	UpdateHealHint( player )
 }
 
+void function SetNextCircleDisplayCustom_( NextCircleDisplayCustomData data )
+{
+	entity localViewPlayer = GetLocalViewPlayer()
+	if ( !IsValid( localViewPlayer ) )
+		return
+
+	var rui = ClGameState_GetRui()
+	RuiTrackFloat3( rui, "playerOrigin", localViewPlayer, RUI_TRACK_ABSORIGIN_FOLLOW )
+
+	RuiSetGameTime( rui, "circleStartTime", data.circleStartTime )
+	RuiSetGameTime( rui, "circleCloseTime", data.circleCloseTime )
+	RuiSetInt( rui, "roundNumber", data.roundNumber )
+	RuiSetString( rui, "roundClosingString", data.roundString )
+
+	RuiSetFloat3( rui, "deathFieldOrigin", data.deathFieldOrigin )
+	RuiSetFloat3( rui, "safeZoneOrigin", data.safeZoneOrigin )
+
+	RuiSetFloat( rui, "deathfieldDistance", data.deathfieldDistance )
+	RuiSetFloat( rui, "deathfieldStartRadius", data.deathfieldStartRadius )
+	RuiSetFloat( rui, "deathfieldEndRadius", data.deathfieldEndRadius )
+
+	RuiSetBool( rui, "hasAltIcon", (data.altIcon != $"") )
+	RuiSetImage( rui, "altIcon", data.altIcon )
+	RuiSetString( rui, "altIconText", data.altIconText )
+}
+
+void function SetNextCircleDisplayCustomStarting( float circleStartTime, asset altIcon, string altIconText )
+{
+	NextCircleDisplayCustomData data
+	data.circleStartTime = circleStartTime
+	data.roundNumber = -1
+	data.altIcon = altIcon
+	data.altIconText = altIconText
+	SetNextCircleDisplayCustom_( data )
+}
+
+void function SetNextCircleDisplayCustomClosing( float circleCloseTime, string prompt )
+{
+	NextCircleDisplayCustomData data
+	data.circleStartTime = Time() - 4.0
+	data.circleCloseTime = circleCloseTime
+	data.roundString = prompt
+	data.roundNumber = -1
+	SetNextCircleDisplayCustom_( data )
+}
+
+void function SetNextCircleDisplayCustomClear()
+{
+	NextCircleDisplayCustomData data
+	SetNextCircleDisplayCustom_( data )
+}
 
 void function NextCircleStartTimeChanged( entity player, float old, float new, bool actuallyChanged )
 {
@@ -1062,7 +1084,7 @@ void function NextCircleStartTimeChanged( entity player, float old, float new, b
 
 	RuiSetGameTime( rui, "circleStartTime", new )
 
-	int roundNumber = SURVIVAL_GetCurrentDeathFieldStage() + 1 //
+	int roundNumber = (SURVIVAL_GetCurrentDeathFieldStage() + 1)
 	RuiSetInt( rui, "roundNumber", roundNumber )
 
 	string roundString = Localize( "#SURVIVAL_CIRCLE_STATUS_ROUND_CLOSING", roundNumber )
@@ -1496,6 +1518,7 @@ void function UpdateMap_THREAD()
 		if ( IsValid( file.mapAimRui ) )
 		{
 			RuiSetBool( file.mapAimRui, "devCheatsAreActive", MapDevCheatsAreActive() )
+			RuiSetBool( file.mapAimRui, "tpPromptIsActive", TPPromptIsActive() )
 		}
 
 		if ( InputIsButtonDown( BUTTON_TRIGGER_RIGHT ) )
@@ -1615,10 +1638,16 @@ void function AddInWorldMinimapObject_WhenValid( entity ent )
 			thread AddInWorldMinimapDeathFieldInternal( ent, file.mapTopo )
 			return
 
-		case "safeZone":
-		case "surveyZone":
 		case "hotZone":
 			SetMapFeatureItem( 300, "#HOT_ZONE", "#HOT_ZONE_DESC", $"rui/hud/gametype_icons/survival/hot_zone" )
+			//
+#if(false)
+
+
+#endif
+		case "safeZone":
+		case "safeZone_noline":
+		case "surveyZone":
 			thread AddInWorldMinimapObjectiveInternal( ent, file.mapTopo )
 			return
 
@@ -1638,6 +1667,13 @@ void function AddInWorldMinimapObject_WhenValid( entity ent )
 			foreach ( screen in file.minimapTopos )
 				thread AddInWorldMinimapObjectInternal( ent, screen, $"rui/hud/gametype_icons/survival/sur_hovertank_minimap_destination", $"rui/hud/gametype_icons/survival/sur_hovertank_minimap_destination", <1.5, 1.5, 0.0>, <0.5, 0.5, 0.5> )
 			return
+
+#if(false)
+
+
+
+
+#endif
 
 		case "SurveyBeacon":
 			foreach ( screen in file.minimapTopos )
@@ -1678,7 +1714,19 @@ void function AddInWorldMinimapObject_WhenValid( entity ent )
 		case "worldMarker":
 			if ( IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
 				thread AddInWorldMinimapObjectInternal( ent, file.mapTopo, $"rui/hud/gametype_icons/ctf/ctf_flag_neutral", $"rui/hud/gametype_icons/ctf/ctf_flag_neutral" )
-		return
+			return
+
+#if(false)
+
+
+
+
+
+
+
+
+
+#endif
 	}
 
 	if ( ent.GetNetworkedClassName() == "player_vehicle" )
@@ -1693,10 +1741,11 @@ void function AddInWorldMinimapObject_WhenValid( entity ent )
 
 	while ( IsValid( ent ) )
 	{
-	#if(false)
+		#if(false)
 
 
 #endif //
+
 		if ( ent.IsPlayer() && ent.GetTeam() != GetLocalViewPlayer().GetTeam() )
 		{
 			waitthread WaitForEntUpdate( ent, GetLocalViewPlayer() )
@@ -2045,6 +2094,55 @@ void function AddMinimapLabel( string title, float xPos, float yPos, float width
 	}
 }
 
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
 
 void function CleanupRuiOnTopoDestroy( var rui, var topo )
 {
@@ -2383,7 +2481,24 @@ bool function Survival_HandleKeyInput( int key )
 
 		return false
 	}
-	#endif
+	else
+	#endif //
+	{
+		if ( TPPromptIsActive() )
+		{
+			switch ( key )
+			{
+				case BUTTON_A:
+				case MOUSE_LEFT:
+					vector worldPos = ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() )
+					GetLocalClientPlayer().ClientCommand( format( "TPPromptGoToMapPoint %.3f %.3f %.3f", worldPos.x, worldPos.y, worldPos.z ) )
+					ScreenFlash( 0.0, 0.0, 0.0, 0.1, 0.5 )
+					EmitSoundOnEntity( GetLocalViewPlayer(), "dropship_mp_epilogue_warpout" )
+					delaythread( 0.25 ) HideScoreboard()
+					return true
+			}
+		}
+	}
 
 	bool pressedPing = false
 	bool swallowInput = false
@@ -2648,7 +2763,7 @@ void function Survival_RunCharacterSelection_Thread()
 	//
 
 	//
-	if ( file.cameFromWaitingForPlayersState )
+//
 //
 
 	HideMapRui()
@@ -2666,7 +2781,8 @@ void function Survival_RunCharacterSelection_Thread()
 	while( Time() < GetGlobalNetTime( "championSquadPresentationStartTime" ) )
 		WaitFrame()
 
-	thread DoChampionSquadCardsPresentation()
+	if ( GetCurrentPlaylistVarInt( "survival_enable_gladiator_intros", 1 ) == 1 )
+		thread DoChampionSquadCardsPresentation()
 }
 
 
@@ -2692,8 +2808,6 @@ void function OnGamestateChanged()
 		RuiSetBool( file.pilotRui, "gamestateWaitingForPlayers", gamestateWaitingForPlayers )
 		RuiSetBool( file.dpadMenuRui, "gamestateWaitingForPlayers", gamestateWaitingForPlayers )
 	}
-
-	UpdateCompassVisibility()
 }
 
 
@@ -2750,7 +2864,7 @@ void function ServerCallback_PlayerBootsOnGround()
 
 	DoF_LerpFarDepthToDefault( 0.5 )
 	DoF_LerpNearDepthToDefault( 0.5 )
-	GetLocalClientPlayer().ClientCommand( "dof_variable_blur 0" )
+	SetConVarFloat( "dof_variable_blur", 0.0 )
 }
 
 
@@ -3064,7 +3178,7 @@ void function TryCycleOrdnance( entity player )
 			{
 				array<string> allOrdnance = SURVIVAL_GetAllPlayerOrdnance( player )
 
-				if ( allOrdnance.len() > 1 )
+				if ( allOrdnance.len() > 1 || !allOrdnance.contains(weapon.GetWeaponClassName()) )
 				{
 					player.ClientCommand( "Sur_SwapToNextOrdnance" )
 				}
@@ -3097,8 +3211,8 @@ void function ReloadPressed( entity player )
 		return
 
 	bool isUsePressed = player.IsInputCommandPressed( IN_USE )
-	bool playerHasUsePrompt = player.HasUsePrompt()
-	if ( isUsePressed && playerHasUsePrompt )
+	entity playerUseEnt = player.GetUseEntity()
+	if ( isUsePressed && playerUseEnt != null )
 		return
 
 	NotifyReloadAttemptButNoReserveAmmo()
@@ -3782,66 +3896,9 @@ void function SayThanks( entity player )
 	Quickchat( player, eCommsAction.REPLY_THANKS )
 }
 
-
-void function UICallback_DestroyAllClientGladCardData()
-{
-	foreach ( rui, nestedGCHandle in file.elemToGladCardHandle )
-	{
-		nestedGCHandle.cardRui = null
-		CleanupNestedGladiatorCard( nestedGCHandle )
-	}
-
-	file.elemToGladCardHandle.clear()
-}
-
-
-void function UICallback_DestroyClientGladCardData( var elem )
-{
-	var rui = Hud_GetRui( elem )
-
-	if ( ( rui in file.elemToGladCardHandle ) )
-	{
-		CleanupNestedGladiatorCard( file.elemToGladCardHandle[ rui ] )
-		delete file.elemToGladCardHandle[ rui ]
-	}
-}
-
-bool function CanSendFriendRequest( entity player )
-{
-	if ( !GetCurrentPlaylistVarBool( "enable_squad_invite", false ) )
-		return false
-
-	return true
-}
-
-bool function CanInviteSquadMate( string uid )
-{
-	if ( !GetCurrentPlaylistVarBool( "enable_squad_invite", false ) )
-		return false
-
-	if ( IsInMyParty( uid ) )
-		return false
-
-	if ( GetParty().numFreeSlots == 0 )
-		return false
-
-	return true
-}
-
-bool function IsInMyParty( string uid )
-{
-	Party party = GetParty()
-	foreach ( p in party.members )
-	{
-		if ( p.uid == uid )
-			return true
-	}
-	return false
-}
-
 bool function CanReportPlayer( entity target )
 {
-	int reportStyle = GetCurrentPlaylistVarInt( "enable_report", 0 )
+	int reportStyle = GetReportStyle()
 
 	if ( !IsValid( target ) )
 		return false
@@ -3870,381 +3927,6 @@ bool function CanReportPlayer( entity target )
 
 	return true
 }
-
-
-void function UICallback_PopulateClientGladCard( var panel, var elem, var muteButton, var mutePingButton, var muteChatButton, var reportButton, var inviteButton, int teamMemberIndex, float startTime, int displayType )
-{
-	entity player
-	player = GetLocalClientPlayer()
-	EHI ehi = player.GetEncodedEHandle()
-
-	var rui = Hud_GetRui( elem )
-	RuiSetBool( rui, "isEmpty", true )
-
-	if ( teamMemberIndex > 0 )
-	{
-		int team = player.GetTeam()
-		table<EHI, PlayerInfo> teamMembers = file.teammates
-
-		int index = teamMemberIndex-1
-		PlayerInfo teammateInfo
-
-		bool foundTeammate = false
-		int i=0
-		foreach ( info in teamMembers )
-		{
-			if ( index == i++ )
-		{
-				teammateInfo = info
-				foundTeammate = true
-				break
-			}
-		}
-
-		if ( foundTeammate )
-		{
-			ehi = teammateInfo.ehi
-			player = teammateInfo.player
-
-			bool isVoiceMuted = false
-			bool isTextMuted = false
-			bool isPingMuted = false
-			bool canReport = false
-
-			if ( IsValid( player ) )
-			{
-				isVoiceMuted = player.IsVoiceMuted()
-				isTextMuted = player.IsTextMuted()
-				isPingMuted = PlayerIsPingMuted( player )
-
-			RuiSetBool( Hud_GetRui( muteButton ), "isMuted", isVoiceMuted )
-			RuiSetBool( Hud_GetRui( mutePingButton ), "isMuted", isPingMuted )
-			RuiSetBool( Hud_GetRui( muteChatButton ), "isMuted", isTextMuted )
-
-				canReport = CanReportPlayer( player )
-			}
-			else
-			{
-				int reportStyle = GetCurrentPlaylistVarInt( "enable_report", 0 )
-
-				switch ( reportStyle )
-				{
-					case 1: //
-						canReport = teammateInfo.hardware == GetLocalClientPlayer().GetHardware()
-						break
-
-					case 2: //
-						canReport = true
-						break
-
-					case 0: //
-					default:
-						canReport = false
-				}
-			}
-
-			Hud_Show( muteButton )
-			Hud_Show( mutePingButton )
-
-			#if(CONSOLE_PROG)
-			Hud_Hide( muteChatButton )
-			#else
-			Hud_Show( muteChatButton )
-			#endif
-
-			bool canInviteToParty = CanInviteSquadMate( teammateInfo.uid )
-			bool canInviteFriend = CanSendFriendRequest( player )
-
-			Hud_SetVisible( inviteButton, canInviteToParty )
-			Hud_SetVisible( reportButton, canReport )
-
-			{
-				ToolTipData d1
-				d1.titleText = isVoiceMuted ? "#UNMUTE" : "#MUTE"
-				d1.tooltipStyle = eTooltipStyle.DEFAULT
-				d1.descText = " "
-				Hud_SetToolTipData( muteButton, d1 )
-			}
-
-			{
-				ToolTipData d2
-				d2.titleText = isPingMuted ? "#UNMUTE_PING" : "#MUTE_PING"
-				d2.tooltipStyle = eTooltipStyle.DEFAULT
-				d2.descText = " "
-				Hud_SetToolTipData( mutePingButton, d2 )
-			}
-
-			{
-				ToolTipData d3
-				d3.titleText = isTextMuted ? "#UNMUTE_CHAT" : "#MUTE_CHAT"
-				d3.tooltipStyle = eTooltipStyle.DEFAULT
-				d3.descText = " "
-				Hud_SetToolTipData( muteChatButton, d3 )
-			}
-
-			{
-				ToolTipData d4
-				d4.titleText = "#INVITE_SQUAD_MATE"
-				d4.tooltipStyle = eTooltipStyle.DEFAULT
-				d4.descText = "#INVITE_SQUAD_MATE_DESC"
-				Hud_SetToolTipData( inviteButton, d4 )
-			}
-
-			{
-				ToolTipData d5
-				d5.titleText = "#REPORT_SQUAD_MATE"
-				d5.tooltipStyle = eTooltipStyle.DEFAULT
-				d5.descText = "#REPORT_SQUAD_MATE_DESC"
-				Hud_SetToolTipData( reportButton, d5 )
-			}
-
-			if ( GetCurrentPlaylistVarBool( "enable_squad_invite", false ) )
-				RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, GetPlayerName( ehi ), teammateInfo.uid, teammateInfo.hardware, teamMemberIndex )
-			else
-				RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, "", "", "", teamMemberIndex )
-		}
-		else
-		{
-			RunUIScript( "ClientCallback_UpdatePlayerOverlayButton", panel, "", "", "", teamMemberIndex )
-
-			Hud_Hide( muteChatButton )
-			Hud_Hide( mutePingButton )
-			Hud_Hide( muteButton )
-			Hud_Hide( reportButton )
-			Hud_Hide( inviteButton )
-
-			return
-		}
-	}
-
-	if ( ehi == EHI_null )
-		return
-
-	RuiSetBool( rui, "isEmpty", false )
-
-	if ( GetCurrentPlaylistVarBool( "enable_disconnected_display", false ) )
-		RuiSetBool( rui, "isConnected", IsValid( GetEntityFromEncodedEHandle( ehi ) ) )
-	else
-		RuiSetBool( rui, "isConnected", true )
-
-	NestedGladiatorCardHandle nestedGCHandle
-	if (!( rui in file.elemToGladCardHandle ))
-	{
-		nestedGCHandle = CreateNestedGladiatorCard( rui, "card", eGladCardDisplaySituation.SQUAD_MANAGEMENT_PAGE_ANIMATED, displayType )
-		file.elemToGladCardHandle[ rui ] <- nestedGCHandle
-	}
-	else
-	{
-		nestedGCHandle = file.elemToGladCardHandle[ rui ]
-	}
-
-	RuiSetGameTime( rui, "startTime", startTime )
-	RuiSetString( rui, "playerName", GetPlayerName( ehi ) )
-	RuiSetBool( rui, "isUsingFullBox", displayType == eGladCardPresentation.FULL_BOX )
-	ChangeNestedGladiatorCardOwner( nestedGCHandle, ehi, Time(), eGladCardLifestateOverride.ALIVE )
-}
-
-
-void function UICallback_ToggleMute( var button )
-{
-	int index = int( Hud_GetScriptID( button ) )
-	entity player
-	player = GetLocalClientPlayer()
-	int team = player.GetTeam()
-	table<EHI, PlayerInfo> teamMembers = file.teammates
-
-	index = index-1
-	PlayerInfo teammateInfo
-
-	bool foundTeammate = false
-	int i=0
-	foreach ( info in teamMembers )
-	{
-		if ( index == i++ )
-	{
-			teammateInfo = info
-			foundTeammate = true
-			break
-		}
-	}
-
-	if ( foundTeammate )
-	{
-		player = teammateInfo.player
-
-		if ( !IsValid( player ) )
-			return
-
-		TogglePlayerVoiceMute( player )
-		var rui = Hud_GetRui( button )
-
-		bool isMuted = player.IsVoiceMuted()
-
-		RuiSetBool( rui, "isMuted", isMuted )
-
-		ToolTipData d1
-		d1.titleText = isMuted ? "#UNMUTE" : "#MUTE"
-		d1.tooltipStyle = eTooltipStyle.DEFAULT
-		d1.descText = " "
-		Hud_SetToolTipData( button, d1 )
-	}
-}
-
-
-void function UICallback_ToggleMutePing( var button )
-{
-	int index = int( Hud_GetScriptID( button ) )
-	entity player
-	player = GetLocalClientPlayer()
-	int team = player.GetTeam()
-	table<EHI, PlayerInfo> teamMembers = file.teammates
-
-	index = index-1
-	PlayerInfo teammateInfo
-
-	bool foundTeammate = false
-	int i=0
-	foreach ( info in teamMembers )
-	{
-		if ( index == i++ )
-	{
-			teammateInfo = info
-			foundTeammate = true
-			break
-		}
-	}
-
-	if ( foundTeammate )
-	{
-		player = teammateInfo.player
-
-		if ( !IsValid( player ) )
-			return
-
-		TogglePlayerWaypointMute( player )
-		var rui = Hud_GetRui( button )
-
-		bool isMuted = PlayerIsPingMuted( player )
-
-		RuiSetBool( rui, "isMuted", isMuted )
-
-		ToolTipData d1
-		d1.titleText = isMuted ? "#UNMUTE_PING" : "#MUTE_PING"
-		d1.tooltipStyle = eTooltipStyle.DEFAULT
-		d1.descText = " "
-		Hud_SetToolTipData( button, d1 )
-	}
-}
-
-
-void function UICallback_ToggleMuteChat( var button )
-{
-	int index = int( Hud_GetScriptID( button ) )
-	entity player
-	player = GetLocalClientPlayer()
-	int team = player.GetTeam()
-	table<EHI, PlayerInfo> teamMembers = file.teammates
-
-	index = index-1
-	PlayerInfo teammateInfo
-
-	bool foundTeammate = false
-	int i=0
-	foreach ( info in teamMembers )
-	{
-		if ( index == i++ )
-	{
-			teammateInfo = info
-			foundTeammate = true
-			break
-		}
-	}
-
-	if ( foundTeammate )
-	{
-		player = teammateInfo.player
-
-		if ( !IsValid( player ) )
-			return
-
-		//
-		TogglePlayerTextMute( player )
-
-		var rui = Hud_GetRui( button )
-
-		bool isMuted = player.IsTextMuted()
-
-		RuiSetBool( rui, "isMuted", isMuted )
-
-		ToolTipData d1
-		d1.titleText = isMuted ? "#UNMUTE_CHAT" : "#MUTE_CHAT"
-		d1.tooltipStyle = eTooltipStyle.DEFAULT
-		d1.descText = " "
-		Hud_SetToolTipData( button, d1 )
-	}
-}
-
-
-void function UICallback_InviteSquadMate( var button )
-{
-	int index = int( Hud_GetScriptID( button ) )
-	entity player
-	player = GetLocalClientPlayer()
-	int team = player.GetTeam()
-	table<EHI, PlayerInfo> teamMembers = file.teammates
-
-	index = index-1
-	PlayerInfo teammateInfo
-
-	bool foundTeammate = false
-	int i=0
-	foreach ( info in teamMembers )
-	{
-		if ( index == i++ )
-		{
-			teammateInfo = info
-			foundTeammate = true
-			break
-		}
-	}
-
-	if ( foundTeammate )
-	{
-		DoInviteToParty( [ teammateInfo.uid ] )
-	}
-}
-
-void function UICallback_ReportSquadMate( var button )
-{
-	int index = int( Hud_GetScriptID( button ) )
-	entity player
-	player = GetLocalClientPlayer()
-	int team = player.GetTeam()
-	table<EHI, PlayerInfo> teamMembers = file.teammates
-
-	index = index-1
-	PlayerInfo teammateInfo
-
-	bool foundTeammate = false
-	int i=0
-	foreach ( info in teamMembers )
-	{
-		if ( index == i++ )
-	{
-			teammateInfo = info
-			foundTeammate = true
-			break
-		}
-	}
-
-	if ( foundTeammate )
-	{
-		string friendlyOrEnemy = "friendly"
-
-		RunUIScript( "ClientToUI_ShowReportPlayerDialog", GetPlayerName( teammateInfo.ehi ), teammateInfo.hardware, teammateInfo.uid, friendlyOrEnemy )
-	}
-}
-
 
 void function OnPlayerKilled( entity player )
 {

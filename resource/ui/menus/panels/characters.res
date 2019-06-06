@@ -408,7 +408,7 @@
         pin_to_sibling_corner	TOP_LEFT
     }
 
-    // ROW 3 ----------------------------------------------
+    // ROW 4 ----------------------------------------------
 
     CharacterButton18
     {
@@ -474,6 +474,133 @@
         cursorVelocityModifier  0.7
 
         pin_to_sibling          CharacterButton20
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+
+    CharacterButton22
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                19
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        pin_to_sibling          CharacterButton21
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+    CharacterButton23
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                19
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        pin_to_sibling          CharacterButton22
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+
+    // ROW 5 ----------------------------------------------
+
+    CharacterButton24
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                16
+        xpos                    72 // -48
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        //navUp                   CharacterButton12
+        //navLeft                 CharacterButton15
+        //navRight                CharacterButton17
+
+        pin_to_sibling			CharacterButton19
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+    }
+    CharacterButton25
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                17
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        //navUp                   CharacterButton13
+        //navLeft                 CharacterButton16
+        //navRight                CharacterButton18
+
+        pin_to_sibling          CharacterButton24
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+    CharacterButton26
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                18
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        //navUp                   CharacterButton14
+        //navLeft                 CharacterButton17
+
+        pin_to_sibling          CharacterButton25
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+    CharacterButton27
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                19
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        pin_to_sibling          CharacterButton26
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+    CharacterButton28
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                19
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        pin_to_sibling          CharacterButton27
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+    }
+    CharacterButton29
+    {
+        ControlName             RuiButton
+        InheritProperties       LobbyCharacterButton
+        classname               CharacterButtonClass
+        scriptID                19
+        xpos                    -121
+        visible                 0
+        cursorVelocityModifier  0.7
+
+        pin_to_sibling          CharacterButton28
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   TOP_LEFT
     }

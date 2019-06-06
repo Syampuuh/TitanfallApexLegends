@@ -35,6 +35,7 @@ global function IsGRXOperationDone
 #if(false)
 
 
+
 #endif
 
 #if(CLIENT)
@@ -95,11 +96,16 @@ global function UIToClient_GRXInventoryCleanStateChange
 global function ClientCodeCallback_GRXPackOpened
 #elseif(UI)
 global function ServerToUI_PROTO_YouAreGreenLightedForGRX
+global function ServerToUI_GRX_QueuedRewardsGiven
+global function DisplayQueuedRewardsGiven
 global function UICodeCallback_GRXOffersRefreshed
 global function UICodeCallback_GRXUserInfoUpdated
 global function UICodeCallback_GRXQueryCompleted
 global function ShGRX_UIScriptResetComplete
 #endif
+
+const int QUEUED_REWARDS_MAX_COUNT = 6
+const int QUEUED_REWARDS_MAX_ITEMS_COUNT = 1
 
 
 #if(false)//
@@ -125,13 +131,6 @@ global enum eItemFlavorGRXMode
 	CURRENCY = GRX_ITEMFLAVORMODE_CURRENCY,
 }
 //
-
-global struct ItemFlavorBag
-{
-	array<ItemFlavor>     flavors
-	array<int>            quantities
-	int                   associatedError = -1
-}
 
 
 #if(UI)
@@ -178,6 +177,9 @@ global asset[GRX_CURRENCY_COUNT] GRX_CURRENCY_CONTAINERS = [$"", $"", $""]
 global ItemFlavor& GRX_BATTLEPASS_PURCHASE_PACK_BASIC
 global ItemFlavor& GRX_BATTLEPASS_PURCHASE_PACK_BUNDLE
 
+global int GRX_DEV_ITEM = -1
+global int GRX_QA_ITEM = -1
+
 
 //
 //
@@ -205,7 +207,7 @@ global struct ScriptGRXOperationInfo
 #elseif(UI)
 		bool shouldRetryOnInterrupt = true
 	#endif
-	bool _addToFrontOfQueue = false
+	bool _isAutoOperation = false //
 
 	void functionref( int id )             doOperationFunc
 	void functionref( int status )         onDoneCallback
@@ -224,6 +226,8 @@ struct PlayerGRXScriptState
 {
 	#if(false)
 
+//
+
 #endif
 
 	#if CLIENT || UI 
@@ -241,10 +245,9 @@ struct PlayerGRXScriptState
 		array<ScriptGRXOperationInfo> operationQueue
 		ScriptGRXOperationInfo ornull activeOperationOrNull = null
 
-		bool isEphemeralPackOpeningQueued = false
+		bool isAutoOperationQueued = false
 
 		GRXUserInfo& WORKAROUND_lastCodeUserInfo
-
 
 		#if(false)
 
@@ -368,10 +371,14 @@ void function ShGRX_LevelInit()
 
 	#if(CLIENT)
 		Remote_RegisterUIFunction( "ServerToUI_PROTO_YouAreGreenLightedForGRX" )
+		Remote_RegisterUIFunction( "ServerToUI_GRX_QueuedRewardsGiven" )
 	#endif
 
 	#if(false)
-//
+
+
+
+
 #endif
 
 	#if(UI)
@@ -389,6 +396,9 @@ void function ShGRX_LevelInit()
 			thread whatTheFunc()
 		}
 	#endif
+
+	GRX_DEV_ITEM = GRX_RegisterItem( "account_flag_dev", eItemFlavorGRXMode.REGULAR )
+	GRX_QA_ITEM = GRX_RegisterItem( "account_flag_QA", eItemFlavorGRXMode.REGULAR )
 }
 #endif
 
@@ -728,10 +738,16 @@ void function QueueGRXOperationInternal( entity player, ScriptGRXOperationInfo o
 	operationInfo.status = eScriptGRXOperationStatus.QUEUED
 	operationInfo.id = scriptState.nextScriptQueryId
 	scriptState.nextScriptQueryId += 1
-	if ( operationInfo._addToFrontOfQueue )
+	if ( operationInfo._isAutoOperation )
+	{
+		Assert( !scriptState.isAutoOperationQueued )
+		scriptState.isAutoOperationQueued = true
 		scriptState.operationQueue.insert( 0, operationInfo )
+	}
 	else
+	{
 		scriptState.operationQueue.append( operationInfo )
+	}
 }
 #endif
 
@@ -1242,6 +1258,8 @@ string function GRX_DBG_PREFIX()
 
 //
 //
+//
+
 
 
 
@@ -1312,33 +1330,6 @@ string function GRX_DBG_PREFIX()
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
 
 
 
@@ -1360,7 +1351,30 @@ string function GRX_DBG_PREFIX()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
+
+
 
 
 
@@ -1644,6 +1658,7 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 
 	scriptState.inventoryState = codeUserInfo.inventoryState
 
+	bool isFirstTimeClean = false
 	if ( willConsiderInventoryReady )
 	{
 		if ( !wasConsideringInventoryReady )
@@ -1655,6 +1670,7 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 		if ( scriptState.isInventoryReady && !scriptState.hasInventoryEverBeenClean )
 		{
 			scriptState.hasInventoryEverBeenClean = true
+			isFirstTimeClean = true
 			#if(false)
 
 #endif
@@ -1700,6 +1716,18 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 #endif
 
 	#if(false)
+
+
+//
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -1708,15 +1736,6 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 
 
 
-
-
-
-
-
-
-
-
-//
 #elseif(UI)
 		if ( willConsiderInventoryReady != wasConsideringInventoryReady )
 		{
@@ -1754,6 +1773,163 @@ void function ServerToUI_PROTO_YouAreGreenLightedForGRX()
 
 
 #if(UI)
+void function ServerToUI_GRX_QueuedRewardsGiven()
+{
+	thread TryRunDialogFlowThread()
+}
+#endif
+
+
+#if(UI)
+bool function DisplayQueuedRewardsGiven()
+{
+	//
+
+	entity player = GetUIPlayer()
+	for ( int persistentArrayIdx = 0; persistentArrayIdx < QUEUED_REWARDS_MAX_COUNT; persistentArrayIdx++ )
+	{
+		Assert( QUEUED_REWARDS_MAX_ITEMS_COUNT == 1 )
+		SettingsAssetGUID rewardItemFlavGUID = player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardGUIDs[0]", persistentArrayIdx ) )
+		if ( rewardItemFlavGUID == 0 )
+			continue
+		if ( !IsValidItemFlavorGUID( rewardItemFlavGUID, eValidation.ASSERT ) )
+			continue //
+		ItemFlavor rewardItemFlav = GetItemFlavorByGUID( rewardItemFlavGUID )
+
+		bool rewardGiven        = (player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardGiven", persistentArrayIdx ) ) > 0)
+		bool rewardAcknowledged = (player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardAcknowledged", persistentArrayIdx ) ) > 0)
+		Assert( !rewardAcknowledged )
+		if ( !rewardGiven )
+			continue
+
+		if ( !GRX_HasItem( ItemFlavor_GetGRXIndex( rewardItemFlav ) ) )
+		{
+			Assert( false )
+			return false
+		}
+
+		Assert( QUEUED_REWARDS_MAX_ITEMS_COUNT == 1 )
+		int quantity = player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardQuantities[0]", persistentArrayIdx ) )
+		Assert( quantity == 1 )
+
+		SettingsAssetGUID sourceItemFlavGUID   = player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].sourceGUID", persistentArrayIdx ) )
+		ItemFlavor ornull sourceItemFlavOrNull = null
+		if ( sourceItemFlavGUID != 0 && IsValidItemFlavorGUID( sourceItemFlavGUID, eValidation.ASSERT ) )
+		{
+			sourceItemFlavOrNull = GetItemFlavorByGUID( sourceItemFlavGUID )
+		}
+		Assert( sourceItemFlavOrNull != null ) //
+
+		string titleText = "#GENERIC_REWARD_RECEIVED"
+		string descText  = ""
+		if ( sourceItemFlavOrNull != null )
+		{
+			ItemFlavor sourceItemFlav = expect ItemFlavor(sourceItemFlavOrNull)
+			switch( ItemFlavor_GetType( sourceItemFlav ) )
+			{
+				case eItemType.challenge:
+				{
+					//
+					titleText = "#LEGENDARY_HUNT_CHALLENGE_COMPLETED_HEADER" //
+
+					//
+					for ( int tierIdx = 0; tierIdx < Challenge_GetTierCount( sourceItemFlav ); tierIdx++ )
+					{
+						if ( Challenge_GetItemRewards( sourceItemFlav, tierIdx ).flavors.contains( rewardItemFlav ) )
+						{
+							Assert( descText == "" )
+							descText = Challenge_GetDescription( sourceItemFlav, tierIdx )
+							#if(!ASSERTING)
+								break
+							#endif
+						}
+					}
+					break
+				}
+
+				default: Assert( false )
+			}
+		}
+
+		BattlePassReward rewardInfo
+		rewardInfo.level = -1
+		rewardInfo.flav = rewardItemFlav
+		rewardInfo.quantity = quantity
+		ShowRewardCeremonyDialog(
+			"",
+			titleText,
+			descText,
+			[rewardInfo],
+			false )
+
+		ClientCommand( format( "acknowledge_reward %d %d", persistentArrayIdx, rewardItemFlavGUID ) )
+
+		return true //
+
+		//
+		//
+		//
+		//
+		//
+		//
+	}
+
+	return false
+}
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+#endif
+
+
+#if(UI)
 void function RunGRXOperations( entity player, PlayerGRXScriptState scriptState )
 {
 	if ( !GRX_IsGRXEnabled() )
@@ -1766,37 +1942,6 @@ void function RunGRXOperations( entity player, PlayerGRXScriptState scriptState 
 		return
 
 	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
 
 #endif
 
@@ -1894,6 +2039,127 @@ void function WORKAROUND_CallOperationDoFuncOnFrameEnd( ScriptGRXOperationInfo o
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+#endif
+
+
+
+#if(false)
+
+
+
+
 #elseif(UI)
 void function UICodeCallback_GRXQueryCompleted( int queryScriptId, int queryGoal, int queryState )
 {
@@ -1941,6 +2207,8 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 
 
 
+
+
 //
 
 
@@ -1964,6 +2232,7 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 //
 //
 //
+
 
 
 //
@@ -1976,7 +2245,11 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 
 #if(false)
 
+
+
+
 //
+
 #elseif(UI)
 	if ( queryScriptId > 0 )
 		return //
@@ -2029,6 +2302,11 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 			ShowGRXErrorDialogue( "" )
 	#endif
 
+	if ( operationInfo._isAutoOperation )
+	{
+		Assert( scriptState.isAutoOperationQueued )
+		scriptState.isAutoOperationQueued = false
+	}
 	scriptState.activeOperationOrNull = null
 	scriptState.operationQueue.remove( 0 )
 
@@ -2038,6 +2316,8 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 
 
 #if(false)
+
+
 
 
 
@@ -2527,6 +2807,64 @@ void function ClientCodeCallback_GRXPackOpened( array<int> balanceDiffs, array<i
 #endif
 
 
+#if(false)
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+#endif
+
+
 #if CLIENT || UI 
 void function AssertCurrencyBundlePlaylistVarsAreValid( ItemFlavor bundle )
 {
@@ -2574,6 +2912,25 @@ bool function GRX_IsOfferRestricted( entity player = null )
 
 	return grxState.isOfferRestricted
 }
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 
 

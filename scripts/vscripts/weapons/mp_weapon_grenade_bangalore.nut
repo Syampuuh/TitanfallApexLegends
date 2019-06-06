@@ -26,6 +26,8 @@ const asset SMOKE_SCREEN_FX = $"P_screen_smoke_bangalore_FP"
 const asset FX_MUZZLE_FLASH_FP = $"P_wpn_mflash_bang_rocket_FP"
 const asset FX_MUZZLE_FLASH_3P = $"P_wpn_mflash_bang_rocket"
 
+const string BANGALORE_SMOKE_FX_TABLE = "exp_creeping_barrage"
+
 struct
 {
 	#if(CLIENT)
@@ -41,6 +43,8 @@ void function MpWeaponGrenadeBangalore_Init()
 	PrecacheParticleSystem( FX_SMOKEGRENADE_TRAIL )
 	PrecacheParticleSystem( FX_MUZZLE_FLASH_FP )
 	PrecacheParticleSystem( FX_MUZZLE_FLASH_3P )
+
+	PrecacheImpactEffectTable( BANGALORE_SMOKE_FX_TABLE )
 
 	file.smokeGasScreenFxId = PrecacheParticleSystem( SMOKE_SCREEN_FX )
 

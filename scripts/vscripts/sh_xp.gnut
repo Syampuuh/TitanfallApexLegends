@@ -82,6 +82,11 @@ global enum XP_TYPE
 	BONUS_FIRST_GAME,
 	BONUS_RESTED_AS,
 	TOTAL_MATCH,
+	TOP_FIVE,
+	BONUS_FIRST_TOP_FIVE,
+	#if(true)
+		CHALLENGE_COMPLETED,
+	#endif
 	_NUM_TYPES,
 }
 
@@ -131,7 +136,9 @@ void function ShXP_Init()
 
 #endif
 
-	InitXPEvents()
+	#if(!UI)
+		InitXPEvents() //
+	#endif
 }
 
 
@@ -493,13 +500,21 @@ void function InitXPEvents()
 	InitXpEventTypeData( XP_TYPE.BONUS_FRIEND, "xp_friend", "#EOG_XP_PREMADE_SQUAD" )
 	XpEventTypeData_SetDisplayEmpty( XP_TYPE.BONUS_FRIEND, true )
 
-	InitXpEventTypeData( XP_TYPE.BONUS_FRIEND_BOOST, "xp_friend_boost", "#EOG_XP_PREMADE_SQUAD", 0.0 )
+	InitXpEventTypeData( XP_TYPE.BONUS_FRIEND_BOOST, "xp_friend_boost", "#EOG_XP_PREMADE_SQUAD" )
+	XpEventTypeData_SetDisplayEmpty( XP_TYPE.BONUS_FRIEND_BOOST, true )
 	//
-	XpEventTypeData_SetCountDisplay( XP_TYPE.BONUS_FRIEND_BOOST, eNumericDisplayType.SHORT_INT )
+
+	#if(true)
+		InitXpEventTypeData( XP_TYPE.CHALLENGE_COMPLETED, "xp_challenge_completed", "#EOG_XP_CHALLENGES_COMPLETED" )
+	#endif
 
 	InitXpEventTypeData( XP_TYPE.WIN_MATCH, "xp_win_match", "#EOG_XP_WON" )
 
 	InitXpEventTypeData( XP_TYPE.TOP_THREE, "xp_top_three", "#EOG_XP_TOP3" )
+
+	InitXpEventTypeData( XP_TYPE.TOP_FIVE, "xp_top_five", "#EOG_XP_TOP5" )
+
+	InitXpEventTypeData( XP_TYPE.BONUS_FIRST_TOP_FIVE, "xp_first_top_five", "#EOG_XP_FIRST_TOP5" )
 
 	InitXpEventTypeData( XP_TYPE.TOTAL_MATCH, "xp_total_match", "#EOG_XP_TOTAL_MATCH" )
 }

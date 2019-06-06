@@ -1,7 +1,14 @@
 global function ExtendedUse
+
 #if(false)
 
 #endif
+
+#if(CLIENT)
+global function DefaultExtendedUseRui
+global function ExtendedUseTextOverride
+#endif
+
 global struct ExtendedUseSettings
 {
 	void functionref( entity ent, entity player, ExtendedUseSettings settings ) successFunc
@@ -150,7 +157,7 @@ void function ExtendedUse( entity ent, entity player, ExtendedUseSettings settin
 	waitthread ExtendedUse_TrackContinuousUse( player, ent, settings.duration, settings.useInputFlag, settings.requireMatchingUseEnt )
 
 	if ( settings.successFunc != null )
-		settings.successFunc( ent, player, settings )
+		thread settings.successFunc( ent, player, settings )
 
 	if ( settings.loopSound != "" )
 		StopSoundOnEntity( ent, settings.loopSound )
@@ -243,3 +250,21 @@ void function TryClearPlayerExtendedUse( entity player, int inputFlags )
 	while ( UseHeld( player, inputFlags ) )
 		WaitFrame()
 }
+
+#if(CLIENT)
+void function DefaultExtendedUseRui( entity ent, entity player, var rui, ExtendedUseSettings settings )
+{
+	RuiSetString( rui, "holdButtonHint", settings.holdHint )
+	RuiSetString( rui, "hintText", settings.hint )
+	RuiSetGameTime( rui, "startTime", Time() )
+	RuiSetGameTime( rui, "endTime", Time() + settings.duration )
+}
+
+string function ExtendedUseTextOverride( entity ent )
+{
+	if ( ent.e.isBusy )
+		return " "
+
+	return ""
+}
+#endif

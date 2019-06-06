@@ -1,0 +1,465 @@
+//
+//
+
+#if CLIENT || UI 
+global function ShPlaylists_LevelInit
+
+global function GetCurrentPlaylistVarString
+global function GetCurrentPlaylistVarBool
+global function GetCurrentPlaylistVarInt
+global function GetCurrentPlaylistVarFloat
+global function GetPlaylistVarString
+global function GetPlaylistVarBool
+global function GetPlaylistVarInt
+global function GetPlaylistVarFloat
+
+global function GetMaxTeamSizeForPlaylist
+global function GetPlaylistMaps
+
+global function GetPlaylistIndexForName
+#endif
+
+#if CLIENT || UI 
+global function CanPlaylistFitPartySize
+#endif
+
+#if(UI)
+global function GetVisiblePlaylistNames
+#endif
+
+#if ( CLIENT || UI ) && DEV 
+global function PrintPlaylists
+#endif
+
+
+
+//
+//
+//
+//
+//
+
+global typedef PlaylistName string
+global typedef PlaylistVarName string
+
+
+
+//
+//
+//
+//
+//
+#if CLIENT || UI 
+struct FileStruct_LifetimeLevel
+{
+	//
+}
+FileStruct_LifetimeLevel& fileLevel
+#endif
+
+
+#if(ASSERTING)
+var ASSERTING_integerRegexp = null
+var ASSERTING_floatRegexp = null
+#endif
+
+
+
+//
+//
+//
+//
+//
+#if CLIENT || UI 
+void function ShPlaylists_LevelInit()
+{
+	FileStruct_LifetimeLevel newFileLevel
+	fileLevel = newFileLevel
+}
+#endif
+
+
+#if CLIENT || UI 
+string function GetCurrentPlaylistVarString( PlaylistVarName varName, string fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
+	if ( stringValueOrNull != null )
+		return expect string( stringValueOrNull )
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+bool function GetCurrentPlaylistVarBool( PlaylistVarName varName, bool fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
+	if ( stringValueOrNull != null )
+	{
+		string sanitizedValue = strip( expect string(stringValueOrNull) ).tolower()
+		if ( sanitizedValue == "1" || sanitizedValue == "true" )
+			return true
+		Assert( sanitizedValue == "0" || sanitizedValue == "false", format( "In playlist '%s', playlist var '%s' must be '1', 'true', '0', or 'false', but it's value is '%s'", GetCurrentPlaylistName(), varName, sanitizedValue ) )
+		return false
+	}
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+int function GetCurrentPlaylistVarInt( PlaylistVarName varName, int fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
+	if ( stringValueOrNull != null )
+	{
+		string stringValue = expect string(stringValueOrNull)
+		#if(ASSERTING)
+			if ( ASSERTING_integerRegexp == null )
+				ASSERTING_integerRegexp = MakeRegexp( "^\\s*\\-?\\d+\\s*$" )
+			Assert( Regexp_DoesMatch( ASSERTING_integerRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid integer: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
+		#endif
+		return int( stringValue )
+	}
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+float function GetCurrentPlaylistVarFloat( PlaylistVarName varName, float fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
+	if ( stringValueOrNull != null )
+	{
+		string stringValue = expect string(stringValueOrNull)
+		#if(ASSERTING)
+			if ( ASSERTING_floatRegexp == null )
+				ASSERTING_floatRegexp = MakeRegexp( "^[-+]?\\d*\\.?\\d*(?:[eE][-+]?\\d+)?$" )
+			Assert( Regexp_DoesMatch( ASSERTING_floatRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid float: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
+		#endif
+		return float( stringValue )
+	}
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+string function GetPlaylistVarString( PlaylistName playlistName, PlaylistVarName varName, string fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	return GetPlaylistVarOrUseValue( playlistName, varName, fallbackValue )
+}
+#endif
+
+
+#if CLIENT || UI 
+bool function GetPlaylistVarBool( PlaylistName playlistName, PlaylistVarName varName, bool fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string stringValue = GetPlaylistVarOrUseValue( playlistName, varName, "" )
+	if ( stringValue != "" )
+	{
+		string sanitizedValue = strip( stringValue ).tolower()
+		if ( sanitizedValue == "1" || sanitizedValue == "true" )
+			return true
+		Assert( sanitizedValue == "0" || sanitizedValue == "false", format( "In playlist '%s', playlist var '%s' must be '1', 'true', '0', or 'false', but it's value is '%s'", GetCurrentPlaylistName(), varName, sanitizedValue ) )
+		return false
+	}
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+int function GetPlaylistVarInt( PlaylistName playlistName, PlaylistVarName varName, int fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string stringValue = GetPlaylistVarOrUseValue( playlistName, varName, "" )
+	if ( stringValue != "" )
+	{
+		#if(ASSERTING)
+			if ( ASSERTING_integerRegexp == null )
+				ASSERTING_integerRegexp = MakeRegexp( "^\\s*\\-?\\d+\\s*$" )
+			Assert( Regexp_DoesMatch( ASSERTING_integerRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid integer: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
+		#endif
+		return int( stringValue )
+	}
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+float function GetPlaylistVarFloat( PlaylistName playlistName, PlaylistVarName varName, float fallbackValue )
+{
+	#if(CLIENT)
+		if ( !IsConnected() ) //
+		{
+			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
+			return fallbackValue
+		}
+	#elseif(UI)
+		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
+	#endif
+
+	string stringValue = GetPlaylistVarOrUseValue( playlistName, varName, "" )
+	if ( stringValue != "" )
+	{
+		#if(ASSERTING)
+			if ( ASSERTING_floatRegexp == null )
+				ASSERTING_floatRegexp = MakeRegexp( "^[-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?$" )
+			Assert( Regexp_DoesMatch( ASSERTING_floatRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid float: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
+		#endif
+		return float( stringValue )
+	}
+
+	return fallbackValue
+}
+#endif
+
+
+#if CLIENT || UI 
+int function GetMaxTeamSizeForPlaylist( PlaylistName playlistName )
+{
+	int maxPlayers = GetPlaylistVarInt( playlistName, "max_players", 0 )
+	int maxTeams   = GetPlaylistVarInt( playlistName, "max_teams", 0 )
+	if ( maxTeams == 0 )
+		return maxPlayers
+	return maxPlayers / maxTeams
+}
+#endif
+
+
+#if CLIENT || UI 
+array<string> function GetPlaylistMaps( PlaylistName playlistName )
+{
+	array<string> mapsArray
+
+	int numModes = GetPlaylistGamemodesCount( playlistName )
+	for ( int modeIndex = 0; modeIndex < numModes; modeIndex++ )
+	{
+		int numMaps = GetPlaylistGamemodeByIndexMapsCount( playlistName, modeIndex )
+		for ( int mapIndex = 0; mapIndex < numMaps; mapIndex++ )
+		{
+			string mapName = GetPlaylistGamemodeByIndexMapByIndex( playlistName, modeIndex, mapIndex )
+			if ( mapsArray.contains( mapName ) )
+				continue
+
+			mapsArray.append( mapName )
+		}
+	}
+
+	return mapsArray
+}
+#endif
+
+
+#if CLIENT || UI 
+bool function CanPlaylistFitPartySize( PlaylistName playlistName, int partySize, bool sendOpenInvite )
+{
+	int maxPlayers        = GetMaxPlayersForPlaylistName( playlistName )
+	int maxTeams          = GetMaxTeamsForPlaylistName( playlistName )
+	int maxPlayersPerTeam = int( max( maxPlayers / maxTeams, 1 ) )
+	bool partiesAllowed   = GetPlaylistVarBool( playlistName, "parties_allowed", true )
+
+	if ( partySize > maxPlayersPerTeam )
+		return false
+
+	if ( sendOpenInvite && maxPlayersPerTeam == 1 )
+		return false
+
+	if ( !partiesAllowed )
+	{
+		if ( partySize > 1 )
+			return false
+
+		if ( sendOpenInvite )
+			return false
+	}
+
+	return true
+}
+#endif
+
+
+#if CLIENT || UI 
+int function GetPlaylistIndexForName( PlaylistName playlistName )
+{
+	int count = GetPlaylistCount()
+	for ( int idx = 0; idx < count; ++idx )
+	{
+		string ornull thisPlaylist = GetPlaylistName( idx )
+		if ( thisPlaylist == playlistName )
+			return idx
+	}
+
+	return -1
+}
+#endif
+
+
+#if(UI)
+array<string> function GetVisiblePlaylistNames()
+{
+	int numPlaylists          = GetPlaylistCount()
+	bool pveLoadingIsForcedOn = IsPvELoadingForcedOn()
+
+	string forcedVisiblePlaylistsString  = GetConVarString( "match_visiblePlaylists" )
+	array<string> forcedVisiblePlaylists = split( forcedVisiblePlaylistsString, " " )
+
+	array<string> list      = []
+	array<string> optInList = []
+	for ( int i = 0; i < numPlaylists; i++ )
+	{
+		string name    = string( GetPlaylistName( i ) )
+		bool visible   = GetPlaylistVarBool( name, "visible", false )
+		bool hubOnly   = GetPlaylistVarBool( name, "hub_only", false )
+		bool optInOnly = GetPlaylistVarBool( name, "opt_in_only", false )
+		bool isPvEOnly = GetPlaylistVarBool( name, "pve_only", false )
+
+		if ( pveLoadingIsForcedOn != isPvEOnly )
+			continue
+
+		if ( forcedVisiblePlaylists.contains( name ) )
+		{
+			list.append( name )
+			continue
+		}
+
+		if ( !visible )
+			continue
+
+		if ( hubOnly )
+			continue
+
+		if ( optInOnly )
+		{
+			if ( ShouldDisplayOptInOptions() )
+			{
+				if ( uiGlobal.isOptInEnabled )
+					optInList.append( name )
+			}
+			continue
+		}
+
+		list.append( name )
+	}
+
+	array<string> finalList = []
+
+	if ( forcedVisiblePlaylists.len() > 0 )
+	{
+		foreach ( string name in list )
+		{
+			if ( !forcedVisiblePlaylists.contains( name ) )
+				continue
+
+			finalList.append( name )
+		}
+	}
+
+	if ( finalList.len() == 0 )
+		finalList = list
+
+	finalList.extend( optInList )
+
+	return finalList
+}
+#endif
+
+
+
+//
+//
+//
+//
+//
+#if ( CLIENT || UI ) && DEV 
+void function PrintPlaylists()
+{
+	printt( "=== PLAYLIST NAMES: ===" )
+
+	int count = GetPlaylistCount()
+	for ( int idx = 0; idx < count; idx++ )
+	{
+		printt( "--", GetPlaylistName( idx ) )
+	}
+}
+#endif
+
+

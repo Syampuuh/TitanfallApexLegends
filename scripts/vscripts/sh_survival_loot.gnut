@@ -50,7 +50,9 @@ global function SURVIVAL_GetShieldHealthForTier
 global function SURVIVAL_IsLootIrrelevant
 global function SURVIVAL_IsLootAnUpgrade
 global function SURVIVAL_GetActionForItem
+global function SURVIVAL_GetInventorySlotCountForPlayer
 
+global function GetAllDeathBoxes
 global function ShouldPickupDNAFromDeathBox
 
 #if(CLIENT)
@@ -59,6 +61,7 @@ global function SURVIVAL_UpdateStringForEquipmentAction
 #endif
 
 #if(false)
+
 
 
 
@@ -161,6 +164,12 @@ global const float SURVIVAL_GROUNDLIST_NEARBY_RADIUS = 1500.0
 global const bool LOOT_GROUND_VERTICAL_LINES = true
 
 global const AUTOPICKUP_DISTANCE = 50.0
+
+#if(false)
+
+
+
+#endif
 
 #if(true)
 global const float VERTICAL_LINE_WIDTH = 48
@@ -341,12 +350,14 @@ struct
 
 
 //
+
 #elseif(CLIENT)
 	array<void functionref( entity , LootData , int )> localPlayerPickedupLootCallbacks
 
 	float lastCacheUpdateTime
 	table<entity,CachedLootActionData> cachedActionForGroundItemData
 	table<entity,CachedLootActionData> cachedActionForGroundItemDataAlt
+	array<entity> allDeathBoxes
 #endif //
 
 	table<int, HealthPickup> healthPickups
@@ -366,7 +377,6 @@ const bool DOES_ALT_USE_SWAP_WEAPON = true
 
 void function SURVIVAL_Loot_InitShared()
 {
-
 	PrecacheModel( DEATH_BOX )
 	PrecacheModel( DEATH_BOX_FLAT_PLANE )
 	PrecacheModel( $"mdl/props/health_injector/health_injector.rmdl" )
@@ -377,13 +387,16 @@ void function SURVIVAL_Loot_InitShared()
 	PrecacheParticleSystem( $"P_ar_loot_drop_point" )
 	PrecacheParticleSystem( $"P_ar_hot_zone_far" )
 
-
 	PrecacheModel( $"mdl/props/global_access_panel_button/global_access_panel_button_console_w_stand.rmdl" )
+
+	RegisterSignal( "_SetPlayerInventory" )
 
 	#if(CLIENT)
 		AddCreateCallback( "prop_survival", OnPropSurvivalCreate )
-		AddCreateCallback( "prop_dynamic", OnDeathBoxCreated )
+		AddCreateCallback( "prop_death_box", OnDeathBoxCreated )
+		AddDestroyCallback( "prop_death_box", OnDeathBoxDestroyed )
 	#elseif(false)
+
 
 
 #endif
@@ -736,6 +749,10 @@ string function SURVIVAL_Loot_GetDetailTypeStringFromRef( string ref )
 			return ""
 		case eLootType.CUSTOMPICKUP:
 			return ""
+#if(false)
+
+
+#endif
 		case eLootType.HELMET:
 			return ""
 #if(false)
@@ -772,6 +789,10 @@ string function SURVIVAL_Loot_GetGeneralTypeStringFromType( int lootType )
 			return "#SURVIVAL_ATTACHMENT"
 		case eLootType.CUSTOMPICKUP:
 			return "Nope"
+#if(false)
+
+
+#endif
 #if(false)
 
 
@@ -1020,13 +1041,13 @@ int function SURVIVAL_GetMaxInventoryLimit( entity player )
 
 int function SURVIVAL_GetInventoryCount( entity player )
 {
-	return player.ConsumableInventory_Get().len()
+	return SURVIVAL_GetPlayerInventory( player ).len()
 }
 
 int function SURVIVAL_CountSquaresInInventory( entity player, string ref )
 {
 	LootData data = SURVIVAL_Loot_GetLootDataByRef( ref )
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
 	int count = 0
 	foreach ( invItem in playerInventory )
 	{
@@ -1042,7 +1063,7 @@ int function SURVIVAL_CountSquaresInInventory( entity player, string ref )
 int function SURVIVAL_CountItemsInInventory( entity player, string ref )
 {
 	LootData data = SURVIVAL_Loot_GetLootDataByRef( ref )
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
 	int count = 0
 	foreach ( invItem in playerInventory )
 	{
@@ -1107,7 +1128,7 @@ int function SURVIVAL_GetStowedWeaponSlot( entity player )
 
 int function SURVIVAL_CountItemsTypesInInventory( entity player, int lootType )
 {
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
 	int count = 0
 	foreach ( invItem in playerInventory )
 	{
@@ -1121,8 +1142,27 @@ int function SURVIVAL_CountItemsTypesInInventory( entity player, int lootType )
 	return count
 }
 
+array<ConsumableInventoryItem> function ClonePlayerInventory( array<ConsumableInventoryItem> inventory )
+{
+	array<ConsumableInventoryItem> newInv
+
+	foreach ( item in inventory )
+	{
+		newInv.append( clone item )
+	}
+
+	return newInv
+}
+
 array<ConsumableInventoryItem> function SURVIVAL_GetPlayerInventory( entity player )
 {
+	#if(false)
+
+
+
+
+#endif
+
 	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
 
 	return playerInventory
@@ -1134,21 +1174,22 @@ int function SURVIVAL_GetCountToFillStack( entity player, string ref )
 	int type = data.index
 
 	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
+	int slotCount = SURVIVAL_GetInventorySlotCountForPlayer( player, data )
 
 	foreach ( invItem in playerInventory )
 	{
 		if ( invItem.type != type )
 			continue
 
-		if ( invItem.count == data.inventorySlotCount )
+		if ( invItem.count == slotCount )
 			continue
 
-		int diff = data.inventorySlotCount - invItem.count
+		int diff = slotCount - invItem.count
 
 		return diff
 	}
 
-	return data.inventorySlotCount
+	return slotCount
 }
 
 
@@ -1164,16 +1205,17 @@ int function SURVIVAL_AddToPlayerInventory( entity player, string ref, int count
 	int numToAdd = count
 	int numAdded = 0
 	int inventoryLimit = SURVIVAL_GetInventoryLimit( player )
+	int slotCount = SURVIVAL_GetInventorySlotCountForPlayer( player, data )
 
 	foreach ( invItem in playerInventory )
 	{
 		if ( invItem.type != type )
 			continue
 
-		if ( invItem.count == data.inventorySlotCount )
+		if ( invItem.count >= slotCount )
 			continue
 
-		int diff = data.inventorySlotCount - invItem.count
+		int diff = slotCount - invItem.count
 		int add = minint( numToAdd, diff )
 		invItem.count += add
 		numToAdd -= add
@@ -1186,7 +1228,7 @@ int function SURVIVAL_AddToPlayerInventory( entity player, string ref, int count
 		item.slot = playerInventory.len()
 		item.type = type
 
-		int add = minint( numToAdd, data.inventorySlotCount )
+		int add = minint( numToAdd, slotCount )
 		item.count = add
 		numToAdd -= add
 		numAdded += add
@@ -1235,7 +1277,7 @@ void function SURVIVAL_RemoveFromPlayerInventory( entity player, string ref, int
 {
 	LootData data = SURVIVAL_Loot_GetLootDataByRef( ref )
 	int type = data.index
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
 
 	int numToRemove = count
 
@@ -1278,11 +1320,6 @@ void function SURVIVAL_RemoveFromPlayerInventory( entity player, string ref, int
 
 array<ConsumableInventoryItem> function SURVIVAL_ConsolidateInventoryItems( entity player, array<ConsumableInventoryItem> playerInventory )
 {
-	if ( playerInventory.len() < 2 )
-	{
-		return playerInventory
-	}
-
 	int INVENTORY_EMPTY = SURVIVAL_Loot_GetLootDataTable().len()
 
 	for ( int i=0; i<playerInventory.len()-1; i++ )
@@ -1293,8 +1330,9 @@ array<ConsumableInventoryItem> function SURVIVAL_ConsolidateInventoryItems( enti
 			continue
 
 		LootData data = SURVIVAL_Loot_GetLootDataByIndex( invItem1.type )
+		int slotCount = SURVIVAL_GetInventorySlotCountForPlayer( player, data )
 
-		if ( data.inventorySlotCount == invItem1.count || invItem1.count == 0 )
+		if ( slotCount == invItem1.count || invItem1.count == 0 )
 			continue
 
 		for ( int j=i+1; j<playerInventory.len(); j++ )
@@ -1303,12 +1341,12 @@ array<ConsumableInventoryItem> function SURVIVAL_ConsolidateInventoryItems( enti
 
 			if ( invItem1.type == invItem2.type )
 			{
-				int numToFull = data.inventorySlotCount - invItem1.count
+				int numToFull = slotCount - invItem1.count
 				int numToMove = minint( numToFull, invItem2.count )
 				invItem2.count -= numToMove
 				invItem1.count += numToMove
 
-				if ( data.inventorySlotCount == invItem1.count )
+				if ( slotCount == invItem1.count )
 					break
 			}
 		}
@@ -1356,6 +1394,28 @@ array<ConsumableInventoryItem> function SURVIVAL_ConsolidateInventoryItems( enti
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 
 bool function SURVIVAL_IsKnownLootItem( entity item )
@@ -1375,7 +1435,7 @@ bool function CanUseStackablePropSurvival( entity player, entity prop )
 	int numToAdd = prop.GetClipCount()
 	int numAdded = 0
 
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
 
 	foreach ( invItem in playerInventory )
 	{
@@ -1487,6 +1547,10 @@ void function SURVIVAL_Loot_SetHighlightForLoot( entity prop, bool isSelected )
 					highlight = "survival_item_ammo_b"
 				else if( ref == "shotgun" )
 					highlight = "survival_item_ammo_shotgun"
+#if(false)
+
+
+#endif
 				else
 					highlight = "survival_item_ammo_a"
 				break
@@ -1627,25 +1691,34 @@ int function SURVIVAL_GetPotentialAppliedHealing( entity player, int kitType )
 }
 
 
-string function SURVIVAL_GetHighlightForTier( int tier )
+string function SURVIVAL_GetHighlightForTier( int tier, bool longerHighlightDist = false )
 {
+	string result
 	switch( tier )
 	{
 		case 1:
-			return "survival_item_common"
+			result = "survival_item_common"
 			break
 		case 2:
-			return "survival_item_rare"
+			result = "survival_item_rare"
 			break
 		case 3:
-			return "survival_item_epic"
+			result = "survival_item_epic"
 			break
 		case 4:
-			return "survival_item_legendary"
+			result = "survival_item_legendary"
 			break
+
+		default:
+			result = "survival_item_common"
+			break
+
 	}
 
-	return "survival_item_common"
+	if (  longerHighlightDist )
+		result+= "_longerHighlightDist"
+
+	return result
 }
 
 array<entity> function SURVIVAL_GetPrimaryWeapons( entity player )
@@ -2042,13 +2115,19 @@ LootActionStruct function SURVIVAL_GetAltActionForBackpackItem( entity player, L
 array<string> function SURVIVAL_GetAllPlayerOrdnance( entity player )
 {
 	array<string> allOrdnance = []
-	array<ConsumableInventoryItem> playerInventory = player.ConsumableInventory_Get()
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
 
 	foreach ( invItem in playerInventory )
 	{
 		LootData data = SURVIVAL_Loot_GetLootDataByIndex( invItem.type )
 		if ( data.lootType != eLootType.ORDNANCE )
 			continue
+
+		if ( data.conditional )
+		{
+			if ( !SURVIVAL_Loot_RunConditionalCheck( data.ref, player ) )
+				continue
+		}
 
 		if ( !allOrdnance.contains( data.ref ) )
 		{
@@ -2393,6 +2472,35 @@ LootActionStruct function SURVIVAL_BuildStringForAction( entity player, int cont
 
 				as.displayString = Localize( "#LOOT_ACTION", buttonString, actionString )
 			}
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+			{
+				if ( actionLoot.lootType == eLootType.CUSTOMPICKUP )
+				{
+					as.displayString = Localize( "#LOOT_ACTION", buttonString, actionString )
+				}
+			}
+
 			break
 
 		case eLootAction.EQUIP:
@@ -2500,6 +2608,17 @@ LootActionStruct function SURVIVAL_BuildStringForAction( entity player, int cont
 			if ( !isInMenu )
 				buttonString = isAltAction ? "%use_alt%" : "%use_long%"
 			as.displayString = Localize( "#LOOT_ACTION_HOLD", buttonString, actionString )
+
+			LootData lootData = lootRef.lootData
+			LootTypeData lt = GetLootTypeData( lootData.lootType )
+			LootData equippedData
+
+			if ( lt.equipmentSlot != "" )
+				equippedData = EquipmentSlot_GetEquippedLootDataForSlot( player, lt.equipmentSlot )
+
+			if ( equippedData.ref != "" )
+				as.additionalData = equippedData
+
 			break
 		default:
 			as.displayString = Localize( "#LOOT_ACTION", buttonString, actionString )
@@ -3279,7 +3398,10 @@ int function GetPriorityForLootType( LootData lootData )
 
 #endif
 		case eLootType.CUSTOMPICKUP:
-			return eLootSortCategories.CONSUMABLES
+#if(false)
+
+
+#endif
 
 		case eLootType.HELMET:
 		case eLootType.ARMOR:
@@ -3296,9 +3418,13 @@ int function GetPriorityForLootType( LootData lootData )
 #if(false)
 
 
+#endif //
 
+#if(false)
 
-#endif
+#endif //
+		case eLootType.RESOURCE:
+			return eLootSortCategories.DEFAULT
 
 		default:
 			return eLootSortCategories.DEFAULT
@@ -3506,10 +3632,26 @@ void function OnDeathBoxUse( entity box, entity player, int useInputFlags )
 	}
 }
 
+array<entity> function GetAllDeathBoxes()
+{
+	#if(false)
+
+#elseif(CLIENT)
+	return file.allDeathBoxes
+	#endif //
+}
+
 void function OnDeathBoxCreated( entity ent )
 {
 	if ( ent.GetTargetName() == DEATH_BOX_TARGETNAME )
 	{
+
+		#if(false)
+
+#elseif(CLIENT)
+		file.allDeathBoxes.append( ent )
+		#endif //
+
 		SetCallback_CanUseEntityCallback( ent, DeathBox_CanUseFunction )
 
 		AddCallback_OnUseEntity( ent, OnDeathBoxUse )
@@ -3519,6 +3661,14 @@ void function OnDeathBoxCreated( entity ent )
 
 #endif //
 	}
+}
+
+void function OnDeathBoxDestroyed( entity ent )
+{
+	#if(CLIENT)
+	if ( file.allDeathBoxes.contains( ent ) )
+		file.allDeathBoxes.removebyvalue( ent )
+	#endif //
 }
 
 bool function DeathBox_CanUseFunction( entity player, entity ent )
@@ -3695,3 +3845,18 @@ AttachmentData function GetAttachmentData( string attachment )
 {
 	return file.attachmentMatrix[ attachment ]
 }
+
+
+int function SURVIVAL_GetInventorySlotCountForPlayer( entity player, LootData data )
+{
+	int result = data.inventorySlotCount
+	#if(false)
+
+
+
+#endif
+
+	return result
+}
+
+

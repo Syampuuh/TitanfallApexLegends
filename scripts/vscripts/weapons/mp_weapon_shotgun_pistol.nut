@@ -6,12 +6,26 @@ global function OnWeaponPrimaryAttack_weapon_shotgun_pistol
 
 //
 //
-array<vector> BLAST_PATTERN_SHOTGUN_PISTOL = [
-	//
-	< 0.0, 8.0, 	0 >, //
-	< -6.0, -6.0, 	0 >, //
-	< 6.0, -6.0, 	0 >, //
-]
+#if(false)
+
+//
+//
+//
+//
+
+//
+//
+//
+//
+
+#else
+	array<vector> BLAST_PATTERN_SHOTGUN_PISTOL = [
+		//
+		< 0.0, 8.0, 	0 >, //
+		< -6.0, -6.0, 	0 >, //
+		< 6.0, -6.0, 	0 >, //
+	]
+#endif
 
 const float BLAST_PATTERN_ADS_SCALE_REDUCTION = 0.5  //
 

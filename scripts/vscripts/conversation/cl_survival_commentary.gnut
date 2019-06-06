@@ -8,6 +8,9 @@ global function SurvivalCommentary_GetCurrentSpeakerPrefix
 global function SurvivalCommentary_ClearCurrentSpeakerPrefix
 global function SurvivalCommentary_IsEnabled
 global function GetBattleChatterAlias1P3P
+#if(DEV)
+global function GetBattleChatterAlias1P3PWithTempVoice
+#endif //
 
 global function ServerCallback_Survival_PlayCrowdEvent
 global function ServerCallback_Survival_NewKillLeader
@@ -58,7 +61,10 @@ bool function SurvivalCommentary_IsEnabled()
 void function ClSurvivalCommentary_Init()
 {
 	ShSurvivalCommentary_Init()
-	SetUseDialogueVDU( false )
+
+	#if(false)
+
+#endif
 
 	AddCallback_KillReplayStarted( KillReplayStarted )
 	AddCallback_KillReplayEnded( KillReplayEnded )
@@ -519,20 +525,20 @@ void function PlayerKilledWrapUp_Internal(int playerPlace, int numPlayerAtStart,
 	entity player = GetLocalClientPlayer()
 	wait 2
 
-	EmitSoundToPlayer_IfValid(player, GetDialogueAliasFromName( PickCommentaryLineFromBucket(host, eSurvivalCommentaryBucket.PLAYER_FINISHER_PLACE) ) )
+	EmitSoundToPlayer_IfValid(player, GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket(host, eSurvivalCommentaryBucket.PLAYER_FINISHER_PLACE) ) )
 
 	wait 3.5
 
 	if ( playerPlace <= 3 )
-		EmitSoundToPlayer_IfValid( player, GetDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_MADE_TOP_3 ) ) )
+		EmitSoundToPlayer_IfValid( player, GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_MADE_TOP_3 ) ) )
 	else if ( playerPlace <= (numPlayerAtStart / 2) - 3 )
-		EmitSoundToPlayer_IfValid( player, GetDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_GREAT ) ) )
+		EmitSoundToPlayer_IfValid( player, GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_GREAT ) ) )
 	else if ( playerPlace <= numPlayerAtStart / 2 )
-		EmitSoundToPlayer_IfValid( player, GetDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_GOOD ) ) )
+		EmitSoundToPlayer_IfValid( player, GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_GOOD ) ) )
 	else if ( playerPlace <= numPlayerAtStart - 3 )
-		EmitSoundToPlayer_IfValid( player, GetDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_OKAY ) ) )
+		EmitSoundToPlayer_IfValid( player, GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_OKAY ) ) )
 	else
-		EmitSoundToPlayer_IfValid( player, GetDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_POORLY ) ) )
+		EmitSoundToPlayer_IfValid( player, GetAnyDialogueAliasFromName( PickCommentaryLineFromBucket( host, eSurvivalCommentaryBucket.PLAYER_DID_POORLY ) ) )
 }
 
 void function EmitSoundToPlayer_IfValid( entity player, string alias)
@@ -582,6 +588,18 @@ string function GetBattleChatterAlias1P3P( entity player, string aliasSubname, b
 		return ""
 	return result
 }
+
+#if(DEV)
+string function GetBattleChatterAlias1P3PWithTempVoice( string aliasSubname, bool firstPerson )
+{
+	string voice = TEMP_VOICE
+	string perspective = firstPerson ? "1p" : "3p"
+	string result = "diag_mp_" + voice + "_" + aliasSubname + "_" + perspective
+	if ( result in FORBIDDEN_DIALOGUE_EVENT_NAMES )
+		return ""
+	return result
+}
+#endif //
 
 string function SurvivalCommentary_GetCurrentSpeakerPrefix()
 {

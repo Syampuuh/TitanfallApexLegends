@@ -306,7 +306,10 @@ void function SurvivalInventoryMenu_EndUpdate()
 	if ( GetActiveMenu() == file.menu )
 	{
 		SurvivalQuickInventory_OnUpdate()
-		ForceVGUIFocusUpdate()
+
+		//
+		if( !GetDpadNavigationActive() )
+			ForceVGUIFocusUpdate()
 	}
 
 	UpdateQuickSwapMenu()

@@ -399,10 +399,12 @@ asset function CharacterExecution_GetVictimAnimSeq( ItemFlavor flavor, string ri
 	switch ( rigWeight )
 	{
 		case "light": key = "victimLightAnimSeq"; break;
-
 		case "medium": key = "victimMediumAnimSeq"; break;
-
 		case "heavy": key = "victimHeavyAnimSeq"; break;
+
+		#if(false)
+
+#endif //
 	}
 
 	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), key )

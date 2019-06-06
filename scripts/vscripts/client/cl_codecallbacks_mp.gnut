@@ -173,36 +173,10 @@ void function ClientCodeCallback_OnNextTitanRespawnAvailableChanged( entity play
 
 void function ClientCodeCallback_OnNextCoreChargeAvailableChanged( entity titansoul )
 {
-	if ( !IsValid( titansoul ) )
-		return
-
-	entity player = GetLocalViewPlayer()
-	if ( !IsValid( player ) )
-		return
-
-	if ( titansoul != player.GetTitanSoul() )
-		return
-
-	local coreTimeRemaining = GetTitanCoreTimeRemaining( player )
-	if ( coreTimeRemaining != null )
-		player.Signal( "ActivateTitanCore" )
-
-	//
 }
 
 void function ClientCodeCallback_OnCoreChargeExpireTimeChanged( entity titansoul )
 {
-	if ( !IsValid( titansoul ) )
-		return
-
-	entity player = GetLocalViewPlayer()
-	if ( !IsValid( player ) )
-		return
-
-	if ( titansoul != player.GetTitanSoul() )
-		return
-
-	//
 }
 
 void function ClientCodeCallback_OnEntityCreation( entity ent )
@@ -285,13 +259,6 @@ void function ClientCodeCallback_OnDeath( entity ent )
 	//
 
 	string className = expect string( ent.GetNetworkedClassName() )
-
-	if ( ent.IsTitan() )
-	{
-		entity soul = ent.GetTitanSoul()
-		if ( IsValid( soul ) )
-			soul.Signal( "OnTitanDeath" )
-	}
 
 	ent.Signal( "OnDeath" )
 

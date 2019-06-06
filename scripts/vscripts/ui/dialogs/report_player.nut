@@ -63,7 +63,7 @@ void function ClientToUI_ShowReportPlayerDialog( string playerName, string playe
 	file.reportPlayerHardware = playerHardware
 	file.reportPlayerUID = playerUID
 
-	int ver = GetCurrentPlaylistVarInt( "enable_report", 0 )
+	int ver = GetReportStyle()
 	#if(CONSOLE_PROG)
 		ver = minint( ver, 1 )
 	#endif

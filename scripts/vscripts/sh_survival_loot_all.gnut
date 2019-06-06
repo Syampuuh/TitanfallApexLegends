@@ -8,6 +8,7 @@ global function SURVIVAL_Loot_IsRefValid
 global function SURVIVAL_Loot_IsRefDisabled
 global function SURVIVAL_Loot_GetByType
 global function SURVIVAL_Loot_GetLootTypeFromString
+global function SURVIVAL_Loot_GetByTier
 
 global function SURVIVAL_Loot_IsUniqueAmmoWeapon
 
@@ -93,7 +94,13 @@ global enum eLootType
 	ATTACHMENT
 	CUSTOMPICKUP
 	BACKPACK
+	#if(false)
+
+#endif
 	HELMET
+	#if(false)
+
+#endif
 	BLANK
 	#if(false)
 
@@ -115,6 +122,45 @@ global enum eLootType
 
 #endif
 
+#if(true)
+global const int HAS_DEATHBOX_OVERRIDE_FRIEND_PROFILES_TO_SEND = 3
+#endif
+
+
+#if(false)
+
+
+
+
+#endif
+
+#if(false)
+
+#endif
+
+
+#if(true)
+global struct OverrideDeathBoxRUI_NetworkOptimizedStruct
+{
+	string name
+	string hardware
+	string playerID
+	int    characterIndex
+	int    skinIndex
+	int    frameIndex
+	int    stanceIndex
+	int    firstBadgeIndex
+	int    firstBadgeDataInt
+	int    secondBadgeIndex
+	int    secondBadgeDataInt
+	int    thirdBadgeIndex
+	int    thirdBadgeDataInt
+
+	bool isValid = false
+}
+#endif
+
+
 struct
 {
 	table< string, LootData > lootData
@@ -122,260 +168,298 @@ struct
 	bool                      initialized
 	array<string>             disabledRefs
 	array<string>             uniqueAmmoWeaponRefs
+
+	#if(true)
+		table<EHI, array< OverrideDeathBoxRUI_NetworkOptimizedStruct > > EHIToOverrideDeathBoxRUIProfilesTable
+		table<string, EHI>                                               corpseToEHITable
+		array< OverrideDeathBoxRUI_NetworkOptimizedStruct >              handcraftedProfiles
+		array< OverrideDeathBoxRUI_NetworkOptimizedStruct >              handcraftedProfilesMasterList //
+	#endif
+
+	#if(UI)
+		bool                                                      overrideDeathBoxRUI_Initialized = false
+		table<string, OverrideDeathBoxRUI_NetworkOptimizedStruct> overrideDeathBoxRUIProfilesTable
+		int                                                       profilesSent = 0
+	#endif
 } file
 
+
 array<string> attachmentSortOrder = ["barrel", "mag", "sight", "grip", "hopup"]
+
+
+string function GetLootTableString( string ref, var datatable, int rowIndex, string columnName )
+{
+	string val = GetDataTableString( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
+	return GetCurrentPlaylistVarString( (ref + "_dt_override_" + columnName), val )
+}
+
+
+asset function GetLootTableAsset( string ref, var datatable, int rowIndex, string columnName )
+{
+	return GetDataTableAsset( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
+}
+
+
+int function GetLootTableInt( string ref, var datatable, int rowIndex, string columnName )
+{
+	int val = GetDataTableInt( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
+	return GetCurrentPlaylistVarInt( (ref + "_dt_override_" + columnName), val )
+}
+
+
+bool function GetLootTableBool( string ref, var datatable, int rowIndex, string columnName )
+{
+	bool val = GetDataTableBool( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
+	return GetCurrentPlaylistVarBool( (ref + "_dt_override_" + columnName), val )
+}
+
+
+float function GetLootTableFloat( string ref, var datatable, int rowIndex, string columnName )
+{
+	float val = GetDataTableFloat( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
+	return GetCurrentPlaylistVarFloat( (ref + "_dt_override_" + columnName), val )
+}
+
 
 void function SURVIVAL_Loot_All_InitShared()
 {
 	#if(!UI)
-
 		//
-
 	#endif
 
-	var dataTable        = GetDataTable( $"datatable/survival_loot.rpak" )
-	array<var> tableList = [dataTable]
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+	var dt = GetDataTable( $"datatable/survival_loot.rpak" )
 	file.lootIndexToString.clear()
 	file.lootData.clear()
 
 	var attachmentTable = GetDataTable( $"datatable/survival_weapon_mods.rpak" )
 
 	file.disabledRefs.clear()
-	string disabledRefs = GetCurrentPlaylistVar( "survival_disabled_loot", " " )
+	string disabledRefs = GetCurrentPlaylistVarString( "survival_disabled_loot", " " )
 	file.disabledRefs = split( disabledRefs, " " )
 
-	foreach ( var dt in tableList )
+	int numRows = GetDatatableRowCount( dt )
+	for ( int i = 0; i < numRows; i++ )
 	{
-		int numRows = GetDatatableRowCount( dt )
-		for ( int i = 0; i < numRows; i++ )
+		LootData data
+		data.ref = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "ref" ) )
+
+		string featureFlagRef = GetLootTableString( data.ref, dt, i, "featureFlag" )
+		if ( featureFlagRef != "" && !GetFeatureFlagByString( featureFlagRef ) )
 		{
-			LootData data
-			data.ref = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "ref" ) )
+			printf( "Skipping loot ref %s because feature flag %s is off.", data.ref, featureFlagRef )
+			continue
+		}
 
-			string pingCommsActionName = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "pingCommsAction" ) )
+		string pingCommsActionName = GetLootTableString( data.ref, dt, i, "pingCommsAction" )
 
-			#if(CLIENT)
-				data.pingCommsAction = GetCommsActionForName( pingCommsActionName )
-			#endif
+		#if(CLIENT)
+			data.pingCommsAction = GetCommsActionForName( pingCommsActionName )
+		#endif
 
-			string lootType = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "type" ) )
+		string lootType = GetLootTableString( data.ref, dt, i, "type" )
 
-			data.baseWeapon = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "baseWeapon" ) )
+		data.baseWeapon = GetLootTableString( data.ref, dt, i, "baseWeapon" )
 
-			if ( data.baseWeapon == "" )
-			{
-				data.baseWeapon = data.ref
-			}
+		if ( data.baseWeapon == "" )
+		{
+			data.baseWeapon = data.ref
+		}
 
-			data.fakeAmmoIcon = GetDataTableAsset( dt, i, GetDataTableColumnByName( dt, "fakeAmmoIcon" ) )
+		data.fakeAmmoIcon = GetLootTableAsset( data.ref, dt, i, "fakeAmmoIcon" )
 
-			data.baseMods = split( GetDataTableString( dt, i, GetDataTableColumnByName( dt, "baseMods" ) ), " " )
+		data.baseMods = split( GetLootTableString( data.ref, dt, i, "baseMods" ), " " )
 
-			data.model = GetDataTableAsset( dt, i, GetDataTableColumnByName( dt, "pickupModel" ) )
-			data.skinOverride = GetDataTableInt( dt, i, GetDataTableColumnByName( dt, "skinOverride" ) )
-			data.hudIcon = GetDataTableAsset( dt, i, GetDataTableColumnByName( dt, "icon" ) )
-			data.attachSound = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "attachSound" ) )
-			data.pickupSound_3p = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "pickupSound_3p" ) )
-			data.pickupSound_1p = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "pickupSound_1p" ) )
-			data.carrySound = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "carrySound" ) )
-			data.scrapValue = GetDataTableInt( dt, i, GetDataTableColumnByName( dt, "scrapValue" ) )
-			data.droppodRotate = GetDataTableBool( dt, i, GetDataTableColumnByName( dt, "droppodRotate" ) )
-			data.isDynamic = GetDataTableBool( dt, i, GetDataTableColumnByName( dt, "isDynamic" ) )
-			data.conditional = GetDataTableBool( dt, i, GetDataTableColumnByName( dt, "conditional" ) )
+		data.model = GetLootTableAsset( data.ref, dt, i, "pickupModel" )
+		data.skinOverride = GetLootTableInt( data.ref, dt, i, "skinOverride" )
+		data.hudIcon = GetLootTableAsset( data.ref, dt, i, "icon" )
+		data.attachSound = GetLootTableString( data.ref, dt, i, "attachSound" )
+		data.pickupSound_3p = GetLootTableString( data.ref, dt, i, "pickupSound_3p" )
+		data.pickupSound_1p = GetLootTableString( data.ref, dt, i, "pickupSound_1p" )
+		data.carrySound = GetLootTableString( data.ref, dt, i, "carrySound" )
+		data.scrapValue = GetLootTableInt( data.ref, dt, i, "scrapValue" )
+		data.droppodRotate = GetLootTableBool( data.ref, dt, i, "droppodRotate" )
+		data.isDynamic = GetLootTableBool( data.ref, dt, i, "isDynamic" )
+		data.conditional = GetLootTableBool( data.ref, dt, i, "conditional" )
 
-			data.pickupString = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "pickupString" ) )
-			data.desc = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "desc" ) )
+		data.pickupString = GetLootTableString( data.ref, dt, i, "pickupString" )
+		data.desc = GetLootTableString( data.ref, dt, i, "desc" )
 
-			data.countPerDrop = GetDataTableInt( dt, i, GetDataTableColumnByName( dt, "countPerDrop" ) )
-			data.tier = GetDataTableInt( dt, i, GetDataTableColumnByName( dt, "tier" ) )
-			#if(false)
+		data.countPerDrop = GetLootTableInt( data.ref, dt, i, "countPerDrop" )
+		data.tier = GetLootTableInt( data.ref, dt, i, "tier" )
+		#if(false)
 
 #endif
 
-			string supportedAttachmentsString  = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "supportedAttachments" ) )
-			array<string> supportedAttachments = split( supportedAttachmentsString, " " )
-			supportedAttachments.sort(
-				int function( string attachmentA, string attachmentB ) : ()
-				{
-					int aIndex = attachmentSortOrder.find( attachmentA )
-					int bIndex = attachmentSortOrder.find( attachmentB )
-					if ( aIndex > bIndex )
-						return 1
-					else if ( aIndex < bIndex )
-						return -1
+		string supportedAttachmentsString  = GetLootTableString( data.ref, dt, i, "supportedAttachments" )
+		array<string> supportedAttachments = split( supportedAttachmentsString, " " )
+		supportedAttachments.sort(
+			int function( string attachmentA, string attachmentB ) : ()
+			{
+				int aIndex = attachmentSortOrder.find( attachmentA )
+				int bIndex = attachmentSortOrder.find( attachmentB )
+				if ( aIndex > bIndex )
+					return 1
+				else if ( aIndex < bIndex )
+					return -1
 
-					return 0
-				}
-			)
-			data.supportedAttachments = supportedAttachments
+				return 0
+			}
+		)
+		data.supportedAttachments = supportedAttachments
 
-			data.lootTags = split( GetDataTableString( dt, i, GetDataTableColumnByName( dt, "lootTags" ) ), " " )
+		data.lootTags = split( GetLootTableString( data.ref, dt, i, "lootTags" ), " " )
 
-			data.lootType = SURVIVAL_Loot_GetLootTypeFromString( lootType )
-			data.netInt = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "netInt" ) )
-			data.inventorySlotCount = GetDataTableInt( dt, i, GetDataTableColumnByName( dt, "inventorySlotCount" ) )
+		data.lootType = SURVIVAL_Loot_GetLootTypeFromString( lootType )
+		data.netInt = GetLootTableString( data.ref, dt, i, "netInt" )
+		data.inventorySlotCount = GetLootTableInt( data.ref, dt, i, "inventorySlotCount" )
 
 #if(CLIENT)
-			data.minInWorld = GetDataTableFloat( dt, i, GetDataTableColumnByName( dt, "minInWorld" ) )
-			if ( IsTestMap() )
-				data.minInWorld = max( -1, data.minInWorld )
-			//
-			#if(false)
+		data.minInWorld = GetLootTableFloat( data.ref, dt, i, "minInWorld" )
+		if ( IsTestMap() )
+			data.minInWorld = max( -1, data.minInWorld )
+		//
+		#if(false)
 
 
 #endif
 
-			#endif
+		#endif
 
-			string passiveRef = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "passive" ) )
-			if ( passiveRef == "" )
-			{
-				data.passive = ePassives.INVALID
-			}
-			else
-			{
-				Assert( passiveRef in ePassives )
-				data.passive = ePassives[passiveRef]
-				#if CLIENT || UI 
-					Assert( data.passive in PASSIVE_NAME_MAP )
-					Assert( data.passive in PASSIVE_DESCRIPTION_SHORT_MAP )
-				#endif
-			}
-
-			switch ( data.lootType )
-			{
-				case eLootType.MAINWEAPON:
-					RegisterWeaponForUse( data.baseWeapon )
-					data.model = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "playermodel" )
-					if ( GetWeaponInfoFileKeyField_Global( data.baseWeapon, "ammo_pool_type" ) != null )
-						data.ammoType = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "ammo_pool_type" )
-					else
-						data.ammoType = ""
-
-					if ( data.fakeAmmoIcon != "" )
-					{
-						file.uniqueAmmoWeaponRefs.append( data.ref )
-					}
-
-					ItemFlavor ornull weaponFlavor = GetWeaponItemFlavorByClass( data.baseWeapon )
-					if ( weaponFlavor != null )
-					{
-						expect ItemFlavor( weaponFlavor )
-
-						int availableState = ItemFlavor_GetPlaylistOpinion( weaponFlavor )
-						bool shouldBeEnabled
-						if ( availableState == eItemFlavorPlaylistOpinion.FORCE_UNLOCK_FOR_SPECIAL_EVENT )
-							shouldBeEnabled = true
-						else if ( availableState == eItemFlavorPlaylistOpinion.HIDDEN )
-							shouldBeEnabled = false
-						else if ( availableState == eItemFlavorPlaylistOpinion.DISABLED )
-							shouldBeEnabled = false
-						else
-							shouldBeEnabled = ItemFlavor_IsActiveForEdition( weaponFlavor, GetConVarInt( "mtx_svEdition" ) )
-
-						if ( !shouldBeEnabled )
-							file.disabledRefs.append( data.ref )
-					}
-
-				case eLootType.ORDNANCE:
-					RegisterWeaponForUse( data.baseWeapon )
-					data.pickupString = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "printName" )
-					data.desc = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "description" )
-					data.hudIcon = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "hud_icon" )
-					break
-
-				case eLootType.ATTACHMENT:
-					int row = GetDataTableRowMatchingStringValue( attachmentTable, PILOT_WEAPON_MOD_COMMON_COLUMN, data.ref )
-					data.pickupString = GetDataTableString( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_NAME_COLUMN )
-					data.desc = GetDataTableString( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_DESCRIPTION_COLUMN )
-
-					data.ammoType = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "ammoType" ) )
-					data.hudIcon = GetDataTableAsset( dt, i, GetDataTableColumnByName( dt, "icon" ) )
-					data.specialCaseInvalidReason = ""//
-					if ( data.hudIcon == $"" )
-						data.hudIcon = GetDataTableAsset( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_IMAGE_COLUMN )
-
-					string attachmentPoint = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "attachmentPoint" ) )
-					data.attachmentStyle = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "type" ) )
-					data.emptyImage = GetDataTableAsset( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "emptyImage" ) )
-
-#if(CLIENT)
-					RegisterAttachmentPoint( attachmentPoint )
-#endif
-
-					break
-
-				case eLootType.AMMO:
-					//
-					break
-			}
-
-			{
-				data.index = file.lootIndexToString.len()
-				file.lootIndexToString.append( data.ref )
-				file.lootData[ data.ref ] <- data
-
-				#if(false)
-
-#endif
-			}
-
-			#if(!UI)
-				if ( data.model != $"" )
-					PrecacheModel( data.model )
+		string passiveRef = GetLootTableString( data.ref, dt, i, "passive" )
+		if ( passiveRef == "" )
+		{
+			data.passive = ePassives.INVALID
+		}
+		else
+		{
+			Assert( passiveRef in ePassives )
+			data.passive = ePassives[passiveRef]
+			#if CLIENT || UI 
+				Assert( data.passive in PASSIVE_NAME_MAP )
+				Assert( data.passive in PASSIVE_DESCRIPTION_SHORT_MAP )
 			#endif
 		}
+
+		switch ( data.lootType )
+		{
+			case eLootType.MAINWEAPON:
+				RegisterWeaponForUse( data.baseWeapon )
+				data.pickupString = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "printName" )
+				data.desc = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "description" )
+				data.hudIcon = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "hud_icon" )
+				data.model = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "playermodel" )
+				if ( GetWeaponInfoFileKeyField_Global( data.baseWeapon, "ammo_pool_type" ) != null )
+					data.ammoType = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "ammo_pool_type" )
+				else
+					data.ammoType = ""
+
+				if ( data.fakeAmmoIcon != "" )
+				{
+					file.uniqueAmmoWeaponRefs.append( data.ref )
+				}
+
+				ItemFlavor ornull weaponFlavor = GetWeaponItemFlavorByClass( data.baseWeapon )
+				if ( weaponFlavor != null )
+				{
+					expect ItemFlavor( weaponFlavor )
+
+					int availableState = ItemFlavor_GetPlaylistOpinion( weaponFlavor )
+					bool shouldBeEnabled
+					if ( availableState == eItemFlavorPlaylistOpinion.FORCE_UNLOCK_FOR_SPECIAL_EVENT )
+						shouldBeEnabled = true
+					else if ( availableState == eItemFlavorPlaylistOpinion.HIDDEN )
+						shouldBeEnabled = false
+					else if ( availableState == eItemFlavorPlaylistOpinion.DISABLED )
+						shouldBeEnabled = false
+					else
+						shouldBeEnabled = ItemFlavor_IsActiveForEdition( weaponFlavor, GetConVarInt( "mtx_svEdition" ) )
+
+					if ( !shouldBeEnabled )
+						file.disabledRefs.append( data.ref )
+				}
+				break
+
+			case eLootType.ORDNANCE:
+				RegisterWeaponForUse( data.baseWeapon )
+				data.pickupString = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "printName" )
+				data.desc = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "description" )
+				data.hudIcon = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "hud_icon" )
+				break
+
+			case eLootType.AMMO:
+				data.countPerDrop = int( GetCurrentPlaylistVarFloat( "loot_ammo_scale_per_drop", 1.0 ) * float( data.countPerDrop ) )
+				data.inventorySlotCount = int( GetCurrentPlaylistVarFloat( "inventory_ammo_scale_stacksize", 1.0 ) * float( data.inventorySlotCount ) )
+				break
+
+			case eLootType.ATTACHMENT:
+				int row = GetDataTableRowMatchingStringValue( attachmentTable, PILOT_WEAPON_MOD_COMMON_COLUMN, data.ref )
+				data.pickupString = GetDataTableString( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_NAME_COLUMN )
+				data.desc = GetDataTableString( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_DESCRIPTION_COLUMN )
+
+				data.ammoType = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "ammoType" ) )
+				data.hudIcon = GetLootTableAsset( data.ref, dt, i, "icon" )
+				data.specialCaseInvalidReason = ""//
+				if ( data.hudIcon == $"" )
+					data.hudIcon = GetDataTableAsset( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_IMAGE_COLUMN )
+
+				string attachmentPoint = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "attachmentPoint" ) )
+				data.attachmentStyle = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "type" ) )
+				data.emptyImage = GetDataTableAsset( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "emptyImage" ) )
+
+#if(CLIENT)
+				RegisterAttachmentPoint( attachmentPoint )
+#endif
+				break
+		}
+
+		{
+			data.index = file.lootIndexToString.len()
+			file.lootIndexToString.append( data.ref )
+			file.lootData[ data.ref ] <- data
+
+			#if(false)
+
+#endif
+		}
+
+		#if(!UI)
+			if ( data.model != $"" )
+				PrecacheModel( data.model )
+		#endif
 	}
 
+#if(false)
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+	#if(UI)
+		RegisterSignal( "GatherFriendInfo" )
+		RegisterSignal( "GatheredEnoughFriendInfo" )
+		SURVIVAL_UIInit_Override_DeathBox_RUI()
+	#endif
+
 	#if(false)
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
 
 #endif
 
@@ -401,6 +485,26 @@ array<LootData> function SURVIVAL_Loot_GetByType( int lootType )
 	}
 
 	return lootOfType
+}
+
+
+array<LootData> function SURVIVAL_Loot_GetByTier( int tier )
+{
+	array<LootData> lootOfTier = []
+	foreach ( string lootRef, LootData lootData in file.lootData )
+	{
+		if ( lootData.tier!= tier )
+			continue
+
+		if ( SURVIVAL_Loot_IsRefDisabled( lootData.ref ) )
+			continue
+
+		printt( lootData.ref )
+
+		lootOfTier.append( lootData )
+	}
+
+	return lootOfTier
 }
 
 
@@ -446,6 +550,13 @@ int function SURVIVAL_Loot_GetLootTypeFromString( string lootTypeString )
 #if(false)
 
 
+
+#endif
+
+#if(false)
+
+
+
 #endif
 
 		case "blank":
@@ -457,9 +568,17 @@ int function SURVIVAL_Loot_GetLootTypeFromString( string lootTypeString )
 #if(false)
 
 
+
 #endif
 
 #if(false)
+
+
+
+#endif
+
+#if(false)
+
 
 
 #endif
@@ -497,6 +616,7 @@ bool function SURVIVAL_Loot_IsRefValid( string ref )
 	return (ref in file.lootData)
 }
 
+
 #if(false)
 
 
@@ -526,10 +646,12 @@ bool function SURVIVAL_Loot_IsRefValid( string ref )
 
 #endif
 
+
 bool function SURVIVAL_Loot_IsRefDisabled( string ref )
 {
 	return file.disabledRefs.contains( ref )
 }
+
 
 #if(CLIENT)
 vector function GetRarityColor( entity ent )
@@ -541,6 +663,7 @@ vector function GetRarityColor( entity ent )
 	return GetKeyColor( COLORID_TEXT_LOOT_TIER0, lootData.tier )
 }
 #endif
+
 
 #if(false)
 //
@@ -563,6 +686,7 @@ vector function GetRarityColor( entity ent )
 
 
 #endif
+
 
 //
 vector function GetFXRarityColorForTier( int tier )
@@ -597,6 +721,7 @@ vector function GetFXRarityColorForTier( int tier )
 
 	unreachable
 }
+
 
 //
 vector function GetFXRarityColorForUnlockable( int tier )
@@ -635,6 +760,7 @@ vector function GetFXRarityColorForUnlockable( int tier )
 	unreachable
 }
 
+
 #if CLIENT && DEV 
 void function DumpModdedKeyColors( int colorID, float modVal )
 {
@@ -649,6 +775,7 @@ void function DumpModdedKeyColors( int colorID, float modVal )
 	}
 }
 #endif
+
 
 #if CLIENT && DEV 
 void function DiffKeyColors( int baseColorID, int colorID )
@@ -672,7 +799,457 @@ void function DiffKeyColors( int baseColorID, int colorID )
 }
 #endif
 
+
 bool function SURVIVAL_Loot_IsUniqueAmmoWeapon( string ref )
 {
 	return file.uniqueAmmoWeaponRefs.contains( ref )
 }
+
+
+#if(UI)
+void function SURVIVAL_UIInit_Override_DeathBox_RUI()
+{
+	if ( !IsConnected() )
+		return
+
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 1 ) != 1 )
+		return
+
+	if ( !file.overrideDeathBoxRUI_Initialized ) //
+	{
+		AddUICallback_OnLevelInit( SURVIVAL_UI_OnLevelInit )
+		AddCallbackAndCallNow_UserInfoUpdated( HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated )
+	}
+
+	file.overrideDeathBoxRUI_Initialized = true
+}
+#endif
+
+
+#if(UI)
+void function SURVIVAL_UI_OnLevelInit()
+{
+	if ( IsLobby() )
+	{
+		return
+	}
+
+	if ( GetCurrentPlaylistVarInt( "enableFlyers", 1 ) != 1 )
+		return
+
+	thread SURVIVAL_UI_GatherFriendInfo()
+}
+#endif
+
+
+#if(UI)
+void function SURVIVAL_UI_GatherFriendInfo()
+{
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 1 ) <= 0 )
+		return
+
+	Signal( uiGlobal.signalDummy, "GatherFriendInfo" )
+	EndSignal( uiGlobal.signalDummy, "GatherFriendInfo" )
+	EndSignal( uiGlobal.signalDummy, "GatheredEnoughFriendInfo" )
+
+
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", HAS_DEATHBOX_OVERRIDE_FRIEND_PROFILES_TO_SEND ) == 0 )
+		return
+
+	file.overrideDeathBoxRUIProfilesTable.clear()
+	file.profilesSent = 0
+
+	FriendsData fData = GetFriendsData()
+
+	while( fData.friends.len() > 0 )
+	{
+		int randomIndex = RandomInt( fData.friends.len() )
+		Friend friend   = fData.friends[ randomIndex  ]
+		fData.friends.fastremove( randomIndex )
+
+		if ( friend.ingame == true ) //
+			continue
+
+		OverrideDeathBoxRUI_NetworkOptimizedStruct profileData
+
+		file.overrideDeathBoxRUIProfilesTable[ friend.hardware + friend.id  ] <- profileData
+
+		CommunityUserInfo ornull cui = GetCommunityUserInfo( friend.hardware, friend.id ) //
+
+		if ( !file.overrideDeathBoxRUIProfilesTable[ friend.hardware + friend.id  ].isValid ) //
+		{
+			wait 2.0 //
+		}
+	}
+}
+#endif
+
+
+#if(UI)
+void function HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated( string hardware, string id )
+{
+	if ( !IsConnected()  ) //
+		return
+
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 1 ) != 1 )
+		return
+
+	if ( IsLobby() )
+		return
+
+	if ( hardware == "" && id == "" )
+		return
+
+	CommunityUserInfo ornull cui = GetCommunityUserInfo( hardware, id )
+
+	if ( cui == null )
+		return
+
+	if ( !((hardware + id) in file.overrideDeathBoxRUIProfilesTable) ) //
+		return
+
+	expect CommunityUserInfo( cui )
+
+	if ( !HasCommunityUserPlayedApex( cui ) )
+		return
+
+	if ( file.profilesSent >= GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", HAS_DEATHBOX_OVERRIDE_FRIEND_PROFILES_TO_SEND ) )
+		return
+
+	OverrideDeathBoxRUI_NetworkOptimizedStruct profileData
+	profileData.name = cui.name
+	profileData.hardware = cui.hardware
+	profileData.playerID = cui.uid
+
+	ItemFlavor character               = GetItemFlavorForCommunityUserInfo( cui, ePlayerStryderCharDataArraySlots.CHARACTER, eItemType.character )
+	LoadoutEntry characterLoadoutEntry = Loadout_CharacterClass()
+	profileData.characterIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( characterLoadoutEntry, character )
+
+	ItemFlavor skin               = GetItemFlavorForCommunityUserInfo( cui, ePlayerStryderCharDataArraySlots.CHARACTER_SKIN, eItemType.character_skin )
+	LoadoutEntry skinLoadoutEntry = Loadout_CharacterSkin( character )
+	profileData.skinIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( skinLoadoutEntry, skin )
+
+	ItemFlavor frame               = GetItemFlavorForCommunityUserInfo( cui, ePlayerStryderCharDataArraySlots.BANNER_FRAME, eItemType.gladiator_card_frame )
+	LoadoutEntry frameLoadoutEntry = Loadout_GladiatorCardFrame( character )
+	profileData.frameIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( frameLoadoutEntry, frame )
+
+	ItemFlavor stance               = GetItemFlavorForCommunityUserInfo( cui, ePlayerStryderCharDataArraySlots.BANNER_STANCE, eItemType.gladiator_card_stance )
+	LoadoutEntry stanceLoadoutEntry = Loadout_GladiatorCardStance( character )
+	profileData.stanceIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( stanceLoadoutEntry, stance )
+
+	ItemFlavor firstBadge               = GetBadgeItemFlavorForCommunityUserInfo( cui, character, 0 )
+	LoadoutEntry firstBadgeLoadoutEntry = Loadout_GladiatorCardBadge( character, 0 )
+	profileData.firstBadgeIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( firstBadgeLoadoutEntry, firstBadge )
+
+	int firstBadgeDataInt = GetBadgeDataIntegerFromCommunityUserInfo( cui, 0 )
+	profileData.firstBadgeDataInt = firstBadgeDataInt
+
+	ItemFlavor secondBadge               = GetBadgeItemFlavorForCommunityUserInfo( cui, character, 1 )
+	LoadoutEntry secondBadgeLoadoutEntry = Loadout_GladiatorCardBadge( character, 1 )
+	profileData.secondBadgeIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( secondBadgeLoadoutEntry, secondBadge )
+
+	int secondBadgeDataInt = GetBadgeDataIntegerFromCommunityUserInfo( cui, 1 )
+	profileData.secondBadgeDataInt = secondBadgeDataInt
+
+	ItemFlavor thirdBadge               = GetBadgeItemFlavorForCommunityUserInfo( cui, character, 2 )
+	LoadoutEntry thirdBadgeLoadoutEntry = Loadout_GladiatorCardBadge( character, 2 )
+	profileData.thirdBadgeIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( thirdBadgeLoadoutEntry, thirdBadge )
+
+	int thirdBadgeDataInt = GetBadgeDataIntegerFromCommunityUserInfo( cui, 2 )
+	profileData.thirdBadgeDataInt = thirdBadgeDataInt
+
+	profileData.isValid = true
+
+	file.overrideDeathBoxRUIProfilesTable[ hardware + id  ] = profileData
+
+	//
+	string clientCommandString = "ClientCommand_RUIProfileList "
+	clientCommandString += profileData.name
+	clientCommandString += " "
+	clientCommandString += profileData.hardware
+	clientCommandString += " "
+	clientCommandString += profileData.playerID
+	clientCommandString += " "
+	clientCommandString += profileData.characterIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.skinIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.frameIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.stanceIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.firstBadgeIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.firstBadgeDataInt.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.secondBadgeIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.secondBadgeDataInt.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.thirdBadgeIndex.tostring()
+	clientCommandString += " "
+	clientCommandString += profileData.thirdBadgeDataInt.tostring()
+
+	//
+	ClientCommand( clientCommandString )
+
+	if ( ++file.profilesSent >= GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", HAS_DEATHBOX_OVERRIDE_FRIEND_PROFILES_TO_SEND ) )
+	{
+		Signal( uiGlobal.signalDummy, "GatheredEnoughFriendInfo" ) //
+	}
+}
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+//
+
+
+//
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+#endif
+

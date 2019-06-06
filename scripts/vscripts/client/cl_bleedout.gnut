@@ -118,6 +118,11 @@ void function BLEEDOUT_RevivePlayerHealerChanged( entity playerToRes, entity old
 		return
 	}
 
+	if ( IsValid( playerHealer ) && IsValid( oldPlayerHealer ) && (playerHealer != oldPlayerHealer) )
+	{
+		oldPlayerHealer.Signal( "Bleedout_StopFirstAid" )
+	}
+
 	entity viewPlayer = GetLocalViewPlayer()
 	int team = viewPlayer.GetTeam()
 

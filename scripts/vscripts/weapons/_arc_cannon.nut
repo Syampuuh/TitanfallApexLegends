@@ -12,7 +12,6 @@ global function ArcCannon_HideIdleEffect
 #if(false)
 
 
-
 #endif
 global function GetArcCannonChargeFraction
 
@@ -165,18 +164,6 @@ void function ArcCannon_Stop( entity weapon, entity player = null )
 
 void function ArcCannon_ChargeBegin( entity weapon )
 {
-	#if(false)
-
-
-
-
-
-
-
-
-
-#endif
-
 	#if(CLIENT)
 		if ( !weapon.ShouldPredictProjectiles() )
 			return
@@ -208,48 +195,6 @@ void function ArcCannon_ChargeEnd( entity weapon, entity player = null )
 		}
 	#endif
 }
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
 
 int function FireArcCannon( entity weapon, WeaponPrimaryAttackParams attackParams )
 {

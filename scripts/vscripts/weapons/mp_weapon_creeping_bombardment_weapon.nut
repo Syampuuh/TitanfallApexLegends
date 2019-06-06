@@ -1,4 +1,3 @@
-
 global function MpWeaponGrenadeCreepingBombardmentWeapon_Init
 global function OnProjectileCollision_WeaponCreepingBombardmentWeapon
 
@@ -28,6 +27,7 @@ void function MpWeaponGrenadeCreepingBombardmentWeapon_Init()
 	PrecacheModel( CREEPING_BOMBARDMENT_WEAPON_BOMB_MODEL )
 }
 
+
 void function OnProjectileCollision_WeaponCreepingBombardmentWeapon( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
 	entity player = projectile.GetOwner()
@@ -48,16 +48,6 @@ void function OnProjectileCollision_WeaponCreepingBombardmentWeapon( entity proj
 		return
 
 	#if(false)
-//
-
-
-
-
-
-
-
-
-
 
 
 #endif
@@ -98,6 +88,30 @@ void function OnProjectileCollision_WeaponCreepingBombardmentWeapon( entity proj
 
 
 //
+
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
 
 #endif //
 

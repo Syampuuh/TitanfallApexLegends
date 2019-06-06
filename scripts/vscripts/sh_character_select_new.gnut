@@ -184,11 +184,8 @@ void function UI_InitCharacterSelectNewMenu()
 	AddMenuFooterOption( fileForever.menu, RIGHT, BUTTON_X, true, "", "", UI_OnLoadoutButton_RightClick ) //
 	AddMenuFooterOption( fileForever.menu, RIGHT, MOUSE_RIGHT, true, "", "", UI_OnLoadoutButton_RightClick ) //
 
-	if ( SquadMuteLegendSelectEnabled() )
-	{
-		AddMenuFooterOption( fileForever.menu, RIGHT, BUTTON_Y, true, "", "", UI_OnToggleMuteButtonClick ) //
-		AddMenuFooterOption( fileForever.menu, RIGHT, KEY_F, true, "", "", UI_OnToggleMuteButtonClick ) //
-	}
+	AddMenuFooterOption( fileForever.menu, RIGHT, BUTTON_Y, true, "", "", UI_OnToggleMuteButtonClick, UI_ShouldShowToggleMuteFooter ) //
+	AddMenuFooterOption( fileForever.menu, RIGHT, KEY_F, true, "", "", UI_OnToggleMuteButtonClick, UI_ShouldShowToggleMuteFooter ) //
 
 	AddMenuEventHandler( fileForever.menu, eUIEvent.MENU_CLOSE, void function() {
 		RunClientScript( "OnCharacterSelectNewMenuClosed_RemoveCallbacks" )
@@ -197,6 +194,11 @@ void function UI_InitCharacterSelectNewMenu()
 	#if(PC_PROG)
 		AddMenuFooterOption( fileForever.menu, RIGHT, KEY_ENTER, true, "", "", UI_OnLoadoutButton_Enter )
 	#endif
+}
+
+bool function UI_ShouldShowToggleMuteFooter()
+{
+	return SquadMuteLegendSelectEnabled()
 }
 
 void function UI_OnLoadoutButton_Enter( var button )
@@ -277,6 +279,7 @@ void function OpenCharacterSelectNewMenu( bool isBrowseMode = false )
 	fileLevel.lightEntsExist = DoMenuLightsExist()
 	fileLevel.detailsPanelVisible = isBrowseMode
 
+	NotifyCharacterSelectBeginEnd( true )
 	RunUIScript( "UI_RunCharacterSelect", fileLevel.isBrowseMode, fileLevel.menuEntsExist )
 }
 
@@ -298,6 +301,8 @@ void function PanAwayCharacterSelect()
 	EmitSoundOnEntity( GetLocalClientPlayer(), "UI_Survival_Intro_LegendPanLeft" )
 
 	wait CHARACTER_SELECT_SCENE_ROTATE_DURATION / 3.0
+
+	NotifyCharacterSelectBeginEnd( false )
 }
 
 void function Client_MuteChanged()
@@ -1075,6 +1080,10 @@ void function OnLoadoutButton_Activate( var button )
 	if ( fileLevel.isBrowseMode )
 	{
 		CloseCharacterSelectNewMenu()
+
+		//
+		thread PlayCharacterReadyUpLine( character )
+
 		return
 	}
 

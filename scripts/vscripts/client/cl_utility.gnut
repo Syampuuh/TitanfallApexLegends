@@ -124,8 +124,6 @@ string function ReloadScripts()
 
 	//
 
-	TitanEmbark_Init()
-
 	ReloadScriptCallbacks()
 
 	reloadingScripts = false
@@ -489,7 +487,7 @@ void function CoreActivatedVO( entity player )
 		return
 
 	expect string( conversationName )
-	TitanCockpit_PlayDialog( player, conversationName )
+	//
 }
 
 void function MonitorFlickerAndChange( entity screen, asset modelname )
@@ -656,19 +654,6 @@ void function Dev_PrintClientMessage( float duration )
 	dev_messageSubString = ""
 }
 
-void function ServerCallback_CollectibleFoundMessage( int numCollectiblesFound, int totalNumCollectibles )
-{
-	//
-	entity player = GetLocalClientPlayer()
-	AnnouncementData announcement = Announcement_Create( "#MSG_COLLECTIBLE_FOUND" )
-	Announcement_SetSubText( announcement, "#SUBMSG_COLLECTIBLE_FOUND" )
-	Announcement_SetOptionalSubTextArgsArray( announcement, [string(numCollectiblesFound), string(totalNumCollectibles)] )
-	Announcement_SetHideOnDeath( announcement, false )
-	Announcement_SetDuration( announcement, 3.5 )
-	Announcement_SetPurge( announcement, true )
-	AnnouncementFromClass( player, announcement )
-}
-
 void function ClientCodeCallback_OnDevnetBugScreenshot()
 {
 	printt( "(devnet screenshot client script callback)" )
@@ -676,11 +661,6 @@ void function ClientCodeCallback_OnDevnetBugScreenshot()
 
 	entity player = GetLocalClientPlayer()
 	player.ClientCommand( "OnDevnetBugScreenshot" )
-}
-
-array<float> function GetTitanDamageStateHealthValues()
-{
-	return [ TITAN_DAMAGE_STAGE_1, TITAN_DAMAGE_STAGE_2, TITAN_DAMAGE_STAGE_3 ]
 }
 
 //
@@ -1057,13 +1037,6 @@ bool function ShouldShowWeakpoints( entity ent )
 		if ( soul.GetShieldHealth() )
 			return false
 	}
-
-	//
-	if ( RodeoState_GetIsPlayerRodeoingVehicle( player, ent ) )
-		return false
-
-	//
-	//
 
 	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
 		return false
@@ -1522,7 +1495,6 @@ bool function ShouldShowButtonHints()
 {
 	return file.showButtonHintsInt == 1
 }
-
 
 //
 //

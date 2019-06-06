@@ -14,9 +14,9 @@ global function Vortex_SetBulletCollectionOffset
 global function CodeCallback_OnVortexHitBullet
 global function CodeCallback_OnVortexHitProjectile
 global function IsIgnoredByVortex
+global function SetCallback_VortexSphereTriggerOnBulletHit
+global function SetCallback_VortexSphereTriggerOnProjectileHit
 #if(false)
-
-
 
 
 
@@ -157,19 +157,17 @@ void function Vortex_Init()
 //
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 #endif //
+
+void function SetCallback_VortexSphereTriggerOnBulletHit( entity vortexSphere, void functionref( entity, entity, var ) callback )
+{
+	vortexSphere.e.Callback_VortexTriggerBulletHit = callback
+}
+
+void function SetCallback_VortexSphereTriggerOnProjectileHit( entity vortexSphere, void functionref( entity, entity, entity, entity, vector ) callback )
+{
+	vortexSphere.e.Callback_VortexTriggerProjectileHit = callback
+}
 
 void function CreateVortexSphere( entity vortexWeapon, bool useCylinderCheck, bool blockOwnerWeapon, int sphereRadius = 40, int bulletFOV = 180 )
 {
@@ -1557,10 +1555,8 @@ bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere
 	//
 	if ( vortexSphere.GetTargetName() == VORTEX_TRIGGER_AREA )
 	{
-		#if(false)
-
-
-#endif
+		if ( vortexSphere.e.Callback_VortexTriggerBulletHit != null )
+			vortexSphere.e.Callback_VortexTriggerBulletHit( weapon, vortexSphere, damageInfo )
 		return false
 	}
 
@@ -1701,10 +1697,8 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 	//
 	if ( vortexSphere.GetTargetName() == VORTEX_TRIGGER_AREA )
 	{
-		#if(false)
-
-
-#endif
+		if ( vortexSphere.e.Callback_VortexTriggerProjectileHit != null )
+			vortexSphere.e.Callback_VortexTriggerProjectileHit( weapon, vortexSphere, attacker, projectile, contactPos )
 		return false
 	}
 

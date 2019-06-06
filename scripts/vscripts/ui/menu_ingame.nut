@@ -386,29 +386,6 @@ void function UpdateLoadoutButtons()
 		else
 			Hud_Hide( file.loadoutHeaderTitan )
 	}
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
 }
 
 //

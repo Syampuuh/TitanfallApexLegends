@@ -98,7 +98,7 @@ void function MeleeShared_Init()
 #if CLIENT || UI 
 void function OnItemFlavorRegistered_Character( ItemFlavor characterClass )
 {
-	array<ItemFlavor> meleeSkinList = RegisterReferencedItemFlavorsFromArray( characterClass, "meleeSkins", "flavor" )
+	array<ItemFlavor> meleeSkinList = RegisterReferencedItemFlavorsFromArray( characterClass, "meleeSkins", "flavor", "featureFlag" )
 	foreach( ItemFlavor meleeSkin in meleeSkinList )
 	{
 		fileLevel.meleeSkinCharacterMap[meleeSkin] <- characterClass
@@ -283,7 +283,7 @@ bool function IsValidMeleeAttackTarget( entity attacker, entity inputWeaponOrNul
 	if ( target.IsBreakableGlass() )
 		return true //
 
-	if ( !IsAlive( target ) )
+	if ( !IsAlive( target ) && !target.e.canBeMeleed )
 		return false
 
 	if ( IsFriendlyTeam( attacker.GetTeam(), target.GetTeam() ) )
@@ -627,9 +627,12 @@ void function CodeCallback_OnMeleeAttackAnimEvent( entity attacker, entity melee
 
 		if ( target.IsPlayer() )
 		{
-			target.KnockBack( pushBackVelocity, MELEE_KNOCKBACK_DURATION )
+			if ( LengthSqr( pushBackVelocity ) > 0.0 )
+			{
+				target.KnockBack( pushBackVelocity, MELEE_KNOCKBACK_DURATION )
+			}
 		}
-		else if ( !IsWorldSpawn( target ) && target.e.canBeMeleed )
+		else if ( !IsWorldSpawn( target ) && !target.HasPusherAncestor() && target.e.canBeMeleed )
 		{
 			#if(false)
 
@@ -642,7 +645,13 @@ void function CodeCallback_OnMeleeAttackAnimEvent( entity attacker, entity melee
 
 		vector attackerKnockBackVelocity = -pushBackVelocity
 		attackerKnockBackVelocity.z = 0.0
-		attacker.KnockBack( attackerKnockBackVelocity * 0.5, 0.25 )
+		attackerKnockBackVelocity *= 0.5
+		if ( LengthSqr( attackerKnockBackVelocity ) > 0.0 )
+		{
+			attacker.KnockBack( attackerKnockBackVelocity, 0.25 )
+		}
+
+		attacker.GrappleDetach()
 	}
 }
 #endif

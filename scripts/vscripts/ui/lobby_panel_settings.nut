@@ -3,6 +3,7 @@ global function SettingsPanel_NavigateToSavedSelection
 global function SettingsPanel_GetDefaultImageForIndex
 
 global function SetupSettingsButton
+global function SetupSettingsSlider
 
 global function CreateSettingsConVarData
 global function SaveSettingsConVars
@@ -206,18 +207,34 @@ var function SetupSettingsButton( var button, string buttonText, string descript
 	return button
 }
 
-
-void function SettingsButton_GetFocus( var button )
+void function SetupSettingsSlider( var slider, string buttonText, string description, asset image, bool showAdditional = false )
 {
-	var rui = Hud_GetRui( file.detailsPanel )
+	var dropButton = Hud_GetChild( slider, "BtnDropButton" )
+
+	SetButtonRuiText( dropButton, buttonText )
+	file.buttonTitles[ dropButton ] <- buttonText
+	file.buttonDescriptions[ dropButton ] <- description
+	file.buttonImages[ dropButton ] <- image
+	file.additionalWidget[ dropButton ] <- showAdditional
+
+	AddButtonEventHandler( dropButton, UIE_GET_FOCUS, DropButton_GetFocus )
+	AddButtonEventHandler( dropButton, UIE_LOSE_FOCUS, DropButton_GetFocus )
+	Hud_AddEventHandler( slider, UIE_GET_FOCUS, ScrollIntoView_OnFocus )
+}
+
+void function DisplaySettingInfoForButton( var button, var rui )
+{
 	RuiSetArg( rui, "selectionText", file.buttonTitles[ button ] )
 	RuiSetArg( rui, "descText", file.buttonDescriptions[ button ] )
 	RuiSetAsset( rui, "detailImage", file.buttonImages[ button ] )
 	RuiSetBool( rui, "showCbInfo", file.additionalWidget[ button ] )
-
-	ScrollPanel_ScrollIntoView( file.panel )
 }
 
+void function SettingsButton_GetFocus( var button )
+{
+	DisplaySettingInfoForButton( button, Hud_GetRui( file.detailsPanel ) )
+	ScrollIntoView_OnFocus( button )
+}
 
 void function SettingsButton_LoseFocus( var button )
 {
@@ -239,7 +256,15 @@ void function SettingsButton_Activate( var button )
 	RuiSetAsset( rui, "detailImage", file.buttonImages[ button ] )
 }
 
+void function DropButton_GetFocus( var button )
+{
+	DisplaySettingInfoForButton( button, Hud_GetRui( file.detailsPanel ) )
+}
 
+void function ScrollIntoView_OnFocus( var panel )
+{
+	ScrollPanel_ScrollIntoView( file.panel )
+}
 
 ConVarData function CreateSettingsConVarData( string conVar, int conVarType )
 {

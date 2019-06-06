@@ -5,7 +5,6 @@ global function GetAttachPoints
 global function GetPreviewPoint
 global function GetAnalysisOffset
 global function MaskTester
-global function DogFightAnimsFromIndex
 global function GetAnalysisForModel
 global function HasAnalysisForModel
 global function CopyAttachPoint
@@ -17,14 +16,11 @@ global function AddDropshipFlightAnalysis
 
 #endif
 
-global const CLASSIC_MP_SKYSHOW_DOGFIGHTS_DELAY	= 75.0 //
 global const DROP_MIN_X = 0.0
 global const ANALYSIS_STEPS = 8 //
 global const ANALYSIS_YAW_STEP = 360.0 / ANALYSIS_STEPS
-global const bool FIRST_ONLY = false
 global const SPAWNPOINT_USE_TIME = 10.0 //
 global const MAX_ANALYSIS_COUNT = 64 //
-global const DESCRIPTION_MULTIPLIER = 0.0006 //
 
 global const DROPSHIP_VERTICAL = "dropship_flyer_attack_vertical_successful"
 global const DROPSHIP_STRAFE = "gd_goblin_zipline_strafe"
@@ -33,92 +29,93 @@ global const DROPSHIP_FLYER_ATTACK_ANIM_VERTICAL = "dropship_flyer_attack_vertic
 global const DROPSHIP_DROP_ANIM = "gd_goblin_zipline_strafe"
 global const DROPSHIP_MODEL = $"mdl/vehicle/goblin_dropship/goblin_dropship.rmdl"
 global const DROPSHIP_MODEL_OLD = $"mdl/vehicle/goblin_dropship/goblin_dropship.rmdl"
+#if(false)
 
-global const STRATON_FLIGHT_ANIM = "st_gunship_dogfight_C"
-global const STRATON_DOGFIGHT_ANIM1 = "st_Dogfight_Target_1"
-global const STRATON_DOGFIGHT_ANIM2 = "st_Dogfight_Target_2"
-global const STRATON_DOGFIGHT_ANIM3 = "st_Dogfight_Target_3"
-global const STRATON_DOGFIGHT_ANIM1_PERSUER = "st_Dogfight_Persuer_1"
-global const STRATON_DOGFIGHT_ANIM2_PERSUER = "st_Dogfight_Persuer_2"
-global const STRATON_DOGFIGHT_ANIM3_PERSUER = "st_Dogfight_Persuer_3"
-global const STRATON_ATTACK_FULL = "st_AngelCity_IMC_Win_Full"
-global const FX_HORNET_DEATH =  $"P_veh_exp_hornet_HS"
+#endif
 
+global const FX_HORNET_DEATH = $"P_veh_exp_hornet_HS"
 
 global const AIRDROP_BASE_ANIM = "dp_droppod_idle"
 global const HOTDROP_TURBO_ANIM = "at_hotdrop_drop_2knee_turbo"
 global const TURBO_WARP_FX = $"P_warp_in_atlas"
 global const TURBO_WARP_COMPANY = $"hotdrop_hld_warp"
 
-global const FX_GUNSHIP_CRASH_EXPLOSION = $"droppod_impact_black"
 global const FX_GUNSHIP_CRASH_EXPLOSION_ENTRANCE = $"veh_gunship_warp_FULL"
 global const FX_GUNSHIP_CRASH_EXPLOSION_EXIT = $"veh_gunship_warp_OUT_FULL"
 
 global const float WARPFALL_SOUND_DELAY = 1.1
 global const float WARPFALL_FX_DELAY = 0.9
 
-//
-//
-//
-//
+global enum eFlightPathAnalysisIndex
+{
+	DROPPOD_AIRDROP_BASE_ANIM = 0,
+	CARE_PACKAGE_AIRDROP_IDLE = 1,
+	RESPAWN_DROPSHIP_FLYIN_MOVE = 2,
+	#if(false)
+
+#endif
+	UNUSED4 = 4,
+	UNUSED5 = 5,
+	UNUSED6 = 6,
+}
 
 global struct NodeFP
 {
 	vector origin
 	vector angles
 	string name
-	int uniqueID
+	int    uniqueID
 	vector attachOrigin
 	vector attachAngles
 	vector vec
-	float dot
+	float  dot
 
-	float fraction
+	float  fraction
 	string attachName
-	float rating
+	float  rating
 }
 
 global struct DropTable
 {
-	table<string,table<string,NodeFP> > nodes
-	bool valid
+	table<string, table<string, NodeFP> > nodes
+	bool                                  valid
 }
 
 global struct CallinData
 {
-	vector		origin
-	float		yaw
-	bool 		yawSet
+	vector origin
+	float  yaw
+	bool   yawSet
 
-	int			team
-	entity		owner
-	vector 		ownerEyePos
-	bool 		ownerEyePosSet
+	int    team
+	entity owner
+	vector ownerEyePos
+	bool   ownerEyePosSet
 
-	float		dist
-	string		squadname
-	int			style
-	bool 		styleSet
-	int			dropshipHealth
-	bool		success
+	float                                            dist
+	string                                           squadname
+	int                                              style
+	bool                                             styleSet
+	int                                              dropshipHealth
+	bool                                             success
 	array<entity functionref( int, vector, vector )> npcSpawnFuncs
 
-	DropTable 	dropTable
-	entity		dropship
+	DropTable dropTable
+	entity    dropship
 
 	//
-	string 		side = "both"
-	string 		anim
-	string 		customSnd
-	bool  		forcedPosition = false
+	string side = "both"
+	string anim
+	string customSnd
+	bool   forcedPosition = false
 }
 
 global struct SpawnPointFP
 {
-	bool 	valid
-	vector 	origin
-	vector 	angles
-	int 	node
+	bool   valid
+	vector origin
+	vector angles
+	int    node
 }
 
 global struct AttachPoint
@@ -126,7 +123,7 @@ global struct AttachPoint
 	vector origin
 	vector angles
 	string name
-	int node
+	int    node
 }
 
 global NodeFP NullNodeFP
@@ -134,21 +131,21 @@ global typedef nodeFPOrNull var
 
 global struct FlightPath
 {
-	vector mins
-	vector maxs
-	int traceMask = TRACE_MASK_NPCWORLDSTATIC
-	string idleAnim
-	bool hasIdleAnim = false
-	bool useNPC = false
-	string npcClass = ""
-	table<string,array<AttachPoint> > deployAttach
-	array<int> nodes
-	asset model
-	string anim
-	int iterator
-	int hull
-	array<AttachPoint> points
-	AttachPoint preview
+	vector                             mins
+	vector                             maxs
+	int                                traceMask = TRACE_MASK_NPCWORLDSTATIC
+	string                             idleAnim
+	bool                               hasIdleAnim = false
+	bool                               useNPC = false
+	string                             npcClass = ""
+	table<string, array<AttachPoint> > deployAttach
+	array<int>                         nodes
+	asset                              model
+	string                             anim
+	int                                iterator
+	int                                hull
+	array<AttachPoint>                 points
+	AttachPoint                        preview
 }
 
 
@@ -158,34 +155,6 @@ global struct FlightPath
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-//
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
 
 
 
@@ -196,7 +165,24 @@ global struct FlightPath
 
 
 
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -210,8 +196,8 @@ global struct FlightPath
 struct
 {
 	table<asset, table<string, FlightPath> > flightAnalysis
-	array<string> dropshipDropoffAnims
-	bool activeNodeAnalysis = false
+	array<string>                            dropshipDropoffAnims
+	bool                                     activeNodeAnalysis = false
 } shFile
 
 
@@ -222,22 +208,6 @@ void function FlightpathShared_Init()
 	FlagInit( "DogFights" )
 	FlagInit( "FlyerPickupAnalysis" )
 	FlagInit( "StratonFullAttack" )
-	FlagInit( "FlightPath_TitanDrop" )
-	FlagInit( "FlightPath_Airdrop" )
-
-	FlagSet( "FlightPath_Airdrop" )
-
-	//
-	//
-	//
-	//
-
-	#if(false)
-//
-//
-//
-//
-#endif //
 
 	level.drawAnalysisPreview <- false
 
@@ -255,10 +225,6 @@ void function FlightpathShared_Init()
 
 	//
 
-	FlagInit( "FlightAnalysisReady" )
-	FlagInit( "StratonFlybys" )
-
-	RegisterSignal( "StratonHornetDogfights" )
 	RegisterSignal( "ClearDisableTitanfall" )
 
 	level.spawnPointsInUse <- {}
@@ -267,176 +233,19 @@ void function FlightpathShared_Init()
 	AddCallback_EntitiesDidLoad( EntitiesDidLoad )
 }
 
+
 void function EntitiesDidLoad()
 {
 	if ( IsMenuLevel() )
 		return
 
 	#if(false)
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/*
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-//
 
 
 
@@ -463,31 +272,24 @@ void function EntitiesDidLoad()
 
 
 
-#endif
+
+//
+
+
+
+
+
+
+
+
+//
+
+
+
+#endif //
 }
 
 #if(false)
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-//
-//
-//
-//
-//
-
-//
-//
-//
-//
 
 
 
@@ -508,18 +310,20 @@ void function DrawAnalysis( FlightPath flightPath )
 	array<AttachPoint> points = flightPath.points
 	for ( int i = 1; i < points.len(); i++ )
 	{
-		AttachPoint point1 = points[i-1]
+		AttachPoint point1 = points[i - 1]
 		AttachPoint point2 = points[i]
 		DebugDrawLine( point1.origin, point2.origin, 255, 0, 0, true, 15.0 )
 	}
 }
 
+
 bool function HasAnalysisForModel( asset model, string animation )
 {
-	if ( !( model in shFile.flightAnalysis ) )
+	if ( !(model in shFile.flightAnalysis) )
 		return false
 	return animation in shFile.flightAnalysis[ model ]
 }
+
 
 FlightPath function GetAnalysisForModel( asset model, string animation )
 {
@@ -529,11 +333,13 @@ FlightPath function GetAnalysisForModel( asset model, string animation )
 	return shFile.flightAnalysis[ model ][ animation ]
 }
 
+
 void function InitFlightAnalysis( FlightPath flightPath )
 {
 	flightPath.deployAttach[ "left" ] <- []
 	flightPath.deployAttach[ "right" ] <- []
 }
+
 
 FlightPath function CreateFlightAnalysis( asset model, string anim, table<string, array<string> > attachments, string event = "" )
 {
@@ -541,6 +347,7 @@ FlightPath function CreateFlightAnalysis( asset model, string anim, table<string
 	InitializeFlightAnalysis( Table, model, anim, attachments, event )
 	return Table
 }
+
 
 FlightPath function CreateFlightAnalysisNPC( asset model, string anim, table<string, array<string> > attachments, string event = "" )
 {
@@ -551,21 +358,22 @@ FlightPath function CreateFlightAnalysisNPC( asset model, string anim, table<str
 	return Table
 }
 
+
 FlightPath function InitializeFlightAnalysis( FlightPath Table, asset model, string anim, table<string, array<string> > attachments, string event = "" )
 {
 	InitFlightAnalysis( Table )
-	if ( !( model in shFile.flightAnalysis ) )
+	if ( !(model in shFile.flightAnalysis) )
 	{
 		shFile.flightAnalysis[ model ] <- {}
 	}
 
-	Assert( !( anim in shFile.flightAnalysis[ model ] ), "Already added " + anim + " to flight flightPath for " + model )
+	Assert( !(anim in shFile.flightAnalysis[ model ]), "Already added " + anim + " to flight flightPath for " + model )
 
 
 	Table.model = model
 	Table.anim = anim
 
-	entity dropship = CreatePropDynamic( model, <0,0,0>, <0,0,0> )
+	entity dropship = CreatePropDynamic( model, <0, 0, 0>, <0, 0, 0> )
 
 	//
 	#if(false)
@@ -602,12 +410,14 @@ FlightPath function InitializeFlightAnalysis( FlightPath Table, asset model, str
 	return Table
 }
 
+
 void function CopyAttachPoint( AttachPoint source, AttachPoint destination )
 {
 	destination.origin = source.origin
 	destination.angles = source.angles
 	destination.name = source.name
 }
+
 
 void function DrawAnalysisArray( Array )
 {
@@ -622,9 +432,10 @@ void function DrawAnalysisArray( Array )
 		index++
 		index %= colors.len()
 		color = colors[ index ]
-		DebugDrawLine( Array[i].origin, Array[i+1].origin, color.r, color.g, color.b, true, 15.0 )
+		DebugDrawLine( Array[i].origin, Array[i + 1].origin, color.r, color.g, color.b, true, 15.0 )
 	}
 }
+
 
 array<AttachPoint> function FillFlightAnalysisPoints( entity dropship, string anim )
 {
@@ -632,7 +443,7 @@ array<AttachPoint> function FillFlightAnalysisPoints( entity dropship, string an
 
 	//
 	string attachName = "ORIGIN"
-	int attachIndex = dropship.LookupAttachment( attachName )
+	int attachIndex   = dropship.LookupAttachment( attachName )
 	if ( attachIndex == 0 )
 	{
 		attachName = "OFFSET"
@@ -642,7 +453,7 @@ array<AttachPoint> function FillFlightAnalysisPoints( entity dropship, string an
 	}
 
 	float duration = dropship.GetSequenceDuration( anim )
-	int steps = int( duration * 1.5 )
+	int steps      = int( duration * 1.5 )
 	float time, ratio
 	array<AttachPoint> Array
 
@@ -683,7 +494,7 @@ array<AttachPoint> function FillFlightAnalysisPoints( entity dropship, string an
 	for ( int i = 1; i + 1 < Array.len(); i++ )
 	{
 		vector pR = Array[ i - 1 ].origin
-		vector p = Array[ i ].origin
+		vector p  = Array[ i ].origin
 		vector pF = Array[ i + 1 ].origin
 
 		vector vec1 = pR - pF
@@ -710,50 +521,43 @@ array<AttachPoint> function FillFlightAnalysisPoints( entity dropship, string an
 	return Array
 }
 
+
 void function AddIdleAnimation( FlightPath flightPath, string anim )
 {
 	flightPath.idleAnim = anim
 	flightPath.hasIdleAnim = true
 }
 
+
 void function AddAnalysisTraceMask( FlightPath flightPath, int mask )
 {
 	flightPath.traceMask = mask
 }
+
 
 void function AddBoundingMaxs( FlightPath flightPath, vector maxs )
 {
 	flightPath.maxs = maxs
 }
 
+
 void function AddBoundingMins( FlightPath flightPath, vector mins )
 {
 	flightPath.mins = mins
 }
+
 
 void function AddAnalysisIterator( FlightPath flightPath, int iterator )
 {
 	flightPath.iterator = iterator
 }
 
+
 array<AttachPoint> function GetAttachPoints( FlightPath flightPath, string side )
 {
 	return flightPath.deployAttach[ side ]
 }
 
-/*
-
-
-
-
-
-
-
-
-
-
-
-*/
 
 void function AddPreviewPoint( FlightPath flightPath, vector org, vector ang )
 {
@@ -764,6 +568,7 @@ void function AddPreviewPoint( FlightPath flightPath, vector org, vector ang )
 	point.angles = ang
 }
 
+
 Point function GetPreviewPoint( FlightPath flightPath )
 {
 	Point point
@@ -772,6 +577,7 @@ Point function GetPreviewPoint( FlightPath flightPath )
 	return point
 }
 
+
 void function FillDeployForAnalysisForEvent( entity dropship, string anim, string event, FlightPath Table, table<string, array<string> > attachments )
 {
 	float frac = dropship.GetScriptedAnimEventCycleFrac( anim, event )
@@ -779,8 +585,8 @@ void function FillDeployForAnalysisForEvent( entity dropship, string anim, strin
 	if ( !frac )
 		return
 
-	float duration = dropship.GetSequenceDuration( anim )
-	float time = duration * frac
+	float duration    = dropship.GetSequenceDuration( anim )
+	float time        = duration * frac
 	Attachment result = dropship.Anim_GetAttachmentAtTime( anim, "ORIGIN", time )
 
 	AttachPoint point = Table.preview
@@ -840,19 +646,15 @@ void function FillDeployForAnalysisForEvent( entity dropship, string anim, strin
 
 #endif //
 
-/*
-
-
-
-*/
 
 vector function GetAnalysisOffset( FlightPath flightPath )
 {
 	if ( flightPath.model in level.superCallinOffset )
-		return <0,0,level.superCallinOffset[ flightPath.model ]>
+		return <0, 0, level.superCallinOffset[ flightPath.model ]>
 
-	return <0,0,0>
+	return <0, 0, 0>
 }
+
 
 void function MaskTester( int mask )
 {
@@ -949,7 +751,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 		return Array
 
 	float duration = dropship.GetSequenceDuration( anim )
-	int steps = int( duration * 15 )
+	int steps      = int( duration * 15 )
 	float time, ratio
 
 	int stepper = int( steps * 0.98 )
@@ -974,7 +776,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 		Array.append( point )
 	}
 
-	for ( ;; )
+	for ( ; ; )
 	{
 		bool smoothed = false
 		for ( int i = 1; i + 1 < Array.len(); i++ )
@@ -983,11 +785,11 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 				continue
 
 			vector pR = expect vector( Array[ i - 1 ].origin )
-			vector p = expect vector( Array[ i ].origin )
+			vector p  = expect vector( Array[ i ].origin )
 			vector pF = expect vector( Array[ i + 1 ].origin )
 
-			vector vec1 = p - pR
-			vector vec2 = p - pF
+			vector vec1  = p - pR
+			vector vec2  = p - pF
 			float length = Length( vec1 ) + Length( vec2 )
 
 			vec1.Norm()
@@ -1167,47 +969,13 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //
-
-
 
 
 
 
 
 
-/*
 
 
 
@@ -1219,13 +987,14 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
-
+//
 
 
 
 
 
 
+//
 
 
 
@@ -1236,6 +1005,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
+//
 
 
 
@@ -1245,6 +1015,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
+//
 
 
 
@@ -1269,186 +1040,21 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
-*/
 
 
-//
-//
 //
-//
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 
 
 
 
-//
 
 
 
@@ -1460,8 +1066,6 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 //
-
-
 
 
 
@@ -1469,9 +1073,6 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
-//
-
-
 
 
 
@@ -1491,9 +1092,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
-
-
-
+//
 
 
 //
@@ -1518,45 +1117,17 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 
 
-
-
-
+//
 
 
 
 
-//
-//
 
-//
 
 
 
 #endif //
 
-table<string,string> function DogFightAnimsFromIndex( int animIndex )
-{
-	string anim1
-	string anim2
-
-	switch ( animIndex )
-	{
-		case 0:
-			anim1 = STRATON_DOGFIGHT_ANIM1
-			anim2 = STRATON_DOGFIGHT_ANIM1_PERSUER
-			break
-		case 1:
-			anim1 = STRATON_DOGFIGHT_ANIM2
-			anim2 = STRATON_DOGFIGHT_ANIM2_PERSUER
-			break
-		case 2:
-			anim1 = STRATON_DOGFIGHT_ANIM3
-			anim2 = STRATON_DOGFIGHT_ANIM3_PERSUER
-			break
-	}
-
-	return { anim1 = anim1, anim2 = anim2 }
-}
 
 bool function IsActiveNodeAnalysis()
 {
@@ -1566,186 +1137,6 @@ bool function IsActiveNodeAnalysis()
 #if(false)
 
 
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1788,7 +1179,7 @@ bool function IsActiveNodeAnalysis()
 
 #endif //
 
-void function AddDropshipFlightAnalysis( asset model, string anim, bool functionref( FlightPath, vector, float ) analysisFunc, string event = "",  )
+void function AddDropshipFlightAnalysis( int index, asset model, string anim, bool functionref( FlightPath, vector, float ) analysisFunc, string event = "" )
 {
 	shFile.dropshipDropoffAnims.append( anim )
 

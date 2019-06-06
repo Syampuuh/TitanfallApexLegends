@@ -51,6 +51,14 @@ global function IterateSettingsArray
 global function RegisterReferencedItemFlavorsFromArray
 global function MakeItemFlavorSet
 global function RegisterItemFlavorFromSettingsAsset
+
+
+global function IsItemFlavorBagValid
+#if DEV || ASSERTING 
+global function DEV_DescribeItemFlavorBag
+#endif
+
+
 global function ItemFlavor_HasUnlockFunc
 global function ItemFlavor_PassesUnlockFunc
 
@@ -87,9 +95,18 @@ global enum eItemType
 	//
 	tagonly,
 	ability,
+	_CALEVENT_RANGE_START,
 	calevent_season,
-	weapon_category,
+	calevent_seasonal_event,
+	_CALEVENT_RANGE_END,
+	#if(true)
+		challenge,
+	#endif
+	music_pack,
+	#if(false)
 
+#endif
+	weapon_category,
 	character,
 	//
 	//
@@ -146,19 +163,19 @@ table<int, string> itemTypeNameMap = {
 	[eItemType.xp_boost] = "#itemtype_xp_boost_NAME",
 	[eItemType.character_skin] = "#itemtype_character_skin_NAME",
 	[eItemType.character_execution] = "#itemtype_character_execution_NAME"
-	#if(false)
+#if(false)
 
 #endif
-	,[eItemType.weapon_skin] = "#itemtype_weapon_skin_NAME",
-	[eItemType.melee_skin] = "#itemtype_melee_skin_NAME",
-	[eItemType.gladiator_card_stance] = "#itemtype_gladiator_card_stance_NAME",
-	[eItemType.gladiator_card_frame] = "#itemtype_gladiator_card_frame_NAME",
-	[eItemType.gladiator_card_intro_quip] = "#itemtype_gladiator_card_intro_quip_NAME",
-	[eItemType.gladiator_card_kill_quip] = "#itemtype_gladiator_card_kill_quip_NAME",
-	[eItemType.gladiator_card_stat_tracker] = "#itemtype_gladiator_card_stat_tracker_NAME",
-	[eItemType.gladiator_card_badge] = "#itemtype_gladiator_card_badge_NAME",
-	[eItemType.loot_main_weapon] = "#itemtype_loot_main_weapon_NAME",
-	[eItemType.battlepass_purchased_xp] = "#itemtype_battlepass_purchased_xp_NAME",
+, [eItemType.weapon_skin] = "#itemtype_weapon_skin_NAME",
+[eItemType.melee_skin] = "#itemtype_melee_skin_NAME",
+[eItemType.gladiator_card_stance] = "#itemtype_gladiator_card_stance_NAME",
+[eItemType.gladiator_card_frame] = "#itemtype_gladiator_card_frame_NAME",
+[eItemType.gladiator_card_intro_quip] = "#itemtype_gladiator_card_intro_quip_NAME",
+[eItemType.gladiator_card_kill_quip] = "#itemtype_gladiator_card_kill_quip_NAME",
+[eItemType.gladiator_card_stat_tracker] = "#itemtype_gladiator_card_stat_tracker_NAME",
+[eItemType.gladiator_card_badge] = "#itemtype_gladiator_card_badge_NAME",
+[eItemType.loot_main_weapon] = "#itemtype_loot_main_weapon_NAME",
+[eItemType.battlepass_purchased_xp] = "#itemtype_battlepass_purchased_xp_NAME",
 }
 
 global enum eItemFlavorPlaylistOpinion
@@ -188,6 +205,13 @@ global struct ItemFlavor
 global typedef RegisterItemFlavorsCallbackType void functionref()
 global typedef OnItemFlavorRegisteredCallbackType void functionref( ItemFlavor flavor )
 global typedef OnAllItemFlavorsRegisteredCallbackType void functionref()
+
+global struct ItemFlavorBag
+{
+	array<ItemFlavor>     flavors
+	array<int>            quantities
+	int                   associatedError = -1
+}
 
 
 
@@ -254,7 +278,8 @@ void function ShItems_LevelInit_Begin()
 	file.unlockFuncs["founders_pack"] <- PlayerHasFoundersPack
 	file.unlockFuncs["starters_pack"] <- PlayerHasStarterPack
 	file.unlockFuncs["twitch_prime"] <- PlayerHasTwitchPrimeRewards
-	file.unlockFuncs["ps_plus"] <- PlayerHasPSPlusEntitlement
+	file.unlockFuncs["ps_plus"] <- PlayerHasEntitlement_PSPLUS_PACK
+	file.unlockFuncs["psplus02"] <- PlayerHasEntitlement_PSPLUS_PACK_02
 	file.unlockFuncs["origin_access_on_pc"] <- PlayerHasOriginAccessOnPC
 	file.unlockFuncs["ea_access_on_xbox"] <- PlayerHasEAAccessOnXbox
 }
@@ -297,8 +322,12 @@ bool function IsItemFlavorRegistrationFinished()
 
 
 const table<asset, asset> sourceTagToIcon = {
+	[ $"settings/itemflav/tag/source_origin_access.rpak" ] = $"rui/menu/buttons/source_origin_access",
+	[ $"settings/itemflav/tag/source_ea_access.rpak" ] = $"rui/menu/buttons/source_ea_access",
+	[ $"settings/itemflav/tag/source_playstation_plus.rpak" ] = $"rui/menu/buttons/source_playstation_plus",
 	[ $"settings/itemflav/tag/source_valentines_day.rpak" ] = $"rui/menu/buttons/source_valentines_day",
-	[ $"settings/itemflav/tag/source_battlepass_season01.rpak" ] = $"rui/menu/buttons/source_battlepass_season01"
+	[ $"settings/itemflav/tag/source_battlepass_season01.rpak" ] = $"rui/menu/buttons/source_battlepass_season01",
+	[ $"settings/itemflav/tag/source_beasthunter_event.rpak" ] = $"rui/menu/buttons/source_beasthunter_event"
 }
 
 void function RegisterTags()
@@ -491,7 +520,8 @@ array<ItemFlavor> function GetItemFlavorsWithTags( array<ItemFlavor> tagList )
 
 bool function IsItemFlavorStructValid( ItemFlavor flavor, int validationBehavior = eValidation.DONT_ASSERT )
 {
-	Assert( validationBehavior != eValidation.ASSERT || (flavor._____INTERNAL_index != -1 && flavor._____INTERNAL_noCopyCheck == flavor), "ItemFlavor struct was either copied or not initialized!" )
+	Assert( validationBehavior != eValidation.ASSERT || flavor._____INTERNAL_index != -1, "ItemFlavor struct was not initialized!" )
+	Assert( validationBehavior != eValidation.ASSERT || flavor._____INTERNAL_noCopyCheck == flavor, "ItemFlavor struct was copied!" )
 	return (flavor._____INTERNAL_index != -1 && flavor._____INTERNAL_noCopyCheck == flavor)
 }
 
@@ -918,7 +948,7 @@ array<var> function IterateSettingsArray( var arr )
 }
 
 
-array<ItemFlavor> function RegisterReferencedItemFlavorsFromArray( ItemFlavor parentFlavor, string arrayFieldName, string refFieldName )
+array<ItemFlavor> function RegisterReferencedItemFlavorsFromArray( ItemFlavor parentFlavor, string arrayFieldName, string refFieldName, string ornull featureFlagFieldNameOrNull = null )
 {
 	array<ItemFlavor> loaded = []
 	var parentBlock          = GetSettingsBlockForAsset( ItemFlavor_GetAsset( parentFlavor ) )
@@ -930,6 +960,20 @@ array<ItemFlavor> function RegisterReferencedItemFlavorsFromArray( ItemFlavor pa
 		{
 			Warning( "Warning: Asset \"" + ItemFlavor_GetAsset( parentFlavor ) + "\" has an empty entry in array \"" + arrayFieldName + "\"" )
 			continue
+		}
+		if ( featureFlagFieldNameOrNull != null )
+		{
+			string featureFlagRef = GetSettingsBlockString( entryBlock, expect string(featureFlagFieldNameOrNull) )
+			if ( featureFlagRef != "" )
+			{
+				Assert( ForAssertingOnly_IsValidFeatureFlagString( featureFlagRef ),
+					format( "Reference to '%s' in '%s' is gated by unknown feature flag: %s", string(entryAsset), string(ItemFlavor_GetAsset( parentFlavor )), featureFlagRef ) )
+				if ( !GetFeatureFlagByString( featureFlagRef ) )
+				{
+					printf( "Skipping reference to '%s' in '%s' because feature flag %s is off.", string(entryAsset), string(ItemFlavor_GetAsset( parentFlavor )), featureFlagRef )
+					continue
+				}
+			}
 		}
 		ItemFlavor ornull childFlavorOrNull = RegisterItemFlavorFromSettingsAsset( entryAsset )
 		if ( childFlavorOrNull != null )
@@ -1044,6 +1088,80 @@ ItemFlavor ornull function RegisterItemFlavorFromSettingsAsset( asset settingsAs
 #endif
 	return flavor
 }
+
+
+#if CLIENT || UI 
+bool function IsItemFlavorBagValid( ItemFlavorBag bag, bool allowEmpty, int assertBehavior = eValidation.DONT_ASSERT )
+{
+	if ( bag.flavors.len() == 0 )
+	{
+		Assert( allowEmpty || assertBehavior != eValidation.ASSERT, format( "ItemFlavorBag is empty: %s", DEV_DescribeItemFlavorBag( bag ) ) )
+		return allowEmpty
+	}
+
+	if ( bag.flavors.len() != bag.quantities.len() )
+	{
+		Assert( assertBehavior != eValidation.ASSERT, format( "ItemFlavorBag flavor/quantity array size mismatch: %s", DEV_DescribeItemFlavorBag( bag ) ) )
+		return false
+	}
+
+	table<ItemFlavor, bool> seenFlavs = {}
+	foreach ( int itemIdx, ItemFlavor itemFlav in bag.flavors )
+	{
+		if ( itemFlav in seenFlavs )
+		{
+			Assert( assertBehavior != eValidation.ASSERT, format( "ItemFlavorBag has duplicate flavor: %s", DEV_DescribeItemFlavorBag( bag ) ) )
+			return false
+		}
+		seenFlavs[itemFlav] <- true
+
+		if ( bag.quantities[itemIdx] <= 0 )
+		{
+			Assert( assertBehavior != eValidation.ASSERT, format( "ItemFlavorBag has bad quantity: %s", DEV_DescribeItemFlavorBag( bag ) ) )
+			return false
+		}
+	}
+
+	return true
+}
+#endif
+
+
+#if ( CLIENT || UI ) && ( DEV || ASSERTING ) 
+string function DEV_DescribeItemFlavorBag( ItemFlavorBag bag )
+{
+	string out = ""
+	if ( bag.associatedError != -1 )
+	{
+		out += format( "(ERROR:%d) ", bag.associatedError )
+	}
+	for ( int itemIdx = 0; itemIdx < maxint( bag.flavors.len(), bag.quantities.len() ); itemIdx++ )
+	{
+		string itemFlavStr
+		if ( itemIdx < bag.flavors.len() )
+		{
+			ItemFlavor itemFlav = bag.flavors[itemIdx]
+			if ( IsItemFlavorStructValid( itemFlav ) )
+				itemFlavStr = ItemFlavor_GetHumanReadableRef( itemFlav )
+			else itemFlavStr = "INVALID"
+		}
+		else itemFlavStr = "MISSING"
+
+		string quantityStr
+		if ( itemIdx < bag.quantities.len() )
+		{
+			ItemFlavor itemFlav = bag.flavors[itemIdx]
+			if ( IsItemFlavorStructValid( itemFlav ) )
+				quantityStr = ItemFlavor_GetHumanReadableRef( itemFlav )
+			else quantityStr = "INVALID"
+		}
+		else quantityStr = "MISSING"
+
+		out += format( "%s%s*%s", (itemIdx == 0 ? "" : ", "), itemFlavStr, quantityStr )
+	}
+	return out
+}
+#endif
 
 
 
@@ -1204,16 +1322,25 @@ bool function PlayerHasFoundersPack( entity player )
 }
 
 
-bool function PlayerHasPSPlusEntitlement( entity player )
+bool function PlayerHasEntitlement_PSPLUS_PACK( entity player )
+{
+	return PlayerHasEntitlement( player, PSPLUS_PACK )
+}
+
+
+bool function PlayerHasEntitlement_PSPLUS_PACK_02( entity player )
+{
+	return PlayerHasEntitlement( player, PSPLUS_PACK_02 )
+}
+
+
+bool function PlayerHasEntitlement( entity player, int entitlement )
 {
 	#if(false)
 
 #endif
-	#if(UI)
-		return LocalPlayerHasEntitlement( PSPLUS_PACK ) ? true : false
-	#endif
-	#if(CLIENT)
-		return LocalPlayerHasEntitlement( PSPLUS_PACK ) ? true : false
+	#if UI || CLIENT 
+		return LocalPlayerHasEntitlement( entitlement ) ? true : false
 	#endif
 }
 //

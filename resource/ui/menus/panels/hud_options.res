@@ -124,7 +124,7 @@
         InheritProperties		SwitchButton
         style					DialogListButton
         navUp					SwitchPingOpacity
-        navDown					SwitchPilotDamageIndicators
+        navDown					SwitchRotateMinimap
         ConVar					"hud_setting_showObituary"
         list
         {
@@ -137,12 +137,31 @@
         pin_to_sibling_corner	BOTTOM_LEFT
         childGroupAlways        ChoiceButtonAlways
     }
-    SwitchPilotDamageIndicators
+    SwitchRotateMinimap
     {
         ControlName				RuiButton
         InheritProperties		SwitchButton
         style					DialogListButton
         navUp					SwitchShowObituary
+        navDown					SwitchPilotDamageIndicators
+        ConVar					"hud_setting_minimapRotate"
+        list
+        {
+            "#SETTING_OFF"	0
+            "#SETTING_ON"	1
+        }
+
+        pin_to_sibling			SwitchShowObituary
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+    }
+    SwitchPilotDamageIndicators
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwitchRotateMinimap
         navDown					SwitchStreamerMode
         ConVar					"damage_indicator_style_pilot"
         list
@@ -152,7 +171,7 @@
             "#SETTING_INDICATOR_BOTH"	    1
         }
 
-        pin_to_sibling			SwitchShowObituary
+        pin_to_sibling			SwitchRotateMinimap
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         childGroupAlways        MultiChoiceButtonAlways

@@ -18,7 +18,6 @@ const int PROMO_PROTOCOL = 2
 struct
 {
 	MainMenuPromos&      promoData
-	array<asset>         images
 	table<string, asset> imageMap
 } file
 
@@ -32,7 +31,6 @@ void function InitPromoData()
 	{
 		string name = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "name" ) ).tolower()
 		asset image = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "image" ) )
-		file.images.append( image )
 		if ( name != "" )
 			file.imageMap[name] <- image
 	}
@@ -86,7 +84,7 @@ asset function GetPromoImage( string identifier )
 	if ( identifier in file.imageMap )
 		image = file.imageMap[identifier]
 	else
-		image = file.images[int(identifier)]
+		image = $"rui/promo/apex_title"
 
 	return image
 }

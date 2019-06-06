@@ -16,6 +16,7 @@ global function Consumable_CanUseConsumable
 global function Consumable_CreatePotentialHealData
 #if(CLIENT)
 global function OnCreateChargeEffect_Consumable
+global function OnCreateMuzzleFlashEffect_Consumable
 
 global function Consumable_UseItemByType
 global function Consumable_UseItemByRef
@@ -302,13 +303,16 @@ void function OnClientConnected( entity player )
 
 void function OnWeaponOwnerChanged_Consumable( entity weapon, WeaponOwnerChangedParams changeParams )
 {
-	#if(false)
-
-
-
-
-
-#endif //
+	if ( !IsValid( changeParams.oldOwner ) )
+	{
+	#if(CLIENT)
+		if ( weapon.GetOwner() == GetLocalClientPlayer() )
+	#endif //
+		{
+			ConsumablePersistentData data
+			file.weaponPersistentData[ weapon ] <- data
+		}
+	}
 
 	file.playerToLastHealChatterTime[ weapon.GetOwner() ] <- Time()
 	file.playerToLastShieldChatterTime[ weapon.GetOwner() ] <- Time()
@@ -381,16 +385,7 @@ void function OnWeaponActivate_Consumable( entity weapon )
 
 
 
-
-
-
 //
-
-
-
-
-
-
 
 
 
@@ -415,6 +410,15 @@ void function OnWeaponActivate_Consumable( entity weapon )
 
 		RunUIScript( "CloseAllMenus" )
 	#endif //
+
+	ConsumablePersistentData useData = file.weaponPersistentData[ weapon ]
+	ResetConsumableData( useData )
+
+	if ( GetCurrentPlaylistVarBool( "survival_healthkits_limit_movement", true ) )
+	{
+		useData.statusEffectHandles.append( StatusEffect_AddEndless( weaponOwner, eStatusEffect.move_slow, GetCurrentPlaylistVarFloat( "survival_healthkits_move_speed_reduction", 0.4 ) ) )
+		useData.statusEffectHandles.append( StatusEffect_AddEndless( weaponOwner, eStatusEffect.disable_wall_run_and_double_jump, 1.0 ) )
+	}
 
 	int consumableType  = file.modNameToConsumableType[ modName ]
 	ConsumableInfo info = file.consumableTypeToInfo[ consumableType ]
@@ -465,7 +469,12 @@ void function OnWeaponActivate_Consumable( entity weapon )
 	}
 	if ( file.consumableTypeToInfo[ consumableType ].ultimateAmount > 0 )
 	{
-		 consumableRecoveryType = eConsumableRecoveryType.ULTIMATE
+		consumableRecoveryType = eConsumableRecoveryType.ULTIMATE
+
+		#if(false)
+
+
+#endif
 	}
 	weapon.SetScriptInt0( consumableRecoveryType )
 
@@ -479,10 +488,9 @@ void function OnWeaponDeactivate_Consumable( entity weapon )
 {
 	entity weaponOwner = weapon.GetOwner()
 
+	ConsumablePersistentData useData
+
 	#if(false)
-
-
-
 
 
 
@@ -513,6 +521,14 @@ void function OnWeaponDeactivate_Consumable( entity weapon )
 		if ( weapon.GetOwner() != GetLocalClientPlayer() )
 			return
 
+		Signal( weaponOwner, "ConsumableDestroyRui" )
+		Chroma_ConsumableEnd()
+
+		if ( !InPrediction() )
+			return
+
+		useData = file.weaponPersistentData[ weapon ]
+
 		string currentMod = GetConsumableModOnWeapon( weapon )
 		if ( currentMod != "" )
 		{
@@ -524,10 +540,13 @@ void function OnWeaponDeactivate_Consumable( entity weapon )
 				EmitSoundOnEntity( weaponOwner, info.cancelSoundName )
 			}
 		}
-
-		Signal( weaponOwner, "ConsumableDestroyRui" )
-		Chroma_ConsumableEnd()
 	#endif //
+
+	if ( IsValid( weaponOwner ) )
+	{
+		foreach ( effectHandle in useData.statusEffectHandles )
+			StatusEffect_Stop( weaponOwner, effectHandle )
+	}
 }
 
 #if(CLIENT)
@@ -561,6 +580,25 @@ void function Consumable_DisplayProgressBar( entity player, entity weapon, int c
 	wait raiseTime + chargeTime
 }
 
+
+void function OnCreateMuzzleFlashEffect_Consumable( entity weapon, int fxHandle )
+{
+	if ( !IsValid( weapon.GetOwner() ) )
+		return
+
+	string modName = GetConsumableModOnWeapon( weapon )
+
+	if ( modName == "health_small" )
+		return
+
+	if ( modName == "health_large" )
+		return
+
+	int armorTier   = EquipmentSlot_GetEquipmentTier( weapon.GetOwner(), "armor" )
+	vector colorVec = GetFXRarityColorForTier( armorTier )
+
+	EffectSetControlPointVector( fxHandle, 2, colorVec )
+}
 
 void function OnCreateChargeEffect_Consumable( entity weapon, int fxHandle )
 {
@@ -622,11 +660,9 @@ bool function OnWeaponChargeBegin_Consumable( entity weapon )
 		}
 	#endif //
 
-
 	return true
 
 }
-
 
 void function OnWeaponChargeEnd_Consumable( entity weapon )
 {
@@ -1344,7 +1380,6 @@ string function GetCanUseResultString( int consumableUseActionResult )
 
 
 
-
 #endif //
 
 //
@@ -1688,8 +1723,31 @@ TargetKitHealthAmounts function Consumable_PredictConsumableUse( entity player, 
 	return targetValues
 }
 
+void function ResetConsumableData( ConsumablePersistentData useData )
+{
+	useData.usedHealth = 0
+	useData.healAmount = 0
+	useData.healthKitResourceId = 0
+	useData.TEMP_shieldStatusHandle = 0
+	useData.TEMP_healthStatusHandle = 0
+	useData.lastMissingHealth = -1
+	useData.lastMissingShields = -1
+	useData.lastCurrentHealth = -1
+	useData.statusEffectHandles = []
+}
 
 bool function WeaponDrivenConsumablesEnabled()
 {
 	return (GetCurrentPlaylistVarInt( "weapon_driven_consumables", 1 ) == 1)
 }
+
+
+#if(false)
+
+
+
+
+
+
+
+#endif

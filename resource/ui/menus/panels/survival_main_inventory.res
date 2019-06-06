@@ -29,8 +29,8 @@ Resource/UI/menus/panels/survival_main_inventory.res
         xpos                    8
         ypos                    0
 
-        navRight                MainWeapon0_Barrel
-        navDown                 Armor
+        navUp                   GridButton1x1
+        navRight                Armor
 
         pin_to_sibling          Armor
         pin_corner_to_sibling   RIGHT
@@ -50,16 +50,16 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        xpos                    -4
-        ypos                    25
+        xpos                    8
+        ypos                    0
 
-        navUp                   Helmet
-        navRight                MainWeapon0_Barrel
-        navDown                 IncapShield
+        navUp                   GridButton1x2
+        navLeft                 Helmet
+        navRight                IncapShield
 
-        pin_to_sibling          BackpackGrid
-        pin_corner_to_sibling   TOP_RIGHT
-        pin_to_sibling_corner   BOTTOM
+        pin_to_sibling          IncapShield
+        pin_corner_to_sibling   RIGHT
+        pin_to_sibling_corner   LEFT
     }
 
     IncapShield
@@ -77,15 +77,15 @@ Resource/UI/menus/panels/survival_main_inventory.res
         rightClickEvents        1
 
         xpos                    8
-        ypos                    0
+        ypos                    25
 
-        navUp                   Armor
-        navRight                MainWeapon0_Barrel
-        navDown                 BackPack
+        navUp                   GridButton1x3
+        navLeft                 Armor
+        navRight                BackPack
 
-        pin_to_sibling          Armor
-        pin_corner_to_sibling   LEFT
-        pin_to_sibling_corner   RIGHT
+        pin_to_sibling          BackpackGrid
+        pin_corner_to_sibling   TOP
+        pin_to_sibling_corner   BOTTOM
     }
 
     BackPack
@@ -104,8 +104,8 @@ Resource/UI/menus/panels/survival_main_inventory.res
         xpos                    8
         ypos                    0
 
-        navUp                   IncapShield
-        navRight                MainWeapon0_Barrel
+        navUp                   GridButton1x4
+        navLeft                 IncapShield
 
         pin_to_sibling          IncapShield
         pin_corner_to_sibling   LEFT
@@ -123,8 +123,9 @@ Resource/UI/menus/panels/survival_main_inventory.res
         classname               "SurvivalEquipment"
         scriptID                "main_weapon0"
 
-        navLeft                 BackPack
-        navDown                 MainWeapon0_Barrel
+        navUp                   MainWeapon0_Barrel
+        navDown                 GridButton0x0
+        navRight                MainWeapon1
 
         rightClickEvents        1
 
@@ -163,10 +164,8 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon0
-        navLeft                 BackPack
         navRight                MainWeapon0_Mag
-        navDown                 MainWeapon1
+        navDown                 MainWeapon0
 
         ypos                    -8
         xpos                    -8
@@ -191,10 +190,9 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon0
         navLeft                 MainWeapon0_Barrel
         navRight                MainWeapon0_Sight
-        navDown                 MainWeapon1
+        navDown                 MainWeapon0
 
         xpos                    4
         ypos                    0
@@ -219,10 +217,9 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon0
         navLeft                 MainWeapon0_Mag
         navRight                MainWeapon0_Grip
-        navDown                 MainWeapon1
+        navDown                 MainWeapon0
 
         xpos                    4
         ypos                    0
@@ -247,10 +244,9 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon0
         navLeft                 MainWeapon0_Sight
         navRight                MainWeapon0_Hopup
-        navDown                 MainWeapon1
+        navDown                 MainWeapon0
 
         xpos                    4
         ypos                    0
@@ -275,9 +271,8 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon0
         navLeft                 MainWeapon0_Grip
-        navDown                 MainWeapon1
+        navDown                 MainWeapon0
 
         xpos                    4
         ypos                    0
@@ -302,9 +297,9 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon0_Barrel
-        navLeft                 BackPack
-        navDown                 MainWeapon1_Barrel
+        navUp                   MainWeapon1_Barrel
+        navDown                 GridButton0x0
+        navLeft                 MainWeapon0
 
         xpos                    40
         ypos                    -80
@@ -328,8 +323,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon1
-        navLeft                 BackPack
+        navDown                 MainWeapon1
         navRight                MainWeapon1_Mag
 
         ypos                    -8
@@ -355,7 +349,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon1
+        navDown                 MainWeapon1
         navLeft                 MainWeapon1_Barrel
         navRight                MainWeapon1_Sight
 
@@ -382,7 +376,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon1
+        navDown                 MainWeapon1
         navLeft                 MainWeapon1_Mag
         navRight                MainWeapon1_Grip
 
@@ -409,7 +403,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon1
+        navDown                 MainWeapon1
         navLeft                 MainWeapon1_Sight
         navRight                MainWeapon1_Hopup
 
@@ -436,7 +430,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         rightClickEvents        1
 
-        navUp                   MainWeapon1
+        navDown                 MainWeapon1
         navLeft                 MainWeapon1_Grip
 
         xpos                    4
@@ -758,7 +752,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         ypos                    50
         xpos                    0
-        wide					415
+        wide					440
         tall					50
         visible					1
         enabled 				1
@@ -779,7 +773,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
 
         ypos                    10
         xpos                    0
-        wide					415
+        wide					440
         tall					50
         visible					1
         enabled 				1
@@ -796,13 +790,13 @@ Resource/UI/menus/panels/survival_main_inventory.res
     {
 	    ControlName				RuiPanel
 
-        ypos                    -28
+        ypos                    17
         xpos                    80
-        wide					180
-        tall					151
+        wide					130
+        tall					109
         visible					1
         enabled 				1
-        scaleImage				1
+        scaleImage				0
         rui                     "ui/inventory_ultimate_ability.rpak"
         zpos                    20
 
@@ -850,7 +844,7 @@ Resource/UI/menus/panels/survival_main_inventory.res
         enabled                 0
         scaleImage              1
 
-        pin_to_sibling          Backpack
+        pin_to_sibling          BackPack
         pin_corner_to_sibling   LEFT
         pin_to_sibling_corner   RIGHT
     }

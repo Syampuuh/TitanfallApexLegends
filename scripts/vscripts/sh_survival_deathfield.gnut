@@ -23,6 +23,11 @@ global function SURVIVAL_GetDeathField
 
 
 
+
+
+
+
+
 #endif
 
 #if(CLIENT)
@@ -194,16 +199,28 @@ void function GenerateDeathFieldStageData()
 	int i = 0
 	while ( 1 )
 	{
-		float radius = GetCurrentPlaylistVarFloat( "deathfield_radius_" + i, -1 )
-		if ( radius < 0 )
-			break
+		float radius = GetCurrentPlaylistVarFloat( "deathfield_radius_" + i, -1.0 )
 
-		file.deathFieldStages.append( CreateDeathFieldStageData( i++ ) )
+		bool allowMissingDefaults = false
+		if ( radius < 0 )
+		{
+			if ( file.deathFieldStages.len() > 0 )
+			{
+				break
+			}
+			else
+			{
+				Warning( "Survival deathfield playlist vars are missing!" )
+				allowMissingDefaults = true
+			}
+		}
+
+		file.deathFieldStages.append( CreateDeathFieldStageData( i++, allowMissingDefaults ) )
 	}
 }
 
 
-DeathFieldStageData function CreateDeathFieldStageData( int index )
+DeathFieldStageData function CreateDeathFieldStageData( int index, bool allowMissingDefaults )
 {
 	float lastRadius = file.deathFieldData.currentRadius
 	if ( file.deathFieldStages.len() > 0 )
@@ -215,15 +232,15 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 	int currentIndex = file.deathFieldStages.len()
 
-	float defaultSpeed     = GetCurrentPlaylistVarFloat( "deathfield_default_shrinkSpeed", 140 )
-	float shrinkSpeed      = GetCurrentPlaylistVarFloat( "deathfield_shrinkSpeed_" + index, -1 )
+	float defaultSpeed     = GetCurrentPlaylistVarFloat( "deathfield_default_shrinkSpeed", 140.0 )
+	float shrinkSpeed      = GetCurrentPlaylistVarFloat( "deathfield_shrinkSpeed_" + index, -1.0 )
 	float circleCloseSpeed = shrinkSpeed > 0 ? shrinkSpeed : defaultSpeed //
 
 	DeathFieldStageData data
-	data.endRadius = GetCurrentPlaylistVarFloat( "deathfield_radius_" + index, -1 )
-	data.preShrinkDuration = GetCurrentPlaylistVarFloat( "deathfield_preShrinkDuration_" + index, -1 )
+	data.endRadius = GetCurrentPlaylistVarFloat( "deathfield_radius_" + index, allowMissingDefaults ? 20000.0 : -1.0 )
+	data.preShrinkDuration = GetCurrentPlaylistVarFloat( "deathfield_preShrinkDuration_" + index, allowMissingDefaults ? 240.0 : -1.0 )
 	data.shrinkDuration = ((lastRadius - data.endRadius) / circleCloseSpeed)
-	data.percentDamagePerTick = GetCurrentPlaylistVarFloat( "deathfield_damagePercent_" + index, -1 )
+	data.percentDamagePerTick = GetCurrentPlaylistVarFloat( "deathfield_damagePercent_" + index, allowMissingDefaults ? 0.01 : -1.0 )
 
 	Assert( data.endRadius > 0 )
 	Assert( data.preShrinkDuration > 0 )
@@ -237,6 +254,27 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 	return data
 }
+
+bool function PlayerShouldSeeSurveyBeaconMarkers( entity player )
+{
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+#else //
+		return player.HasPassive( ePassives.PAS_PATHFINDER )
+
+	#endif //
+}
+
 
 #if(false)
 
@@ -326,6 +364,44 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -360,23 +436,6 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -393,8 +452,6 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 //
-
-
 
 
 
@@ -731,7 +788,6 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 
-
 //
 
 
@@ -970,28 +1026,12 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 
-//
-
 
 
 
 
 
 //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1014,78 +1054,7 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//
 
 
 
@@ -1093,6 +1062,10 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 //
+
+
+
+
 
 
 
@@ -1141,6 +1114,106 @@ DeathFieldStageData function CreateDeathFieldStageData( int index )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 
@@ -1266,7 +1339,7 @@ void function SURVIVAL_AddCallback_OnDeathFieldStopShrink( void functionref( Dea
 void function UpdateSurveyBeaconHint()
 {
 	entity player = GetLocalViewPlayer()
-	if ( !player.HasPassive( ePassives.PAS_PATHFINDER ) )
+	if ( !PlayerShouldSeeSurveyBeaconMarkers( player ) )
 		RemoveMapFeatureItemByName( "#SURVEY_BEACON" )
 	else
 		SetMapFeatureItem( 100, "#SURVEY_BEACON", "#SURVEY_BEACON_DESC", $"rui/hud/gametype_icons/survival/survey_beacon_only_pathfinder" )
@@ -1305,7 +1378,7 @@ void function OnPropScriptCreated( entity prop )
 		RuiTrackFloat3( rui, "deathFieldOrigin", prop, RUI_TRACK_ABSORIGIN_FOLLOW )
 	}
 
-	if ( prop.GetTargetName() == "safeZone" )
+	if ( (prop.GetTargetName() == "safeZone") || (prop.GetTargetName() == "safeZone_noline") )
 	{
 		file.safeZone = prop
 
@@ -1635,8 +1708,20 @@ bool function SurveyBeacon_CanUseFunction( entity player, entity beacon )
 		return false
 	}
 
-	bool canUse = ControlPanel_CanUseFunction( player, beacon )
-	if ( canUse && HasActiveSurveyZone( player ) )
+	if ( !ControlPanel_CanUseFunction( player, beacon ) )
+		return false
+
+	#if(false)
+
+
+
+
+//
+
+
+#endif //
+
+	if ( HasActiveSurveyZone( player ) )
 	{
 		#if(CLIENT)
 			AddPlayerHint( 0.1, 0, $"rui/hud/gametype_icons/survival/survey_beacon_only_pathfinder", "#SURVEY_ALREADY_ACTIVE" )
@@ -1644,7 +1729,7 @@ bool function SurveyBeacon_CanUseFunction( entity player, entity beacon )
 		return false
 	}
 
-	return canUse
+	return true
 }
 
 #if(CLIENT)
@@ -1832,8 +1917,13 @@ void function DisplayHolsterWeaponHint()
 		return
 
 	entity viewPlayer = GetLocalViewPlayer()
-
 	entity activeWeapon = viewPlayer.GetActiveWeapon( eActiveInventorySlot.mainHand )
+	if ( !IsValid( activeWeapon ) )
+		return
+
+	if ( activeWeapon.GetWeaponType() != WT_DEFAULT )
+		return
+
 	if ( activeWeapon == viewPlayer.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_2 ) )
 		return
 

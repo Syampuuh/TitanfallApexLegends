@@ -248,6 +248,9 @@ void function HideVisibleTabBodies( TabData tabData )
 
 void function DeactivateTab( TabData tabData )
 {
+	if ( tabData.tabIndex == INVALID_TAB_INDEX )
+		return
+
 	HidePanel( tabData.tabDefs[tabData.tabIndex].panel )
 }
 

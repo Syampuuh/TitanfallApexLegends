@@ -1,18 +1,23 @@
 global function OnWeaponPrimaryAttack_holopilot
 global function OnWeaponChargeLevelIncreased_holopilot
 global function PlayerCanUseDecoy
+#if(CLIENT)
+global function CreateARIndicator
+#endif
 
 global const int DECOY_FADE_DISTANCE = 16000 //
 global const float DECOY_DURATION = 15.0
 const float ULTIMATE_DECOY_DURATION = 5.0
 
-global const vector HOLOPILOT_ANGLE_SEGMENT = <0,60,0>
+global const vector HOLOPILOT_ANGLE_SEGMENT = <0, 60, 0>
 global function Decoy_Init
 
 const DECOY_AR_MARKER = $"P_ar_ping_squad_CP"
 const float DECOY_TRACE_DIST = 5000.0
 
 #if(false)
+
+
 
 
 
@@ -42,7 +47,7 @@ void function Decoy_Init()
 
 
 #else
-	PrecacheParticleSystem( DECOY_AR_MARKER )
+		PrecacheParticleSystem( DECOY_AR_MARKER )
 	#endif
 }
 
@@ -73,6 +78,7 @@ void function Decoy_Init()
 
 
 //
+
 
 
 
@@ -130,16 +136,16 @@ var function OnWeaponPrimaryAttack_holopilot( entity weapon, WeaponPrimaryAttack
 	if ( weapon.GetWeaponChargeLevelMax() > 1 )
 		chargeLevel *= 2 //
 	//
-#if(false)
+	#if(false)
 
 
 
 
 
 #else
-	if ( chargeLevel == 1 )
-		CreateARIndicator( weaponOwner )
-#endif
+		if ( chargeLevel == 1 )
+			CreateARIndicator( weaponOwner )
+	#endif
 
 	PlayerUsedOffhand( weaponOwner, weapon )
 
@@ -149,13 +155,13 @@ var function OnWeaponPrimaryAttack_holopilot( entity weapon, WeaponPrimaryAttack
 #if(CLIENT)
 void function CreateARIndicator( entity player )
 {
-	vector eyePos = player.EyePosition()
-	vector viewVector = player.GetViewVector()
+	vector eyePos      = player.EyePosition()
+	vector viewVector  = player.GetViewVector()
 	TraceResults trace = TraceLine( eyePos, eyePos + (viewVector * DECOY_TRACE_DIST), player, TRACE_MASK_SOLID_BRUSHONLY, TRACE_COLLISION_GROUP_NONE )
 	if ( trace.fraction < 1.0 )
 	{
-		trace = TraceLine( trace.endPos, trace.endPos + <0,0,-2000 * trace.fraction >, player, TRACE_MASK_SOLID_BRUSHONLY, TRACE_COLLISION_GROUP_NONE )
-		int arID = GetParticleSystemIndex( DECOY_AR_MARKER )
+		trace = TraceLine( trace.endPos, trace.endPos + <0, 0, -2000 * trace.fraction >, player, TRACE_MASK_SOLID_BRUSHONLY, TRACE_COLLISION_GROUP_NONE )
+		int arID     = GetParticleSystemIndex( DECOY_AR_MARKER )
 		int fxHandle = StartParticleEffectInWorldWithHandle( arID, trace.endPos, trace.surfaceNormal )
 		EffectSetControlPointVector( fxHandle, 1, FRIENDLY_COLOR_FX )
 		thread DestroyAfterTime( fxHandle, 1.0 )
@@ -173,7 +179,7 @@ void function DestroyAfterTime( int fxHandle, float time )
 			EffectStop( fxHandle, true, true )
 		}
 	)
-	wait( time )
+	wait(time)
 }
 #endif
 
@@ -207,21 +213,23 @@ void function DestroyAfterTime( int fxHandle, float time )
 
 
 
-//
-
-
-
-
-
-
-
-
 
 //
-//
-//
-//
 
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
 
 
 
@@ -330,6 +338,22 @@ void function DestroyAfterTime( int fxHandle, float time )
 
 
 
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
 //
 
 
@@ -338,13 +362,6 @@ void function DestroyAfterTime( int fxHandle, float time )
 
 
 //
-
-
-
-
-
-
-//
 //
 
 
@@ -352,6 +369,20 @@ void function DestroyAfterTime( int fxHandle, float time )
 
 //
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -498,7 +529,8 @@ void function DestroyAfterTime( int fxHandle, float time )
 
 #endif //
 
-bool function PlayerCanUseDecoy( entity ownerPlayer ) //
+bool function PlayerCanUseDecoy( entity ownerPlayer )
+//
 {
 	if ( !ownerPlayer.IsZiplining() )
 	{
@@ -509,15 +541,11 @@ bool function PlayerCanUseDecoy( entity ownerPlayer ) //
 			return false
 	}
 
-	float angleCheckParam = GetCurrentPlaylistVarFloat( "mirageabilitycheck", 0.99 )
-
-	if ( ownerPlayer.GetViewVector().Dot( <0, 0, -1> ) > angleCheckParam )
-		return false
-
 	//
 
 	return true
 }
+
 
 bool function OnWeaponChargeLevelIncreased_holopilot( entity weapon )
 {
@@ -526,21 +554,20 @@ bool function OnWeaponChargeLevelIncreased_holopilot( entity weapon )
 			return true
 	#endif
 
-	int level = weapon.GetWeaponChargeLevel()
+	int level    = weapon.GetWeaponChargeLevel()
 	int maxLevel = weapon.GetWeaponChargeLevelMax()
 
 	if ( level == maxLevel )
 	{
 		if ( weapon.HasMod( "disguise" ) )
 		{
-		//
-		//
+			//
+			//
 		}
 		else
 		{
-		//
+			//
 			weapon.PlayWeaponEffect( HOLO_EMITTER_CHARGE_FX_1P, HOLO_EMITTER_CHARGE_FX_3P, "FX_EMITTER_L_01" )
-
 		}
 	}
 	else
@@ -548,15 +575,15 @@ bool function OnWeaponChargeLevelIncreased_holopilot( entity weapon )
 		switch ( level )
 		{
 			case 1:
-			//
-			//
-			//
+				//
+				//
+				//
 
 			case 2:
-			//
-			//
-			//
-		}
+				//
+				//
+				//
+			}
 	}
 
 	return true

@@ -182,7 +182,7 @@ void function PrelaunchValidation( bool autoContinue = false )
 		PrintLaunchDebugVal( "isOriginLatest", isOriginLatest )
 		if ( !isOriginLatest )
 		{
-			SetLaunchState( eLaunchState.CANT_CONTINUE, Localize( "#ORIGIN_UPDATE_AVAILABLE" ) )
+			SetLaunchState( eLaunchState.CANT_CONTINUE, Localize( "#TITLE_UPDATE_AVAILABLE" ) )
 			return
 		}
 	#endif //
@@ -405,6 +405,7 @@ void function PrelaunchValidation( bool autoContinue = false )
 #if(SPINNER_DEBUG_INFO)
 	SetSpinnerDebugInfo( "isAuthenticatedByStryder" )
 #endif
+	float startTime = Time()
 	while ( true )
 	{
 		bool isAuthenticatedByStryder = IsStryderAuthenticated()
@@ -412,6 +413,12 @@ void function PrelaunchValidation( bool autoContinue = false )
 
 		if ( isAuthenticatedByStryder )
 			break
+		if ( Time() - startTime > 10.0 )
+		{
+			SetLaunchState( eLaunchState.WAIT_TO_CONTINUE, Localize( "#ORIGIN_IS_OFFLINE" ), Localize( "#MAINMENU_RETRY" ) )
+			return
+		}
+
 		WaitFrame()
 	}
 

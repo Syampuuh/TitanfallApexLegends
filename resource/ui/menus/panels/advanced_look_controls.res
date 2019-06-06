@@ -24,7 +24,6 @@
         style					DialogListButton
         xpos					0
         ypos					0
-        navUp					SldGamepadCustomADSTurnDelay
         navDown					SldGamepadCustomDeadzoneIn
         tabPosition				1
         ConVar					"gamepad_custom_enabled"
@@ -331,7 +330,6 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SldGamepadCustomADSTurnTime
-        navDown					SwchGamepadCustomEnabled
         conCommand				"gamepad_custom_ads_turn_delay"
         minValue				0.0
         maxValue				1.0

@@ -180,11 +180,12 @@ struct {
 void function ShApexScreens_Init()
 {
 	#if(false)
+
 #elseif(CLIENT)
 		AddCallback_OnEnumStaticPropRui( OnEnumStaticPropRui )
 	#endif
 
-	if ( !IsLobby() && !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
+	if ( !GetCurrentPlaylistVarBool( "enable_apex_screens", true ) )
 		return
 
 	Remote_RegisterClientFunction( "ServerToClient_ApexScreenKillDataChanged", "int", 0, 512, "float", 0.0, 10000.0, 32, "int", 0, 32, "entity" )

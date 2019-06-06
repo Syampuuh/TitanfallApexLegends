@@ -107,11 +107,15 @@ global enum ePingType
 	ZIPLINE,
 	SURVEYBEACON,
 	HOVERTANK,
+	FLYER,
+	FLYER_CAGED,
+	JUMPTOWER,
 
 	ABILITY_DRONEMEDIC,
 	ABILITY_DOMESHIELD,
 	ABILITY_WORMHOLE,
 	ABILITY_JUMPPAD,
+
 
 	RESPAWN_STATION,
 	RESPAWN_DROPSHIP,
@@ -129,6 +133,12 @@ global enum ePingType
 	BLOODHOUND_POI_LOOTING_RECENT,
 	BLOODHOUND_POI_WOUNDED,
 	BLOODHOUND_POI_WOUNDED_RECENT,
+
+	_assertion_marker, //
+
+	#if(false)
+
+#endif
 
 	_count
 }
@@ -245,12 +255,10 @@ const string CMDNAME_PING_REPLY = "cmd_PingReply"
 
 const string CMDNAME_CANCEL_PING_BY_TICKETID = "cmd_CancelPingByTicketID"
 
-string function Ping_GetSoundForLocationPing( int pingType, bool isOurs )
+string function Ping_GetSoundForLocationPing( int pingType, bool isOurs, bool isSameTeam )
 {
 	switch( pingType )
 	{
-		//
-		//
 		case ePingType.ENEMY_GENERAL:
 		case ePingType.ENEMY_SPECIFIC:
 		case ePingType.ENEMY_TRAP:
@@ -263,7 +271,23 @@ string function Ping_GetSoundForLocationPing( int pingType, bool isOurs )
 		case ePingType.ABILITY_DRONEMEDIC:
 		case ePingType.ABILITY_WORMHOLE:
 		case ePingType.ABILITY_JUMPPAD:
-			return (isOurs ? "" : "")
+#if(false)
+
+
+#endif
+			return ""
+	}
+
+	if ( !isSameTeam )
+	{
+		switch ( pingType )
+		{
+			case ePingType.BLEEDOUT:
+			case ePingType.SELF_REVIVE:
+				if ( !isSameTeam )
+					return "ui_mapping_item_3p"
+				break
+		}
 	}
 
 	return (isOurs ? PING_SOUND_LOCATION_1P : PING_SOUND_LOCATION_3P)
@@ -303,15 +327,15 @@ void function ShPing_Init()
 #endif
 
 	#if(CLIENT)
-	AddCallback_RegisterRootItemFlavors( void function() {
-		foreach( var block in IterateSettingsAssetArray( $"settings/itemflavlist/pings.rpak", "list" ) )
-		{
-			ItemFlavor ornull pingOrNull = RegisterItemFlavorFromSettingsAsset( GetSettingsBlockAsset( block, "flavor" ) )
-			//
-			//
-			//
-		}
-	} )
+		AddCallback_RegisterRootItemFlavors( void function() {
+			foreach( var block in IterateSettingsAssetArray( $"settings/itemflavlist/pings.rpak", "list" ) )
+			{
+				ItemFlavor ornull pingOrNull = RegisterItemFlavorFromSettingsAsset( GetSettingsBlockAsset( block, "flavor" ) )
+				//
+				//
+				//
+			}
+		} )
 	#endif
 }
 
@@ -343,6 +367,9 @@ bool function Ping_ShouldExecutePing( entity player )
 
 
 #endif //
+
+	if ( GetGameState() >= eGameState.WinnerDetermined )
+		return false
 
 	if ( TryPingBlockingFunction( player, "ping" ) )
 		return false
@@ -458,7 +485,7 @@ PingTraceResults function DoPingTrace( entity player )
 	const int colGroup = TRACE_COLLISION_GROUP_NONE
 	//
 	//
-	const int colMask = (TRACE_MASK_VISIBLE_AND_NPCS | CONTENTS_BLOCKLOS | CONTENTS_BLOCK_PING)
+	const int colMask = (TRACE_MASK_VISIBLE_AND_NPCS | CONTENTS_BLOCKLOS | CONTENTS_BLOCK_PING | CONTENTS_HITBOX)
 
 	TraceResults tr = PingTraceForPlayer( player, PING_TRACE_DISTANCE, colMask, colGroup )
 
@@ -626,6 +653,10 @@ int function GetCommsActionForOwnerAnnounce( entity player, entity wp )
 			return eCommsAction.PING_FRIENDLY_TELEPORTER
 
 		case ePingType.ABILITY_JUMPPAD:
+#if(false)
+
+
+#endif
 			return eCommsAction.PING_WE_GO
 	}
 
@@ -710,7 +741,8 @@ ReplyCommsActionInfo function Ping_GetCommsActionForWaypointReply( entity player
 			result.commsAction = eCommsAction.REPLY_RESPAWN_YES
 			break
 
-		#if(false)
+#if(false)
+
 
 
 
@@ -1109,6 +1141,10 @@ array<int> function GetReplyOptionsForWaypoint( entity player, entity wp )
 					case ePingType.ABILITY_DOMESHIELD:
 					case ePingType.ABILITY_WORMHOLE:
 					case ePingType.ABILITY_JUMPPAD:
+#if(false)
+
+
+#endif
 						if ( wp.wp.haveConfirmed )
 							results.append( ePingReply.BLANK )
 						else
@@ -1131,6 +1167,10 @@ array<int> function GetReplyOptionsForWaypoint( entity player, entity wp )
 					case ePingType.ABILITY_DOMESHIELD:
 					case ePingType.ABILITY_WORMHOLE:
 					case ePingType.ABILITY_JUMPPAD:
+#if(false)
+
+
+#endif
 						results.append( ePingReply.THANKS )
 						break
 
@@ -1206,6 +1246,8 @@ array<int> function GetReplyOptionsForWaypoint( entity player, entity wp )
 			break
 
 #if(false)
+
+
 
 
 
@@ -1395,6 +1437,7 @@ bool function IsTrapName( string scriptName )
 
 
 
+
 #endif
 			return true
 	}
@@ -1577,6 +1620,77 @@ entity function GetTeleporterForHitEnt( entity hitEnt )
 	return null
 }
 
+//
+bool function IsJumpTowerName( string scriptName )
+{
+	switch( scriptName )
+	{
+		case JUMPTOWER_PING_NAME:
+			return true
+	}
+	return false
+}
+
+
+entity function GetJumpTowerForHitEnt( entity hitEnt )
+{
+	if ( IsJumpTowerName( hitEnt.GetScriptName() ) )
+		return hitEnt
+
+	entity parentEnt = hitEnt.GetParent()
+	if ( IsValid( parentEnt ) && IsJumpTowerName( parentEnt.GetScriptName() ) )
+		return parentEnt
+
+	return null
+}
+
+#if(true)
+entity function GetDeathBoxFromFlyerForHitEnt( entity hitEnt )
+{
+	if ( !IsValid( hitEnt ) )
+		return null
+
+	#if(CLIENT)
+		if ( !(hitEnt instanceof C_DynamicProp) )
+			return null
+
+		if ( hitEnt.GetModelName() != FLYER_MODEL )
+			return null
+
+		array<entity> children = hitEnt.GetChildren()
+		entity deathBoxFromFlyer = null
+
+		if ( children.len() == 0 )
+			return null
+
+		foreach( child in children )
+		{
+			if ( child.GetTargetName() != DEATH_BOX_TARGETNAME )
+				continue
+
+			deathBoxFromFlyer = child
+			break
+		}
+
+		return deathBoxFromFlyer
+
+	#endif
+
+	return null
+}
+
+entity function GetFlyerForHitEnt( entity hitEnt )
+{
+	if ( !IsValid( hitEnt ) )
+		return null
+
+	if ( IsFlyer( hitEnt ) )
+		return hitEnt
+
+	return null
+
+}
+#endif //
 
 PingCommandParams function GetPingParamsForHitEnt( entity hitEnt, entity player )
 {
@@ -1731,6 +1845,11 @@ PingCommandParams function GetPingParamsForHitEnt( entity hitEnt, entity player 
 	//
 	{
 		entity respawnEnt = GetHitEntForTargetName( processedHitEnt, RESPAWN_CHAMBER_TARGETNAME )
+		#if(false)
+
+
+#endif
+
 		if ( IsValid( respawnEnt ) )
 		{
 			result.hitEnt = respawnEnt
@@ -1770,6 +1889,39 @@ PingCommandParams function GetPingParamsForHitEnt( entity hitEnt, entity player 
 			return result
 		}
 	}
+
+	{
+		entity jumpTower = GetJumpTowerForHitEnt( processedHitEnt )
+		if ( IsValid( jumpTower ) )
+		{
+			result.hitEnt = jumpTower
+			result.pingType = ePingType.JUMPTOWER
+			return result
+		}
+	}
+
+
+	#if(true)
+	{
+		if ( GetCurrentPlaylistVarInt( "enableFlyers", 1 ) == 1 )
+		{
+			entity flyer = GetFlyerForHitEnt( processedHitEnt )
+			if ( IsValid( flyer ) )
+			{
+				result.hitEnt = flyer
+				if ( IsCagedFlyer( flyer) ) 
+				{
+					result.pingType = ePingType.FLYER_CAGED
+				}
+				else
+				{
+					result.pingType = ePingType.FLYER
+				}
+				return result
+			}
+		}
+	}
+	#endif
 
 	//
 	{
@@ -1890,7 +2042,7 @@ int function GetCarePackageCommsAction( entity pingingPlayer, int pingType, enti
 	return eCommsAction.PING_CAREPACKAGE
 }
 
-Assert( ePingType._count == 51 )
+Assert( ePingType._assertion_marker == 54 )
 int function GetCommsActionForPing( entity pingingPlayer, int pingType, entity pingedEnt )
 {
 	switch( pingType )
@@ -1985,6 +2137,15 @@ int function GetCommsActionForPing( entity pingingPlayer, int pingType, entity p
 		case ePingType.HOVERTANK:
 			return eCommsAction.PING_HOVERTANK
 
+		case ePingType.FLYER:
+			return eCommsAction.PING_FLYER
+
+		case ePingType.FLYER_CAGED:
+			return eCommsAction.PING_FLYER_CAGED
+
+		case ePingType.JUMPTOWER:
+			return eCommsAction.PING_JUMPTOWER
+
 		case ePingType.ZIPLINE:
 			return eCommsAction.PING_ZIPLINE
 
@@ -2012,6 +2173,10 @@ int function GetCommsActionForPing( entity pingingPlayer, int pingType, entity p
 		case ePingType.SELF_REVIVE:
 		case ePingType.RESPAWN_CARD:
 		case ePingType.RESPAWN_BANNER:
+#if(false)
+
+
+#endif
 			return eCommsAction.BLANK
 
 		case ePingType.BLOODHOUND_POI_TRAVELER:
@@ -2031,12 +2196,12 @@ int function GetCommsActionForPing( entity pingingPlayer, int pingType, entity p
 }
 
 
-int function Ping_GetSortModifier( int pingType )
+int function Ping_GetSortModifier( int pingType, bool isSameTeam )
 {
 	switch( pingType )
 	{
 		case ePingType.BLEEDOUT:
-			return 10
+			return (isSameTeam ? 10 : 0)
 
 		case ePingType.RESPAWN_BANNER:
 			return 10
@@ -2081,7 +2246,8 @@ entity function GetAllyByTeamMemberIndex( entity player, int teamNumIndex )
 	return null
 }
 
-Assert( ePingType._count == 51 )
+
+Assert( ePingType._assertion_marker == 54 )
 asset function Ping_IconForPing_Hud( entity player, int pingType, entity pingedEnt, entity owner )
 {
 	switch( pingType )
@@ -2101,7 +2267,7 @@ asset function Ping_IconForPing_Hud( entity player, int pingType, entity pingedE
 			return RESPAWN_BEACON_ICON
 
 		case ePingType.RESPAWN_CARD: //
-			return $"rui/hud/unitframes/frame_status_mask"
+		return $"rui/hud/unitframes/frame_status_mask"
 
 		case ePingType.BLEEDOUT:
 		case ePingType.RESPAWN_BANNER:
@@ -2121,6 +2287,13 @@ asset function Ping_IconForPing_Hud( entity player, int pingType, entity pingedE
 
 		case ePingType.ABILITY_JUMPPAD:
 			return $"rui/hud/ultimate_icons/ultimate_octane_in_world"
+
+#if(false)
+
+
+
+#endif
+
 	}
 
 	int commsAction = GetCommsActionForPing( player, pingType, pingedEnt )
@@ -2133,6 +2306,7 @@ asset function Ping_IconForPing_Minimap( entity player, int pingType, entity pin
 	switch( pingType )
 	{
 		case ePingType.RESPAWN_CARD: //
+
 		case ePingType.BLEEDOUT:
 		case ePingType.RESPAWN_BANNER:
 			return $"rui/hud/unitframes/frame_status_mask"
@@ -2146,6 +2320,7 @@ asset function Ping_IconForPing_Bigmap( entity player, int pingType, entity ping
 	switch( pingType )
 	{
 		case ePingType.RESPAWN_CARD: //
+
 		case ePingType.BLEEDOUT:
 		case ePingType.RESPAWN_BANNER:
 			return $"rui/hud/unitframes/frame_status_mask"
@@ -2242,7 +2417,7 @@ vector function Ping_LineColorForPing_Hud( int pingType )
 }
 
 
-vector function Ping_IconColorForPing_Hud( int pingType )
+vector function Ping_IconColorForPing_Hud( int pingType, bool isSameTeam )
 {
 	vector color
 	switch( pingType )
@@ -2263,7 +2438,10 @@ vector function Ping_IconColorForPing_Hud( int pingType )
 			break
 
 		case ePingType.BLEEDOUT:
-			color = SrgbToLinear( GetKeyColor( COLORID_HUD_BLEEDOUT_COLOR ) / 255.0 )
+			if ( isSameTeam )
+				color = SrgbToLinear( GetKeyColor( COLORID_HUD_BLEEDOUT_COLOR ) / 255.0 )
+			else
+				color = 0.25 * (<1, 1, 1> + SrgbToLinear( GetKeyColor( COLORID_HUD_BLEEDOUT_COLOR ) / 255.0 ))
 			break
 
 		case ePingType.RESPAWN_BANNER:
@@ -2332,7 +2510,7 @@ void function DoLocalPingConfirm( vector origin, int pingType, entity pingedEnt,
 	RuiSetString( rui, "promptText", "" )
 	RuiSetImage( rui, "iconImage", $"rui/hud/gametype_icons/obj_foreground_diamond" )    //
 	RuiSetFloat3( rui, "targetPos", origin )
-	RuiSetFloat3( rui, "iconColor", SrgbToLinear( Ping_IconColorForPing_Hud( pingType ) ) )
+	RuiSetFloat3( rui, "iconColor", SrgbToLinear( Ping_IconColorForPing_Hud( pingType, true ) ) )
 	RuiSetFloat( rui, "iconSize", 32.0 )
 	RuiSetFloat( rui, "iconSizePinned", 32.0 )
 	RuiSetBool( rui, "isFinished", true )
@@ -2631,6 +2809,7 @@ void function Ping_SetMapWaypoint( entity player, vector origin )
 
 
 
+//
 
 
 

@@ -18,6 +18,10 @@ global function SonarShared_Init
 
 
 
+
+
+
+
 #endif
 
 #if(CLIENT)
@@ -31,6 +35,7 @@ const asset FX_SONAR_TARGET = $"P_ar_target_sonar"
 struct
 {
 	#if(false)
+
 
 
 
@@ -61,8 +66,8 @@ void function SonarShared_Init()
 #endif //
 
 	#if(CLIENT)
-		//
-		//
+		StatusEffect_RegisterEnabledCallback( eStatusEffect.sonar_detected, EntitySonarStatusEnabled)
+		StatusEffect_RegisterDisabledCallback( eStatusEffect.sonar_detected, EntitySonarStatusDisabled )
 
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.lockon_detected, EntitySonarDetectedEnabled )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.lockon_detected, EntitySonarDetectedDisabled )
@@ -113,8 +118,27 @@ void function SonarShared_Init()
 
 
 
-//
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 
@@ -310,6 +334,18 @@ void function SonarPulseConeTrail( entity player, vector dir, float duration, fl
 }
 #endif //
 
+void function EntitySonarStatusEnabled( entity ent, int statusEffect, bool actuallyChanged )
+{
+	ManageHighlightEntity( ent )
+	EntitySonarDetectedEnabled( ent, statusEffect, actuallyChanged )
+}
+
+void function EntitySonarStatusDisabled( entity ent, int statusEffect, bool actuallyChanged )
+{
+	ManageHighlightEntity( ent )
+	EntitySonarDetectedDisabled( ent, statusEffect, actuallyChanged )
+}
+
 void function EntitySonarDetectedEnabled( entity ent, int statusEffect, bool actuallyChanged )
 {
 	if ( ent == GetLocalViewPlayer() )
@@ -323,8 +359,8 @@ void function EntitySonarDetectedEnabled( entity ent, int statusEffect, bool act
 		entity firstPersonProxy = ent.GetFirstPersonProxy()
 		entity predictedFirstPersonProxy = ent.GetPredictedFirstPersonProxy()
 
+		vector highlightColor = statusEffect == eStatusEffect.sonar_detected ? HIGHLIGHT_COLOR_ENEMY : <1,0,0>
 		//
-		vector highlightColor = <1,0,0>
 		if ( StatusEffect_GetSeverity( ent, eStatusEffect.damage_received_multiplier ) > 0.0 )
 			highlightColor = <1,0,0>
 
@@ -340,7 +376,8 @@ void function EntitySonarDetectedEnabled( entity ent, int statusEffect, bool act
 		if ( IsValid( predictedFirstPersonProxy ) )
 			SonarViewModelHighlight( predictedFirstPersonProxy, highlightColor )
 
-		thread PlayLoopingSonarSound( ent )
+		EmitSoundOnEntity( ent, "HUD_MP_EnemySonarTag_Activated_1P" )
+		//
 	}
 	else
 	{

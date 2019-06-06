@@ -5,6 +5,8 @@ global function UpdateSystemPanel
 
 global function OpenSystemMenu
 
+global function ShouldDisplayOptInOptions
+
 struct ButtonData
 {
 	string             label
@@ -25,6 +27,8 @@ struct
 	table<var, ButtonData > nullButtonData
 	table<var, ButtonData > leavePartyData
 	table<var, ButtonData > abandonMissionButtonData
+
+	InputDef& qaFooter
 } file
 
 void function InitSystemMenu()
@@ -51,6 +55,8 @@ void function InitSystemPanelMain( var panel )
 	#if(DEV)
 		AddPanelFooterOption( panel, LEFT, BUTTON_Y, true, "#Y_BUTTON_DEV_MENU", "#DEV_MENU", OpenDevMenu )
 	#endif
+
+	file.qaFooter = AddPanelFooterOption( panel, LEFT, BUTTON_X, true, "#X_BUTTON_QA", "QA", ToggleOptIn, ShouldDisplayOptInOptions )
 }
 
 void function InitSystemPanel( var panel )
@@ -107,6 +113,8 @@ void function OnSystemMenu_Open()
 {
 	SetBlurEnabled( true )
 	ShowPanel( Hud_GetChild( file.menu, "SystemPanel" ) )
+
+	UpdateOptInFooter()
 }
 
 
@@ -228,3 +236,43 @@ void function OnReturnToMainMenu( int result )
 		ClientCommand( "disconnect" )
 }
 #endif
+
+
+void function ToggleOptIn( var button )
+{
+	uiGlobal.isOptInEnabled = !uiGlobal.isOptInEnabled
+
+	if ( GetActiveMenu() == file.menu )
+		CloseActiveMenu()
+}
+
+
+bool function ShouldDisplayOptInOptions()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( GRX_IsInventoryReady() && (GRX_HasItem( GRX_DEV_ITEM ) || GRX_HasItem( GRX_QA_ITEM )) )
+		return true
+
+	return GetGlobalNetBool( "isOptInServer" )
+}
+
+
+void function UpdateOptInFooter()
+{
+	if ( uiGlobal.isOptInEnabled )
+	{
+		file.qaFooter.gamepadLabel = "#X_BUTTON_HIDE_OPT_IN"
+		file.qaFooter.mouseLabel = "#HIDE_OPT_IN"
+	}
+	else
+	{
+		file.qaFooter.gamepadLabel = "#X_BUTTON_SHOW_OPT_IN"
+		file.qaFooter.mouseLabel = "#SHOW_OPT_IN"
+	}
+
+	UpdateFooterOptions()
+}
+
+

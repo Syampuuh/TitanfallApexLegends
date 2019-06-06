@@ -47,6 +47,21 @@ void function CharacterSkillsDialog_OnOpen()
 		RuiSetColorAlpha( file.contentRui, "ultimateColorHighlight", SrgbToLinear( colorData.ultimateColorHighlight ), 1 )
 	}
 
+	string character = ItemFlavor_GetHumanReadableRef( file.character )
+	float damageScale = GetCurrentPlaylistVarFloat( "damage_scale_" + character, 1.0 )
+
+	if ( damageScale < 1.0 )
+	{
+		int percent = int((1.0 - damageScale)*100)
+		RuiSetImage( file.contentRui, "specialPerkIcon", $"rui/hud/passive_icons/juggernaut" )
+		RuiSetString( file.contentRui, "specialPerkDesc", Localize( "#SPECIAL_PERK_JUGGERNAUT", percent ) )
+	}
+	else
+	{
+		RuiSetImage( file.contentRui, "specialPerkIcon", $"" )
+		RuiSetString( file.contentRui, "specialPerkDesc", "" )
+	}
+
 	RuiSetImage( file.contentRui, "passiveIcon", ItemFlavor_GetIcon( CharacterClass_GetPassiveAbility( file.character ) ) )
 	RuiSetString( file.contentRui, "passiveName", Localize( ItemFlavor_GetLongName( CharacterClass_GetPassiveAbility( file.character ) ) ) )
 	RuiSetString( file.contentRui, "passiveDesc", Localize( ItemFlavor_GetLongDescription( CharacterClass_GetPassiveAbility( file.character ) ) ) )

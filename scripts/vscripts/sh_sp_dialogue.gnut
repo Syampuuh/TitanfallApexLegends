@@ -2,7 +2,6 @@
 
 #if(CLIENT)
 	const bool DEBUG_QUEUE_PRINTS = false
-	const BT_EYE_GLOW = $"P_BT_eye_SM"
 
 	global table<string, bool> FORBIDDEN_DIALOGUE_EVENT_NAMES = {
 		//
@@ -10,19 +9,11 @@
 	}
 #endif
 
-global function RegisterDialogue
-global function RegisterRadioDialogue
 global function RegisterCSVDialogue
 global function SPDialogueInit
-global function GetBuddyTitanDialogueEnt
-global function GetPlayingLinePriority
-global function GetLinePriority
-global function GetLastLineRequestPriority
-global function GetDialogueAliasFromName
+global function Dialog_RegisterNetworking
 
 #if(false)
-
-
 
 
 
@@ -37,17 +28,13 @@ global function GetDialogueAliasFromName
 #endif //
 
 #if(CLIENT)
-	global function SpeakerIsBuddy
-	global function BuddyTitanEyeFlash
-	global function ServerCallback_PlayDialogueOnEntity
-	global function ServerCallback_PlayDialogueAtPosition
-	global function ServerCallback_PlayDialogueOnEnvironmentSpeakers
-	global function ServerCallback_AbortCurrentDialogue
-	global function QueueAndWait
-	global function RemoveFromQueue
-	global function DevDialogueWithoutSoundAlias
+	global function SCB_PlayDialogueOnEntity
+	global function SCB_PlayDialogueAtPosition
+	global function SCB_PlayDialogueOnEnvironmentSpeakers
+	global function SCB_AbortCurrentDialogue
 	global function SetUseDialogueVDU
-	global function PlayClientSelfDialogueByName
+	global function PlayAnyClientSelfDialogueByName
+	global function GetAnyDialogueAliasFromName
 
 	global function ResumeDialogueQueue
 	global function PauseDialogueQueue
@@ -55,25 +42,40 @@ global function GetDialogueAliasFromName
 	global function RemovePlayerDialogueEventsFromDialogueQueue
 #endif //
 
+#if(DEV)
+global function ShouldTryToReplaceMissingVoiceWithTempVoice
+#endif //
+
+struct DialogueEntryGroup
+{
+	string groupName
+	array<int> aliasIds
+	asset sourceDataTable
+
+#if(false)
+
+#endif //
+}
+
 struct DialogueData
 {
-	string name
 	string alias
 	int priority
 	string perspective
-	int cutoffRule
 	bool canPlayIfSolo
 	string radioDisplayName
-	int team
+	string voice
 	bool radioIntercept
 	string DEV_DialogueText
 	asset vduVideo
+
+	DialogueEntryGroup& group
+	int indexInGroup
 }
 
 global struct QueueItem
 {
 	int priority
-	int cutoffRule
 	int entHandle = -1
 	float timeAdded = -1
 	bool active = false
@@ -107,25 +109,35 @@ global enum eDialogueFlags
 	SHORT_DELAY_AFTER_PLAYING =			(1<<0),
 	SURVIVAL_HOST_ALL_SPEAKERS =		(1<<1),
 	NO_ON_FINISHED_NOTIFY =				(1<<2),
+	MUTE_PLAYER_PINGS_FOR_DURATION =	(1<<3)
 }
+
+#if(CLIENT)
+struct CachedCharacterData
+{
+	string longName
+	asset portraitImage
+}
+#endif //
 
 struct
 {
 	array<DialogueData> registeredDialog
-	array<string> registeredDialogIDs
+	table<string,DialogueEntryGroup> nameToGroupMap
+
 	bool                dialoguePlaying = false
 	array<QueueItem> queue
 	var                 currentDialoguePlayingHandle
 	table<string,asset> callerIDs
 	table<int,bool> waitingOnDialogue
-	bool                useVDU = true
+	bool                useVDU = false
 	array<var> currentDialoguePlayingHandles
-	string              nameCurrentlyPlaying
 	int                 lastLineRequestPriority
 
+	array<string> validVoices
+
 	#if(DEV)
-		array<string> validVoices
-		array<string> validPerspectives = [ "", "solo" ] //
+		array<string> validPerspectives = ["", "solo", "radio"] //
 	#endif //
 
 	#if(CLIENT)
@@ -133,6 +145,7 @@ struct
 		int videoChannel = -1
 		array<EnvironmentSpeaker> environmentSpeakers
 		int dialoguePauseStackCount = 0
+		table<string,CachedCharacterData> voiceToCachedCharDataMap
 	#endif //
 } file
 
@@ -143,9 +156,9 @@ global const PRIORITY_NORMAL 	= 10
 global const PRIORITY_LOW 		= 5
 global const PRIORITY_LOWEST 	= 1
 
-//
-global const int CUTOFF_DEFAULT = 0            //
-global const int CUTOFF_SAME_ENTITY = 1    	//
+#if(DEV)
+global const string TEMP_VOICE = "playerM1"
+#endif //
 
 void function SPDialogueInit()
 {
@@ -155,13 +168,9 @@ void function SPDialogueInit()
 
 
 
-
-
-//
-//
-
-//
 #endif //
+
+	AddCallback_OnItemFlavorRegistered( eItemType.character, OnCharacterRegistered )
 
 	#if(CLIENT)
 		AddCallback_OnClientScriptInit( ClientScriptInitForPlayer )
@@ -172,7 +181,6 @@ void function SPDialogueInit()
 		RegisterSignal( "RemovedFromQueue" )
 		RegisterSignal( "AbortCurrentDialogue" )
 		RegisterSignal( "EndSoundEarly" )
-		PrecacheParticleSystem( BT_EYE_GLOW )
 
 		file.videoChannel = ReserveVideoChannel()
 
@@ -185,6 +193,23 @@ void function SPDialogueInit()
 	#endif //
 }
 
+const string FUNCNAME_PlayDialogueOnEntity = "SCB_PlayDialogueOnEntity"
+const string FUNCNAME_PlayDialogueAtPosition = "SCB_PlayDialogueAtPosition"
+const string FUNCNAME_PlayDialogueOnEnvironmentSpeakers = "SCB_PlayDialogueOnEnvironmentSpeakers"
+const string FUNCNAME_AbortCurrentDialogue = "SCB_AbortCurrentDialogue"
+void function Dialog_RegisterNetworking()
+{
+	Remote_RegisterClientFunction( FUNCNAME_PlayDialogueOnEntity, "int", -1, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX )
+	Remote_RegisterClientFunction( FUNCNAME_PlayDialogueAtPosition, "int", -1, INT_MAX, "int", INT_MIN, INT_MAX, "vector", -MAX_WORLD_COORD, MAX_WORLD_COORD, 32 )
+	Remote_RegisterClientFunction( FUNCNAME_PlayDialogueOnEnvironmentSpeakers, "int", 0, INT_MAX, "int", 0, INT_MAX, "int", 0, INT_MAX, "int", -1, INT_MAX, "entity" )
+	Remote_RegisterClientFunction( FUNCNAME_AbortCurrentDialogue )
+}
+
+DialogueData function GetDataForAliasId( int index )
+{
+	return file.registeredDialog[index]
+}
+
 #if(false)
 
 
@@ -194,7 +219,40 @@ void function SPDialogueInit()
 
 
 
+
+
+
+
+
+
 #endif //
+
+#if(CLIENT)
+int function GetAnyAliasIdForName( string dialogueName )
+{
+	if ( !(dialogueName in file.nameToGroupMap) )
+		return -1
+	DialogueEntryGroup group = file.nameToGroupMap[dialogueName]
+	return group.aliasIds.getrandom()
+}
+#endif //
+
+void function OnCharacterRegistered( ItemFlavor flavor )
+{
+	var block    = GetSettingsBlockForAsset( CharacterClass_GetSetFile( flavor ) )
+	string voice = GetSettingsBlockString( block, "voice" ).tolower()
+
+	if ( !file.validVoices.contains( voice ) )
+	{
+		file.validVoices.append( voice )
+		#if(CLIENT)
+			CachedCharacterData ccd
+			ccd.longName = ItemFlavor_GetLongName( flavor )
+			ccd.portraitImage = CharacterClass_GetCharacterLockedPortrait( flavor )
+			file.voiceToCachedCharDataMap[voice] <- ccd
+		#endif //
+	}
+}
 
 void function EnvironmentSpeakerListInit()
 {
@@ -228,14 +286,12 @@ void function RegisterCSVDialogue( asset dt )
 	int columnAlias = GetDataTableColumnByName( dataTable, "alias" )
 	int columnPriority = GetDataTableColumnByName( dataTable, "priority" )
 	int columnRadioDisplayName = GetDataTableColumnByName( dataTable, "radioDisplayName" )
-	int columnTeam = GetDataTableColumnByName( dataTable, "team" )
+	int columnVoice = GetDataTableColumnByName( dataTable, "voice" )
 	int columnRadioIntercept = GetDataTableColumnByName( dataTable, "radioIntercept" )
 	int columnVDUVideo = GetDataTableColumnByName( dataTable, "vduVideo" )
 	int columnDevDialogueText = GetDataTableColumnByName( dataTable, "dialogue" )
-
 	int optionalColumnPerspective = GetDataTableColumnByName( dataTable, "perspective" )
-	int optionalColumnCutoffRule = GetDataTableColumnByName( dataTable, "cutoffRule" )
-	int optionalColumnCanPlayIfSolo = GetDataTableColumnByName( dataTable, "canPlayIfSolo" )
+	int optionalCanPlayIfSolo = GetDataTableColumnByName( dataTable, "canPlayIfSolo" )
 
 	int numRows = GetDatatableRowCount( dataTable )
 	for ( int i = 0; i < numRows; i++ )
@@ -254,51 +310,33 @@ void function RegisterCSVDialogue( asset dt )
 		int priority = GetDataTableInt( dataTable, i, columnPriority )
 		Assert( priority >= 0, "Dialogue alias " + alias + " has invalid priority in the dialogue csv. Must be >= 0" )
 
-		int cutoffRule = CUTOFF_DEFAULT
-		if ( optionalColumnCutoffRule != -1 )
-		{
-			cutoffRule = GetDataTableInt( dataTable, i, optionalColumnCutoffRule )
-
-			//
-		}
-
-		string extraPerspective = ""
-		if ( optionalColumnPerspective != -1 )
-		{
-			extraPerspective = GetDataTableString( dataTable, i, optionalColumnPerspective )
-
-			#if(false)
+		string extraPerspective = ((optionalColumnPerspective > -1) ? GetDataTableString( dataTable, i, optionalColumnPerspective ) : "")
+		#if(false)
 
 #endif
-		}
 
-		bool canPlayIfSolo = true
-		if ( optionalColumnCanPlayIfSolo != -1 )
-		{
-			canPlayIfSolo = GetDataTableBool( dataTable, i, optionalColumnCanPlayIfSolo )
-		}
-
+		bool canPlayIfSolo = ((optionalCanPlayIfSolo > -1) ? GetDataTableBool( dataTable, i, optionalCanPlayIfSolo ) : true)
 		string radioDisplayName = GetDataTableString( dataTable, i, columnRadioDisplayName )
-		string teamString = GetDataTableString( dataTable, i, columnTeam )
-		int team = TEAM_UNASSIGNED
-		if ( teamString == "TEAM_IMC" )
-			team = TEAM_IMC
-		else if ( teamString == "TEAM_MILITIA" )
-			team = TEAM_MILITIA
-
-		bool radioIntercept = GetDataTableBool( dataTable, i, columnRadioIntercept )
-
-		asset vduVideo
-		if ( columnVDUVideo > -1 )
-			vduVideo = GetDataTableAsset( dataTable, i, columnVDUVideo )
-
+		string voice = ((columnVoice > -1) ? GetDataTableString( dataTable, i, columnVoice ).tolower() : "")
+		bool radioIntercept = ((columnRadioIntercept > -1) ? GetDataTableBool( dataTable, i, columnRadioIntercept ) : false)
+		asset vduVideo = ((columnVDUVideo > -1) ? GetDataTableAsset( dataTable, i, columnVDUVideo ) : $"")
 		string DEV_DialogueText = GetDataTableString( dataTable, i, columnDevDialogueText )
 
-		RegisterDialogueLine( name, alias, priority, radioDisplayName, team, radioIntercept, vduVideo, DEV_DialogueText, extraPerspective, cutoffRule, canPlayIfSolo )
+		if ( (voice.len() > 0) && (!file.validVoices.contains( voice )) )
+			Warning( "Dialogue '%s' in source '%s' specifies unknown voice '%s'.", name, string( dt ), voice )
+
+		if ( (voice.len() > 0) && (radioDisplayName.len() > 0) )
+		{
+			Warning( "Dialogue '%s' has both voice '%s' and radioDisplay '%s'. Will only use voice.", name, voice, radioDisplayName )
+			radioDisplayName = ""
+		}
+
+		RegisterDialogueLine( name, alias, priority, radioDisplayName, voice, radioIntercept, vduVideo, DEV_DialogueText, extraPerspective, canPlayIfSolo, dt )
 	}
 }
 
-void function RegisterDialogueLine( string name, string alias, int priority, string radioDisplayName, int team, bool radioIntercept, asset vduVideo, string DEV_DialogueText, string extraPerspective, int cutoffRule, bool canPlayIfSolo )
+string s_prevNameRegistered
+void function RegisterDialogueLine( string name, string alias, int priority, string radioDisplayName, string voice, bool radioIntercept, asset vduVideo, string DEV_DialogueText, string extraPerspective, bool canPlayIfSolo, asset dt )
 {
 	Assert( name != "", "Can't register a line of dialogue with no name" )
 	Assert( priority >= 0, "Can't register a line of dialogue with a negative priority" )
@@ -318,88 +356,35 @@ void function RegisterDialogueLine( string name, string alias, int priority, str
 #endif //
 
 	DialogueData data
-	data.name = name
 	data.alias = alias
 	data.priority = priority
 	data.perspective = extraPerspective
-	data.cutoffRule = cutoffRule
 	data.canPlayIfSolo = canPlayIfSolo
 	data.radioDisplayName = radioDisplayName
-	data.team = team
+	data.voice = voice
 	data.radioIntercept = radioIntercept
 	data.vduVideo = vduVideo
 	data.DEV_DialogueText = DEV_DialogueText
 
+	int aliasId = file.registeredDialog.len()
 	file.registeredDialog.append( data )
 
-	Assert( file.registeredDialogIDs.find( name ) == -1, "Tried to register dialogue name twice: " + name )
-	file.registeredDialogIDs.append( name )
+	if ( !( name in file.nameToGroupMap ) )
+	{
+		DialogueEntryGroup newGroup
+		newGroup.groupName = name
+		newGroup.sourceDataTable = dt
+		file.nameToGroupMap[name] <- newGroup
+	}
+	DialogueEntryGroup group = file.nameToGroupMap[name]
+	Assert( (dt == group.sourceDataTable), format( "Dialogue entry '%s' from '%s' has already been defined in '%s'.", name, string( dt ), string( group.sourceDataTable ) ) )
+	Assert( ((group.aliasIds.len() == 0) || (s_prevNameRegistered == name)), format( "Dialogue entry '%s' in '%s' is defined in more than one section. Dupes (groups) are allowed, but must be defined all one-after-another.", name, string( dt ) ) )
 
-	Assert( file.registeredDialog.len() == file.registeredDialogIDs.len() )
-}
+	data.indexInGroup = group.aliasIds.len()
+	data.group = group
+	group.aliasIds.append( aliasId )
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-void function RegisterDialogue( string name, string alias, int priority )
-{
-	Assert( 0, "Deprecated function RegisterDialogue. Use a .csv and RegisterCSVDialogue instead" )
-}
-
-void function RegisterRadioDialogue( string name, string alias, int priority, string radioDisplayName, int team, bool radioIntercept = false )
-{
-	Assert( 0, "Deprecated function RegisterRadioDialogue. Use a .csv and RegisterCSVDialogue instead" )
-}
-
-
-entity function GetBuddyTitanDialogueEnt( entity buddyTitan )
-{
-	entity dialogueEnt
-	entity titanSoul = buddyTitan.GetTitanSoul()
-	if ( titanSoul )
-		dialogueEnt = titanSoul.GetTitanSoulNetEnt( "dialogueEnt" )
-	return dialogueEnt
+	s_prevNameRegistered = name
 }
 
 #if(false)
@@ -451,59 +436,9 @@ entity function GetBuddyTitanDialogueEnt( entity buddyTitan )
 
 
 
+#endif //
 
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if(false)
 
 
 
@@ -657,34 +592,115 @@ entity function GetBuddyTitanDialogueEnt( entity buddyTitan )
 
 
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 #endif //
-
-string function GetDialogueAliasFromName( string name )
-{
-	int aliasID = file.registeredDialogIDs.find( name )
-
-	Assert( aliasID >= 0, "Dialogue line " + name + " is not registered" )
-
-	DialogueData data = file.registeredDialog[ aliasID ]
-
-	return data.alias
-}
 
 #if(CLIENT)
+	string function GetAnyDialogueAliasFromName( string name )
+	{
+		int aliasID = GetAnyAliasIdForName( name )
+		Assert( aliasID >= 0, "Dialogue line " + name + " is not registered" )
+		DialogueData data = GetDataForAliasId( aliasID )
+		return data.alias
+	}
 
 	int s_queueItemNextNum= 0
-	QueueItem function QueueAndWait( int priority, int cutoffRule, int entHandle = -1, string debugRef = "" )
+	QueueItem function QueueAndWait( int priority, int entHandle = -1, string debugRef = "" )
 	{
 		//
 
 		//
 		QueueItem queueItem
 		queueItem.priority = priority
-		queueItem.cutoffRule = cutoffRule
 		queueItem.timeAdded = Time()
 		queueItem.entHandle = entHandle
 		queueItem.debugRef = debugRef
@@ -867,19 +883,18 @@ string function GetDialogueAliasFromName( string name )
 		WaitSignal( soundHandle, "OnSoundFinished" )
 	}
 
-	void function ServerCallback_PlayDialogueOnEntity( int aliasID, int dialogueFlags, int speakerEHandle )
+	void function SCB_PlayDialogueOnEntity( int aliasID, int dialogueFlags, int speakerEHandle )
 	{
 		entity speaker = GetEntityFromEncodedEHandle( speakerEHandle )
 		thread PlayClientDialogueOnEntity( aliasID, dialogueFlags, speaker )
 	}
 
-	void function ServerCallback_PlayDialogueAtPosition( int aliasID, int dialogueFlags, float x, float y, float z)
+	void function SCB_PlayDialogueAtPosition( int aliasID, int dialogueFlags, vector pos )
 	{
-		thread PlayClientDialogueOnPos( aliasID, dialogueFlags, <x, y, z> )
+		thread PlayClientDialogueOnPos( aliasID, dialogueFlags, pos )
 	}
 
-
-	void function ServerCallback_PlayDialogueOnEnvironmentSpeakers( int aliasID, int numSpeakers, int dialogueFlags, int responseID, entity responseSpeaker )
+	void function SCB_PlayDialogueOnEnvironmentSpeakers( int aliasID, int numSpeakers, int dialogueFlags, int responseID, entity responseSpeaker )
 	{
 		array<EnvironmentSpeaker> nearbySpeakers = SortEnvironmentSpeakersByClosest()
 		array<entity> speakerEnts
@@ -935,17 +950,16 @@ string function GetDialogueAliasFromName( string name )
 
 	void function PlayClientDialogue_Internal( int aliasID, int dialogueFlags, array<entity> speakers, vector pos )
 	{
-		Assert( aliasID < file.registeredDialogIDs.len() )
-		Assert( aliasID < file.registeredDialog.len() )
-
-		DialogueData data = file.registeredDialog[ aliasID ]
+		DialogueData data = GetDataForAliasId( aliasID )
 
 		string milesAlias = data.alias
 
 		if ( speakers.len() == 1 && ! ShouldPlayDialogueIfSolo( data, speakers[0] ) )
 			return
 
-		if ( milesAlias.find("%") >= 0 )
+		string radioDisplayName = data.radioDisplayName
+		asset specificImage = $""
+		if ( milesAlias.find( "%" ) >= 0 )
 		{
 			Assert ( speakers.len() == 1, "Generic audio alias attempted to be made specific from multiple speakers simultaneously." )
 
@@ -953,9 +967,19 @@ string function GetDialogueAliasFromName( string name )
 			{
 				milesAlias = SpecifyAliasFromGeneric( data, speakers[0] )
 			}
+			else if ( speakers[0] == null )
+			{
+				milesAlias = SpecifyRadioDialoguePerspective( data )
+				if ( (data.voice.len() > 0) && (data.voice in file.voiceToCachedCharDataMap) )
+				{
+					CachedCharacterData ccd = file.voiceToCachedCharDataMap[data.voice]
+					radioDisplayName = ccd.longName
+					specificImage = ccd.portraitImage
+				}
+			}
 			else
 			{
-				Warning( "Tried to play %s with an invalid speaker. Couldn't specify generic alias.", milesAlias )
+				Warning( "Tried to play '%s' with an invalid speaker. Couldn't specify generic alias.", milesAlias )
 				return
 			}
 		}
@@ -963,19 +987,19 @@ string function GetDialogueAliasFromName( string name )
 		if ( DEBUG_QUEUE_PRINTS )
 		{
 			printt( "Dialogue Added to Queue" )
-			printt( "  name:", data.name )
+			printt( "  name:", data.group.groupName )
 		}
 
 		int speakerEHandle = -1
 		if ( speakers.len() == 1 && IsValid( speakers[0] ) )
 			speakerEHandle = speakers[0].GetEncodedEHandle()
-		QueueItem queueItem = QueueAndWait( data.priority, data.cutoffRule, speakerEHandle, milesAlias )
+		QueueItem queueItem = QueueAndWait( data.priority, speakerEHandle, milesAlias )
 		//
 		if ( !queueItem.success )
 			return
 
 		bool isDevText = ((data.alias == "") && (data.DEV_DialogueText != ""))
-		printt( "Playing Dialogue: name:", data.name, " || alias:", milesAlias, " || priority:", data.priority, (isDevText ? " (dev text)" : "") )
+		printf( "Playing Dialogue - '%s'#%d -> '%s', priority:%d, from:'%s'  %s", data.group.groupName, data.indexInGroup, milesAlias, data.priority, string( data.group.sourceDataTable ), (isDevText ? " (dev text)" : "") )
 
 		float duration
 		float extraWait = 0.0
@@ -985,7 +1009,7 @@ string function GetDialogueAliasFromName( string name )
 			duration = max( data.DEV_DialogueText.len() * 0.07, 1.5 )
 			printt( "len, duration", data.DEV_DialogueText.len(), duration )
 			if ( speakers.len() == 0 || !IsValid( speakers[0] ) )
-				speakerName = ((data.radioDisplayName.len() > 0) ? Localize( data.radioDisplayName ) : "non_NPC")
+				speakerName = ((radioDisplayName.len() > 0) ? Localize( radioDisplayName ) : "non_NPC")
 			else
 				speakerName = speakers[0].GetScriptName()
 		}
@@ -998,9 +1022,9 @@ string function GetDialogueAliasFromName( string name )
 			extraWait = 0.40
 
 		var waveformRUI
-		if ( data.radioDisplayName != "" && file.useVDU)
+		if ( radioDisplayName != "" && file.useVDU)
 		{
-			waveformRUI = CreateWaveform( data.radioDisplayName, data.team, duration, null, data.radioIntercept )
+			waveformRUI = CreateWaveform( radioDisplayName, duration, specificImage, null, data.radioIntercept )
 			if ( data.vduVideo != $"" )
 				StartVideoOnChannel( file.videoChannel, data.vduVideo, false, 0.0 )
 		}
@@ -1020,6 +1044,9 @@ string function GetDialogueAliasFromName( string name )
 		OnThreadEnd(
 		function() : ( player, aliasID, waveformRUI, queueItem, dialogueFlags )
 			{
+				if ( dialogueFlags & eDialogueFlags.MUTE_PLAYER_PINGS_FOR_DURATION )
+					SetCommsDialogueEnabled( true )
+
 				//
 				if ( IsValid( player ) && !(dialogueFlags & eDialogueFlags.NO_ON_FINISHED_NOTIFY) )
 					player.ClientCommand( "DialogueFinishedForID " + aliasID )
@@ -1027,12 +1054,12 @@ string function GetDialogueAliasFromName( string name )
 					thread DestroyWaveform( waveformRUI )
 				file.currentDialoguePlayingHandle = null
 				file.currentDialoguePlayingHandles = []
-				file.nameCurrentlyPlaying = ""
 				RemoveFromQueue( queueItem )
 			}
 		)
 
-		file.nameCurrentlyPlaying = data.name
+		if ( dialogueFlags & eDialogueFlags.MUTE_PLAYER_PINGS_FOR_DURATION )
+			SetCommsDialogueEnabled( false )
 
 		if ( !(milesAlias in FORBIDDEN_DIALOGUE_EVENT_NAMES) )
 		{
@@ -1040,15 +1067,6 @@ string function GetDialogueAliasFromName( string name )
 			{
 				if ( IsValid( speaker ) )
 				{
-					if ( SpeakerIsBuddy( speaker, player ) )
-						thread BuddyTitanEyeFlash( player.GetPetTitan(), duration )
-
-					if ( speaker == player.GetPetTitan() )
-					{
-						speaker = GetBuddyTitanDialogueEnt( speaker )
-						Assert( speaker )
-					}
-
 					if ( isDevText )
 						thread DevDialogueWithoutSoundAlias( speakerName, data.DEV_DialogueText, duration )
 					else
@@ -1082,18 +1100,17 @@ string function GetDialogueAliasFromName( string name )
 			SurvivalCommentary_ClearCurrentSpeakerPrefix()
 	}
 
-void function PlayClientSelfDialogueByName( entity self, string name, int dialogueFlags = 0 )
+void function PlayAnyClientSelfDialogueByName( entity self, string name )
 {
-	if ( file.registeredDialogIDs.find( name ) < 0 )
+	int aliasID = GetAnyAliasIdForName( name )
+	if ( aliasID < 0 )
 	{
 		Warning( "Dialogue line " + name + " is not registered" )
 		return
 	}
 
-	int aliasID =  file.registeredDialogIDs.find( name )
-
+	int dialogueFlags = 0
 	PlayClientDialogue_Internal( aliasID, dialogueFlags, [self], <0,0,0> )
-
 }
 
 void function PlayClientDialogueOnEntity( int aliasID, int dialogueFlags, entity ent )
@@ -1113,15 +1130,10 @@ void function PlayClientDialogueOnPos( int aliasID, int dialogueFlags, vector po
 
 void function PlayDialogueNoQueueWithQueuedResponse( int aliasID, int responseID, int dialogueFlags, array<entity> speakers, entity responseSpeaker, float x, float y, float z )
 {
-	Assert( aliasID < file.registeredDialogIDs.len() )
-	Assert( aliasID < file.registeredDialog.len() )
-	Assert( responseID < file.registeredDialogIDs.len() )
-	Assert( responseID < file.registeredDialog.len() )
+	Assert( (GetLinePriorityForAliasId( aliasID ) == PRIORITY_NO_QUEUE), "Can only use PlayDialogueNoQueueWithQueuedResponse with a leading line of priority zero!" )
 
-	Assert( GetLinePriority( file.registeredDialogIDs[ aliasID ] ) == PRIORITY_NO_QUEUE, "Can only use PlayDialogueNoQueueWithQueuedResponse with a leading line of priority zero!" )
-
-	DialogueData leadingLineData = file.registeredDialog[ aliasID ]
-	DialogueData responseLineData = file.registeredDialog[ responseID ]
+	DialogueData leadingLineData = GetDataForAliasId( aliasID )
+	DialogueData responseLineData = GetDataForAliasId( responseID )
 
 	string leadingMilesAlias = leadingLineData.alias
 	string responseMilesAlias = responseLineData.alias
@@ -1155,28 +1167,51 @@ string function SpecifyAliasFromGeneric( DialogueData data, entity speaker )
 		milesAlias = StringReplace( milesAlias, "%perspective%", specifiedPerspective )
 	}
 
+	string aliasWithGenericVoice = milesAlias
+
 	string voice = GetPlayerVoice( speaker )
 	if ( milesAlias.find( "%voice%" ) >= 0 )
 		milesAlias = StringReplace( milesAlias, "%voice%", voice )
 
+	#if(DEV)
+	if ( ShouldTryToReplaceMissingVoiceWithTempVoice() )
+	{
+		if ( !DoesAliasExist( milesAlias ) )
+		{
+			if ( aliasWithGenericVoice.find( "%voice%" ) >= 0 )
+			{
+				milesAlias = StringReplace( aliasWithGenericVoice, "%voice%", TEMP_VOICE )
+
+				if ( !DoesAliasExist( milesAlias ) )
+					Warning( "Attempted to fall back to temp voice \"" + TEMP_VOICE + "\" for alias \"" + data.alias + "\", but resulting alias \"" + milesAlias + "\" does not exist in miles."  )
+			}
+			else
+			{
+				Warning( "Alias \"" + aliasWithGenericVoice + "\" does not exist, and since there is no generic voice field, we can't fall back to \"" + TEMP_VOICE + "\"." )
+			}
+		}
+	}
+	#endif //
+
 	return milesAlias
 }
 
-bool function SpeakerIsBuddy( entity speaker, entity player )
+string function SpecifyRadioDialoguePerspective( DialogueData data )
 {
-	if ( !IsValid( player.GetPetTitan() ) )
-		return false
+	string milesAlias = data.alias
+	if ( data.perspective != "radio" )
+		return data.alias
 
-	if ( speaker == player.GetPetTitan() )
-		return true
+	string radioAlias = StringReplace( milesAlias, "%perspective%", data.perspective )
 
-	if ( speaker == GetBuddyTitanDialogueEnt( player.GetPetTitan() ) )
-		return true
+	//
+	if ( !DoesAliasExist( radioAlias ) )
+		return StringReplace( milesAlias, "%perspective%", "3p" )
 
-	return false
+	return radioAlias
 }
 
-void function ServerCallback_AbortCurrentDialogue()
+void function SCB_AbortCurrentDialogue()
 {
 	AbortCurrentDialogue()
 }
@@ -1196,25 +1231,6 @@ void function AbortCurrentDialogue()
 		}
 		Signal( GetLocalClientPlayer(), "AbortCurrentDialogue" )
 	}
-}
-
-void function BuddyTitanEyeFlash( entity bt, float duration )
-{
-	EndSignal( bt, "OnDestroy" )
-	EndSignal( level, "AbortConversationImmediately" )
-
-	int effectIndex = GetParticleSystemIndex( BT_EYE_GLOW )
-	int attachID = bt.LookupAttachment( "EYEGLOW" )
-	int fxID = StartParticleEffectOnEntity( bt, effectIndex, FX_PATTACH_POINT_FOLLOW, attachID )
-
-	OnThreadEnd(
-		function() : ( fxID )
-		{
-			EffectStop( fxID, true, true )
-		}
-	)
-
-	wait duration
 }
 
 void function ClientScriptInitForPlayer( entity player )
@@ -1240,32 +1256,19 @@ void function SetUseDialogueVDU(bool useVDU)
 	file.useVDU = useVDU
 }
 
-
 #endif //
 
-int function GetPlayingLinePriority()
+#if(DEV)
+bool function ShouldTryToReplaceMissingVoiceWithTempVoice()
 {
-	if( !file.dialoguePlaying )
-		return -1
-
-	return GetLinePriority(file.nameCurrentlyPlaying)
+	return ( GetCurrentPlaylistVarInt( "vo_fallback_to_temp", 0 ) == 1 )
 }
+#endif //
 
-int function GetLinePriority( string name )
+int function GetLinePriorityForAliasId( int aliasId )
 {
-	int dialogueIndex = file.registeredDialogIDs.find( name )
-
-	//
-	if ( dialogueIndex == -1 )
-		return -1
-
-	DialogueData data = file.registeredDialog[ dialogueIndex ]
+	DialogueData data = GetDataForAliasId( aliasId )
 	return data.priority
-}
-
-int function GetLastLineRequestPriority()
-{
-	return file.lastLineRequestPriority
 }
 
 bool function ShouldPlayDialogueIfSolo( DialogueData data, entity speaker )

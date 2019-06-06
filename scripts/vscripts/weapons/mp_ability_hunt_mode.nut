@@ -7,6 +7,10 @@ global function OnWeaponDeactivate_hunt_mode
 
 #endif //
 
+#if DEV && CLIENT 
+global function GetBloodhoundColorCorrectionID
+#endif //
+
 //
 const asset HUNT_MODE_ACTIVATION_SCREEN_FX = $"P_hunt_screen"
 const asset HUNT_MODE_BODY_FX = $"P_hunt_body"
@@ -14,7 +18,7 @@ const asset HUNT_MODE_BODY_FX = $"P_hunt_body"
 struct
 {
 	#if(CLIENT)
-	int colorCorrection
+	int colorCorrection = -1
 	#endif //
 } file
 
@@ -312,3 +316,10 @@ void function StopHuntMode()
 			player.Signal( "HuntMode_ForceAbilityStop" )
 	#endif
 }
+
+#if DEV && CLIENT 
+int function GetBloodhoundColorCorrectionID()
+{
+	return file.colorCorrection
+}
+#endif //

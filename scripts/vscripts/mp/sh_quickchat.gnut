@@ -65,40 +65,50 @@ struct
 
 void function LoadCommsActionsFromDatatable()
 {
-	var tbl = GetDataTable( $"datatable/comms_actions.rpak" )
+	var dt = GetDataTable( $"datatable/comms_actions.rpak" )
 
-	int col_event        = GetDataTableColumnByName( tbl, "event" )
-	int col_menuText     = GetDataTableColumnByName( tbl, "menuText" )
-	int col_shortText    = GetDataTableColumnByName( tbl, "shortText" )
-	int col_chatText     = GetDataTableColumnByName( tbl, "chatText" )
-	int col_aliasSubname = GetDataTableColumnByName( tbl, "aliasSubname" )
-	int col_hasCalm      = GetDataTableColumnByName( tbl, "hasCalm" )
-	int col_hasCalmFar   = GetDataTableColumnByName( tbl, "hasCalmFar" )
-	int col_hasUrgent    = GetDataTableColumnByName( tbl, "hasUrgent" )
-	int col_hasUrgentFar = GetDataTableColumnByName( tbl, "hasUrgentFar" )
-	int col_subEvent     = GetDataTableColumnByName( tbl, "subEvent" )
-	int col_flavorEvent     = GetDataTableColumnByName( tbl, "flavorEvent" )
-	int col_defaultIcon  = GetDataTableColumnByName( tbl, "defaultIcon" )
-	int col_pingAsset    = GetDataTableColumnByName( tbl, "pingAsset" )
+	int col_featureFlag  = GetDataTableColumnByName( dt, "featureFlag" )
+	int col_event        = GetDataTableColumnByName( dt, "event" )
+	int col_menuText     = GetDataTableColumnByName( dt, "menuText" )
+	int col_shortText    = GetDataTableColumnByName( dt, "shortText" )
+	int col_chatText     = GetDataTableColumnByName( dt, "chatText" )
+	int col_aliasSubname = GetDataTableColumnByName( dt, "aliasSubname" )
+	int col_hasCalm      = GetDataTableColumnByName( dt, "hasCalm" )
+	int col_hasCalmFar   = GetDataTableColumnByName( dt, "hasCalmFar" )
+	int col_hasUrgent    = GetDataTableColumnByName( dt, "hasUrgent" )
+	int col_hasUrgentFar = GetDataTableColumnByName( dt, "hasUrgentFar" )
+	int col_subEvent     = GetDataTableColumnByName( dt, "subEvent" )
+	int col_flavorEvent  = GetDataTableColumnByName( dt, "flavorEvent" )
+	int col_defaultIcon  = GetDataTableColumnByName( dt, "defaultIcon" )
+	int col_pingAsset    = GetDataTableColumnByName( dt, "pingAsset" )
 
-	for ( int row = 0; row < GetDatatableRowCount( tbl ); row++ )
+	for ( int row = 0; row < GetDatatableRowCount( dt ); row++ )
 	{
-		string commsActionName = GetDataTableString( tbl, row, col_event )
-		int commsAction        = eCommsAction[commsActionName]
+		string commsActionName 	= GetDataTableString( dt, row, col_event )
+
+		string featureFlagRef = GetDataTableString( dt, row, col_featureFlag )
+		if ( featureFlagRef != "" && !GetFeatureFlagByString( featureFlagRef ) )
+		{
+			printf( "Skipping comms action %s because feature flag %s is off.", commsActionName, featureFlagRef )
+			continue
+		}
+
+		int commsAction        	= eCommsAction[commsActionName]
 
 		CommsAction action
-		action.menuText = GetDataTableString( tbl, row, col_menuText )
-		action.shortText = GetDataTableString( tbl, row, col_shortText )
-		action.chatText = GetDataTableString( tbl, row, col_chatText )
-		action.aliasSubname = GetDataTableString( tbl, row, col_aliasSubname )
-		action.hasCalm = GetDataTableBool( tbl, row, col_hasCalm )
-		action.hasCalmFar = GetDataTableBool( tbl, row, col_hasCalmFar )
-		action.hasUrgent = GetDataTableBool( tbl, row, col_hasUrgent )
-		action.hasUrgentFar = GetDataTableBool( tbl, row, col_hasUrgentFar )
-		action.subEvent = GetDataTableString( tbl, row, col_subEvent )
-		action.flavorEvent = GetDataTableString( tbl, row, col_flavorEvent )
-		action.defaultIcon = GetDataTableAsset( tbl, row, col_defaultIcon )
-		action.pingAsset = GetDataTableAsset( tbl, row, col_pingAsset )
+		action.menuText		 	= GetDataTableString( 	dt, row, col_menuText )
+		action.shortText 		= GetDataTableString( 	dt, row, col_shortText )
+		action.chatText 		= GetDataTableString( 	dt, row, col_chatText )
+		action.aliasSubname 	= GetDataTableString( 	dt, row, col_aliasSubname )
+		action.hasCalm 			= GetDataTableBool( 	dt, row, col_hasCalm )
+		action.hasCalmFar 		= GetDataTableBool( 	dt, row, col_hasCalmFar )
+		action.hasUrgent 		= GetDataTableBool( 	dt, row, col_hasUrgent )
+		action.hasUrgentFar 	= GetDataTableBool( 	dt, row, col_hasUrgentFar )
+		action.subEvent 		= GetDataTableString( 	dt, row, col_subEvent )
+		action.flavorEvent 		= GetDataTableString( 	dt, row, col_flavorEvent )
+		action.defaultIcon 		= GetDataTableAsset( 	dt, row, col_defaultIcon )
+		action.pingAsset 		= GetDataTableAsset( 	dt, row, col_pingAsset )
+
 		if ( action.pingAsset != $"" )
 			RegisterItemFlavorFromSettingsAsset( action.pingAsset )
 		file.actions[commsAction] <- action
@@ -108,7 +118,7 @@ void function LoadCommsActionsFromDatatable()
 
 void function ShQuickchat_Init()
 {
-	LoadCommsActionsFromDatatable()
+	AddCallback_RegisterRootItemFlavors( LoadCommsActionsFromDatatable )
 
 	#if(false)
 
@@ -645,6 +655,20 @@ string function GetPlayerDialogSound( entity player, int index, CommsOptions opt
 		ext = ""
 
 	string result = GetBattleChatterAlias1P3P( player, (subAlias + ext), options.isFirstPerson )
+
+#if(DEV)
+	if ( ShouldTryToReplaceMissingVoiceWithTempVoice() )
+	{
+		if ( !DoesAliasExist( result ) )
+		{
+			result = GetBattleChatterAlias1P3PWithTempVoice( (subAlias + ext), options.isFirstPerson )
+
+			if ( !DoesAliasExist( result ) )
+				Warning( "Attempted to fall back to temp voice \"" + TEMP_VOICE + "\", but resulting alias \"" + result + "\" does not exist in miles."  )
+		}
+	}
+#endif //
+
 	return result
 }
 
@@ -666,6 +690,11 @@ void function AddCallback_OnQuickchatEvent( int index, void functionref(entity,i
 #endif //
 
 #if(false)
+
+
+
+
+
 
 
 

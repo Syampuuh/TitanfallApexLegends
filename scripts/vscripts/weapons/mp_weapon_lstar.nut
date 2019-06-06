@@ -12,8 +12,8 @@ global function OnWeaponActivate_weapon_lstar
 
 const LSTAR_COOLDOWN_EFFECT_1P = $"wpn_mflash_snp_hmn_smokepuff_side_FP"
 const LSTAR_COOLDOWN_EFFECT_3P = $"wpn_mflash_snp_hmn_smokepuff_side"
-const LSTAR_BURNOUT_EFFECT_1P = $"xo_spark_med"
-const LSTAR_BURNOUT_EFFECT_3P = $"xo_spark_med"
+const LSTAR_BURNOUT_EFFECT_1P = $"P_lstar_burnout_sparks_FP"
+const LSTAR_BURNOUT_EFFECT_3P = $"P_lstar_burnout_sparks"
 
 const float LSTAR_OVERHEAT_WARNING_CHARGE_FRAC = 0.8
 
@@ -68,22 +68,20 @@ int function LSTARPrimaryAttack( entity weapon, WeaponPrimaryAttackParams attack
 }
 
 //
-void function OnWeaponCooldown_weapon_lstar( entity weapon )
+void function OnWeaponCooldown_weapon_lstar( entity weapon, bool isFirstTimeCooldown )
 {
 	//
-	if ( weapon.GetWeaponChargeFraction() == 1.0 )  //
-	{
-		weapon.EmitWeaponSound_1p3p( LSTAR_BURNOUT_SOUND_1P, LSTAR_BURNOUT_SOUND_3P )
-		weapon.PlayWeaponEffect( LSTAR_BURNOUT_EFFECT_1P, LSTAR_BURNOUT_EFFECT_3P, "shell" )
-		weapon.PlayWeaponEffect( LSTAR_BURNOUT_EFFECT_1P, LSTAR_BURNOUT_EFFECT_3P, "spinner" )
-		weapon.PlayWeaponEffect( LSTAR_BURNOUT_EFFECT_1P, LSTAR_BURNOUT_EFFECT_3P, "vent_cover_L" )
-		weapon.PlayWeaponEffect( LSTAR_BURNOUT_EFFECT_1P, LSTAR_BURNOUT_EFFECT_3P, "vent_cover_R" )
-	}
-	//
-	else
+	if ( isFirstTimeCooldown )
 	{
 		weapon.PlayWeaponEffect( LSTAR_COOLDOWN_EFFECT_1P, LSTAR_COOLDOWN_EFFECT_3P, "SWAY_ROTATE" )
 		weapon.EmitWeaponSound_1p3p( "LSTAR_VentCooldown", "LSTAR_VentCooldown_3p" )
+
+		//
+		if ( weapon.IsOverheated() )
+		{
+			weapon.EmitWeaponSound_1p3p( LSTAR_BURNOUT_SOUND_1P, LSTAR_BURNOUT_SOUND_3P )
+			weapon.PlayWeaponEffect( LSTAR_BURNOUT_EFFECT_1P, LSTAR_BURNOUT_EFFECT_3P, "vent_spinner" )
+		}
 	}
 }
 

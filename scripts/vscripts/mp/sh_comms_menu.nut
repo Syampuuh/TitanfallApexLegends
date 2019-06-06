@@ -728,7 +728,7 @@ vector function GetIconColorForMenuOption( int index )
 			}
 			else
 			{
-				return Ping_IconColorForPing_Hud( op.pingType )
+				return Ping_IconColorForPing_Hud( op.pingType, true )
 			}
 		}
 	}

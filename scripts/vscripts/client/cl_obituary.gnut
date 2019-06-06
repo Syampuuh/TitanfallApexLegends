@@ -296,6 +296,8 @@ void function Obituary_Print_Localized( string localizedPrint, vector altColor1 
 	RuiSetGameTime( rui, "updateTime", Time() )
 	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
 
+	//
+
 	RuiSetString( rui, "obitString", localizedPrint )
 
 	RuiSetFloat3( rui, "string1Color", SrgbToLinear( altColor1 / 255.0 ) )
@@ -347,6 +349,12 @@ void function Obituary_Print_PlayerDeath( string attackerString, asset weaponIco
 
 void function UpdateObituaryQueue()
 {
+	#if(false)
+
+#else //
+	const int EXTRA_OFFSET = 0
+	#endif //
+
 	for ( int index = file.obituaryQueue.len() - 1; index >= 0; index-- )
 	{
 		ObituaryData obitData = file.obituaryQueue[index]
@@ -358,7 +366,7 @@ void function UpdateObituaryQueue()
 			continue
 		}
 
-		RuiSetInt( obitData.rui, "offset", index + file.indexOffest )
+		RuiSetInt( obitData.rui, "offset", (EXTRA_OFFSET + index + file.indexOffest) )
 		RuiSetGameTime( obitData.rui, "updateTime", Time() )
 	}
 }
@@ -425,4 +433,6 @@ void function Obituary_SetEnabled( bool state )
 void function Obituary_SetIndexOffset( int offset )
 {
 	file.indexOffest = offset
+
+	UpdateObituaryQueue()
 }

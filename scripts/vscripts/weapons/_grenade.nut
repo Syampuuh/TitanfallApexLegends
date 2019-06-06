@@ -8,6 +8,10 @@ global function GetGrenadeDeploySound_3p
 global function GetGrenadeProjectileSound
 global function Grenade_OnWeaponToss
 
+#if(false)
+//
+#endif //
+
 const DEFAULT_FUSE_TIME = 2.25
 global const float DEFAULT_MAX_COOK_TIME = 99999.9 //
 
@@ -194,6 +198,49 @@ var function Grenade_OnWeaponTossReleaseAnimEvent( entity weapon, WeaponPrimaryA
 	var result = Grenade_OnWeaponToss( weapon, attackParams, 1.0 )
 	return result
 }
+
+#if(false)
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 
 var function Grenade_OnWeaponTossCancelDrop( entity weapon, WeaponPrimaryAttackParams attackParams )
 {

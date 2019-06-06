@@ -101,7 +101,6 @@ Resource/UI/menus/panels/survival_quick_inventory_grid.res
 		tall			89
 		visible			0
 		scaleImage		1
-		tabPosition		1
 		drawColor		"255 255 255 255"
 
 		zpos			1
@@ -252,7 +251,6 @@ Resource/UI/menus/panels/survival_quick_inventory_grid.res
 		tall			89
 		visible			0
 		scaleImage		1
-		tabPosition		1
 		drawColor		"255 255 255 255"
 
 		zpos			1
@@ -403,7 +401,6 @@ Resource/UI/menus/panels/survival_quick_inventory_grid.res
 		tall			89
 		visible			0
 		scaleImage		1
-		tabPosition		1
 		drawColor		"255 255 255 255"
 
 		zpos			1

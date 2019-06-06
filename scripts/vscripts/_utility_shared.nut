@@ -4,9 +4,9 @@ globalize_all_functions
 
 global const TRIG_FLAG_NONE				= 0
 global const TRIG_FLAG_PLAYERONLY		= 0x0001
-global const TRIG_FLAG_NPCONLY			= 0x0002
-global const TRIG_FLAG_NOCONTEXTBUSY	= 0x0004
-global const TRIG_FLAG_ONCE				= 0x0008
+//
+//
+//
 global const TRIG_FLAG_EXCLUSIVE		= 0x0010 //
 global const TRIG_FLAG_DEVDRAW			= 0x0020
 global const TRIG_FLAG_START_DISABLED	= 0x0040
@@ -91,13 +91,10 @@ global struct RaySphereIntersectStruct
 
 global enum eGradeFlags
 {
-	NONE = 0,
-
-	IS_OPEN =		(1 << 0),
-	IS_BUSY =		(1 << 1),
-	IS_OPEN_SECRET = (1 << 2),
-
-	_flagCount			= 2
+	IS_OPEN =			(1 << 0),
+	IS_BUSY =			(1 << 1),
+	IS_OPEN_SECRET =	(1 << 2),
+	IS_LOCKED =			(1 << 3),
 }
 
 
@@ -138,6 +135,9 @@ void function InitWeaponScripts()
 	#if(false)
 
 #endif
+	#if(false)
+
+#endif
 	MpWeaponSniper_Init()
 	MpWeaponLSTAR_Init()
 	MpWeaponEnergyAR_Init()
@@ -152,6 +152,10 @@ void function InitWeaponScripts()
 	MpWeaponThermiteGrenade_Init()
 	MeleeWraithKunai_Init()
 	MpWeaponWraithKunaiPrimary_Init()
+	#if(false)
+
+
+#endif
 
 	MpAbilityGibraltarShield_Init()
 	MpWeaponBubbleBunker_Init()
@@ -171,13 +175,8 @@ void function InitWeaponScripts()
 	#if(false)
 
 
-
 #endif
 	MpWeaponPhaseTunnel_Init()
-	MpWeaponTeslaTrap_Init()
-	#if(false)
-
-#endif
 	#if(false)
 
 
@@ -186,13 +185,10 @@ void function InitWeaponScripts()
 
 
 
-#endif
-	#if(false)
 
 
 #endif
 	#if(false)
-
 
 
 
@@ -204,6 +200,13 @@ void function InitWeaponScripts()
 	#if(false)
 
 
+
+
+#endif
+	#if(false)
+
+
+
 #endif
 	#if(false)
 
@@ -216,9 +219,15 @@ void function InitWeaponScripts()
 	#if(false)
 
 
+#endif
+	#if(false)
+
+
 
 #endif
 	#if(false)
+
+
 
 
 #endif
@@ -229,9 +238,6 @@ void function InitWeaponScripts()
 #endif
 
 	#if(false)
-
-
-
 
 
 #endif
@@ -1121,30 +1127,69 @@ vector function GetSinglePointOnBezier( array<vector> points, float t )
 	unreachable
 }
 
+//
+array< vector > function GetBezierOfPathLoop( array< vector > path, int numSegments )
+{
+	int numNodesInPath = path.len()
+	int idx_cur = 0
+	array< vector > nodeTangents
+	array< vector > bezierPath
+
+	nodeTangents.append( GetBezierNodeTangent( path[ 0 ], path[ ( numNodesInPath - 1 ) ], path[ 1 ] ) )
+	for( ; idx_cur < numNodesInPath; idx_cur++ )
+	{
+		int idx_next 	= ( idx_cur + 1 ) % numNodesInPath
+		int idx_next_2 	= ( idx_cur + 2 ) % numNodesInPath
+
+		//
+		if ( idx_cur < ( numNodesInPath - 1 ) )
+		{
+			nodeTangents.append( GetBezierNodeTangent( path[ idx_next ], path[ idx_cur ], path[ idx_next_2 ] ) )
+		}
+
+		array< vector > bezierPoints = GetAllPointsOnBezier( [ path[ idx_cur ], path[ idx_cur ] - nodeTangents[ idx_cur ], path[ idx_next ] + nodeTangents[ idx_next ], path[ idx_next ] ], numSegments )
+		//
+		bezierPoints.pop()
+		bezierPath.extend( bezierPoints )
+	}
+
+	return bezierPath
+}
+
+//
+//
+vector function GetBezierNodeTangent( vector nodePos, vector predecessorPos, vector successorPos )
+{
+	vector preToNode = nodePos - predecessorPos
+	vector nodeToSuccessor = successorPos - nodePos
+
+	float preToNodeLen = Distance( nodePos, predecessorPos )
+	float nodeToSuccessorLen = Distance( successorPos, nodePos )
+
+	vector preToNodeNorm = preToNode / preToNodeLen
+	vector nodeToSuccessorNorm = nodeToSuccessor / nodeToSuccessorLen
+
+	float angleToBisect = acos( DotProduct( preToNodeNorm, nodeToSuccessorNorm ) )
+	angleToBisect 		= 180 - RadToDeg( angleToBisect )
+	angleToBisect 		*= 0.5
+	vector crossUp      = Normalize( CrossProduct( preToNodeNorm, nodeToSuccessorNorm ) )
+	if ( Length( crossUp ) == 0 )
+	{
+		printt( "!!! Cross up length is 0 !!!" )
+		return < 0, 0, 0 >
+	}
+	vector bisectVector = VectorRotateAxis( preToNodeNorm, crossUp, angleToBisect )
+
+	vector tangentDir = Normalize( CrossProduct( bisectVector, crossUp ) )
+	float tangentDist = min( preToNodeLen, nodeToSuccessorLen ) * 0.5
+
+	//
+	return tangentDir * tangentDist
+}
+
 bool function GetDoomedState( entity ent )
 {
-	entity soul = ent.GetTitanSoul()
-	if ( !IsValid( soul ) )
-		return false
-
-	return soul.IsDoomed()
-}
-
-bool function TitanCoreInUse( entity player )
-{
-	Assert( player.IsTitan() )
-
-	if ( !IsAlive( player ) )
-		return false
-
-	return Time() < SoulTitanCore_GetExpireTime( player.GetTitanSoul() )
-}
-
-float function GetTitanCoreTimeRemaining( entity player )
-{
-	Assert( player.IsTitan() )
-
-	return SoulTitanCore_GetExpireTime( player.GetTitanSoul() ) - Time()
+	return false
 }
 
 bool function CoreAvailableDuringDoomState()
@@ -1694,13 +1739,6 @@ float function GetPulseFrac( rate = 1, startTime = 0 )
 	return (1 - cos( ( Time() - startTime ) * (rate * (2*PI)) )) / 2
 }
 
-bool function IsPetTitan( entity titan )
-{
-	Assert( titan.IsTitan() )
-
-	return titan.GetTitanSoul().GetBossPlayer()	!= null
-}
-
 vector function StringToVector( string vecString, string delimiter = " " )
 {
 	array<string> tokens = split( vecString, delimiter )
@@ -1714,13 +1752,6 @@ float function GetShieldHealthFrac( entity ent )
 {
 	if ( !IsAlive( ent ) )
 		return 0.0
-
-	if ( HasSoul( ent ) )
-	{
-		entity soul = ent.GetTitanSoul()
-		if ( IsValid( soul ) )
-			ent = soul
-	}
 
 	int shieldHealth = ent.GetShieldHealth()
 	int shieldMaxHealth = ent.GetShieldHealthMax()
@@ -2308,7 +2339,7 @@ int function GameScore_GetScore( int team )
 
 bool function TitanEjectIsDisabled()
 {
-	return (GetGlobalNetBool( "titanEjectEnabled" ) == false)
+	return false
 }
 
 bool function IsHitEffectiveVsTitan( entity victim, int damageType )
@@ -2403,19 +2434,6 @@ array<vector> function VectorArrayWithin( array<vector> Array, vector origin, fl
 			resultArray.append( p )
 	}
 	return resultArray
-}
-
-string function GetTitanChassis( entity titan )
-{
-	if ( !("titanChassis" in titan.s ) )
-	{
-		Assert( HasSoul( titan ) )
-
-		entity soul = titan.GetTitanSoul()
-		titan.s.titanChassis <- GetSoulTitanSubClass( soul )
-	}
-
-	return expect string( titan.s.titanChassis )
 }
 
 vector function ClampVectorToCube( vector vecStart, vector vec, vector cubeOrigin, float cubeSize )
@@ -3033,16 +3051,6 @@ int function GetWaveSpawnType()
 	return shGlobal.waveSpawnType
 }
 
-void function SetWaveSpawnInterval( float interval )
-{
-	shGlobal.waveSpawnInterval = interval
-}
-
-float function GetWaveSpawnInterval()
-{
-	return shGlobal.waveSpawnInterval
-}
-
 bool function IsArcTitan( entity npc )
 {
 	return npc.GetAISettingsName() == "npc_titan_arc"
@@ -3311,13 +3319,6 @@ entity function GetPetTitanOwner( entity titan )
 
 entity function GetSoulFromPlayer( entity player )
 {
-	Assert( player.IsPlayer(), "argument should be a player" )
-
-	if ( player.IsTitan() )
-		return player.GetTitanSoul()
-	else if ( IsValid( player.GetPetTitan() ) )
-		return player.GetPetTitan().GetTitanSoul()
-
 	return null
 }
 
@@ -4697,40 +4698,25 @@ bool function TeamHasBots( int team )
 }
 
 
-int function GetNumTeamsRemaining()
+array<int> function GetTeamsForPlayers( array<entity> playersToUse )
 {
-	return GetTeamsWithLivingPlayers().len()
-}
-
-array<int> function GetTeamsWithLivingPlayers()
-{
-	array<entity> playersAlive = GetPlayerArray_AliveConnected()
-	array<int> teamsWithPlayersAlive
-	int team
-	bool teamFound = false
-
-	foreach (player in playersAlive)
+	array<int> results
+	foreach ( player in playersToUse )
 	{
-		teamFound = false
-		team = player.GetTeam()
-
-		if (teamsWithPlayersAlive.len() == 0)
-		{
-			teamsWithPlayersAlive.append( team )
-			continue
-		}
-
-		foreach (trackedTeam in teamsWithPlayersAlive)
-		{
-			if (team == trackedTeam)
-				teamFound = true
-		}
-
-		if (!teamFound)
-			teamsWithPlayersAlive.append( team )
+		int team = player.GetTeam()
+		if ( !results.contains( team ) )
+			results.append( team )
 	}
 
-	return teamsWithPlayersAlive
+	return results
+}
+int function GetNumTeamsRemaining()
+{
+	return GetTeamsForPlayers( GetPlayerArray_AliveConnected() ).len()
+}
+int function GetNumTeamsExisting()
+{
+	return GetTeamsForPlayers( GetPlayerArray() ).len()
 }
 
 array<entity> function GetPlayerArrayOfTeam_AliveConnected( int team )
@@ -4808,13 +4794,47 @@ int function GetNumPlayersJumpingWithSquad( int team )
 	return count
 }
 
-void function DeleteAllByScriptName( string scriptName  )
+void function DeleteAllByScriptName( string scriptName, string scriptGroup = ""  )
 {
 	array <entity> ents = GetEntArrayByScriptName( scriptName )
 	foreach( ent in ents )
 	{
+		if ( !IsValid( ent ) )
+			continue
+
+
+		if ( scriptGroup != "" )
+		{
+			if ( ent.HasKey( "script_group" ) && ent.GetValueForKey( "script_group" ) == scriptGroup )
+				ent.Destroy()
+		}
+		else
+		{
+			ent.Destroy()
+			continue
+		}
+	}
+}
+
+void function DeleteAllByScriptNameWithLinkedEnts( string scriptName  )
+{
+	//
+	array <entity> ents = GetEntArrayByScriptName( scriptName )
+	foreach( ent in ents )
+	{
+		DeleteAllLinkedEnts( ent )
 		if ( IsValid( ent ) )
 			ent.Destroy()
+	}
+}
+
+void function DeleteAllLinkedEnts( entity ent )
+{
+	array <entity> linkedEnts = ent.GetLinkEntArray()
+	foreach( linkedEnt in linkedEnts )
+	{
+		if ( IsValid( linkedEnt ) )
+			linkedEnt.Destroy()
 	}
 }
 
@@ -4948,4 +4968,16 @@ bool function UseSoloModePostGamePresentation()
 void function KnockBackPlayer( entity player, vector pushDir, float scale, float time )
 {
 	player.KnockBack( pushDir * scale, time )
+}
+
+
+bool function PlayersInSameParty( entity player1, entity player2 )
+{
+	if ( player1.GetPartyLeaderClientIndex() < 0 )
+		return false
+
+	if ( player2.GetPartyLeaderClientIndex() < 0 )
+		return false
+
+	return ( player1.GetPartyLeaderClientIndex() == player2.GetPartyLeaderClientIndex() )
 }

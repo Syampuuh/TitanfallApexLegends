@@ -3,12 +3,16 @@ global function CreateSpectatorHud
 global function UpdateRespawnTime
 global function UpdateRespawnStatus
 global function UpdateDeathAndSpectatorHUD
+global function RefreshDeathAndSpectatorHUD
 
 global function ShowRoundEndSquadResults
 global function IsViewingSquadSummary
+global function PopulatePlayerStatsRui
 
 global function ServerCallback_DeadHudSetDamageHistory
 global function ServerCallback_DeadHudClearDamageHistory
+
+global function UICallback_SetShowingEOGMenu
 
 const string SOUND_KEEP_THE_PARTY_GOING = "ui_ingame_activateburncard"
 
@@ -46,6 +50,7 @@ struct
 	bool lobbyReturnRegistered = false
 	bool summaryRegistered = false
 	bool reportRegistered = false
+	bool skipRegistered = false
 
 	bool                             viewingSquadSummary = false
 	entity                           squadResultsCamera
@@ -93,12 +98,6 @@ void function ClSpectatorHud_Init()
 	RegisterButtonPressedCallback( KEY_LSHIFT, TryToggleGladCard )
 	RegisterButtonPressedCallback( BUTTON_Y, TryToggleGladCard )
 
-	if ( GetCurrentPlaylistVarBool( "enable_eog_squad_invite", false ) )
-	{
-		RegisterButtonPressedCallback( KEY_SPACE, TryPartyUp )
-		RegisterButtonPressedCallback( BUTTON_X, TryPartyUp )
-	}
-
 	RegisterButtonPressedCallback( BUTTON_STICK_RIGHT, ReportPlayerButtonPressed )
 	RegisterButtonPressedCallback( KEY_R, ReportPlayerButtonPressed )
 
@@ -142,6 +141,15 @@ void function CreateSpectatorHud()
 }
 
 
+void function RefreshDeathAndSpectatorHUD()
+{
+	if ( !IsSpectating() )
+		return
+
+	UpdateDeathAndSpectatorHUD( GetLocalClientPlayer(), GetLocalClientPlayer().GetObserverTarget() )
+}
+
+
 void function UpdateDeathAndSpectatorHUD( entity player, entity currentTarget )
 {
 	Assert( file.spectatorHud != null )
@@ -164,14 +172,14 @@ void function UpdateDeathAndSpectatorHUD( entity player, entity currentTarget )
 		//
 		if ( index < teamPlayers.len() && (!playerSpectateTarget || IsEnemyTeam( currentTarget.GetTeam(), player.GetTeam() )) )
 		{
-			printt( "Setting voice Icon to " + teamPlayers[index].GetPlayerName() )
+			//
 			RuiSetString( file.deadHud, "playerName" + (index + 1), teamPlayers[index].GetPlayerName() )
 			RuiTrackInt( file.deadHud, "playerMic" + (index + 1), teamPlayers[index], RUI_TRACK_MIC_STATUS )
 			RuiSetBool( file.deadHud, "playerAvailable" + (index + 1), true )
 		}
 		else
 		{
-			printt( "Setting voice Icon to empty" )
+			//
 			RuiSetString( file.deadHud, "playerName" + (index + 1), "" )
 			RuiSetInt( file.deadHud, "playerMic" + (index + 1), -1 )
 			RuiSetBool( file.deadHud, "playerAvailable" + (index + 1), false )
@@ -221,10 +229,10 @@ void function UpdateDeathAndSpectatorHUD( entity player, entity currentTarget )
 	RuiSetString( file.deadHud, "spectateName", playerName )
 	RuiSetBool( file.deadHud, "spectatingEnemy", IsEnemyTeam( currentTarget.GetTeam(), player.GetTeam() ) )
 
-	#if(false)
-
-
-#endif //
+	//
+	//
+	//
+	//
 }
 
 
@@ -242,20 +250,21 @@ void function SetSpectatorHudIsViewingSquadStats( bool isViewingSquadStats )
 {
 	if ( isViewingSquadStats )
 		file.summaryValid = true
-	UpdateSpectateButtons( true, file.summaryValid )
+	UpdateSpectateButtons( true, file.summaryValid, false )
 	RuiSetBool( file.deadHud, "summaryValid", file.summaryValid )
 	RuiSetBool( file.spectatorHud, "isViewingSquadStats", isViewingSquadStats )
 	RuiSetBool( file.deadHud, "isViewingSquadStats", isViewingSquadStats )
 
 	file.isViewingSquadStats = isViewingSquadStats
+	RuiSetBool( file.deadHud, "allowSkipDeathCam", false)
 }
 
 #if(false)
 
 
-
-
-
+//
+//
+//
 
 
 
@@ -321,11 +330,13 @@ void function GameStateChanged()
 	if ( file.deadHud != null )
 		RuiSetInt( file.deadHud, "gameState", GetGameState() )
 
+#if(true)
 	if ( GetGameState() >= eGameState.WinnerDetermined )
 	{
 		UpdateGladCardVisibility()
 		ShowRoundEndSquadResults( false )
 	}
+#endif //
 }
 
 
@@ -366,36 +377,41 @@ void function UpdateRespawnStatus( int respawnStatus )
 
 	entity clientPlayer = GetLocalClientPlayer()
 	bool showDeathRecap = ShouldShowDeathRecap( clientPlayer )
+	bool allowSkipDeathCam = !GetCurrentPlaylistVarBool( "disallow_deathcam_skip", false ) && !IsAlive( clientPlayer ) && ( clientPlayer.IsObserver() && clientPlayer.GetObserverMode() == OBS_MODE_DEATHCAM )
 
 	switch ( respawnStatus )
 	{
 		case eRespawnStatus.WAITING_FOR_DELIVERY:
 			respawnText = "#WAITING_FOR_RESPAWN"
 			respawnHint = "#HINT_PING_RESPAWN_BEACON"
+			UpdateSpectateButtons( false, file.summaryValid, allowSkipDeathCam )
 			break
 
 		case eRespawnStatus.PICKUP_DESTROYED:
 			respawnText = "#STATUS_PICKUP_DESTROYED"
-			UpdateSpectateButtons( true, file.summaryValid )
+			UpdateSpectateButtons( true, file.summaryValid, allowSkipDeathCam )
 			break
 
 		case eRespawnStatus.SQUAD_ELIMINATED:
 			respawnText = "#STATUS_SQUAD_ELIMINATED"
-			UpdateSpectateButtons( true, file.summaryValid )
+			UpdateSpectateButtons( true, file.summaryValid, allowSkipDeathCam )
 			break
 
 		case eRespawnStatus.WAITING_FOR_DROPPOD:
 			respawnText = "#RESPAWNING_IN"
+			UpdateSpectateButtons( false, file.summaryValid, allowSkipDeathCam )
 			break
 
 		case eRespawnStatus.WAITING_FOR_PICKUP:
 			respawnText = "#STATUS_PICKUP_WAITING"
 			respawnHint = "#HINT_PING_GLADIATOR_CARD"
+			UpdateSpectateButtons( false, file.summaryValid, allowSkipDeathCam )
 			break
 
 		case eRespawnStatus.NONE:
 			respawnText = ""
 			showDeathRecap = false
+			allowSkipDeathCam = false
 			break
 	}
 
@@ -403,6 +419,7 @@ void function UpdateRespawnStatus( int respawnStatus )
 	RuiSetString( file.deadHud, "respawnHint", respawnHint )
 	RuiSetInt( file.deadHud, "respawnStatus", respawnStatus )
 	RuiSetBool( file.deadHud, "showDeathRecap", showDeathRecap )
+	RuiSetBool( file.deadHud, "allowSkipDeathCam", allowSkipDeathCam )
 }
 
 
@@ -413,7 +430,7 @@ void function UpdateRespawnTime( float startTime, float endTime )
 }
 
 
-void function UpdateSpectateButtons( bool allowReturn, bool allowSummary )
+void function UpdateSpectateButtons( bool allowReturn, bool allowSummary, bool allowSkipDeathCam )
 {
 	//
 	bool canBindReturn  = allowReturn && (!IsAlive( GetLocalClientPlayer() ) || GetGameState() >= eGameState.WinnerDetermined)
@@ -422,13 +439,13 @@ void function UpdateSpectateButtons( bool allowReturn, bool allowSummary )
 	if ( canBindReturn && !file.lobbyReturnRegistered )
 	{
 		RegisterButtonPressedCallback( BUTTON_B, ReturnToLobby )
-		RegisterButtonPressedCallback( KEY_ESCAPE, ReturnToLobby )
+		RegisterButtonPressedCallback( KEY_SPACE, ReturnToLobby )
 		file.lobbyReturnRegistered = true
 	}
 	else if ( !canBindReturn && file.lobbyReturnRegistered )
 	{
 		DeregisterButtonPressedCallback( BUTTON_B, ReturnToLobby )
-		DeregisterButtonPressedCallback( KEY_ESCAPE, ReturnToLobby )
+		DeregisterButtonPressedCallback( KEY_SPACE, ReturnToLobby )
 		file.lobbyReturnRegistered = false
 	}
 
@@ -459,6 +476,18 @@ void function UpdateSpectateButtons( bool allowReturn, bool allowSummary )
 
 
 */
+	if ( allowSkipDeathCam && !file.skipRegistered )
+	{
+		RegisterButtonPressedCallback( BUTTON_A, SkipDeathCam )
+		RegisterButtonPressedCallback( KEY_TAB, SkipDeathCam )
+		file.skipRegistered = true
+	}
+	else if ( !allowSkipDeathCam && file.skipRegistered )
+	{
+		DeregisterButtonPressedCallback( BUTTON_A, SkipDeathCam )
+		DeregisterButtonPressedCallback( KEY_TAB, SkipDeathCam )
+		file.skipRegistered = false
+	}
 }
 
 
@@ -531,6 +560,9 @@ bool function CanReport()
 	if ( IsScoreboardShown() )
 		return false
 
+	if ( Fullmap_IsVisible() )
+		return false
+
 	if ( file.isViewingSquadStats )
 		return false
 
@@ -579,6 +611,27 @@ void function ShowReportDialogAfterDelay( var button )
 	RunUIScript( "ClientToUI_ShowReportPlayerDialog", reportPlayerName, reportPlayerHardware, reportPlayerUID, friendlyOrEnemy )
 }
 
+void function SkipDeathCam( var button )
+{
+	if ( IsLobby() )
+		return
+
+	if ( IsMenuOpen() )
+		return
+
+	if ( Time() - LastMenuToggleTime() < (1 / 30.0) )
+		return
+
+	if ( IsScoreboardShown() )
+		return
+
+	if ( GetGameState() > eGameState.WinnerDetermined )
+		return
+
+	entity player = GetLocalClientPlayer()
+	player.ClientCommand( "SkipDeathCam" )
+}
+
 
 void function OnPlayerLifeStateChanged( entity player, int oldState, int newState )
 {
@@ -587,7 +640,7 @@ void function OnPlayerLifeStateChanged( entity player, int oldState, int newStat
 
 	if ( newState == LIFE_ALIVE )
 	{
-		UpdateSpectateButtons( false, false )
+		UpdateSpectateButtons( false, false, false )
 		ShowRoundEndSquadResults( false )
 	}
 }
@@ -616,7 +669,7 @@ void function ShowRoundEndSquadResults( bool show )
 	SetSpectatorHudIsViewingSquadStats( show )
 	UpdateMainHudVisibility( GetLocalViewPlayer() )
 	Hud_SetAboveBlur( HudElement( "IngameTextChat" ), true )
-	UpdateSpectateButtons( true, true )
+	UpdateSpectateButtons( true, true, false )
 	UpdateWaypointRuiVisibility()
 
 	EmitSoundOnEntity( player, "UI_Menu_RoundSummary_Results" )
@@ -698,60 +751,8 @@ void function ShowRoundEndSquadResults( bool show )
 			file.squadResultsStatsRuis.append( playerStatsRui )
 			RuiSetFloat( playerStatsRui, "offset", offsets[i] )
 
-			//
-			if ( EHIHasValidScriptStruct( data.eHandle ) )
-			{
-				RuiSetString( playerStatsRui, "playerName", EHI_GetName( data.eHandle ) )
-				if ( IsValid( FromEHI( data.eHandle ) ) )
-					RuiTrackInt( playerStatsRui, "micStatus", FromEHI( data.eHandle ), RUI_TRACK_MIC_STATUS )
-			}
-
-			if ( UseSoloModePostGamePresentation() )
-			{
-				//
-				RuiSetString( playerStatsRui, "title3", "#SQUADSTAT_KILL" )
-				squadKillCount += data.kills
-				RuiSetString( playerStatsRui, "value3", string( data.kills ) )
-
-				//
-				RuiSetString( playerStatsRui, "title4", "#SQUADSTAT_DAMAGE" )
-				RuiSetString( playerStatsRui, "value4", string( data.damageDealt ) )
-
-				//
-				RuiSetString( playerStatsRui, "title5", "#SQUADSTAT_SURVIVE" )
-				string m = string( data.survivalTime / 60 )
-				string s = string ( data.survivalTime % 60 )
-				if ( s.len() == 1 )
-					s = "0" + s
-				RuiSetString( playerStatsRui, "value5", Localize( "#SQUADSTAT_SURVIVE_TIME_FORMAT", m, s ) )
-			}
-			else
-			{
-				//
-				RuiSetString( playerStatsRui, "title1", "#SQUADSTAT_KILL" )
-				squadKillCount += data.kills
-				RuiSetString( playerStatsRui, "value1", string( data.kills ) )
-
-				//
-				RuiSetString( playerStatsRui, "title2", "#SQUADSTAT_DAMAGE" )
-				RuiSetString( playerStatsRui, "value2", string( data.damageDealt ) )
-
-				//
-				RuiSetString( playerStatsRui, "title3", "#SQUADSTAT_SURVIVE" )
-				string m = string( data.survivalTime / 60 )
-				string s = string ( data.survivalTime % 60 )
-				if ( s.len() == 1 )
-					s = "0" + s
-				RuiSetString( playerStatsRui, "value3", Localize( "#SQUADSTAT_SURVIVE_TIME_FORMAT", m, s ) )
-
-				//
-				RuiSetString( playerStatsRui, "title4", "#SQUADSTAT_REVIVE" )
-				RuiSetString( playerStatsRui, "value4", string( data.revivesGiven ) )
-
-				//
-				RuiSetString( playerStatsRui, "title5", "#SQUADSTAT_RESPAWN" )
-				RuiSetString( playerStatsRui, "value5", string( data.respawnsGiven ) )
-			}
+			PopulatePlayerStatsRui( playerStatsRui, i )
+			squadKillCount += data.kills
 		}
 
 		//
@@ -766,9 +767,33 @@ void function ShowRoundEndSquadResults( bool show )
 		}
 		else
 		{
-			RuiSetString( file.squadResultsBorderRui, "headerText", squadSummaryData.squadPlacement == 1 ? "#SQUAD_PLACEMENT_GCARDS_TITLE" : "#SQUAD_HEADER_DEFEAT" )
-			RuiSetString( file.squadResultsBorderRui, "killsText", "#SQUAD_KILLS_COUNT" )
+			string titleString = squadSummaryData.squadPlacement == 1 ? "#SQUAD_PLACEMENT_GCARDS_TITLE" : "#SQUAD_HEADER_DEFEAT"
+			string killsText = "#SQUAD_KILLS_COUNT"
+
+			#if(true)
+				if ( IsEliteGame() )
+				{
+					string playlistName = Localize( GetCurrentPlaylistVarString( "name", "#APEX" ) )
+					printt( playlistName )
+					titleString = squadSummaryData.squadPlacement == 1 ? "#SQUAD_PLACEMENT_GCARDS_TITLE_W_GAMEMODE" : "#SQUAD_HEADER_DEFEAT_W_GAMEMODE"
+					titleString = Localize( titleString, playlistName )
+				}
+			#endif
+
+			#if(false)
+
+
+
+
+
+#endif //
+
+			RuiSetString( file.squadResultsBorderRui, "headerText", titleString )
+			RuiSetString( file.squadResultsBorderRui, "killsText", killsText )
 		}
+
+		if ( GetCurrentPlaylistVarBool( "enable_eog_menu", false ) )
+			RunUIScript( "OpenEOGMenu" )
 	}
 	else
 	{
@@ -776,6 +801,76 @@ void function ShowRoundEndSquadResults( bool show )
 	}
 
 	UpdateScoreboardVisibility()
+}
+
+void function UICallback_SetShowingEOGMenu( bool showing )
+{
+	if ( file.squadResultsBorderRui != null )
+		RuiSetBool( file.squadResultsBorderRui, "showingEOGMenu", showing )
+
+	if ( file.deadHud != null )
+		RuiSetBool( file.deadHud, "showingEOGMenu", showing )
+}
+
+void function PopulatePlayerStatsRui( var playerStatsRui, int index, bool connected = true )
+{
+	SquadSummaryData squadSummaryData = GetSquadSummaryData()
+	SquadSummaryPlayerData data = squadSummaryData.playerData[ index ]
+
+	RuiSetBool( playerStatsRui, "isConnected", connected )
+
+	//
+	if ( EHIHasValidScriptStruct( data.eHandle ) )
+	{
+		RuiSetString( playerStatsRui, "playerName", EHI_GetName( data.eHandle ) )
+		if ( IsValid( FromEHI( data.eHandle ) ) )
+			RuiTrackInt( playerStatsRui, "micStatus", FromEHI( data.eHandle ), RUI_TRACK_MIC_STATUS )
+	}
+
+	if ( UseSoloModePostGamePresentation() )
+	{
+		//
+		RuiSetString( playerStatsRui, "title3", "#SQUADSTAT_KILL" )
+		RuiSetString( playerStatsRui, "value3", string( data.kills ) )
+
+		//
+		RuiSetString( playerStatsRui, "title4", "#SQUADSTAT_DAMAGE" )
+		RuiSetString( playerStatsRui, "value4", string( data.damageDealt ) )
+
+		//
+		RuiSetString( playerStatsRui, "title5", "#SQUADSTAT_SURVIVE" )
+		string m = string( data.survivalTime / 60 )
+		string s = string ( data.survivalTime % 60 )
+		if ( s.len() == 1 )
+			s = "0" + s
+		RuiSetString( playerStatsRui, "value5", Localize( "#SQUADSTAT_SURVIVE_TIME_FORMAT", m, s ) )
+	}
+	else
+	{
+		//
+		RuiSetString( playerStatsRui, "title1", "#SQUADSTAT_KILL" )
+		RuiSetString( playerStatsRui, "value1", string( data.kills ) )
+
+		//
+		RuiSetString( playerStatsRui, "title2", "#SQUADSTAT_DAMAGE" )
+		RuiSetString( playerStatsRui, "value2", string( data.damageDealt ) )
+
+		//
+		RuiSetString( playerStatsRui, "title3", "#SQUADSTAT_SURVIVE" )
+		string m = string( data.survivalTime / 60 )
+		string s = string ( data.survivalTime % 60 )
+		if ( s.len() == 1 )
+			s = "0" + s
+		RuiSetString( playerStatsRui, "value3", Localize( "#SQUADSTAT_SURVIVE_TIME_FORMAT", m, s ) )
+
+		//
+		RuiSetString( playerStatsRui, "title4", "#SQUADSTAT_REVIVE" )
+		RuiSetString( playerStatsRui, "value4", string( data.revivesGiven ) )
+
+		//
+		RuiSetString( playerStatsRui, "title5", "#SQUADSTAT_RESPAWN" )
+		RuiSetString( playerStatsRui, "value5", string( data.respawnsGiven ) )
+	}
 }
 
 void function KeepGladCardUpdated( var rui, int eHandle )
@@ -792,8 +887,13 @@ void function KeepGladCardUpdated( var rui, int eHandle )
 
 void function ClearRoundEndSquadResults( entity player )
 {
+	RunUIScript( "CloseEOGMenu" )
+
 	if ( file.squadResultsBorderRui != null )
+	{
 		RuiDestroyIfAlive( file.squadResultsBorderRui )
+		file.squadResultsBorderRui = null
+	}
 
 	foreach( var rui in file.squadResultsStatsRuis )
 		RuiDestroyIfAlive( rui )
@@ -873,7 +973,7 @@ void function UpdateGladCardVisibility()
 {
 	RuiSetBool( file.deadHud, "showingCard", file.showGladCard )
 
-	if ( !IsSpectating() || !file.showGladCard || file.viewingSquadSummary || !IsValid( file.currentTarget ) || !file.currentTarget.IsPlayer() || GetGameState() >= eGameState.WinnerDetermined )
+	if ( !IsSpectating() || !file.showGladCard || file.viewingSquadSummary || !IsValid( file.currentTarget ) || !file.currentTarget.IsPlayer() || GetGameState() >= eGameState.WinnerDetermined || Fullmap_IsVisible() )
 	{
 		HideGladCard( true )
 		return

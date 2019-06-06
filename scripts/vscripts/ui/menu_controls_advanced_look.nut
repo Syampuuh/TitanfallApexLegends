@@ -10,6 +10,7 @@ struct
 	table<var, string> buttonTitles
 	table<var, string> buttonDescriptions
 	var                detailsPanel
+	var                contentPanel
 
 	array<ConVarData> conVarDataList
 
@@ -32,8 +33,9 @@ void function InitControlsAdvancedLookMenu()
 void function InitAdvancedLookControlsPanel( var panel )
 {
 	file.panel = panel
-	var contentPanel = Hud_GetChild( panel, "ContentPanel" )
 	file.detailsPanel = Hud_GetChild( panel, "DetailsPanel" )
+	var contentPanel = Hud_GetChild( panel, "ContentPanel" )
+	file.contentPanel = contentPanel
 
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, OnAdvancedLookControlsPanel_Show )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, OnAdvancedLookControlsPanel_Hide )
@@ -128,6 +130,13 @@ void function Button_Toggle_CustomEnabled( var button )
 	foreach ( var item in file.enableItems )
 		Hud_SetVisible( item, isEnabled )
 		//
+
+	var btnGamepadCustomEnabled = Hud_GetChild( file.contentPanel, "SwchGamepadCustomEnabled" )
+	var sldGamepadCustomDeadzoneIn = Hud_GetChild( file.contentPanel, "SldGamepadCustomDeadzoneIn" )
+	if( isEnabled )
+		Hud_SetNavDown( btnGamepadCustomEnabled, sldGamepadCustomDeadzoneIn )
+	else
+		Hud_SetNavDown( btnGamepadCustomEnabled, btnGamepadCustomEnabled )
 }
 
 
@@ -137,6 +146,7 @@ void function SetupButtonBase( var button, string buttonText, string description
 	file.buttonTitles[button] <- buttonText
 	file.buttonDescriptions[button] <- description
 	AddButtonEventHandler( button, UIE_GET_FOCUS, Button_Focused )
+	AddButtonEventHandler( button, UIE_LOSE_FOCUS, Button_LoseFocus )
 }
 
 
@@ -158,8 +168,9 @@ var function SetupSlider( var slider, string buttonText, string description )
 	SetButtonRuiText( button, buttonText )
 	file.buttonTitles[button] <- buttonText
 	file.buttonDescriptions[button] <- description
-	AddButtonEventHandler( button, UIE_GET_FOCUS, Button_Focused )
-	AddButtonEventHandler( button, UIE_LOSE_FOCUS, Button_LoseFocus )
+	AddButtonEventHandler( button, UIE_GET_FOCUS, DropButton_Focused )
+	AddButtonEventHandler( button, UIE_LOSE_FOCUS, DropButton_Focused )
+	Hud_AddEventHandler( slider, UIE_GET_FOCUS, Setting_Focused )
 
 	return button
 }
@@ -176,8 +187,7 @@ bool function RequiresGraphDisplay( var button )
 	return false
 }
 
-
-void function Button_Focused( var button )
+void function DisplaySettingInfoForButton( var button )
 {
 	var rui = Hud_GetRui( file.detailsPanel )
 	RuiSetArg( rui, "selectionText", file.buttonTitles[button] )
@@ -186,15 +196,15 @@ void function Button_Focused( var button )
 	RuiSetBool( rui, "showCbInfo", false )
 
 	bool requiresGraph = RequiresGraphDisplay( button )
-	if ( requiresGraph )
-	{
-		foreach ( var graph in file.graphs )
-			Hud_SetVisible( graph, requiresGraph )
-	}
-
-	ScrollPanel_ScrollIntoView( file.panel )
+	foreach ( var graph in file.graphs )
+		Hud_SetVisible( graph, requiresGraph )
 }
 
+void function Button_Focused( var button )
+{
+	DisplaySettingInfoForButton( button )
+	Setting_Focused( button )
+}
 
 void function Button_LoseFocus( var button )
 {
@@ -210,6 +220,15 @@ void function Button_LoseFocus( var button )
 		Hud_SetVisible( graph, false )
 }
 
+void function DropButton_Focused( var button )
+{
+	DisplaySettingInfoForButton( button )
+}
+
+void function Setting_Focused( var panel )
+{
+	ScrollPanel_ScrollIntoView( file.panel )
+}
 
 void function OpenConfirmRestoreLookControlsDefaultsDialog( var button )
 {

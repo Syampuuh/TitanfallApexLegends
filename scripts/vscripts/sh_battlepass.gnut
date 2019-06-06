@@ -4,6 +4,7 @@ global function ShBattlePass_LevelInit
 #if CLIENT || UI 
 global function IsBattlePassEnabled
 global function GetPlayerActiveBattlePass
+global function GetPlayerLastActiveBattlePass
 global function GetPlayerBattlePassXPProgress
 global function GetBattlePassLevelForXP
 global function GetBattlePassXPForLevel
@@ -55,6 +56,7 @@ global function CanPlayerPurchaseBattlePass
 global function GetBattlePassXPEventValueDisplay
 global function GetImageForBattlePassReward
 global function GetStringForBattlePassReward
+global function ShouldBattlePassTabBeEnabled
 #endif
 
 #if DEV && ( CLIENT || UI ) 
@@ -118,6 +120,7 @@ global ItemFlavor& BATTLEPASS_SEASON1_XP_BOOST_FLAV
 global const asset BATTLEPASS_MODEL_BOOST = $"mdl/menu/xp_badge.rmdl"
 global const asset BATTLEPASS_MODEL_APEX_COINS = $"mdl/menu/coin.rmdl"
 global const asset BATTLEPASS_MODEL_CRAFTING_METALS = $"mdl/currency/crafting/currency_crafting_epic.rmdl"
+global const float BATTLEPASS_XP_BOOST_AMOUNT = 2.5
 
 //
 //
@@ -213,12 +216,10 @@ ItemFlavor ornull function GetPlayerActiveBattlePass( EHI playerEHI )
 	if ( !IsBattlePassEnabled() )
 		return null
 
-	if ( !GRX_IsInventoryReady( FromEHI( playerEHI ) ) )
-		return null
-
-	if ( GetCurrentPlaylistVarBool( "battlepass_offer_restricted", false ) && GRX_IsOfferRestricted( FromEHI( playerEHI ) ) )
-		return null
-
+	//
+	//
+	//
+	//
 	//
 
 	ItemFlavor ornull seasonOrNull = GetActiveSeason( GetUnixTimestamp() )
@@ -226,6 +227,46 @@ ItemFlavor ornull function GetPlayerActiveBattlePass( EHI playerEHI )
 		return null
 
 	return Season_GetBattlePass( expect ItemFlavor(seasonOrNull) )
+}
+#endif
+
+
+#if CLIENT || UI 
+ItemFlavor ornull function GetPlayerLastActiveBattlePass( EHI playerEHI )
+{
+	#if CLIENT || UI 
+		Assert( playerEHI == LocalClientEHI() )
+	#endif
+
+	if ( !IsBattlePassEnabled() )
+		return null
+
+	//
+	//
+	//
+	//
+	//
+
+	ItemFlavor ornull seasonOrNull = GetLatestSeason( GetUnixTimestamp() )
+	if ( seasonOrNull == null )
+		return null
+
+	return Season_GetBattlePass( expect ItemFlavor(seasonOrNull) )
+}
+#endif
+
+
+#if(UI)
+bool function ShouldBattlePassTabBeEnabled()
+{
+	if ( !IsBattlePassEnabled() )
+		return false
+
+	ItemFlavor ornull seasonOrNull = GetLatestSeason( GetUnixTimestamp() )
+	if ( seasonOrNull == null )
+		return false
+
+	return GetUnixTimestamp() < CalEvent_GetHideUnixTime( expect ItemFlavor( seasonOrNull ) )
 }
 #endif
 
@@ -409,7 +450,7 @@ float function GetPlayerBattlePassXPBoostPercent( EHI playerEHI, ItemFlavor pass
 	#endif
 
 	int numXPBoosts = GetPlayerBattlePassXPBoostCount( playerEHI, pass )
-	return numXPBoosts * XpEventTypeData_GetFrac( XP_TYPE.BONUS_FRIEND_BOOST ) * 100.0
+	return numXPBoosts * BATTLEPASS_XP_BOOST_AMOUNT
 }
 #endif
 
@@ -600,7 +641,7 @@ array<BattlePassReward> function GetBattlePassLevelRewards( ItemFlavor pass, int
 				BattlePassReward reward
 
 				reward.flav = GetItemFlavorByAsset( rewardAsset )
-				string overrideRef = GetCurrentPlaylistVar( format( "%s_level_%d_override_ref", ItemFlavor_GetHumanReadableRef( pass ), levelIndex ), "" )
+				string overrideRef = GetCurrentPlaylistVarString( format( "%s_level_%d_override_ref", ItemFlavor_GetHumanReadableRef( pass ), levelIndex ), "" )
 				if ( overrideRef != "" )
 					reward.flav = GetItemFlavorByHumanReadableRef( overrideRef )
 
@@ -786,9 +827,6 @@ int function BattlePassPurchasedXP_GetXPAmount( ItemFlavor purchasedXPFlav )
 
 
 #if(false)
-
-
-
 
 
 
@@ -1081,6 +1119,7 @@ ItemFlavor function DEV_BattlePass( EHI playerEHI = EHI_null )
 
 
 //
+
 
 
 

@@ -20,10 +20,9 @@ global function PlayLootPickupFeedbackFX
 global function ServerToClient_OnStartedUsingHealthPack
 
 global function GetLootPromptStyle
-global function TEMP_GetSavedEHI
+global function GetEHIForDeathBox
 
 global function DeathBoxGetExtendedUseSettings
-global function TEMP_SaveEHI
 global function CreateDeathBoxRui
 
 global function GetHighlightFillAlphaForLoot
@@ -41,58 +40,6 @@ const bool HAS_ITEM_PICKUP_FEEDACK_FX = false
 #if(false)
 
 #endif //
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-#endif
 
 struct VerticalLineStruct
 {
@@ -118,18 +65,12 @@ struct {
 
 	var[eLootPromptStyle._COUNT]                lootPromptRui
 	table<int, var[eLootPromptStyle._COUNT]>    lootTypePromptRui
-	table<entity, EHI>                          TEMP_boxToEHI
 
 	float nextHealthAllowTime = 0
 
 	#if(true)
 		array<VerticalLineStruct> verticalLines
 	#endif //
-
-	#if(false)
-
-
-#endif
 } file
 
 void function Cl_Survival_LootInit()
@@ -161,7 +102,7 @@ void function Cl_Survival_LootInit()
 	AddCallback_UseEntLoseFocus( Sur_OnUseEntLoseFocus )
 
 	AddCreateCallback( "prop_survival", OnPropCreated )
-	AddCreateCallback( "prop_dynamic", OnDeathBoxCreated )
+	AddCreateCallback( "prop_death_box", OnDeathBoxCreated )
 
 	AddCallback_EntitiesDidLoad( SurvivalLoot_EntitiesDidLoad )
 
@@ -200,10 +141,6 @@ void function Cl_Survival_LootInit()
 	file.lootTypePromptRui[eLootType.MAINWEAPON][eLootPromptStyle.COMPACT] = compactWeaponPromptRui
 
 	AddCallback_OnRefreshCustomGamepadBinds( OnRefreshCustomGamepadBinds )
-
-	#if(false)
-
-#endif
 }
 
 
@@ -432,7 +369,6 @@ void function OnDeathBoxCreated( entity ent )
 	{
 		AddEntityCallback_GetUseEntOverrideText( ent, DeathBoxTextOverride )
 		ent.SetDoDestroyCallback( true )
-		TEMP_SaveEHI( ent )
 		//
 
 		if ( ent.GetOwner() == GetLocalClientPlayer() )
@@ -464,7 +400,7 @@ void function AttachCoverToDeathBox( entity ent )
 
 void function CreateDeathBoxRui( entity deathBox )
 {
-	EHI ornull ehi = TEMP_GetSavedEHI( deathBox )
+	EHI ornull ehi = GetEHIForDeathBox( deathBox )
 	if ( ehi == null )
 		return
 
@@ -498,9 +434,12 @@ void function CreateDeathBoxRui( entity deathBox )
 	NestedGladiatorCardHandle nestedGCHandle = CreateNestedGladiatorCard( rui, "card", eGladCardDisplaySituation.DEATH_BOX_STILL, eGladCardPresentation.FRONT_DETAILS )
 
 	//
-	#if(false)
-
-#endif
+	#if(true)
+		if (  deathBox.GetNetBool( "overrideRUI"  ) )
+		{
+			CreateDeathBoxRuiWithOverridenData( deathBox, nestedGCHandle  )
+		}
+	#endif
 
 
 	ChangeNestedGladiatorCardOwner( nestedGCHandle, ehi, null, eGladCardLifestateOverride.ALIVE )
@@ -536,12 +475,21 @@ string function DeathBoxTextOverride( entity ent )
 		return " "
 
 	if ( ShouldPickupDNAFromDeathBox( ent, GetLocalViewPlayer() ) )
-		return Localize( "#HINT_PICKUP_DNA_USE", ent.GetOwner().GetPlayerName() )
+	{
+		if ( ent.GetCustomOwnerName() != "" )
+		{
+			return Localize( "#HINT_PICKUP_DNA_USE", ent.GetCustomOwnerName() )
+		}
+		else
+		{
+			return Localize( "#HINT_PICKUP_DNA_USE", ent.GetOwner().GetPlayerName() )
+		}
+	}
 
 	if ( ent.GetLinkEntArray().len() == 0 )
 		return " "
 
-	EHI ornull ehi = TEMP_GetSavedEHI( ent )
+	EHI ornull ehi = GetEHIForDeathBox( ent )
 	if ( ehi == null )
 		return ""
 	expect EHI( ehi )
@@ -550,6 +498,10 @@ string function DeathBoxTextOverride( entity ent )
 
 	int team          = EHI_GetTeam( ehi )
 	string playerName = GetPlayerName( ehi )
+
+	if ( ent.GetCustomOwnerName() != "" ) //
+		playerName = ent.GetCustomOwnerName()
+
 	string hint       = "#DEATHBOX_HINT_NAME"
 
 	if ( IsEnemyTeam( team, GetLocalViewPlayer().GetTeam() ) )
@@ -1695,7 +1647,7 @@ void function SURVIVAL_Loot_QuickSwap_Internal( entity pickup, entity player, in
 	settings.loopSound = "UI_Survival_PickupTicker"
 	settings.successSound = "UI_Survival_DeathBoxOpen"
 	settings.displayRui = $"ui/extended_use_hint.rpak"
-	settings.displayRuiFunc = DisplayRuiForDeathBox
+	settings.displayRuiFunc = DefaultExtendedUseRui
 	settings.icon = $""
 	settings.hint = "#PROMPT_SWAP"
 	settings.duration = 0.3
@@ -1728,7 +1680,7 @@ ExtendedUseSettings function DeathBoxGetExtendedUseSettings( entity ent, entity 
 	settings.loopSound = "UI_Survival_PickupTicker"
 	settings.successSound = "UI_Survival_DeathBoxOpen"
 	settings.displayRui = $"ui/extended_use_hint.rpak"
-	settings.displayRuiFunc = DisplayRuiForDeathBox
+	settings.displayRuiFunc = DefaultExtendedUseRui
 	settings.icon = $""
 	settings.hint = "#PROMPT_OPEN"
 	settings.successFunc = ExtendedTryOpenGroundList
@@ -1748,36 +1700,14 @@ void function ExtendedTryOpenGroundList( entity ent, entity player, ExtendedUseS
 	OpenSurvivalGroundList( player, ent )
 }
 
-
-void function DisplayRuiForDeathBox( entity ent, entity player, var rui, ExtendedUseSettings settings )
+EHI ornull function GetEHIForDeathBox( entity box )
 {
-	RuiSetString( rui, "holdButtonHint", settings.holdHint )
-	RuiSetString( rui, "hintText", settings.hint )
-	RuiSetGameTime( rui, "startTime", Time() )
-	RuiSetGameTime( rui, "endTime", Time() + settings.duration )
-}
+	EHI eHandle = box.GetNetInt( "ownerEHI" )
 
-
-EHI ornull function TEMP_GetSavedEHI( entity box )
-{
-	if ( !(box in file.TEMP_boxToEHI) )
+	if ( eHandle == -1  )
 		return null
 
-	return file.TEMP_boxToEHI[ box ]
-}
-
-
-void function TEMP_SaveEHI( entity box )
-{
-	entity player = box.GetOwner()
-
-	if ( !IsValid( player ) )
-		return
-
-	if ( !(player in file.TEMP_boxToEHI) )
-		file.TEMP_boxToEHI[ box ] <- ToEHI( player )
-
-	file.TEMP_boxToEHI[ box ] = ToEHI( player )
+	return eHandle
 }
 
 
@@ -1872,110 +1802,43 @@ float function GetHighlightFillAlphaForLoot( entity lootEnt )
 
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if(true)
+void function CreateDeathBoxRuiWithOverridenData( entity deathBox, NestedGladiatorCardHandle nestedGCHandle  )
+{
+	printt( "Creating with overriden profile data"  )
+	SetNestedGladiatorCardOverrideName( nestedGCHandle, deathBox.GetCustomOwnerName() )
+
+	int characterIndex = deathBox.GetNetInt(  "characterIndex" )
+	LoadoutEntry characterLoadoutEntry = Loadout_CharacterClass()
+	ItemFlavor character = ConvertLoadoutSlotContentsIndexToItemFlavor( characterLoadoutEntry, characterIndex )
+	SetNestedGladiatorCardOverrideCharacter( nestedGCHandle, character )
+
+	int skinIndex = deathBox.GetNetInt( "skinIndex" )
+	LoadoutEntry skinLoadoutEntry = Loadout_CharacterSkin( character )
+	SetNestedGladiatorCardOverrideSkin( nestedGCHandle, ConvertLoadoutSlotContentsIndexToItemFlavor( skinLoadoutEntry, skinIndex ) )
+
+	int frameIndex = deathBox.GetNetInt( "frameIndex" )
+	LoadoutEntry frameLoadoutEntry = Loadout_GladiatorCardFrame( character )
+	SetNestedGladiatorCardOverrideFrame( nestedGCHandle, ConvertLoadoutSlotContentsIndexToItemFlavor( frameLoadoutEntry, frameIndex ) )
+
+	int stanceIndex = deathBox.GetNetInt( "stanceIndex"  )
+	LoadoutEntry stanceLoadoutEntry = Loadout_GladiatorCardStance( character )
+	SetNestedGladiatorCardOverrideStance( nestedGCHandle, ConvertLoadoutSlotContentsIndexToItemFlavor( stanceLoadoutEntry, stanceIndex ) )
+
+	int firstBadgeIndex = deathBox.GetNetInt( "firstBadgeIndex" )
+	LoadoutEntry firstBadgeLoadoutEntry = Loadout_GladiatorCardBadge( character, 0 )
+	int firstBadgeDataInt = deathBox.GetNetInt( "firstBadgeDataInt"  )
+	SetNestedGladiatorCardOverrideBadge( nestedGCHandle, 0, ConvertLoadoutSlotContentsIndexToItemFlavor( firstBadgeLoadoutEntry, firstBadgeIndex ), firstBadgeDataInt )
+
+	int secondBadgeIndex = deathBox.GetNetInt( "secondBadgeIndex" )
+	LoadoutEntry secondBadgeLoadoutEntry = Loadout_GladiatorCardBadge( character, 1 )
+	int secondBadgeDataInt = deathBox.GetNetInt( "secondBadgeDataInt"  )
+	SetNestedGladiatorCardOverrideBadge( nestedGCHandle, 1, ConvertLoadoutSlotContentsIndexToItemFlavor( secondBadgeLoadoutEntry, secondBadgeIndex ), secondBadgeDataInt )
+
+	int thirdBadgeIndex = deathBox.GetNetInt( "thirdBadgeIndex" )
+	LoadoutEntry thirdBadgeLoadoutEntry = Loadout_GladiatorCardBadge( character, 2 )
+	int thirdBadgeDataInt = deathBox.GetNetInt( "thirdBadgeDataInt"  )
+	SetNestedGladiatorCardOverrideBadge( nestedGCHandle, 2, ConvertLoadoutSlotContentsIndexToItemFlavor( thirdBadgeLoadoutEntry, thirdBadgeIndex ), thirdBadgeDataInt )
+
+}
 #endif

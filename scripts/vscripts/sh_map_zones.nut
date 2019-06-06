@@ -22,9 +22,17 @@ global function MapZones_GetChromaBackgroundForZoneId
 
 
 
-//
+
+
+
+
+
+
 
 //
+
+
+
 
 
 
@@ -133,6 +141,40 @@ int function MapZones_GetZoneIdForTriggerName( string triggerName )
 	return zoneId
 }
 
+string function GetZoneGroupForZoneId( int zoneId )
+{
+	Assert( zoneId < GetDatatableRowCount( file.mapZonesDataTable ) )
+
+	string name = ""
+	int column = GetDataTableColumnByName( file.mapZonesDataTable, "zoneGroup" )
+	if ( column >= 0 )
+		name = GetDataTableString( file.mapZonesDataTable, zoneId, column )
+
+	if ( name.len() == 0 )
+		return GetZoneNameForZoneId( zoneId )
+	return name
+}
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+
 #if(false)
 
 
@@ -174,30 +216,6 @@ int function MapZones_GetZoneIdForTriggerName( string triggerName )
 
 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -221,70 +239,6 @@ int function MapZones_GetZoneIdForTriggerName( string triggerName )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 
 
 
@@ -447,6 +401,138 @@ int function MapZones_GetZoneIdForTriggerName( string triggerName )
 
 
 
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -507,8 +593,53 @@ int function MapZones_GetZoneIdForTriggerName( string triggerName )
 
 
 
+
+
+
 //
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -541,10 +672,6 @@ void function MapZones_ZoneIntroText( entity player, string zoneDisplayName, int
 {
 	if ( s_zoneIntroRui != null )
 		RuiDestroyIfAlive( s_zoneIntroRui )
-
-//
-//
-//
 
 	var rui = CreateCockpitRui( $"ui/map_zone_intro_title.rpak", 0 )
 	RuiSetString( rui, "titleText", zoneDisplayName )
@@ -597,9 +724,16 @@ void function SCB_OnPlayerEntersMapZone( int zoneId, int zoneTier )
 
 
 
-
-
 //
+
+
+
+
+
+
+
+
+
 
 
 

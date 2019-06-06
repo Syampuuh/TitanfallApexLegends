@@ -39,8 +39,8 @@
 		ControlName				RuiPanel
 		xpos					0
 		ypos					-130
-		wide					511
-		tall					349
+		wide					519
+		tall					357
 		visible					1
         rui					    "ui/battle_pass_status.rpak"
 

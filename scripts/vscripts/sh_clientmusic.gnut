@@ -1,174 +1,363 @@
-//
-
-#if(CLIENT)
 global function ClientMusic_SharedInit
 global function ClientMusic_RegisterNetworking
-global function ClientMusic_DisableForClient
-global function ClientMusic_EnableForClient
-#endif
-
-#if(false)
-
-
-#endif
-
-#if(false)
-
-
-#endif //
+//
+global function ClientMusic_PlayCustomTrackOnClient
+global function ClientMusic_StopCustomTrackOnClient
 
 #if(CLIENT)
 global function ClientMusic_RequestStingerForNewZone
-#endif
 
-#if CLIENT && DEV 
-global function ClientMusic_PrintStatus
+#if(false)
+
 #endif //
 
+#if(DEV)
+global function ClientMusic_PrintStatus
+#endif //
+#endif //
+
+#if(false)
+
+
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
 
 
 //
-//
-//
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 
-#if(CLIENT)
+
+
+
+
+
+
+/**/
+
+/**/
+/**/
+/**/
+/**/
+/**/
+/**///
+
+//
+/**/
+/**/
+/**/
+/**/
+/**/
+
+//
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+
+/**/
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#else //
+
 global enum eMusicTrack
 {
 	ZoneTransitionStingers,
 
-	#if(false)
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-#endif //
-
 	_count
 }
-#endif
 
+const array<string> [eMusicTrack._count] s_TracksMap =
+[
+	/**/			["music_skyway_17_slonedies"],
+]
 
-#if(CLIENT)
 enum eMusicLevel
 {
 	None,
-	#if(false)
+	Ambient,
 
-
-
-
-
-
-
-#endif
+	CustomTrack,
 
 	_count
 }
-#endif
+
+#endif //
 
 
-//
-//
-//
-//
-//
 
 #if(CLIENT)
+
 struct TrackPlayData
 {
-	int        shufflePos = 999
+	int shufflePos = 999
 	array<int> shuffledIndices
 
 	int lastIndex = -1
 }
-#endif
+TrackPlayData[eMusicTrack._count] s_TrackPlayDatas
+
+int s_lastPlayedMuscTrackDEBUG = -1
+string function GetNextShuffledTrackFor( int musicTrack )
+{
+	s_lastPlayedMuscTrackDEBUG = musicTrack
+	Assert( (musicTrack >= 0) && (musicTrack < eMusicTrack._count) )
+	if ( s_TracksMap[musicTrack].len() == 0 )
+		return ""
+
+	TrackPlayData tpd = s_TrackPlayDatas[musicTrack]
+	array<int> indices = tpd.shuffledIndices
+
+	++(tpd.shufflePos)
+	if ( tpd.shufflePos >= indices.len() )
+	{
+		tpd.shufflePos = 0
+
+		//
+		{
+
+			int length = s_TracksMap[musicTrack].len()
+			indices.resize( length )
+			for ( int idx = 0; idx < length; ++idx )
+				indices[idx] = idx
+			indices.randomize()
+
+			//
+			if ( (length > 1) && (indices[0] == tpd.lastIndex) )
+				indices.reverse()
+		}
+	}
+
+	tpd.lastIndex = indices[tpd.shufflePos]
+	return s_TracksMap[musicTrack][tpd.lastIndex]
+}
+
+bool s_zoneStingerRequested = false
+float s_zoneStingerRequestedTime
+void function ClientMusic_RequestStingerForNewZone( int zoneId )
+{
+	s_zoneStingerRequested = true
+	s_zoneStingerRequestedTime = Time()
+}
+
+float function GetStartTimeForAlias( string alias )
+{
+#if(false)
 
 
-#if CLIENT || UI 
-struct
+
+
+
+#endif //
+	return 0.0
+}
+
+var s_lastPlayedHandle = null
+string s_lastPlayedAliasDEBUG = ""
+void function StartPlayingMusic( string musicAlias )
+{
+	if ( musicAlias == "" )
+		return
+	entity player = GetLocalViewPlayer()
+	if ( !IsValid( player ) )
+		return
+
+	float seekTime = GetStartTimeForAlias( musicAlias )
+	if ( seekTime > 0.0001 )
+		s_lastPlayedHandle = EmitSoundOnEntityWithSeek( player, musicAlias, seekTime )
+	else
+		s_lastPlayedHandle = EmitSoundOnEntity( player, musicAlias )
+	SetPlayThroughKillReplay( s_lastPlayedHandle )
+	s_lastPlayedAliasDEBUG = musicAlias
+
+	printf( "%s() - '%s'", FUNC_NAME(), musicAlias )
+}
+void function StopPlayingMusic()
+{
+	if ( s_lastPlayedHandle != null )
+		StopSound( s_lastPlayedHandle )
+
+	s_lastPlayedHandle = null
+}
+
+
+int s_cachedAnswer = 0
+float s_cachedAnswerTime = -999.0
+float s_cachedAnswerTimeWasLastTrue = -999.0
+int function CountEnemiesNearby()
 {
 	#if(false)
 
-#endif
-
-	#if(CLIENT)
-		table<int, array<string> > tracksMap
-
-		bool  musicSystemIsDisabled = false
-		bool  zoneStingerRequested = false
-		float zoneStingerRequestedTime
-		bool  threadIsRunning = false
-		bool  threadInFrame = false
-		bool  threadInLoopWaitFrame = false
-		float threadStartTime = -999.0
-		float threadLastFrameTime = -999.0
-		int   queuedCustomTrack = -1
-		int   musicLevel = eMusicLevel.None
-		bool  customTrackIsPlaying = false
-
-		TrackPlayData[eMusicTrack._count] trackPlayDatas
-		int                               lastPlayedMusicTrackDEBUG
-		string                            lastPlayedAliasDEBUG
-		var                               lastPlayedHandle = null
-
-		#if(false)
 
 
 
-#endif
+
+
+
+
+
+
+
+
+
+#else
+		return 0
 	#endif
-} file
-#endif
-
-
-
-//
-//
-//
-//
-//
-
-#if CLIENT || UI 
-void function ClientMusic_SharedInit()
+}
+float function CountEnemiesNearbyTimeSinceValid()
 {
-	#if(CLIENT)
-		#if(false)
+	return (Time() - s_cachedAnswerTimeWasLastTrue)
+}
+
+float function GetEffectiveDeltaSince( float timeThen )
+{
+	if ( timeThen <= 0.0001 )
+		return 999999.0
+
+	return (Time() - timeThen)
+}
+
+bool function CombatTriggeredCheck( entity player )
+{
+	#if(false)
+
+
+
 
 #endif
-	#endif
 
-	#if(CLIENT)
-		RegisterSignal( "ClientMusic_CustomTrackStop" )
+	return false
+}
 
-		file.tracksMap[eMusicTrack.ZoneTransitionStingers] <- [
-			"music_beacon_12_spoke1fallensoldiers",
-			"music_skyway_17_slonedies",
-			"music_timeshift_16_explorepresent",
-			"music_timeshift_22_panicburst",
-			"music_wilds_14_timetoinstallbatterytwo"]
+const float NEARBY_FRIENDLY_RANGE = 3000.0
+bool function AnyNearbyFriendlyIsCombatTriggered( entity player )
+{
+	array<entity> teamPlayers = GetPlayerArrayEx( "any", player.GetTeam(), TEAM_ANY, player.GetOrigin(), NEARBY_FRIENDLY_RANGE )
+	foreach ( teamPlayer in teamPlayers )
+	{
+		if ( CombatTriggeredCheck( teamPlayer ) )
+			return true
+	}
 
-		#if(false)
+	return false
+}
+
+bool function AnyNearbyFriendlyIsBleedingOut( entity player )
+{
+	array<entity> teamPlayers = GetPlayerArrayEx( "any", player.GetTeam(), TEAM_ANY, player.GetOrigin(), NEARBY_FRIENDLY_RANGE )
+	foreach ( teamPlayer in teamPlayers )
+	{
+		if ( Bleedout_IsBleedingOut( teamPlayer ) )
+			return true
+	}
+
+	return false
+}
+
+bool function MyTeamIsDeadMyWholeTeamIsDead( entity player )
+{
+	array<entity> teamPlayers = GetPlayerArrayOfTeam_Alive( player.GetTeam() )
+	if ( teamPlayers.len() == 0 )
+		return true
+
+	return false
+}
+
+bool s_customTrackIsPlaying = false
+void function StartPlayingCustomTrack( int musicTrack )
+{
+	StopPlayingCustomTrack()
+	EndSignal( clGlobal.levelEnt, "ClientMusic_CustomTrackStop" )
+
+	string alias = GetNextShuffledTrackFor( musicTrack )
+	if ( alias == "" )
+		return
+
+	StartPlayingMusic( alias )
+	s_customTrackIsPlaying = true
+
+	OnThreadEnd(
+		function() : ()
+		{
+			s_customTrackIsPlaying = false
+		}
+	)
+
+	if ( s_lastPlayedHandle != null )
+		WaitSignal( s_lastPlayedHandle, "OnSoundFinished" )
+}
+
+void function StopPlayingCustomTrack()
+{
+	Signal( clGlobal.levelEnt, "ClientMusic_CustomTrackStop" )
+	Assert( s_customTrackIsPlaying == false )
+}
+
+#if(false)
+
+
 
 
 
@@ -190,145 +379,174 @@ void function ClientMusic_SharedInit()
 
 #endif //
 
-		thread ClientMusicThinkThread()
-	#endif
-}
-#endif
-
-
-#if(CLIENT)
-void function ClientMusic_RegisterNetworking()
+int s_queuedCustomTrack = -1
+int function GetDesiredMusicLevel( int currentMusicLevel )
 {
-	Remote_RegisterClientFunction( "ClientMusic_DisableForClient", "entity" )
-	Remote_RegisterClientFunction( "ClientMusic_EnableForClient", "entity" )
-	#if(false)
+#if(false)
 
 
-#endif
-}
-#endif
+
+
 
 
 
 //
 //
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //
 
-#if(CLIENT)
-void function ClientMusic_RequestStingerForNewZone( int zoneId )
-{
-	file.zoneStingerRequested = true
-	file.zoneStingerRequestedTime = Time()
-}
-#endif
-
-
-#if(CLIENT)
-void function ClientMusic_DisableForClient( entity player )
-{
-	#if(false)
 
 #else
-		Assert( player == GetLocalClientPlayer() )
-		file.musicSystemIsDisabled = true
-	#endif
-}
+
+	return eMusicLevel.None
 #endif
+}
 
-
-#if(CLIENT)
-void function ClientMusic_EnableForClient( entity player )
+int s_musicLevel = eMusicLevel.None
+void function ClientMusicFRAME()
 {
-	#if(false)
+	int newMusicLevel = GetDesiredMusicLevel( s_musicLevel )
+	if ( (newMusicLevel != s_musicLevel) || ((newMusicLevel == eMusicLevel.CustomTrack) && (s_queuedCustomTrack > 0)) )
+	{
+		StopPlayingMusic()
+		if ( newMusicLevel == eMusicLevel.CustomTrack )
+		{
+			thread StartPlayingCustomTrack( s_queuedCustomTrack )
+			s_queuedCustomTrack = -1
+		}
+#if(false)
 
-#else
-		Assert( player == GetLocalClientPlayer() )
-		file.musicSystemIsDisabled = false
-	#endif
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+	}
+
+	if ( s_zoneStingerRequested && (s_musicLevel == eMusicLevel.Ambient || s_musicLevel == eMusicLevel.None) )
+	{
+		float timeSinceRequest = (Time() - s_zoneStingerRequestedTime)
+		if ( timeSinceRequest < 10.0 )
+			StartPlayingMusic( GetNextShuffledTrackFor( eMusicTrack.ZoneTransitionStingers ) )
+
+		s_zoneStingerRequested = false
+	}
+
+	//
+#if(false)
+
+
+
+
+
+
+
+
+
+#endif //
 }
-#endif
 
 
-#if(false)
+bool s_isRunning = false
+bool s_inFrame = false
+bool s_inLoopWaitFrame = false
+float s_startTime = -999.0
+float s_lastFrameTime = 0
+void function ClientMusicFrameThread()
+{
+	Assert( !s_isRunning )
+	s_isRunning = true
+	s_startTime = Time()
 
+	WaitFrame()
 
+	while ( true )
+	{
+#if(DEV)
+		float preFrameTime = Time()
+#endif //
 
+		s_inFrame = true
+		s_lastFrameTime = Time()
+		ClientMusicFRAME()
+		s_inFrame = false
 
+#if(DEV)
+		float postFrameTime = Time()
+		Assert( preFrameTime == postFrameTime, format( "ClientMusicFRAME() stalled for %.2f seconds. Should have no waits.", (postFrameTime - preFrameTime) ) )
+#endif //
 
-//
+		s_inLoopWaitFrame = true
+		WaitFrame()
+		s_inLoopWaitFrame = false
+	}
+}
 
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-
-#if(false)
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-#endif
-
-
-
-//
-//
-//
-//
-//
-
-#if CLIENT && DEV 
+#if(DEV)
 void function ClientMusic_PrintStatus()
 {
-	printf( "running: %s, mid-frame: %s, in-waitframe: %s, startTime: %.2f, lastFrameTime: %.2f, timeNow: %.2f", (file.threadIsRunning ? "yes" : "no"), (file.threadInFrame ? "yes" : "no"), (file.threadInLoopWaitFrame ? "yes" : "no"), file.threadStartTime, file.threadLastFrameTime, Time() )
+	printf( "running: %s, mid-frame: %s, in-waitframe: %s, startTime: %.2f, lastFrameTime: %.2f, timeNow: %.2f", (s_isRunning ? "yes" : "no"), (s_inFrame ? "yes" : "no"), (s_inLoopWaitFrame ? "yes" : "no"), s_startTime, s_lastFrameTime, Time() )
 	printf( "status: %s", GetClientMusicStatusLine() )
 }
-#endif
+#endif //
 
-
-#if CLIENT && DEV 
-string function GetClientMusicStatusLine()
-{
-	//
-	return format( "'%s',   latest - %s::'%s'", GetDebugNameForMusicLevel( file.musicLevel ), GetDebugNameForMusicTrack( file.lastPlayedMusicTrackDEBUG ), file.lastPlayedAliasDEBUG )
-}
-#endif
-
-
-#if CLIENT && DEV 
 string function GetDebugNameForMusicLevel( int musicLevel )
 {
 	foreach( string key, int val in eMusicLevel )
@@ -338,10 +556,7 @@ string function GetDebugNameForMusicLevel( int musicLevel )
 	}
 	return ""
 }
-#endif
 
-
-#if CLIENT && DEV 
 string function GetDebugNameForMusicTrack( int musicTrack )
 {
 	foreach( string key, int val in eMusicTrack )
@@ -351,373 +566,96 @@ string function GetDebugNameForMusicTrack( int musicTrack )
 	}
 	return ""
 }
-#endif
 
-
-
-//
-//
-//
-//
-//
-
-
-#if(CLIENT)
-void function ClientMusicThinkThread()
+#if(DEV)
+string function GetClientMusicStatusLine()
 {
-	Assert( !file.threadIsRunning )
-	file.threadIsRunning = true
-	file.threadStartTime = Time()
-
-	while ( true )
-	{
-		#if(DEV)
-			float preFrameTime = Time()
-		#endif
-
-		file.threadInFrame = true
-		file.threadLastFrameTime = Time()
-		ClientMusicThink()
-		file.threadInFrame = false
-
-		#if(DEV)
-			float postFrameTime = Time()
-			Assert( preFrameTime == postFrameTime, format( "ClientMusicFRAME() stalled for %.2f seconds. Should have no waits.", (postFrameTime - preFrameTime) ) )
-		#endif
-
-		file.threadInLoopWaitFrame = true
-		WaitFrame()
-		file.threadInLoopWaitFrame = false
-	}
+	//
+	return format( "'%s',   latest - %s::'%s'", GetDebugNameForMusicLevel( s_musicLevel ), GetDebugNameForMusicTrack( s_lastPlayedMuscTrackDEBUG ), s_lastPlayedAliasDEBUG )
 }
-#endif
+#endif //
+#endif //
 
+const string FUNCNAME_PLAYCUSTOMTRACKONCLIENT = "ClientMusic_PlayCustomTrackOnClient"
+const string FUNCNAME_STOPCUSTOMTRACKONCLIENT = "ClientMusic_StopCustomTrackOnClient"
 
-#if(CLIENT)
-void function ClientMusicThink()
+#if(false)
+
+#endif //
+void function ClientMusic_RegisterNetworking()
 {
-	bool allowStinger = true
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	Remote_RegisterClientFunction( FUNCNAME_PLAYCUSTOMTRACKONCLIENT, "entity", "int", -1, eMusicTrack._count )
+	Remote_RegisterClientFunction( FUNCNAME_STOPCUSTOMTRACKONCLIENT, "entity" )
+#if(false)
 
 #endif
+}
 
-	if ( file.zoneStingerRequested && allowStinger )
-	{
-		float timeSinceRequest = (Time() - file.zoneStingerRequestedTime)
-		if ( timeSinceRequest < 10.0 )
-		{
 #if(false)
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+//
+#endif //
+
+void function ClientMusic_PlayCustomTrackOnClient( entity player, int musicTrack )
+{
+	Assert( (musicTrack >= 0) && (musicTrack < eMusicTrack._count) )
+
+#if(false)
+//
+
+#else
+	printf( "%s() - recieved for musicTrack:%d", FUNC_NAME(), musicTrack )
+	s_queuedCustomTrack = musicTrack
 #endif
-			{
-				StartPlayingMusic( "music_skyway_17_slonedies" )
-			}
-		}
+}
 
-		file.zoneStingerRequested = false
-	}
+void function ClientMusic_StopCustomTrackOnClient( entity player )
+{
+#if(false)
 
-	//
-	#if(false)
+#else
+	printf( "%s() - received.", FUNC_NAME() )
+	StopPlayingCustomTrack()
+#endif
+}
+
+void function ClientMusic_SharedInit()
+{
+#if(CLIENT)
+	RegisterSignal( "ClientMusic_CustomTrackStop" )
+	thread ClientMusicFrameThread()
+#endif //
+}
+
+
+#if(false)
+
+
+
+
+
+
+
+
 
 
 
 
 
 #endif //
-}
-#endif
-
-
-#if(CLIENT)
-void function StartPlayingMusic( string musicAlias )
-{
-	if ( musicAlias == "" )
-		return
-	entity player = GetLocalViewPlayer()
-	if ( !IsValid( player ) )
-		return
-
-	file.lastPlayedHandle = EmitSoundOnEntity( player, musicAlias )        //
-	SetPlayThroughKillReplay( file.lastPlayedHandle )
-	file.lastPlayedAliasDEBUG = musicAlias
-
-	printf( "%s() - '%s'", FUNC_NAME(), musicAlias )
-}
-#endif
-
-
-#if(CLIENT)
-void function StopPlayingMusic()
-{
-	//
-
-	if ( file.lastPlayedHandle != null )
-		StopSound( file.lastPlayedHandle )
-
-	file.lastPlayedHandle = null
-}
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-#endif
 
 

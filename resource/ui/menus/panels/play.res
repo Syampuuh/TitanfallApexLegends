@@ -1,5 +1,14 @@
 "resource/ui/menus/panels/play.res"
 {
+    Screen
+    {
+        ControlName				Label
+        wide			        %100
+        tall			        %100
+        labelText				""
+        visible					0
+    }
+
     PanelFrame
     {
 		ControlName				Label
@@ -13,6 +22,28 @@
         paintbackground         1
 
         proportionalToParent    1
+    }
+
+    MiniPromo
+    {
+        ControlName				RuiButton
+        wide					254
+        tall                    270
+        ypos					-59
+        rui                     "ui/mini_promo.rpak"
+        visible					1
+        cursorVelocityModifier  0.7
+
+        navDown                 ModeButton
+        navRight                InviteFriendsButton0
+
+        proportionalToParent    1
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+
+        sound_focus             "UI_Menu_Focus_Large"
     }
 
 	ChatRoomTextChat
@@ -46,7 +77,7 @@
     {
         ControlName				RuiButton
         classname               "MenuButton"
-        wide					384
+        wide					367
         tall					38
         ypos                    16
         rui                     "ui/generic_button.rpak"
@@ -69,16 +100,17 @@
     {
         ControlName				RuiButton
         classname               "MenuButton"
-        wide					384
+        wide					367
         tall					76
         ypos                    16
+        zpos                    10
         rui                     "ui/generic_dropdown_button.rpak"
         labelText               ""
         visible					1
         cursorVelocityModifier  0.7
         sound_accept            "UI_Menu_SelectMode_Extend"
 
-        navUp                   FillButton
+        navUp                   MiniPromo
         navDown                 ReadyButton
         navRight                InviteFriendsButton0
 
@@ -89,11 +121,92 @@
         pin_to_sibling_corner	TOP_LEFT
     }
 
+    GamemodeSelectV2Button
+    {
+        ControlName				RuiButton
+        classname               "MenuButton MatchmakingStatusRui"
+        wide					367
+        tall					168
+        ypos                    13
+        zpos                    10
+        rui                     "ui/gamemode_select_v2_lobby_button.rpak"
+        labelText               ""
+        visible					1
+        cursorVelocityModifier  0.7
+        sound_accept            "UI_Menu_SelectMode_Extend"
+
+        navUp                   MiniPromo
+        navDown                 ReadyButton
+        navRight                InviteFriendsButton0
+
+        proportionalToParent    1
+
+        pin_to_sibling			ReadyButton
+        pin_corner_to_sibling	BOTTOM_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+    }
+
+
+    EliteBadge
+    {
+        ControlName				RuiButton
+        wide					96
+        tall					96
+        ypos                    0
+        xpos                    0
+        zpos                    20
+        rui                     "ui/elite_badge_lobby.rpak"
+        labelText               ""
+        visible					1
+
+        proportionalToParent    1
+
+        pin_to_sibling			ModeButton
+        pin_corner_to_sibling	BOTTOM_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+    }
+
+    PlaylistNotificationMessage
+    {
+        ControlName				RuiPanel
+
+        wide					288
+        tall					40
+
+        ypos                    0
+        xpos                    0
+        zpos					3
+
+        rui						"ui/menu_button_small.rpak"
+        labelText               ""
+        visible					0
+
+        ruiArgs
+        {
+            buttonText "#APEX_ELITE_AVAILABLE"
+            isSelected 1
+        }
+
+        enabled					1
+        visible					1
+        auto_wide_tocontents 	1
+        behave_as_label         1
+        ruiDefaultHeight        36
+        fontHeight              32
+
+        proportionalToParent    1
+
+        pin_to_sibling			ModeButton
+        pin_corner_to_sibling	BOTTOM_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+    }
+
+
     ReadyButton
     {
         ControlName				RuiButton
         classname               "MenuButton MatchmakingStatusRui"
-        wide					384
+        wide					367
         tall					112
         rui                     "ui/generic_ready_button.rpak"
         labelText               ""
@@ -109,32 +222,6 @@
         pin_to_sibling_corner	BOTTOM_LEFT
 
         sound_focus             "UI_Menu_Focus_Large"
-    }
-
-    OpenLootBoxButton
-    {
-        ControlName             RuiButton
-        classname               "MenuButton"
-        wide                    256
-        tall                    112
-        xpos                    0
-        ypos                    -16
-        rui                     "ui/generic_loot_button.rpak"
-        labelText               ""
-        visible                 1
-        cursorVelocityModifier  0.7
-
-        proportionalToParent    1
-
-        navLeft                 InviteFriendsButton1
-        navDown                 MiniPromo
-
-        pin_to_sibling          PanelFrame
-        pin_corner_to_sibling   TOP_RIGHT
-        pin_to_sibling_corner   TOP_RIGHT
-
-        sound_focus             "UI_Menu_Focus_Large"
-        sound_accept            "UI_Menu_OpenLootBox"
     }
 
     InviteFriendsButton0
@@ -160,7 +247,6 @@
         xpos                    400
         ypos                    -90
 
-        navDown                 MiniPromo
         navLeft                 FriendButton1
         navRight                OpenLootBoxButton
 
@@ -321,6 +407,165 @@
 		pin_to_sibling_corner	TOP_LEFT
 	}
 
+	ChallengesBox
+    {
+        ControlName				RuiPanel
+        ypos					-60
+        wide					308
+        tall					86
+        visible					0
+        rui					    "ui/lobby_challenge_box.rpak"
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	TOP_RIGHT
+        pin_to_sibling_corner	TOP_RIGHT
+    }
+
+    ChallengeButton0
+    {
+        ControlName RuiButton
+
+        pin_to_sibling          ChallengesBox
+        pin_corner_to_sibling	TOP_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+        xpos                    0
+        ypos                    16
+        wide					308
+        tall					82
+
+        visible                 0
+        rui                     "ui/lobby_challenge_box_row.rpak"
+    }
+
+    ChallengeButton1
+    {
+        ControlName RuiButton
+
+        pin_to_sibling          ChallengeButton0
+        pin_corner_to_sibling	TOP_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+        xpos                    0
+        ypos                    16
+        wide					308
+        tall					82
+
+        visible                 0
+        rui                     "ui/lobby_challenge_box_row.rpak"
+    }
+
+    ChallengeButton2
+    {
+        ControlName RuiButton
+
+        pin_to_sibling          ChallengeButton1
+        pin_corner_to_sibling	TOP_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+        xpos                    0
+        ypos                    16
+        wide					308
+        tall					82
+
+        visible                 0
+        rui                     "ui/lobby_challenge_box_row.rpak"
+    }
+
+    ChallengeButton3
+    {
+        ControlName RuiButton
+
+        pin_to_sibling          ChallengeButton2
+        pin_corner_to_sibling	TOP_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+        xpos                    0
+        ypos                    16
+        wide					308
+        tall					82
+
+        visible                 0
+        rui                     "ui/lobby_challenge_box_row.rpak"
+    }
+
+    AllChallengesButton
+    {
+        ControlName			    RuiButton
+        ypos                    31
+        zpos			        3
+        wide			        400 // intentionally goes off screen
+        tall			        64
+        visible			        0
+        labelText               ""
+        rui					    "ui/lobby_all_challenges_button.rpak"
+        proportionalToParent    1
+        sound_focus             "UI_Menu_Focus_Small"
+        cursorVelocityModifier  0.7
+        pin_to_sibling			ChallengeButton2
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+    }
+
+    OpenLootBoxButtonAnchorWithChallenges
+    {
+		ControlName				Label
+		xpos					0
+		ypos					0
+        wide                    308
+        tall                    88
+		labelText				""
+		visible				    0
+        bgcolor_override        "0 0 0 64"
+        paintbackground         1
+
+        proportionalToParent    1
+
+        pin_to_sibling          AllChallengesButton
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
+    }
+
+    OpenLootBoxButtonAnchorWithoutChallenges
+    {
+		ControlName				Label
+		xpos					0
+		ypos					-24
+        wide                    308
+        tall                    88
+		labelText				""
+		visible				    0
+        bgcolor_override        "0 0 0 64"
+        paintbackground         1
+
+        proportionalToParent    1
+
+        pin_to_sibling          PanelFrame
+        pin_corner_to_sibling   TOP_RIGHT
+        pin_to_sibling_corner   TOP_RIGHT
+    }
+
+    OpenLootBoxButton
+    {
+        ControlName             RuiButton
+        classname               "MenuButton"
+        wide                    308
+        tall                    88
+        xpos                    0
+        ypos                    0
+        rui                     "ui/generic_loot_button.rpak"
+        labelText               ""
+        visible                 1
+        cursorVelocityModifier  0.7
+
+        proportionalToParent    1
+
+        navLeft                 InviteFriendsButton1
+
+        pin_to_sibling          OpenLootBoxButtonAnchorWithoutChallenges
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   TOP_LEFT
+
+        sound_focus             "UI_Menu_Focus_Large"
+        sound_accept            "UI_Menu_OpenLootBox"
+    }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //ChatroomPanel
@@ -393,27 +638,5 @@
         tall					470
         visible					0
         controlSettingsFile		"resource/ui/menus/panels/match_info.res"
-    }
-
-    MiniPromo
-    {
-        ControlName				RuiButton
-        wide					254
-        tall                    270
-        ypos					-83
-        rui                     "ui/mini_promo.rpak"
-        visible					1
-        cursorVelocityModifier  0.7
-
-        navLeft                 InviteFriendsButton1
-        navUp                   OpenLootBoxButton
-
-        proportionalToParent    1
-
-        pin_to_sibling			PanelFrame
-        pin_corner_to_sibling	BOTTOM_RIGHT
-        pin_to_sibling_corner	BOTTOM_RIGHT
-
-        sound_focus             "UI_Menu_Focus_Large"
     }
 }

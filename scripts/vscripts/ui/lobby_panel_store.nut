@@ -4,6 +4,11 @@ global function InitStoreVCPanel
 global function InitStoreCharactersPanel
 global function InitLootPanel
 global function InitOffersPanel
+#if(false)
+
+
+#endif
+
 global function JumpToStoreCharacter
 
 enum eStoreSection
@@ -85,11 +90,11 @@ struct
 struct SeasonalStoreData
 {
 	string seasonTag = ""
-	asset tallImage = $""
-	asset squareImage = $""
-	asset topImage = $""
-	asset tallFrameOverlayImage = $""
-	asset squareFrameOverlayImage = $""
+	asset  tallImage = $""
+	asset  squareImage = $""
+	asset  topImage = $""
+	asset  tallFrameOverlayImage = $""
+	asset  squareFrameOverlayImage = $""
 }
 
 
@@ -112,6 +117,14 @@ struct
 	table< string, SeasonalStoreData > seasonalDataMap
 } s_offers
 
+
+#if(false)
+
+
+
+
+#endif
+
 void function InitDummyPanel( var panel )
 {
 
@@ -133,9 +146,19 @@ void function InitStorePanel( var panel )
 
 	int buttonNum = 0
 
+	#if(false)
+//
+//
+
+
+
+
+#endif
+
 	//
 	{
 		var tabBody = Hud_GetChild( panel, "ECPanel" )
+		//
 		AddTab( panel, tabBody, "#MENU_STORE_PANEL_SHOP" )
 	}
 
@@ -172,7 +195,7 @@ void function OnStorePanel_Show( var panel )
 	//
 	DeactivateTab( tabData )
 	SetTabNavigationEnabled( file.storePanel, false )
-	tabData.tabIndex = 0
+
 	foreach ( tabDef in GetPanelTabs( file.storePanel ) )
 	{
 		SetTabDefEnabled( tabDef, false )
@@ -217,6 +240,7 @@ void function OnStorePanel_Hide( var panel )
 	file.storeCacheValid = false
 }
 
+
 void function CallDLCStoreCallback_Safe()
 {
 	if ( !file.openDLCStoreCallbackCalled )
@@ -226,9 +250,11 @@ void function CallDLCStoreCallback_Safe()
 	}
 }
 
+
 void function OnGRXStoreUpdate()
 {
 	TabData tabData = GetTabDataForPanel( file.storePanel )
+	int numTabs = tabData.tabDefs.len()
 
 	if ( !GRX_IsInventoryReady() || !GRX_AreOffersReady() )
 	{
@@ -250,17 +276,33 @@ void function OnGRXStoreUpdate()
 		int vcTabIndex = -1
 		foreach ( tabDef in GetPanelTabs( file.storePanel ) )
 		{
+			if ( Hud_GetHudName( tabDef.panel ) == "ECPanel" )
+				tabDef.title = "#MENU_STORE_EXCLUSIVE"
+
 			if ( Hud_GetHudName( tabDef.panel ) == "LootPanel" )
+			{
 				SetTabDefEnabled( tabDef, GetLootTickPurchaseOffer() != null )
+			}
+#if(false)
+
+
+
+
+#endif
 			else
+			{
 				SetTabDefEnabled( tabDef, true )
+			}
 		}
 
 		int activeIndex = tabData.tabIndex
 		if ( !file.storeCacheValid && uiGlobal.lastMenuNavDirection == MENU_NAV_FORWARD )
 			activeIndex = 0
 
-		bool wasPanelActive = IsTabActive( tabData )
+		while( !IsTabIndexEnabled( tabData, activeIndex ) && activeIndex < numTabs )
+			activeIndex++
+
+		bool wasPanelActive       = IsTabActive( tabData )
 		bool isActiveIndexVCPanel = activeIndex == Tab_GetTabIndexByBodyName( tabData, "VCPanel" )
 		if ( !isActiveIndexVCPanel || !wasPanelActive )
 			ActivateTab( tabData, activeIndex )
@@ -371,8 +413,8 @@ void function InitVCPacks( var panel )
 
 	s_vc.packsInitialized = true
 
-	array<int> vcPriceInts       = GetEntitlementPricesAsInt( s_vc.vcPackEntitlements )
-	array<string> vcPriceStrings = GetEntitlementPricesAsStr( s_vc.vcPackEntitlements )
+	array<int> vcPriceInts               = GetEntitlementPricesAsInt( s_vc.vcPackEntitlements )
+	array<string> vcPriceStrings         = GetEntitlementPricesAsStr( s_vc.vcPackEntitlements )
 	array<string> vcOriginalPriceStrings = GetEntitlementOriginalPricesAsStr( s_vc.vcPackEntitlements )
 
 	for ( int vcPackIndex = 0; vcPackIndex < STORE_VC_NUM_PACKS; vcPackIndex++ )
@@ -1048,17 +1090,17 @@ void function InitOffers()
 	int featuredWidth = 0
 
 	int exclusiveWidth = 0
-	int exclusiveX	   = 0
+	int exclusiveX     = 0
 
 	var dataTable = GetDataTable( $"datatable/seasonal_store_data.rpak" )
 	for ( int i = 0; i < GetDatatableRowCount( dataTable ); i++ )
 	{
-		string seasonTag = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "seasonTag" ) ).tolower()
-		asset tallImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "tallImage" ) )
-		asset squareImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "squareImage" ) )
-		asset tallFrameOverlayImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "tallFrameOverlay" ) )
+		string seasonTag              = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "seasonTag" ) ).tolower()
+		asset tallImage               = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "tallImage" ) )
+		asset squareImage             = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "squareImage" ) )
+		asset tallFrameOverlayImage   = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "tallFrameOverlay" ) )
 		asset squareFrameOverlayImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "squareFrameOverlay" ) )
-		asset topImage = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "topImage" ) )
+		asset topImage                = GetDataTableAsset( dataTable, i, GetDataTableColumnByName( dataTable, "topImage" ) )
 
 		SeasonalStoreData seasonalStoreData
 		seasonalStoreData.seasonTag = seasonTag
@@ -1072,7 +1114,7 @@ void function InitOffers()
 	}
 	//
 
-	int featuredColumns = 0
+	int featuredColumns  = 0
 	int exclusiveColumns = 0
 
 	for ( int col = 0; col < 5; col++ )
@@ -1127,7 +1169,7 @@ void function InitOffers()
 
 			InitOfferButton( s_offers.fullOfferButtons[col], columnOffers[0], true )
 
-			if ( columnOffers[0].prereq != null && col > 0  )
+			if ( columnOffers[0].prereq != null && col > 0 )
 				InitSpacerButton( s_offers.fullOfferButtons[col - 1], columnOffers[0] )
 		}
 		else if ( columnOffers.len() == 2 )
@@ -1155,7 +1197,7 @@ void function InitOffers()
 
 			if ( columnOffers[0].prereq != null && col > 0 )
 				InitSpacerButton( s_offers.topOfferButtons[col - 1], columnOffers[0] )
-			if ( columnOffers[1].prereq != null && col > 0  )
+			if ( columnOffers[1].prereq != null && col > 0 )
 				InitSpacerButton( s_offers.bottomOfferButtons[col - 1], columnOffers[1] )
 		}
 
@@ -1207,7 +1249,7 @@ void function OfferButton_Activate( var button )
 	Assert( offer.output.flavors.len() == 1 )
 	ItemFlavor flav = s_offers.buttonToOfferData[button].output.flavors[0]
 
-	if ( StoreItemTypePresentationSupported( flav ) )
+	if ( InspectItemTypePresentationSupported( flav ) )
 		SetStoreItemPresentationModeActive( offer )
 	else
 		PurchaseDialog( flav, 1, true, null, null )
@@ -1360,3 +1402,312 @@ void function CharactersPanel_OnFocusChanged( var panel, var oldFocus, var newFo
 
 	UpdateFooterOptions()
 }
+
+
+/*
+
+
+
+*/
+#if(false)
+
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+//
+
+
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+//
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+
+

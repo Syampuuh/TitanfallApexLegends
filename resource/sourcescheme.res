@@ -113,6 +113,8 @@ Scheme
 		ListPanel.SelectedOutOfFocusBgColor	"55 23 200 128"
 		ListPanel.EmptyListInfoTextColor	OffWhite
 
+		FileOpenDialog.SelectedBgColor 		"170 128 0 255"
+
 		Menu.TextColor						OffWhite
 		Menu.BgColor						"80 80 80 255"
 		Menu.ArmedTextColor					OffWhite

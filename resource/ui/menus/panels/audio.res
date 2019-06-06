@@ -294,7 +294,8 @@
             "#SETTING_NINE_CHANNEL"     9
         }
 
-        pin_to_sibling          SwchChatSpeechToText
+        pin_to_sibling          SwchChatSpeechToText [$ENGLISH]
+        pin_to_sibling			SwchSoundWithoutFocus [!$ENGLISH]
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
     }

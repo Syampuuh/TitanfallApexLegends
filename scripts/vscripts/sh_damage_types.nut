@@ -75,6 +75,9 @@ global enum eDamageSourceId
 	mp_weapon_semipistol
 	mp_weapon_autopistol
 	mp_weapon_sniper
+	#if(false)
+
+#endif
 	mp_weapon_shotgun
 	mp_weapon_mastiff
 	mp_weapon_frag_grenade
@@ -84,9 +87,13 @@ global enum eDamageSourceId
 	mp_weapon_nuke_satchel
 	#if(false)
 
+
 #endif
 	mp_extreme_environment
 	mp_weapon_shotgun_pistol
+	#if(false)
+
+#endif
 	#if(false)
 
 #endif
@@ -112,20 +119,22 @@ global enum eDamageSourceId
 	melee_wraith_kunai
 	mp_weapon_wraith_kunai_primary
 
+	#if(false)
+
+
+#endif
+
 	//
 	mp_weapon_defensive_bombardment_weapon
 	mp_weapon_creeping_bombardment_weapon
 
 	#if(false)
 
-#endif //
-	#if(false)
-#endif //
-	#if(false)
+
+
 
 #endif //
 	#if(false)
-
 
 #endif //
 	#if(false)
@@ -136,6 +145,13 @@ global enum eDamageSourceId
 
 #endif //
 	#if(false)
+
+#endif //
+	#if(false)
+
+
+#endif //
+	#if(false)
 #endif //
 	#if(false)
 #endif //
@@ -148,7 +164,13 @@ global enum eDamageSourceId
 
 
 #endif //
-	mp_weapon_tesla_trap
+	#if(false)
+
+#endif //
+	#if(false)
+
+
+#endif //
 
 	//
 	mp_weapon_super_spectre
@@ -161,6 +183,17 @@ global enum eDamageSourceId
 	mp_weapon_gunship_launcher
 	mp_weapon_gunship_turret
 	mp_weapon_gunship_missile
+
+	#if(false)
+
+
+
+
+
+
+
+
+#endif
 
 	//
 	human_melee
@@ -242,8 +275,15 @@ global enum eDamageSourceId
 
 	#if(false)
 
+#endif
+	#if(false)
 
-//
+
+
+#endif
+
+	#if(false)
+
 #endif
 
 	_count
@@ -352,8 +392,28 @@ void function DamageTypes_Init()
 
 		[ eDamageSourceId.melee_pilot_emptyhanded ] 				= "#DEATH_MELEE",
 		[ eDamageSourceId.melee_wraith_kunai ] 						= "#DEATH_MELEE_WRAITH_KUNAI",
-		[ eDamageSourceId.mp_weapon_wraith_kunai_primary ] 			= "#DEATH_MELEE_WRAITH_KUNAI",
-		[ eDamageSourceId.mp_weapon_tesla_trap ]					= "#DEATH_TESLA_TRAP",
+		[ eDamageSourceId.mp_weapon_wraith_kunai_primary ] 			= "#DEATH_MELEE_WRAITH_KUNAI"
+
+		#if(false)
+
+#endif
+
+		#if(false)
+
+
+#endif
+
+		#if(false)
+
+#endif
+		#if(false)
+//
+#endif
+		#if(false)
+
+
+#endif
+
 	}
 
 	#if(DEV)

@@ -1,7 +1,10 @@
 global function InitSquadPanel
-global function SquadPanel_Shutdown
 global function ClientCallback_SetStartTimeForRui
 global function ClientCallback_UpdatePlayerOverlayButton
+
+global function RegisterButtonForUID
+global function AssignUIDToButton
+global function GetUIDForButton
 
 struct SquadPanelData
 {
@@ -90,14 +93,8 @@ void function InitSquadPanel( var panel )
 
 			{
 				button = Hud_GetChild( panel, "GCardOverlay"+i )
-				AddButtonEventHandler( button, UIE_CLICK, OnOverlayClick )
-				AddButtonEventHandler( button, UIE_CLICKRIGHT, OnOverlayClickRight )
-				ToolTipData td
-				td.tooltipFlags = td.tooltipFlags | eToolTipFlag.CLIENT_UPDATE
-				td.tooltipStyle = eTooltipStyle.DEFAULT
-				Hud_SetToolTipData( button, td )
 
-				file.buttonToUID[ button ] <- ""
+				RegisterButtonForUID( button )
 			}
 		}
 		i++
@@ -105,6 +102,9 @@ void function InitSquadPanel( var panel )
 
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, OnShowSquad )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, OnHideSquad )
+
+	if ( !( uiGlobal.uiShutdownCallbacks.contains(SquadPanel_Shutdown) ) )
+		AddUICallback_UIShutdown( SquadPanel_Shutdown )
 }
 
 void function SquadPanel_Shutdown()
@@ -130,7 +130,9 @@ void function OnMuteChatButtonClick( var button )
 
 void function OnInviteButtonClick( var button )
 {
-	Hud_Hide( button )
+	if ( Hud_IsSelected( button ) )
+		return
+
 	RunClientScript( "UICallback_InviteSquadMate", button )
 }
 
@@ -152,6 +154,7 @@ void function OnShowSquad( var panel )
 		var inviteButton
 		var reportButton
 		var overlayButton
+		var disconnectedElem
 
 		if ( i > 0 )
 		{
@@ -161,22 +164,21 @@ void function OnShowSquad( var panel )
 			inviteButton = Hud_GetChild( panel, "TeammateInvite"+i )
 			reportButton = Hud_GetChild( panel, "TeammateReport"+i )
 			overlayButton = Hud_GetChild( panel, "GCardOverlay"+i )
+			disconnectedElem = Hud_GetChild( panel, "TeammateDisconnected"+i )
 
 			Hud_ClearToolTipData( overlayButton )
 		}
 
-		RunClientScript( "UICallback_PopulateClientGladCard", panel, elem, muteButton, mutePingButton, muteChatButton, reportButton, inviteButton, i, Time(), eGladCardPresentation.FULL_BOX )
+		RunClientScript( "UICallback_PopulateClientGladCard", panel, elem, muteButton, mutePingButton, muteChatButton, reportButton, null, overlayButton, disconnectedElem, i, Time(), eGladCardPresentation.FULL_BOX )
 		file.squadPanels[panel].cardsInitialized[elem] = true
 
 		i++
 	}
 }
 
-void function ClientCallback_UpdatePlayerOverlayButton( var panel, string name, string uid, string hardware, int buttonIndex )
+void function ClientCallback_UpdatePlayerOverlayButton( var panel, var overlayButton, string name, string uid, string hardware, int buttonIndex )
 {
-	var overlayButton = Hud_GetChild( panel, "GCardOverlay"+buttonIndex )
-
-	file.buttonToUID[ overlayButton ] = uid
+	AssignUIDToButton( overlayButton, uid )
 
 	if ( uid == "" || hardware == "" )
 	{
@@ -189,36 +191,46 @@ void function ClientCallback_UpdatePlayerOverlayButton( var panel, string name, 
 	}
 
 
-	bool canAddFriend = true
-	bool canInviteParty = CanInviteToparty() == 0
+	bool canAddFriend = CanSendFriendRequest( GetUIPlayer() )
+	bool canInviteParty = CanInviteSquadMate( uid ) && CanInviteToparty() == 0
 
-	CommunityFriends friends = GetFriendInfo()
-	foreach ( id in friends.ids )
+	if ( canAddFriend )
 	{
-		if ( uid == id )
+		CommunityFriends friends = GetFriendInfo()
+		foreach ( id in friends.ids )
 		{
-			canAddFriend = false
-			break
+			if ( uid == id )
+			{
+				canAddFriend = false
+				break
+			}
 		}
 	}
 
-	Party myParty = GetParty()
-	foreach ( p in myParty.members )
+	if ( canInviteParty )
 	{
-		if ( p.uid == uid )
+
+		Party myParty = GetParty()
+		foreach ( p in myParty.members )
 		{
-			canInviteParty = false
-			break
+			if ( p.uid == uid )
+			{
+				canInviteParty = false
+				break
+			}
 		}
 	}
 
-	ToolTipData td
-	td.tooltipStyle = eTooltipStyle.DEFAULT
-	td.titleText = ""
-	td.descText = name
-	td.actionHint2 = canInviteParty ? "#CLICK_INVITE_PARTY" : ""
-	td.actionHint1 = canAddFriend ? "#RCLICK_INVITE_FRIEND" : ""
-	Hud_SetToolTipData( overlayButton, td )
+	if ( canInviteParty || canAddFriend )
+	{
+		ToolTipData td
+		td.tooltipStyle = eTooltipStyle.DEFAULT
+		td.titleText = ""
+		td.descText = name
+		td.actionHint2 = canInviteParty ? "#CLICK_INVITE_PARTY" : ""
+		td.actionHint1 = canAddFriend ? "#RCLICK_INVITE_FRIEND" : ""
+		Hud_SetToolTipData( overlayButton, td )
+	}
 }
 
 void function OnHideSquad( var panel )
@@ -242,20 +254,23 @@ void function ClientCallback_SetStartTimeForRui( var elem, float delay )
 
 void function OnOverlayClick( var button )
 {
-	string uid = file.buttonToUID[ button ]
+	string uid = GetUIDForButton( button )
 
 	if ( uid == "" )
 		return
 
-	bool canInviteParty = CanInviteToparty() == 0
+	bool canInviteParty = CanInviteSquadMate( uid ) && CanInviteToparty() == 0
 
-	Party myParty = GetParty()
-	foreach ( p in myParty.members )
+	if ( canInviteParty )
 	{
-		if ( p.uid == uid )
+		Party myParty = GetParty()
+		foreach ( p in myParty.members )
 		{
-			canInviteParty = false
-			break
+			if ( p.uid == uid )
+			{
+				canInviteParty = false
+				break
+			}
 		}
 	}
 
@@ -270,20 +285,23 @@ void function OnOverlayClick( var button )
 
 void function OnOverlayClickRight( var button )
 {
-	string uid = file.buttonToUID[ button ]
+	string uid = GetUIDForButton( button )
 
 	if ( uid == "" )
 		return
 
-	bool canAddFriend = true
+	bool canAddFriend = CanSendFriendRequest( GetUIPlayer() )
 
-	CommunityFriends friends = GetFriendInfo()
-	foreach ( id in friends.ids )
+	if ( canAddFriend )
 	{
-		if ( uid == id )
+		CommunityFriends friends = GetFriendInfo()
+		foreach ( id in friends.ids )
 		{
-			canAddFriend = false
-			break
+			if ( uid == id )
+			{
+				canAddFriend = false
+				break
+			}
 		}
 	}
 
@@ -293,5 +311,28 @@ void function OnOverlayClickRight( var button )
 	ToolTipData td = Hud_GetToolTipData( button )
 	td.actionHint1 = "#STATUS_FRIEND_REQUEST_SENT"
 
+	EmitUISound( "UI_Menu_InviteFriend_Send" )
 	DoInviteToBeFriend( uid )
+}
+
+void function RegisterButtonForUID( var button )
+{
+	AddButtonEventHandler( button, UIE_CLICK, OnOverlayClick )
+	AddButtonEventHandler( button, UIE_CLICKRIGHT, OnOverlayClickRight )
+	ToolTipData td
+	td.tooltipFlags = td.tooltipFlags | eToolTipFlag.CLIENT_UPDATE
+	td.tooltipStyle = eTooltipStyle.DEFAULT
+	Hud_SetToolTipData( button, td )
+
+	file.buttonToUID[ button ] <- ""
+}
+
+void function AssignUIDToButton( var button, string uid )
+{
+ 	file.buttonToUID[ button ] = uid
+}
+
+string function GetUIDForButton( var button )
+{
+	return file.buttonToUID[ button ]
 }

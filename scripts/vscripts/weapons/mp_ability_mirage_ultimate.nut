@@ -14,6 +14,7 @@ bool function OnWeaponAttemptOffhandSwitch_ability_mirage_ultimate( entity weapo
 	return true
 }
 
+
 var function OnWeaponPrimaryAttack_mirage_ultimate( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
 	var ammoToReturn = OnWeaponPrimaryAttack_holopilot( weapon, attackParams )
@@ -24,14 +25,26 @@ var function OnWeaponPrimaryAttack_mirage_ultimate( entity weapon, WeaponPrimary
 	return ammoToReturn
 }
 
+
 void function OnWeaponChargeEnd_ability_mirage_ultimate( entity weapon )
 {
 	if ( weapon.GetWeaponPrimaryClipCount() == 0 ) //
 		return
 
 	weapon.SetWeaponPrimaryClipCount( 0 )
-	WeaponPrimaryAttackParams attackParams
-	OnWeaponPrimaryAttack_mirage_ultimate( weapon, attackParams )
+#if(false)
+
+
+
+
+
+
+
+#endif
+	{
+		WeaponPrimaryAttackParams attackParams
+		OnWeaponPrimaryAttack_mirage_ultimate( weapon, attackParams )
+	}
 }
 
 #if(false)
@@ -90,11 +103,59 @@ bool function OnWeaponChargeBegin_ability_mirage_ultimate( entity weapon )
 	weapon.EmitWeaponSound_1p3p( "Mirage_Vanish_Activate_1P", "Mirage_Vanish_Activate_3P" )
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	PlayerUsedOffhand( ownerPlayer, weapon, false )
-	#if(false)
+
+#if(false)
+
+
+
+
 
 
 //
 
+
 #endif
 	return true
 }
+
+
+#if(false)
+
+
+
+
+#endif
+
+
+#if(false)
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+

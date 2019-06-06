@@ -65,9 +65,9 @@ void function OnPlayVideoMenu_Open()
 	DisableBackgroundMovie()
 	SetMouseCursorVisible( false )
 	StopVideos( eVideoPanelContext.UI )
-	StopUIMusic()
-	PlayVideoFullScreen( file.video, file.milesAudio, forceUseCaptioning )
 	uiGlobal.playingVideo = true
+	PlayContextualMenuMusic()
+	PlayVideoFullScreen( file.video, file.milesAudio, forceUseCaptioning )
 
 	if ( file.skippable )
 	{

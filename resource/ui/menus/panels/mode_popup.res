@@ -31,7 +31,7 @@
         {
             rui                     "ui/generic_popup_button.rpak"
             clipRui                 1
-            wide					384
+            wide					367
             tall					60
             cursorVelocityModifier  0.7
         }

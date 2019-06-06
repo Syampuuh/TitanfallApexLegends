@@ -188,13 +188,15 @@ void function ScrollPanel_InitPanel( var panel )
 }
 
 
-void function ScrollPanel_InitScrollBar( var panel, var scrollBarElement )
+void function ScrollPanel_InitScrollBar( var panel, var scrollBarElement, bool addEventHandler = true )
 {
 	ScrollPanelData data = GetDataForPanel( panel )
 
 	data.scrollBarElement = scrollBarElement
 	Hud_SetKeyValue( data.scrollBarElement, "parentPanel", panel )
-	Hud_AddEventHandler( data.scrollBarElement, UIE_CLICK, OnScrollBarClick )
+
+	if ( addEventHandler )
+		Hud_AddEventHandler( data.scrollBarElement, UIE_CLICK, OnScrollBarClick )
 
 	UpdatePanelElements( data )
 }

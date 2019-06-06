@@ -53,15 +53,20 @@ global struct SeasonData
 //
 //
 
-#if CLIENT || UI 
-struct CalEventData
-{
-	//
-	//
-	//
-	//
-}
-#endif
+int UNIX_TIME_FALLBACK_1970 = 1
+int UNIX_TIME_FALLBACK_2038 = 2145916800 //
+
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 #if CLIENT || UI 
@@ -77,7 +82,7 @@ struct FileStruct_LifetimeLevel
 	array<ItemFlavor> allCalEvents = []
 	array<ItemFlavor> allSeasons = []
 
-	table<ItemFlavor, CalEventData> calEventDataMap = {}
+	//
 }
 FileStruct_LifetimeLevel& fileLevel
 #endif
@@ -103,14 +108,34 @@ void function ShCalEvent_LevelInit()
 #endif
 
 	AddCallback_RegisterRootItemFlavors( void function() {
-		ItemFlavor ornull eventOrNull = RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/calevent/season01.rpak" )
-		if ( eventOrNull != null )
-			fileLevel.allCalEvents.append( expect ItemFlavor( eventOrNull ) )
+		foreach ( asset eventAsset in WORKAROUND_GetAllCalEvents() )
+		{
+			ItemFlavor ornull eventOrNull = RegisterItemFlavorFromSettingsAsset( eventAsset )
+			if ( eventOrNull != null )
+				fileLevel.allCalEvents.append( expect ItemFlavor( eventOrNull ) )
+		}
 
 		foreach ( ItemFlavor event in fileLevel.allCalEvents )
 		{
-			CalEventData ced
-			fileLevel.calEventDataMap[event] <- ced
+			//
+			//
+
+			if ( CalEvent_GetRevealUnixTime( event ) == UNIX_TIME_FALLBACK_2038 )
+			{
+				Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 2038).", ItemFlavor_GetHumanReadableRef( event ), GetGlobalSettingsString( ItemFlavor_GetAsset( event ), "revealUnixTimePlaylistVarName" ), UNIX_TIME_FALLBACK_2038 )
+			}
+			if ( CalEvent_GetHideUnixTime( event ) == UNIX_TIME_FALLBACK_1970 )
+			{
+				Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 1970).", ItemFlavor_GetHumanReadableRef( event ), GetGlobalSettingsString( ItemFlavor_GetAsset( event ), "hideUnixTimePlaylistVarName" ), UNIX_TIME_FALLBACK_1970 )
+			}
+			if ( CalEvent_GetStartUnixTime( event ) == UNIX_TIME_FALLBACK_2038 )
+			{
+				Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 2038).", ItemFlavor_GetHumanReadableRef( event ), GetGlobalSettingsString( ItemFlavor_GetAsset( event ), "startUnixTimePlaylistVarName" ), UNIX_TIME_FALLBACK_2038 )
+			}
+			if ( CalEvent_GetFinishUnixTime( event ) == UNIX_TIME_FALLBACK_1970 )
+			{
+				Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 1970).", ItemFlavor_GetHumanReadableRef( event ), GetGlobalSettingsString( ItemFlavor_GetAsset( event ), "finishUnixTimePlaylistVarName" ), UNIX_TIME_FALLBACK_1970 )
+			}
 
 			if ( ItemFlavor_GetType( event ) == eItemType.calevent_season )
 			{
@@ -121,11 +146,17 @@ void function ShCalEvent_LevelInit()
 				//
 				foreach ( ItemFlavor otherEvent in fileLevel.allSeasons )
 				{
-					Assert( CalEvent_GetStartUnixTime( event ) >= CalEvent_GetFinishUnixTime( otherEvent )
-							&& CalEvent_GetStartUnixTime( event ) < CalEvent_GetStartUnixTime( otherEvent ),
+					/*
+
+
+
+
+
+
+*/
+					Assert( CalEvent_GetStartUnixTime( event ) >= CalEvent_GetFinishUnixTime( otherEvent ),
 						format( "Season %s start overlaps with season %s", ItemFlavor_GetHumanReadableRef( event ), ItemFlavor_GetHumanReadableRef( otherEvent ) ) )
-					Assert( CalEvent_GetFinishUnixTime( event ) >= CalEvent_GetFinishUnixTime( otherEvent )
-							&& CalEvent_GetFinishUnixTime( event ) < CalEvent_GetStartUnixTime( otherEvent ),
+					Assert( CalEvent_GetFinishUnixTime( event ) >= CalEvent_GetFinishUnixTime( otherEvent ),
 						format( "Season %s start overlaps with season %s", ItemFlavor_GetHumanReadableRef( event ), ItemFlavor_GetHumanReadableRef( otherEvent ) ) )
 				}
 				//
@@ -260,7 +291,7 @@ ItemFlavor ornull function GetUpcomingSeason( int t )
 #if CLIENT || UI 
 bool function CalEvent_IsRevealed( ItemFlavor event, int t )
 {
-	int revealUnixTime = CalEvent_GetRevealUnixTime( event, true )
+	int revealUnixTime = CalEvent_GetRevealUnixTime( event )
 	return (t >= revealUnixTime)
 }
 #endif
@@ -269,7 +300,7 @@ bool function CalEvent_IsRevealed( ItemFlavor event, int t )
 #if CLIENT || UI 
 bool function CalEvent_IsVisible( ItemFlavor event, int t )
 {
-	int hideUnixTime = CalEvent_GetHideUnixTime( event, true )
+	int hideUnixTime = CalEvent_GetHideUnixTime( event )
 	return CalEvent_IsRevealed( event, t ) && (t < hideUnixTime)
 }
 #endif
@@ -278,7 +309,7 @@ bool function CalEvent_IsVisible( ItemFlavor event, int t )
 #if CLIENT || UI 
 bool function CalEvent_HasStarted( ItemFlavor event, int t )
 {
-	int startUnixTime = CalEvent_GetStartUnixTime( event, true )
+	int startUnixTime = CalEvent_GetStartUnixTime( event )
 	return CalEvent_IsVisible( event, t ) && (t >= startUnixTime)
 }
 #endif
@@ -287,79 +318,107 @@ bool function CalEvent_HasStarted( ItemFlavor event, int t )
 #if CLIENT || UI 
 bool function CalEvent_IsActive( ItemFlavor event, int t )
 {
-	int finishUnixTime = CalEvent_GetFinishUnixTime( event, true )
+	int finishUnixTime = CalEvent_GetFinishUnixTime( event )
 	return CalEvent_HasStarted( event, t ) && (t < finishUnixTime)
 }
 #endif
 
 
 #if CLIENT || UI 
-int function CalEvent_GetRevealUnixTime( ItemFlavor flav, bool warnIfUnset = false )
+int function CalEvent_GetRevealUnixTime( ItemFlavor flav )
 {
-	Assert( ItemFlavor_GetType( flav ) == eItemType.calevent_season )
+	Assert( ItemFlavor_GetType( flav ) > eItemType._CALEVENT_RANGE_START && ItemFlavor_GetType( flav ) < eItemType._CALEVENT_RANGE_END )
 
 	string playlistVarName = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "revealUnixTimePlaylistVarName" )
-	int val                = GetCurrentPlaylistVarInt( playlistVarName, -1 )
-	if ( val == -1 )
+	int val
+//
+//
+//
+//
+//
+//
+//
+//
 	{
-		val = 32503680000
-		if ( warnIfUnset )
-			Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 3000).", ItemFlavor_GetHumanReadableRef( flav ), playlistVarName, val )
+		val = GetCurrentPlaylistVarInt( playlistVarName, -1 )
 	}
+	if ( val == -1 )
+		val = UNIX_TIME_FALLBACK_2038
 	return val
 }
 #endif
 
 
 #if CLIENT || UI 
-int function CalEvent_GetHideUnixTime( ItemFlavor flav, bool warnIfUnset = false )
+int function CalEvent_GetHideUnixTime( ItemFlavor flav )
 {
-	Assert( ItemFlavor_GetType( flav ) == eItemType.calevent_season )
+	Assert( ItemFlavor_GetType( flav ) > eItemType._CALEVENT_RANGE_START && ItemFlavor_GetType( flav ) < eItemType._CALEVENT_RANGE_END )
 
 	string playlistVarName = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "hideUnixTimePlaylistVarName" )
-	int val                = GetCurrentPlaylistVarInt( playlistVarName, -1 )
-	if ( val == -1 )
+	int val
+//
+//
+//
+//
+//
+//
+//
+//
 	{
-		val = 1
-		if ( warnIfUnset )
-			Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 1970).", ItemFlavor_GetHumanReadableRef( flav ), playlistVarName, val )
+		val = GetCurrentPlaylistVarInt( playlistVarName, -1 )
 	}
+	if ( val == -1 )
+		val = UNIX_TIME_FALLBACK_2038
 	return val
 }
 #endif
 
 
 #if CLIENT || UI 
-int function CalEvent_GetStartUnixTime( ItemFlavor flav, bool warnIfUnset = false )
+int function CalEvent_GetStartUnixTime( ItemFlavor flav )
 {
-	Assert( ItemFlavor_GetType( flav ) == eItemType.calevent_season )
+	Assert( ItemFlavor_GetType( flav ) > eItemType._CALEVENT_RANGE_START && ItemFlavor_GetType( flav ) < eItemType._CALEVENT_RANGE_END )
 
 	string playlistVarName = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "startUnixTimePlaylistVarName" )
-	int val                = GetCurrentPlaylistVarInt( playlistVarName, -1 )
-	if ( val == -1 )
+	int val
+//
+//
+//
+//
+//
+//
+//
+//
 	{
-		val = 32503680000
-		if ( warnIfUnset )
-			Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 3000).", ItemFlavor_GetHumanReadableRef( flav ), playlistVarName, val )
+		val = GetCurrentPlaylistVarInt( playlistVarName, -1 )
 	}
+	if ( val == -1 )
+		val = UNIX_TIME_FALLBACK_2038
 	return val
 }
 #endif
 
 
 #if CLIENT || UI 
-int function CalEvent_GetFinishUnixTime( ItemFlavor flav, bool warnIfUnset = false )
+int function CalEvent_GetFinishUnixTime( ItemFlavor flav )
 {
-	Assert( ItemFlavor_GetType( flav ) == eItemType.calevent_season )
+	Assert( ItemFlavor_GetType( flav ) > eItemType._CALEVENT_RANGE_START && ItemFlavor_GetType( flav ) < eItemType._CALEVENT_RANGE_END )
 
 	string playlistVarName = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "finishUnixTimePlaylistVarName" )
-	int val                = GetCurrentPlaylistVarInt( playlistVarName, -1 )
-	if ( val == -1 )
+	int val
+//
+//
+//
+//
+//
+//
+//
+//
 	{
-		val = 1
-		if ( warnIfUnset )
-			Warning( "CalEvent %s playlist var '%s' is unset. Using %d (the year 1970).", ItemFlavor_GetHumanReadableRef( flav ), playlistVarName, val )
+		val = GetCurrentPlaylistVarInt( playlistVarName, -1 )
 	}
+	if ( val == -1 )
+		val = UNIX_TIME_FALLBACK_2038
 	return val
 }
 #endif
@@ -368,7 +427,7 @@ int function CalEvent_GetFinishUnixTime( ItemFlavor flav, bool warnIfUnset = fal
 #if CLIENT || UI 
 ItemFlavor function Season_GetBattlePass( ItemFlavor flav )
 {
-	Assert( ItemFlavor_GetType( flav ) == eItemType.calevent_season )
+	Assert( ItemFlavor_GetType( flav ) > eItemType._CALEVENT_RANGE_START && ItemFlavor_GetType( flav ) < eItemType._CALEVENT_RANGE_END )
 
 	return fileLevel.seasonBattlePassMap[flav]
 }
@@ -376,7 +435,7 @@ ItemFlavor function Season_GetBattlePass( ItemFlavor flav )
 
 
 #if CLIENT || UI 
-ItemFlavor function BattlePass_GetSeason( ItemFlavor flav ) //
+ItemFlavor function BattlePass_GetSeason( ItemFlavor flav )
 {
 	Assert( ItemFlavor_GetType( flav ) == eItemType.battlepass )
 

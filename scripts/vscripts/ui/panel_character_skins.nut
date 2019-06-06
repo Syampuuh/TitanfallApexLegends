@@ -195,7 +195,7 @@ void function OnMeleeSkinChanged( EHI playerEHI, ItemFlavor flavor )
 ItemFlavor ornull function GetMeleeHeirloom( ItemFlavor character )
 {
 	LoadoutEntry entry = Loadout_MeleeSkin( GetTopLevelCustomizeContext() )
-	array<ItemFlavor> melees = RegisterReferencedItemFlavorsFromArray( GetTopLevelCustomizeContext(), "meleeSkins", "flavor" )
+	array<ItemFlavor> melees = GetValidItemFlavorsForLoadoutSlot( LocalClientEHI(), entry )
 
 	foreach ( meleeFlav in melees )
 	{

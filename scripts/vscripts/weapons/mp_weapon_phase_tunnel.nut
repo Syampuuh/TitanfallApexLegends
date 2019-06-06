@@ -129,6 +129,7 @@ void function MpWeaponPhaseTunnel_Init()
 
 
 
+
 #endif //
 
 	#if(CLIENT)
@@ -219,6 +220,15 @@ bool function OnWeaponChargeBegin_weapon_phase_tunnel( entity weapon )
 			}
 
 			#if(false)
+//
+
+
+
+//
+
+
+
+
 
 
 
@@ -347,6 +357,9 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 
 
 
+//
+
+
 
 
 
@@ -568,6 +581,10 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 
 
 //
+
+
+
+
 
 
 
@@ -600,6 +617,8 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 
 
 
+//
+
 
 
 
@@ -691,6 +710,7 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 
 
 
+
 //
 //
 //
@@ -726,6 +746,7 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 //
 //
 //
+
 
 
 
@@ -750,6 +771,8 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 
 
 
+
+
 //
 //
 //
@@ -961,8 +984,6 @@ var function OnWeaponPrimaryAttack_ability_phase_tunnel( entity weapon, WeaponPr
 
 
 
-
-//
 
 
 

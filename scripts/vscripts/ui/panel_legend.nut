@@ -11,7 +11,7 @@ void function OnShowLegendPage( var panel )
 	SurvivalInventory_SetBGVisible( true )
 
 	var elem = Hud_GetChild( panel, "GCard" )
-	RunClientScript( "UICallback_PopulateClientGladCard", panel, elem, null, null, null, null, null, 0, Time(), eGladCardPresentation.FRONT_CLEAN )
+	RunClientScript( "UICallback_PopulateClientGladCard", panel, elem, null, null, null, null, null, null, null, 0, Time(), eGladCardPresentation.FRONT_CLEAN )
 
 	ItemFlavor ornull character = null
 
@@ -34,6 +34,7 @@ void function OnShowLegendPage( var panel )
 	PopulateSkillElem( Hud_GetChild( panel, "Ultimate" ) , character )
 	PopulateSkillElem( Hud_GetChild( panel, "Passive" ) , character )
 	PopulateSkillElem( Hud_GetChild( panel, "Tactical" ) , character )
+	PopulateSkillElem( Hud_GetChild( panel, "SpecialPerk" ) , character )
 }
 
 void function OnHideLegendPage( var panel )
@@ -74,6 +75,25 @@ void function PopulateSkillElem( var elem, ItemFlavor character )
 			RuiSetColorAlpha( rui, "tintColor", SrgbToLinear( colorData.ultimateColor ), 1 )
 			RuiSetColorAlpha( rui, "tintColorHighlight", SrgbToLinear( colorData.ultimateColorHighlight ), 1 )
 			break
+		case "specialPerk":
+			string characterRef = ItemFlavor_GetHumanReadableRef( character )
+			float damageScale = GetCurrentPlaylistVarFloat( "damage_scale_" + characterRef, 1.0 )
+
+			printt( damageScale )
+
+			if ( damageScale < 1.0 )
+			{
+				int percent = int((1.0 - damageScale)*100)
+				RuiSetImage( rui, "icon", $"rui/hud/passive_icons/juggernaut" )
+				RuiSetString( rui, "desc", Localize( "#SPECIAL_PERK_JUGGERNAUT", percent ) )
+			}
+			else
+			{
+				RuiSetImage( rui, "icon", $"" )
+				RuiSetString( rui, "desc", "" )
+			}
+			RuiSetGameTime( rui, "initTime", Time() )
+			return
 	}
 
 	RuiSetBool( rui, "isUltimate", skillType == "ultimate" )

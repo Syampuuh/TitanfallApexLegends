@@ -26,7 +26,7 @@
         tall                    50
         wide                    900
         wrap					1
-        visible                 1
+        visible                 0
         textAlignment			"west"
         fgcolor_override		"255 45 45 255"
     }
@@ -69,7 +69,7 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchAspectRatio
-        navDown					SldFOV
+        navDown					SldBrightness
         // list is populated by code
         childGroupAlways        MultiChoiceButtonAlways
     }

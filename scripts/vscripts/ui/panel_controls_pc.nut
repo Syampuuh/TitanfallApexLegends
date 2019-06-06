@@ -53,9 +53,9 @@ void function InitControlsPCPanel( var panel )
 
 	//
 
-	SetupSettingsButton( Hud_GetChild( Hud_GetChild( file.keyBindingPanel, "SldMouseSensitivity" ), "BtnDropButton" ), "#MOUSE_SENSITIVITY", "#MOUSE_KEYBOARD_MENU_SENSITIVITY_DESC", $"rui/menu/settings/settings_pc" )
+	SetupSettingsSlider( Hud_GetChild( file.keyBindingPanel, "SldMouseSensitivity" ), "#MOUSE_SENSITIVITY", "#MOUSE_KEYBOARD_MENU_SENSITIVITY_DESC", $"rui/menu/settings/settings_pc" )
+	SetupSettingsSlider( Hud_GetChild( file.keyBindingPanel, "SldMouseSensitivityZoomed" ), "#MOUSE_SENSITIVITY_ZOOM", "#MOUSE_KEYBOARD_MENU_SENSITIVITY_ZOOM_DESC", $"rui/menu/settings/settings_pc" )
 
-	SetupSettingsButton( Hud_GetChild( Hud_GetChild( file.keyBindingPanel, "SldMouseSensitivityZoomed" ), "BtnDropButton" ), "#MOUSE_SENSITIVITY_ZOOM", "#MOUSE_KEYBOARD_MENU_SENSITIVITY_ZOOM_DESC", $"rui/menu/settings/settings_pc" )
 	SetupSettingsButton( Hud_GetChild( file.keyBindingPanel, "SwchMouseAcceleration" ), "#MOUSE_ACCELERATION", "#MOUSE_KEYBOARD_MENU_ACCELERATION_DESC", $"rui/menu/settings/settings_pc" )
 	SetupSettingsButton( Hud_GetChild( file.keyBindingPanel, "SwchMouseInvertY" ), "#MOUSE_INVERT", "#MOUSE_KEYBOARD_MENU_INVERT_DESC", $"rui/menu/settings/settings_pc" )
 	SetupSettingsButton( Hud_GetChild( file.keyBindingPanel, "SwchLightingEffects" ), "#LIGHTING_EFFECTS", "#MOUSE_KEYBOARD_MENU_LIGHTING_DESC", $"rui/menu/settings/settings_pc" )

@@ -4,7 +4,6 @@
 global function GamemodeSurvivalShared_Init
 
 global function Survival_CanUseHealthPack
-global function Survival_CanUseTitanItem
 global function Survival_PlayerCanDrop
 
 global function Survival_GetCharacterSelectDuration
@@ -17,6 +16,8 @@ global function Sur_GetPlaneEnt
 global function SetVictorySequencePlatformModel
 global function GetVictorySequencePlatformModel
 global function PredictHealthPackUse
+
+global function GetMusicForJump
 
 global function Survival_GetCurrentRank
 global function CanWeaponInspect
@@ -102,26 +103,30 @@ global enum eSurvivalHints
 
 global struct VictoryPlatformModelData
 {
-	bool isSet = false
-	asset modelAsset
+	bool   isSet = false
+	asset  modelAsset
 	vector originOffset
 	vector modelAngles
 }
 
 struct
 {
-	entity planeCenterEnt
-	entity planeEnt
-	VictoryPlatformModelData &victorySequencePlatforData
+	entity                     planeCenterEnt
+	entity                     planeEnt
+	VictoryPlatformModelData & victorySequencePlatforData
 } file
 
 #if(CLIENT)
 void function GamemodeSurvivalShared_Init()
 {
 	#if(CLIENT)
+		#if(true)
+			ShEliteStreak_Init()
+		#endif
 		BleedoutShared_Init()
 		ShApexScreens_Init()
 		Sh_RespawnBeacon_Init()
+		Sh_Airdrops_Init()
 
 		PrecacheImpactEffectTable( "dropship_dust" )
 		PrecacheModel( SURVIVAL_PLANE_MODEL )
@@ -145,45 +150,6 @@ void function GamemodeSurvivalShared_Init()
 #endif
 
 #if(CLIENT)
-bool function Survival_CanUseTitanItem( entity player )
-{
-	#if(CLIENT)
-		if ( IsWatchingReplay() )
-			return false
-
-		if ( player != GetLocalClientPlayer() )
-			return false
-
-		if ( player != GetLocalViewPlayer() )
-			return false
-
-		if ( IsWatchingReplay() )
-			return false
-	#endif
-
-	if ( !IsAlive( player ) )
-		return false
-
-	if ( !player.IsTitan() )
-		return false
-
-	if ( player.ContextAction_IsActive() )
-		return false
-
-	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
-		return false
-
-	entity soul = player.GetTitanSoul()
-
-	if ( !IsValid( soul ) )
-		return false
-
-	if ( soul.IsEjecting() )
-		return false
-
-	return true
-}
-
 bool function Survival_PlayerCanDrop( entity player )
 {
 	if ( !IsAlive( player ) )
@@ -217,7 +183,7 @@ bool function Survival_CanUseHealthPack( entity player, int itemType, bool check
 			if ( SURVIVAL_CountItemsInInventory( player, SURVIVAL_Loot_GetHealthPickupRefFromType( itemType ) ) > 0 )
 				return true
 
-			bool needHeal = GetHealthFrac( player ) < 1.0
+			bool needHeal   = GetHealthFrac( player ) < 1.0
 			bool needShield = GetShieldHealthFrac( player ) < 1.0
 
 			if ( needHeal && needShield )
@@ -233,24 +199,26 @@ bool function Survival_CanUseHealthPack( entity player, int itemType, bool check
 		}
 	}
 
-#if(CLIENT)
-	if ( printReason )
-	{
-		switch( canUseResult )
+	#if(CLIENT)
+		if ( printReason )
 		{
-			case eUseHealthKitResult.DENY_NONE:
-				//
-				break
-			case eUseHealthKitResult.DENY_NO_HEALTH_KIT:
-			case eUseHealthKitResult.DENY_NO_KITS:
-			case eUseHealthKitResult.DENY_NO_SHIELD_KIT:
-				player.ClientCommand( "ClientCommand_Quickchat " + eCommsAction.INVENTORY_NEED_HEALTH )
-				//
-			default:
-				AnnouncementMessageRight( player, healthKitResultStrings[canUseResult] )
-				break
+			switch( canUseResult )
+			{
+				case eUseHealthKitResult.DENY_NONE:
+					//
+					break
+
+				case eUseHealthKitResult.DENY_NO_HEALTH_KIT:
+				case eUseHealthKitResult.DENY_NO_KITS:
+				case eUseHealthKitResult.DENY_NO_SHIELD_KIT:
+					player.ClientCommand( "ClientCommand_Quickchat " + eCommsAction.INVENTORY_NEED_HEALTH )
+					//
+
+				default:
+					AnnouncementMessageRight( player, healthKitResultStrings[canUseResult] )
+					break
+			}
 		}
-	}
 	#endif
 
 	return false
@@ -390,8 +358,8 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 	if ( itemType == eHealthPickupType.ULTIMATE )
 	{
 		entity ultimateAbility = player.GetOffhandWeapon( OFFHAND_INVENTORY )
-		int ammo = ultimateAbility.GetWeaponPrimaryClipCount()
-		int maxAmmo = ultimateAbility.GetWeaponPrimaryClipCountMax()
+		int ammo               = ultimateAbility.GetWeaponPrimaryClipCount()
+		int maxAmmo            = ultimateAbility.GetWeaponPrimaryClipCountMax()
 
 		if ( ammo >= maxAmmo )
 			return eUseHealthKitResult.DENY_ULT_FULL
@@ -400,12 +368,12 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 	}
 	else if ( GetCurrentPlaylistVarInt( "survival_shields", 1 ) > 0 )
 	{
-		int currentHealth = player.GetHealth()
+		int currentHealth  = player.GetHealth()
 		int currentShields = player.GetShieldHealth()
-		bool canHeal = false
-		bool canShield = false
-		bool needHeal = currentHealth < player.GetMaxHealth()
-		bool needShield = currentShields < player.GetShieldHealthMax()
+		bool canHeal       = false
+		bool canShield     = false
+		bool needHeal      = currentHealth < player.GetMaxHealth()
+		bool needShield    = currentShields < player.GetShieldHealthMax()
 
 		HealthPickup pickup = SURVIVAL_Loot_GetHealthKitDataFromStruct( itemType )
 
@@ -433,7 +401,7 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 			if ( pickup.healAmount > 0 && pickup.healCap > 100 )
 			{
 				int targetHealth = int( currentHealth + pickup.healAmount )
-				int overHeal = targetHealth - player.GetMaxHealth()
+				int overHeal     = targetHealth - player.GetMaxHealth()
 				if ( overHeal && currentShields < player.GetShieldHealthMax() )
 					canShield = true
 			}
@@ -485,7 +453,7 @@ float function Survival_GetCharacterSelectDuration( int pickIndex )
 #if(CLIENT)
 bool function Survival_CharacterSelectEnabled()
 {
-	return Survival_GetCharacterSelectDuration(0) > 0.0
+	return Survival_GetCharacterSelectDuration( 0 ) > 0.0
 }
 #endif
 
@@ -595,14 +563,14 @@ void function OnPropDynamicCreated( entity prop )
 
 TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPickup itemData )
 {
-	int currentHealth = player.GetHealth()
-	int currentShields = player.GetShieldHealth()
+	int currentHealth   = player.GetHealth()
+	int currentShields  = player.GetShieldHealth()
 	int shieldHealthMax = player.GetShieldHealthMax()
 
 	int resourceHealthRemaining = 0
-	int virtualHealth = minint( currentHealth + resourceHealthRemaining, 100 )
-	int missingHealth = 100 - virtualHealth
-	int missingShields = shieldHealthMax - currentShields
+	int virtualHealth           = minint( currentHealth + resourceHealthRemaining, 100 )
+	int missingHealth           = 100 - virtualHealth
+	int missingShields          = shieldHealthMax - currentShields
 
 	TargetKitHealthAmounts targetValues
 
@@ -629,7 +597,7 @@ TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPicku
 	}
 
 	if ( itemData.shieldAmount > 0 && shieldHealthMax > 0 )
-		targetValues.targetShields = minint(player.GetShieldHealth() + int( itemData.shieldAmount ), shieldHealthMax) / float( shieldHealthMax )
+		targetValues.targetShields = minint( player.GetShieldHealth() + int( itemData.shieldAmount ), shieldHealthMax ) / float( shieldHealthMax )
 
 	return targetValues
 }
@@ -648,7 +616,7 @@ bool function CanWeaponInspect( entity player, int activity )
 
 int function Survival_GetCurrentRank( entity player )
 {
-	int team = player.GetTeam()
+	int team                  = player.GetTeam()
 	int numLivingSquadMembers = GetPlayerArrayOfTeam_AliveConnected( team ).len()
 	if ( numLivingSquadMembers <= 0 )
 	{
@@ -682,10 +650,18 @@ VictoryPlatformModelData function GetVictorySequencePlatformModel()
 
 }
 
+string function GetMusicForJump( entity player )
+{
+	#if(false)
+
+#else
+		return MusicPack_GetSkydiveMusic( GetMusicPackForPlayer( player ) )
+	#endif //
+}
 
 bool function PositionIsInMapBounds( vector pos )
 {
-	return ( fabs( pos.x ) < MAX_MAP_BOUNDS && fabs( pos.y ) < MAX_MAP_BOUNDS && fabs( pos.z ) < MAX_MAP_BOUNDS )
+	return (fabs( pos.x ) < MAX_MAP_BOUNDS && fabs( pos.y ) < MAX_MAP_BOUNDS && fabs( pos.z ) < MAX_MAP_BOUNDS)
 }
 
 bool function Survival_IsPlayerHealing( entity player )

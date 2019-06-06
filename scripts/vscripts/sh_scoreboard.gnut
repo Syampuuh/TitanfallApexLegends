@@ -12,9 +12,11 @@ global function HideScoreboard
 global function ToggleScoreboard
 global function AddScoreboardShowCallback
 global function AddScoreboardHideCallback
+global function TPPromptIsActive
 
 global function ClientCodeCallback_ToggleScoreboard
 global function ClientToUI_ToggleScoreboard
+global function ClientToUI_ShowScoreboardWithTPPrompt
 global function ClientToUI_HideScoreboard
 #endif
 
@@ -118,6 +120,12 @@ void function ClientToUI_ToggleScoreboard()
 {
 	ToggleScoreboard()
 }
+void function ClientToUI_ShowScoreboardWithTPPrompt()
+{
+	file.wantsToShowScoreboard = true
+	s_nextShowWantsTPPrompt = true
+	UpdateScoreboardVisibility()
+}
 #endif
 
 
@@ -130,10 +138,19 @@ void function ClientToUI_HideScoreboard()
 
 
 #if(CLIENT)
+bool s_latestShowWasForTPPrompt = false
+bool s_nextShowWantsTPPrompt = false
+bool function TPPromptIsActive()
+{
+	return (clGlobal.isScoreboardShown && s_latestShowWasForTPPrompt)
+}
+
 void function UpdateScoreboardVisibility()
 {
-	bool shouldShow = file.wantsToShowScoreboard
+	bool wantsTPPrompt = s_nextShowWantsTPPrompt
+	s_nextShowWantsTPPrompt = false
 
+	bool shouldShow = file.wantsToShowScoreboard
 	if ( GetGameState() >= eGameState.WinnerDetermined )
 		shouldShow = false
 	else if ( IsViewingSquadSummary() )
@@ -150,6 +167,7 @@ void function UpdateScoreboardVisibility()
 
 	if ( shouldShow )
 	{
+		s_latestShowWasForTPPrompt = wantsTPPrompt
 		RunUIScript( "TryCloseSurvivalInventory", null )
 		RunUIScript( "SetShowingMap", true )
 

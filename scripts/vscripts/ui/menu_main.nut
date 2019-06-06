@@ -36,7 +36,7 @@ void function InitMainMenu()
 	file.subtitle = Hud_GetChild( file.menu, "Subtitle" )
 	var subtitleRui = Hud_GetRui( file.subtitle )
 	RuiSetString( subtitleRui, "subtitleText", Localize( "#BATTLE_PASS_SEASON_NUMBER", 1 ).toupper() )
-
+	
 	file.versionDisplay = Hud_GetChild( menu, "VersionDisplay" )
 	file.signedInDisplay = Hud_GetChild( menu, "SignInDisplay" )
 }

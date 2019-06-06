@@ -237,6 +237,7 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+
 //
 
 
@@ -264,13 +265,23 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 //
+//
 
 
 
-//
 
 
-//
+
+
+
+
+
+
+
+
+
+
+
 //
 
 
@@ -278,6 +289,7 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+//
 
 
 
@@ -291,10 +303,10 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
-//
 
 
 
+//
 
 
 
@@ -302,6 +314,7 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+//
 
 
 
@@ -409,13 +422,14 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+
+
 //
 
 
 
 
 //
-
 
 
 
@@ -525,17 +539,23 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+
+
+
 //
 
 
 
 //
+
 
 
+//
 
 
 
 
+
 //
 
 
@@ -548,23 +568,39 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 //
 
 //
+
+
+
+
 
 
 
+
+
+
+
+
+
+//
 
 
 
 
 
+//
 
+//
 
 
 
 
 //
+
 
 
 
+//
+
 
 
 
@@ -578,6 +614,7 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 
 
 
+
 //
 
 
@@ -622,9 +659,17 @@ bool function OnWeaponAttemptOffhandSwitch_weapon_dirty_bomb( entity weapon )
 //
 //
 
+//
 //
 //
 //
+
+
+
+
+
+
+
 //
 
 
@@ -1100,9 +1145,39 @@ void function OnWeaponTossPrep_weapon_dirty_bomb( entity weapon, WeaponTossPrepP
 	weapon.EmitWeaponSound_1p3p( GetGrenadeDeploySound_1p( weapon ), GetGrenadeDeploySound_3p( weapon ) )
 }
 
+void function RestoreDirtyBombAmmo( entity owner )
+{
+	if ( IsAlive( owner ) )
+	{
+		entity weapon = owner.GetOffhandWeapon( OFFHAND_SPECIAL )
+		if ( IsValid( weapon ) && weapon.GetWeaponClassName() == "mp_weapon_dirty_bomb" )
+		{
+			int ammoReq = weapon.GetAmmoPerShot()
+			weapon.SetWeaponPrimaryClipCount( minint( weapon.GetWeaponPrimaryClipCount() + ammoReq, weapon.GetWeaponPrimaryClipCountMax() ) )
+		}
+	}
+}
+
+
 void function OnDirtyBombPlanted( entity projectile )
 {
 	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

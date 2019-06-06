@@ -11,6 +11,7 @@ global function AddUICallback_OnLevelInit
 global function UICodeCallback_SmokeTestRunning
 global function AddUICallback_InputModeChanged
 global function AddUICallback_KeyBindSet
+global function AddUICallback_UIShutdown
 
 global function SetShowingMap
 global function IsShowingMap
@@ -178,6 +179,14 @@ global struct PieChartData
 	float                sum = 0.0
 }
 
+global enum eMenuMusicContext
+{
+	NONE,
+	MAIN_MENU,
+	LOBBY,
+	CUSTOM,
+}
+
 global struct UIGlobals
 {
 	table               menus = {}
@@ -197,6 +206,7 @@ global struct UIGlobals
 	var                 dialogCloseCallback = null
 	table               signalDummy = {}
 	float               dialogInputEnableTime = 0.0
+	int              	activeMusicContext = eMenuMusicContext.NONE
 	string              activeMusic = ""
 	bool                isShowingMap = false //
 
@@ -233,6 +243,7 @@ global struct UIGlobals
 	array<void functionref()>               resolutionChangedCallbacks
 	array<void functionref(bool)>           inputModeChangeCallbacks
 	array<void functionref(string, string)> keyBindSetCallbacks
+	array<void functionref()> 				uiShutdownCallbacks
 
 	table<var, MenuDef> menuData
 	string              pin_lastMenuId
@@ -256,11 +267,11 @@ global struct UIGlobals
 
 	bool cachedLoadoutsReady = false
 	bool commsMenuOpen = false
+
+	bool isOptInEnabled = false
 }
 
 global UIGlobals uiGlobal
-
-global const MAINMENU_MUSIC_DELAY = 4.0
 
 
 void function UICodeCallback_SmokeTestRunning( string param )
@@ -307,6 +318,7 @@ void function UICodeCallback_UIInit()
 	RegisterSignal( "OpenErrorDialog" )
 	RegisterSignal( "BoughtItem" )
 	RegisterSignal( "TrackIsOverScrollBar" )
+	RegisterSignal( "PlayContextualMenuMusicThread" )
 
 	thread UpdateClientMenuOpenStateThread()
 
@@ -317,6 +329,9 @@ void function UICodeCallback_UIInit()
 	ListPanelInit()
 	ScrollPanelInit()
 	GridPanelInit()
+
+	ShGladiatorCards_Init()
+
 	#if(true)
 		Sh_InitToolTips()
 	#endif
@@ -337,12 +352,12 @@ void function UICodeCallback_UIInit()
 
 void function UICodeCallback_UIShutdown()
 {
-	ShGladiatorCards_UIShutdown()
+	foreach ( func in uiGlobal.uiShutdownCallbacks )
+	{
+		func()
+	}
 
 	//
-	SquadPanel_Shutdown()
-	Inventory_Shutdown()
-	ShEHI_VMShutdown()
 }
 
 
@@ -415,6 +430,10 @@ bool function IsShowingMap()
 	return uiGlobal.isShowingMap
 }
 
+void function AddUICallback_UIShutdown( void functionref() callbackFunc )
+{
+	uiGlobal.uiShutdownCallbacks.append( callbackFunc )
+}
 
 void function AddUICallback_InputModeChanged( void functionref( bool ) callbackFunc )
 {

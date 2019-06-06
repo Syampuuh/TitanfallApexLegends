@@ -130,6 +130,7 @@ void function OnSurvivalGroundListMenu_Open()
 	UpdateGroundListMenu()
 	ListPanel_ScrollListPaneltoIndex( file.groundList, 0 )
 	RunClientScript( "UICallback_GroundlistOpened" )
+	ListPanel_FocusFirstItem( file.groundList, true )
 	thread Delayed_SetCursorToObject( file.groundHeader )
 
 	RunClientScript( "UICallback_SetGroundMenuHeaderToPlayerName", file.groundHeader )
@@ -273,7 +274,7 @@ void function StartGroundItemExtendedUse( var button, int position, float durati
 		}
 	)
 
-	while ( ( InputIsButtonDown( MOUSE_LEFT ) || InputIsButtonDown( BUTTON_A ) ) && Time() < uiEndTime && GetMouseFocus() == button )
+	while ( ( InputIsButtonDown( MOUSE_LEFT ) || InputIsButtonDown( BUTTON_A ) ) && Time() < uiEndTime && ( GetMouseFocus() == button || GetDpadNavigationActive() ) )
 	{
 		vector screenPos = ConvertCursorToScreenPos()
 		Hud_SetPos( elem, screenPos.x - Hud_GetWidth( elem )*0.5, screenPos.y - Hud_GetHeight( elem )*0.5 )
@@ -325,6 +326,9 @@ void function GroundItem_OpenQuickSwap( var button, int position, int guid )
 	int gridOffset = -buttonY + (gridHeight / 2)
 
 	Hud_SetY( file.quickSwapGrid, gridOffset )
+
+	if ( GetDpadNavigationActive() )
+		Hud_SetFocused( Hud_GetChild( file.quickSwapGrid, "GridButton0x0" ) )
 
 	int gridWidth = Hud_GetWidth( file.quickSwapGrid )
 

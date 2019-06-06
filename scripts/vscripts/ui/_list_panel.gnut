@@ -12,6 +12,7 @@ global function ListPanel_GetButtonAtIndex
 global function ListPanel_OnListButtonClick
 global function ListPanel_OnListButtonClickRight
 global function ListPanel_ScrollListPaneltoIndex
+global function ListPanel_FocusFirstItem
 global function ListPanel_UpdateSelectedState
 global function ListPanel_SetScrollCallback
 
@@ -23,6 +24,7 @@ global struct ListPanelListDef
 {
 	int          itemCount
 	array<float> itemHeights = []
+	array<bool>  itemIsHeaderList = []  //
 }
 
 struct ListElementData
@@ -42,6 +44,7 @@ struct ListPanelData
 	float scrollListOffset
 
 	bool exclusiveSelection = false
+	bool needsInitialFocus = false
 
 	int paddingVert = 8
 
@@ -51,6 +54,8 @@ struct ListPanelData
 	array<ListElementData> usedElements = []
 
 	int   lastItemCount = -1
+	int	  lastClickedAssignedIndex = -1
+	int   lastFocusedIndex = 0
 	float lastTotalListSize = -1
 	float totalListSize
 	float listOffset
@@ -310,31 +315,37 @@ void function OnListButtonGetFocus( var button )
 
 	expect ListElementData( buttonData )
 
-	if ( IsControllerModeActive() && !GetConVarBool( "gameCursor_ModeActive" ) )
+	if ( IsControllerModeActive() && GetDpadNavigationActive() && data.scrollValue == 0.0 )
 	{
 		int focusOffset = Hud_GetY( button )
-
-		array<int> visibleIndices = GetVisibleListItemsIndices( data, data.listOffset )
+		UIPos panelPos = REPLACEHud_GetAbsPos( data.panel )
 
 		if ( focusOffset < 0 )
 		{
-			data.scrollValue = (float( data.buttonHeight + data.paddingVert ) / SCROLL_SPEED) * -1
-			UpdateButtonElements( data )
-			data.scrollValue = 0.0
-		}
-		else if ( focusOffset < 0 && buttonData.assignedIndex == visibleIndices[0] && buttonData.assignedIndex != 0 )
-		{
-			data.scrollValue = (float( data.buttonHeight + data.paddingVert ) / SCROLL_SPEED) * -1
+			//
+			bool isIndexValid = buttonData.assignedIndex > 0 && buttonData.assignedIndex < ListPanel_GetItemCount( data )
+			if( isIndexValid && ListPanel_IsHeaderItemAtIndex( data, buttonData.assignedIndex - 1 ) )
+			{
+				int topHeaderHeight = ListPanel_GetItemHeight( data, 0 )
+				data.scrollValue = (float( panelPos.y - Hud_GetAbsY( button ) + data.paddingVert + topHeaderHeight ) / SCROLL_SPEED) * -1
+			}
+			else
+			{
+				data.scrollValue = (float( panelPos.y - Hud_GetAbsY( button ) + data.paddingVert ) / SCROLL_SPEED) * -1
+			}
+
 			UpdateButtonElements( data )
 			data.scrollValue = 0.0
 		}
 		else if ( focusOffset + float( data.buttonHeight + data.paddingVert ) > data.panelHeight )
 		{
-			data.scrollValue = float( data.buttonHeight + data.paddingVert ) / SCROLL_SPEED
+			data.scrollValue = float( data.buttonHeight + data.paddingVert - ( panelPos.y + data.panelHeight - Hud_GetAbsY( button ) ) ) / SCROLL_SPEED
 			UpdateButtonElements( data )
 			data.scrollValue = 0.0
 		}
 	}
+
+	data.lastFocusedIndex = buttonData.assignedIndex
 
 	if ( data.getFocusCallback != null )
 		data.getFocusCallback( data.panel, buttonData.button, buttonData.assignedIndex )
@@ -375,6 +386,8 @@ void function ListPanel_OnListButtonClick( var button )
 
 	if ( data.exclusiveSelection && Hud_IsSelected( button ) != wasSelected )
 		UpdateSelectedState( data )
+
+	data.lastClickedAssignedIndex = buttonData.assignedIndex
 }
 
 
@@ -431,6 +444,8 @@ void function ListPanel_OnListButtonClickRight( var button )
 
 	if ( data.exclusiveSelection && Hud_IsSelected( button ) != wasSelected )
 		UpdateSelectedState( data )
+
+	data.lastClickedAssignedIndex = buttonData.assignedIndex
 }
 
 
@@ -550,7 +565,7 @@ void function ListPanel_ScrollListPaneltoIndex( var panel, int index )
 {
 	ListPanelData data = GetDataForPanel( panel )
 
-	float offset    = GetOffsetForIndex( data, index )
+	float offset    = index > 0 ? GetOffsetForIndex( data, index ) : 0.0
 	float oldOffset = data.listOffset
 
 	float elementHeight = float( data.buttonHeight + data.paddingVert )
@@ -560,6 +575,22 @@ void function ListPanel_ScrollListPaneltoIndex( var panel, int index )
 	data.scrollValue = 0.0
 }
 
+void function ListPanel_FocusFirstItem( var panel, bool delayUntilFirstUpdate = false )
+{
+	ListPanelData data = GetDataForPanel( panel )
+
+	data.needsInitialFocus = delayUntilFirstUpdate
+
+	if ( data.usedElements.len() == 0 || delayUntilFirstUpdate || !IsControllerModeActive() )
+		return
+
+	if( !ListPanel_IsHeaderItemAtIndex( data, 0 ) )
+		Hud_SetFocused( GetElementDataForItemIndex( data, 0 ).button )
+	else
+		Hud_SetFocused( GetElementDataForItemIndex( data, 1 ).button )
+
+	UpdateSelectedState( data )
+}
 
 array<int> function GetVisibleListItemsIndices( ListPanelData data, float offset )
 {
@@ -572,12 +603,19 @@ array<int> function GetVisibleListItemsIndices( ListPanelData data, float offset
 		return []
 	}
 
-	int visibleHeight = (ListPanel_GetItemHeight( data, firstIndex ) + data.paddingVert)
+	int buttonHeight = ListPanel_GetItemHeight( data, firstIndex )
+	int visibleHeight = (buttonHeight + data.paddingVert)
 	visibleHeight = int(data.indexAtOffset[firstIndex] - offset)
+
+	//
+	int heightPadding = buttonHeight * 2
+	if( firstIndex > 0 )
+		visibleIndices.append ( firstIndex - 1 )
+
 	visibleIndices.append ( firstIndex )
 
 	int lastIndex = firstIndex + 1
-	while ( visibleHeight < data.panelHeight && lastIndex < data.indexAtOffset.len() )
+	while ( visibleHeight < data.panelHeight + heightPadding && lastIndex < data.indexAtOffset.len() )
 	{
 		visibleHeight += ListPanel_GetItemHeight( data, lastIndex ) + data.paddingVert
 		visibleIndices.append ( lastIndex )
@@ -593,8 +631,10 @@ void function UpdateButtonElements( ListPanelData data, bool forceRefresh = fals
 	//
 	int itemCount       = ListPanel_GetItemCount( data )
 	float totalListSize = ListPanel_GetTotalSize( data )
+	bool itemCountDecreased = false
 	if ( data.lastItemCount != itemCount || data.lastTotalListSize != totalListSize )
 	{
+		itemCountDecreased = itemCount < data.lastItemCount
 		data.totalListSize = ListPanel_GetTotalSize( data, true )
 		data.lastItemCount = itemCount
 		forceRefresh = true
@@ -655,9 +695,12 @@ void function UpdateButtonElements( ListPanelData data, bool forceRefresh = fals
 		Hud_SetY( listButton, newY )
 		Hud_SetHeight( listButton, ListPanel_GetItemHeight( data, itemIndex ) )
 
+		//
+		Hud_SetEnabled( listButton, !ListPanel_IsHeaderItemAtIndex( data, itemIndex ) )
+
 		if ( visIndex == 0 )
 		{
-			Hud_SetNavUp( listButton, data.navUpElement )
+			Hud_SetNavUp( listButton, listButton )
 		}
 		else
 		{
@@ -668,11 +711,23 @@ void function UpdateButtonElements( ListPanelData data, bool forceRefresh = fals
 		}
 
 		if ( visIndex == visibleIndices.len() - 1 )
-			Hud_SetNavDown( listButton, data.navDownElement )
+			Hud_SetNavDown( listButton, listButton )
 
 		Hud_Show( listButton )
 	}
 	data.lastVisibleIndices = visibleIndices
+
+	if ( data.needsInitialFocus && data.usedElements.len() > 0 )
+		ListPanel_FocusFirstItem( data.panel )
+
+	//
+	//
+	bool didFocusChangeToHeader = false
+	if( data.lastFocusedIndex < ListPanel_GetItemCount( data ) )
+		didFocusChangeToHeader = ListPanel_IsHeaderItemAtIndex( data, data.lastFocusedIndex )
+
+	if( data.lastClickedAssignedIndex >= 0 && ( itemCountDecreased || didFocusChangeToHeader ) )
+		UpdateButtonFocus( data )
 
 	if ( data.scrollBarElement != null )
 		UpdateScrollBar( data )
@@ -693,7 +748,6 @@ ListElementData function GetElementDataForItemIndex( ListPanelData data, int ite
 	newButtonData.assignedIndex = itemIndex
 	data.usedElements.append( newButtonData )
 	data.bindCallback( data.panel, newButtonData.button, itemIndex )
-	Hud_Show( newButtonData.button )
 
 	return newButtonData
 }
@@ -724,6 +778,35 @@ ListElementData ornull function GetElementDataForButton( ListPanelData data, var
 	}
 
 	return null
+}
+
+void function UpdateButtonFocus( ListPanelData data )
+{
+	int usedElemCount = data.usedElements.len()
+
+	//
+	if( IsControllerModeActive() && usedElemCount > 0 && data.lastClickedAssignedIndex >= 0 )
+	{
+		int buttonToFocusIndex = data.lastClickedAssignedIndex
+		int itemCount = ListPanel_GetItemCount( data )
+
+		if ( usedElemCount == 1 )
+			buttonToFocusIndex = 0
+		else if( buttonToFocusIndex >= itemCount )
+			buttonToFocusIndex = itemCount - 1
+
+		if( buttonToFocusIndex < ListPanel_GetItemCount( data ) )
+		{
+			while( ListPanel_IsHeaderItemAtIndex( data, buttonToFocusIndex ) && buttonToFocusIndex > 0 )
+			{
+				buttonToFocusIndex--
+			}
+		}
+
+		Hud_SetFocused( GetElementDataForItemIndex( data, buttonToFocusIndex ).button )
+		UpdateSelectedState( data )
+		data.lastClickedAssignedIndex = -1
+	}
 }
 
 
@@ -908,6 +991,14 @@ int function ListPanel_GetBaseButtonHeight( var panel )
 int function ListPanel_GetItemHeight( ListPanelData data, int index )
 {
 	return int( data.listDefCallback( data.panel ).itemHeights[index] * data.buttonHeight )
+}
+
+bool function ListPanel_IsHeaderItemAtIndex( ListPanelData data, int index )
+{
+	if( data.listDefCallback( data.panel ).itemIsHeaderList.len() <= 0 )
+		return false
+
+	return data.listDefCallback( data.panel ).itemIsHeaderList[index]
 }
 
 

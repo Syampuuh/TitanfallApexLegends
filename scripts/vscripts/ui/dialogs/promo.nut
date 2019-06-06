@@ -8,7 +8,7 @@ const PROMO_DIALOG_MAX_PAGES = 9
 
 struct PromoDialogPageData
 {
-	asset image = $""
+	asset  image = $""
 	string title = ""
 	string desc = ""
 	string link = ""
@@ -35,32 +35,40 @@ struct
 	void functionref() hijackCloseCallback = null
 
 	array<PromoDialogPageData> pages
-	int activePageIndex = 0
-	var lastPageRui
-	var activePageRui
-	int updateID = -1
+	int                        activePageIndex = 0
+	var                        lastPageRui
+	var                        activePageRui
+	int                        updateID = -1
+
+	int promoVersionSeen_PREDICTED = -1
 } file
 
 
-void function OpenPromoDialogIfNew()
+bool function OpenPromoDialogIfNew()
 {
 	UpdatePromoData()
 
 	entity player = GetUIPlayer()
 	if ( player == null || !IsPromoDialogAllowed() )
-		return
+		return false
 
 	int promoVersion = GetPromoDataVersion()
-	int promoVersionSeen = player.GetPersistentVarAsInt( "promoVersionSeen" )
+	if ( file.promoVersionSeen_PREDICTED == -1 )
+		file.promoVersionSeen_PREDICTED = player.GetPersistentVarAsInt( "promoVersionSeen" )
 
-	if ( promoVersion != 0 && promoVersion != promoVersionSeen )
+	if ( promoVersion != 0 && promoVersion != file.promoVersionSeen_PREDICTED )
+	{
 		AdvanceMenu( file.menu )
+		return true
+	}
+
+	return false
 }
 
 
 bool function IsPromoDialogAllowed()
 {
-	return ( IsPromoDataProtocolValid() && IsLobby() && IsFullyConnected() && GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
+	return (IsPromoDataProtocolValid() && IsLobby() && IsFullyConnected() && GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsTabPanelActive( GetPanel( "PlayPanel" ) ))
 }
 
 
@@ -91,10 +99,10 @@ void function InitPromoDialog()
 }
 
 
-void function PromoDialog_OpenHijacked( string content, void functionref() closeCallback )
+void function PromoDialog_OpenHijacked( string content )
 {
 	file.hijackContent = content
-	file.hijackCloseCallback = closeCallback
+	//
 	AdvanceMenu( file.menu )
 }
 
@@ -120,6 +128,7 @@ void function PromoDialog_OnClose()
 		if ( file.hijackCloseCallback != null )
 		{
 			file.hijackCloseCallback()
+			file.hijackCloseCallback = null
 		}
 	}
 }
@@ -127,15 +136,11 @@ void function PromoDialog_OnClose()
 
 void function PromoDialog_OnNavigateBack()
 {
-	UserClosedPromoDialog( null )
-}
-
-
-void function UserClosedPromoDialog( var button )
-{
-	entity player = GetUIPlayer()
-	if ( player != null && IsFullyConnected() && file.hijackContent == null )
-		ClientCommand( "SetPromoVersionSeen " + string( GetPromoDataVersion() ) )
+	if ( GetUIPlayer() != null && IsFullyConnected() && file.hijackContent == null )
+	{
+		file.promoVersionSeen_PREDICTED = GetPromoDataVersion()
+		ClientCommand( format( "SetPromoVersionSeen %d", file.promoVersionSeen_PREDICTED ) )
+	}
 
 	CloseActiveMenu()
 }
@@ -220,6 +225,7 @@ void function DeregisterPageChangeInput()
 	file.pageChangeInputsRegistered = false
 }
 
+
 void function TrackDpadInput()
 {
 	bool canChangePage = false
@@ -248,6 +254,7 @@ void function TrackDpadInput()
 		WaitFrame()
 	}
 }
+
 
 void function Page_NavLeft( var button )
 {
@@ -329,5 +336,5 @@ bool function PageHasBuyOption()
 {
 	string link = file.pages[file.activePageIndex].link
 
-	return ( link.find( "buy:" ) == 0 )
+	return (link.find( "buy:" ) == 0)
 }

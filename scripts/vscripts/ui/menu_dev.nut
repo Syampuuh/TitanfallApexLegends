@@ -289,6 +289,9 @@ void function SetupDefaultDevCommandsMP()
 		SetupDevMenu( "Survival Helmets", SetDevMenu_SurvivalLoot, "helmet" )
 		SetupDevMenu( "Survival Armor", SetDevMenu_SurvivalLoot, "armor" )
 		SetupDevMenu( "Survival Backpack", SetDevMenu_SurvivalLoot, "backpack" )
+		#if(false)
+
+#endif
 		SetupDevMenu( "Survival Incap Shield", SetDevMenu_SurvivalLoot, "incapshield" )
 		SetupDevMenu( "Survival Incap Shield Debugging", SetDevMenu_SurvivalIncapShieldBots )
 		SetupDevMenu( "Survival Items", SetDevMenu_SurvivalLoot, "ordnance ammo health custom_pickup" )

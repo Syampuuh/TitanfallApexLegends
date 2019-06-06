@@ -29,7 +29,7 @@ global struct MenuCharacterDef
 
 global struct MenuModelData
 {
-	entity	 poseEnt
+	entity   poseEnt
 	entity   model
 	entity   mover
 	vector   baseOrigin
@@ -37,7 +37,7 @@ global struct MenuModelData
 	float[2] baseRotationDelta = [0, 0]
 	float[2] rotationDelta
 	float    maxTurnSpeed = DEFAULT_MAX_TURN_SPEED
-	string 	 bodyAnim
+	string   bodyAnim
 }
 
 global struct CameraZoomData
@@ -63,10 +63,10 @@ struct PartyMemberDisplayThreadData
 	PartyMember&       partyMemberInfo
 	CommunityUserInfo& userInfo
 	bool               isReady
-	bool			   isLeader
+	bool               isLeader
 	bool               isFocused
 
-	bool			   isDirty
+	bool isDirty
 }
 
 struct PresentationDef
@@ -159,9 +159,11 @@ struct
 		array<entity> dimmedEnts
 
 		#if(DEV)
-			bool DEV_previewSelfAsParty = false
+			bool   DEV_previewSelfAsParty = false
+			string DEV_characterOffsetCharacter = ""
+			vector DEV_characterOffset = <0, 0, 0>
 		#endif //
-		int  transitionTest = 3
+		int transitionTest = 3
 	#endif //
 } file
 
@@ -210,6 +212,7 @@ global function DEV_TweakWeaponCamera
 global function DEV_TogglePreviewParty
 global function DEV_TransitionTest
 global function DEV_ScaleModel
+global function DEV_TweakCharacterOffset
 #endif //
 
 global function UIToClient_PROTO_UpdateClientWithLocalClientUID
@@ -458,39 +461,226 @@ void function InitPresentationData()
 {
 	//
 
-	SetPresentationData( ePresentationType.INACTIVE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [] )
-	SetPresentationData( ePresentationType.PLAY, file.playCharacter, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_PLAY, EndPresentation_PLAY )
-	SetPresentationData( ePresentationType.CHARACTER_SELECT, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, GetEntArrayByScriptName( "close_character_light" ), StartPresentation_CHARACTER_SELECT )
-	SetPresentationData( ePresentationType.CHARACTER_SKIN, file.customizeCharacter, false, 360, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_CHARACTER_SKIN, EndPresentation_CHARACTER_SKIN )
-	SetPresentationData( ePresentationType.CHARACTER_CARD, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_CHARACTER_CARD )
-	SetPresentationData( ePresentationType.CHARACTER_QUIPS, file.customizeCharacter, true, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, GetEntArrayByScriptName( "close_character_light" ), StartPresentation_CHARACTER_QUIPS )
-	SetPresentationData( ePresentationType.WEAPON_CATEGORY, null, false, 0, 0, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [] )
-	SetPresentationData( ePresentationType.WEAPON_SKIN, file.customizeWeapon, false, 80, 80, 50, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [], StartPresentation_WEAPON_SKIN, EndPresentation_WEAPON_SKIN )
-	//
-	SetPresentationData( ePresentationType.STORE, null, false, 0, 0, DEFAULT_FOV, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, 2300.0, 3000.0, 1.0, 1.0, 0.0, [], StartPresentation_TEMP )
-	SetPresentationData( ePresentationType.NO_MODELS, null, false, 0, 0, 15, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 1.0, 1.0, 0.0, [], StartPresentation_TEMP )
-	SetPresentationData( ePresentationType.BATTLE_PASS, null, false, 0, 0, 15.5, DEFAULT_DOF_NEAR_START, DEFAULT_DOF_NEAR_END, DEFAULT_DOF_FAR_START, DEFAULT_DOF_FAR_END, 0.22, 0.55, 70.0, [], StartPresentation_BATTLE_PASS, EndPresentation_BATTLE_PASS )
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.INACTIVE]
+		pd.modelData = null
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = DEFAULT_FOV
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 1.0
+		pd.csmTexelScale2 = 1.0
+		pd.csmStartDistance = 0.0
+		pd.lights = []
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.PLAY]
+		pd.modelData = file.playCharacter
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 15.5
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 0.22
+		pd.csmTexelScale2 = 0.55
+		pd.csmStartDistance = 70.0
+		pd.lights = []
+		pd.startFunc = StartPresentation_PLAY
+		pd.endFunc = EndPresentation_PLAY
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.CHARACTER_SELECT]
+		pd.modelData = file.customizeCharacter
+		pd.useCharacterOffsets = true
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 50
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 0.22
+		pd.csmTexelScale2 = 0.55
+		pd.csmStartDistance = 70.0
+		pd.lights = GetEntArrayByScriptName( "close_character_light" )
+		pd.startFunc = StartPresentation_CHARACTER_SELECT
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.CHARACTER_SKIN]
+		pd.modelData = file.customizeCharacter
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 360
+		pd.maxPitchDegrees = 0
+		pd.fov = 50
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 0.22
+		pd.csmTexelScale2 = 0.55
+		pd.csmStartDistance = 70.0
+		pd.lights = []
+		pd.startFunc = StartPresentation_CHARACTER_SKIN
+		pd.endFunc = EndPresentation_CHARACTER_SKIN
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.CHARACTER_CARD]
+		pd.modelData = null
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 50
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 0.22
+		pd.csmTexelScale2 = 0.55
+		pd.csmStartDistance = 70.0
+		pd.lights = []
+		pd.startFunc = StartPresentation_CHARACTER_CARD
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.CHARACTER_QUIPS]
+		pd.modelData = file.customizeCharacter
+		pd.useCharacterOffsets = true
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 50
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 0.22
+		pd.csmTexelScale2 = 0.55
+		pd.csmStartDistance = 70.0
+		pd.lights = GetEntArrayByScriptName( "close_character_light" )
+		pd.startFunc = StartPresentation_CHARACTER_QUIPS
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.WEAPON_CATEGORY]
+		pd.modelData = null
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 50
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 1.0
+		pd.csmTexelScale2 = 1.0
+		pd.csmStartDistance = 0.0
+		pd.lights = []
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.WEAPON_SKIN]
+		pd.modelData = file.customizeWeapon
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 80
+		pd.maxPitchDegrees = 80
+		pd.fov = 50
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 1.0
+		pd.csmTexelScale2 = 1.0
+		pd.csmStartDistance = 0.0
+		pd.lights = []
+		pd.startFunc = StartPresentation_WEAPON_SKIN
+		pd.endFunc = EndPresentation_WEAPON_SKIN
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.STORE]
+		pd.modelData = null
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = DEFAULT_FOV
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = 2300.0
+		pd.dofFarEnd = 3000.0
+		pd.csmTexelScale1 = 1.0
+		pd.csmTexelScale2 = 1.0
+		pd.csmStartDistance = 0.0
+		pd.lights = []
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.NO_MODELS]
+		pd.modelData = null
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 15
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 1.0
+		pd.csmTexelScale2 = 1.0
+		pd.csmStartDistance = 0.0
+		pd.lights = []
+	}
+
+	{
+		PresentationDef pd = file.presentationData[ePresentationType.BATTLE_PASS]
+		pd.modelData = null
+		pd.useCharacterOffsets = false
+		pd.maxYawDegrees = 0
+		pd.maxPitchDegrees = 0
+		pd.fov = 15.5
+		pd.dofNearStart = DEFAULT_DOF_NEAR_START
+		pd.dofNearEnd = DEFAULT_DOF_NEAR_END
+		pd.dofFarStart = DEFAULT_DOF_FAR_START
+		pd.dofFarEnd = DEFAULT_DOF_FAR_END
+		pd.csmTexelScale1 = 0.22
+		pd.csmTexelScale2 = 0.55
+		pd.csmStartDistance = 70.0
+		pd.lights = []
+		pd.startFunc = StartPresentation_BATTLE_PASS
+		pd.endFunc = EndPresentation_BATTLE_PASS
+	}
+
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
 }
 
-//
-void function SetPresentationData( int presentationType, MenuModelData ornull modelData, bool useCharacterOffsets, float maxYawDegrees, float maxPitchDegrees, float fov, float dofNearStart, float dofNearEnd, float dofFarStart, float dofFarEnd, float csmTexelScale1, float csmTexelScale2, float csmStartDistance, array<entity> lights, void functionref() startFunc = null, void functionref() endFunc = null )
-{
-	file.presentationData[ presentationType ].modelData = modelData
-	file.presentationData[ presentationType ].useCharacterOffsets = useCharacterOffsets
-	file.presentationData[ presentationType ].maxYawDegrees = maxYawDegrees
-	file.presentationData[ presentationType ].maxPitchDegrees = maxPitchDegrees
-	file.presentationData[ presentationType ].fov = fov
-	file.presentationData[ presentationType ].dofNearStart = dofNearStart
-	file.presentationData[ presentationType ].dofNearEnd = dofNearEnd
-	file.presentationData[ presentationType ].dofFarStart = dofFarStart
-	file.presentationData[ presentationType ].dofFarEnd = dofFarEnd
-	file.presentationData[ presentationType ].csmTexelScale1 = csmTexelScale1
-	file.presentationData[ presentationType ].csmTexelScale2 = csmTexelScale2
-	file.presentationData[ presentationType ].csmStartDistance = csmStartDistance
-	file.presentationData[ presentationType ].lights = lights
-	file.presentationData[ presentationType ].startFunc = startFunc
-	file.presentationData[ presentationType ].endFunc = endFunc
-}
 
 void function StartPresentation_PLAY()
 {
@@ -523,7 +713,7 @@ void function StartPresentation_CHARACTER_SKIN()
 
 	if ( !EffectDoesExist( file.baseFXHandle ) )
 	{
-		file.baseFXHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( CHARACTER_BASE_EFFECT ), ModelData_GetMover( file.customizeCharacter ).GetOrigin() + <0,0,-1.2>, <-2.2, 0, 0> )
+		file.baseFXHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( CHARACTER_BASE_EFFECT ), ModelData_GetMover( file.customizeCharacter ).GetOrigin() + <0, 0, -1.2>, <-2.2, 0, 0> )
 		EffectSetDontKillForReplay( file.baseFXHandle )
 	}
 
@@ -568,10 +758,6 @@ void function StartPresentation_BATTLE_PASS()
 void function EndPresentation_BATTLE_PASS()
 {
 	BattlePassLightsOff()
-}
-
-void function StartPresentation_TEMP()
-{
 }
 
 void function InitMenuEntities()
@@ -720,6 +906,10 @@ void function UpdateMenuCharacterModelInternal( int overrideCharacterFlavorNetwo
 		entity refEnt = ModelData_GetPoseEntity( expect MenuModelData( file.presentationData[ file.currentPresentationType ].modelData ) )
 		vector base   = refEnt.GetOrigin()
 		vector offset = CharacterClass_GetGalleryModelOffset( character )
+		#if(DEV)
+			if ( ItemFlavor_GetHumanReadableRef( character ) == file.DEV_characterOffsetCharacter )
+				offset = file.DEV_characterOffset
+		#endif //
 
 		ModelData_GetMover( expect MenuModelData( file.presentationData[ file.currentPresentationType ].modelData ) ).SetOrigin( base + offset )
 	}
@@ -953,7 +1143,7 @@ void function TrackPartyMembersAndDisplayModelsThread()
 			partyMemberDisplayThreadData.userInfo.charData.resize( ePlayerStryderCharDataArraySlots.COUNT, 0 ) //
 
 			partyMemberDisplayThreadData.partyMemberSeenThisUpdate = true
-			if ( partyMemberDisplayThreadData.isReady != partyMemberInfo.ready || partyMemberDisplayThreadData.isDirty)
+			if ( partyMemberDisplayThreadData.isReady != partyMemberInfo.ready || partyMemberDisplayThreadData.isDirty )
 			{
 				if ( partyMemberDisplayThreadData.rui != null )
 				{
@@ -1098,15 +1288,15 @@ void function TrackPartyMembersAndDisplayModelsThread()
 
 void function TellUIToUpdateInviteButtons()
 {
-	string leftSpotUID = ""
+	string leftSpotUID      = ""
 	string leftSpotHardware = ""
-	string leftSpotName = ""
-	bool leftSpotInMatch = false
+	string leftSpotName     = ""
+	bool leftSpotInMatch    = false
 
-	string rightSpotUID = ""
+	string rightSpotUID      = ""
 	string rightSpotHardware = ""
-	string rightSpotName = ""
-	bool rightSpotInMatch = false
+	string rightSpotName     = ""
+	bool rightSpotInMatch    = false
 
 	//
 	foreach( string partyMemberUid, PartyMemberDisplayThreadData partyMemberDisplayThreadData in file.partyMemberUidCharacterDataMap )
@@ -1158,7 +1348,7 @@ void function DisplayPartyMemberModelThread( PartyMemberDisplayThreadData data )
 	data.body.MakeSafeForUIScriptHack()
 	data.body.Anim_Play( data.idleActivity )
 
-/*
+	/*
 
 
 
@@ -1170,7 +1360,7 @@ void function DisplayPartyMemberModelThread( PartyMemberDisplayThreadData data )
 */
 
 	data.isReady = data.partyMemberInfo.ready
-/*
+	/*
 
 
 */
@@ -1198,14 +1388,14 @@ void function DisplayPartyMemberModelThread( PartyMemberDisplayThreadData data )
 			data.body = null
 		}
 
-/*
+		/*
 
 */
 		data.rui = null
 	} )
 
 	bool wasInMatch = PartyMemberInMatch( data.partyMemberInfo )
-	bool firstTime = true
+	bool firstTime  = true
 
 	while ( 1 )
 	{
@@ -1405,7 +1595,7 @@ void function ClearAllCharacterPreview( entity player )
 
 void function RefreshPresentationType()
 {
-	if ( IsLootCeremonyActive() || IsStoreItemPresentationModeActive() )
+	if ( IsLootCeremonyActive() || IsSpecialItemPresentationModeActive() )
 		return
 
 	file.presentationTypeInitialized = false
@@ -1557,7 +1747,7 @@ void function SetMenuCamera( entity player, int presentationType, bool interpola
 
 void function ModelRotationThread()
 {
-	for ( ;; )
+	for ( ; ; )
 	{
 		WaitFrame()
 
@@ -1694,6 +1884,12 @@ void function DEV_ScaleModel( float scale )
 	model.SetLocalAngles( angleOffset )
 	model.Anim_SetPaused( true )
 }
+
+void function DEV_TweakCharacterOffset( string character, vector offset )
+{
+	file.DEV_characterOffsetCharacter = character
+	file.DEV_characterOffset = offset
+}
 #endif //
 #endif //
 
@@ -1784,7 +1980,7 @@ void function TrackIsOverScrollBar( var listPanel )
 {
 	EndSignal( uiGlobal.signalDummy, "TrackIsOverScrollBar" )
 
-	var scrollPanel = Hud_GetChild( listPanel, "ScrollPanel" )
+	var scrollPanel      = Hud_GetChild( listPanel, "ScrollPanel" )
 	bool rotationEnabled = true
 
 	while ( true )
@@ -1922,7 +2118,7 @@ void function MenuModelHighlightInMatch( entity model )
 	model.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_NEUTRAL )
 	int highlightId = model.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
 	model.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_LOBBY_IN_MATCH, true, HIGHLIGHT_OUTLINE_NONE, 1.0, highlightId, false )
-	model.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, <0,0,0> )
+	model.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, <0, 0, 0> )
 	model.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <1000, 1, 0> )
 
 	model.Highlight_SetFadeInTime( 0.0 )

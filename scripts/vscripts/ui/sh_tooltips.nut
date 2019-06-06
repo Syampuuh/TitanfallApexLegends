@@ -275,9 +275,21 @@ void function UpdateToolTipElement( var toolTipElement, var focusElement )
 		}
 	#endif
 
+	switch ( dt.commsAction )
+	{
+		case eCommsAction.INVENTORY_NEED_AMMO_BULLET:
+		case eCommsAction.INVENTORY_NEED_AMMO_SPECIAL:
+		case eCommsAction.INVENTORY_NEED_AMMO_HIGHCAL:
+		case eCommsAction.INVENTORY_NEED_AMMO_SHOTGUN:
+#if(false)
+
+#endif
+			dt.commsPromptDefault = IsControllerModeActive() ? "#PING_PROMPT_REQUEST_AMMO_GAMEPAD" : "#PING_PROMPT_REQUEST_AMMO"
+	}
+
 	string commsPrompt = dt.commsPromptDefault
 	if ( (dt.tooltipFlags & eToolTipFlag.EMPTY_SLOT) || (dt.commsAction != eCommsAction.BLANK) && commsPrompt == "" )
-		commsPrompt = "#PING_PROMPT_REQUEST"
+		commsPrompt = IsControllerModeActive() ? "#PING_PROMPT_REQUEST_GAMEPAD" : "#PING_PROMPT_REQUEST"
 
 	var rui = GetTooltipRui()
 

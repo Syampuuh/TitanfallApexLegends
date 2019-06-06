@@ -18,10 +18,9 @@ global function ClearBattlePassItem
 #if(UI)
 global function InitPassPanel
 global function InitRewardPanel
-global function InitPassAwardsMenu
 global function InitLegendBonusDialog
 global function InitAboutBattlePass1Dialog
-
+global function BattlePass_CanEquipReward
 global function GetRewardPanel
 
 global function InitPassXPPurchaseDialog
@@ -36,10 +35,6 @@ global function GetBattlePassXPPurchaseOffer
 global function TryDisplayBattlePassAwards
 
 global function InitBattlePassRewardButtonRui
-#endif
-
-#if(UI)
-global function ShowPassAwardsDialog
 #endif
 
 
@@ -148,7 +143,8 @@ void function InitPassPanel( var panel )
 	{
 		Hud_AddEventHandler( rewardButton, UIE_GET_FOCUS, BattlePass_OnFocusReward )
 		Hud_AddEventHandler( rewardButton, UIE_LOSE_FOCUS, BattlePass_OnRewardLoseFocus )
-		Hud_AddEventHandler( rewardButton, UIE_CLICKRIGHT, BattlePass_OnActivateReward )
+		Hud_AddEventHandler( rewardButton, UIE_CLICK, BattlePass_OnActivateReward )
+		Hud_AddEventHandler( rewardButton, UIE_CLICKRIGHT, BattlePass_OnAltActivateReward )
 	}
 
 	file.rewardBarFooter = Hud_GetChild( panel, "RewardBarFooter" )
@@ -247,8 +243,8 @@ void function InitRewardPanel( var rewardBarPanel, array<RewardGroup> rewardGrou
 	Hud_SetWidth( rewardBarPanel, contentWidth )
 	Hud_SetWidth( file.rewardBarFooter, contentWidth )
 
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	bool hasActiveBattlePass           = activeBattlePass != null
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	bool hasActiveBattlePass           = activeBattlePass != null && GRX_IsInventoryReady()
 	if ( hasActiveBattlePass )
 	{
 		expect ItemFlavor( activeBattlePass )
@@ -343,7 +339,7 @@ void function BattlePass_PageBackward( var button )
 void function BattlePass_OnPurchase( var button )
 {
 	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 	{
 		return
 	}
@@ -418,6 +414,32 @@ void function BattlePass_OnActivateReward( var button )
 		{
 			if ( scriptId == buttonIndex )
 			{
+				if ( InspectItemTypePresentationSupported( bpReward.flav ) )
+				{
+					SetBattlePassItemPresentationModeActive( bpReward )
+				}
+				return
+			}
+
+			buttonIndex++
+		}
+	}
+}
+
+
+void function BattlePass_OnAltActivateReward( var button )
+{
+	int scriptId = int( Hud_GetScriptID( button ) )
+
+	array<RewardGroup> rewardGroups = GetRewardGroupsForPage( file.currentPage )
+
+	int buttonIndex = 0
+	foreach ( groupIndex, rewardGroup in rewardGroups )
+	{
+		foreach ( rewardIndex, bpReward in rewardGroup.rewards )
+		{
+			if ( scriptId == buttonIndex )
+			{
 				BattlePass_EquipReward( bpReward )
 				return
 			}
@@ -426,6 +448,7 @@ void function BattlePass_OnActivateReward( var button )
 		}
 	}
 }
+
 
 string function BattlePass_GetShortDescString( BattlePassReward reward )
 {
@@ -492,7 +515,7 @@ string function GetBattlePassRewardItemDesc( BattlePassReward reward )
 			itemDesc = GetFormattedValueForCurrency( reward.quantity, GRX_CURRENCY_PREMIUM )
 	}
 	else if ( ItemFlavor_GetType( reward.flav ) == eItemType.xp_boost )
-		itemDesc = Localize( itemDesc, XpEventTypeData_GetFrac( XP_TYPE.BONUS_FRIEND_BOOST ) * 100.0 )
+		itemDesc = Localize( itemDesc, BATTLEPASS_XP_BOOST_AMOUNT )
 
 	return itemDesc
 }
@@ -594,8 +617,8 @@ LoadoutEntry ornull function GetItemFlavorLoadoutEntry( ItemFlavor item, bool st
 
 void function BattlePass_UpdateRewardDetails( BattlePassReward reward )
 {
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 	{
 		return
 	}
@@ -669,7 +692,7 @@ void function BattlePass_UpdateRewardDetails( BattlePassReward reward )
 
 	HudElem_SetRuiArg( file.premiumReqButton, "isPremium", reward.isPremium )
 
-	RunClientScript( "UIToClient_ItemPresentation", ItemFlavor_GetGUID( reward.flav ), reward.level )
+	RunClientScript( "UIToClient_ItemPresentation", ItemFlavor_GetGUID( reward.flav ), reward.level, false )
 }
 
 
@@ -677,7 +700,7 @@ array<RewardGroup> function GetRewardGroupsForPage( int pageNumber )
 {
 	array<RewardGroup> rewardGroups
 
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
 	if ( activeBattlePass == null )
 		return rewardGroups
 
@@ -791,8 +814,8 @@ array<RewardGroup> function GetEmptyRewardGroups()
 
 void function BattlePass_SetPageToCurrentLevel()
 {
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 	{
 		BattlePass_SetPage( 0 )
 		return
@@ -848,7 +871,7 @@ void function BattlePass_UpdateRewardDetailsToNextReward( ItemFlavor activeBattl
 
 void function BattlePass_SetPage( int pageNumber )
 {
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
 	if ( activeBattlePass == null )
 	{
 		file.currentPage = 0
@@ -930,14 +953,18 @@ void function OnGRXStateChanged()
 void function BattlePass_UpdatePurchaseButton()
 {
 	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 	{
+		Hud_SetEnabled( file.purchaseButton, false )
+		Hud_SetVisible( file.purchaseButton, false )
 		HudElem_SetRuiArg( file.purchaseButton, "buttonText", "#COMING_SOON" )
 		return
 	}
 
 	expect ItemFlavor( activeBattlePass )
 
+	Hud_SetEnabled( file.purchaseButton, true )
+	Hud_SetVisible( file.purchaseButton, true )
 	Hud_SetLocked( file.purchaseButton, false )
 	Hud_ClearToolTipData( file.purchaseButton )
 
@@ -1083,7 +1110,7 @@ int function SortByRemainingXP( BPCharacterXPData a, BPCharacterXPData b )
 
 void function BattlePass_UpdateStatus()
 {
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
 	bool hasActiveBattlePass           = activeBattlePass != null
 
 	if ( !hasActiveBattlePass )
@@ -1117,11 +1144,22 @@ void function BattlePass_UpdateStatus()
 
 	ItemFlavor ornull currentSeason = GetLatestSeason( GetUnixTimestamp() )
 	int seasonEndUnixTime = CalEvent_GetFinishUnixTime( expect ItemFlavor( currentSeason ) )
-	DisplayTime dt = SecondsToDHMS( seasonEndUnixTime - GetUnixTimestamp() )
+	int remainingSeasonTime = seasonEndUnixTime - GetUnixTimestamp()
+
+	if ( remainingSeasonTime > 0 )
+	{
+		DisplayTime dt = SecondsToDHMS( remainingSeasonTime )
+		HudElem_SetRuiArg( file.statusBox, "timeRemainingText", Localize( "#BATTLE_PASS_DAYS_REMAINING", string( dt.days ), string( dt.hours ) ) )
+	}
+	else
+	{
+		HudElem_SetRuiArg( file.statusBox, "timeRemainingText", Localize( "#BATTLE_PASS_SEASON_ENDED" ) )
+	}
 
 	HudElem_SetRuiArg( file.statusBox, "seasonNameText", ItemFlavor_GetLongName( activeBattlePass ) )
-	HudElem_SetRuiArg( file.statusBox, "timeRemainingText", Localize( "#BATTLE_PASS_DAYS_REMAINING", string( dt.days ), string( dt.hours ) ) )
-	HudElem_SetRuiArg( file.statusBox, "seasonNumberText", Localize( "#BATTLE_PASS_SEASON_NUMBER", "1" ) )
+	HudElem_SetRuiArg( file.statusBox, "seasonNumberText", Localize( ItemFlavor_GetShortName( activeBattlePass ) ) )
+	HudElem_SetRuiArg( file.statusBox, "smallLogo", GetGlobalSettingsAsset( ItemFlavor_GetAsset( activeBattlePass ), "smallLogo" ), eRuiArgType.IMAGE )
+	HudElem_SetRuiArg( file.statusBox, "bannerImage", GetGlobalSettingsAsset( ItemFlavor_GetAsset( activeBattlePass ), "bannerImage" ), eRuiArgType.IMAGE )
 
 	ItemFlavor dummy
 	ItemFlavor bpLevelBadge = GetItemFlavorByAsset( $"settings/itemflav/gcard_badge/account/season01_bplevel.rpak" )
@@ -1212,8 +1250,8 @@ void function PassXPPurchaseDialog_OnGetTopLevel()
 void function PassXPPurchaseDialog_UpdateRewards()
 {
 	GRXScriptOffer xpPurchaseOffer = expect GRXScriptOffer( GetBattlePassXPPurchaseOffer() )
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 		return
 
 	expect ItemFlavor( activeBattlePass )
@@ -1304,8 +1342,8 @@ void function PassXPPurchaseDialog_UpdateRewards()
 
 void function InitBattlePassRewardButtonRui( var rui, BattlePassReward bpReward )
 {
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	bool hasActiveBattlePass           = activeBattlePass != null
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	bool hasActiveBattlePass           = activeBattlePass != null && GRX_IsInventoryReady()
 	bool hasPremiumPass                = false
 	int battlePassLevel                = 0
 	if ( hasActiveBattlePass )
@@ -1362,8 +1400,8 @@ void function OnBattlePassXPPurchaseResult( bool wasSuccessful )
 
 void function PassXPIncButton_OnActivate( var button )
 {
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 		return
 
 	expect ItemFlavor( activeBattlePass )
@@ -1695,6 +1733,7 @@ struct
 	var passPurchaseButton
 	var bundlePurchaseButton
 	var seasonLogoBox
+	var offersBorders
 
 	bool closeOnGetTopLevel = false
 } s_passPurchaseMenu
@@ -1709,6 +1748,7 @@ void function InitPassPurchaseMenu()
 	s_passPurchaseMenu.passPurchaseButton = Hud_GetChild( menu, "PassPurchaseButton" )
 	s_passPurchaseMenu.bundlePurchaseButton = Hud_GetChild( menu, "BundlePurchaseButton" )
 	s_passPurchaseMenu.seasonLogoBox = Hud_GetChild( menu, "SeasonLogo" )
+	s_passPurchaseMenu.offersBorders = Hud_GetChild( menu, "OffersBorders" )
 
 	Hud_AddEventHandler( s_passPurchaseMenu.passPurchaseButton, UIE_CLICK, PassPurchaseButton_OnActivate )
 	Hud_AddEventHandler( s_passPurchaseMenu.bundlePurchaseButton, UIE_CLICK, BundlePurchaseButton_OnActivate )
@@ -1720,7 +1760,7 @@ void function InitPassPurchaseMenu()
 void function PassPurchaseButton_OnActivate( var button )
 {
 	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 		return
 
 	expect ItemFlavor( activeBattlePass )
@@ -1737,7 +1777,7 @@ void function PassPurchaseButton_OnActivate( var button )
 void function BundlePurchaseButton_OnActivate( var button )
 {
 	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 		return
 
 	expect ItemFlavor( activeBattlePass )
@@ -1759,39 +1799,29 @@ void function PassPurchaseMenu_OnOpen()
 	RunClientScript( "ClearBattlePassItem" )
 	UI_SetPresentationType( ePresentationType.BATTLE_PASS )
 
-	if ( GRX_IsOfferRestricted( GetUIPlayer() ) )
+	//
+
+
+	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
+		return
+
+	expect ItemFlavor( activeBattlePass )
+	asset battlePassAsset = ItemFlavor_GetAsset( activeBattlePass )
+	bool offerRestricted = GRX_IsOfferRestricted( GetUIPlayer() )
+
+	HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "seasonName", ItemFlavor_GetLongName( activeBattlePass ) )
+	HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "titleText", GetGlobalSettingsString( battlePassAsset, "featureTitle" ) )
+	HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "logo", GetGlobalSettingsAsset( battlePassAsset, "largeLogo" ), eRuiArgType.IMAGE )
+
+	HudElem_SetRuiArg( s_passPurchaseMenu.offersBorders, "seasonShortName", ItemFlavor_GetShortName( activeBattlePass ) )
+
+	for ( int i = 1 ; i <= 14 ; i++ )
 	{
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText1", "#BATTLE_PASS_FEATURE_1" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText2", "#BATTLE_PASS_FEATURE_2" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText3", "#BATTLE_PASS_FEATURE_3" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText4", "#BATTLE_PASS_FEATURE_RESTRICTED" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText5", "#BATTLE_PASS_FEATURE_7" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText6", "#BATTLE_PASS_FEATURE_8" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText7", "#BATTLE_PASS_FEATURE_9" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText8", "#BATTLE_PASS_FEATURE_10" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText9", "#BATTLE_PASS_FEATURE_11" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText10", "#BATTLE_PASS_FEATURE_12" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText11", "#BATTLE_PASS_FEATURE_13" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText12", "#BATTLE_PASS_FEATURE_14" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText13", "" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText14", "" )
-	}
-	else
-	{
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText1", "#BATTLE_PASS_FEATURE_1" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText2", "#BATTLE_PASS_FEATURE_2" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText3", "#BATTLE_PASS_FEATURE_3" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText4", "#BATTLE_PASS_FEATURE_4" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText5", "#BATTLE_PASS_FEATURE_5" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText6", "#BATTLE_PASS_FEATURE_6" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText7", "#BATTLE_PASS_FEATURE_7" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText8", "#BATTLE_PASS_FEATURE_8" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText9", "#BATTLE_PASS_FEATURE_9" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText10", "#BATTLE_PASS_FEATURE_10" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText11", "#BATTLE_PASS_FEATURE_11" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText12", "#BATTLE_PASS_FEATURE_12" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText13", "#BATTLE_PASS_FEATURE_13" )
-		HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText14", "#BATTLE_PASS_FEATURE_14" )
+		if ( offerRestricted )
+			HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText" + i, GetGlobalSettingsString( battlePassAsset, "bulletText" + i + "_restricted" ) )
+		else
+			HudElem_SetRuiArg( s_passPurchaseMenu.seasonLogoBox, "bulletText" + i, GetGlobalSettingsString( battlePassAsset, "bulletText" + i ) )
 	}
 
 	UpdatePassPurchaseButtons()
@@ -1830,7 +1860,7 @@ void function UpdatePassPurchaseButtons()
 	RuiSetString( bundleButton, "priceBeforeDiscount", GetFormattedValueForCurrency( 4700, GRX_CURRENCY_PREMIUM ) )
 
 	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 		return
 
 	expect ItemFlavor( activeBattlePass )
@@ -1870,8 +1900,8 @@ bool function TryDisplayBattlePassAwards()
 		return false
 
 	EHI playerEHI = ToEHI( GetUIPlayer() )
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
+	ItemFlavor ornull activeBattlePass = GetPlayerLastActiveBattlePass( ToEHI( GetUIPlayer() ) )
+	if ( activeBattlePass == null || !GRX_IsInventoryReady() )
 		return false
 
 	expect ItemFlavor( activeBattlePass )
@@ -1935,7 +1965,12 @@ bool function TryDisplayBattlePassAwards()
 
 	allAwards.sort( SortByAwardLevel )
 
-	ShowPassAwardsDialog( allAwards )
+	ShowRewardCeremonyDialog(
+		"",
+		Localize( "#BATTLE_PASS_REACHED_LEVEL", GetBattlePassDisplayLevel( currentLevel ) ),
+		"",
+		allAwards,
+		true )
 
 	return true
 }
@@ -1955,147 +1990,6 @@ int function SortByAwardLevel( BattlePassReward a, BattlePassReward b )
 
 	return 0
 }
-
-
-struct
-{
-	var menu
-	var awardPanel
-	var awardHeader
-	var continueButton
-
-	array<BattlePassReward> displayAwards = []
-
-	table<var, BattlePassReward> buttonToItem
-
-} s_passAwardsMenu
-
-
-void function InitPassAwardsMenu()
-{
-	var menu = GetMenu( "PassAwardsMenu" )
-
-	s_passAwardsMenu.awardHeader = Hud_GetChild( menu, "Header" )
-	s_passAwardsMenu.awardPanel = Hud_GetChild( menu, "AwardsList" )
-
-	AddMenuEventHandler( menu, eUIEvent.MENU_OPEN, PassAwardsDialog_OnOpen )
-	AddMenuEventHandler( menu, eUIEvent.MENU_CLOSE, PassAwardsDialog_OnClose )
-
-	s_passAwardsMenu.continueButton = Hud_GetChild( menu, "ContinueButton" )
-	Hud_AddEventHandler( s_passAwardsMenu.continueButton, UIE_CLICK, ContinueButton_OnActivate )
-
-	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
-}
-
-
-void function ShowPassAwardsDialog( array<BattlePassReward> awards )
-{
-	PassAwardsDialog_SetAwards( awards )
-	AdvanceMenu( GetMenu( "PassAwardsMenu" ) )
-}
-
-
-void function PassAwardsDialog_SetAwards( array<BattlePassReward> awards )
-{
-	s_passAwardsMenu.displayAwards = clone awards
-}
-
-void function PassAwardsDialog_OnOpen()
-{
-	UI_SetPresentationType( ePresentationType.BATTLE_PASS )
-
-	Assert( s_passAwardsMenu.displayAwards.len() != 0 )
-
-	ClientCommand( "UpdateBattlePassLastEarnedXP" )
-	ClientCommand( "UpdateBattlePassLastPurchasedXP" )
-	ClientCommand( "UpdateBattlePassLastSeenPremium" )
-
-	RegisterButtonPressedCallback( BUTTON_A, ContinueButton_OnActivate )
-	RegisterButtonPressedCallback( KEY_SPACE, ContinueButton_OnActivate )
-
-	PassDialog_UpdateAwards()
-
-	EmitUISound( "UI_Menu_BattlePass_LevelUp" )
-}
-
-void function ContinueButton_OnActivate( var button )
-{
-	CloseActiveMenu()
-}
-
-
-void function PassAwardsDialog_OnClose()
-{
-	s_passAwardsMenu.displayAwards = []
-
-	DeregisterButtonPressedCallback( BUTTON_A, ContinueButton_OnActivate )
-	DeregisterButtonPressedCallback( KEY_SPACE, ContinueButton_OnActivate )
-}
-
-void function PassDialog_UpdateAwards()
-{
-	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( GetUIPlayer() ) )
-	if ( activeBattlePass == null )
-		return
-
-	expect ItemFlavor( activeBattlePass )
-
-	int startingAwardLevel      = GetPlayerBattlePassLevel( GetUIPlayer(), activeBattlePass, false )
-
-	HudElem_SetRuiArg( s_passAwardsMenu.awardHeader, "headerText", Localize( "#BATTLE_PASS_REACHED_LEVEL", GetBattlePassDisplayLevel( startingAwardLevel ) ) )
-	HudElem_SetRuiArg( s_passAwardsMenu.awardHeader, "titleText", Localize( "#BATTLE_PASS_REACHED_LEVEL", GetBattlePassDisplayLevel( startingAwardLevel ) ) )
-
-	//
-	//
-	//
-	//
-	//
-	//
-	var scrollPanel = Hud_GetChild( s_passAwardsMenu.awardPanel, "ScrollPanel" )
-
-	foreach ( button, _ in s_passAwardsMenu.buttonToItem )
-	{
-		Hud_RemoveEventHandler( button, UIE_GET_FOCUS, PassAward_OnFocusAward )
-	}
-	s_passAwardsMenu.buttonToItem.clear()
-
-	int numAwards = s_passAwardsMenu.displayAwards.len()
-
-	Hud_InitGridButtonsDetailed( s_passAwardsMenu.awardPanel, numAwards, 1, minint( numAwards, 8 ) )
-	Hud_SetHeight( s_passAwardsMenu.awardPanel, Hud_GetHeight( s_passAwardsMenu.awardPanel ) * 1.3 )
-	for ( int index = 0; index < numAwards; index++ )
-	{
-		var awardButton = Hud_GetChild( scrollPanel, "GridButton" + index )
-
-		BattlePassReward bpReward = s_passAwardsMenu.displayAwards[index]
-		s_passAwardsMenu.buttonToItem[awardButton] <- bpReward
-
-		HudElem_SetRuiArg( awardButton, "isOwned", true )
-		HudElem_SetRuiArg( awardButton, "isPremium", bpReward.isPremium )
-
-		int rarity = ItemFlavor_HasQuality( bpReward.flav ) ? ItemFlavor_GetQuality( bpReward.flav ) : 0
-		HudElem_SetRuiArg( awardButton, "rarity", rarity )
-		RuiSetImage( Hud_GetRui( awardButton ), "buttonImage", GetImageForBattlePassReward( bpReward ) )
-
-		if ( ItemFlavor_GetType( bpReward.flav ) == eItemType.account_pack )
-			HudElem_SetRuiArg( awardButton, "isLootBox", true )
-
-		HudElem_SetRuiArg( awardButton, "itemCountString", "" )
-		if ( ItemFlavor_GetType( bpReward.flav ) == eItemType.account_currency )
-			HudElem_SetRuiArg( awardButton, "itemCountString", string( bpReward.quantity ) )
-
-		Hud_AddEventHandler( awardButton, UIE_GET_FOCUS, PassAward_OnFocusAward )
-
-		if ( index == 0 )
-			PassAward_OnFocusAward( awardButton )
-	}
-}
-
-void function PassAward_OnFocusAward( var button )
-{
-	RunClientScript( "UIToClient_ItemPresentation", ItemFlavor_GetGUID( s_passAwardsMenu.buttonToItem[button].flav ), s_passAwardsMenu.buttonToItem[button].level )
-}
-
 
 #endif
 
@@ -2122,10 +2016,12 @@ GRXScriptOffer ornull function GetBattlePassXPPurchaseOffer()
 
 
 #if(CLIENT)
-void function UIToClient_ItemPresentation( SettingsAssetGUID itemFlavorGUID, int level )
+void function UIToClient_ItemPresentation( SettingsAssetGUID itemFlavorGUID, int level, bool showLow )
 {
 	entity sceneRef = GetEntByScriptName( "battlepass_ref" )
 	fileLevel.sceneRefOrigin = sceneRef.GetOrigin()
+	if ( showLow )
+		fileLevel.sceneRefOrigin += <0, 0, -8.5>
 	fileLevel.sceneRefAngles = sceneRef.GetAngles()
 
 	ShowBattlepassItem( GetItemFlavorByGUID( itemFlavorGUID ), level )
@@ -2289,7 +2185,7 @@ void function ShowBattlePassItem_CharacterSkin( ItemFlavor item )
 	entity model = CreateClientSidePropDynamic( origin, angles, $"mdl/dev/empty_model.rmdl" )
 	CharacterSkin_Apply( model, item )
 	model.MakeSafeForUIScriptHack()
-	model.SetModelScale( 0.8 )
+	model.SetModelScale( 0.75 )
 	model.SetParent( mover )
 
 	thread PlayAnim( model, "ACT_MP_MENU_LOOT_CEREMONY_IDLE", mover )
@@ -2567,7 +2463,6 @@ void function ShowBattlePassItem_Badge( ItemFlavor item, int level )
 	const float BATTLEPASS_BADGE_WIDTH = 670.0
 	const float BATTLEPASS_BADGE_HEIGHT = 670.0
 	const float BATTLEPASS_BADGE_SCALE = 0.06
-	const asset BATTLEPASS_BADGE_BG_MODEL = $"mdl/menu/loot_ceremony_stat_tracker_bg.rmdl"
 
 	vector origin        = fileLevel.sceneRefOrigin + <0, 0, 30>
 	vector angles        = fileLevel.sceneRefAngles
@@ -2579,7 +2474,7 @@ void function ShowBattlePassItem_Badge( ItemFlavor item, int level )
 	var topo = CreateRUITopology_Worldspace( origin, placardAngles, width, height )
 	var rui  = RuiCreate( $"ui/world_space_badge.rpak", topo, RUI_DRAW_VIEW_MODEL, 0 )
 	ItemFlavor dummy
-	CreateNestedGladiatorCardBadge( rui, "badge", LocalClientEHI(), item, 0, dummy, level + 2 )
+	CreateNestedGladiatorCardBadge( rui, "badge", LocalClientEHI(), item, 0, dummy, level == -1 ? 0 : level + 2 )
 	RuiSetBool( rui, "isVisible", true )
 	RuiSetBool( rui, "battlepass", true )
 

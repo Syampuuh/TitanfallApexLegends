@@ -156,6 +156,7 @@ Scheme
 		Chat.EnemyFontColor					"230 83 14 255"
 		Chat.NeutralFontColor				OffWhite
 		Chat.RuiFont 						DefaultRegularFont
+		Chat.RuiAsianFont					DefaultAsianFont
 		Chat.RuiFontHeight					28
 		Chat.RuiMinFontHeight				16
 
@@ -200,6 +201,10 @@ Scheme
 		TextEntry.SelectedBgColor			"0 0 0 255"
 		TextEntry.OutOfFocusSelectedBgColor	LightBlue
 		TextEntry.FocusEdgeColor			"0 0 0 196"
+		TextEntry.LangIdBgColor				LightBlue
+		TextEntry.LangIdFontHeight			16
+		TextEntry.ButtonFontRui 			DefaultRegularFont
+		TextEntry.ButtonFontHeightRui		16
 
 		ToggleButton.SelectedTextColor		OffWhite
 
@@ -2916,6 +2921,23 @@ Scheme
             clipRui					1
 			labelText				""
 			ypos                    4
+		}
+
+		SettingBasicButton
+		{
+			font                    Default_28
+			wide					1040
+			tall					60
+			zpos					3
+			ypos                    2
+			visible					1
+			enabled					1
+			rui						"ui/settings_base_button.rpak"
+			clipRui					1
+			labelText               ""
+            cursorVelocityModifier  0.7
+
+            sound_accept            "UI_Menu_Accept"
 		}
 
 		SwitchButton

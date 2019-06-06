@@ -8,52 +8,62 @@ globalize_all_functions
 
 global const ANALYSIS_PREVIEW_TIME = 5.0
 
+#if(false)
+
+
+
+#endif //
+
 struct AirdropBadPlace
 {
-	int id
+	int    id
 	vector origin
-	int radius
+	int    radius
 	entity ownerEnt
 }
 
 struct
 {
 	array<AirdropBadPlace> airdropBadPlaceArray
-	int airdropBadPlaceCount
+	int                    airdropBadPlaceCount
 } file
 
 vector function GetOriginFromAttachPoint( AttachPoint point, vector origin, vector forward, vector right )
 {
-	origin += forward *  point.origin.x
-	origin += right *  -point.origin.y
-	origin += <0,0,point.origin.z>
+	origin += forward * point.origin.x
+	origin += right * -point.origin.y
+	origin += <0, 0, point.origin.z>
 	return origin
 }
 
+
 vector function GetOriginFromPoint( Point point, vector origin, vector forward, vector right )
 {
-	origin += forward *  point.origin.x
-	origin += right *  -point.origin.y
-	origin += <0,0,point.origin.z>
+	origin += forward * point.origin.x
+	origin += right * -point.origin.y
+	origin += <0, 0, point.origin.z>
 	return origin
 }
+
 
 vector function GetAnglesFromAttachPoint( AttachPoint point, vector angles )
 {
 	return AnglesCompose( angles, point.angles )
 }
 
+
 vector function GetAnglesFromPoint( Point point, vector angles )
 {
 	return AnglesCompose( angles, point.angles )
 }
+
 
 array<vector> function GetFlightPathPoints( FlightPath flightPath, vector origin, vector forward, vector right )
 {
 	array<vector> orgs = []
 	for ( int i = 0; i < flightPath.points.len(); i++ )
 	{
-		AttachPoint point = flightPath.points[i]
+		AttachPoint point  = flightPath.points[i]
 		vector foundOrigin = GetOriginFromAttachPoint( point, origin, forward, right )
 
 		orgs.append( foundOrigin )
@@ -85,13 +95,13 @@ bool function IsLegalFlightPath( FlightPath flightPath, vector origin, vector fo
 {
 	array<vector> orgs = GetFlightPathPoints( flightPath, origin, forward, right )
 
-	vector endPos = orgs[ orgs.len()-1 ]
+	vector endPos = orgs[ orgs.len() - 1 ]
 
 	DoTraceCoordCheck( false )
 
 	for ( int i = 1; i < orgs.len(); i++ )
 	{
-		TraceResults result = TraceHull( orgs[i-1], orgs[i], flightPath.mins, flightPath.maxs, null, flightPath.traceMask, TRACE_COLLISION_GROUP_NONE )
+		TraceResults result = TraceHull( orgs[i - 1], orgs[i], flightPath.mins, flightPath.maxs, null, flightPath.traceMask, TRACE_COLLISION_GROUP_NONE )
 		if ( result.fraction < 1 )
 		{
 			if ( result.hitSky )
@@ -119,30 +129,31 @@ bool function IsLegalFlightPath( FlightPath flightPath, vector origin, vector fo
 	return true
 }
 
+
 bool function IsLegalFlightPath_OverTime( FlightPath flightPath, vector origin, vector forward, vector right, bool draw = false )
 {
 	array<vector> orgs = GetFlightPathPoints( flightPath, origin, forward, right )
 
-	vector endPos = orgs[ orgs.len()-1 ]
+	vector endPos = orgs[ orgs.len() - 1 ]
 
 	DoTraceCoordCheck( false )
 
 	for ( int i = 1; i < orgs.len(); i++ )
 	{
-		TraceResults result = TraceHull( orgs[i-1], orgs[i], flightPath.mins, flightPath.maxs, null, flightPath.traceMask, TRACE_COLLISION_GROUP_NONE )
+		TraceResults result = TraceHull( orgs[i - 1], orgs[i], flightPath.mins, flightPath.maxs, null, flightPath.traceMask, TRACE_COLLISION_GROUP_NONE )
 		if ( result.fraction < 1 )
 		{
 			if ( result.hitSky )
 			{
 				if ( draw )
-					DebugDrawLine( orgs[i-1], orgs[i], 0, 255, 0, true, ANALYSIS_PREVIEW_TIME )
+					DebugDrawLine( orgs[i - 1], orgs[i], 0, 255, 0, true, ANALYSIS_PREVIEW_TIME )
 				continue
 			}
 
 			if ( Distance( result.endPos, endPos ) > 16 )
 			{
 				if ( draw )
-					DebugDrawLine( orgs[i-1], orgs[i], 255, 0, 0, true, ANALYSIS_PREVIEW_TIME )
+					DebugDrawLine( orgs[i - 1], orgs[i], 255, 0, 0, true, ANALYSIS_PREVIEW_TIME )
 
 				DoTraceCoordCheck( true )
 				return false
@@ -150,7 +161,7 @@ bool function IsLegalFlightPath_OverTime( FlightPath flightPath, vector origin, 
 		}
 
 		if ( draw )
-			DebugDrawLine( orgs[i-1], orgs[i], 0, 255, 0, true, ANALYSIS_PREVIEW_TIME )
+			DebugDrawLine( orgs[i - 1], orgs[i], 0, 255, 0, true, ANALYSIS_PREVIEW_TIME )
 
 		WaitFrame()
 	}
@@ -905,30 +916,30 @@ float function FixYaw( float yaw )
 const bool DEBUG_DROP_POINTS = false
 const bool DEBUG_DROP_POINTS_LINES = false
 const DEBUG_DRAW_TIME = 0.02
-const vector AIRDROP_MAXS = <80,80,256>
-const vector AIRDROP_MINS = <-80,-80,0>
+const vector AIRDROP_MAXS = <80, 80, 256>
+const vector AIRDROP_MINS = <-80, -80, 0>
 
-bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePackage = false, entity realmEnt = null)
+bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePackage = false, entity realmEnt = null )
 {
-	const MAX_DIST_TO_GROUND_SQR = 16*16
+	const MAX_DIST_TO_GROUND_SQR = 16 * 16
 	const DOOR_UP_OFFSET = 64
 	const LEDGE_DOWN_OFFSET = 96
 	const EDGE_TRACE_HEIGHT = 48
-	const vector UP_VECTOR = <0,0,1>
+	const vector UP_VECTOR = <0, 0, 1>
 
 	int door_space_distance = isCarePackage ? 64 : 128
-	int edge_trace_dist = isCarePackage ? 64 : 96
-	int maxSurfaceAngle = isCarePackage ? 55 : 20
+	int edge_trace_dist     = isCarePackage ? 64 : 96
+	int maxSurfaceAngle     = isCarePackage ? 55 : 20
 
 	int failCode = 0
 
 	entity edgeGroundEnt
 	float edgeDistDiff
 
-	vector startOrigin = baseOrigin + <0,0,10000>
-	vector endOrigin = baseOrigin + <0,0,-128>
-	vector forward = AnglesToForward( < 0, yaw, 0 > )
-	vector up = <0,0,1>
+	vector startOrigin = baseOrigin + <0, 0, 10000>
+	vector endOrigin   = baseOrigin + <0, 0, -128>
+	vector forward     = AnglesToForward( < 0, yaw, 0 > )
+	vector up          = <0, 0, 1>
 
 	//
 	vector maxs = !isCarePackage ? AIRDROP_MAXS : AIRDROP_MAXS * 0.65
@@ -937,19 +948,18 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 	if ( IsNearAirdropBadPlace( baseOrigin, realmEnt ) )
 		failCode = failCode | 0x0040
 
-	TraceResults trace = TraceHull( startOrigin, endOrigin, mins, maxs, null, ( TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP ), TRACE_COLLISION_GROUP_NONE, UP_VECTOR, realmEnt )
-	float dot = DotProduct( up, trace.surfaceNormal )
+	TraceResults trace = TraceHull( startOrigin, endOrigin, mins, maxs, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, UP_VECTOR, realmEnt )
+	float dot          = DotProduct( up, trace.surfaceNormal )
 	//
 	if ( dot != 0 && DotToAngle( dot ) > maxSurfaceAngle )
 	{
 		failCode = failCode | 0x0001
-		if ( DEBUG_DROP_POINTS_LINES )
-		{
-			vector right = CrossProduct( AnglesToForward( <0,yaw,0> ), trace.surfaceNormal )
-			DebugDrawLine( trace.endPos, trace.endPos + right * 64, 0, 255, 0, true, DEBUG_DRAW_TIME )
-			DebugDrawLine( trace.endPos, trace.endPos + trace.surfaceNormal * 64, 0, 0, 255, true, DEBUG_DRAW_TIME )
-			DebugDrawArrow( trace.endPos, baseOrigin, 2, 255, 255, 255, true, DEBUG_DRAW_TIME)
-		}
+		#if(false)
+
+
+
+
+#endif
 	}
 
 	//
@@ -962,85 +972,82 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 
 	//
 	float distToNodeSqr = DistanceSqr( trace.endPos, baseOrigin )
-	float distToNode = Distance( trace.endPos, baseOrigin )
+	float distToNode    = Distance( trace.endPos, baseOrigin )
 	if ( distToNodeSqr > MAX_DIST_TO_GROUND_SQR )
 		failCode = failCode | 0x0004
 
 
 	//
-	vector traceOrigin = trace.endPos
-	array<vector> ridgeTraceVectorArray = [ <1,0,0>, <-0.5,0.86,0>, <-0.5,-0.86,0> ]
+	vector traceOrigin                  = trace.endPos
+	array<vector> ridgeTraceVectorArray = [ <1, 0, 0>, <-0.5, 0.86, 0>, <-0.5, -0.86, 0> ]
 	foreach ( traceVector in ridgeTraceVectorArray )
 	{
-		vector ridgeOrigin = traceOrigin + <0,0,16> + traceVector * 18
-		vector ridgeTraceOrigin = baseOrigin + <0,0,-12> + traceVector * 18
+		vector ridgeOrigin      = traceOrigin + <0, 0, 16> + traceVector * 18
+		vector ridgeTraceOrigin = baseOrigin + <0, 0, -12> + traceVector * 18
 
-		TraceResults ridgeTrace = TraceLine( ridgeOrigin, ridgeTraceOrigin, null, ( TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP ), TRACE_COLLISION_GROUP_NONE, realmEnt )
-		float fraction = ridgeTrace.fraction
+		TraceResults ridgeTrace = TraceLine( ridgeOrigin, ridgeTraceOrigin, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
+		float fraction          = ridgeTrace.fraction
 		if ( fraction == 1 )
 		{
 			failCode = failCode | 0x0080
-			if ( DEBUG_DROP_POINTS_LINES )
-			{
-				DebugDrawArrow( ridgeOrigin, ridgeTrace.endPos, 4, 0, 128, 128, true, DEBUG_DRAW_TIME )
-			}
+			#if(false)
+
+#endif
 			break
 		}
 	}
 
 
 	//
-	array<vector> edgeTraceVectorArray = [ <1,0,0>, <0.5,0.86,0>, <-0.5,0.86,0>, <-1,0,0>, <-0.5,-0.86,0>, <0.5,-0.86,0> ]
+	array<vector> edgeTraceVectorArray = [ <1, 0, 0>, <0.5, 0.86, 0>, <-0.5, 0.86, 0>, <-1, 0, 0>, <-0.5, -0.86, 0>, <0.5, -0.86, 0> ]
 	foreach ( traceVector in edgeTraceVectorArray )
 	{
-		vector edgeOrigin = baseOrigin + <0,0,EDGE_TRACE_HEIGHT> + traceVector * edge_trace_dist
-		vector edgeTraceOrigin = baseOrigin + <0,0,-EDGE_TRACE_HEIGHT> + traceVector * edge_trace_dist
+		vector edgeOrigin      = baseOrigin + <0, 0, EDGE_TRACE_HEIGHT> + traceVector * edge_trace_dist
+		vector edgeTraceOrigin = baseOrigin + <0, 0, -EDGE_TRACE_HEIGHT> + traceVector * edge_trace_dist
 
-		TraceResults sightTrace = TraceLine( baseOrigin + <0,0,EDGE_TRACE_HEIGHT>, edgeOrigin, null, ( TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP ), TRACE_COLLISION_GROUP_NONE, realmEnt )
+		TraceResults sightTrace = TraceLine( baseOrigin + <0, 0, EDGE_TRACE_HEIGHT>, edgeOrigin, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
 		if ( sightTrace.fraction < 1 )
 		{
-			if ( DEBUG_DROP_POINTS_LINES )
-			{
-				DebugDrawArrow( baseOrigin + <0,0,EDGE_TRACE_HEIGHT>, sightTrace.endPos, 4, 0, 255, 0, true, DEBUG_DRAW_TIME )
-			}
+			#if(false)
+
+#endif
 			continue    //
 		}
 
-		TraceResults edgeTrace = TraceLine( edgeOrigin, edgeTraceOrigin, null, ( TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP ), TRACE_COLLISION_GROUP_NONE, realmEnt )
-		float fraction = edgeTrace.fraction
+		TraceResults edgeTrace = TraceLine( edgeOrigin, edgeTraceOrigin, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
+		float fraction         = edgeTrace.fraction
 		if ( fraction == 1 )
 		{
 			failCode = failCode | 0x0020
-			if ( DEBUG_DROP_POINTS_LINES )
-			{
-				DebugDrawArrow( edgeOrigin, edgeTraceOrigin, 4, 255, 0, 0, true, DEBUG_DRAW_TIME )
-			}
+			#if(false)
+
+#endif
 			break
 		}
 	}
 
 
 	//
-	vector playerMins = <-16,-16,0>//
-	vector playerMaxs = <16,16,72>//
-	vector doorOrigin = baseOrigin + <0,0,DOOR_UP_OFFSET>
+	vector playerMins = <-16, -16, 0>//
+	vector playerMaxs = <16, 16, 72>//
+	vector doorOrigin = baseOrigin + <0, 0, DOOR_UP_OFFSET>
 
-	vector base = <0,yaw,0>
-	float yawOffset = 360.0/3.0
+	vector base     = <0, yaw, 0>
+	float yawOffset = 360.0 / 3.0
 
-	array<vector> anglesToTest = [ base , AnglesCompose( base, <0,yawOffset,0> ), AnglesCompose( base, <0,-yawOffset,0> ) ]
+	array<vector> anglesToTest = [ base, AnglesCompose( base, <0, yawOffset, 0> ), AnglesCompose( base, <0, -yawOffset, 0> ) ]
 	if ( isCarePackage )
 		anglesToTest = []
 
 	foreach ( angles in anglesToTest )
 	{
 		forward = AnglesToForward( angles )
-		array<vector> openingTraceVectorArray = [ forward, VectorRotate( forward, <0,30,0> ), VectorRotate( forward, <0,-30,0> ) ]
-		bool failed = false
+		array<vector> openingTraceVectorArray = [ forward, VectorRotate( forward, <0, 30, 0> ), VectorRotate( forward, <0, -30, 0> ) ]
+		bool failed                           = false
 		foreach ( traceVector in openingTraceVectorArray )
 		{
 			vector doorEndOrigin = doorOrigin + traceVector * door_space_distance
-			vector ledgeOrigin = doorEndOrigin + <0,0,-LEDGE_DOWN_OFFSET>
+			vector ledgeOrigin   = doorEndOrigin + <0, 0, -LEDGE_DOWN_OFFSET>
 
 			//
 			float fraction = TraceHullSimple( doorOrigin, doorEndOrigin, playerMins, playerMaxs, null )
@@ -1049,8 +1056,9 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 				failCode = failCode | 0x0008
 				failed = true
 
-				if ( DEBUG_DROP_POINTS_LINES )
-					DebugDrawArrow( doorOrigin, doorEndOrigin, 4, 255,0,0, true, DEBUG_DRAW_TIME )
+				#if(false)
+
+#endif
 				break
 			}
 
@@ -1061,11 +1069,10 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 				failCode = failCode | 0x0010
 				failed = true
 
-				if ( DEBUG_DROP_POINTS_LINES )
-				{
-					DebugDrawArrow( doorOrigin, doorEndOrigin, 4, 255,0,0, true, DEBUG_DRAW_TIME )
-					DebugDrawArrow( doorEndOrigin, ledgeOrigin, 4, 255,0,255, true, DEBUG_DRAW_TIME )
-				}
+				#if(false)
+
+
+#endif
 				break
 			}
 		}
@@ -1075,37 +1082,36 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 	}
 
 
-	if ( DEBUG_DROP_POINTS )
-	{
-		if ( DEBUG_DROP_POINTS_LINES && failCode & 0x0005 )
-		{
-			DebugDrawCylinder( trace.endPos, < -90, 0, 0 >, maxs.x, maxs.z, 250, 50, 0, false, DEBUG_DRAW_TIME )
-			DebugDrawCylinder( baseOrigin, < -90, 0, 0 >, maxs.x, maxs.z, 70, 70, 70, false, DEBUG_DRAW_TIME )
-		}
+	#if(false)
 
-		if ( failCode )
-			printt( "dropPoint check faild at origin:", baseOrigin, "yaw:", yaw )
-		if ( failCode & 0x0001 )
-			printt( "\t- Surface angle to steep. Slope angle:", DotToAngle( dot ))
-		if ( failCode & 0x0002 )
-			printt( "\t- Didn't land on the worldspawn entity. Ground Ent:", groundEnt)
-		if ( failCode & 0x0004 )
-			printt( "\t- Didn't reach the ground. Dist from ground:", sqrt( distToNodeSqr ), distToNode)
-		if ( failCode & 0x0008 )
-			printt( "\t- Door area was not clear." )
-		if ( failCode & 0x0010 )
-			printt( "\t- Door opened towards a ledge." )
-		if ( failCode & 0x0020 )
-			printt( "\t- Part of the Pod was sticking out over an ledge." )
-		if ( failCode & 0x0040 )
-			printt( "\t- To close to an Airdrop Bad Place." )
-		if ( failCode & 0x0080 )
-			printt( "\t- Part might have been on a narrow ridge or low wall etc." )
-		if ( failCode & 0x0100 )
-			printt( "\t- Point was touching out of bound trigger." )
-		if ( failCode & 0x0200 )
-			printt( "\t- Trace started in solid." )
-	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 
 	if ( failCode )
 		return false
@@ -1113,6 +1119,183 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 	//
 	return true
 }
+
+
+#if(false)
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+//
+
+
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+#endif //
+
+#if(false)
+
+
+
+
+
+
+
+
+
+#endif //
 
 #if(false)
 
@@ -1171,6 +1354,14 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 
 
 
+//
+
+
+
+
+
+
+
 
 
 
@@ -1315,6 +1506,7 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 
 
 //
+
 
 
 

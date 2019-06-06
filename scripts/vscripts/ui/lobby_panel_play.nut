@@ -1,5 +1,6 @@
 global function InitPlayPanel
 
+global function IsPlayPanelCurrentlyTopLevel
 global function PlayPanelUpdate
 global function ClientToUI_PartyMemberJoinedOrLeft
 global function GetModeSelectButton
@@ -9,6 +10,7 @@ global function Lobby_GetPlaylists
 global function Lobby_GetSelectedPlaylist
 global function Lobby_IsPlaylistAvailable
 global function Lobby_SetSelectedPlaylist
+global function Lobby_OnGamemodeSelectV2Close
 
 global function Lobby_GetPlaylistState
 global function Lobby_GetPlaylistStateString
@@ -18,6 +20,12 @@ global function Lobby_UpdatePlayPanelPlaylists
 global function CanInvite
 
 global function UpdateLootBoxButton
+#if(true)
+global function PartyHasEliteAccess
+global function ForceElitePlaylist
+global function ForceNonElitePlaylist
+#endif
+global function PulseModeButton
 
 #if(DEV)
 global function DEV_PrintPartyInfo
@@ -37,6 +45,11 @@ global enum ePlaylistState
 	NO_PLAYLIST,
 	TRAINING_REQUIRED,
 	PARTY_SIZE_OVER,
+	LOCKED,
+	#if(true)
+		ELITE_ACCESS_REQUIRED,
+	#endif
+	_COUNT
 }
 
 
@@ -45,18 +58,24 @@ const table< int, string > playlistStateMap = {
 	[ ePlaylistState.TRAINING_REQUIRED ] = "#PLAYLIST_STATE_TRAINING_REQUIRED",
 	[ ePlaylistState.AVAILABLE ] = "#PLAYLIST_STATE_AVAILABLE",
 	[ ePlaylistState.PARTY_SIZE_OVER ] = "#PLAYLIST_STATE_PARTY_SIZE_OVER",
+	[ ePlaylistState.LOCKED ] = "#PLAYLIST_STATE_LOCKED"
+#if(true)
+,[ ePlaylistState.ELITE_ACCESS_REQUIRED ] = "#PLAYLIST_STATE_ELITE_REQUIRED"
+#endif
 }
 
 const string PLAYLIST_TRAINING = "survival_training"
 
 struct
 {
+	var panel
 	var chatBox
 	var chatroomMenu
 	var chatroomMenu_chatroomWidget
 
 	var fillButton
 	var modeButton
+	var gamemodeSelectV2Button
 	var readyButton
 	var trainingButton
 	var inviteFriendsButton0
@@ -75,11 +94,13 @@ struct
 
 	int lastExpireTime
 
+	string lastVisiblePlaylistValue
+
 	array<string> playlists
 	string        selectedPlaylist
 
-	bool   personInLeftSpot = false
-	bool   personInRightSlot = false
+	bool personInLeftSpot = false
+	bool personInRightSlot = false
 
 	Friend& friendInLeftSpot
 	Friend& friendInRightSpot
@@ -88,21 +109,23 @@ struct
 	string lastPlayedPlayerHardware0 = ""
 	string lastPlayedPlayerPlatformUid1 = ""
 	string lastPlayedPlayerHardware1 = ""
-	int lastPlayedPlayerPersistenceIndex0 = -1
-	int lastPlayedPlayerPersistenceIndex1 = -1
-	float lastPlayedPlayerInviteSentTimestamp0 = -1
-	float lastPlayedPlayerInviteSentTimestamp1 = -1
+	int    lastPlayedPlayerPersistenceIndex0 = -1
+	int    lastPlayedPlayerPersistenceIndex1 = -1
+	float  lastPlayedPlayerInviteSentTimestamp0 = -1
+	float  lastPlayedPlayerInviteSentTimestamp1 = -1
 
 
 	bool leftWasReady = false
 	bool rightWasReady = false
 
 	bool fullInstallNotification = false
-} file
 
+	bool wasReady = false
+} file
 
 void function InitPlayPanel( var panel )
 {
+	file.panel = panel
 	SetPanelTabTitle( panel, "#PLAY" )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, PlayPanel_OnShow )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, PlayPanel_OnHide )
@@ -115,6 +138,12 @@ void function InitPlayPanel( var panel )
 
 	file.modeButton = Hud_GetChild( panel, "ModeButton" )
 	Hud_AddEventHandler( file.modeButton, UIE_CLICK, ModeButton_OnActivate )
+
+	file.gamemodeSelectV2Button = Hud_GetChild( panel, "GamemodeSelectV2Button" )
+	Hud_AddEventHandler( file.gamemodeSelectV2Button, UIE_CLICK, GameModeSelectV2Button_OnActivate )
+	Hud_AddEventHandler( file.gamemodeSelectV2Button, UIE_GET_FOCUS, GameModeSelectV2Button_OnGetFocus )
+	Hud_AddEventHandler( file.gamemodeSelectV2Button, UIE_LOSE_FOCUS, GameModeSelectV2Button_OnLoseFocus )
+	Hud_SetVisible( file.gamemodeSelectV2Button, false )
 
 	file.readyButton = Hud_GetChild( panel, "ReadyButton" )
 	Hud_AddEventHandler( file.readyButton, UIE_CLICK, ReadyButton_OnActivate )
@@ -153,9 +182,20 @@ void function InitPlayPanel( var panel )
 	HudElem_SetRuiArg( file.openLootBoxButton, "buttonText", Localize( "#OPEN_LOOT" ) )
 	Hud_AddEventHandler( file.openLootBoxButton, UIE_CLICK, OpenLootBoxButton_OnActivate )
 
-	AddMenuVarChangeHandler( "isMatchmaking", UpdateLobbyButtons )
+	#if(true)
+		var allChallengesButton = Hud_GetChild( panel, "AllChallengesButton" )
+		Hud_SetVisible( allChallengesButton, false )
+		#if(false)
 
-	UpdateFillButtonVisibility()
+
+
+
+
+#endif
+		Hud_AddEventHandler( allChallengesButton, UIE_CLICK, AllChallengesButton_OnActivate )
+	#endif
+
+	AddMenuVarChangeHandler( "isMatchmaking", UpdateLobbyButtons )
 
 	file.chatBox = Hud_GetChild( panel, "ChatRoomTextChat" )
 	file.hdTextureProgress = Hud_GetChild( panel, "HDTextureProgress" )
@@ -163,7 +203,24 @@ void function InitPlayPanel( var panel )
 	InitMiniPromo( Hud_GetChild( panel, "MiniPromo" ) )
 
 	RegisterSignal( "UpdateFriendButtons" )
+
+	#if(true)
+		var eliteBadge = Hud_GetChild( file.panel, "EliteBadge" )
+		Hud_AddEventHandler( eliteBadge, UIE_CLICK, OpenEliteIntroMenuNonAnimated )
+	#endif
+
+	#if(false)
+
+
+#endif
 }
+
+
+bool function IsPlayPanelCurrentlyTopLevel()
+{
+	return GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsPanelActive( file.panel )
+}
+
 
 void function UpdateLastPlayedPlayerInfo()
 {
@@ -188,9 +245,9 @@ void function UpdateLastPlayedPlayerInfo()
 		curPartyMemberUids.append( member.uid )
 	}
 
-	for( int i = 0; i < maxTrackedSquadMembers; i++ )
+	for ( int i = 0; i < maxTrackedSquadMembers; i++ )
 	{
-		string lastPlayedPlayerUid = expect string( GetPersistentVar( "lastGameSquadStats[" + i + "].platformUid" ) )
+		string lastPlayedPlayerUid      = expect string( GetPersistentVar( "lastGameSquadStats[" + i + "].platformUid" ) )
 		string lastPlayedPlayerHardware = expect string( GetPersistentVar( "lastGameSquadStats[" + i + "].hardware" ) )
 
 		if ( lastPlayedPlayerUid == "" || lastPlayedPlayerHardware == "" )
@@ -216,6 +273,7 @@ void function UpdateLastPlayedPlayerInfo()
 	}
 }
 
+
 bool function InviteLastPlayedPanelShouldBeVisible()
 {
 	if ( GetUnixTimestamp() - GetPersistentVarAsInt( "lastGameTime" ) > INVITE_LAST_PANEL_EXPIRATION )
@@ -227,6 +285,7 @@ bool function InviteLastPlayedPanelShouldBeVisible()
 	return true
 }
 
+
 bool function PlayerIsInMatch( string playerPlatformUid, string playerHardware )
 {
 	CommunityUserInfo ornull userInfoOrNull = GetUserInfo( playerHardware, playerPlatformUid )
@@ -237,6 +296,7 @@ bool function PlayerIsInMatch( string playerPlatformUid, string playerHardware )
 	}
 	return false
 }
+
 
 var function GetModeSelectButton()
 {
@@ -252,13 +312,13 @@ var function GetLobbyChatBox()
 
 void function PlayPanel_OnShow( var panel )
 {
-	UI_SetPresentationType( ePresentationType.PLAY )
-
 	if ( IsFullyConnected() )
 	{
 		AccessibilityHint( eAccessibilityHint.LOBBY_CHAT )
+		Lobby_UpdatePlayPanelPlaylists()
 	}
 
+	UpdateFillButtonVisibility()
 	UpdateLobbyButtons()
 
 	if ( file.chatroomMenu )
@@ -266,14 +326,51 @@ void function PlayPanel_OnShow( var panel )
 		Hud_Hide( file.chatroomMenu )
 		Hud_Hide( file.chatroomMenu_chatroomWidget )
 	}
-	AddCallbackAndCallNow_OnGRXInventoryStateChanged( UpdateLootBoxStatus )
+	AddCallbackAndCallNow_OnGRXInventoryStateChanged( UpdatePlayPanelGRXDependantElements )
+	AddCallbackAndCallNow_OnGRXInventoryStateChanged( UpdateFriendButtons )
 	AddCallbackAndCallNow_RemoteMatchInfoUpdated( OnRemoteMatchInfoUpdated )
 
 	ClientCommand( "ViewingMainLobbyPage" )
 
 	StartMiniPromo()
+
+	UI_SetPresentationType( ePresentationType.PLAY )
+	#if(true)
+		thread TryPopupEliteMessage()
+	#endif
+
+	bool newPlaylistSelect = GamemodeSelectV2_IsEnabled()
+	if ( newPlaylistSelect )
+	{
+		Hud_SetNavUp( file.readyButton, file.gamemodeSelectV2Button )
+	}
+	else
+	{
+		Hud_SetNavUp( file.readyButton, file.modeButton )
+	}
+
+	thread TryRunDialogFlowThread()
 }
 
+
+#if(true)
+void function TryPopupEliteMessage()
+{
+	WaitEndFrame()
+
+	if ( GetActiveMenu() == GetMenu( "LobbyMenu" ) && IsPanelActive( file.panel ) )
+	{
+		if ( GetPersistentVar( "lossForgivenessMessage" ) != eLossForgivenessReason.NONE )
+		{
+			OpenLossForgivenessDialog( GetPersistentVarAsInt( "lossForgivenessMessage" ) )
+		}
+		else if ( GetPersistentVar( "eliteTutorialState" ) == eEliteTutorialState.SHOW_FORGIVENESS )
+		{
+			OpenEliteForgivenessDialog()
+		}
+	}
+}
+#endif
 
 void function UpdateLobbyButtons()
 {
@@ -285,6 +382,7 @@ void function UpdateLobbyButtons()
 	UpdateModeButton()
 	UpdateFriendButtons()
 	UpdateLastPlayedButtons()
+	UpdatePlaylistBadges()
 }
 
 
@@ -318,9 +416,10 @@ void function UpdateHDTextureProgress()
 	}
 }
 
+
 void function UpdateFillButtonVisibility()
 {
-	if( GetCurrentPlaylistVarBool( "enable_teamNoFill", false ) )
+	if ( GetCurrentPlaylistVarBool( "enable_teamNoFill", false ) )
 	{
 		Hud_SetVisible( file.fillButton, true )
 		Hud_SetNavUp( file.modeButton, file.fillButton )
@@ -331,10 +430,16 @@ void function UpdateFillButtonVisibility()
 	{
 		Hud_SetVisible( file.fillButton, false )
 		Hud_SetNavUp( file.modeButton, file.inviteFriendsButton0 )
-		Hud_SetNavDown( file.inviteFriendsButton0, file.modeButton )
-		Hud_SetNavLeft( file.inviteFriendsButton0, file.modeButton )
+
+		var buttonToLink = file.modeButton
+		if ( GamemodeSelectV2_IsEnabled() )
+			buttonToLink = file.gamemodeSelectV2Button
+
+		Hud_SetNavDown( file.inviteFriendsButton0, buttonToLink )
+		Hud_SetNavLeft( file.inviteFriendsButton0, buttonToLink )
 	}
 }
+
 
 void function UpdateLastSquadDpadNav()
 {
@@ -355,7 +460,7 @@ void function UpdateLastSquadDpadNav()
 		Hud_SetNavLeft( file.inviteFriendsButton0, file.inviteLastPlayedUnitFrame0 )
 		Hud_SetNavRight( file.inviteLastPlayedUnitFrame0, file.inviteFriendsButton0 )
 
-		if( isVisibleButton1 )
+		if ( isVisibleButton1 )
 		{
 			Hud_SetNavDown( file.inviteLastPlayedUnitFrame1, buttonBeneathLastSquadPanel )
 			Hud_SetNavUp( buttonBeneathLastSquadPanel, file.inviteLastPlayedUnitFrame1 )
@@ -372,6 +477,7 @@ void function UpdateLastSquadDpadNav()
 	}
 }
 
+
 bool function ShowDownloadCompleteDialog()
 {
 	if ( GetGameFullyInstalledProgress() != 1 )
@@ -380,7 +486,7 @@ bool function ShowDownloadCompleteDialog()
 	if ( !HasNonFullyInstalledAssetsLoaded() )
 		return false
 
-	if  ( file.fullInstallNotification )
+	if ( file.fullInstallNotification )
 		return false
 
 	if ( GetActiveMenu() != GetMenu( "LobbyMenu" ) )
@@ -388,9 +494,10 @@ bool function ShowDownloadCompleteDialog()
 
 	if ( GetPersistentVar( "showGameSummary" ) && IsPostGameMenuValid( true ) )
 		return false
-		
+
 	return true
 }
+
 
 array<string> function Lobby_GetPlaylists()
 {
@@ -410,22 +517,9 @@ bool function Lobby_IsPlaylistAvailable( string playlistName )
 }
 
 
-int function GetPlaylistIndexForName( string playlist )
-{
-	int count = GetPlaylistCount()
-	for ( int idx = 0; idx < count; ++idx )
-	{
-		string ornull thisPlaylist = GetPlaylistName( idx )
-		if ( thisPlaylist == playlist )
-			return idx
-	}
-
-	return -1
-}
-
-
 void function Lobby_SetSelectedPlaylist( string playlistName )
 {
+	printt( "Lobby_SetSelectedPlaylist " + playlistName )
 	file.selectedPlaylist = playlistName
 	UpdateLobbyButtons()
 
@@ -437,7 +531,8 @@ void function Lobby_SetSelectedPlaylist( string playlistName )
 void function PlayPanel_OnHide( var panel )
 {
 	Signal( uiGlobal.signalDummy, "UpdateFriendButtons" )
-	RemoveCallback_OnGRXInventoryStateChanged( UpdateLootBoxStatus )
+	RemoveCallback_OnGRXInventoryStateChanged( UpdatePlayPanelGRXDependantElements )
+	RemoveCallback_OnGRXInventoryStateChanged( UpdateFriendButtons )
 	RemoveCallback_RemoteMatchInfoUpdated( OnRemoteMatchInfoUpdated )
 
 	StopMiniPromo()
@@ -485,6 +580,7 @@ void function UpdateFriendButton( var rui, PartyMember info, bool inMatch )
 	}
 }
 
+
 void function KeepMicIconUpdated( PartyMember info, var rui )
 {
 	EndSignal( uiGlobal.signalDummy, "UpdateFriendButtons" )
@@ -495,6 +591,7 @@ void function KeepMicIconUpdated( PartyMember info, var rui )
 		WaitFrame()
 	}
 }
+
 
 void function UpdateFriendButtons()
 {
@@ -565,10 +662,10 @@ void function UpdateFriendButtons()
 	entity player = GetUIPlayer()
 	if ( IsLocalClientEHIValid() && IsValid( player ) )
 	{
-		bool hasPremiumPass = false
+		bool hasPremiumPass                = false
 		ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( player ) )
 		bool hasActiveBattlePass           = activeBattlePass != null
-		if ( hasActiveBattlePass )
+		if ( hasActiveBattlePass && GRX_IsInventoryReady() )
 		{
 			expect ItemFlavor( activeBattlePass )
 			hasPremiumPass = DoesPlayerOwnBattlePass( player, activeBattlePass )
@@ -589,6 +686,133 @@ void function UpdateFriendButtons()
 	Hud_SetToolTipData( file.inviteFriendsButton0, toolTipData )
 	Hud_SetToolTipData( file.inviteFriendsButton1, toolTipData )
 }
+
+
+void function UpdatePlaylistBadges()
+{
+	int currentStreak = 0
+
+	bool newPlaylistSelect = GamemodeSelectV2_IsEnabled()
+
+	#if(true)
+		currentStreak = GetCurrentEliteStreak( GetUIPlayer() )
+		bool shouldShowEliteBadge = IsElitePlaylist( file.selectedPlaylist )
+	#endif
+
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+	#if(true)
+		var eliteBadge = Hud_GetChild( file.panel, "EliteBadge" )
+		Hud_SetVisible( eliteBadge, false )
+
+		if ( newPlaylistSelect )
+		{
+			Hud_SetPinSibling( eliteBadge, Hud_GetHudName( file.gamemodeSelectV2Button ) )
+		}
+		else
+		{
+			Hud_SetPinSibling( eliteBadge, Hud_GetHudName( file.modeButton ) )
+		}
+	#endif
+
+	var msgLabel = Hud_GetChild( file.panel, "PlaylistNotificationMessage" )
+	Hud_SetVisible( msgLabel, false )
+
+	if ( newPlaylistSelect )
+	{
+		Hud_SetPinSibling( msgLabel, Hud_GetHudName( file.gamemodeSelectV2Button ) )
+	}
+	else
+	{
+		Hud_SetPinSibling( msgLabel, Hud_GetHudName( file.modeButton ) )
+	}
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+	#if(true)
+		if ( shouldShowEliteBadge )
+		{
+			Hud_SetVisible( eliteBadge, shouldShowEliteBadge )
+
+			var rui = Hud_GetRui( eliteBadge )
+
+			RuiSetInt( rui, "streak", currentStreak )
+
+			if ( IsFullyConnected() )
+				RuiSetBool( rui, "eliteForgiveness", expect bool( GetPersistentVar( "hasEliteForgiveness" ) ) )
+
+			int maxStreak = GetMaxEliteStreak( GetUIPlayer() )
+			ToolTipData tooltip
+			tooltip.titleText = Localize( "#ELITE_TOOLTIP_INFO", currentStreak )
+			tooltip.descText = Localize( "#ELITE_TOOLTIP_INFO_2", maxStreak )
+			Hud_SetToolTipData( eliteBadge, tooltip )
+		}
+		else if ( PartyHasEliteAccess() )
+		{
+			bool foundElitePlaylist = false
+
+			foreach ( playlist in GetVisiblePlaylistNames() )
+			{
+				if ( IsElitePlaylist( playlist ) )
+				{
+					foundElitePlaylist = true
+					break
+				}
+			}
+
+			if ( foundElitePlaylist )
+				Hud_SetVisible( msgLabel, true )
+		}
+	#endif
+}
+
 
 void function UpdateLastPlayedButtons()
 {
@@ -695,9 +919,8 @@ void function UpdateLastPlayedButtons()
 		toolTipData1.actionHint1 = "#X_BUTTON_INSPECT"
 		Hud_SetToolTipData( file.inviteLastPlayedUnitFrame1, toolTipData1 )
 	}
-
-
 }
+
 
 void function ClientToUI_PartyMemberJoinedOrLeft( string leftSpotUID, string leftSpotHardware, string leftSpotName, bool leftSpotInMatch, string rightSpotUID, string rightSpotHardware, string rightSpotName, bool rightSpotInMatch )
 {
@@ -767,6 +990,11 @@ int function Lobby_GetPlaylistState( string playlistName )
 	if ( GetPartySize() > GetMaxTeamSizeForPlaylist( playlistName ) )
 		return ePlaylistState.PARTY_SIZE_OVER
 
+	#if(true)
+		if ( IsElitePlaylist( playlistName ) && !PartyHasEliteAccess() )
+			return ePlaylistState.ELITE_ACCESS_REQUIRED
+	#endif
+
 	return ePlaylistState.AVAILABLE
 }
 
@@ -786,9 +1014,9 @@ void function UpdateReadyButton()
 {
 	bool isLeader = IsPartyLeader()
 
-	bool isReady = GetConVarBool( "party_readyToSearch" )
+	bool isReady      = GetConVarBool( "party_readyToSearch" )
 	int remainingTime = Player_GetRemainingMatchmakingDelay( GetUIPlayer() )
-	bool hasPenalty = remainingTime > 0
+	bool hasPenalty   = remainingTime > 0
 
 	string buttonText
 	if ( hasPenalty )
@@ -845,19 +1073,60 @@ void function UpdateModeButton()
 	if ( !IsConnected() )
 		return
 
+	string visiblePlaylistValue = GetConVarString( "match_visiblePlaylists" )
+	if ( visiblePlaylistValue != file.lastVisiblePlaylistValue )
+	{
+		Lobby_UpdatePlayPanelPlaylists()
+		file.lastVisiblePlaylistValue = visiblePlaylistValue
+	}
+
 	Hud_SetLocked( file.modeButton, !CanActivateModeButton() )
 
 	bool isReady = GetConVarBool( "party_readyToSearch" )
 	Hud_SetEnabled( file.modeButton, !isReady && CanActivateModeButton() )
 	HudElem_SetRuiArg( file.modeButton, "isReady", isReady )
+	HudElem_SetRuiArg( file.gamemodeSelectV2Button, "isReady", isReady )
+
+	if ( file.wasReady != isReady )
+	{
+		UISize screenSize = GetScreenSize()
+
+		int maxDist = int( screenSize.height * 0.08 )
+
+		int x = Hud_GetX( file.modeButton )
+		int y = isReady ? Hud_GetBaseY( file.modeButton ) + maxDist : Hud_GetBaseY( file.modeButton )
+
+		int currentY = Hud_GetY( file.modeButton )
+		int diff     = abs( currentY - y )
+
+		float duration = 0.15 * (float( diff ) / float( maxDist ))
+
+		Hud_MoveOverTime( file.modeButton, x, y, 0.15 )
+
+		file.wasReady = isReady
+	}
 
 	bool isLeader = IsPartyLeader()
 
 	string playlistName        = isLeader ? file.selectedPlaylist : GetParty().playlistName
 	string invalidPlaylistText = isLeader ? "#SELECT_PLAYLIST" : "#PARTY_LEADER_CHOICE"
 
-	string name = GetPlaylistVarOrUseValue( playlistName, "name", invalidPlaylistText )
+	string name = GetPlaylistVarString( playlistName, "name", invalidPlaylistText )
 	HudElem_SetRuiArg( file.modeButton, "buttonText", Localize( name ) )
+
+	bool useGamemodeSelectV2 = GamemodeSelectV2_IsEnabled() && !(ShouldDisplayOptInOptions() && uiGlobal.isOptInEnabled)
+	Hud_SetVisible( file.modeButton, !useGamemodeSelectV2 )
+	Hud_SetVisible( file.gamemodeSelectV2Button, useGamemodeSelectV2 )
+	RuiSetBool( Hud_GetRui( file.readyButton ), "showReadyFrame", !useGamemodeSelectV2 )
+	if ( useGamemodeSelectV2 )
+	{
+		GamemodeSelectV2_UpdateSelectButton( file.gamemodeSelectV2Button, playlistName )
+		HudElem_SetRuiArg( file.gamemodeSelectV2Button, "alwaysShowDesc", true )
+		HudElem_SetRuiArg( file.gamemodeSelectV2Button, "isPartyLeader", isLeader )
+
+		HudElem_SetRuiArg( file.gamemodeSelectV2Button, "modeLockedReason", "" )
+		Hud_SetLocked( file.gamemodeSelectV2Button, !CanActivateModeButton() )
+	}
 }
 
 
@@ -879,7 +1148,6 @@ void function UpdateFillButton()
 		HudElem_SetRuiArg( file.fillButton, "buttonText", Localize( "#MATCH_TEAM_FILL" ) )
 
 	Hud_SetLocked( file.fillButton, !IsPartyLeader() || AreWeMatchmaking() || !supportsNoFill )
-
 }
 
 
@@ -901,6 +1169,36 @@ void function ModeButton_OnActivate( var button )
 		return
 
 	AdvanceMenu( GetMenu( "ModeSelectDialog" ) )
+}
+
+
+void function GameModeSelectV2Button_OnActivate( var button )
+{
+	if ( Hud_IsLocked( button ) || !CanActivateModeButton() )
+		return
+
+	Hud_SetVisible( file.gamemodeSelectV2Button, false )
+	Hud_SetVisible( file.readyButton, false )
+	AdvanceMenu( GetMenu( "GamemodeSelectV2Dialog" ) )
+}
+
+
+void function GameModeSelectV2Button_OnGetFocus( var button )
+{
+	GamemodeSelectV2_PlayVideo( button, file.selectedPlaylist )
+}
+
+
+void function GameModeSelectV2Button_OnLoseFocus( var button )
+{
+	//
+}
+
+
+void function Lobby_OnGamemodeSelectV2Close()
+{
+	Hud_SetVisible( file.gamemodeSelectV2Button, true )
+	Hud_SetVisible( file.readyButton, true )
 }
 
 
@@ -987,9 +1285,26 @@ void function ReadyButton_OnActivate( var button )
 			return
 		}
 
-		ReadyButtonActivate()
+		bool isLeader = IsPartyLeader()
+
+		if ( isLeader && ShouldShowLowPopDialog( file.selectedPlaylist ) )
+		{
+			OpenLowPopDialog( ReadyButtonActivateForDataCenter )
+		}
+		else
+		{
+			ReadyButtonActivate()
+		}
 	}
 }
+
+
+void function ReadyButtonActivateForDataCenter( int datacenterIndex )
+{
+	LowPop_SetRankedDatacenter( datacenterIndex )
+	ReadyButtonActivate()
+}
+
 
 void function ReadyButtonActivate()
 {
@@ -1065,8 +1380,8 @@ void function InviteLastPlayedButton_OnActivate( var button )
 		HudElem_SetRuiArg( button, "unitframeFooterText", "#INVITE_PLAYER_INVITED" )
 		Hud_SetLocked( button, true )
 	}
-
 }
+
 
 void function InviteLastPlayedButton_OnRightClick( var button )
 {
@@ -1093,6 +1408,7 @@ void function InviteLastPlayedButton_OnRightClick( var button )
 
 	InspectFriend( friend )
 }
+
 
 void function InvitePlayerByUID( string platformUID )
 {
@@ -1186,7 +1502,7 @@ void function OpenLootBoxButton_OnActivate( var button )
 }
 
 
-void function UpdateLootBoxStatus()
+void function UpdatePlayPanelGRXDependantElements()
 {
 	bool isReady = GRX_IsInventoryReady()
 
@@ -1197,6 +1513,10 @@ void function UpdateLootBoxStatus()
 	Hud_SetVisible( file.openLootBoxButton, lootBoxCount > 0 )
 
 	UpdateLootBoxButton( file.openLootBoxButton )
+
+	#if(true)
+		UpdateLobbyChallengeMenu()
+	#endif
 }
 
 
@@ -1275,7 +1595,7 @@ bool function CompletedTraining()
 	if ( !IsFullyConnected() || !IsPersistenceAvailable() )
 		return false
 
-	if ( !GetVisiblePlaylists().contains( PLAYLIST_TRAINING ) )
+	if ( !GetVisiblePlaylistNames().contains( PLAYLIST_TRAINING ) )
 		return true
 
 	if ( GetCurrentPlaylistVarBool( "require_training", true ) )
@@ -1283,6 +1603,7 @@ bool function CompletedTraining()
 
 	return true
 }
+
 
 void function OnRemoteMatchInfoUpdated()
 {
@@ -1363,11 +1684,15 @@ void function DEV_PrintUserInfo( CommunityUserInfo userInfo, string prefix = "" 
 	printt( prefix + "userInfo.kills", userInfo.kills )
 	printt( prefix + "userInfo.wins", userInfo.wins )
 	printt( prefix + "userInfo.matches", userInfo.matches )
+	printt( prefix + "userInfo.eliteStreak", userInfo.eliteStreak )
 	printt( prefix + "userInfo.lastCharIdx", userInfo.lastCharIdx )
 	printt( prefix + "userInfo.isLivestreaming", userInfo.isLivestreaming )
 	printt( prefix + "userInfo.isOnline", userInfo.isOnline )
 	printt( prefix + "userInfo.isJoinable", userInfo.isJoinable )
 	printt( prefix + "userInfo.privacySetting", userInfo.privacySetting )
+	printt( prefix + "userInfo.partyFull", userInfo.partyFull )
+	printt( prefix + "userInfo.partyInMatch", userInfo.partyInMatch )
+	printt( prefix + "userInfo.lastServerChangeTime", userInfo.lastServerChangeTime )
 
 	foreach ( int index, data in userInfo.charData )
 	{
@@ -1376,32 +1701,141 @@ void function DEV_PrintUserInfo( CommunityUserInfo userInfo, string prefix = "" 
 }
 #endif
 
+
+#if(true)
+void function AllChallengesButton_OnActivate( var button )
+{
+	if ( IsDialog( GetActiveMenu() ) )
+		return
+
+	if ( !IsTabPanelActive( GetPanel( "PlayPanel" ) ) )
+		return
+
+	AdvanceMenu( GetMenu( "AllChallengesMenu" ) )
+}
+#endif
+
+
 void function Lobby_UpdatePlayPanelPlaylists()
 {
-	file.playlists = GetVisiblePlaylists()
+	file.playlists = GetVisiblePlaylistNames()
 	Assert( file.playlists.len() > 0 )
-	//
 
-	if ( IsFullyConnected() )
+	if ( !IsFullyConnected() )
+		return
+
+	if ( AreWeMatchmaking() )
+		return
+
+	if ( !CompletedTraining() && IsPartyLeader() && GetPartySize() == 1 )
 	{
-		if ( !AreWeMatchmaking() )
+		Lobby_SetSelectedPlaylist( PLAYLIST_TRAINING )
+		SetMatchmakingPlaylist( PLAYLIST_TRAINING ) //
+	}
+	else if ( !file.playlists.contains( file.selectedPlaylist ) || file.selectedPlaylist == PLAYLIST_TRAINING )
+	{
+		foreach ( playlist in file.playlists )
 		{
-			if ( !CompletedTraining() && IsPartyLeader() && GetPartySize() == 1 )
-			{
-				Lobby_SetSelectedPlaylist( PLAYLIST_TRAINING )
-				SetMatchmakingPlaylist( PLAYLIST_TRAINING ) //
-			}
-			else if ( !file.playlists.contains( file.selectedPlaylist ) || file.selectedPlaylist == PLAYLIST_TRAINING )
-			{
-				foreach ( playlist in file.playlists )
-				{
-					if ( playlist == PLAYLIST_TRAINING )
-						continue
+			if ( playlist == PLAYLIST_TRAINING )
+				continue
 
-					Lobby_SetSelectedPlaylist( playlist )
-					break
-				}
-			}
+			Lobby_SetSelectedPlaylist( playlist )
+			break
 		}
 	}
+
+	#if(true)
+		if ( PartyHasEliteAccess() )
+		{
+			if ( GetPersistentVar( "shouldForceElitePlaylist" ) )
+				ForceElitePlaylist()
+		}
+		else if ( IsElitePlaylist( file.selectedPlaylist ) )
+		{
+			ForceNonElitePlaylist()
+		}
+	#endif
 }
+
+
+#if(true)
+void function ForceElitePlaylist()
+{
+	printt( "ForceElitePlaylist" )
+	foreach ( playlist in file.playlists )
+	{
+		if ( !IsElitePlaylist( playlist ) )
+			continue
+
+		Lobby_SetSelectedPlaylist( playlist )
+		break
+	}
+}
+#endif
+
+
+#if(true)
+void function ForceNonElitePlaylist()
+{
+	printt( "ForceNonElitePlaylist" )
+	foreach ( playlist in file.playlists )
+	{
+		if ( IsElitePlaylist( playlist ) )
+			continue
+
+		Lobby_SetSelectedPlaylist( playlist )
+		break
+	}
+}
+#endif
+
+
+#if(true)
+bool function HasEliteAccess()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	return GetPersistentVarAsInt( "hasEliteAccess" ) > 0
+}
+#endif
+
+
+#if(true)
+bool function PartyHasEliteAccess()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( HasEliteAccess() )
+		return true
+
+	if ( GetCurrentPlaylistVarBool( "elite_dev_playtest", false ) )
+		return true
+
+	Party party = GetParty()
+	foreach ( member in party.members )
+	{
+		CommunityUserInfo ornull userInfoOrNull = GetUserInfo( member.hardware, member.uid )
+
+		if ( userInfoOrNull != null )
+		{
+			CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+
+			if ( userInfo.eliteStreak > 0 )
+				return true
+		}
+	}
+
+	return false
+}
+#endif
+
+
+void function PulseModeButton()
+{
+	var rui = Hud_GetRui( file.modeButton )
+	RuiSetGameTime( rui, "startPulseTime", Time() )
+}
+
+

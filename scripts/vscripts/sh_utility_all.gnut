@@ -62,11 +62,8 @@ global struct Timeout
 
 global struct ShuffleData
 {
-	int shufflePos = 999
-	array<int> shuffledIndices
-	int lastIndex = -1
-
-	int count = 0
+	array<int> _indices
+	int _pos
 }
 
 global struct ThrottleData
@@ -233,7 +230,11 @@ bool function CallingFuncIsNewThread()
 	}
 
 	const int CHECK_DEPTH = 4
-	return (CHECK_DEPTH == 4)
+	return (i == CHECK_DEPTH)
+}
+void function AssertIsNewThread()
+{
+	Assert( CallingFuncIsNewThread(), "Must be threaded off" )
 }
 
 void function AssertParameters( func, int paramCount, string paramDesc )
@@ -242,6 +243,16 @@ void function AssertParameters( func, int paramCount, string paramDesc )
 	string funcName = expect string( funcInfos.name )
 	//
 	Assert( funcInfos.parameters.len() == (paramCount + 1), "Function \"" + funcName +"\" must have exactly " + paramCount + " parameters (" + paramDesc + ")." )
+}
+
+string function GetNameForEnum( table<string,int> enumTable, int val )
+{
+	foreach( string name, int index in enumTable )
+	{
+		if ( index == val )
+			return name
+	}
+	return format( "%s() - INVALID: %d", FUNC_NAME(), val )
 }
 
 void function PrintTable( tbl, int indent = 0, int maxDepth = 4 )
@@ -264,74 +275,6 @@ string function RepeatString( string str, int times )
 		out += str
 	}
 	return out
-}
-
-string function GetCurrentPlaylistVar( string val, string opVal = "" )
-{
-	#if(UI)
-		var result = Code_GetCurrentPlaylistVar( val )
-		if ( result != null )
-			return expect string( result )
-
-		return opVal
-	#else
-		return GetCurrentPlaylistVarOrUseValue( val, opVal )
-	#endif
-}
-
-string function GetCurrentPlaylistVarOrUseValue( string val, string opVal )
-{
-	#if(true)
-		if ( !IsConnected() )
-			return opVal
-	#endif
-
-	return Code_GetCurrentPlaylistVarOrUseValue( val, opVal ) //
-}
-
-int function GetCurrentPlaylistVarInt( string val, int useVal )
-{
-	return int( GetCurrentPlaylistVarOrUseValue( val, string( useVal ) ) )
-}
-
-float function GetCurrentPlaylistVarFloat( string val, float useVal )
-{
-	return float( GetCurrentPlaylistVarOrUseValue( val, string( useVal ) ) )
-}
-
-bool function GetCurrentPlaylistVarBool( string val, bool useVal )
-{
-	return GetCurrentPlaylistVarOrUseValue( val, string( useVal ) ) == "true" || GetCurrentPlaylistVarOrUseValue( val, string( useVal ) ) == "1"
-}
-
-string function GetCurrentPlaylistVarString( string val, string useVal )
-{
-	return GetCurrentPlaylistVarOrUseValue( val, useVal )
-}
-
-int function GetCurrentPlaylistVarOrUseValueOriginalInt( string val, int useVal )
-{
-	return int( GetCurrentPlaylistVarOrUseValueOriginal( val, string( useVal ) ) )
-}
-
-float function GetCurrentPlaylistVarOrUseValueOriginalFloat( string val, float useVal )
-{
-	return float( GetCurrentPlaylistVarOrUseValueOriginal( val, string( useVal ) ) )
-}
-
-bool function GetCurrentPlaylistVarOrUseValueOriginalBool( string val, bool useVal )
-{
-	return bool( GetCurrentPlaylistVarOrUseValueOriginal( val, string( useVal ) ) )
-}
-
-string function GetCurrentPlaylistVarOrUseValueOriginalString( string val, string useVal )
-{
-	return GetCurrentPlaylistVarOrUseValueOriginal( val, useVal )
-}
-
-bool function IsMultiplayerPlaylist()
-{
-	return GetCurrentPlaylistVarInt( "classic_mp", 1 ) ? true : false
 }
 
 bool function IsOdd( int num )
@@ -592,6 +535,16 @@ string function StringReplace( string baseString, string searchString, string re
 	newString += baseString.slice( searchIndex )
 
 	return newString
+}
+
+var function MakeRegexp( string patternString )
+{
+	return regexp( patternString )
+}
+
+bool function Regexp_DoesMatch( var pattern, string str )
+{
+	return expect bool(pattern.match( str ))
 }
 
 bool function DoesMatchRegexp( string baseString, string patternString )
@@ -888,6 +841,15 @@ string function VectorToString( vector vec )
 vector function FlattenNormalizeVec( vector v )
 {
 	return Normalize( <v.x, v.y, 0> )
+}
+
+int function GetReportStyle()
+{
+	#if(PS4_PROG)
+		return 0
+	#else
+		return GetCurrentPlaylistVarInt( "enable_report", 0 )
+	#endif
 }
 
 vector function GetClosestPointOnPlane( vector a, vector b, vector c, vector p, bool clampInside = false )
@@ -1705,7 +1667,7 @@ int function real_int_modulo( int x, int n )
 #if(CLIENT)
 vector function OriginToGround( vector origin, int traceMask = TRACE_MASK_NPCWORLDSTATIC )
 {
-	vector endOrigin = origin - <0,0,20000>
+	vector endOrigin = <origin.x, origin.y, -MAX_WORLD_COORD_BUFFER >
 	TraceResults traceResult = TraceLine( origin, endOrigin, [], traceMask, TRACE_COLLISION_GROUP_NONE )
 
 	return traceResult.endPos
@@ -1715,40 +1677,45 @@ vector function OriginToGround( vector origin, int traceMask = TRACE_MASK_NPCWOR
 //
 //
 
-void function Shuffle_Init( ShuffleData data, int numberOfIndices )
+void function Shuffle_Init( ShuffleData sd, int count )
 {
-	Assert( numberOfIndices > 0 )
-	data.count = numberOfIndices
+	Assert( count > 0 )
+	sd._indices.resize( count )
+	for ( int idx = 0; idx < count; ++idx )
+		sd._indices[idx] = idx
+
+	sd._pos = count
 }
 
 int function Shuffle_GetNextIndex( ShuffleData sd )
 {
-	if ( sd.count <= 0 )
-		return -1
+	Assert( sd._indices.len() > 0 )
 
-	array<int> indices = sd.shuffledIndices
+	array<int> idxs = sd._indices
+	int count = idxs.len()
+	if ( count == 1 )
+		return idxs[0]
 
-	++(sd.shufflePos)
-	if ( sd.shufflePos >= indices.len() )
+	++(sd._pos)
+	if ( sd._pos >= count )
 	{
-		sd.shufflePos = 0
+		int lastIndexPlayed = ((sd._pos == count) ? idxs.top() : -1)
+		idxs.randomize()
+		if ( idxs[0] == lastIndexPlayed )
+			idxs.reverse()	//
 
-		//
-		{
-			indices.resize( sd.count )
-			for ( int idx = 0; idx < sd.count; ++idx )
-				indices[idx] = idx
-			indices.randomize()
-
-			//
-			if ( (sd.count > 1) && (indices[0] == sd.lastIndex) )
-				indices.reverse()
-		}
+		sd._pos = 0
 	}
 
-	sd.lastIndex = indices[sd.shufflePos]
-	return sd.lastIndex
+	return idxs[sd._pos]
 }
+
+int function Shuffle_GetCount( ShuffleData sd )
+{
+	return sd._indices.len()
+}
+
+
 //
 
 #if(CLIENT)
@@ -2107,7 +2074,7 @@ int function GetDayOfWeek( int unixTime )
 
 string function GetDayOfWeekName( int dayOfWeek )
 {
-	array<string> days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+	array<string> days = ["#SUNDAY", "#MONDAY", "#TUESDAY", "#WEDNESDAY", "#THURSDAY", "#FRIDAY", "#SATURDAY"]
 	Assert( dayOfWeek >= 0 && dayOfWeek <= days.len() )
 	return days[dayOfWeek]
 }
@@ -2143,5 +2110,125 @@ int function SecondsRemainingInDay( int unixTime )
 {
 	int endOfDay = GetEndOfDay( unixTime )
 	return endOfDay - unixTime
+}
+
+
+#if(true)
+int function GetCurrentEliteStreak( entity player )
+{
+	int currentStreak = 0
+
+	#if(UI)
+	if ( !IsFullyConnected() )
+		return 0
+	#endif
+
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	currentStreak = player.GetPersistentVarAsInt( "currentEliteStreak" )
+
+	return currentStreak
+}
+
+int function GetMaxEliteStreak( entity player )
+{
+	int maxStreak = 0
+
+	#if(UI)
+		if ( !IsFullyConnected() )
+			return 0
+	#endif
+
+	string ornull currentSeasonRefOrNull = GetCurrentStatSeasonRefOrNull()
+
+	if ( currentSeasonRefOrNull == null )
+		return 0
+
+	expect string(currentSeasonRefOrNull)
+
+	if ( !IsValid( player ) )
+		return 0
+
+	maxStreak = GetStat_Int( player, ResolveStatEntry( CAREER_STATS.season_elite_max_streak, currentSeasonRefOrNull ) )
+
+	return maxStreak
+}
+#endif
+
+
+#if CLIENT || UI 
+bool function CanSendFriendRequest( entity player )
+{
+	if ( !GetCurrentPlaylistVarBool( "enable_squad_friend_invite", false ) )
+		return false
+
+	return true
+}
+
+bool function CanInviteSquadMate( string uid )
+{
+	if ( !GetCurrentPlaylistVarBool( "enable_squad_invite", false ) )
+		return false
+
+	if ( IsInMyParty( uid ) )
+		return false
+
+	if ( GetParty().numFreeSlots == 0 )
+		return false
+
+	return true
+}
+
+bool function IsInMyParty( string uid )
+{
+	Party party = GetParty()
+	foreach ( p in party.members )
+	{
+		if ( p.uid == uid )
+			return true
+	}
+	return false
+}
+#endif
+
+
+#if(false)
+
+
+//
+
+#endif
+
+
+bool function IsSeason01EventActive()
+{
+	asset eventAsset = $"settings/itemflav/calevent/season01_event.rpak"
+	if ( !IsValidItemFlavorSettingsAsset( eventAsset ) )
+		return false
+	return CalEvent_IsActive( GetItemFlavorByAsset( eventAsset ), GetUnixTimestamp() ) //
+}
+
+
+entity function AssertLocalOrServerValidPlayer( entity player )
+{
+	#if(false)
+
+#elseif CLIENT || UI 
+		if ( player == null )
+			player = GetLocalClientPlayer()
+		Assert( player == GetLocalClientPlayer() )
+	#endif
+
+	return player
 }
 

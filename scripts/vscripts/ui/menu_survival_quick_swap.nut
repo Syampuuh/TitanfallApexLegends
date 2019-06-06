@@ -29,7 +29,6 @@ void function InitQuickSwapMenu()
 	AddMenuEventHandler( menu, eUIEvent.MENU_CLOSE, OnSurvivalQuickSwapMenu_Close )
 
 	AddMenuFooterOption( menu, LEFT, BUTTON_Y, true, "", "", SurvivalMenuSwapWeapon, IsSurvivalMenuEnabled )
-	AddMenuFooterOption( menu, LEFT, BUTTON_DPAD_UP, true, "", "", TryCloseSurvivalInventory, IsSurvivalMenuEnabled )
 	AddMenuFooterOption( menu, LEFT, KEY_TAB, true, "", "", TryCloseSurvivalInventory, IsSurvivalMenuEnabled )
 
 	file.quickSwapGrid = Hud_GetChild( menu, "QuickSwapGrid" )

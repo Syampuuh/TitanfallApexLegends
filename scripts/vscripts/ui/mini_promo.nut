@@ -75,7 +75,7 @@ void function StopMiniPromo()
 
 array<MiniPromoPageData> function InitPages()
 {
-	string content = GetPromoDataLayout()
+	string content = "" //
 	//
 	//
 	//
@@ -197,7 +197,12 @@ void function MiniPromoButton_OnActivate( var button )
 	}
 	else if ( page.linkType == "storetab" )
 	{
-		JumpToStoreCharacter( GetItemFlavorByHumanReadableRef( page.linkRef2 ) )
+		if ( IsValidItemFlavorHumanReadableRef( page.linkRef2 ) )
+		{
+			ItemFlavor character = GetItemFlavorByHumanReadableRef( page.linkRef2 )
+			if ( !GRX_IsItemOwnedByPlayer( character ) )
+				JumpToStoreCharacter( character )
+		}
 	}
 
 	//

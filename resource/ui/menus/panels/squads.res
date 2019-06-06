@@ -261,6 +261,30 @@ resource/ui/menus/panels/squads.res
         pin_to_sibling_corner   BOTTOM_RIGHT
     }
 
+    TeammateDisconnected1
+    {
+        ControlName             RuiPanel
+
+        wide					232
+        tall					64
+
+        scriptID                1
+
+        rui                     "ui/disconnected_widget.rpak"
+
+        xpos                    0
+        ypos                    0
+        zpos                    100
+
+        visible                 0
+        enabled                 1
+        cursorVelocityModifier  0.6
+
+        pin_to_sibling          TeammateMute1
+        pin_corner_to_sibling   LEFT
+        pin_to_sibling_corner   LEFT
+    }
+
     TeammateMute2
     {
         ControlName             RuiButton
@@ -321,7 +345,7 @@ resource/ui/menus/panels/squads.res
         wide					64
         tall					64
 
-        scriptID                1
+        scriptID                2
 
         rui                     "ui/mute_button.rpak"
 
@@ -393,5 +417,29 @@ resource/ui/menus/panels/squads.res
         pin_to_sibling          GCard2
         pin_corner_to_sibling   CENTER
         pin_to_sibling_corner   BOTTOM_RIGHT
+    }
+
+    TeammateDisconnected2
+    {
+        ControlName             RuiPanel
+
+        wide					232
+        tall					64
+
+        scriptID                1
+
+        rui                     "ui/disconnected_widget.rpak"
+
+        xpos                    0
+        ypos                    0
+        zpos                    100
+
+        visible                 0
+        enabled                 1
+        cursorVelocityModifier  0.6
+
+        pin_to_sibling          TeammateMute2
+        pin_corner_to_sibling   LEFT
+        pin_to_sibling_corner   LEFT
     }
 }

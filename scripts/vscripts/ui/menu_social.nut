@@ -60,6 +60,17 @@ struct
 {
 	var menu
 	var combinedCard
+	#if(false)
+
+
+
+
+
+
+
+
+
+#endif
 	var decorationRui
 	var menuHeaderRui
 } s_inspectFile
@@ -496,6 +507,7 @@ void function FriendButton_Init( var button, Friend friend )
 	toolTipData.tooltipStyle = eTooltipStyle.BUTTON_PROMPT
 	toolTipData.actionHint1 = "#Y_BUTTON_INSPECT"
 
+	bool gotUserInfo = false
 	if ( !isOffline )
 	{
 		bool canInvite = !friend.inparty && GetParty().numFreeSlots > 0
@@ -509,8 +521,22 @@ void function FriendButton_Init( var button, Friend friend )
 			{
 				expect CommunityUserInfo( userInfo )
 				toolTipData.actionHint3 = userInfo.isJoinable ? "X_BUTTON_JOIN" : ""
+
+				gotUserInfo = true
+				RuiSetBool( rui, "partyInMatch", userInfo.partyInMatch )
+				RuiSetBool( rui, "partyIsFull", userInfo.partyFull )
+				RuiSetString( rui, "privacy", userInfo.privacySetting )
+				RuiSetInt( rui, "timeInMatch", int( Time() - userInfo.lastServerChangeTime ) )
 			}
 		}
+	}
+
+	if ( !gotUserInfo )
+	{
+		RuiSetBool( rui, "partyInMatch", false )
+		RuiSetBool( rui, "partyIsFull", false )
+		RuiSetString( rui, "privacy", "invite" )
+		RuiSetInt( rui, "timeInMatch", 0 )
 	}
 
 	Hud_SetToolTipData( button, toolTipData )
@@ -778,12 +804,12 @@ void function OnPartyPrivacyButton_Activate( var button )
 	if ( GetConVarString( "party_privacy" ) == "open" )
 	{
 		//
-		ClientCommand( "party_privacy invite" )
+		SetConVarString( "party_privacy", "invite" )
 	}
 	else
 	{
 		//
-		ClientCommand( "party_privacy open" )
+		SetConVarString( "party_privacy",  "open" )
 	}
 }
 
@@ -925,7 +951,7 @@ void function PreviewFriendCosmetics( bool isForLocalPlayer, CommunityUserInfo o
 		{
 			ItemFlavor tracker = GetTrackerItemFlavorForCommunityUserInfo( userInfo, character, trackerIndex )
 			int dataInteger = GetTrackerDataIntegerFromCommunityUserInfo( userInfo, trackerIndex )
-			SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.TRACKER, trackerIndex, tracker )
+			SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.TRACKER, trackerIndex, tracker, dataInteger )
 		}
 
 		ItemFlavor introQuip = GetItemFlavorForCommunityUserInfo( userInfo, ePlayerStryderCharDataArraySlots.CHARACTER_INTRO_QUIP, eItemType.gladiator_card_intro_quip )
@@ -966,6 +992,22 @@ void function InitInspectMenu()
 
 	s_inspectFile.menu = menu
 	s_inspectFile.combinedCard = Hud_GetChild( menu, "CombinedCard" )
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
 	s_inspectFile.menuHeaderRui = Hud_GetRui( Hud_GetChild( menu, "MenuHeader" ) )
 	s_inspectFile.decorationRui = Hud_GetRui( Hud_GetChild( menu, "Decoration" ) )
 
@@ -1006,6 +1048,32 @@ void function OnUserInfoUpdated( string hardware, string id )
 	}
 
 	thread PreviewFriendCosmetics( isForLocalPlayer, userInfoOrNull )
+
+	#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
 }
 
 
@@ -1037,4 +1105,59 @@ void function OnViewProfile( var button )
 	ShowPlayerProfileCardForUID( s_socialFile.actionFriend.id )
 }
 
+#if(false)
 
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //

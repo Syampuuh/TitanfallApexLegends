@@ -6,7 +6,7 @@ bool function OnWeaponChargeBegin_ability_heal( entity weapon )
 {
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	float duration     = weapon.GetWeaponSettingFloat( eWeaponVar.charge_time )
-	StimPlayer( ownerPlayer, duration )
+	StimPlayerWithOffhandWeapon( ownerPlayer, duration, weapon )
 	#if(false)
 
 

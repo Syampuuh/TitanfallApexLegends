@@ -1,21 +1,45 @@
-untyped
+#if(true)//
 
-global function FlyersShared_Init
+global function ShFlyers_Init
 
-global function CreateFlyerSequence
-//
-global function DevFlyerPrintCount
-global function GetCirclingFlyers
-//
+global function IsFlyerThatStillHasDeathBox
+global function GetDeathBoxFromFlyer
 
-global const FLYER_MODEL = $"mdl/Creatures/flyer/r2_flyer.rmdl"
-const FLYER_1000X_MODEL = $"mdl/Creatures/flyer/r2_flyer.rmdl"
-const FLYER_500X_MODEL = $"mdl/Creatures/flyer/r2_flyer.rmdl"
-const FLYER_MODEL_STATIC = $"mdl/Creatures/flyer/r2_flyer.rmdl"
 
-const PLAYER_CORPSE_FOR_FLYER_MODEL = $"mdl/Humans/pilots/pilot_medium_reaper_m.rmdl"
+global const FLYER_MODEL = $"mdl/Creatures/flyer/flyer_kingscanyon_animated.rmdl"
+const FLYER_1000X_MODEL = $"mdl/Creatures/flyer/flyer_kingscanyon_animated.rmdl"
+const FLYER_500X_MODEL = $"mdl/Creatures/flyer/flyer_kingscanyon_animated.rmdl"
+const FLYER_MODEL_STATIC = $"mdl/Creatures/flyer/flyer_kingscanyon_animated.rmdl"
+const asset DEATHBOX_DROP_FX = $"P_loot_flyer"
 
-global int FLYER_WITH_CORPSE_COUNT_TO_SPAWN = 3 //
+const TIME_BEFORE_FLYER_DROPS_LOOT = 3.0
+const TIME_FOR_CAGED_FLYER_DAMAGED_STATE_TRANSITIONS = 10.0
+const TIME_FOR_CAGED_FLYER_TRIGGER_VACATED_STATE_TRANSITIONS = 10.0
+float TIME_FOR_CAGED_FLYER_STAY_IN_CAUTIOUS_STATE = 5.0 //
+const TIME_FOR_CAGED_FLYER_STAY_IN_ANGRY_STATE = 45.0
+const DIST_THRESHOLD_FOR_ANGRY_CAGED_FLYER = 275
+
+global int FLYER_WITH_DEATHBOX_COUNT_TO_SPAWN = 0 //
+const bool FLYER_WITH_DEATHBOX_FLYING_IDLE_ALWAYS = false
+const float FLYER_WITH_DEATHBOX_FLYING_IDLE_RADIUS = 1500
+const int FLYER_WITH_DEATHBOX_HEALTH = 250
+const int CAGED_FLYER_HEALTH = 150
+
+
+const float FLYER_LOOT_LEGENDARY_TIER_PROBABILTY = 0.02
+const float FLYER_LOOT_EPIC_TIER_PROBABILITY = 0.38
+const int FLYER_LOOT_CAP_ON_EPIC_OR_HIGHER_ITEM_COUNT = 3
+
+const float FLYER_LOOT_TIER_OVERRIDE = -1.0
+const int FLYER_PERCHED_APPROACH_DISTANCE_THRESHOLD = 1024
+const int FLYER_FLYING_APPROACH_DISTANCE_THRESHOLD = 450
+
+const int FLYER_LOOT_ITEMS_FLOOR = 5
+const int FLYER_LOOT_ITEMS_CEILING = 10
+
+global const string DEATHBOX_FLYER_SCRIPT_NAME = "deathboxFlyer"
+global const string CAGED_FLYER_SCRIPT_NAME = "cagedFlyer"
+
 
 #if(false)
 
@@ -26,159 +50,503 @@ global int FLYER_WITH_CORPSE_COUNT_TO_SPAWN = 3 //
 
 
 
-#elseif(CLIENT)
-//
+
+
+
+
+#endif
+
+#if(CLIENT)
+global function ServerCallback_PlayLootRarityFXOnDeathboxDrop
 #endif
 
 
-//
-//
-//
-//
+#if(DEV)
+struct TestFlyerSpawnDataStruct
+{
+	vector origin
+	vector angles
+	bool   startsInFlight
+}
+#endif
 
-enum flyerState
+global function IsFlyer
+global function IsCagedFlyer
+global function IsDeathboxFlyer
+
+
+enum perchedFlyerState
 {
 	idle,
-	takeOff
-	takeOffFast
+	takeOff,
 }
 
-global struct FlyerAnim
+struct DeathBoxFlyerDataStruct
 {
- 	string name
- 	string flyer
- 	string npc
- 	string spectre
- 	FlightPath flightPath
- 	bool hasAnalysis
+	bool   isPerched = false
+	float  timeTakeoffStarted = -1.0
+	bool   droppedLoot = false
+	entity deathBox
+	entity scriptMoverParent
+	bool   startsFlying = false
+}
+
+enum cagedFlyerState
+{
+	IDLE,
+	CAUTIOUS_TO_ANGRY,
+	CAUTIOUS_TO_IDLE,
+	ANGRY,
+	INVALID,
+}
+
+struct CagedFlyerDataStruct
+{
+	float  timeLastDamaged = -1.0
+	float  timeTriggerLastVacated = -1.0
+	float  timeLastBecameCautious = -1.0
+	float  timeLastBecameAngry = -1.0
+	entity linkedTrigger
 }
 
 struct
 {
-	array<FlyerAnim> flyerPickupAnimations
+	array< entity >                          deathBoxFlyerNodes
+	table< entity, DeathBoxFlyerDataStruct > deathBoxFlyerToDataStructTable //
+	table< entity, CagedFlyerDataStruct >    cagedFlyerToDataStructTable //
+	int fliersToSpawn = 0
 
-	int devFlyerCountReal = 0
-	int devFlyerCountCheap = 0
-	int devFlyerCountStatic = 0
-
-	int flyerCheapMixCount = 0
-	array< entity > flyerWithCorpseNodes
+	#if(DEV)
+		int                               currentTestFlyerSpawnIndex = -1 //
+		array< TestFlyerSpawnDataStruct > testflyerSpawnData
+		bool flyerSpawnDataSorted = false
+	#endif
 } file
 
-void function FlyersShared_Init()
+void function ShFlyers_Init()
 {
-	//
-	//
 	//
 	PrecacheModel( FLYER_MODEL_STATIC )
 	PrecacheModel( FLYER_MODEL )
 	PrecacheModel( FLYER_500X_MODEL )
 	PrecacheModel( FLYER_1000X_MODEL )
-	PrecacheModel( PLAYER_CORPSE_FOR_FLYER_MODEL  )
+
+	PrecacheParticleSystem( DEATHBOX_DROP_FX )
+
 	//
 
-	RegisterSignal( "FlyerNewPath" )
-	RegisterSignal( "KillFlyer" )
 
 	RegisterSignal( "FlyerStopThink" )
 	RegisterSignal( "FlyerDeath" )
-	RegisterSignal( "StopPerchedIdle" )
-	RegisterSignal( "PickupAborted" )
-	RegisterSignal( "EndAddToSequence" )
-
-	//
-	#if(CLIENT)
-		RegisterSignal( "OnBreak" )
-	#endif
-
-	level.circlingFlyers		<- {}
-
-	level.XWING_GROUP_ANIM_VARIATIONS <- []
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "a" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "b" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "c" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "d" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "e" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "f" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "g" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "h" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "i" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "j" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "k" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "l" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "m" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "n" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "o" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "p" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "q" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "r" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "s" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "t" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "u" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "v" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "w" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "x" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "y" )
-	level.XWING_GROUP_ANIM_VARIATIONS.append( "z" )
-
-	level.XWING_FLYING_ANIMS <- []
-	level.XWING_FLYING_ANIMS.append( { anim = "fly2", repeat = 6 } )
-	level.XWING_FLYING_ANIMS.append( { anim = "flap", repeat = 3 } )
-	level.XWING_FLYING_ANIMS.append( { anim = "glide", repeat = 1 } )
-
-	{
-		FlyerAnim flyerAnim
-	 	flyerAnim.name = "normalDive"
-	 	flyerAnim.flyer = "flyer_PicksUp_Soldier"
-	 	flyerAnim.npc = "pt_flyer_PicksUp_Soldier"
-	 	flyerAnim.spectre = "pt_flyer_PicksUp_Spectre"
-		file.flyerPickupAnimations.append( flyerAnim )
-	}
-	{
-		FlyerAnim flyerAnim
-	 	flyerAnim.name = "steepDive"
-	 	flyerAnim.flyer = "flyer_PickingUp_Soldier_dive"
-	 	flyerAnim.npc = "pt_flyer_pickingup_soldier_dive"
-	 	flyerAnim.spectre = "pt_flyer_pickingup_spectre_dive"
-	 	flyerAnim.hasAnalysis = true
-		file.flyerPickupAnimations.append( flyerAnim )
-	}
-	{
-		FlyerAnim flyerAnim
-	 	flyerAnim.name = "intro"
-	 	flyerAnim.flyer = "flyer_PicksUp_Soldier_intro"
-	 	flyerAnim.npc = "pt_flyer_PicksUp_Soldier_intro"
-	 	flyerAnim.spectre = "pt_flyer_PicksUp_Soldier_intro"
-		file.flyerPickupAnimations.append( flyerAnim )
-	}
-
-	level.FlyerPickupNodes 	<- {}
-
-	level.dropshipAttackAnims <- {}
-	level.dropshipAttackAnims[ DROPSHIP_STRAFE ] <- {
-														shipAnim = DROPSHIP_FLYER_ATTACK_ANIM
-														flyerArray = [ "flyer_dropshipattack_top", "flyer_dropshipattack_right", "flyer_dropshipattack_cockpit" ]
-													}
-	level.dropshipAttackAnims[ DROPSHIP_VERTICAL ] <- {
-														shipAnim = DROPSHIP_FLYER_ATTACK_ANIM_VERTICAL
-														flyerArray = [ "flyer_dropshipattack_vertical_top", "flyer_dropshipattack_vertical_right", "flyer_dropshipattack_vertical_cockpit" ]
-													}
+	RegisterSignal( "StopFlyerIdle" )
+	RegisterSignal( "RecalculateFlyerState" )
+	RegisterSignal( "CagedFlyerSetPainParameter"  )
 
 	#if(false)
 
 
 
+
+
+
+#endif
+}
+
+
+#if(false)
+
+/*
+
+
+
+*/
+
+//
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //
 //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 #endif
-	#if(CLIENT)
-		AddCreateCallback( "script_mover", FlyerCreationCallback )
-	#endif
-}
 
 
 /*
@@ -187,7 +555,7 @@ void function FlyersShared_Init()
 
 */
 
-/*
+#if(false)
 
 
 
@@ -208,6 +576,7 @@ void function FlyersShared_Init()
 
 
 
+//
 
 
 
@@ -224,6 +593,7 @@ void function FlyersShared_Init()
 
 
 
+//
 
 
 
@@ -256,11 +626,14 @@ void function FlyersShared_Init()
 
 
 
+//
+//
 
 
 
 
 
+//
 
 
 
@@ -275,10 +648,13 @@ void function FlyersShared_Init()
 
 
 
+//
 
+//
 
 
 
+//
 
 
 
@@ -287,7 +663,10 @@ void function FlyersShared_Init()
 
 
 
+//
+//
 
+//
 
 
 
@@ -324,11 +703,13 @@ void function FlyersShared_Init()
 
 
 
+//
 
 
 
 
 
+//
 
 
 
@@ -338,6 +719,7 @@ void function FlyersShared_Init()
 
 
 
+//
 
 
 
@@ -359,6 +741,7 @@ void function FlyersShared_Init()
 
 
 
+//
 
 
 
@@ -380,926 +763,830 @@ void function FlyersShared_Init()
 
 
 
+//
 
 
 
 
 
 
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif //
+
+
+#if(false)
+
+
+//
+
+
+//
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+//
+
+//
+//
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
 #if(CLIENT)
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-#endif
-
-/*
-
-
-
-*/
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-entity function _CreateProperFlyer( table sequence, entity path, entity ref )
+void function ServerCallback_PlayLootRarityFXOnDeathboxDrop( entity deathBox  )
 {
-	entity flyer
-	int flyerType = expect int( sequence.flyerType )
-
-	switch ( flyerType )
-	{
-		case eFlyerType.Real:
-			break
-		case eFlyerType.Cheap:
-			break
-		case eFlyerType.Static:
-			break
-		case eFlyerType.CheapMix:
-			//
-			if ( file.flyerCheapMixCount % 2 )
-				flyerType = eFlyerType.Static
-			else
-				flyerType = eFlyerType.Cheap
-			file.flyerCheapMixCount++
-			break
-	}
-
-	flyer = _CreateFlyer( flyerType, path, ref )
-
-	//
-	flyer.s.sequence	<- sequence
-	flyer.s.flyerType	<- flyerType
-	flyer.s.path 		<- path
-
-	level.circlingFlyers[ flyer ] <- flyer
-
-	return flyer
+	thread PlayLootRarityFXOnDeathboxDrop_threaded( deathBox  )
 }
 
-entity function _CreateFlyer( int flyerType, entity path, entity ref )
+void function PlayLootRarityFXOnDeathboxDrop_threaded( entity deathBox  )
 {
-	asset modelname	= $""
+	EndSignal( deathBox, "OnDeath" )
+	EndSignal( deathBox, "OnDestroy" )
 
-	switch ( flyerType )
-	{
-		case eFlyerType.Real:
-			modelname =  FLYER_MODEL
-			file.devFlyerCountReal++
-			break
-		case eFlyerType.Cheap:
-			modelname =  FLYER_MODEL
-			//
-			//
-			file.devFlyerCountCheap++
-			break
-		case eFlyerType.Static:
-			modelname =  FLYER_MODEL_STATIC
-			file.devFlyerCountStatic++
-			break
-		case eFlyerType.Cheap500x:
-			modelname = FLYER_500X_MODEL
-			file.devFlyerCountCheap++
-			break
-		case eFlyerType.Cheap1000x:
-			modelname = FLYER_1000X_MODEL
-			file.devFlyerCountCheap++
-			break
-	}
+	int fxID = GetParticleSystemIndex( DEATHBOX_DROP_FX )
+	vector boxOrigin = deathBox.GetOrigin()
+	int deatboxTier = deathBox.GetNetInt( "lootRarity"  )
+	vector colorVec = GetFXRarityColorForTier( deatboxTier )
 
-	entity flyer = CreatePropDynamic( modelname, path.GetOrigin(), path.GetAngles() )
+	int deathBoxFX = StartParticleEffectOnEntity( deathBox, fxID, FX_PATTACH_POINT_FOLLOW, deathBox.LookupAttachment( "FX_CENTER" ) )
+	EffectSetControlPointVector( deathBoxFX, 1, colorVec )
 
-	float modelscale = RandomFloatRange( 0.85, 1.1 )
-	int r = RandomIntRange( 215, 256 )
-	int g = RandomIntRange( 215, 256 )
-	int b = RandomIntRange( 215, 256 )
+	OnThreadEnd(
+		function() : ( deathBoxFX )
+		{
+			if ( EffectDoesExist( deathBoxFX  )  )
+				EffectStop( deathBoxFX, true, true )
+		}
+	)
+
+	wait 1.0
+
+}
+#endif //
 
 
-	//
-	flyer.kv.fadedist = 14000
-	flyer.kv.rendercolor = "" + r + " " + g + " " + b//
-	flyer.kv.modelscale = modelscale
-	flyer.kv.solid = SOLID_BBOX
+//
+bool function IsFlyerThatStillHasDeathBox( entity flyer )
+{
+	if ( !IsValid( flyer ) )
+		return false
 
+	if ( !(flyer in file.deathBoxFlyerToDataStructTable) )
+		return false
+
+	return IsValid( file.deathBoxFlyerToDataStructTable[ flyer  ].deathBox )
+}
+
+
+entity function GetDeathBoxFromFlyer( entity flyer )
+{
+	if ( !IsValid( flyer ) )
+		return null
+
+	if ( !(flyer in file.deathBoxFlyerToDataStructTable) )
+		return null
+
+	if ( !IsValid( file.deathBoxFlyerToDataStructTable[ flyer  ].deathBox ) )
+		return null
+
+	return file.deathBoxFlyerToDataStructTable[ flyer  ].deathBox
+
+}
+
+
+
+#endif //
+
+
+bool function IsFlyer( entity ent )
+{
 	#if(false)
 
-#endif
-	//
-	//
-	//
 
-	//
-	thread _Death( flyer )
-	thread _FlyerCleanUp( flyer )
+#elseif(CLIENT)
+		if ( !(ent instanceof C_DynamicProp) )
+			return false
+	#endif
 
-	return flyer
+	if ( ent.GetModelName().tolower() != FLYER_MODEL.tolower() ) //
+		return false
+
+	return true
+
 }
 
-table function GetCirclingFlyers()
+bool function IsDeathboxFlyer( entity ent  )
 {
-	return expect table( level.circlingFlyers )
+	if ( !IsFlyer( ent ) )
+		return false
+
+	return ent.GetScriptName() == DEATHBOX_FLYER_SCRIPT_NAME
+
 }
 
-#if(false)
-
-
-/*
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-*/
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-/*
-
-
-
-*/
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-*/
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-//
-
-
-//
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-void function FlyerCreationCallback( entity ent )
+bool function IsCagedFlyer( entity ent )
 {
-	Assert( IsClient() )
+	if ( !IsFlyer( ent ) )
+		return false
 
-	if ( ent.GetModelName() == FLYER_MODEL )
-		ent.s.gibDist <- 5120
+	return ent.GetScriptName() == CAGED_FLYER_SCRIPT_NAME
 }
-
-
-/*
-
-
-
-*/
-void function _Death( entity flyer )
-{
-	flyer.EndSignal( "OnDeath" )
-	flyer.EndSignal( "OnDestroy" )
-	flyer.WaitSignal( "OnBreak" )
-
-	//
-
-	flyer.Signal( "KillFlyer" )
-}
-
-void function _FlyerCleanUp( entity flyer )
-{
-	flyer.EndSignal( "OnDeath" )
-	flyer.EndSignal( "OnDestroy" )
-	flyer.WaitSignal( "KillFlyer" )
-
-	local sequence = flyer.s.sequence
-
-	//
-	delete sequence.pathsInUse[ flyer.s.xanim ]
-
-	//
-	delete level.circlingFlyers[ flyer ]
-
-	//
-	if ( GetBugReproNum() != 54905 )
-	{
-		flyer.GetOrigin()
-		flyer.GetOrigin()
-	}
-
-	if ( flyer.Anim_IsActive() )
-		flyer.Anim_Stop()
-
-	if ( flyer.s.path )
-		flyer.s.path.Anim_Stop()
-
-	flyer.ClearParent()
-
-	if ( flyer.s.path )
-		flyer.s.path.Destroy()
-
-	sequence.numFlyers--
-	Assert( sequence.numFlyers >= 0 )
-
-	switch ( sequence.flyerType )
-	{
-		case eFlyerType.Real:
-			file.devFlyerCountReal--
-			break
-		case eFlyerType.Cheap:
-			file.devFlyerCountCheap--
-			break
-		case eFlyerType.Static:
-			file.devFlyerCountStatic--
-			break
-		case eFlyerType.CheapMix:
-			file.flyerCheapMixCount--
-			break
-	}
-
-
-	if ( flyer.s.endFunc )
-		waitthread flyer.s.endFunc( flyer )
-
-	flyer.Destroy()
-}
-
-
-/*
-
-
-
-*/
-table function CreateFlyerSequence( vector origin, vector angles )
-{
-	table sequence
-	sequence.num					<- 22
-	sequence.groupAnimName			<- null
-	sequence.invalidArray			<- []
-	sequence.singleAnimName			<- null
-	sequence.flyerType				<- null
-	sequence.runFunc 				<- null
-	sequence.runFuncOptionalVar		<- null
-	sequence.runFuncOptionalVar2	<- null
-	sequence.endFunc 				<- null
-	sequence.origin 				<- origin
-	sequence.angles 				<- angles
-	sequence.groupAnimMax			<- 22
-	sequence.pathsInUse				<- {}
-	sequence.ref 					<- CreateRef( origin, angles )
-	sequence.numFlyers				<- 0
-	sequence.animPaths 				<- eFlyerPathScale.x1
-	sequence.startDirection			<- null
-
-	return sequence
-}
-
-entity function CreateRef( vector origin, vector angles )
-{
-	asset modelname = $"mdl/dev/empty_model.rmdl"
-	entity ref = CreatePropDynamic( modelname, origin, angles )
-
-	ref.Hide()
-	#if(false)
-
-#endif
-
-	return ref
-}
-
-void function ShowEnt( entity model )
-{
-	if ( !IsValid_ThisFrame( model ) )
-		return
-
-	model.Show()
-}
-
-void function DevFlyerPrintCount()
-{
-	int total
-
-	while ( 1 )
-	{
-		total = file.devFlyerCountReal + file.devFlyerCountCheap + file.devFlyerCountStatic
-		printl( "Flyers [T]: " + total + ", [R]: " + file.devFlyerCountReal + ", [C]: " + file.devFlyerCountCheap + ", [S]: " + file.devFlyerCountStatic )
-		wait 1
-	}
-}
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif

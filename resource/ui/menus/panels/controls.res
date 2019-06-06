@@ -19,10 +19,10 @@
     BtnGamepadLayout
     {
         ControlName				RuiButton
-        InheritProperties		SwitchButton
-        navDown					SwchStickLayout
+        InheritProperties		SettingBasicButton
         tabPosition				1
-        ypos                    0
+
+        navDown					SwchStickLayout
     }
     SwchStickLayout
     {
@@ -367,8 +367,7 @@
     BtnControllerOpenAdvancedMenu
     {
         ControlName				RuiButton
-        InheritProperties		SwitchButton
-        style					DialogListButton
+        InheritProperties		SettingBasicButton
         pin_to_sibling			SwchVibration
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT

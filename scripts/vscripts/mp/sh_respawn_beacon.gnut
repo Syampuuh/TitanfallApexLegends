@@ -10,6 +10,19 @@ global function GetRespawnStyle
 
 
 
+#endif
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
 
 
 #endif
@@ -24,6 +37,9 @@ global function ServerCallback_RespawnBeaconStop
 #endif
 
 global const string RESPAWN_CHAMBER_TARGETNAME = "respawn_chamber"
+#if(false)
+
+#endif
 global const string RESPAWN_DNA_TARGETNAME = "respawn_dna"
 global const string RESPAWN_DROPSHIP_TARGETNAME = "respawn_dropship"
 
@@ -31,8 +47,14 @@ const float RESPAWN_BEACON_HOLO_EFFECT_HEIGHT = 75.0
 
 global const float RESPAWN_DNA_LIFETIME = 90.0
 const float RESPAWN_DROP_TIME = 10.0
-const asset RESPAWN_BEACON_MODEL = $"mdl/dev/empty_model.rmdl"
 global const float RESPAWN_BEACON_RESPAWN_TIME = 5.0
+
+#if(false)
+
+
+
+
+#endif
 
 global const string RESPAWN_BEACON_SUCCESS_SOUND = "Survival_RespawnChamber_Activate"
 global const string RESPAWN_BEACON_LOOP_SOUND = "Survival_RespawnBeacon_Linking_loop"
@@ -49,6 +71,9 @@ const string SOUND_HOLOGRAM_LOOP = "Survival_Emit_RespawnChamber"
 
 const float RESPAWN_CHAMBER_ICON_FADE_DIST_NEAR = 300.0
 const float RESPAWN_CHAMBER_ICON_FADE_DIST_FAR = 1000.0
+
+const string ANIM_FLYIN_IDLE = "dropship_classic_mp_flyin_idle"
+const string ANIM_FLYIN_MOVE = "dropship_classic_mp_flyin"
 
 global enum eRespawnStatus
 {
@@ -69,25 +94,38 @@ global enum eRespawnStyle
 
 global struct dropshipAnimData
 {
-	string idleAnim
-	string idlePOVAnim
-	string jumpAnim
-	string jumpPOVAnim
-	string attachment = "origin"
-	bool hideProxy = true
+	string                     idleAnim
+	string                     idlePOVAnim
+	string                     jumpAnim
+	string                     jumpPOVAnim
+	string                     attachment = "origin"
+	bool                       hideProxy = true
 	void functionref( entity ) viewConeFunc
-	float yawAngle
-	string firstPersonJumpOutSound //
+	float                      yawAngle
+	string                     firstPersonJumpOutSound //
+}
+
+global struct DropshipAltFlyinData
+{
+	vector startPos
+	vector endPos
+	float  timeToTake
+	entity dropship
+	string dropshipAISettings
 }
 
 struct
 {
 	array<dropshipAnimData> dropshipAnimDataList
-	array<entity> allStations
+	array<entity>           allStations
 
 	#if(CLIENT)
-		array<var> respawnChamberRuis
+		array<var>         respawnChamberRuis
 		table<entity, int> chamberToBeamFX
+
+		#if(false)
+
+#endif
 	#endif
 
 	#if(false)
@@ -104,12 +142,15 @@ void function Sh_RespawnBeacon_Init()
 #endif
 
 	PrecacheModel( RESPAWN_DROPSHIP_MODEL )
-	AddCallback_EntitiesDidLoad( RespawnBeacon_EntitiesdidLoad )
 
 	if ( GetRespawnStyle() == eRespawnStyle.NONE )
 		return
 
-	PrecacheModel( RESPAWN_BEACON_MODEL )
+	#if(false)
+
+
+
+#endif
 	PrecacheParticleSystem( RESPAWN_BEACON_EMITTER_FX )
 	PrecacheParticleSystem( RESPAWN_BEACON_BEAM_FX )
 	PrecacheParticleSystem( RESPAWN_BEACON_SCAN_FX )
@@ -126,6 +167,12 @@ void function Sh_RespawnBeacon_Init()
 		AddDestroyCallback( PLAYER_WAYPOINT_CLASSNAME, PlayerWaypoint_DestroyCallback )
 
 		AddCallback_OnClientScriptInit( OverrideMinimapPackages )
+
+		#if(false)
+
+
+
+#endif
 
 		RegisterButtonPressedCallback( KEY_SPACE, TryPingRespawnItem )
 		RegisterButtonPressedCallback( BUTTON_A, TryPingRespawnItem )
@@ -189,19 +236,21 @@ void function Sh_RespawnBeacon_Init()
 #endif
 }
 
+
 void function RespawnBeacons_RegisterNetworking()
 {
 	RegisterNetworkedVariable( "respawnDNATimeout", SNDC_PLAYER_GLOBAL, SNVT_TIME, -1 )
 	RegisterNetworkedVariable( "respawnStatus", SNDC_PLAYER_GLOBAL, SNVT_INT, 0 )
 
 	#if(CLIENT)
-	RegisterNetworkedVariableChangeCallback_int( "respawnStatus", RespawnStatusChanged )
+		RegisterNetworkedVariableChangeCallback_int( "respawnStatus", RespawnStatusChanged )
 	#endif
 }
 
-void function RespawnBeacon_EntitiesdidLoad()
+
+void function ShRespawnBeacon_RegisterAinAnalysisFuncs()
 {
-	AddDropshipFlightAnalysis( RESPAWN_DROPSHIP_MODEL, "dropship_classic_mp_flyin", AnaylsisFuncDropshipTestJumpout, "dropship_deploy" )
+	AddDropshipFlightAnalysis( eFlightPathAnalysisIndex.RESPAWN_DROPSHIP_FLYIN_MOVE, RESPAWN_DROPSHIP_MODEL, ANIM_FLYIN_MOVE, AnaylsisFuncDropshipTestJumpout, "dropship_deploy" )
 }
 
 #if(CLIENT)
@@ -209,8 +258,8 @@ void function OverrideMinimapPackages( entity player )
 {
 	if ( GetRespawnStyle() == eRespawnStyle.RESPAWN_CHAMBERS )
 	{
-		RegisterMinimapPackage( "prop_script", 	eMinimapObject_prop_script.RESPAWN_CHAMBER, 		MINIMAP_OBJECT_RUI, 		MinimapPackage_RespawnChamber, 		FULLMAP_OBJECT_RUI, 		MinimapPackage_RespawnChamber )
-		RegisterMinimapPackage( "prop_script", 	eMinimapObject_prop_script.RESPAWN_DNA, 			$"ui/minimap_square_respawn_dna_pickup.rpak", MinimapPackage_RespawnDNA, 		$"ui/in_world_minimap_respawn_dna.rpak", 		MinimapPackage_RespawnDNA )
+		RegisterMinimapPackage( "prop_script", eMinimapObject_prop_script.RESPAWN_CHAMBER, MINIMAP_OBJECT_RUI, MinimapPackage_RespawnChamber, FULLMAP_OBJECT_RUI, MinimapPackage_RespawnChamber )
+		RegisterMinimapPackage( "prop_script", eMinimapObject_prop_script.RESPAWN_DNA, $"ui/minimap_square_respawn_dna_pickup.rpak", MinimapPackage_RespawnDNA, $"ui/in_world_minimap_respawn_dna.rpak", MinimapPackage_RespawnDNA )
 	}
 }
 
@@ -247,7 +296,7 @@ void function RespawnStatusChanged( entity player, int old, int new, bool actual
 		{
 			if ( !EffectDoesExist( file.chamberToBeamFX[ ent ] ) )
 			{
-				file.chamberToBeamFX[ ent ] = StartParticleEffectOnEntityWithPos( ent, fxId, FX_PATTACH_POINT_FOLLOW_NOROTATE, ent.LookupAttachment( "FX_EMITTER" ), <0,0,0>, <0,0,0> )
+				file.chamberToBeamFX[ ent ] = StartParticleEffectOnEntityWithPos( ent, fxId, FX_PATTACH_POINT_FOLLOW_NOROTATE, ent.LookupAttachment( "FX_EMITTER" ), <0, 0, 0>, <0, 0, 0> )
 			}
 		}
 		else
@@ -281,54 +330,197 @@ void function UpdateRespawnChamberRuis( var rui, bool waitingToBeRespawned )
 
 void function RespawnEntitySpawned( entity ent )
 {
-	switch ( ent.GetTargetName() )
+	if ( ent.GetTargetName() != RESPAWN_CHAMBER_TARGETNAME )
 	{
-		case RESPAWN_CHAMBER_TARGETNAME:
-#if(CLIENT)
-			AddEntityCallback_GetUseEntOverrideText( ent, RespawnChamber_TextOverride )
-			var rui = AddOverheadIcon( ent, RESPAWN_BEACON_ICON, false, $"ui/overhead_icon_respawn_beacon.rpak" )
-			RuiSetFloat2( rui, "iconSize", <80,80,0> )
-			RuiSetFloat( rui, "distanceFade", RESPAWN_CHAMBER_ICON_FADE_DIST_NEAR )
-			RuiSetBool( rui, "adsFade", true )
-			RuiSetString( rui, "hint", "#RESPAWN_ALLCAPS" )
-
-			thread ManageRespawnChamberData( ent, rui )
-
-			if ( GetCurrentPlaylistVarBool( "enable_radar_on_respawn_beacons", true ) )
-				thread AddRadarToRespawnStation( ent )
-#endif
-
 #if(false)
 
-
-
-
-
-
-
-
-
 #endif
-
-			file.allStations.append( ent )
-
-			SetCallback_CanUseEntityCallback( ent, IsNotBusy )
-			AddCallback_OnUseEntity( ent, RespawnChamberOnUse )
-			break
-
-#if(false)
-
-
-
-
-
-#endif
-			break
+		{
+			return
+		}
 	}
 
+	#if(CLIENT)
+		AddEntityCallback_GetUseEntOverrideText( ent, RespawnChamber_TextOverride )
+		var rui = AddOverheadIcon( ent, RESPAWN_BEACON_ICON, false, $"ui/overhead_icon_respawn_beacon.rpak" )
+		RuiSetFloat2( rui, "iconSize", <80, 80, 0> )
+		RuiSetFloat( rui, "distanceFade", RESPAWN_CHAMBER_ICON_FADE_DIST_NEAR )
+		RuiSetBool( rui, "adsFade", true )
+		RuiSetString( rui, "hint", "#RESPAWN_ALLCAPS" )
+
+		thread ManageRespawnChamberData( ent, rui )
+
+		if ( ent.GetTargetName() == RESPAWN_CHAMBER_TARGETNAME ) //
+			thread AddRadarToRespawnStation( ent )
+	#elseif(false)
+
+
+
+
+
+
+
+
+
+#endif
+
+	file.allStations.append( ent )
+
+	SetCallback_CanUseEntityCallback( ent, IsNotBusy )
+	AddCallback_OnUseEntity( ent, RespawnChamberOnUse )
+
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 }
 
 #if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -427,6 +619,9 @@ void function RespawnEntitySpawned( entity ent )
 
 
 
+
+
+//
 
 
 
@@ -505,15 +700,25 @@ void function ManageRespawnChamberData( entity ent, var rui )
 
 void function AddRadarToRespawnStation( entity ent )
 {
-	vector fwd = AnglesToForward( ent.GetAngles() )
-	vector up = AnglesToUp( ent.GetAngles() )
-	vector rgt = AnglesToRight( ent.GetAngles() )
-	vector offset = up*100
-	vector angles = AnglesCompose( ent.GetAngles(), <0,0,-10> )
+	#if(false)
+
+#endif
+
+	vector fwd    = AnglesToForward( ent.GetAngles() )
+	vector up     = AnglesToUp( ent.GetAngles() )
+	vector rgt    = AnglesToRight( ent.GetAngles() )
+	vector offset = up * 100
+	vector angles = AnglesCompose( ent.GetAngles(), <0, 0, -10> )
 
 	ent.EndSignal( "OnDestroy" )
 
-	entity fxHolder = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", ent.GetOrigin() + up*RESPAWN_BEACON_HOLO_EFFECT_HEIGHT, <-90,0,0> )
+	#if(false)
+
+#else
+		float height = RESPAWN_BEACON_HOLO_EFFECT_HEIGHT
+	#endif
+
+	entity fxHolder = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", ent.GetOrigin() + up * height, <-90, 0, 0> )
 
 	array<int> fx
 	fx.append( StartParticleEffectOnEntity( fxHolder, GetParticleSystemIndex( RESPAWN_BEACON_EMITTER_FX ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 ) )
@@ -539,7 +744,7 @@ void function MinimapPackage_RespawnDNA( entity ent, var rui )
 	RuiSetImage( rui, "defaultIcon", $"" )
 	RuiSetImage( rui, "clampedDefaultIcon", $"" )
 	RuiSetBool( rui, "useTeamColor", false )
-	RuiSetFloat2( rui, "iconScale", <1.0,60.0/120.0,0.0> * 2.0 )
+	RuiSetFloat2( rui, "iconScale", <1.0, 60.0 / 120.0, 0.0> * 2.0 )
 
 	thread RespawnDNA_SetCharacterIcon( ent, rui, "defaultIcon" )
 }
@@ -557,7 +762,7 @@ void function RespawnDNA_SetCharacterIcon( entity ent, var rui, string argName )
 	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( owner ), Loadout_CharacterClass() )
 
 	asset setFile = CharacterClass_GetSetFile( character )
-	asset icon = GetGlobalSettingsAsset( setFile, "unitframe_icon" )
+	asset icon    = GetGlobalSettingsAsset( setFile, "unitframe_icon" )
 
 	RuiSetImage( rui, argName, icon )
 }
@@ -574,7 +779,7 @@ void function MinimapPackage_RespawnChamber( entity ent, var rui )
 string function RespawnChamber_TextOverride( entity ent )
 {
 	entity player = GetLocalViewPlayer()
-	int team = player.GetTeam()
+	int team      = player.GetTeam()
 	if ( GetPlayerArrayOfTeam( team ).len() == GetPlayerArrayOfTeam_Alive( team ).len() ||
 			!TeammatesWaitingToBeRespawned( team ) )
 	{
@@ -598,15 +803,15 @@ string function RespawnDNA_TextOverride( entity ent )
 
 void function RespawnChamberOnUse( entity pickup, entity player, int pickupFlags )
 {
-	if ( !(pickupFlags & USE_INPUT_LONG ) )
+	if ( !(pickupFlags & USE_INPUT_LONG) )
 		return
 
 	if ( !TeammatesWaitingToBeRespawned( player.GetTeam() ) )
 		return
 
 	#if(CLIENT)
-	HidePlayerHint( "#RESPAWN_AT_BEACONS_HINT" )
-		#endif
+		HidePlayerHint( "#RESPAWN_AT_BEACONS_HINT" )
+	#endif
 
 	ExtendedUseSettings settings
 	settings.successSound = RESPAWN_BEACON_SUCCESS_SOUND
@@ -625,7 +830,13 @@ void function RespawnChamberOnUse( entity pickup, entity player, int pickupFlags
 
 
 #endif
-	settings.duration = RESPAWN_BEACON_RESPAWN_TIME
+
+	#if(false)
+
+#else
+		settings.duration = RESPAWN_BEACON_RESPAWN_TIME
+	#endif
+
 	settings.useInputFlag = IN_USE_LONG
 
 	thread ExtendedUse( pickup, player, settings )
@@ -662,8 +873,17 @@ void function DisplayRuiForRespawnChamber_Internal( var rui, asset icon, float s
 
 
 
+
+
+
+
+
+
+
+
 //
 //
+
 
 
 
@@ -708,7 +928,7 @@ bool function TeammatesWaitingToBeRespawned( int team )
 string function RespawnBeacon_TextOverride( entity ent )
 {
 	entity player = GetLocalViewPlayer()
-	entity owner = ent.GetOwner()
+	entity owner  = ent.GetOwner()
 
 	if ( !IsValid( owner ) )
 		return ""
@@ -824,7 +1044,7 @@ void function ReviveRuiThread( float endTime )
 		}
 	)
 
-	wait ( endTime - Time() )
+	wait (endTime - Time())
 }
 
 void function ServerCallback_RespawnDNAHint()
@@ -876,6 +1096,7 @@ void function ServerCallback_RespawnDNAHint()
 
 
 
+
 //
 
 
@@ -962,6 +1183,57 @@ void function ServerCallback_RespawnDNAHint()
 
 
 
+//
+//
+//
+//
+//
+//
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -981,49 +1253,7 @@ void function ServerCallback_RespawnDNAHint()
 //
 
 
-//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
 
 
 
@@ -1114,9 +1344,9 @@ void function ServerCallback_RespawnDNAHint()
 
 bool function AnaylsisFuncDropshipTestJumpout( FlightPath flightPath, vector origin, float yaw )
 {
-	vector angles = <0,yaw,0>
+	vector angles  = <0, yaw, 0>
 	vector forward = AnglesToForward( angles )
-	vector right = AnglesToRight( angles )
+	vector right   = AnglesToRight( angles )
 
 	if ( !IsLegalFlightPath( flightPath, origin, forward, right, true ) )
 		return false
@@ -1127,9 +1357,10 @@ bool function AnaylsisFuncDropshipTestJumpout( FlightPath flightPath, vector ori
 	return true
 }
 
+
 bool function CanDeploy( FlightPath flightPath, vector origin, vector angles, vector forward, vector right )
 {
-	Point deployPoint = GetPreviewPoint( flightPath )
+	Point deployPoint   = GetPreviewPoint( flightPath )
 	vector deployOrigin = GetOriginFromPoint( deployPoint, origin, forward, right )
 	vector deployAngles = GetAnglesFromPoint( deployPoint, angles )
 
@@ -1139,9 +1370,9 @@ bool function CanDeploy( FlightPath flightPath, vector origin, vector angles, ve
 
 	vector deployFwd = AnglesToForward( deployAngles )
 
-	deployOrigin = deployOrigin - deployFwd*150 //
+	deployOrigin = deployOrigin - deployFwd * 150 //
 
-	TraceResults results = TraceHull( deployOrigin, deployOrigin - <0,0,1000>, <-300,-300,-300>, <300,300,300>, null, flightPath.traceMask, TRACE_COLLISION_GROUP_NONE )
+	TraceResults results = TraceHull( deployOrigin, deployOrigin - <0, 0, 1000>, <-300, -300, -300>, <300, 300, 300>, null, flightPath.traceMask, TRACE_COLLISION_GROUP_NONE )
 	//
 	//
 	//
@@ -1163,7 +1394,7 @@ void function TryPingRespawnItem( entity player )
 	entity viewPlayer = GetLocalViewPlayer()
 
 	if ( player.GetPlayerNetInt( "respawnStatus" ) == eRespawnStatus.WAITING_FOR_PICKUP ||
-		player.GetPlayerNetInt( "respawnStatus" ) == eRespawnStatus.WAITING_FOR_DELIVERY )
+					player.GetPlayerNetInt( "respawnStatus" ) == eRespawnStatus.WAITING_FOR_DELIVERY )
 	{
 		vector org = viewPlayer.GetOrigin()
 		player.ClientCommand( "PingNearestRespawn " + org.x + " " + org.y + " " + org.z )
@@ -1234,7 +1465,11 @@ void function PlayerWaypoint_CreateCallback( entity wp )
 	{
 		if ( IsValid( pingedEnt ) )
 		{
-			if( pingedEnt.GetTargetName() == RESPAWN_CHAMBER_TARGETNAME )
+#if(false)
+
+#else
+			if ( pingedEnt.GetTargetName() == RESPAWN_CHAMBER_TARGETNAME )
+#endif
 			{
 				var rui = pingedEnt.e.overheadRui
 				if ( rui != null )
@@ -1270,7 +1505,7 @@ void function PlayerWaypoint_DestroyCallback( entity wp )
 	{
 		if ( IsValid( pingedEnt ) )
 		{
-			if( pingedEnt.GetTargetName() == RESPAWN_DNA_TARGETNAME )
+			if ( pingedEnt.GetTargetName() == RESPAWN_DNA_TARGETNAME )
 			{
 				var rui = pingedEnt.e.overheadRui
 				if ( rui != null )
@@ -1309,7 +1544,7 @@ void function SpectatorShowRespawnRui( float startTime, float endTime )
 	EmitSoundOnEntity( player, RESPAWN_BEACON_LOOP_SOUND )
 
 	OnThreadEnd(
-		function() : ( rui , player )
+		function() : ( rui, player )
 		{
 			if ( IsValid( player ) )
 			{
@@ -1331,3 +1566,197 @@ void function ServerCallback_RespawnBeaconStop()
 		clGlobal.levelEnt.Signal( "SpectatorShowRespawnRui" )
 }
 #endif
+
+#if(false)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
+
+

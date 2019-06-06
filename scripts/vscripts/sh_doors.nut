@@ -92,7 +92,20 @@ void function ShDoors_Init()
 
 bool function IsDoor( entity ent )
 {
-	return IsCodeDoor( ent )
+	if ( IsCodeDoor( ent ) )
+		return true
+
+	switch ( ent.GetScriptName() )
+	{
+		case "survival_door_model":
+		case "survival_door_plain":
+		case "survival_door_sliding":
+		case "survival_door_blockable":
+		case "survival_door_code":
+		return true
+	}
+
+	return false
 }
 
 array<entity> function GetAllPropDoors()
@@ -454,6 +467,9 @@ bool function DoorsAreEnabled()
 
 
 
+
+
+
 #endif
 
 #if(false)
@@ -591,40 +607,7 @@ void function OnCodeDoorDestroyed_Client( entity door )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //
-
-
-
-
-
-
-
-
 
 
 
@@ -813,6 +796,7 @@ bool function IsCodeDoor( entity door )
 
 
 //
+
 
 
 
@@ -1092,6 +1076,10 @@ const table<int, vector> BLOCKABLE_DOOR_NOTCH_ROTATIONS = {
 
 
 #if(false)
+
+
+
+
 
 
 
@@ -1630,6 +1618,18 @@ bool function CircleIntersectsArc(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+//
 
 
 

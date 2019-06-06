@@ -222,7 +222,12 @@ void function OnSelectedWeaponChanged( entity selectedWeapon )
 	}
 
 	if ( selectedWeapon.IsWeaponOffhand() )
-		return
+	{
+		bool isOffhandUsesAmmoStatus = selectedWeapon.GetWeaponSettingBool( eWeaponVar.offhand_uses_hud_ammo_status )
+
+		if ( !isOffhandUsesAmmoStatus )
+			return
+	}
 
 	UpdateHudDataForMainWeapons( player, selectedWeapon )
 	UpdateDpadHud( player )
@@ -248,10 +253,12 @@ void function UpdateHudDataForMainWeapons( entity player, entity selectedWeapon 
 {
 	var rui = file.weapon_hud_rui
 
+	bool isOffhandUsesAmmoStatus = IsValid( selectedWeapon ) && selectedWeapon.GetWeaponSettingBool( eWeaponVar.offhand_uses_hud_ammo_status )
+
 	entity weaponInSlot0 = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_0 )
 	entity weaponInSlot1 = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_1 )
-	bool noWeapon        = !IsValid( weaponInSlot0 ) && !IsValid( weaponInSlot1 )
-	bool isMainWeapon    = IsValid( selectedWeapon ) && (selectedWeapon == weaponInSlot0 || selectedWeapon == weaponInSlot1)
+	bool noWeapon        = !IsValid( weaponInSlot0 ) && !IsValid( weaponInSlot1 ) && !isOffhandUsesAmmoStatus
+	bool isMainWeapon    = IsValid( selectedWeapon ) && (selectedWeapon == weaponInSlot0 || selectedWeapon == weaponInSlot1 )
 	bool isTitan =			player.IsTitan()
 
 	if ( noWeapon || isTitan )
@@ -261,8 +268,12 @@ void function UpdateHudDataForMainWeapons( entity player, entity selectedWeapon 
 		return
 	}
 
-	RuiSetBool( rui, "noMainWeaponEquiped", false )
-	RuiSetBool( rui, "isMainWeaponSelected", isMainWeapon )
+	if ( !isOffhandUsesAmmoStatus )
+	{
+		RuiSetBool( rui, "noMainWeaponEquiped", false )
+		RuiSetBool( rui, "isMainWeaponSelected", isMainWeapon )
+	}
+
 	//
 
 	int activeWeaponTab = -1
@@ -308,6 +319,11 @@ void function UpdateHudDataForMainWeapons( entity player, entity selectedWeapon 
 
 		bool canShowReloadHint = CanShowReloadHint()
 		RuiSetBool( file.ammo_status_hint, "canShowReloadHint", canShowReloadHint )
+	}
+	else if ( isOffhandUsesAmmoStatus )
+	{
+		float lowAmmoFrac = selectedWeapon.GetWeaponSettingFloat( eWeaponVar.low_ammo_fraction )
+		RuiSetFloat( file.ammo_status_hint, "lowAmmoFrac", lowAmmoFrac )
 	}
 	else
 	{
@@ -847,7 +863,12 @@ void function TrackPrimaryWeaponEnabled( entity player, var rui, string endStrin
 
 	while ( IsAlive( player ) )
 	{
-		RuiSetBool( rui, "weaponIsUp", player.GetWeaponDisableFlags() != WEAPON_DISABLE_FLAGS_ALL && player.GetWeaponDisableFlags() != WEAPON_DISABLE_FLAGS_MAIN && player.GetActiveWeapon( eActiveInventorySlot.mainHand ) != null && !player.IsUsingOffhandWeapon( eActiveInventorySlot.mainHand ) )
+		bool weaponUsesAmmoStatus 	= false
+		entity selectedWeapon	 	= player.GetActiveWeapon( eActiveInventorySlot.mainHand )
+		if ( IsValid( selectedWeapon ) )
+			weaponUsesAmmoStatus = !player.IsUsingOffhandWeapon( eActiveInventorySlot.mainHand ) || selectedWeapon.GetWeaponSettingBool( eWeaponVar.offhand_uses_hud_ammo_status )
+
+		RuiSetBool( rui, "weaponIsUp", player.GetWeaponDisableFlags() != WEAPON_DISABLE_FLAGS_ALL && player.GetWeaponDisableFlags() != WEAPON_DISABLE_FLAGS_MAIN && weaponUsesAmmoStatus )
 		WaitFrame()
 	}
 }

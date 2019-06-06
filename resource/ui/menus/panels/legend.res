@@ -104,4 +104,22 @@ resource/ui/menus/panels/legend.res
         pin_corner_to_sibling	RIGHT
         pin_to_sibling_corner	LEFT
     }
+
+    SpecialPerk
+    {
+        ControlName             RuiPanel
+        xpos					0
+        ypos					0
+        wide 					400
+        tall					320
+        rui 					"ui/character_special_perk.rpak"
+        visible					1
+        zpos					5
+
+        scriptID                "specialPerk"
+
+        pin_to_sibling			Tactical
+        pin_corner_to_sibling	TOP
+        pin_to_sibling_corner	BOTTOM
+    }
 }
