@@ -13,7 +13,7 @@ void function InitTestMenu()
 	file.buttons = GetElementsByClassname( menu, "DevButtonClass" )
 	foreach ( button in file.buttons )
 	{
-		//
+		                                                                
 
 		Hud_SetText( button, "" )
 		Hud_SetEnabled( button, false )

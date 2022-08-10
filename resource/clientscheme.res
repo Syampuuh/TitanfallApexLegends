@@ -90,8 +90,10 @@ Scheme
 
 		ClosedCaption.RuiFont 				DefaultRegularFont
 	 	ClosedCaption.RuiFontHeight 		32
-	 	ClosedCaption.RuiFontHeightLarge	40
-	 	ClosedCaption.RuiFontHeightHuge		48
+	 	ClosedCaption.RuiFontHeightLarge	40	[!$NX]
+		ClosedCaption.RuiFontHeightLarge	36	[$NX]
+	 	ClosedCaption.RuiFontHeightHuge		48	[!$NX]
+		ClosedCaption.RuiFontHeightHuge		40	[$NX]
 	}
 
 	//////////////////////// FONTS /////////////////////////////
@@ -368,17 +370,6 @@ Scheme
 				name		Default
 				tall		19
 				antialias	1
-			}
-		}
-
-		GameUIButtons
-		{
-			1
-			{
-				bitmap		1
-				name		"ControllerButtons"
-				scalex		0.843
-				scaley		0.843
 			}
 		}
 

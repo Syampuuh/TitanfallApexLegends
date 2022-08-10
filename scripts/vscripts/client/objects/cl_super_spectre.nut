@@ -13,7 +13,7 @@ void function ClSuperSpectre_Init()
 
 void function CreateCallback_SuperSpectre( entity super_spectre )
 {
-	AddAnimEvent( super_spectre, "create_dataknife", CreateThirdPersonDataKnife ) //
+	AddAnimEvent( super_spectre, "create_dataknife", CreateThirdPersonDataKnife )                                  
 
 	if ( file.initialized )
 		return
@@ -21,17 +21,17 @@ void function CreateCallback_SuperSpectre( entity super_spectre )
 
 	asset super_spectre_model = super_spectre.GetModelName()
 
-	//
-	//
-	//
+	                        
+	                      
+	                        
 	ModelFX_BeginData( "friend_lights", super_spectre_model, "friend", true )
 		ModelFX_AddTagSpawnFX( "FX_R_EYE",		$"P_spectre_eye_friend" )
 		ModelFX_AddTagSpawnFX( "FX_L_EYE",		$"P_spectre_eye_friend" )
 	ModelFX_EndData()
 
-	//
-	//
-	//
+	                        
+	                   
+	                        
 	ModelFX_BeginData( "foe_lights", super_spectre_model, "foe", true )
 		ModelFX_AddTagSpawnFX( "FX_R_EYE",		$"P_spectre_eye_foe" )
 		ModelFX_AddTagSpawnFX( "FX_L_EYE",		$"P_spectre_eye_foe" )
@@ -40,9 +40,9 @@ void function CreateCallback_SuperSpectre( entity super_spectre )
 
 
 	ModelFX_BeginData( "SuperSpectreDamage", super_spectre_model, "all", true )
-		//
-		//
-		//
+		                        
+		                 
+		                        
 
 		ModelFX_AddTagHealthFX( 0.66, "FX_DAM_VENT_FR", $"P_sup_spec_dam_vent_1", false )
 		ModelFX_AddTagHealthFX( 0.66, "FX_DAM_VENT_FL", $"P_sup_spec_dam_vent_1", false )

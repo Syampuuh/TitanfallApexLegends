@@ -1,0 +1,160 @@
+#base "_base_ability_tactical.txt"
+
+WeaponData
+{
+    printname   				                    "#ABL_CLUSTER_MISSILE"
+    shortprintname				                    "#ABL_CLUSTER_MISSILE"
+    description 				                    "#ABL_CLUSTER_MISSILE_DESC"
+    longdesc					                    "#ABL_CLUSTER_MISSILE_LONGDESC"
+
+    // General
+    menu_icon					                    "rui/pilot_loadout/ordnance/electric_smoke_menu"
+    hud_icon					                    "rui/hud/tactical_icons/tactical_valk"
+
+    fire_mode   				                    offhand
+    fire_rate   				                    18
+    is_semi_auto                                    1
+    anim_stop_start_gesture_on_attack               1
+    alt_fire_anim_count                             1
+	offhand_switch_slot								1
+
+
+    // DKLEIN: Refactoring this to be a burst fire wepaon that shoots one rocket with each shot in the burst
+
+    burst_fire_count								12  // actual control over how many rounds we fire is in script
+    burst_fire_delay								0.5
+
+	cooldown_type									"ammo_instant"
+
+	ammo_clip_size   					            360 // this number should be divisible by 12
+	ammo_default_total					            360
+	ammo_display						            bar
+	ammo_min_to_fire					            30
+	ammo_per_shot						            30
+	ammo_stockpile_max					            360
+	regen_ammo_refill_rate  				        12
+	regen_ammo_refill_start_delay		            0.0
+	reload_enabled                                  0  // required to make ammo regen work
+
+    "play_offhand_start_end_anim"                   "1"
+
+	deploy_time                                     0.3
+
+	damage_near_distance                            0
+    damage_near_value                               8
+    explosionradius                                 80 // currently hardcoded
+    damage_far_distance                             0
+    damage_far_value                                0
+
+
+    OnWeaponRegenEnd                                "OnWeaponRegenEndGeneric"
+    OnWeaponAttemptOffhandSwitch		            "OnWeaponAttemptOffhandSwitch_ability_valk_cluster_missile"
+    OnWeaponActivate                                "OnWeaponActivate_ability_valk_cluster_missile"
+    OnWeaponDeactivate					            "OnWeaponDeactivate_ability_valk_cluster_missile"
+    OnWeaponPrimaryAttack                           "OnWeaponPrimaryAttack_valk_cluster_missile"
+    //GetProjectilePosition                         "GetProjectilePosition_ability_valk_cluster_missile"
+    OnProjectileCollision				            "OnProjectileCollision_ability_valk_cluster_missile"
+    OnClientAnimEvent					            "OnClientAnimEvent_ability_valk_cluster_missile"
+
+	"fire_sound_1_player_1p" 						""
+	"fire_sound_1_player_3p" 						""
+
+	"fire_sound_2_player_1p"						""
+	"fire_sound_2_player_3p"						""
+
+
+	"zoom_effects"									"0"
+
+	"sound_zoom_in"									""
+	"sound_zoom_out"								"Weapon_Car_ADS_Out"
+
+
+    "fx_muzzle_flash_view"                          "P_valk_rckt_mflash_FP"
+    "fx_muzzle_flash_world"                         "P_valk_rckt_mflash"
+    "fx_muzzle_flash_attach"                        "muzzle_flash_01"
+
+    // NOTE: specifies muzzle flash for the second barrel
+    "fx_muzzle_flash2_view"                         "P_valk_rckt_mflash_FP"
+    "fx_muzzle_flash2_world"                        "P_valk_rckt_mflash"
+    "fx_muzzle_flash2_attach"                       "muzzle_flash_02"
+
+	"looping_sounds"								"1"
+
+	"burst_or_looping_fire_sound_start_1p"			""
+	"burst_or_looping_fire_sound_middle_1p"			""
+	"burst_or_looping_fire_sound_end_1p"			""
+
+	"burst_or_looping_fire_sound_start_3p"			""
+	"burst_or_looping_fire_sound_middle_3p"			""
+	"burst_or_looping_fire_sound_end_3p"			""
+
+	"burst_or_looping_fire_sound_start_npc"			""
+	"burst_or_looping_fire_sound_middle_npc"		""
+	"burst_or_looping_fire_sound_end_npc"			""
+
+	"sound_grenade_projectile"						""
+
+	//Effect
+	"impact_effect_table"                           "exp_valk_rocket"
+
+    //grenade_arc_indicator_effect					"P_arc_red"
+    //grenade_arc_impact_indicator_effect			"P_wrp_trl_end"
+    grenade_arc_indicator_show_from_hip			    0
+    grenade_arc_indicator_bounce_count			    1
+    grenade_arc_indicator_ignore_base_velocity      0
+
+    "projectile_launch_speed"						"4000" // unused; speed is controlled via min and max travel time
+    "projectile_launch_pitch_offset"				"0"
+    "projectile_first_person_offset_fraction"		"0"
+
+    "projectile_inherit_owner_velocity_scale"		"1.0"
+
+    projectile_adjust_to_gun_barrel                 1
+    projectile_adjust_to_hand	        			0
+//
+	projectile_gravity_scale                        1.0
+	projectile_air_friction                         1268
+	projectile_gravity_scale_time_2                 0.504
+
+
+    // Models
+    //viewmodel										"mdl/Weapons/valk_tactical/ptpov_valk_tactical.rmdl"
+    "viewmodel"                                     "mdl/weapons/valkyrie_rockets/valkyrie_rockets.rmdl"
+    //	playermodel									"mdl/weapons/empty_handed/w_empty_handed_human.rmdl"
+    //  projectilemodel 							"mdl/weapons/bullets/projectile_rocket_launcher_sram.rmdl"
+
+    projectilemodel                                 "mdl/humans_r5/pilots_r5/pilot_valkyrie/w_valkyrie_rocket_cannister_projectile.rmdl"
+
+    //projectile_trail_effect_0_1p     				"P_FlightCore_trail"
+   	//projectile_trail_effect_0_3p 					"P_FlightCore_trail"
+   	//projectile_trail_attachment 					"exhaust"
+
+    damage_type 									burn
+	Mods
+	{
+	    survival_armor_cooldown_mod
+        {
+            "regen_ammo_refill_rate"    "*1.25"
+        }
+
+                            
+        arenas_tac_max
+        {
+			"ammo_clip_size"   								"36" // 3 * burst_fire_count (12)
+            "ammo_default_total"							"12"
+            "ammo_min_to_fire"								"1"
+            "ammo_per_shot"									"1"
+            "ammo_stockpile_max"							"1"
+        }
+
+        arenas_tac_max_cooldown
+        {
+            "ammo_regen_takes_from_stockpile"               "1"
+            "ammo_default_total"							"360" // 360 * 1 charges
+            "ammo_stockpile_max"							"720" // 360 * 2 charges
+        }
+           
+	}
+
+
+}

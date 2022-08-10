@@ -1,72 +1,78 @@
-//
-
-#if(false)
-
-#endif
-
+  
 const bool PULSETRAIL = true
 
 global function SonarShared_Init
 
-#if(false)
+#if SERVER
+                          
+                        
+                                  
+                                
 
-
-
-
-
-
-
-
-
-
-
-
+                                           
+                                     
+                                              
+                                                 
+                                             
+                                                       
+                                                          
+                                                     
 
 #endif
 
-#if(CLIENT)
+#if CLIENT
 global function SonarPulse
 global function ServerCallback_SonarPulseFromPosition
 global function ServerCallback_SonarPulseConeFromPosition
+global function ServerCallback_SonarPulseConeFromEntityMultiple
+global function ServerCallback_SetSonarHighlightDrawDist_AllianceProximity
 #endif
 
 const asset FX_SONAR_TARGET = $"P_ar_target_sonar"
+const asset FX_CAMERA_TARGET = $"P_ar_target_drone"
+const asset FX_DRONE_TARGET = $"P_ar_foa_lockon"
+const asset FX_HEAL_TARGET = $"P_ar_target_ally"
 
 struct
 {
-	#if(false)
+	#if SERVER
+		                                                                           
+		                                                                            
+		                                                                       
+		                                                                       
+		                                                                                 
+		                                                                     
+		                                                                                          
+		                                                                                         
 
-
-
-
-
-
-#endif //
-
-
+	#endif         
 } file
 
 void function SonarShared_Init()
 {
-	RegisterSignal( "SonarPing" )
 	PrecacheParticleSystem( $"P_ar_sonar_CP_amp" )
 	PrecacheParticleSystem( $"P_ar_sonar_CP" )
 	PrecacheParticleSystem( $"P_ar_sonar_plane_CP" )
 
-	#if(true)
-	PrecacheParticleSystem( $"P_sonar_ground_detect" )
-	#endif //
+	#if PULSETRAIL
+		PrecacheParticleSystem( $"P_sonar_ground_detect" )
+	#endif             
 
-	//
+	                                                
 	PrecacheParticleSystem( $"P_holo_screespace" )
 	PrecacheParticleSystem( FX_SONAR_TARGET )
+	PrecacheParticleSystem( FX_CAMERA_TARGET )
+	PrecacheParticleSystem( FX_DRONE_TARGET )
+               
+                                          
+       
 
-	#if(false)
+	#if SERVER
+		                                                                      
+	#endif         
 
-#endif //
-
-	#if(CLIENT)
-		StatusEffect_RegisterEnabledCallback( eStatusEffect.sonar_detected, EntitySonarStatusEnabled)
+	#if CLIENT
+		StatusEffect_RegisterEnabledCallback( eStatusEffect.sonar_detected, EntitySonarStatusEnabled )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.sonar_detected, EntitySonarStatusDisabled )
 
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.lockon_detected, EntitySonarDetectedEnabled )
@@ -75,200 +81,398 @@ void function SonarShared_Init()
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.sonar_blocked, EntitySonarBlockingEnabled )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.sonar_blocked, EntitySonarBlockingDisabled )
 
+                            
+                                                                
+        
+
+		         
+		                                                                      
 		RegisterSignal( "EntitySonarDetectedDisabled" )
-	#endif //
+	#endif         
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
-const float AR_EFFECT_SIZE 		= 192.0 //
+#if CLIENT
+void function AddRemoveSonarHealthRUI( entity highlightEnt, int oldContext, int newContext )
+{
+
+	                                         
+	if ( !(highlightEnt.IsPlayer() || highlightEnt.IsPlayerDecoy()) )
+		return
+
+	printt("ent: " + string(highlightEnt) + " -- old: " + string(oldContext) + " -- new: " + string(newContext))
+	if ( oldContext == newContext )
+		return
+
+	if ( newContext == HIGHLIGHT_CONTEXT_SONAR )
+	{
+		ReconScan_ShowHudForTarget( GetLocalViewPlayer(), highlightEnt )
+	}
+
+	if ( oldContext == HIGHLIGHT_CONTEXT_SONAR )
+	{
+		ReconScan_RemoveHudForTarget( GetLocalViewPlayer(), highlightEnt )
+	}
+}
+#endif
+
+#if CLIENT
+void function AddRemoveSonarOverviewScanRUI( entity highlightEnt, int oldContext, int newContext )
+{
+
+	                                         
+	if ( !(highlightEnt.IsPlayer() || highlightEnt.IsPlayerDecoy()) )
+		return
+
+	printt("ent: " + string(highlightEnt) + " -- old: " + string(oldContext) + " -- new: " + string(newContext))
+	if ( oldContext == newContext )
+		return
+
+	if ( newContext == HIGHLIGHT_CONTEXT_SONAR )
+	{
+		ReconScan_ShowHudForTarget( GetLocalViewPlayer(), highlightEnt, true, $"ui/recon_overview_scan_target.rpak" )
+	}
+
+	if ( oldContext == HIGHLIGHT_CONTEXT_SONAR )
+	{
+		ReconScan_RemoveHudForTarget( GetLocalViewPlayer(), highlightEnt )
+	}
+}
+
+#endif
+
+#if SERVER
+                                                                                               
+ 
+	                                           
+ 
+
+                                                                 
+ 
+	                             
+	                                                                                
+	                                                
+ 
+
+                                                                    
+ 
+	                                                                                     
+	                                                   
+ 
+
+                                                                                        
+ 
+	                                                                           
+	                                                            
+ 
+
+                                                                                           
+ 
+	                                                                                     
+	                                                     
+ 
+
+                                                                     
+ 
+	                                                     
+		                                                      
+
+	           
+ 
+
+                                                                                   
+ 
+	                                                                                                                                 
+	               
+ 
+
+                                                                       
+ 
+	                                               
+		      
+
+	                                                
+	                                                      
+ 
+
+                                              
+ 
+	                   
+
+	                             
+	 
+		                                                
+		                                                                          
+
+		                                      
+			                                                    
+		    
+			                                                     
+	 
+ 
+
+                                            
+ 
+	                      
+		      
+
+	                   
+
+	                            
+	 
+		                                         
+		                                                        
+		                                            
+	 
+ 
+
+                                                                                
+ 
+	                            
+		            
+
+	                             
+		            
+
+	                                                                  
+		            
+
+	                                                                                             
+		            
+
+	                                                                                   
+	                                                                 
+	                                                                                
+	                                                                        
+
+	                                                  
+ 
+
+                                                                                                                                                                 
+ 
+	                                       
+	                           
+
+	                                        
+		                                  
+
+	                                    
+		                              
+
+	                                                                
+
+	                                                                                                                                                                              
+	                                                   
+	 
+		                                                                 
+		                                                                                                   
+		 
+			                                                                   
+		 
+		                                                                                                                 
+		                                                                                         
+		 
+			                                                                                                                     
+		 
+	 
+
+	                                     
+	 
+		                                     
+		                                                
+		 
+			                                                
+		 
+
+		                                                                                                                                                             
+		 
+			                                     
+			                              
+
+			                  
+			 
+				        
+				                                                                                    
+					                                                 
+				                                                                                         
+					                                                
+                   
+				                                                                                         
+					                                                
+          
+                  
+                                                                                              
+                                                    
+          
+				    
+					                                                
+				                                                                                                                                         
+				                        
+				                         
+				                                                                            
+				                                                  
+				                                     
+			 
+		 
+		    
+		 
+			                                                                                    
+				                                                                           
+			    
+				                                                                          
+		 
+		                                                  
+
+		                                                     
+		                                                                          
+
+		                                                                                                                                                                                              
+		                                                                                                                                                                                                                                     
+		                                                                                                        
+		                            
+		 
+			                                                     
+				                                                                                                                
+		 
+
+		                                                                      
+		                                                         
+	 
+ 
+
+                                                                 
+ 
+	                      
+		      
+
+	                                                                                      
+
+	                                  
+	                           
+
+	                                                                                                                                                
+		                                                            
+
+	                                    
+	 
+		                                        
+		                                         
+		 
+			                                                        
+			                                            
+			                                                                    
+		 
+		                                                          
+
+		                                    
+			                           
+
+		                                     
+		 
+			                                       
+			            
+			                                                
+		 
+
+		                            
+		 
+			                                                     
+				                                                           
+		 
+	 
+ 
+
+                                                           
+ 
+	                                     
+		                               
+	                                          
+		                                   
+
+	                                
+ 
+
+                                                           
+ 
+	                                  
+	 
+		                                       
+		 
+			                                
+
+			                                          
+				                                  
+		 
+	 
+ 
+#endif         
+
+#if CLIENT
+const float AR_EFFECT_SIZE = 192.0                                                                       
 const float AR_EFFECT_SIZE_CONE = 80.0
 
-void function ServerCallback_SonarPulseFromPosition( float x, float y,float z, float range, float speedScale = 1.0, bool hasDamageAmp = false )
+void function ServerCallback_SonarPulseFromPosition( vector origin, float range, int times, float delayBetwen, float speedScale, bool hasDamageAmp )
 {
 	entity player = GetLocalViewPlayer()
-	thread SonarPulse( player, SONAR_PULSE_SPACE + (SONAR_PULSE_SPEED * speedScale), <x,y,z>, range, hasDamageAmp )
 
-	//
+	                                                                                                         
 	if ( player.HasPassive( ePassives.PAS_TRACKING_VISION ) )
-		TrackingVision_CreateSonarPulseArea( <x,y,z>, range, <0,0,0>, 360 )
+		TrackingVision_CreateSonarPulseArea( origin, range, <0, 0, 0>, 360 )
+
+	thread _SonarPulseFromPosition( origin, range, times, delayBetwen, speedScale, hasDamageAmp )
+}
+void function _SonarPulseFromPosition( vector origin, float range, int times, float delayBetwen, float speedScale, bool hasDamageAmp )
+{
+	entity player = GetLocalViewPlayer()
+	player.EndSignal( "OnDestroy" )
+
+	for ( int i = 0; i < times; i++ )
+	{
+		thread SonarPulse( player, SONAR_PULSE_SPACE + (SONAR_PULSE_SPEED * speedScale), origin, range, hasDamageAmp )
+
+		wait delayBetwen
+	}
+}
+
+void function ServerCallback_SonarPulseConeFromEntityMultiple( entity ent, int times, float delayBetween, float pulseConeRange, vector pulseConeDir, float pulseConeFOV, int team, float speedScale, bool hasDamageAmp, bool showTrail )
+{
+	thread _SonarPulseConeFromEntityMultiple( ent, times, delayBetween, pulseConeRange, pulseConeDir, pulseConeFOV, team, speedScale, hasDamageAmp, showTrail )
+}
+void function _SonarPulseConeFromEntityMultiple( entity ent, int times, float delayBetween, float pulseConeRange, vector pulseConeDir, float pulseConeFOV, int team, float speedScale, bool hasDamageAmp, bool showTrail )
+{
+	entity player = GetLocalViewPlayer()
+
+	if ( !IsValid( ent ) )
+		return
+
+	ent.EndSignal( "OnDestroy" )
+
+	int timesDone = 0
+	while ( IsValid( ent ) && timesDone < times )
+	{
+		vector pulseConeOrigin = ent.GetOrigin()
+		vector fwd             = pulseConeDir
+
+		                 
+		if ( pulseConeDir == <-1, -1, -1> )
+		{
+			fwd = AnglesToForward( ent.GetAngles() )
+
+			if ( ent.GetOwner() == GetLocalViewPlayer() )
+				fwd = GetLocalViewPlayer().GetViewVector()
+		}
+
+		thread SonarPulseCone( player, SONAR_PULSE_SPACE + (SONAR_PULSE_SPEED * speedScale), pulseConeOrigin, pulseConeRange, fwd, 1, 0.25, hasDamageAmp, showTrail )
+		wait delayBetween
+		timesDone++
+	}
 }
 
 void function ServerCallback_SonarPulseConeFromPosition( vector pulseConeOrigin, float pulseConeRange, vector pulseConeDir, float pulseConeFOV, int team, float speedScale, bool hasDamageAmp, bool showTrail )
 {
 	entity player = GetLocalViewPlayer()
-	thread SonarPulseCone( player, SONAR_PULSE_SPACE + ( SONAR_PULSE_SPEED * speedScale ), pulseConeOrigin, pulseConeRange, pulseConeDir, 1, 0.25, hasDamageAmp, showTrail )
+	thread SonarPulseCone( player, SONAR_PULSE_SPACE + (SONAR_PULSE_SPEED * speedScale), pulseConeOrigin, pulseConeRange, pulseConeDir, 1, 0.25, hasDamageAmp, showTrail )
 
-	//
+	                                                                                                         
 	if ( player.HasPassive( ePassives.PAS_TRACKING_VISION ) && team == player.GetTeam() )
 		TrackingVision_CreateSonarPulseArea( pulseConeOrigin, pulseConeRange, pulseConeDir, pulseConeFOV )
 }
@@ -277,13 +481,13 @@ void function SonarPulse( entity player, float pulseSpeed, vector pulsePosition,
 {
 	if ( hasDamageAmp )
 	{
-		int fxHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_CP_amp" ), pulsePosition, <0,0,0> )
+		int fxHandle        = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_CP_amp" ), pulsePosition, <0, 0, 0> )
 		vector controlPoint = <radius / pulseSpeed, radius / AR_EFFECT_SIZE, 0.0>
 		EffectSetControlPointVector( fxHandle, 1, controlPoint )
 	}
 	else
 	{
-		int fxHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_CP" ), pulsePosition, <0,0,0> )
+		int fxHandle        = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_CP" ), pulsePosition, <0, 0, 0> )
 		vector controlPoint = <radius / pulseSpeed, radius / AR_EFFECT_SIZE, 0.0>
 		EffectSetControlPointVector( fxHandle, 1, controlPoint )
 	}
@@ -296,32 +500,32 @@ void function SonarPulseCone( entity player, float pulseSpeed, vector pulsePosit
 		vector angles = VectorToAngles( dir )
 		if ( hasDamageAmp )
 		{
-			int fxHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_plane_CP" ), pulsePosition, angles )
+			int fxHandle        = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_plane_CP" ), pulsePosition, angles )
 			vector controlPoint = <radius / pulseSpeed, radius / AR_EFFECT_SIZE_CONE, 0.0>
 			EffectSetControlPointVector( fxHandle, 1, controlPoint )
 		}
 		else
 		{
-			int fxHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_plane_CP" ), pulsePosition, angles )
+			int fxHandle        = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( $"P_ar_sonar_plane_CP" ), pulsePosition, angles )
 			vector controlPoint = <radius / pulseSpeed, radius / AR_EFFECT_SIZE_CONE, 0.0>
 			EffectSetControlPointVector( fxHandle, 1, controlPoint )
 		}
 
-		#if(true)
+		#if PULSETRAIL
 			if ( showTrail )
 				thread SonarPulseConeTrail( player, dir, radius / pulseSpeed, radius )
-		#endif //
+		#endif             
 
 		wait interval
 	}
 }
 
-#if(true)
+#if PULSETRAIL
 void function SonarPulseConeTrail( entity player, vector dir, float duration, float radius )
 {
 	vector origin = player.EyePosition()
-	entity mover = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", origin, VectorToAngles( dir ) )
-	int fxHandle = StartParticleEffectOnEntity( mover, GetParticleSystemIndex( $"P_sonar_ground_detect" ), FX_PATTACH_POINT_FOLLOW, mover.LookupAttachment( "REF" ) )
+	entity mover  = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", origin, VectorToAngles( dir ) )
+	int fxHandle  = StartParticleEffectOnEntity( mover, GetParticleSystemIndex( $"P_sonar_ground_detect" ), FX_PATTACH_POINT_FOLLOW, mover.LookupAttachment( "REF" ) )
 
 	mover.NonPhysicsMoveTo( origin + dir * radius, duration, 0, 0 )
 	wait duration
@@ -332,11 +536,12 @@ void function SonarPulseConeTrail( entity player, vector dir, float duration, fl
 
 	mover.Destroy()
 }
-#endif //
+#endif             
 
 void function EntitySonarStatusEnabled( entity ent, int statusEffect, bool actuallyChanged )
 {
 	ManageHighlightEntity( ent )
+
 	EntitySonarDetectedEnabled( ent, statusEffect, actuallyChanged )
 }
 
@@ -348,21 +553,32 @@ void function EntitySonarStatusDisabled( entity ent, int statusEffect, bool actu
 
 void function EntitySonarDetectedEnabled( entity ent, int statusEffect, bool actuallyChanged )
 {
+	bool scannedByCryptoTT        = StatusEffect_GetSeverity( ent, eStatusEffect.crypto_tt_scanned_visual ) > 0.0
+	bool showThirdPersonHighlight = !scannedByCryptoTT
+
 	if ( ent == GetLocalViewPlayer() )
 	{
-		//
+		                                       
 		if ( statusEffect == eStatusEffect.sonar_detected && StatusEffect_GetSeverity( ent, eStatusEffect.lockon_detected ) )
 			return
 
-		entity viewModelArm = ent.GetViewModelArmsAttachment()
-		entity viewModelEntity = ent.GetViewModelEntity()
-		entity firstPersonProxy = ent.GetFirstPersonProxy()
+		entity viewModelArm              = ent.GetViewModelArmsAttachment()
+		entity viewModelEntity           = ent.GetViewModelEntity()
+		entity firstPersonProxy          = ent.GetFirstPersonProxy()
 		entity predictedFirstPersonProxy = ent.GetPredictedFirstPersonProxy()
 
-		vector highlightColor = statusEffect == eStatusEffect.sonar_detected ? HIGHLIGHT_COLOR_ENEMY : <1,0,0>
-		//
+		vector highlightColor = statusEffect == eStatusEffect.sonar_detected ? HIGHLIGHT_COLOR_ENEMY : <1, 0, 0>
+		string highlightSound = "HUD_MP_EnemySonarTag_Activated_1P"
+
 		if ( StatusEffect_GetSeverity( ent, eStatusEffect.damage_received_multiplier ) > 0.0 )
-			highlightColor = <1,0,0>
+		{
+			highlightColor = <1, 0, 0>
+		}
+		else if ( scannedByCryptoTT )
+		{
+			highlightColor = < 0.21, 0.79, 0.34 > * 0.1
+			highlightSound = "Canyonlands_Scr_Cryto_TT_Players_Indicator"
+		}
 
 		if ( IsValid( viewModelArm ) )
 			SonarViewModelHighlight( viewModelArm, highlightColor )
@@ -376,10 +592,10 @@ void function EntitySonarDetectedEnabled( entity ent, int statusEffect, bool act
 		if ( IsValid( predictedFirstPersonProxy ) )
 			SonarViewModelHighlight( predictedFirstPersonProxy, highlightColor )
 
-		EmitSoundOnEntity( ent, "HUD_MP_EnemySonarTag_Activated_1P" )
-		//
+		EmitSoundOnEntity( ent, highlightSound )
+		                                     
 	}
-	else
+	else if ( showThirdPersonHighlight )
 	{
 		ClInitHighlight( ent )
 	}
@@ -389,21 +605,21 @@ void function EntitySonarDetectedDisabled( entity ent, int statusEffect, bool ac
 {
 	if ( ent == GetLocalViewPlayer() )
 	{
-		//
+		                                        
 		if ( statusEffect == eStatusEffect.sonar_detected && StatusEffect_GetSeverity( ent, eStatusEffect.lockon_detected ) )
 		{
 			return
 		}
 		else if ( statusEffect == eStatusEffect.lockon_detected && StatusEffect_GetSeverity( ent, eStatusEffect.sonar_detected ) )
 		{
-			//
+			                                       
 			EntitySonarDetectedEnabled( ent, eStatusEffect.sonar_detected, true )
 			return
 		}
 
-		entity viewModelArm = ent.GetViewModelArmsAttachment()
-		entity viewModelEntity = ent.GetViewModelEntity()
-		entity firstPersonProxy = ent.GetFirstPersonProxy()
+		entity viewModelArm              = ent.GetViewModelArmsAttachment()
+		entity viewModelEntity           = ent.GetViewModelEntity()
+		entity firstPersonProxy          = ent.GetFirstPersonProxy()
 		entity predictedFirstPersonProxy = ent.GetPredictedFirstPersonProxy()
 
 		if ( IsValid( viewModelArm ) )
@@ -430,26 +646,26 @@ void function EntitySonarBlockingEnabled( entity ent, int statusEffect, bool act
 {
 	if ( ent == GetLocalViewPlayer() )
 	{
-		//
+		                                       
 		if ( statusEffect == eStatusEffect.sonar_detected && StatusEffect_GetSeverity( ent, eStatusEffect.lockon_detected ) )
 			return
 
-		//
-		//
-		//
+		                                                   
+		                                                     
+		                                                                       
 
-		//
-		//
-		//
+		                                                                                                        
+		                                                                                        
+		  	                        
 
-		//
-		//
+		                                   
+		  	                                                          
 
-		//
-		//
+		                                    
+		  	                                                           
 
-		//
-		//
+		                                             
+		  	                                                                    
 
 		thread PlayLoopingSonarSound( ent )
 	}
@@ -463,22 +679,22 @@ void function EntitySonarBlockingDisabled( entity ent, int statusEffect, bool ac
 {
 	if ( ent == GetLocalViewPlayer() )
 	{
-		//
-		/*
+		                                        
+		  
+		                                                                                                                     
+		 
+			      
+		 
+		                                                                                                                          
+		 
+			                                       
+			                                                                     
+			      
+		 
+		  
 
-
-
-
-
-
-
-
-
-
-*/
-
-		entity viewModelEntity = ent.GetViewModelEntity()
-		entity firstPersonProxy = ent.GetFirstPersonProxy()
+		entity viewModelEntity           = ent.GetViewModelEntity()
+		entity firstPersonProxy          = ent.GetFirstPersonProxy()
 		entity predictedFirstPersonProxy = ent.GetPredictedFirstPersonProxy()
 
 		if ( IsValid( viewModelEntity ) )
@@ -511,4 +727,21 @@ void function PlayLoopingSonarSound( entity ent )
 		EmitSoundOnEntity( ent, "HUD_MP_EnemySonarTag_Flashed_1P" )
 	}
 }
+
+                                                                                                                                
+void function ServerCallback_SetSonarHighlightDrawDist_AllianceProximity( entity enemy, int sonarSourceTeam )
+{
+	entity player = GetLocalClientPlayer()
+	if ( !IsValid( player ) || !IsValid( enemy ) || player == enemy )
+		return
+
+	int enemyTeam = enemy.GetTeam()
+	int playerTeam = player.GetTeam()
+
+	                                                                                                                                               
+	if ( playerTeam != sonarSourceTeam && playerTeam != enemyTeam && IsFriendlyTeam( playerTeam, sonarSourceTeam ) )
+		Highlight_SetAllianceProximityDrawFunc( enemy, HIGHLIGHT_CONTEXT_SONAR )
+
+}
 #endif
+

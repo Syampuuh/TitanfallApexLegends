@@ -1,0 +1,499 @@
+global function ScopeTracking_Init
+global function ScopeTracking_Thread
+global function ScopeTracking_EndThread
+global function ScopeTracking_GetBestTarget
+global function ScopeTracking_IsTracking
+#if SERVER
+                                                      
+#endif
+
+#if CLIENT
+global function ScopeTracking_StartLock
+global function ScopeTracking_StopLock
+global function ScopeTracking_UpdateLock
+#endif
+
+const float BINOCULAR_TRACKING_MAX_DISTANCE = 400 * METERS_TO_INCHES
+const int BINOCULAR_MAX_TARGETS = 6
+const float BINOCULAR_TRACKING_ZOOM_FOV = 2.5
+const float BINOCULAR_TRACKING_TOGGLE_ZOOM_FOV = 1.0
+
+const bool SCOPE_DEBUG = false
+const string SCOPE_BEST_TARGET_NETVAR = "bestScopeTrackingTarget"
+
+global struct ScopePotentialTargetData
+{
+	entity target
+	float score
+}
+
+struct
+{
+	#if CLIENT
+		bool currentlyLocking
+		var scopeRui
+	#endif         
+
+#if SERVER
+	                                                                           
+	                                         
+#endif         
+
+} file
+
+void function ScopeTracking_Init()
+{
+	RegisterSignal( "EndScopeTracking" )
+
+	RegisterNetworkedVariable( SCOPE_BEST_TARGET_NETVAR, SNDC_PLAYER_EXCLUSIVE, SNVT_ENTITY )
+
+#if CLIENT
+	file.currentlyLocking = false
+#endif         
+}
+
+#if SERVER
+                                                                                    
+ 
+	                                                     
+	 
+		                                                            
+		 
+			                                  
+			 
+				           
+			 
+		 
+	 
+	            
+ 
+#endif
+
+entity function ScopeTracking_GetBestTarget( entity owner )
+{
+	if ( IsValid(owner) )
+	{
+	            
+	  	                                    
+	  		                                  
+	  	    
+	  		           
+	        
+  	          
+		return owner.GetPlayerNetEnt( SCOPE_BEST_TARGET_NETVAR )
+  	      
+	}
+	return null
+}
+
+#if CLIENT
+void function ScopeTracking_StartLock( entity target, float timeToLock )
+{
+	if ( file.scopeRui != null )
+	{
+		file.currentlyLocking = true
+		RuiSetFloat( file.scopeRui, "timeToLock", timeToLock + 0.5)
+		RuiSetGameTime( file.scopeRui, "lockStartTime", Time() )
+
+		RuiSetBool( file.scopeRui, "hasTarget", IsValid(target) )
+		RuiSetBool( file.scopeRui, "lockingTarget", true )
+		if ( IsValid(target) )
+		{
+			int attachment = target.LookupAttachment( "CHESTFOCUS" )
+			RuiTrackFloat3( file.scopeRui, "targetPos", target, RUI_TRACK_POINT_FOLLOW, attachment )
+		}
+	}
+}
+
+void function ScopeTracking_StopLock( )
+{
+	if ( file.scopeRui != null )
+	{
+		file.currentlyLocking = false
+		RuiSetBool( file.scopeRui, "lockingTarget", false )
+	}
+}
+
+void function ScopeTracking_UpdateLock( entity target, float timeToLock, float timeTracking )
+{
+	                    
+
+
+	                              
+	   
+	  	                                          
+	  	                                                      
+	  	                                                          
+	  
+	  	                                                         
+	  	                                                                
+	  	                      
+	  	 
+	  		                                                        
+	  		                                                                                        
+	  	 
+	   
+}
+#endif
+
+void function ScopeTracking_EndThread( entity player )
+{
+	player.Signal( "EndScopeTracking" )
+}
+
+
+bool function ScopeTracking_IsTracking( entity owner )
+{
+	#if CLIENT
+	if ( owner == GetLocalViewPlayer() )
+	{
+		if ( file.scopeRui != null )
+			return true
+	}
+	#endif
+
+	#if SERVER
+	                                    
+		           
+	#endif
+
+	return false
+}
+
+
+void function ScopeTracking_Thread( entity owner, entity weapon, float trackingFOV  , bool lockMode, bool fromTac, array <entity> targetExcludeList)
+{
+	weapon.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "EndScopeTracking" )
+
+	#if CLIENT
+	if ( owner != GetLocalViewPlayer() )
+		return
+
+	file.currentlyLocking = false
+	file.scopeRui = CreateFullscreenRui( $"ui/tactical_binoculars.rpak" )
+	RuiSetFloat( file.scopeRui, "timeToLock", 1.0 )
+	RuiSetBool( file.scopeRui, "lockMode", lockMode )
+	RuiSetBool ( file.scopeRui, "fromTac", fromTac )
+	#endif
+
+	#if SERVER
+	                                     
+	                                           
+	                                                                       
+	                                                                                    
+
+	                                                 
+	 
+		                                           
+		                                                   
+	 
+	#endif
+
+	OnThreadEnd(
+		function() : ( owner )
+		{
+			#if SERVER
+			                                  
+			                                                       
+			#endif
+			#if CLIENT
+			if ( file.scopeRui != null )
+			{
+				RuiDestroyIfAlive( file.scopeRui )
+				file.scopeRui = null
+			}
+			#endif
+		}
+	)
+
+	while( true )
+	{
+		#if CLIENT
+		float cornerScale = trackingFOV/owner.GetFOV()
+		RuiSetFloat( file.scopeRui, "cornerScale", cornerScale )
+
+		RuiSetFloat( file.scopeRui, "range", BINOCULAR_TRACKING_MAX_DISTANCE )
+		float distanceToTarget = Distance( owner.EyePosition(), owner.GetCrosshairTraceEndPos() )
+		RuiSetFloat( file.scopeRui, "crossDist", distanceToTarget )
+		RuiSetBool( file.scopeRui, "outOfRange", false )
+		#endif
+
+
+            
+  		             
+  		                                                                                                                                
+  		                   
+  		 
+  			       
+  			                                                               
+  		 
+  
+        
+
+
+
+		#if SERVER
+		                                            
+
+
+		                                                                  
+		                             
+		 
+			                         
+				        
+
+			                                         
+				        
+
+			                                    
+			 
+				                             
+				                                   
+			 
+
+			                                                                                        
+			 
+				                  
+				 
+					                                                                         
+					                                                                           
+				 
+				        
+			 
+
+
+			                                                                                                       
+			                                                                                   
+			                                                                                    
+			                                                                        
+
+			                   
+			 
+				                                                                                                                    
+
+				                  
+				 
+					                                               
+					                             
+					 
+						                                        
+					 
+					                      
+					 
+						                                
+					 
+					                        
+					 
+						                              
+					 
+
+					                                                       
+
+					                                                                 
+				 
+
+
+				                                   
+				                      
+				                          
+				                                                       
+
+				                                  
+					                                  
+
+				                                        
+			 
+			               
+			 
+				                  
+				 
+					                                                                        
+					                                                                
+					                                                              
+				 
+			 
+		 
+
+		                        
+		                                                     
+		 
+			                              
+			                   
+			                                                             
+			 
+				                                   
+				 
+					                            
+					                              
+				 
+			 
+		 
+
+
+		                                         
+		                                                             
+
+		#endif         
+
+		#if CLIENT
+			entity bestScopeTarget = owner.GetPlayerNetEnt( SCOPE_BEST_TARGET_NETVAR )
+
+			if ( SCOPE_DEBUG )
+			{
+				if ( IsValid(bestScopeTarget) )
+				{
+					DebugDrawSphere( bestScopeTarget.GetWorldSpaceCenter(), 10, <0, 100, 255>, true, 0.1 )
+
+
+					entity aaTarget = GetAimAssistCurrentTarget()
+					if ( IsValid(aaTarget) && aaTarget != bestScopeTarget )
+					{
+						DebugDrawSphere( aaTarget.GetWorldSpaceCenter(), 15, COLOR_RED, true, 0.1 )
+					}
+				}
+			}
+
+			entity hawkTacWeapon = owner.GetOffhandWeapon( OFFHAND_TACTICAL )
+			if ( IsValid( hawkTacWeapon) )
+			{
+				bool hasAmmo = hawkTacWeapon.GetWeaponPrimaryClipCount() >= hawkTacWeapon.GetAmmoPerShot()
+				RuiSetBool( file.scopeRui, "hasAmmo", hasAmmo )
+			}
+
+			RuiSetBool( file.scopeRui, "hasTarget", IsValid(bestScopeTarget) )
+			
+			RuiSetString( file.scopeRui, "targetClass", "" )
+			                                
+			if ( IsValid(bestScopeTarget) && !file.currentlyLocking)
+			{
+				bool showTargetClass = GetCurrentPlaylistVarBool( "hawk_scope_show_targetClass", true )
+				if ( showTargetClass )
+				{
+					ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( bestScopeTarget ), Loadout_Character() )
+					string name = Localize( ItemFlavor_GetShortName( character ) )
+					RuiSetString( file.scopeRui, "targetClass", name )
+				}
+
+				bool showArmorTier = GetCurrentPlaylistVarBool( "hawk_scope_show_armorTier", true )
+				if ( showArmorTier )
+				{
+					int armorTier = EquipmentSlot_GetEquipmentTier( bestScopeTarget, "armor" )
+					RuiSetInt( file.scopeRui, "armorTier", armorTier )
+				}
+
+
+				bool showWeapons = GetCurrentPlaylistVarBool( "hawk_scope_show_weapons", false )
+				if ( showWeapons )
+				{
+					array<entity> weapons  = SURVIVAL_GetPrimaryWeapons( bestScopeTarget )
+					int weaponNum = 1
+					foreach ( targetWeapon in weapons )
+					{
+						Assert( targetWeapon.GetWeaponClassName() != "", "Weapon classname is blank for " + targetWeapon )
+						LootData weaponLootData = SURVIVAL_Loot_GetLootDataByRef( targetWeapon.GetWeaponClassName() )
+
+						string ruiArgString = "weapon" + weaponNum + "Image"
+						RuiSetImage( file.scopeRui, ruiArgString, weaponLootData.hudIcon )
+
+						ruiArgString = "ammo" + weaponNum + "Image"
+						asset ammoHudIcon = $""
+						if ( weaponLootData.ammoType == "" )
+						{
+	   						                                                      
+						}
+						else
+						{
+							LootData ammoLootData = SURVIVAL_Loot_GetLootDataByRef( weaponLootData.ammoType )
+							ammoHudIcon = ammoLootData.hudIcon
+						}
+
+						RuiSetImage( file.scopeRui, ruiArgString, ammoHudIcon )
+
+						weaponNum++
+						if ( weaponNum > 2 )
+							break
+
+					}
+				}
+
+
+
+					                
+				int attachment = bestScopeTarget.LookupAttachment( "CHESTFOCUS" )
+				RuiTrackFloat3( file.scopeRui, "targetPos", bestScopeTarget, RUI_TRACK_POINT_FOLLOW, attachment )
+
+				               
+				array<entity> teamPlayers = GetPlayerArrayOfTeam( bestScopeTarget.GetTeam() )
+				int teamCount = teamPlayers.len()
+				RuiSetInt( file.scopeRui, "teamCount", teamCount )
+
+				                                
+				   
+				  	                                                  
+				   
+
+				array<int> playerStates = [ -1,-1,-1 ]
+
+				int playerNum = 1
+				foreach (teammate in teamPlayers )
+				{
+					bool isAlive = IsAlive( teammate )
+					bool isBleedingOut = Bleedout_IsBleedingOut( teammate )
+					bool validPlayer = false
+
+					int playerState = -1
+					if ( isAlive )
+					{
+						if ( isBleedingOut )
+						{
+							playerState = 1
+						}
+						else
+						{
+							playerState = 0
+						}
+						validPlayer = true
+					}
+					else
+					{
+						if ( PlayerIsMarkedAsCanBeRespawned( teammate ) )
+						{
+							validPlayer = true
+							playerState = 2
+						}
+					}
+					string argName = ""
+					if ( teammate == bestScopeTarget )
+					{
+						playerStates[0] = playerState
+					}
+					else
+					{
+						if ( validPlayer )
+						{
+							if ( playerNum <= 2 )
+								playerStates[playerNum] = playerState
+							playerNum++
+						}
+					}
+
+				}
+
+				for( int i = 0; i < 3; ++i )
+				{
+					RuiSetInt( file.scopeRui, "player" + i + "State", playerStates[i] )
+				}
+			}
+
+
+		#endif         
+
+		WaitFrame()
+	}
+}
+
+
+
+

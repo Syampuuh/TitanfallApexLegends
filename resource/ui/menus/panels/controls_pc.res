@@ -25,7 +25,7 @@
 
         ypos                    0
 
-        navDown					SldMouseSensitivityZoomed
+        navDown					BtnLookSensitivityMenu
         minValue				0.2
         maxValue				20.0
         stepSize				0.2
@@ -54,10 +54,11 @@
         navUp					SldMouseSensitivity
         navDown					SwchMouseAcceleration
         minValue				0.2
-        maxValue				20.0
+        maxValue				10.0
         stepSize				0.2
 
         conCommand				"mouse_zoomed_sensitivity_scalar_0"
+        visible 0
     }
     TextEntryMouseSensitivityZoomed
     {
@@ -69,6 +70,19 @@
         pin_to_sibling			SldMouseSensitivityZoomed
         pin_corner_to_sibling	RIGHT
         pin_to_sibling_corner	RIGHT
+        visible 0
+    }
+
+    BtnLookSensitivityMenu
+    {
+        ControlName				RuiButton
+        InheritProperties		SettingBasicButton
+
+        pin_to_sibling			SldMouseSensitivity
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SldMouseSensitivity
+        navDown					SwchMouseAcceleration
     }
 
     SwchMouseAcceleration
@@ -76,10 +90,10 @@
         ControlName				RuiButton
         InheritProperties		SwitchButton
         style					DialogListButton
-        pin_to_sibling			SldMouseSensitivityZoomed
+        pin_to_sibling			BtnLookSensitivityMenu
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SldMouseSensitivityZoomed
+        navUp					BtnLookSensitivityMenu
         navDown					SwchMouseInvertY
         ConVar 					"m_acceleration"
         TextInsetWidth          120
@@ -124,7 +138,7 @@
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
         navUp                   SwchMouseInvertY
-        navDown                 BtnGamepadLayout
+        //navDown                 BtnGamepadLayout
         ConVar                  "chroma_enable"
 
         list

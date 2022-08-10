@@ -1,16 +1,16 @@
 global function BirdClusterSharedInit
 
-#if(false)
-
-
-
-
-
-//
-#endif //
-#if(CLIENT)
+#if SERVER
+	                                  
+	       
+		                            
+		                                     
+		                              
+	            
+#endif         
+#if CLIENT
 	global function BirdClusterPointSpawned
-#endif //
+#endif         
 
 const vector TRACKING_ICON_OFFSET = <0,0,16>
 const vector TRACKING_ICON_OFFSET_SHORT = <0,0,8>
@@ -27,49 +27,50 @@ const CLUSTER_MAX_DIST_SQR = CLUSTER_MAX_DIST * CLUSTER_MAX_DIST
 const CLUSTER_MID_DIST_SQR = CLUSTER_MID_DIST * CLUSTER_MID_DIST
 const CLUSTER_MIN_DIST_SQR = CLUSTER_MIN_DIST * CLUSTER_MIN_DIST
 const CLUSTER_NEAR_DIST_SQR = 768 * 768
-const CLUSTER_LIFETIME = 60
+const CLUSTER_LIFETIME = 90
 const CLUSTER_ITERATION_INTERVAL = 0.25
 const CLUSTER_SIZE_THRESHOLD = 5
 const CLUSTER_MAX_TAKEOFF_DELAY = 0.3
 const bool CLUSTER_USE_FAKE = false
 const bool CLUSTER_DEBUG_CLUSTER = false
+const string CLUSTER_BIRD_MOVER_SCRIPTNAME = "bird_cluster_mover"
 
 global const asset CLUSTER_BIRD_MODEL = $"mdl/creatures/bird/bird.rmdl"
 global const CLUSTER_BIRD_DISSOLVE_VFX = $"dissolve_bird"
 
-#if(false)
+#if SERVER
+                  
+ 
+	                   
+	                     
+	                       
+	                    
+	                        
+	                       
+	                     
+ 
+#endif         
 
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
+#if CLIENT
 struct BirdClusterInfo
 {
 	array<entity> birdArray
 	entity birdClusterMainEnt
 	entity ownerPlayer
 }
-#endif //
+#endif         
 
 struct
 {
-	#if(false)
-
-
-
-//
-#endif //
-	#if(CLIENT)
+	#if SERVER
+		                                     
+		       
+			                                       
+		            
+	#endif         
+	#if CLIENT
 		array< BirdClusterInfo > birdClusterInfoArray
-	#endif //
+	#endif         
 } file
 
 void function BirdClusterSharedInit()
@@ -78,545 +79,548 @@ void function BirdClusterSharedInit()
 	if ( !birdClusterEnabled )
 		return
 
-	#if(false)
+	#if SERVER
+		                                   
+		                                                   
 
-
-
-
-#endif
-	#if(CLIENT)
+		                                                                                                          
+	#endif
+	#if CLIENT
 		AddTargetNameCreateCallback( "bird_cluster_point", BirdClusterPointSpawned )
 	#endif
 }
 
-#if(false)
+#if SERVER
+                                                              
+ 
+	                           
+	       
+		                     
+	      
+ 
+
+                                  
+ 
+	                                                                                                  
+	                                                                                                 
+
+	             
+	 
+		                                        
+
+		                           
+
+		                                                      
+		 
+			                                      
+			                               
+			        
+		 
+
+
+		                                                           
+		                                        
+		 
+			                           
+
+			                                                                   
+			                                               
+				        
+
+			                                                                                                          
+
+			                           
+			                                              
+			 
+				                                                                                       
+				                          
+					     
+
+				                                 
+
+				                                           
+				                    
+
+				                     
+				     
+			 
+
+			                     
+				     
+		 
+
+		                                      
+		                               
+	 
+ 
+
+                                                                                         
+ 
+	                                        
+	                                       
+
+	                                                                                                                                         
+	       
+	                       
+		                                        
+	      
+
+	                                          
+	 
+		                                                                
+
+		                                          
+		                                                                                               
+			        
+
+		                                     
+			        
+
+		                                                                               
+			        
+
+		                                                                                                           
+			        
+
+		                              
+	 
+
+	                   
+ 
+
+                                                                                        
+ 
+	                        
+	                                              
+	                                                                          
+	                                            
 
+	                       
+
+	                            
+	 
+		                                                                       
+		                              
+		                           
+		                          
+		                  
+	 
 
+	                                                                                  
+
+	                                                                                                       
+	       	                                                               
+	                     
+
+	                                     
+	 
+		                                              
+
+		                                                  
+		                                     
+		                                     
+		                                                
+		                             
+		                               
+		                            
+
+		                      
+			                   
 
+		                                
+		                                            
+	 
 
+	                                                                                                                       
+	                          
+	                                              
 
+	                              
+	                           
+	                          
+	                                   
+	                             
 
+	                                                   
 
+	                  
+ 
 
+                                                                 
+ 
+	                                   
+		      
 
+	                                                              
 
+	                            
+		      
+
+	                                                    
+		                  
 
+	                              
+	                            
+
+	                                                                    
+
+	                                                                                           
+	                                                                                                      
+ 
+
+                                                                      
+ 
+	                             
 
+	                                                                      
+	                                                           
+	          
+
+	                                                                                                     
+	                              
 
+	            
+		                            
+		 
+			                   
+			                      
+				              
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
+			                       
+				               
+		 
+	 
+
+	                                                                   
+	                                                                        
+
+	                                          
+	                                                             
+
+	                     
+	                                     
+
+	                                                         
+ 
+
+                         
+	                                   
+     
+	                                 
+      
+
+                                                                                        
+ 
+	                            
+
+	                                                                                                      
+	                            
+		         
+	                              
+
+	                                                                                                                                           
+	                       
+
+	                                     
+	 
+		           
+
+		                                                    
+		                                                                                                                                               
+		                                                  
+
+		                                    
+			        
+
+		                                                                         
+		                                    
+			        
+
+		                                                                     
+			        
+
+		                            
+
+		                                                    
+		                                                       
+		                                                  
+
+		 
+			                                                                                                       
+			                                                                    
+
+			                                                       
+			                                                        
+			 
+				                                                   
+				                                                            
+				                                                                                  
+				                                                                                 
+
+				                                                                                                
+				                                                                                  
+				                                                                                                                
+			 
+
+		 
+
+		                                                       
+		                          
+	 
+
+	                 
+ 
+
+                                                                      
+ 
+	                     
+	                                    
+	                      
+	                      
+
+	                                                        
+	                                               
+	                 
+	                   
+
+	                        
+
+	                                                  
+	 
+		                                                                             
+		                                                                                                                 
+		                            
+
+		       
+			                                              
+			 
+				                                                       
+				                                                                   
+				                                                               
+			 
+		            
+
+		                
+		 
+			                                                              
+		 
+		                           
+		 
+			                 
+			               
+		 
+
+		                                                  
+	 
+
+	                                                                    
+ 
+
+                                                                                           
+ 
+	                                               
+	 
+		                             
+		                                                                                
+			        
+
+		  		                                                                                     
+		  			        
+
+
+		                                                                     
+			           
+	 
+
+	            
+ 
+
+                                                                
+ 
+	                                               
+	 
+		                                     
+			                  
+	 
+
+	           
+ 
+
+                                         
+ 
+	                                                     
+	 
+		                                             
+			                                
+	 
+ 
+
+                                                                
+ 
+	            
+	                                                        
+		              
+
+	                          
+		              
+
+	                                                                       
+		           
+
+	                                                                                              
+	                                                                      
+	                           
+		           
+
+	            
+ 
+
+                                                          
+ 
+	                                   
+	 
+		                             
+
+		                             
+		 
+			                                          
+				               
+		 
+	 
+
+	                                                      
+ 
+
+
+                                      
+ 
+	                                  
+ 
+
+                                                              
+ 
+	             
+	                                               
+	 
+		                                                            
+			       
+	 
+
+	            
+ 
+
+                                           
+ 
+	             
+	                                               
+	 
+		                                     
+	 
+
+	            
+ 
+#endif         
+
+#if DEV && SERVER
+                                                          
+ 
+	                        
+	                                       
+	                                                                                 
+
+	                                                                                                                                                                              
+	                          
+	 
+		                                            
+		      
+	 
+
+	                                 
+
+	                                           
+
+ 
+
+                            
+ 
+	                             
+		      
+
+	                         
+	                          
+
+	                             
+
+	             
+	 
+		                                           
+		                                                                                                                 
+		       
+		                       
+			                                        
+		      
+
+		                                          
+		 
+			                                                                                         
+			                  
+			 
+				                                                                          
+			 
+			    
+			 
+				                                                                              
+			 
+			                                                                                                                                                        
+		 
+
+		                                               
+		 
+			                                
+			 
+				                                                                                                
+				        
+			 
+
+			                                
+			 
+				                                                                          
+				                                                                                                                                                   
+				                            
+					                                                                                                              
+				    
+					                                                                                                              
+			 
+			    
+			 
+				                                                                          
+				                                                                                                                                                             
+				                            
+					                                                                                                    
+				    
+					                                                                                                    
+			 
+		 
+
+		           
+	 
+ 
+
+                              
+ 
+	                                     
+	                                                                                                                                                  
+	                             
+		      
+
+	                           
+	                                   
+	                         
+	                                   
+ 
+#endif                
+
+#if CLIENT
 void function BirdClusterPointSpawned( entity info_target )
 {
 	__BirdClusterPointSpawned( info_target )
@@ -651,7 +655,7 @@ void function __BirdClusterPointSpawned( entity info_target )
 
 	BirdClusterInfo clusterInfo
 	clusterInfo = CreateOrReturnExistingBirdClusterInfo( mainEnt, ownerPlayer )
-	//
+	  	                                                   
 
 	entity bird = CreateClientSidePropDynamic( info_target.GetOrigin(), info_target.GetAngles(), CLUSTER_BIRD_MODEL )
 	bird.SetFadeDistance( CLUSTER_MAX_DIST )
@@ -662,7 +666,7 @@ void function __BirdClusterPointSpawned( entity info_target )
 	float initialTime = RandomFloatRange( 0, duration )
 	thread PlayAnim( bird, BIRD_ANIM_ARRAY[ animIndex ], null, null, 0.0, initialTime )
 
-	//
+	                        
 	clusterInfo.birdArray.append( bird )
 }
 
@@ -691,7 +695,7 @@ BirdClusterInfo function CreateOrReturnExistingBirdClusterInfo( entity mainEnt, 
 
 	AddEntityDestroyedCallback( mainEnt, BirdClusterInfoOnDestroy )
 
-	//
+	                                       
 
 	return newClusterInfo
 }
@@ -713,7 +717,7 @@ void function __BirdClusterInfoOnDestroy( entity info_target )
 	if ( !IsValid( clusterInfo.ownerPlayer ) )
 	{
 		DeleteBirdCluster( clusterInfo )
-		return	//
+		return	                                             
 	}
 
 	Assert( clusterInfo.birdClusterMainEnt == info_target )
@@ -721,11 +725,11 @@ void function __BirdClusterInfoOnDestroy( entity info_target )
 
 	float distSqr = DistanceSqr( info_target.GetOrigin(), clusterInfo.ownerPlayer.GetOrigin() )
 
-	//
+	                                                                        
 
 	if ( distSqr > CLUSTER_MID_DIST_SQR )
 	{
-		//
+		                                                               
 		DeleteBirdCluster( clusterInfo )
 		return
 	}
@@ -733,7 +737,7 @@ void function __BirdClusterInfoOnDestroy( entity info_target )
 	foreach( index, bird in clusterInfo.birdArray )
 		thread BirdFlightThread( bird, index )
 
-	//
+	                                                       
 	file.birdClusterInfoArray.fastremovebyvalue( clusterInfo )
 }
 
@@ -742,13 +746,13 @@ void function BirdFlightThread( entity bird, int order )
 	bird.EndSignal( "OnDestroy" )
 
 	float delay = RandomFloatRange( 0, CLUSTER_MAX_TAKEOFF_DELAY * order )
-	//
+	                                                           
 	wait delay
 
 	float duration = bird.GetSequenceDuration( "Bird_react_fly_small" )
 	Assert( duration > 2, "fly away anim must be more then 2 seconds long" )
 
-	//
+	                          
 
 	entity refEnt = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", bird.GetOrigin(), bird.GetAngles() )
 	bird.SetParent( refEnt )
@@ -769,12 +773,12 @@ void function BirdFlightThread( entity bird, int order )
 	wait duration - 2.0
 
 	int fxId = GetParticleSystemIndex( CLUSTER_BIRD_DISSOLVE_VFX )
-	int fxHandle = StartParticleEffectOnEntity( bird, fxId, FX_PATTACH_ABSORIGIN_FOLLOW, 0 )
+	int fxHandle = StartParticleEffectOnEntity( bird, fxId, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
 	waitthread fadeModelAlphaOutOverTime( bird, 1 )
 
 	wait 1
 
-	//
+	                       
 }
 
 
@@ -787,13 +791,12 @@ void function fadeModelAlphaOutOverTime( entity model, float duration )
 	int startAlpha = 255
 	int endAlpha = 0
 
-	model.kv.rendermode = 4 //
+	model.kv.rendermode = 4                      
 
 	while ( Time() <= endTime )
 	{
 		float alphaResult = GraphCapped( Time(), startTime, endTime, startAlpha, endAlpha )
 		model.kv.renderamt = alphaResult
-		printt ("Alpha = " + alphaResult)
 		WaitFrame()
 	}
 }
@@ -809,6 +812,6 @@ void function DeleteBirdCluster( BirdClusterInfo clusterInfo )
 
 	file.birdClusterInfoArray.fastremovebyvalue( clusterInfo )
 }
-#endif //
+#endif         
 
 

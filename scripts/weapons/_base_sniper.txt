@@ -2,10 +2,14 @@
 #base "_base_projectile_ricochet.txt"
 #base "_base_character_mods.txt"
 
+#base "ap_settings/_ap_weapon_base.txt"
+#base "ap_settings/_ap_weapon_range_long.txt"
+#base "ap_settings/_ap_weapon_pattern_single.txt"
+
 WeaponData
 {
 	// General - Settings
-	"weaponClass"                              "human"
+	"weapon_type_flags"                        "WPT_PRIMARY"
 	"weaponSubClass"                           "sniper"
 	"body_type"                                "heavy"
 	"leveled_pickup"                           "1"
@@ -25,6 +29,7 @@ WeaponData
 	"minimap_reveal_distance"                  "32000"
 	"vortex_refire_behavior"                   "bullet"
 	"holster_type"                             "rifle"
+	"thirdperson_fire_from_mount_point"			"1"
 
 	// Behavior - Movement
 	"ads_move_speed_scale"                     "0.35"
@@ -40,11 +45,6 @@ WeaponData
     "holster_time"								"0.6"
 	"raise_time"  								"0.55"
 	"lower_time"  								"0.5"
-
-	"deploy_time"                              "0.9"
-	"holster_time"                             "0.6"
-	"lower_time"                               "0.45"
-	"raise_time"                               "0.75"
 
 	"zoom_time_in"                              "0.34"
 	"zoom_time_out"                             "0.31"
@@ -66,6 +66,10 @@ WeaponData
 	// Network
 	//"net_optimize"		                   "1"
 
+	// Script - Callbacks
+    "OnWeaponActivate"							"OnWeaponActivate_weapon_basic_bolt"
+    "OnClientAnimEvent"							"OnClientAnimEvent_weapon_basic_bolt"
+
 	// Damage
 	//
 	"damage_type"                              "bullet"
@@ -73,7 +77,6 @@ WeaponData
 	"damage_headshot_scale"                    "2.0"
 	"damage_leg_scale"                         "0.9"
 	"damage_shield_scale"                      "1"
-	"damage_heavyarmor_nontitan_scale"         "0.35"
 	"critical_hit_damage_scale"                "2"
 
 	// Damage - Distance
@@ -113,6 +116,7 @@ WeaponData
 	// Ammo
 	//
 	"ammo_suck_behavior"                       "primary_weapons"
+	"secondary_ammo_pool_type"                      ""
 
 	// Behavior - Animation
 	//setting to "0" so it's tunable in Bakery
@@ -205,11 +209,11 @@ WeaponData
 	// Sway - ADS
 	"sway_rotate_attach_zoomed"                "jx_c_pov"
 	"sway_rotate_attach_blend_time_zoomed"     "0.2"
-	"sway_min_pitch_zoomed"                    "-0.25"
-	"sway_min_yaw_zoomed"                      "-0.085"
+	"sway_min_pitch_zoomed"                    "-0.125"
+	"sway_min_yaw_zoomed"                      "-0.065"
 	"sway_min_roll_zoomed"                     "-1"
-	"sway_max_pitch_zoomed"                    "0.25"
-	"sway_max_yaw_zoomed"                      "0.085"
+	"sway_max_pitch_zoomed"                    "0.125"
+	"sway_max_yaw_zoomed"                      "0.065"
 	"sway_max_roll_zoomed"                     "1"
 	"sway_rotate_gain_zoomed"                  "5"
 	"sway_move_left_rotate_roll_zoomed"        "-0.2"
@@ -222,8 +226,9 @@ WeaponData
 	"sway_turn_down_rotate_pitch_zoomed"       "0.25"
 
 	// Viewdrift - ADS
-	"viewdrift_ads_delay"                      "0.9"
-	"viewdrift_ads_delay_debounce_time"        "0.45"
+	// higher viewdrift to further discourage long range usage
+	"viewdrift_ads_delay"                      "1.1"
+	"viewdrift_ads_delay_debounce_time"        "0.5"
 
 	"viewdrift_ads_speed_pitch"   				"0.3"
 	"viewdrift_ads_speed_yaw" 					"0.3"
@@ -251,7 +256,7 @@ WeaponData
 
 	// FX - Impacts
 	//
-	"impact_effect_table"                      "default_far_sniper"
+	"impact_effect_table"                      "titan_bullet"
 
 	// FX
 	"fx_muzzle_flash_attach"                   "muzzle_flash"
@@ -261,7 +266,8 @@ WeaponData
 
 	// FX - Projectile
 	"projectilemodel"                          "mdl/dev/empty_model.rmdl"
-	"projectile_trail_effect_0"                "P_tracer_proj_sniper"
+	"projectile_trail_effect_0_1p"                "P_tracer_proj_sniper"
+	"projectile_trail_effect_0_3p"                "P_tracer_proj_sniper"
 
 	// FX - Firing
 	"fx_muzzle_flash_view"                     "wpn_muzzleflash_snp_hmn_FP"
@@ -279,4 +285,32 @@ WeaponData
 	// Bodygroups
 	"bodygroup_ads_scope_name"                 "ads_scopes"
 	"bodygroup_ads_scope_set"                  "0"
+
+	"trophy_system_ignores"                          "always"
+
+    Mods
+    {
+        elevator_shooter
+        {
+           "viewkick_air_scale_ads"						"1.0"
+
+           "spread_air_hip"  								"*0.5"
+
+           "spread_kick_on_fire_air_hip" 					"1"
+
+           "spread_max_kick_air_hip" 						"*0.8"
+
+           "spread_air_ads"  								"0"
+
+           "spread_kick_on_fire_air_ads" 					"0"
+
+           "spread_max_kick_air_ads" 						"0"
+
+            "viewdrift_ads_air_scale_pitch"   			"0.4"
+            "viewdrift_ads_air_scale_yaw" 				"0.3"
+
+            "viewdrift_hipfire_air_scale_pitch"	            "0.0"
+            "viewdrift_hipfire_air_scale_yaw"               "0.0"
+        }
+    }
 }

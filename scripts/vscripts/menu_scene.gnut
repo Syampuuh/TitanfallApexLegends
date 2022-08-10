@@ -1,0 +1,1288 @@
+  
+  
+  
+                                                                            
+               
+                    
+                         
+                   
+                   
+                           
+                          
+                               
+                              
+                                 
+                          
+                
+                      
+                 
+                  
+                
+                
+                      
+                             
+                  
+              
+  
+
+
+#if SERVER || CLIENT || UI
+global function MenuScene_Init
+#endif
+
+#if CLIENT
+global function MenuScene_GetConfig
+global function StartMenuScene
+global function MenuScene_Stop
+global function MenuScene_Refresh
+global function MenuScene_SetVisible
+global function TEMP_MenuScene_GetCameraPos
+#endif
+
+
+
+                      
+                      
+                      
+                      
+                      
+
+#if CLIENT
+global struct MenuSceneHighlightConfig
+{
+	vector color = <0, 0, 0>
+	float  intensityScalar = 100.0
+	float  fadeInTime = 0.2
+	float  fadeOutTime = 0.75
+	float  lifeTime = 1.0
+	float  radius = 1.0
+}
+#endif
+
+
+#if CLIENT
+global struct MenuSceneTweakLightConfig
+{
+	vector col = <1, 1, 1>
+	float  brightness = 2.0
+	float  specularIntensity = 1.0
+	float  distance = 300.0
+	float  innerCone = 10.0
+	float  outerCone = 30.0
+	float  halfBrightFrac = 0.75
+	bool   pbrFalloff = true
+	bool   castsShadows = false
+}
+#endif
+
+
+#if CLIENT
+global struct MenuSceneConfig
+{
+	string name = "unknown"
+
+	entity ornull refEnt
+	vector ornull refPos                                         
+	vector ornull refAng                                                           
+	bool          startVisible = true
+	float         scale = 1.0                 
+	bool          animReplayOnRefresh = false
+	bool          preferVideo = false
+	bool          switchAfterVideo = false
+
+	ItemFlavor&                     subjectFlav                 
+	ItemFlavor ornull               associatedFlav                                                                                                                          
+	ItemFlavor ornull               accompanyingSkinFlav                                                                                            
+	ItemFlavor ornull               accompanyingCharmFlav                                                                                
+	MenuSceneHighlightConfig ornull subjectHighlightCfg                 
+	                                                                                                          
+	                                                                                                                                              
+	                                                                                                         
+	                                                                                                                                             
+	float ornull                    subjectRotateSpeed = null
+
+	array<entity>                    directTweakLights
+	array<MenuSceneTweakLightConfig> directLightConfigs
+	asset                            lightingRigModel = $"mdl/empty/lights/empty_lights.rmdl"                 
+	asset                            lightingRigAnim = $""                                                  
+	array<string>                    lightingRigLightAttachmentNames
+
+	array<entity> ambientTweakLights
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+global struct MenuScene
+{
+	                     
+}
+#endif
+
+
+
+                       
+                       
+                       
+                       
+                       
+
+#if SERVER || CLIENT
+const asset MDL_QUIP_BACKING = $"mdl/menu/loot_ceremony_quip_bg.rmdl"
+const asset MDL_EXECUTION_VICTIM = $"mdl/humans/class/medium/dummy_v20_base_w.rmdl"
+const asset MDL_TRACKER_BACKING = $"mdl/menu/loot_ceremony_stat_tracker_bg.rmdl"
+#endif
+
+
+#if CLIENT
+struct MenuSceneState
+{
+	MenuSceneConfig& cfg
+
+	vector     refPos
+	vector     refAng
+	bool       shouldShow = true
+	bool       didSwitchFromVideo = false
+	array<int> fxHandles
+
+	entity            subjectMover
+	ItemFlavor ornull activeSubjectFlav
+	array<entity>     subjectModels
+	entity            lightingRig
+	var               subjectRuiTopo
+	var               subjectRui
+	asset             subjectVideoAsset
+	int               subjectVideoChannel = -1
+}
+#endif
+
+
+#if CLIENT
+struct TypeConfig
+{
+	float         extraScale = 1.0
+	float         zOffset = 0.0
+	int           modelsRequired = 1
+	bool          ruiRequired = false
+	asset         ruiAsset = $""
+	UISize        ruiSize
+	float         ruiPixelScale = 1.0
+	string ornull placementAttachment = null
+	vector        defaultRotation = <0, 0, 0>
+	float         zoomDistMin = 0.0
+	float         zoomDistMax = 0.0
+	vector        zoomOffset = <30.0, 0.0, 30.0>
+
+	asset functionref( MenuSceneConfig cfg, MenuSceneState state )  getVideoAsset
+	vector functionref( MenuSceneConfig cfg, MenuSceneState state ) getZoomFocusPos
+
+	void functionref( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged )        updateFunc
+	void functionref( MenuSceneConfig cfg, MenuSceneState state, bool functionref() waitForRefreshFunc ) updateFunc_Thread
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+struct FileStruct_LifetimeLevel
+{
+	#if CLIENT
+		table<MenuScene, MenuSceneState> menuSceneStateMap
+
+		table<int, TypeConfig> typeConfigMap
+		TypeConfig&            videoConfig
+		table<entity, int>     ambientTweakLightUseStackCountMap
+		#if ASSERTING
+			table<entity, MenuScene> directTweakLightsInUseMap
+		#endif
+	#endif
+}
+#endif
+#if SERVER || CLIENT
+FileStruct_LifetimeLevel fileLevel                             
+#elseif UI
+FileStruct_LifetimeLevel& fileLevel                             
+
+struct {
+	  
+} fileVM                            
+#endif
+
+
+
+                         
+                         
+                         
+                         
+                         
+
+#if SERVER || CLIENT || UI
+void function MenuScene_Init()
+{
+	#if UI
+		FileStruct_LifetimeLevel newFileLevel
+		fileLevel = newFileLevel
+	#endif
+
+	#if SERVER || CLIENT
+		PrecacheModel( MDL_QUIP_BACKING )
+		PrecacheModel( MDL_EXECUTION_VICTIM )
+		PrecacheModel( MDL_TRACKER_BACKING )
+	#endif
+
+	#if CLIENT
+		RegisterSignal( "MenuScene_Refresh" )
+		RegisterSignal( "MenuScene_Stop" )
+		RegisterSignal( "MenuSceneUpdateThread_Refresh" )
+		RegisterSignal( "MenuSceneUpdateThread_Stop" )
+
+		fileLevel.typeConfigMap = {
+			[eItemType.character] = InitTypeConfig_Character(),
+			[eItemType.character_skin] = InitTypeConfig_CharacterSkin(),
+			[eItemType.character_execution] = InitTypeConfig_CharacterExecution(),
+			[eItemType.skydive_emote] = InitTypeConfig_SkydiveEmote(),
+			[eItemType.skydive_trail] = InitTypeConfig_SkydiveTrail(),
+			[eItemType.gladiator_card_stance] = InitTypeConfig_GladiatorCardFrameOrStance(),
+			[eItemType.gladiator_card_frame] = InitTypeConfig_GladiatorCardFrameOrStance(),
+			[eItemType.gladiator_card_intro_quip] = InitTypeConfig_GladiatorCardIntroQuip(),
+			[eItemType.gladiator_card_kill_quip] = InitTypeConfig_GladiatorCardKillQuip(),
+			[eItemType.gladiator_card_stat_tracker] = InitTypeConfig_GladiatorCardStatTracker(),
+			[eItemType.gladiator_card_badge] = InitTypeConfig_GladiatorCardBadge(),
+			[eItemType.melee_skin] = InitTypeConfig_MeleeSkin(),
+			[eItemType.loot_main_weapon] = InitTypeConfig_LootMainWeapon(),
+			[eItemType.weapon_skin] = InitTypeConfig_WeaponSkin(),
+			[eItemType.weapon_charm] = InitTypeConfig_WeaponCharm(),
+			[eItemType.music_pack] = InitTypeConfig_MusicPack(),
+			[eItemType.loadscreen] = InitTypeConfig_Loadscreen(),
+			[eItemType.account_currency] = InitTypeConfig_AccountCurrency(),
+			[eItemType.account_currency_bundle] = InitTypeConfig_AccountCurrencyBundle(),
+			[eItemType.account_pack] = InitTypeConfig_AccountPack(),
+			                                                  
+		}
+		fileLevel.videoConfig = InitTypeConfig_BinkVideo()
+	#endif
+}
+#endif
+
+
+
+                          
+                          
+                          
+                          
+                          
+
+#if CLIENT
+MenuSceneConfig function MenuScene_GetConfig( MenuScene handle )
+{
+	return fileLevel.menuSceneStateMap[handle].cfg
+}
+#endif
+
+
+#if CLIENT
+MenuScene function StartMenuScene( MenuSceneConfig cfg )
+{
+	MenuScene handle
+	MenuSceneState state
+	state.cfg = cfg
+	state.shouldShow = cfg.startVisible
+	DbgPrint( cfg.name, "StartMenuScene" )
+	thread RunMenuScene_Thread( handle, cfg, state )
+	return handle
+}
+#endif
+
+
+#if CLIENT
+void function MenuScene_Stop( MenuScene handle )
+{
+	if ( !(handle in fileLevel.menuSceneStateMap) )
+	{
+		Warning( "[MenuScene] Tried to stop a scene that was not started, ignoring. Callstack:\n%s", GetStack() )
+		return
+	}
+	DbgPrint( MenuScene_GetConfig( handle ).name, "MenuScene_Stop" )
+	Signal( handle, "MenuScene_Stop" )
+}
+#endif
+
+
+#if CLIENT
+void function MenuScene_Refresh( MenuScene handle )
+{
+	if ( !(handle in fileLevel.menuSceneStateMap) )
+	{
+		Warning( "[MenuScene] Tried to refresh scene that was not started, ignoring. Callstack:\n%s", GetStack() )
+		return
+	}
+	DbgPrint( MenuScene_GetConfig( handle ).name, "MenuScene_Refresh" )
+	Signal( handle, "MenuScene_Refresh", { visible = null } )
+}
+#endif
+
+
+#if CLIENT
+void function MenuScene_SetVisible( MenuScene handle, bool shouldBeVisible )
+{
+	DbgPrint( MenuScene_GetConfig( handle ).name, "MenuScene_SetVisible( %s )", string(shouldBeVisible) )
+	Signal( handle, "MenuScene_Refresh", { visible = shouldBeVisible } )
+}
+#endif
+
+
+#if CLIENT
+Coord function TEMP_MenuScene_GetCameraPos( MenuScene handle, vector origCamPos, vector extraOffset )
+{
+	MenuSceneState state = fileLevel.menuSceneStateMap[handle]
+	TypeConfig typeCfg   = fileLevel.typeConfigMap[ItemFlavor_GetType( state.cfg.subjectFlav )]
+
+	vector focusPos = state.subjectModels[0].GetOrigin()
+	if ( typeCfg.getZoomFocusPos != null )
+		focusPos = typeCfg.getZoomFocusPos( state.cfg, state )
+
+	vector toCamAng      = VectorToAngles( FlattenVec( origCamPos - focusPos ) )
+	Coord out
+	out.pos = state.refPos + RotateVector( typeCfg.zoomOffset + extraOffset, toCamAng )
+	out.ang = VectorToAngles( FlattenVec( state.refPos - origCamPos ) )
+	return out
+}
+#endif
+
+
+
+                       
+                       
+                       
+                       
+                       
+
+#if SERVER || CLIENT || UI
+void function DbgPrint( string name, string fmt, ... )
+{
+	printt( format( "[MenuScene %s %s] %s", name, VM_NAME(),
+		format( fmt, vargc > 0 ? vargv[0] : 0, vargc > 1 ? vargv[1] : 0, vargc > 2 ? vargv[2] : 0, vargc > 3 ? vargv[3] : 0, vargc > 4 ? vargv[4] : 0, vargc > 5 ? vargv[5] : 0, vargc > 6 ? vargv[6] : 0, vargc > 7 ? vargv[7] : 0 ) ) )
+}
+#endif
+
+
+
+                   
+                   
+                   
+                   
+                   
+
+#if CLIENT
+void function RunMenuScene_Thread( MenuScene handle, MenuSceneConfig cfg, MenuSceneState state )
+{
+	EndSignal( handle, "MenuScene_Stop" )
+
+	fileLevel.menuSceneStateMap[handle] <- state
+
+	OnThreadEnd( void function() : ( handle, cfg, state ) {
+		delete fileLevel.menuSceneStateMap[handle]
+
+		bool fullCleanup = true
+		CleanupMenuScene( handle, state, fullCleanup )
+	} )
+
+	bool isFirstTime = true
+	UpdateRefCoords( cfg, state, isFirstTime )
+
+	state.subjectMover = CreateClientsideScriptMover( EMPTY_MODEL, state.refPos, state.refAng )
+	state.subjectMover.MakeSafeForUIScriptHack()
+
+	if ( cfg.directTweakLights.len() > 0 )
+	{
+		if ( cfg.lightingRigModel == $"" )
+			Warning( "[MenuScene %s] Scene has %d tweak lights but lighting rig model is $\"\".", cfg.name, cfg.directTweakLights.len() )
+
+		state.lightingRig = CreateClientSidePropDynamic( state.refPos, state.refAng, cfg.lightingRigModel )
+		                                                                  
+
+		foreach ( entity ambientTweakLight in cfg.ambientTweakLights )
+		{
+			if ( ambientTweakLight in fileLevel.ambientTweakLightUseStackCountMap )
+			{
+				fileLevel.ambientTweakLightUseStackCountMap[ambientTweakLight]++
+			}
+			else
+			{
+				fileLevel.ambientTweakLightUseStackCountMap[ambientTweakLight] <- 1
+				ambientTweakLight.SetTweakLightUpdateShadowsEveryFrame( true )
+			}
+		}
+
+		#if ASSERTING
+			foreach ( entity directTweakLight in cfg.directTweakLights )
+			{
+				if ( directTweakLight in fileLevel.directTweakLightsInUseMap )
+					Warning( "[MenuScene %s] Tweak light is already in use by scene '%s': %s", cfg.name, MenuScene_GetConfig( fileLevel.directTweakLightsInUseMap[directTweakLight] ).name, directTweakLight.GetScriptName() )
+				fileLevel.directTweakLightsInUseMap[directTweakLight] <- handle
+			}
+			if ( cfg.directTweakLights.len() != cfg.lightingRigLightAttachmentNames.len() )
+				Warning( "[MenuScene %s] Mismatch between number of lights specified (%d) and number of attachments to attach them to (%s).", cfg.name, cfg.directTweakLights.len(), cfg.lightingRigLightAttachmentNames.join( ", " ) )
+			if ( cfg.directTweakLights.len() != cfg.directLightConfigs.len() )
+				Warning( "[MenuScene %s] Mismatch between number of lights specified (%d) and number of lighting configs provided (%d).", cfg.name, cfg.directTweakLights.len(), cfg.directLightConfigs.len() )
+		#endif
+	}
+
+
+	ItemFlavor currSubjectFlav
+	TypeConfig currTypeCfg
+	TypeConfig nextTypeCfg
+	bool wasShowing = true
+	while ( true )
+	{
+		bool didFlavChange = (cfg.subjectFlav != currSubjectFlav)
+		if ( didFlavChange )
+		{
+			DbgPrint( cfg.name, "Flav changed to %s (from %s)", DEV_DescItemFlavor( cfg.subjectFlav, true ), DEV_DescItemFlavor( currSubjectFlav, true ) )
+			currSubjectFlav = cfg.subjectFlav
+
+			nextTypeCfg = fileLevel.typeConfigMap[ItemFlavor_GetType( cfg.subjectFlav )]
+
+			if ( cfg.preferVideo && currTypeCfg.getVideoAsset != null )
+			{
+				asset videoAsset = currTypeCfg.getVideoAsset( cfg, state )
+				if ( videoAsset != $"" )
+				{
+					DbgPrint( cfg.name, "Switching to video: %s", string(videoAsset) )
+
+					nextTypeCfg = fileLevel.videoConfig
+					state.subjectVideoAsset = videoAsset
+					state.subjectVideoChannel = ReserveVideoChannel( void function( int channel ) : (cfg, handle) {
+						Signal( handle, "MenuSceneUpdateThread_Refresh", { visible = null, didVideoFinish = true } )
+					} )
+				}
+			}
+		}
+
+		bool didTypeChange = (nextTypeCfg != currTypeCfg)
+		if ( didTypeChange )
+		{
+			DbgPrint( cfg.name, "Type changed" )
+
+			CleanupMenuScene( handle, state, false )
+
+			currTypeCfg = nextTypeCfg
+
+			DbgPrint( cfg.name, "Making %d subject models", currTypeCfg.modelsRequired )
+			for ( int subjectModelIdx = 0; subjectModelIdx < currTypeCfg.modelsRequired; subjectModelIdx++ )
+			{
+				entity subjectModel = CreateClientSidePropDynamic( state.refPos, state.refAng, EMPTY_MODEL )
+				subjectModel.SetParent( state.subjectMover )
+				subjectModel.MakeSafeForUIScriptHack()
+				state.subjectModels.append( subjectModel )
+			}
+
+			if ( currTypeCfg.ruiRequired )
+			{
+				state.subjectRuiTopo = RuiTopology_CreatePlane( <0, 0, 0>, <0, 0, 0>, <0, 0, 0>, true )
+				state.subjectRui = RuiCreate( currTypeCfg.ruiAsset, state.subjectRuiTopo, RUI_DRAW_WORLD, 0 )
+				DbgPrint( cfg.name, "Making RUI: ", string(currTypeCfg.ruiAsset) )
+			}
+		}
+
+		state.subjectMover.SetOrigin( state.refPos + currTypeCfg.zOffset * AnglesToUp( state.refAng ) )
+		state.subjectMover.NonPhysicsStop()
+		if ( state.shouldShow && cfg.subjectRotateSpeed != null )
+			state.subjectMover.NonPhysicsRotate( <0, 0, 1>, expect float(cfg.subjectRotateSpeed) )
+
+		foreach ( entity subjectModel in state.subjectModels )
+		{
+			subjectModel.SetModelScale( cfg.scale * currTypeCfg.extraScale )
+			if ( didTypeChange )
+			{
+				vector subjectModelPosRelativeToMover = <0, 0, 0>
+				if ( currTypeCfg.placementAttachment != null )
+				{
+					int attachmentIdx = subjectModel.LookupAttachment( expect string(currTypeCfg.placementAttachment) )
+					if ( attachmentIdx > 0 )
+					{
+						vector attachmentWorldPos                  = subjectModel.GetAttachmentOrigin( attachmentIdx )
+						vector attachmentPosRelativeToSubjectModel = WorldPosToLocalPos( attachmentWorldPos, subjectModel )
+						subjectModelPosRelativeToMover = -attachmentPosRelativeToSubjectModel
+					}
+					else Warning( "[MenuScene %s] Could not find attachment '%s' on subject model '%s'.", cfg.name, expect string(currTypeCfg.placementAttachment), string(subjectModel.GetModelName()) )
+				}
+				subjectModel.SetLocalOrigin( subjectModelPosRelativeToMover )
+				subjectModel.SetLocalAngles( <0, 0, 0> )
+			}
+
+			if ( state.shouldShow )
+				ShowEntityAndChildren( subjectModel )
+		}
+
+		if ( didFlavChange || didTypeChange )
+		{
+			bool playEndCap = true
+			CleanupFXArray( state.fxHandles, false, playEndCap )
+		}
+
+		if ( state.subjectRui != null )
+		{
+			if ( state.shouldShow )
+			{
+				vector ruiWorldSize = <currTypeCfg.ruiSize.width, currTypeCfg.ruiSize.height, 0.0> * currTypeCfg.ruiPixelScale * cfg.scale
+				vector ruiPos       = state.refPos - 0.5 * ruiWorldSize.x * AnglesToRight( state.refAng ) + 0.5 * ruiWorldSize.y * AnglesToUp( state.refAng )
+				vector ruiRight     = ruiWorldSize.x * AnglesToRight( state.refAng )
+				vector ruiDown      = ruiWorldSize.y * -1.0 * AnglesToUp( state.refAng )
+				RuiTopology_UpdatePos( state.subjectRuiTopo, ruiPos, ruiRight, ruiDown )
+			}
+			else
+			{
+				RuiTopology_UpdatePos( state.subjectRuiTopo, <0, 0, 0>, <0, 0, 0>, <0, 0, 0> )
+			}
+		}
+
+		if ( currTypeCfg.updateFunc_Thread != null )
+		{
+			if ( didTypeChange )
+				thread RunUpdateFunc_Thread( currTypeCfg, handle, cfg, state )
+			else
+				Signal( handle, "MenuSceneUpdateThread_Refresh", { flavChanged = didFlavChange } )
+		}
+		else
+		{
+			currTypeCfg.updateFunc( cfg, state, didTypeChange, didFlavChange )
+		}
+
+		foreach ( entity subjectModel in state.subjectModels )
+		{
+			if ( !state.shouldShow )
+				HideEntityAndChildren( subjectModel )
+
+			if ( (didTypeChange || didFlavChange || (!wasShowing && state.shouldShow)) && cfg.subjectHighlightCfg != null )
+				HighlightSubject( expect MenuSceneHighlightConfig(cfg.subjectHighlightCfg), subjectModel )
+		}
+
+		bool updateTweakLightParams = true
+		UpdateTweakLights( cfg, state, false, updateTweakLightParams )
+
+		if ( !state.shouldShow )
+		{
+			bool destroyImmediately = true
+			CleanupFXArray( state.fxHandles, destroyImmediately, false )
+		}
+
+		table refreshRes = WaitSignal( handle, "MenuScene_Refresh" )
+		if ( refreshRes.visible != null )
+		{
+			wasShowing = state.shouldShow
+			state.shouldShow = expect bool(refreshRes.visible)
+		}
+		if ( "didVideoFinish" in refreshRes && refreshRes.didVideoFinish )
+		{
+			DbgPrint( cfg.name, "Video finished" )
+			nextTypeCfg = fileLevel.typeConfigMap[ItemFlavor_GetType( cfg.subjectFlav )]
+		}
+
+		                                                  
+
+		UpdateRefCoords( cfg, state, false )
+	}
+}
+#endif
+
+
+#if CLIENT
+void function CleanupMenuScene( MenuScene handle, MenuSceneState state, bool isFull )
+{
+	Signal( handle, "MenuSceneUpdateThread_Stop" )
+
+	DbgPrint( state.cfg.name, "Destroying %d subject models", state.subjectModels.len() )
+	foreach ( entity subjectModel in state.subjectModels )
+		subjectModel.Destroy()
+	state.subjectModels.clear()
+
+	bool destroyImmediately = true
+	CleanupFXArray( state.fxHandles, destroyImmediately, false )
+
+	if ( state.subjectRui != null )
+	{
+		RuiDestroyIfAlive( state.subjectRui )
+		DbgPrint( state.cfg.name, "Destroying RUI" )
+		state.subjectRui = null
+		RuiTopology_Destroy( state.subjectRuiTopo )
+		state.subjectRuiTopo = null
+	}
+
+	if ( state.subjectVideoAsset != $"" )
+	{
+		state.subjectVideoAsset = $""
+		ReleaseVideoChannel( state.subjectVideoChannel )
+		state.subjectVideoChannel = -1
+	}
+
+	if ( isFull )
+	{
+		foreach ( entity tweakLight in state.cfg.directTweakLights )
+		{
+			tweakLight.SetTweakLightRealtimeShadows( false )
+			tweakLight.SetTweakLightUpdateShadowsEveryFrame( false )
+			tweakLight.SetTweakLightDistance( 2.0 )                                                 
+			#if ASSERTING
+				delete fileLevel.directTweakLightsInUseMap[tweakLight]
+			#endif
+		}
+
+		foreach ( entity ambientTweakLight in state.cfg.ambientTweakLights )
+		{
+			fileLevel.ambientTweakLightUseStackCountMap[ambientTweakLight]--
+			if ( fileLevel.ambientTweakLightUseStackCountMap[ambientTweakLight] == 0 )
+			{
+				delete fileLevel.ambientTweakLightUseStackCountMap[ambientTweakLight]
+				ambientTweakLight.SetTweakLightUpdateShadowsEveryFrame( false )
+			}
+		}
+	}
+}
+#endif
+
+
+#if CLIENT
+void function RunUpdateFunc_Thread( TypeConfig typeCfg, MenuScene handle, MenuSceneConfig cfg, MenuSceneState state )
+{
+	EndSignal( handle, "MenuSceneUpdateThread_Stop" )
+	typeCfg.updateFunc_Thread( cfg, state, bool function() : (handle) {
+		table waitRes = WaitSignal( handle, "MenuSceneUpdateThread_Refresh" )
+		return expect bool(waitRes.flavChanged)
+	} )
+	WaitForever()
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_Character()
+{
+	TypeConfig tc
+	tc.extraScale = 0.7
+	tc.zOffset = 0.7
+	tc.zoomDistMax = 64.0
+	tc.getZoomFocusPos = vector function( MenuSceneConfig cfg, MenuSceneState state ) {
+		return state.subjectModels[0].GetAttachmentOrigin( state.subjectModels[0].LookupAttachment( "HEADFOCUS" ) )
+	}
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		CharacterSkin_Apply( state.subjectModels[0], expect ItemFlavor(cfg.accompanyingSkinFlav) )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_CharacterSkin()
+{
+	TypeConfig tc
+	tc.extraScale = 0.7
+	tc.zOffset = 4.0
+	tc.zoomDistMax = 64.0
+	tc.getZoomFocusPos = vector function( MenuSceneConfig cfg, MenuSceneState state ) {
+		return state.subjectModels[0].GetAttachmentOrigin( state.subjectModels[0].LookupAttachment( "HEADFOCUS" ) )
+	}
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		CharacterSkin_Apply( state.subjectModels[0], cfg.subjectFlav )
+		state.subjectModels[0].Anim_Play( "ACT_MP_MENU_LOOT_CEREMONY_IDLE" )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_CharacterExecution()
+{
+	TypeConfig tc
+	tc.extraScale = 0.4
+	tc.zOffset = 12.0
+	tc.modelsRequired = 2
+	tc.zoomDistMax = 52.0
+	                                    
+	tc.getZoomFocusPos = vector function( MenuSceneConfig cfg, MenuSceneState state ) {
+		entity attackerModel = state.subjectModels[0]
+		return attackerModel.GetAttachmentOrigin( attackerModel.LookupAttachment( "HEADFOCUS" ) )
+	}
+	tc.getVideoAsset = asset function( MenuSceneConfig cfg, MenuSceneState state )
+	{
+		return CharacterExecution_GetExecutionVideo( cfg.subjectFlav )
+	}
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		entity attackerModel = state.subjectModels[0]
+		entity victimModel   = state.subjectModels[1]
+
+		asset attackerAnimSeq = CharacterExecution_GetAttackerPreviewAnimSeq( cfg.subjectFlav )
+		asset victimAnimSeq   = CharacterExecution_GetVictimPreviewAnimSeq( cfg.subjectFlav )
+
+		if ( isFirst )
+			victimModel.SetModel( MDL_EXECUTION_VICTIM )
+
+		CharacterSkin_Apply( attackerModel, expect ItemFlavor(cfg.accompanyingSkinFlav) )
+
+		if ( flavChanged )
+		{
+			if ( attackerModel.Anim_HasSequence( attackerAnimSeq ) )
+			{
+				attackerModel.Anim_Play( attackerAnimSeq )
+			}
+			else Warning( "[MenuScene %s] Could not find execution anim on attacker: %s", cfg.name, string(attackerAnimSeq) )
+
+			if ( victimModel.Anim_HasSequence( victimAnimSeq ) )
+			{
+				victimModel.Anim_Play( victimAnimSeq )
+			}
+			else Warning( "[MenuScene %s] Could not find execution anim on victim: %s", cfg.name, string(victimAnimSeq) )
+		}
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_SkydiveEmote()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 0.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		  
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_SkydiveTrail()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 0.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		  
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_GladiatorCardFrameOrStance()
+{
+	TypeConfig tc
+	tc.zOffset = 2.0
+	tc.modelsRequired = 0
+	tc.ruiRequired = true
+	tc.ruiAsset = $"ui/loot_ceremony_glad_card.rpak"
+	tc.ruiSize.width = 528
+	tc.ruiSize.height = 912
+	tc.ruiPixelScale = 1.0 / 16.0
+	tc.updateFunc_Thread = void function( MenuSceneConfig cfg, MenuSceneState state, bool functionref() waitForRefreshFunc ) {
+		NestedGladiatorCardHandle gladCardHandle = CreateNestedGladiatorCard(
+			state.subjectRui, "card",
+			eGladCardDisplaySituation.MENU_LOOT_CEREMONY_ANIMATED, eGladCardPresentation.OFF )
+		ChangeNestedGladiatorCardOwner( gladCardHandle, LocalClientEHI() )
+		SetNestedGladiatorCardOverrideCharacter( gladCardHandle, cfg.associatedFlav )
+
+		if ( ItemFlavor_GetType( cfg.subjectFlav ) == eItemType.gladiator_card_frame )
+		{
+			ChangeNestedGladiatorCardPresentation( gladCardHandle, eGladCardPresentation.FRONT_FRAME_ONLY )
+			SetNestedGladiatorCardOverrideFrame( gladCardHandle, cfg.subjectFlav )
+		}
+		else if ( ItemFlavor_GetType( cfg.subjectFlav ) == eItemType.gladiator_card_stance )
+		{
+			ChangeNestedGladiatorCardPresentation( gladCardHandle, eGladCardPresentation.FRONT_STANCE_ONLY )
+			SetNestedGladiatorCardOverrideStance( gladCardHandle, cfg.subjectFlav )
+
+			ItemFlavor characterDefaultFrame = GetDefaultItemFlavorForLoadoutSlot( EHI_null, Loadout_GladiatorCardFrame( expect ItemFlavor(cfg.associatedFlav) ) )
+			SetNestedGladiatorCardOverrideFrame( gladCardHandle, characterDefaultFrame )                          
+		}
+
+		RuiSetBool( state.subjectRui, "firstTime", true )
+		RuiSetInt( state.subjectRui, "rarity", ItemFlavor_GetQuality( cfg.subjectFlav, eRarityTier.NONE ) )
+
+		OnThreadEnd( void function() : (gladCardHandle) {
+			CleanupNestedGladiatorCard( gladCardHandle )
+		} )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_GladiatorCardIntroQuip()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0 / 16.0
+	tc.zOffset = 24.0
+	tc.ruiRequired = true
+	tc.ruiAsset = $"ui/loot_reward_intro_quip.rpak"
+	tc.ruiSize.width = 390
+	tc.ruiSize.height = 208
+	tc.ruiPixelScale = 1.0 / 16.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		state.subjectModels[0].SetModel( MDL_QUIP_BACKING )
+
+		RuiSetBool( state.subjectRui, "isVisible", true )
+		RuiSetInt( state.subjectRui, "rarity", ItemFlavor_GetQuality( cfg.subjectFlav, eRarityTier.NONE ) )
+		RuiSetImage( state.subjectRui, "portraitImage", CharacterClass_GetGalleryPortrait( expect ItemFlavor(cfg.associatedFlav) ) )
+		RuiSetString( state.subjectRui, "quipTypeText", "#LOOT_QUIP_INTRO" )
+		RuiTrackFloat( state.subjectRui, "level", null, RUI_TRACK_SOUND_METER, 0 )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_GladiatorCardKillQuip()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0 / 16.0
+	tc.zOffset = 24.0
+	tc.ruiRequired = true
+	tc.ruiAsset = $"ui/loot_reward_kill_quip.rpak"
+	tc.ruiSize.width = 528
+	tc.ruiSize.height = 912
+	tc.ruiPixelScale = 1.0 / 16.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		state.subjectModels[0].SetModel( MDL_QUIP_BACKING )
+
+		RuiSetBool( state.subjectRui, "isVisible", true )
+		RuiSetInt( state.subjectRui, "rarity", ItemFlavor_GetQuality( cfg.subjectFlav, eRarityTier.NONE ) )
+		RuiSetImage( state.subjectRui, "portraitImage", CharacterClass_GetGalleryPortrait( expect ItemFlavor(cfg.associatedFlav) ) )
+		RuiSetString( state.subjectRui, "quipTypeText", "#LOOT_QUIP_KILL" )
+		RuiTrackFloat( state.subjectRui, "level", null, RUI_TRACK_SOUND_METER, 0 )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_GladiatorCardStatTracker()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0 / 24.0
+	tc.zOffset = 27.0
+	tc.ruiRequired = true
+	tc.ruiAsset = $"ui/loot_ceremony_stat_tracker.rpak"
+	tc.ruiSize.width = 594
+	tc.ruiSize.height = 230
+	tc.ruiPixelScale = 1.0 / 24.0
+	tc.updateFunc_Thread = void function( MenuSceneConfig cfg, MenuSceneState state, bool functionref() waitForRefreshFunc ) {
+		state.subjectModels[0].SetModel( MDL_TRACKER_BACKING )
+
+		RuiSetBool( state.subjectRui, "isVisible", true )
+		UpdateRuiWithStatTrackerData( state.subjectRui, "tracker", LocalClientEHI(), cfg.associatedFlav, -1, cfg.subjectFlav, null, true )
+		RuiSetColorAlpha( state.subjectRui, "trackerColor0", GladiatorCardStatTracker_GetColor0( cfg.subjectFlav ), 1.0 )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_GladiatorCardBadge()
+{
+	TypeConfig tc
+	tc.extraScale = 0.06
+	tc.zOffset = 20.0
+	tc.updateFunc_Thread = void function( MenuSceneConfig cfg, MenuSceneState state, bool functionref() waitForRefreshFunc ) {
+		                                              
+		                                                                         
+		  
+		                                   
+		                                   
+		                                                       
+		                                                       
+		  
+		                                          
+		  	                                                         
+		  	                    
+		                                                                                        
+		  
+		                                      
+		                                                                                                                       
+		                                                                                                      
+		  
+		                                              
+		  	                        
+		  	                           
+		     
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_MeleeSkin()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 1.08
+	tc.zoomDistMax = 52.0
+	                                    
+	tc.getZoomFocusPos = vector function( MenuSceneConfig cfg, MenuSceneState state ) {
+		return state.subjectModels[0].GetAttachmentOrigin( state.subjectModels[0].LookupAttachment( "MENU_ROTATE" ) )
+	}
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		  
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_LootMainWeapon()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 0.0
+	tc.placementAttachment = "MENU_ROTATE"
+	                                    
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		ShowDefaultBodygroupsOnFakeWeapon( state.subjectModels[0], WeaponItemFlavor_GetClassname( cfg.subjectFlav ) )
+		WeaponCosmetics_Apply( state.subjectModels[0], cfg.accompanyingSkinFlav, cfg.accompanyingCharmFlav )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_WeaponSkin()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 28.0
+	tc.placementAttachment = "MENU_ROTATE"
+	tc.zoomDistMax = 52.0
+	                                    
+	tc.getZoomFocusPos = vector function( MenuSceneConfig cfg, MenuSceneState state ) {
+		return state.subjectModels[0].GetAttachmentOrigin( state.subjectModels[0].LookupAttachment( "MENU_ROTATE" ) )
+	}
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		entity weaponEnt = state.subjectModels[0]
+
+		ShowDefaultBodygroupsOnFakeWeapon( weaponEnt, WeaponItemFlavor_GetClassname( expect ItemFlavor(cfg.associatedFlav) ) )
+		WeaponCosmetics_Apply( weaponEnt, cfg.subjectFlav, cfg.accompanyingCharmFlav )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_WeaponCharm()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 0.0
+	tc.placementAttachment = "CHARM"
+	tc.zoomDistMax = 30.0
+	                                   
+	tc.getZoomFocusPos = vector function( MenuSceneConfig cfg, MenuSceneState state ) {
+		return GetCharmForWeaponEntity( state.subjectModels[0] ).GetWorldSpaceCenter()
+	}
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		entity weaponEnt = state.subjectModels[0]
+
+		ShowDefaultBodygroupsOnFakeWeapon( weaponEnt, WeaponItemFlavor_GetClassname( expect ItemFlavor(cfg.associatedFlav) ) )
+		WeaponCosmetics_Apply( weaponEnt, cfg.accompanyingSkinFlav, cfg.subjectFlav )
+
+		if ( cfg.accompanyingSkinFlav == null && GetSkinIndexByName_Safe( weaponEnt, "charm_preview_black" ) != -1 )
+			SetSkinByName_Safe( weaponEnt, "charm_preview_black" )
+
+		float WEAPON_CHARM_EXTRA_EXTRA_SCALE = 1.34
+
+		entity charmModel = GetCharmForWeaponEntity( weaponEnt )
+		if ( IsValid( charmModel ) )
+			charmModel.SetModelScale( weaponEnt.GetModelScale() * WEAPON_CHARM_EXTRA_EXTRA_SCALE )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_MusicPack()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0 / 16.0
+	tc.zOffset = 24.0
+	tc.ruiRequired = true
+	tc.ruiAsset = $"ui/loot_reward_intro_quip.rpak"
+	tc.ruiSize.width = 528
+	tc.ruiSize.height = 912
+	tc.ruiPixelScale = 1.0 / 16.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		state.subjectModels[0].SetModel( MDL_QUIP_BACKING )
+
+		RuiSetBool( state.subjectRui, "isVisible", true )
+		RuiSetInt( state.subjectRui, "rarity", ItemFlavor_GetQuality( cfg.subjectFlav, eRarityTier.NONE ) )
+		RuiSetImage( state.subjectRui, "portraitImage", MusicPack_GetPortraitImage( cfg.subjectFlav ) )
+		RuiSetFloat( state.subjectRui, "portraitBlend", MusicPack_GetPortraitBlend( cfg.subjectFlav ) )
+		RuiSetString( state.subjectRui, "quipTypeText", "#MUSIC_PACK" )
+		RuiTrackFloat( state.subjectRui, "level", null, RUI_TRACK_SOUND_METER, 0 )
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_Loadscreen()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 30.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		  
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_AccountCurrency()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 26.0
+	tc.zoomDistMax = 38.0
+	                                    
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		  
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_AccountCurrencyBundle()
+{
+	TypeConfig tc
+	tc.extraScale = 1.0
+	tc.zOffset = 26.0
+	tc.zoomDistMax = 38.0
+	                                    
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		  
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_AccountPack()
+{
+	TypeConfig tc
+	tc.extraScale = 0.6
+	tc.zOffset = 15.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		entity subjectMdl = state.subjectModels[0]
+		subjectMdl.SetModel( GRXPack_GetTickModel( cfg.subjectFlav ) )
+		SetSkinByName_Safe( subjectMdl, GRXPack_GetTickModelSkin( cfg.subjectFlav ) )
+	}
+	return tc
+}
+#endif
+
+
+            
+                                              
+   
+  	             
+  	                   
+  	                
+  	                                                                                                            
+  		  
+  	 
+  	         
+   
+        
+
+
+#if CLIENT
+TypeConfig function InitTypeConfig_BinkVideo()
+{
+	TypeConfig tc
+	tc.ruiRequired = true
+	tc.ruiAsset = $"ui/finisher_video.rpak"
+	tc.ruiSize.width = 1920
+	tc.ruiSize.height = 1080
+	tc.ruiPixelScale = 1.0 / 16.0
+	tc.updateFunc = void function( MenuSceneConfig cfg, MenuSceneState state, bool isFirst, bool flavChanged ) {
+		RuiSetInt( state.subjectRui, "channel", state.subjectVideoChannel )
+		if ( isFirst )
+		{
+			bool isLooping = !cfg.switchAfterVideo
+			StartVideoOnChannel( state.subjectVideoChannel, state.subjectVideoAsset, isLooping, 0.0 )
+		}
+	}
+	return tc
+}
+#endif
+
+
+#if CLIENT
+void function UpdateRefCoords( MenuSceneConfig cfg, MenuSceneState state, bool isFirstTime )
+{
+	state.refPos = <0, 0, 0>
+	state.refAng = <0, 0, 0>
+	if ( cfg.refPos != null )
+	{
+		if ( isFirstTime && IsValid( cfg.refEnt ) )
+			Warning( "[MenuScene %s] Both refPos (%s) and refEnt (%s) are specified. Ignoring refEnt.", cfg.name, string(cfg.refPos), string(expect entity(cfg.refEnt).GetOrigin()) )
+		if ( isFirstTime && cfg.refAng == null )
+			Warning( "[MenuScene %s] refPos was specified without refAng -- using 0,0,0 as angle which probably isn't what you want.", cfg.name, string(cfg.refPos), string(expect entity(cfg.refEnt).GetOrigin()) )
+		state.refPos = expect vector(cfg.refPos)
+	}
+	else if ( IsValid( cfg.refEnt ) )
+	{
+		state.refPos = expect entity(cfg.refEnt).GetOrigin()
+		state.refAng = expect entity(cfg.refEnt).GetAngles()
+	}
+	else if ( isFirstTime )
+	{
+		Warning( "[MenuScene %s] refEnt is invalid (and refPos was not specified) -- not sure where to put menu scene.", cfg.name )
+	}
+
+	if ( cfg.refAng != null )
+		state.refAng = expect vector(cfg.refAng)
+
+	DbgPrint( cfg.name, "UpdateRefCoords: refEnt = %s, refPos = %s, refAng = %s", string(cfg.refEnt), string(cfg.refPos), string(cfg.refAng) )
+}
+#endif
+
+
+            
+                                                                                                  
+   
+  	                                     
+  
+  	              
+  	 
+  		               
+  		                                                                 
+  		 
+  			                                                  
+  			                                  
+  			                                                              
+  		 
+  
+  		          
+  		                                                               
+  		 
+  			        
+  			                                
+  			 
+  				                                  
+  					                                                                                                                                                                                      
+  				                                                   
+  			 
+  			                                       
+  			 
+  				                                                    
+  			 
+  
+  			                           
+  			                                      
+  		 
+  		                                                             
+  		 
+  			                           
+  			                               
+  			 
+  				                                 
+  					                                                                                                                                                                                 
+  				                                                  
+  			 
+  			                                      
+  			 
+  				                                                   
+  			 
+  		 
+  
+  		                              
+  			                                         
+  		    
+  			             
+  	 
+   
+        
+
+
+#if CLIENT
+void function HighlightSubject( MenuSceneHighlightConfig cfg, entity subject )
+{
+	                                       
+	foreach ( entity ent in GetEntityAndImmediateChildren( subject ) )
+	{
+		ent.Highlight_ResetFlags()
+		ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
+		ent.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_NEUTRAL )
+		int highlightId = ent.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
+		ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_MENU_MODEL_REVEAL, true, HIGHLIGHT_OUTLINE_MENU_MODEL_REVEAL, cfg.radius, highlightId, false )
+		ent.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, cfg.color )
+		ent.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 1, <cfg.intensityScalar, 1, 0> )
+
+		ent.Highlight_SetFadeInTime( cfg.fadeInTime )
+		ent.Highlight_SetFadeOutTime( cfg.fadeOutTime )
+		ent.Highlight_StartOn()
+
+		ent.Highlight_SetLifeTime( cfg.lifeTime )
+	}
+}
+#endif
+
+
+#if CLIENT
+void function UpdateTweakLights( MenuSceneConfig cfg, MenuSceneState state, bool doCoords, bool doParams )
+{
+	foreach ( int lightIdx, entity tweakLight in cfg.directTweakLights )
+	{
+		if ( lightIdx >= cfg.lightingRigLightAttachmentNames.len() || lightIdx > cfg.directLightConfigs.len() )
+			continue
+
+		if ( doCoords )
+		{
+			string attachmentName = cfg.lightingRigLightAttachmentNames[lightIdx]
+			int attachmentIdx     = state.lightingRig.LookupAttachment( attachmentName )
+			vector lightOrigin    = state.lightingRig.GetAttachmentOrigin( attachmentIdx )
+			vector lightAngles    = state.lightingRig.GetAttachmentAngles( attachmentIdx )
+			tweakLight.SetTweakLightOrigin( lightOrigin )
+			tweakLight.SetTweakLightAngles( lightAngles )
+		}
+
+		if ( doParams )
+		{
+			MenuSceneTweakLightConfig lightCfg = cfg.directLightConfigs[lightIdx]
+			tweakLight.SetTweakLightColor( lightCfg.col )
+			tweakLight.SetTweakLightBrightness( lightCfg.brightness )
+			tweakLight.SetTweakLightSpecIntensity( lightCfg.specularIntensity )
+			tweakLight.SetTweakLightDistance( lightCfg.distance )
+			tweakLight.SetTweakLightInnerCone( lightCfg.innerCone )
+			tweakLight.SetTweakLightCone( lightCfg.outerCone )
+			tweakLight.SetTweakLightHalfBrightFrac( lightCfg.halfBrightFrac )
+			tweakLight.SetTweakLightPBRFalloff( lightCfg.pbrFalloff )
+			tweakLight.SetTweakLightRealtimeShadows( lightCfg.castsShadows )
+			tweakLight.SetTweakLightUpdateShadowsEveryFrame( lightCfg.castsShadows )
+			                                               
+		}
+	}
+}
+#endif
+
+
+
+

@@ -1,0 +1,131 @@
+resource/ui/menus/dialog_clubs_participation.menu
+{
+	menu
+	{
+		ControlName				Frame
+		xpos					0
+		ypos					0
+		zpos					3
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		tabPosition				0
+		PaintBackgroundType		0
+		infocus_bgcolor_override	"0 0 0 0"
+		outoffocus_bgcolor_override	"0 0 0 0"
+		modal					1
+
+		DarkenBackground
+		{
+			ControlName				Label
+			xpos					0
+			ypos					0
+			wide					%100
+			tall					%100
+			labelText				""
+			bgcolor_override		"0 0 0 227"
+			visible					1
+			paintbackground			1
+		}
+
+		DialogFrame
+		{
+			ControlName				RuiPanel
+			wide					%100
+			tall					500
+			tall_nx_handheld		570		[$NX || $NX_UI_PC]
+			rui                     "ui/basic_image.rpak"
+			visible					1
+
+			pin_to_sibling			DarkenBackground
+			pin_corner_to_sibling	CENTER
+			pin_to_sibling_corner	CENTER
+		}
+
+		DialogContent
+        {
+            ControlName				RuiPanel
+            wide					%100
+            tall					500
+			tall_nx_handheld		570		[$NX || $NX_UI_PC]
+            labelText               ""
+            visible					1
+            rui                     "ui/club_announcement_content.rpak"
+
+            ruiArgs
+            {
+                headerText          "#LOBBY_CLUBS_JOIN_CONFIRM_NAME"
+                alphaOverride       "0.5"
+            }
+
+            proportionalToParent    1
+
+            pin_to_sibling			DialogFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        ClubDetailsPanel
+        {
+            ControlName				CNestedPanel
+
+            xpos                    0
+            ypos                    -112
+            ypos_nx_handheld        -75			[$NX || $NX_UI_PC]
+            zpos                    0
+
+            wide                    875
+			wide_nx_handheld        919			[$NX || $NX_UI_PC]
+            tall                    284
+			tall_nx_handheld        352			[$NX || $NX_UI_PC]
+
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/panel_club_details_participation.res"
+
+            pin_to_sibling          DialogContent
+            pin_corner_to_sibling   TOP
+            pin_to_sibling_corner   TOP
+        }
+
+		CrossplayDisabledWarning
+		{
+			ControlName				Label
+	        xpos					0
+	        ypos					32
+            ypos_nx_handheld        -22			[$NX || $NX_UI_PC]
+	        wide					%100
+	        tall					%100
+	        labelText				"#CLUBS_PARTICIPATION_WARNING_CROSSPLAY"
+	        textAlignment           north
+	        bgcolor_override		"255 0 0 227"
+	        visible					0
+	        paintbackground			0
+
+	        pin_to_sibling          ClubDetailsPanel
+	        pin_corner_to_sibling   TOP
+	        pin_to_sibling_corner   TOP
+		}
+
+    }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    FooterButtons
+    {
+		ControlName				CNestedPanel
+		InheritProperties       DialogFooterButtons
+
+		wide %50
+
+		pin_to_sibling			DialogFrame
+		pin_corner_to_sibling	BOTTOM_LEFT
+		pin_to_sibling_corner	BOTTOM
+    }
+}

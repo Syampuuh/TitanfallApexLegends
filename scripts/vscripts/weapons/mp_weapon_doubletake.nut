@@ -1,40 +1,58 @@
-global function MpWeaponDoubletake_Init
 global function OnWeaponPrimaryAttack_weapon_doubletake
 global function OnWeaponChargeLevelIncreased_weapon_doubletake
 global function OnWeaponChargeEnd_weapon_doubletake
 global function OnProjectileCollision_weapon_doubletake
+global function OnWeaponActivate_weapon_doubletake
+global function OnWeaponDeactivate_weapon_doubletake
 
-#if(false)
-
-#endif //
-
-//
-//
-
-//
-//
-const array<vector> BLAST_PATTERN_TRIPLE_TAKE = [
-	//
-	< 0.0, 0.0, 	0 >,
-	< -1.0, 0.0, 	0 >,
-	< 1.0, 0.0, 	0 >,
-]
+#if SERVER
+                                                          
+#endif              
 
 struct
 {
 	EnergyChargeWeaponData chargeWeaponData
 } file
 
-
-void function MpWeaponDoubletake_Init()
+void function OnWeaponActivate_weapon_doubletake( entity weapon )
 {
-	//
-	//
 
-	file.chargeWeaponData.blastPattern = BLAST_PATTERN_TRIPLE_TAKE
-	//
-	//
-	//
+		if ( weapon.HasMod( KINETIC_LOADER_HOPUP ) )
+		{
+			#if SERVER
+				                                                                          
+					                                      
+			#endif
+			OnWeaponActivate_Kinetic_Loader( weapon )
+		}
+#if SERVER
+		    
+		 
+			                                             
+				                                         
+
+			                                                                  
+			 
+				                                   
+				                          
+			 
+		 
+
+		                                       
+
+		                    
+			      
+
+		                        
+		 
+			                                                                                  
+		 
+	#endif
+}
+
+void function OnWeaponDeactivate_weapon_doubletake( entity weapon )
+{
+	OnWeaponDeactivate_Kinetic_Loader( weapon )
 }
 
 var function OnWeaponPrimaryAttack_weapon_doubletake( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -43,13 +61,13 @@ var function OnWeaponPrimaryAttack_weapon_doubletake( entity weapon, WeaponPrima
 	return Fire_DoubleTake( weapon, attackParams, playerFired)
 }
 
-#if(false)
-
-
-
-
-
-#endif //
+#if SERVER
+                                                                                                                
+ 
+	                        
+	                                                           
+ 
+#endif              
 
 int function Fire_DoubleTake( entity weapon, WeaponPrimaryAttackParams attackParams, bool playerFired )
 {
@@ -58,12 +76,12 @@ int function Fire_DoubleTake( entity weapon, WeaponPrimaryAttackParams attackPar
 	if ( playerFired )
 	{
 		float spreadAngle = weapon.GetAttackSpreadAngle()
-		//
+		                                      
 		patternScale += spreadAngle
 	}
 	else
 	{
-		patternScale = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_blast_pattern_npc_scale" ) )
+		patternScale = weapon.GetWeaponSettingFloat( eWeaponVar.blast_pattern_npc_scale )
 	}
 
 	bool ignoreSpread = false
@@ -80,13 +98,17 @@ void function OnWeaponChargeEnd_weapon_doubletake( entity weapon )
 	EnergyChargeWeapon_OnWeaponChargeEnd( weapon, file.chargeWeaponData )
 }
 
-void function OnProjectileCollision_weapon_doubletake( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_weapon_doubletake( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical, bool isPassthrough )
 {
-	#if(false)
+	#if SERVER
+                           
+                                                               
+                                
 
+		                                                                                                      
+		                                                           
+			      
 
-
-
-
-#endif
+		                                       
+	#endif
 }

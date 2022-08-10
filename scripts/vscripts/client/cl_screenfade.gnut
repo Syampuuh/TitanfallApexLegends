@@ -6,8 +6,9 @@ global function UpdateScreenFade
 
 global function ScreenCoverTransition
 global function ServerToClient_ScreenCoverTransition
+global function SetCustomScreenFadeAsset
 
-//
+                                                 
 global const float SCREEN_COVER_TRANSITION_IN_DURATION = 0.7
 global const float SCREEN_COVER_TRANSITION_OUT_DURATION = 0.9
 
@@ -19,6 +20,8 @@ struct
 	void functionref() screenFadeFunc
 
 	float screenCoverEndTime = 0.0
+
+	asset ruiAssetName = $"ui/screen_fade.rpak"
 } file
 
 void function ClScreenfade_Init()
@@ -29,25 +32,31 @@ void function ClScreenfade_Init()
 	thread PlayerPainSoundThread()
 	thread PlayerDeathfieldSoundThread()
 
-	file.screenFade = RuiCreate( $"ui/screen_fade.rpak", clGlobal.topoFullScreen, RUI_DRAW_POSTEFFECTS, RUI_SORT_SCREENFADE )
+	asset ruiAssetName = file.ruiAssetName
+
+	file.screenFade = RuiCreate( ruiAssetName, clGlobal.topoFullScreen, RUI_DRAW_POSTEFFECTS, RUI_SORT_SCREENFADE )
 	RuiSetResolutionToScreenSize( file.screenFade )
 
 	if ( IsLobby() )
 		return
 
 	RuiSetFloat3( file.screenFade, "fadeColor", <0, 0, 0> )
-	RuiSetFloat( file.screenFade, "fadeAlpha", 1.0 )
+	RuiSetFloat( file.screenFade, "fadeAlpha", 0.0 )
+	RuiSetImage( file.screenFade, "emblemImage", GetModeEmblemImage( GetCurrentPlaylistName() ) )
 }
 
+void function SetCustomScreenFadeAsset( asset fade )
+{
+	file.ruiAssetName = fade
+}
 
 void function ScreenCoverTransition( float endTime )
 {
 	printt( "Calling ScreenCoverTransition with endTime", endTime, " at time", Time() )
-	DumpStack()
-	//
-	//
+	                            
+	                                                            
 
-	//
+	                                                                                                                                                    
 	if ( endTime > file.screenCoverEndTime )
 	{
 		Chroma_BeginBannerTransition()
@@ -57,12 +66,6 @@ void function ScreenCoverTransition( float endTime )
 
 		file.screenCoverEndTime = endTime
 		RuiSetGameTime( file.screenFade, "coverEndTime", endTime )
-		#if(true)
-			RuiSetBool( file.screenFade, "isEliteGame", IsEliteGame() )
-			if ( IsEliteGame() )
-				sound = "UI_Survival_Intro_BannerTop5_Appear"
-		#endif
-
 		EmitSoundOnEntity( GetLocalClientPlayer(), sound )
 
 		array<entity> teamPlayers = GetPlayerArrayOfTeam( GetLocalClientPlayer().GetTeam() )
@@ -84,12 +87,6 @@ void function ScreenCoverTransition( float endTime )
 		}
 
 		sound = "UI_Survival_Intro_Banner_Disappear"
-
-		#if(true)
-			if ( IsEliteGame() )
-				sound = "UI_Survival_Intro_BannerTop5_Disappear"
-		#endif
-
 
 		EmitSoundOnEntityAfterDelay( GetLocalClientPlayer(), sound, max( 0, endTime - Time() - SCREEN_COVER_TRANSITION_OUT_DURATION - 0.1 ) )
 	}
@@ -116,13 +113,13 @@ void function UpdateScreenFadeInternal()
 {
 	table fadeParams = expect table( GetFadeParams() )
 
-	//
-	/*
+	                           
+	                                       
 
+	                              
+		                                                          
 
-
-
-*/
+	                        
 
 	RuiSetFloat3( file.screenFade, "fadeColor", <expect int( fadeParams.r ) / 255.0, expect int( fadeParams.g ) / 255.0, expect int( fadeParams.b ) / 255.0> )
 	RuiSetFloat( file.screenFade, "fadeAlpha", expect int( fadeParams.a ) / 255.0 )
@@ -152,40 +149,6 @@ void function RegisterDoomProtectionHintDamage( float newAmount )
 }
 
 
-void function DoomProtectionHintThread()
-{
-	const float HINT_DURATION = 4.0
-	const float THRESHOLD_PILOT = 1000
-	const float THRESHOLD_TITAN = 2000
-	const float FIRSTTIME_SCALE = 0.6
-
-	while ( true )
-	{
-		WaitFrame()
-
-		entity player = GetLocalViewPlayer()
-		if ( !IsValid( player ) )
-			continue
-
-		float threshold = player.IsTitan() ? THRESHOLD_TITAN : THRESHOLD_PILOT
-		if ( g_doomProtectionHintLastShowedTime == 0.0 )
-			threshold *= FIRSTTIME_SCALE
-
-		if ( g_doomProtectionHintDamage > threshold )
-		{
-			wait 0.4
-			player = GetLocalViewPlayer()
-			if ( IsValid( player ) )
-			{
-				SetTimedEventNotification( HINT_DURATION, player.IsTitan() ? "#NOTIFY_HINT_TITAN_USE_FINISHERS" : "#NOTIFY_HINT_PILOTS_USE_FINISHERS" )
-				g_doomProtectionHintLastShowedTime = Time()
-				g_doomProtectionHintDamage = 0.0
-			}
-		}
-	}
-}
-
-
 string function GetPainSound( entity player, string varName )
 {
 	return player.GetPlayerSettingString( varName )
@@ -197,7 +160,7 @@ void function PlayerDeathfieldSoundThread()
 	entity ourPlayer = null
 	bool arePlaying  = false
 
-	const float START_PLAYING_DIST = -30.0        //
+	const float START_PLAYING_DIST = -30.0                                               
 	const float STOP_PLAYING_DIST = 0.0
 
 	const string SOUND_DEATHFIELD_START = "Survival_Circle_Enter"
@@ -207,6 +170,12 @@ void function PlayerDeathfieldSoundThread()
 	while ( true )
 	{
 		bool shouldPlay = false
+		                                                                                                                                 
+		bool shouldCheckOtherDeathFieldSources = false
+                                
+                                  
+                                            
+        
 
 		entity localViewPlayer = GetLocalViewPlayer()
 		if ( !IsValid( localViewPlayer ) )
@@ -215,7 +184,7 @@ void function PlayerDeathfieldSoundThread()
 		else if ( !IsAlive( localViewPlayer ) )
 		{
 		}
-		else if ( !DeathField_IsActive() )
+		else if ( !DeathField_IsActive( localViewPlayer.DeathFieldIndex() ) && !shouldCheckOtherDeathFieldSources )
 		{
 		}
 		else if ( (ourPlayer != null) && (ourPlayer != localViewPlayer) )
@@ -223,31 +192,41 @@ void function PlayerDeathfieldSoundThread()
 		}
 		else
 		{
-			//
+			     
 			vector eyePos      = localViewPlayer.EyePosition()
-			float frontierDist = DeathField_PointDistanceFromFrontier( eyePos )
+			float frontierDist = DeathField_PointDistanceFromFrontier( eyePos, localViewPlayer.DeathFieldIndex() )
 			if ( arePlaying && (frontierDist < STOP_PLAYING_DIST) )
 				shouldPlay = true
 			if ( !arePlaying && (frontierDist < START_PLAYING_DIST) )
 				shouldPlay = true
+
+                                 
+                                                                                                             
+                                                                                                           
+                      
+         
 		}
+
+		                                            
+		                                                     
+		entity clientPlayer = GetLocalClientPlayer()
 
 		if ( !arePlaying && shouldPlay )
 		{
 			ourPlayer = localViewPlayer
 			arePlaying = true
 
-			EmitSoundOnEntity( ourPlayer, SOUND_DEATHFIELD_START )
-			EmitSoundOnEntity( ourPlayer, SOUND_DEATHFIELD_CONSTANT )
+			EmitSoundOnEntity( clientPlayer, SOUND_DEATHFIELD_START )
+			EmitSoundOnEntity( clientPlayer, SOUND_DEATHFIELD_CONSTANT )
 		}
 		else if ( arePlaying && !shouldPlay )
 		{
-			if ( IsValid( ourPlayer ) )
+			if ( IsValid( clientPlayer ) )
 			{
-				//
-				StopSoundOnEntity( ourPlayer, SOUND_DEATHFIELD_CONSTANT )
-				//
-				EmitSoundOnEntity( ourPlayer, SOUND_DEATHFIELD_STOP )
+				  
+				StopSoundOnEntity( clientPlayer, SOUND_DEATHFIELD_CONSTANT )
+				  
+				EmitSoundOnEntity( clientPlayer, SOUND_DEATHFIELD_STOP )
 			}
 
 			arePlaying = false
@@ -263,11 +242,11 @@ void function PlayerDeathfieldSoundThread()
 
 void function PlayerPainSoundThread()
 {
-	//
-	//
-	//
-	//
-	//
+	                  
+	                                           
+	                                                     
+	                 
+	                
 
 	float HEALTH_PERCENT_LAYER1     = 0.85
 	float HEALTH_PERCENT_LAYER1_END = 0.85
@@ -276,14 +255,14 @@ void function PlayerPainSoundThread()
 	float HEALTH_PERCENT_LAYER3     = 0.55
 	float HEALTH_PERCENT_LAYER3_END = 0.59
 
-	if ( true )    //
+	if ( true )                                              
 	{
 		HEALTH_PERCENT_LAYER1 = 0.66
 		HEALTH_PERCENT_LAYER1_END = 0.66
 		HEALTH_PERCENT_LAYER2 = 0.33
 		HEALTH_PERCENT_LAYER2_END = 0.33
-		HEALTH_PERCENT_LAYER3 = 0.33 //
-		HEALTH_PERCENT_LAYER3_END = 0.33 //
+		HEALTH_PERCENT_LAYER3 = 0.33                                                                                             
+		HEALTH_PERCENT_LAYER3_END = 0.33                                                                                             
 	}
 
 	entity ourPlayer      = null
@@ -354,7 +333,7 @@ void function PlayerPainSoundThread()
 		{
 			if ( shouldPlayLayer1 )
 			{
-				//
+				                            
 				arePlayingLayer1 = true
 				Assert( (ourPlayer == null) || (ourPlayer == localViewPlayer) )
 				ourPlayer = localViewPlayer
@@ -371,7 +350,7 @@ void function PlayerPainSoundThread()
 			}
 			else
 			{
-				//
+				                            
 				if ( IsValid( ourPlayer ) )
 				{
 					if ( soundLayer1Start != "" )
@@ -391,7 +370,7 @@ void function PlayerPainSoundThread()
 		{
 			if ( shouldPlayLayer2 )
 			{
-				//
+				                            
 				arePlayingLayer2 = true
 				Assert( (ourPlayer == null) || (ourPlayer == localViewPlayer) )
 				ourPlayer = localViewPlayer
@@ -408,7 +387,7 @@ void function PlayerPainSoundThread()
 			}
 			else
 			{
-				//
+				                            
 				if ( IsValid( ourPlayer ) )
 				{
 					if ( soundLayer2Start != "" )
@@ -428,7 +407,7 @@ void function PlayerPainSoundThread()
 		{
 			if ( shouldPlayLayer3 )
 			{
-				//
+				                            
 				arePlayingLayer3 = true
 				Assert( (ourPlayer == null) || (ourPlayer == localViewPlayer) )
 				ourPlayer = localViewPlayer
@@ -445,7 +424,7 @@ void function PlayerPainSoundThread()
 			}
 			else
 			{
-				//
+				                            
 				if ( IsValid( ourPlayer ) )
 				{
 					if ( soundLayer3Start != "" )
@@ -469,15 +448,15 @@ void function PlayerPainSoundThread()
 }
 
 
-/*
+  
+                                                                  
+ 
+	                                                                   
 
-
-
-
-
-
-
-
-
-*/
+	            
+		                                             
+	    
+		                                             
+ 
+  
 

@@ -5,19 +5,19 @@ global function OnWeaponReadyToFire_WeaponCreepingBombardment
 global function OnWeaponTossReleaseAnimEvent_WeaponCreepingBombardment
 global function OnWeaponDeactivate_WeaponCreepingBombardment
 
-#if(false)
-
+#if SERVER
+                                        
 #endif
 
-//
+               
 const string CREEPING_BOMBARDMENT_MISSILE_WEAPON = "mp_weapon_creeping_bombardment_weapon"
 const SFX_BOMBARDMENT_EXPLOSION_BANGALORE = "skyway_scripted_titanhill_mortar_explode"
 
-const float CREEPING_BOMBARDMENT_WIDTH 		 	= 2750 //
+const float CREEPING_BOMBARDMENT_WIDTH 		 	= 2750                                            
 const float CREEPING_BOMBARDMENT_BOMBS_PER_STEP = 6
-const int 	CREEPING_BOMBARDMENT_STEP_COUNT		= 6//
-const float CREEPING_BOMBARDMENT_STEP_INTERVAL 	= 0.75//
-const float CREEPING_BOMBARDMENT_DELAY 			= 2.0 //
+const int 	CREEPING_BOMBARDMENT_STEP_COUNT		= 6                                                                       
+const float CREEPING_BOMBARDMENT_STEP_INTERVAL 	= 0.75                                                              
+const float CREEPING_BOMBARDMENT_DELAY 			= 2.0                                                                       
 
 const float CREEPING_BOMBARDMENT_SHELLSHOCK_DURATION = 8.0
 
@@ -27,6 +27,14 @@ const asset FX_CREEPING_BOMBARDMENT_GLOW_3P = $"P_bFlare_glow_3P"
 
 const string CREEPING_BOMBARDMENT_FLARE_SOUND 	= "Bangalore_Ultimate_Flare_Hiss"
 
+struct
+{
+	#if SERVER
+		                                                           
+	#endif
+
+} file
+
 void function MpWeaponGrenadeCreepingBombardment_Init()
 {
 	PrecacheWeapon( CREEPING_BOMBARDMENT_MISSILE_WEAPON )
@@ -35,10 +43,10 @@ void function MpWeaponGrenadeCreepingBombardment_Init()
 	PrecacheParticleSystem( FX_CREEPING_BOMBARDMENT_GLOW_FP )
 	PrecacheParticleSystem( FX_CREEPING_BOMBARDMENT_GLOW_3P )
 
-	#if(false)
-//
-
-#endif //
+	#if SERVER
+		                                                                                                                       
+		                                                                                                                                
+	#endif         
 
 }
 
@@ -62,17 +70,18 @@ var function OnWeaponTossReleaseAnimEvent_WeaponCreepingBombardment( entity weap
 	entity weaponOwner = weapon.GetWeaponOwner()
 	Assert( weaponOwner.IsPlayer() )
 
-	#if(false)
-
-
-
-
-#endif
+	#if SERVER
+		                                                                        
+		                                    
+			                                                                                       
+		                                                                
+		                                                      
+	#endif
 
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 
-void function OnProjectileCollision_WeaponCreepingBombardment( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_WeaponCreepingBombardment( entity projectile, vector pos, vector normal, entity hitEnt, int hitBox, bool isCritical, bool isPassthrough )
 {
 	entity player = projectile.GetOwner()
 	if ( hitEnt == player )
@@ -81,93 +90,99 @@ void function OnProjectileCollision_WeaponCreepingBombardment( entity projectile
 	if ( projectile.GrenadeHasIgnited() )
 		return
 
-	table collisionParams =
-	{
-		pos = pos,
-		normal = normal,
-		hitEnt = hitEnt,
-		hitbox = hitbox
-	}
+	DeployableCollisionParams cp
+	cp.pos = pos
+	cp.normal = normal
+	cp.hitEnt = hitEnt
+	cp.hitBox = hitBox
+	cp.isCritical = isCritical
+                     
+	cp.deployableFlags = eDeployableFlags.VEHICLES_NO_STICK
+                           
 
-	bool result = PlantStickyEntityOnWorldThatBouncesOffWalls( projectile, collisionParams, 0.7 )
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
+	bool didStick = PlantStickyEntityOnWorldThatBouncesOffWalls( projectile, cp, 0.7 )
+#if SERVER
+	                
+	 
+                       
+		                                  
+			                                                                 
+                             
+		      
+	 
+	                                                                            
 #endif
 	projectile.GrenadeIgnite()
 	projectile.SetDoesExplode( false )
 }
 
-#if(false)
+#if SERVER
+                                                                                
+ 
+	                                                                                                         
+	                              
+		      
 
+	                                                         
+	                                                               
+	                                                      
+	                          
+	 
+		                                                                                     
+		 
+			                                       
+		 
+		                                                                                            
+		 
+			                                                                                      
+		 
+	 
 
-//
+	                        
+		                                                                               
+ 
 
+                                                                     
+ 
+	                                      
 
+	                        
+		      
 
-//
-//
+	                                                                                                
+	                                    
+		      
 
+	                                      
 
+	                                       
+	                                                                                                                                                                                    
+	          
+	                                       
+		                                                                      
+	    
+		                                                                                                                                                         
+	                                                                                             
 
+	                                                                 
 
+	                       
+	                                                                                             
+		                                              
+	    
+		                                               
 
+	                                                                                                                          
+		                           
+		                                                                 
+		                                
+		                                   
+		                            
 
+	                                                                                     
+	                                          
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                          
+		                      
+ 
 #endif

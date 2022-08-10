@@ -66,6 +66,7 @@
     ServerSearchMessage
     {
         ControlName				Label
+        ypos					230
         auto_wide_tocontents 	1
         auto_tall_tocontents 	1
         visible					0
@@ -91,5 +92,46 @@
         pin_to_sibling			ServerSearchMessage
         pin_corner_to_sibling	TOP
         pin_to_sibling_corner	BOTTOM
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    RuiIssuesTransparency [$CVAR_developer]
+    {
+        ControlName				RuiPanel
+        wide					1920
+        tall					1080
+        rui                     "ui/rui_issues_transparency.rpak"
+        visible					0
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
+    }
+
+    RuiIssuesSamplingBlur [$CVAR_developer]
+    {
+        ControlName				RuiPanel
+        wide					1920
+        tall					1080
+        rui                     "ui/rui_issues_sampling_blur.rpak"
+        visible					0
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
+    }
+
+    RuiIssues9SliceScaling [$CVAR_developer]
+    {
+        ControlName				RuiPanel
+        wide					1920
+        tall					1080
+        rui                     "ui/rui_issues_9_slice_scaling.rpak"
+        visible					0
+
+        pin_to_sibling			PanelFrame
+        pin_corner_to_sibling	CENTER
+        pin_to_sibling_corner	CENTER
     }
 }

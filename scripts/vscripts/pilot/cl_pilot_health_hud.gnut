@@ -4,9 +4,11 @@ global function ClHealthHud_Init
 
 global function HealthHUD_ViewPlayerChanged
 global function HealthHUD_Update
+global function HealthHUD_StopUpdate
 global function DamageOverlayUpdate
 global function PilotEMP_Internal
 global function HealthHUD_ClearFX
+global function PlayShieldOverlayFX
 
 global function SetHealthDisplayRange
 
@@ -27,19 +29,18 @@ const FX_SHIELD_BREAK = $"P_armor_FP_break"
 const FX_SHIELD_CHARGING = $"P_armor_FP_charging_CP"
 const FX_SHIELD_FULL = $"P_armor_FP_charged_full_CP"
 
-const bool HAS_RUI_HEALTH_OVERLAY = true
 struct
 {
-	//
-	var healthFX
-	var shieldFX
-	var shieldBreakFX
-	var shieldChargingFX
-	var shieldFullFX
+	                     
+	int healthFX
+	int shieldFX
+	int shieldBreakFX
+	int shieldChargingFX
+	int shieldFullFX
 
 	var healthOverlay
 
-	float healthDisplayMax
+	float healthDisplayMax = 100
 	float healthDisplayMin
 
 	int healthFXCount = 0
@@ -48,8 +49,8 @@ struct
 
 void function ClHealthHud_Init()
 {
-	//
-	//
+	                                                                                                          
+	                                                             
 
 	PrecacheParticleSystem( FX_HEALTH )
 	file.healthFX = GetParticleSystemIndex( FX_HEALTH )
@@ -74,27 +75,23 @@ void function ClHealthHud_Init()
 	file.healthDisplayMin = DEFAULT_HEALTH_DISPLAY_MIN
 	file.healthDisplayMax = DEFAULT_HEALTH_DISPLAY_MAX
 
-	#if(true)
-		file.healthOverlay = RuiCreate( $"ui/hurt_overlay.rpak", clGlobal.topoFullscreenHudPermanent, RUI_DRAW_HUD, 0 )
-		RuiSetResolutionToScreenSize( file.healthOverlay )
-		UISize screenSize = GetVirtualScreenSize( GetScreenSize().width, GetScreenSize().height )
-		RuiSetFloat2( file.healthOverlay, "actualRes", <float( screenSize.width ), float( screenSize.height ), 0> )
-	#endif
+	file.healthOverlay = RuiCreate( $"ui/hurt_overlay.rpak", clGlobal.topoFullscreenHudPermanent, RUI_DRAW_HUD, 0 )
+	RuiSetResolutionToScreenSize( file.healthOverlay )
+	UISize screenSize = GetVirtualScreenSize( GetScreenSize().width, GetScreenSize().height )
+	RuiSetFloat2( file.healthOverlay, "actualRes", <float( screenSize.width ), float( screenSize.height ), 0> )
 
 	AddClientCallback_OnResolutionChanged( HealthOverlaySetSize )
 
-	//
+	                                           
 	AddCallback_OnViewPlayerChanged( HealthHUD_ViewPlayerChanged )
 }
 
 
 void function HealthOverlaySetSize()
 {
-#if(true)
 	RuiSetResolutionToScreenSize( file.healthOverlay )
 	UISize screenSize = GetVirtualScreenSize( GetScreenSize().width, GetScreenSize().height )
 	RuiSetFloat2( file.healthOverlay, "actualRes", <float( screenSize.width ), float( screenSize.height ), 0> )
-#endif
 }
 
 
@@ -122,7 +119,10 @@ void function InitHealthDisplayRange( entity player )
 {
 	float rangeScaler
 
-	//
+	if ( player.GetMaxHealth() == 0 )
+		return
+
+	                                                     
 	if ( clGlobal.pilotRedDamageWarningScalar != 1.0 )
 	{
 		rangeScaler = clGlobal.pilotRedDamageWarningScalar
@@ -201,13 +201,29 @@ void function SettingsChange_Update( entity player )
 	}
 }
 
+void function HealthHUD_StopUpdate( entity player )
+{
+	if ( !IsValid( player ) )
+		return
+
+	if ( player != GetLocalClientPlayer() )
+		return
+
+	Signal( clGlobal.signalDummy, "End_HealthHUD_Update" )
+	HealthHUD_ClearFX( player )
+}
+
 
 void function HealthHUD_Update( entity player )
 {
-	#if(false)
+	if ( (GetGameState() <= eGameState.PickLoadout) && !IsAlive( player ) )
+		return
 
-
-#endif //
+                         
+		                                                                                                            
+		if ( Control_IsModeEnabled() && player.GetPlayerNetBool( "Control_IsPlayerOnSpawnSelectScreen" ) )
+			return
+                               
 
 	player.EndSignal( "OnDestroy" )
 	Signal( clGlobal.signalDummy, "End_HealthHUD_Update" )
@@ -216,21 +232,21 @@ void function HealthHUD_Update( entity player )
 	OnThreadEnd(
 		function() : (  )
 		{
-			#if(true)
-				RuiSetFloat( file.healthOverlay, "healthFrac", 1.0 )
-				RuiSetFloat2( file.healthOverlay, "overlayRange", <file.healthDisplayMax * 0.25, file.healthDisplayMax, 0.0> )
-			#endif
+			RuiSetFloat( file.healthOverlay, "healthFrac", 1.0 )
+			RuiSetFloat2( file.healthOverlay, "overlayRange", <file.healthDisplayMax * 0.25, file.healthDisplayMax, 0.0> )
 		}
 	)
 
-	#if(true)
+	if ( !IsSpectatingThirdPerson() && ( player.GetObserverMode() != OBS_MODE_ROAMING && player.GetTeam() != TEAM_SPECTATOR ) )
+	{
 		RuiTrackFloat( file.healthOverlay, "healthFrac", player, RUI_TRACK_HEALTH )
 		RuiSetFloat2( file.healthOverlay, "overlayRange", <file.healthDisplayMax * 0.25, file.healthDisplayMax, 0.0> )
-	#endif
+	}
 
 	float healthFrac = GetHealthFrac( player )
 	float shieldFrac = GetShieldHealthFrac( player )
 	int shieldTier = EquipmentSlot_GetEquipmentTier( player, "armor" )
+
 	if ( healthFrac < 1.0 )
 		DamageOverlayUpdate( player, healthFrac, 0.99 )
 
@@ -245,12 +261,21 @@ void function HealthHUD_Update( entity player )
 		if ( IsWatchingReplay() && GetLocalViewPlayer() == GetLocalClientPlayer() )
 			continue
 
-		if ( IsSpectatingThirdPerson() )
+		if ( IsSpectatingThirdPerson() || ( player.GetObserverMode() == OBS_MODE_ROAMING && player.GetTeam() == TEAM_SPECTATOR ) )
+		{
+			RuiSetFloat( file.healthOverlay, "healthFrac", 1.0 )
+			RuiSetFloat2( file.healthOverlay, "overlayRange", <file.healthDisplayMax * 0.25, file.healthDisplayMax, 0.0> )
 			continue
+		}
 
 		if ( !IsAlive( player ) )
 		{
-			//
+                           
+				                                                                                                                                   
+				if ( Control_IsModeEnabled() )
+					break
+                                 
+			                          
 		}
 		else
 		{
@@ -260,6 +285,7 @@ void function HealthHUD_Update( entity player )
 
 			shieldFrac = GetShieldHealthFrac( player )
 			shieldTier = EquipmentSlot_GetEquipmentTier( player, "armor" )
+
 			if ( shieldFrac != lastShieldFrac || shieldTier != lastShieldTier )
 				ShieldOverlayUpdate( player, shieldFrac, lastShieldFrac, player.GetShieldHealthMax() )
 
@@ -344,19 +370,20 @@ void function DamageOverlayUpdate( entity player, float healthFrac, float lastHe
 	entity cockpit = player.GetCockpit()
 	if ( healthFrac < file.healthDisplayMax && healthFrac < lastHealthFrac && cockpit && !IsSpectating() )
 	{
-		int fxHandle = StartParticleEffectOnEntity( cockpit, file.healthFX, FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+		int fxHandle = StartParticleEffectOnEntity( cockpit, file.healthFX, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
+		EffectSetIsWithCockpit( fxHandle, true )
 		player.s.healthFX.append( fxHandle )
 		file.healthFXCount++
 	}
 }
 
-#if(true)
+#if MP
 void function ShieldOverlayUpdate( entity player, float shieldFrac, float lastShieldFrac, int shieldDisplayMax )
 {
 	if ( GetCurrentPlaylistVarInt( "health_overlay_enabled", 1 ) == 0 )
 		return
 
-	var particleSystemIdx
+	int particleSystemIdx
 
 	if ( shieldFrac <= 0.0 )
 	{
@@ -366,29 +393,39 @@ void function ShieldOverlayUpdate( entity player, float shieldFrac, float lastSh
 	{
 		particleSystemIdx = file.shieldFullFX
 	}
-	else if ( shieldFrac < 1.0 && (lastShieldFrac < shieldFrac) )
+	else if ( shieldFrac < 1.0 && ( lastShieldFrac < shieldFrac ) )
 	{
+		                                                                                                
+		if ( player.IsMostRecentShieldChangeFromSingleSource( SHIELD_CHANGE_SOURCE_REGEN, player.GetShieldHealth(), 0.5 ) )
+			return
+
 		particleSystemIdx = file.shieldChargingFX
 	}
-	else if ( shieldFrac < lastShieldFrac)
+	else if ( shieldFrac < lastShieldFrac )
 	{
 		particleSystemIdx = file.shieldFX
+	}
+	else
+	{
+		return
 	}
 
 	PlayShieldOverlayFX( player, particleSystemIdx )
 }
 
-void function PlayShieldOverlayFX( entity player, var particleSystemIdx )
+void function PlayShieldOverlayFX( entity player, int particleSystemIdx )
 {
 	entity cockpit = player.GetCockpit()
 	if ( !cockpit )
 		return
 
-	int fxHandle = StartParticleEffectOnEntity( cockpit, particleSystemIdx, FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+	int fxHandle = StartParticleEffectOnEntity( cockpit, particleSystemIdx, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
 
-	int armorTier = EquipmentSlot_GetEquipmentTier( GetLocalViewPlayer(), "armor" )
+	int armorTier = maxint( 1, EquipmentSlot_GetEquipmentTier( GetLocalViewPlayer(), "armor" ) )
+
 	vector shieldColor = GetFXRarityColorForTier( armorTier )
 
+	EffectSetIsWithCockpit( fxHandle, true )
 	EffectSetControlPointVector( fxHandle, 1, shieldColor )
 }
-#endif
+#endif     

@@ -11,7 +11,6 @@ WeaponData
 	"menu_icon"										"rui/pilot_loadout/suit/light"
     "hud_icon"										"rui/hud/tactical_icons/tactical_wraith"
 
-	"weaponClass" 									"human"
 	"weaponType"									"tactical"
 	"fire_mode"   									"offhand"
 	"offhand_default_inventory_slot"				"1"
@@ -20,7 +19,6 @@ WeaponData
     "hide_holstered_sidearm_when_active"			"1"
     "zoom_effects"                                  "0"
 
-	"OnWeaponPrimaryAttack"							"OnWeaponPrimaryAttack_ability_phase_walk"
 	"OnWeaponChargeBegin"							"OnWeaponChargeBegin_ability_phase_walk"
 	"OnWeaponChargeEnd"								"OnWeaponChargeEnd_ability_phase_walk"
 	"OnWeaponActivate"								"OnWeaponActivate_ability_phase_walk"
@@ -35,17 +33,15 @@ WeaponData
 	"stat_accuracy"   								"50"
 	"stat_rof"										"40"
 
-	"sound_dryfire"   								"titan_dryfire"
-
 	// Effects
 	"impact_effect_table" 							"exp_rocket_dumbfire"
-	"projectile_trail_effect_0" 					"Rocket_Smoke_SMALL_Titan_2"
+	"projectile_trail_effect_0_1p" 					"Rocket_Smoke_SMALL_Titan_2"
+	"projectile_trail_effect_0_3p" 					"Rocket_Smoke_SMALL_Titan_2"
 	"projectile_trail_attachment" 					"exhaust"
 	"vortex_absorb_effect"							"wpn_vortex_projectile_rocket_FP"
 	"vortex_absorb_effect_third_person"				"wpn_vortex_projectile_rocket"
 	"vortex_absorb_sound"							"Vortex_Shield_AbsorbRocket"
 	"vortex_absorb_sound_1p_vs_3p"					"Vortex_Shield_AbsorbRocket_1P_VS_3P"
-	"sound_weapon_ready"							"survival_ui_tactical_ready"
 	"projectile_adjust_to_gun_barrel"				"0"
 
 	"player_hands_attachment"						"L_FOREARM"
@@ -55,19 +51,26 @@ WeaponData
 	"explosion_inner_radius"  						"50"
 	"explosionradius" 								"120"
 	"impulse_force"   								"1"
+	"locks_weapon_change"							"1"
 
 	// Ammo
 	"cooldown_type"                                 "ammo_instant"
 	"ammo_display"									"count"
-	"ammo_clip_size"   								"250"
+
+	"ammo_drains_to_empty_on_fire"					"0"
+	"ammo_no_remove_from_clip"						"0"
+
+    "deploy_time"   								"1.25"
+
+    "ammo_clip_size"   								"250"
 	"ammo_default_total"							"250"
 	"ammo_min_to_fire"								"250"
 	"ammo_per_shot"									"250"
 	"ammo_stockpile_max"							"250"
-	"ammo_drains_to_empty_on_fire"					"0"
-	"ammo_no_remove_from_clip"						"0"
+	"no_ammo_used_on_primary_attack"	            "1"
 
-    "charge_time"									"3.0"
+	"charge_time"									"4.0"
+
     "charge_cooldown_time"							"1.0"
     "charge_cooldown_delay"   						"0.5"
     "charge_end_forces_fire"  						"1"
@@ -76,32 +79,21 @@ WeaponData
     "charge_maintained_until_fired"					"1"
     "charge_allow_midway_charge"					"0"
     "charge_effect_show_during_drain"				"0"
+    "charge_finish_primary_attack_on_cancel"		"1"
+
+    "primary_fire_does_not_block_sprint"            "1"
 
 	//Regen Ammo
 	"regen_ammo_refill_rate"						"10"
 	"regen_ammo_refill_start_delay"					"0.0"
 
-	MP_BASE
-	{
-		// Damage - When Used by Players
-		"damage_near_distance"							"800"
-		"damage_far_distance" 							"1200"
-		"damage_near_value"   							"900"
-		"damage_far_value"								"900"
-		"explosion_damage"								"100"
-		"explosion_damage_heavy_armor"					"250"
-	}
-
-	SP_BASE
-	{
-		// Damage - When Used by Players
-		"damage_near_distance"							"800"
-		"damage_far_distance" 							"1200"
-		"damage_near_value"   							"900"
-		"damage_far_value"								"900"
-		"explosion_damage"								"100"
-		"explosion_damage_heavy_armor"					"250"
-	}
+    // Damage - When Used by Players
+    "damage_near_distance"							"800"
+    "damage_far_distance" 							"1200"
+    "damage_near_value"   							"900"
+    "damage_far_value"								"900"
+    "explosion_damage"								"100"
+    "explosion_damage_heavy_armor"					"250"
 
 	// Behavior
 	"fire_rate"   									"1.0"
@@ -109,10 +101,9 @@ WeaponData
 	"zoom_time_out"   								"0.01"
 	"zoom_fov"										"50"
 	"reload_time" 									"0"
-	"holster_time"									"0.15"
-	//"deploy_time" 								"0.75"  //want to be driven by animation
 	"lower_time"  									"0.5"
 	"raise_time"  									"0.5"
+    "holster_time"									"0.15"
 	"vortex_refire_behavior"  						"rocket"
 	"allow_empty_fire"								"0"
 	"reload_enabled"  								"0"
@@ -254,6 +245,35 @@ WeaponData
 		ult_active
 		{
 			"offhand_active_slot"       "altHand"
+			"deploy_time"   			"0.4"
+			"activitymodifier1p"		"ult_active"
+        }
+
+                               
+        arenas_tac_max
+        {
+			"ammo_clip_size"   								"4"
+            "ammo_default_total"							"2"
+            "ammo_min_to_fire"								"1"
+            "ammo_per_shot"									"1"
+            "ammo_stockpile_max"							"1"
+        }
+
+        arenas_tac_max_cooldown
+        {
+            "ammo_regen_takes_from_stockpile"               "1"
+            "ammo_default_total"							"250" // 250 * 1 charges
+            "ammo_stockpile_max"							"750" // 250 * 3 charges
+        }
+           
+
+        extra_tactical_charges
+        {
+            "ammo_clip_size"   								"750"
+            "ammo_default_total"							"750"
+            "ammo_min_to_fire"								"350"
+            "ammo_per_shot"									"350"
+            "ammo_stockpile_max"							"750"
         }
 	}
 }

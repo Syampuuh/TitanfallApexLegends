@@ -1,0 +1,142 @@
+global function PassiveGrenadier_Init
+                               
+#if SERVER
+                                               
+#endif
+
+#if CLIENT
+global function ServerToClient_DisplayToggleThrowPowerHintForPlayer
+#endif
+      
+
+global const string GRENADIER_PASSIVE_WEAPON_MOD = "fuse_long_throw_passive"
+
+void function PassiveGrenadier_Init()
+{
+                               
+	Remote_RegisterServerFunction( "ClientCallback_ToggleThrowPower" )
+	Remote_RegisterClientFunction( "ServerToClient_DisplayToggleThrowPowerHintForPlayer" )
+      
+
+	#if SERVER
+		                                                                           
+	#else
+                                
+		RegisterConCommandTriggeredCallback( "+scriptCommand5", AttemptToggleThrowPower )
+       
+	#endif
+}
+
+#if SERVER
+                                                                                              
+ 
+	                         
+		      
+
+	                                                                                      
+	
+	                                
+	              
+	 
+		                                                             
+		                                                             
+		                                             
+	 
+
+	                                    
+	             
+	 
+		                                                             
+		                                             
+	 
+ 
+
+                               
+                                                              
+ 
+	                                                                                                  
+		      
+
+	                                                                           
+	                                                                                  
+
+	                         
+		      
+
+	                              
+		      
+
+	                                               
+	                                                             
+	               
+		      
+
+	                                        
+	                                   
+	                                                   
+	 
+		                                                      
+		                                 
+	 
+	    
+	 
+		                                                          
+	 
+	                                                                 
+	                                                                         
+ 
+      
+#endif              
+
+#if CLIENT
+                               
+void function AttemptToggleThrowPower( entity player )
+{
+	if ( !PlayerHasPassive( player, ePassives.PAS_FUSE ) )
+		return
+
+	if ( !TryCharacterButtonCommonReadyChecks( player ) )
+		return
+
+	entity weapon = ( player.GetActiveWeapon( eActiveInventorySlot.mainHand ) )
+
+	if ( !IsValid( weapon ) )
+		return
+
+	if ( weapon.GetWeaponTypeFlags() != WPT_GRENADE )
+		return
+
+	Remote_ServerCallFunction( "ClientCallback_ToggleThrowPower" )
+}
+
+void function ServerToClient_DisplayToggleThrowPowerHintForPlayer()
+{
+	                                                
+}
+
+
+void function _DisplayToggleThrowPowerHintForPlayer()
+{
+	entity player = GetLocalViewPlayer()
+
+	if ( !IsValid( player ) )
+		return
+
+	entity weapon = ( player.GetActiveWeapon( eActiveInventorySlot.mainHand ) )
+
+	player.EndSignal( "OnDeath" )
+	weapon.EndSignal( "WeaponDeactivateEvent" )
+
+	OnThreadEnd(
+		function() : ()
+		{
+			HidePlayerHint( "#FUSE_PASSIVE_TOGGLE_THROW_POWER" )
+		}
+	)
+
+	AddPlayerHint( 6.5, 0.15, $"", "#FUSE_PASSIVE_TOGGLE_THROW_POWER" )
+
+	WaitForever()
+}
+      
+#endif              

@@ -2,7 +2,7 @@ untyped
 
 global function ClDialogue_Init
 
-//
+                                                                                                                               
 global function ServerCallback_PlayConversation
 global function ServerCallback_PlaySquadConversation
 global function SetDialogueDebugLevel
@@ -14,6 +14,7 @@ global function AddSpeakerToBlacklist
 global function RemoveSpeakerFromBlacklist
 global function AbortConversationDueToPriority
 
+global function CreateDialogPopup
 global function CreateWaveform
 global function CreateWaveformVideo
 global function WaveformVideoSwitchTest
@@ -24,19 +25,19 @@ global function DestroyWaveform_Immediate
 global function PlayConversationToLocalClient
 global function ResetSquadConversationDebounceTimers
 
-global function PlayOneLinerConversationOnEntWithPriority //
-global function PlayAnnouncerLineThroughDeathWithPriority //
+global function PlayOneLinerConversationOnEntWithPriority                                                                                                                           
+global function PlayAnnouncerLineThroughDeathWithPriority                                                                                                                                                        
 
-/*
-
-*/
+  
+	                                                             
+  
 
 const WAVEFORM_FADE_DURATION = 1.0
 
 struct
 {
 	int nextVoiceIndex = 0
-	int DebugLevel = 0  //
+	int DebugLevel = 0                 
 
 	table squadConversationDebounceTimers
 	array squadConversationPriorities
@@ -64,7 +65,7 @@ void function ClDialogue_Init()
 	file.aiTalkers = {
 		[ TEAM_IMC ] = {},
 		[ TEAM_MILITIA ] = {},
-		[ TEAM_BOTH ] = {},
+		[ TEAM_NPC_FRIENDLY_TO_PLAYERS ] = {},
 	}
 
 	InitGlobals()
@@ -77,15 +78,15 @@ void function ClDialogue_Init()
 
 	AddCreateCallback( "npc_soldier", AI_Dialogue_General_Init )
 
-	//
-	#document("ClDebugPlayConversation"," Play conversation specified on this client.")
+	                    
+	#document( "ClDebugPlayConversation", " Play conversation specified on this client." )
 	AddCallback_KillReplayStarted( ResetSquadConversationDebounceTimers )
 	AddCallback_KillReplayEnded( ResetSquadConversationDebounceTimers )
 
 	AddCallback_EntitiesDidLoad( EntitiesDidLoad )
 
 	var dataTableVideo = GetDataTable( $"datatable/caller_ids_video.rpak" )
-	int videoRows = GetDatatableRowCount( dataTableVideo )
+	int videoRows = GetDataTableRowCount( dataTableVideo )
 	for ( int i = 0; i < videoRows; i++ )
 	{
 		string title = GetDataTableString( dataTableVideo, i, GetDataTableColumnByName( dataTableVideo, "title" ) )
@@ -95,7 +96,7 @@ void function ClDialogue_Init()
 	file.callerIDsVideo[ "default" ] <- $"media/vdu_test"
 
 	var dataTable = GetDataTable( $"datatable/caller_ids_mp.rpak" )
-	int rows = GetDatatableRowCount( dataTable )
+	int rows = GetDataTableRowCount( dataTable )
 	for ( int i = 0; i < rows; i++ )
 	{
 		string title = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "title" ) )
@@ -116,7 +117,7 @@ void function EntitiesDidLoad()
 void function AI_Dialogue_General_Init( entity guy )
 {
 	int team = guy.GetTeam()
-	guy.s.spawnTeam <- team //
+	guy.s.spawnTeam <- team                                                  
 
 	if ( !( team in file.aiTalkers ) )
 		return
@@ -128,7 +129,7 @@ void function AI_Dialogue_General_Init( entity guy )
 	dialogue.enabled <- true
 
 	dialogue.hasBeenAlerted <- false
-	dialogue.currentConversationPriority <- 0 //
+	dialogue.currentConversationPriority <- 0                                                      
 
 	guy.s.dialogue <- dialogue
 
@@ -145,9 +146,9 @@ void function InitGlobals()
 	level.AnnouncementPriority		<- 1000
 	level.debugType					<- ""
 
-	level.DefaultLineInterval		<- 0.45	//
+	level.DefaultLineInterval		<- 0.45	                                                    
 
-	level.ConversationIntervalMin	<- 0.5	//
+	level.ConversationIntervalMin	<- 0.5	                                                                                 
 	level.ConversationIntervalMax	<- 1.0
 
 	level.speakerBlacklist          <- {}
@@ -173,9 +174,9 @@ int function GetTeamForConversation( entity player )
 
 void function PlayConversationToLocalClient( string convAlias )
 {
-	//
-	//
-	//
+	                              
+	  	      
+	        
 
 	if ( IsWatchingReplay() )
 	{
@@ -188,7 +189,7 @@ void function PlayConversationToLocalClient( string convAlias )
 	int priority = GetConversationPriority( convAlias )
 	entity player = GetLocalClientPlayer()
 
-	if ( IsLobby() ) //
+	if ( IsLobby() )                                                                          
 		thread ClRunConversation( player, convAlias )
 	else
 		thread ClAttemptConversation( convAlias, player, priority )
@@ -203,9 +204,9 @@ void function ServerCallback_PlayConversation( int conversationIndex )
 
 void function ServerCallback_PlaySquadConversation( int conversationIndex, int eHandle1, int eHandle2, int eHandle3, int eHandle4 )
 {
-	#if(false)
-
-#endif
+	#if GRUNT_CHATTER_MP_ENABLED
+		return
+	#endif
 
 	entity ai = GetEntityFromEncodedEHandle( eHandle1 )
 	if ( !IsAlive( ai ) )
@@ -258,11 +259,11 @@ void function ServerCallback_PlaySquadConversation( int conversationIndex, int e
 		{
 			printt( "Soldier is " + expect string( soldier.GetNetworkedClassName() ) )
 		}
-		//
+		                                                             
 		return
 	}
 
-	if ( dialogueNotInitialized ) //
+	if ( dialogueNotInitialized )                                                                  
 	{
 		printt( "ABORTING CONVERSATION: .s.dialogue not initialized: " + conversationType )
 		return
@@ -279,7 +280,7 @@ void function ServerCallback_PlaySquadConversation( int conversationIndex, int e
 
 	int currentConversationPriority = GetSquadConversationPriority( squad )
 
-	if ( priority <= currentConversationPriority ) //
+	if ( priority <= currentConversationPriority )                                                   
 	{
 		if ( file.DebugLevel > 1 )
 			printt( "Priority of conversationType " + conversationType + " is " + priority + ", which is not higher than CurrentConversationPriority of " + currentConversationPriority + ", cancelling squad conversation " )
@@ -296,7 +297,7 @@ void function ServerCallback_PlaySquadConversation( int conversationIndex, int e
 		return
 	}
 
-	//
+	                                                                                                 
     if ( currentConversationPriority )
 	{
 		CancelSquadConversation( squad )
@@ -339,7 +340,7 @@ int function GetSquadConversationPriority( array<entity> squad )
 	int highest = 0
 	foreach ( guy in squad )
 	{
-		//
+		                  
 		if ( !IsValid( guy ) )
 			continue
 
@@ -359,16 +360,12 @@ void function ClDebugPlayConversation( string conversationType )
 
 void function ClAttemptConversation( string conversationType, entity player, int priority )
 {
-	//
-	if ( IsLockedVDU() )
-		return
-
 	if ( file.DebugLevel > 0 )
 	{
 		printt( "Attempting conversation " + conversationType )
 	}
 
-	//
+	                                           
 	if ( AbortConversationDueToPriority( priority ) )
 	{
 		if ( file.DebugLevel > 1 )
@@ -379,14 +376,14 @@ void function ClAttemptConversation( string conversationType, entity player, int
 		return
 	}
 
-	//
-	//
-	//
-	//
-	//
-	//
+	                      
+	   
+	  	                          
+	  		                                                                                               
+	  	      
+	   
 
-	//
+	                                  
 	CancelConversation( player )
 
 	level.CurrentPriority = priority
@@ -426,20 +423,20 @@ void function CancelConversation( entity speakingEnt )
 	}
 
 	clGlobal.levelEnt.Signal( "CancelConversation" )
-	speakingEnt.Signal( "CancelConversation" ) //
+	speakingEnt.Signal( "CancelConversation" )                                                                         
 
-	//
-	//
+	                                                                                                   
+	                                                           
 	Assert( !level.CurrentPriority )
 }
 
 bool function AbortConversationDueToPriority( int priority )
 {
-	//
+	                                                       
 	if ( priority > level.CurrentPriority )
 		return false
 
-	//
+	                                                                                                   
 	if ( priority < level.AnnouncementPriority )
 		return true
 
@@ -472,12 +469,12 @@ void function ClRunConversation( entity player, string conversationType )
 	clGlobal.levelEnt.EndSignal( "CancelConversation" )
 	player.EndSignal( "OnDestroy" )
 
-	//
+	                                                     
 	local conversation = ClSelectRandomConversation( conversationType, GetTeamForConversation( player ) )
-	//
+	                                                       
 	conversation = RemoveChoicesFromConversation( conversation )
 
-	//
+	                   
 	int numRadio = 0
 	foreach ( elem in conversation )
 	{
@@ -485,9 +482,9 @@ void function ClRunConversation( entity player, string conversationType )
 			numRadio++
 	}
 
-	//
+	                                                                                                                       
 
-	//
+	                         
 	foreach ( index, elem in conversation )
 	{
 		if ( file.DebugLevel > 1 )
@@ -495,7 +492,7 @@ void function ClRunConversation( entity player, string conversationType )
 			printt( " Running elem " + elem )
 		}
 
-		ClRunConversationElement( player, elem )	//
+		ClRunConversationElement( player, elem )	                                                                               
 
 		if ( file.DebugLevel > 1 )
 		{
@@ -506,19 +503,19 @@ void function ClRunConversation( entity player, string conversationType )
 
 void function RandomizeSquadVoices( array<entity> squad )
 {
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+	                               
+	                       
+	                                             
+	   
+	  	                                                    
+	  	                                                          
+	   
 
 	int offset = RandomInt( VOICE_COUNT )
 	for ( int i = 0; i < squad.len(); i++ )
 	{
 		squad[i].s.dialogue.voiceIndex = ( i + offset ) % VOICE_COUNT
-		//
+		                                                            
 	}
 }
 
@@ -531,7 +528,7 @@ void function ClRunSquadConversation( entity player, string conversationType, ar
 		}
 	)
 
-	//
+	                                                  
 	RandomizeSquadVoices( squad )
 
 	squad[0].EndSignal( "CancelConversation" )
@@ -542,9 +539,9 @@ void function ClRunSquadConversation( entity player, string conversationType, ar
 
 	level.debugType = conversationType
 
-	//
+	                                                     
 	local conversation = ClSelectRandomConversation( conversationType, GetTeamForConversationFromSquad( player, squad ) )
-	//
+	                                                       
 	conversation = RemoveChoicesFromConversation( conversation )
 
 	foreach ( index, elem in conversation )
@@ -554,7 +551,7 @@ void function ClRunSquadConversation( entity player, string conversationType, ar
 			printt( " Running elem " + elem )
 		}
 
-		ClRunSquadConversationElement( player, elem, squad )	//
+		ClRunSquadConversationElement( player, elem, squad )	                                                                               
 
 		if ( file.DebugLevel > 1 )
 		{
@@ -573,35 +570,35 @@ function ClSelectRandomConversation( string conversationType, int team )
 
 	if ( conversationArray.len() == 0 )
 	{
-		conversationArray = convStruct.conversationTable[ TEAM_BOTH ]
+		conversationArray = convStruct.conversationTable[ TEAM_NPC_FRIENDLY_TO_PLAYERS ]
 		Assert( conversationArray.len() > 0, "Conversation " + conversationType + " isn't available for team ID: " + team )
 	}
 
 	Assert( IsArray( conversationArray ) )
 
-	//
+	                                                       
 
-	//
-	//
+	                                                          
+	                                                   
 	if ( !( conversationArray in level.ConversationIndices ) || level.ConversationIndices[ conversationArray ] >= conversationArray.len() )
 	{
-		//
+		                                                                   
 		conversationArray.randomize()
 		level.ConversationIndices[ conversationArray ] <- 0
 	}
 
 	local conversation = conversationArray[ level.ConversationIndices[ conversationArray ] ]
 
-	//
+	                                                           
 	level.ConversationIndices[ conversationArray ]++
 
 	return conversation
 }
 
-//
+                            
 function RemoveChoicesFromConversation( conversation )
 {
-	//
+	                                                                  
 	local _conversation = []
 	foreach ( elem in conversation )
 	{
@@ -620,7 +617,7 @@ table function RemoveChoicesFromElem( table elem )
 	switch ( elem.dialogType )
 	{
 		case "radio":
-			//
+			                                                                   
 			Assert( IsArray( elem.choices ) )
 
 			if ( elem.choices.len() )
@@ -660,7 +657,7 @@ table function RemoveChoicesFromElem( table elem )
 			if ( elem.randomize )
 				elem.choices.randomize()
 
-			local _choices //
+			local _choices                                                                                     
 			for ( int i = 0; i < count; i++ )
 			{
 				table subelem = RemoveChoicesFromElem( expect table( elem.choices[i] ) )
@@ -730,52 +727,52 @@ void function ClRunConversationElement( entity player, elem )
 			break
 
 		case "dispatch":
-			Assert( false ) //
-			/*
+			Assert( false )                                                      
+			  
+			                                                                                             
+			                           
+			                    
 
+			                   
 
+			                      
+			 
+				                                                                                                                        
+				                     
 
+				                          
+					                                         
 
+				                            
+				     
+			 
 
+			                                                                   
+			                                 
 
+			                                               
+			                        
 
+			                                        
+			 
+				                                                    
+			 
+			    
+			 
+				                                             
 
+				                          
+					                                                                                           
+				                                                 
+				                               
+			 
 
+			                                                               
+			                                      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+			                       
+			  	                                                            
+			  
 			break
 
 
@@ -823,7 +820,7 @@ void function ClRunConversationElement( entity player, elem )
 		case "multiple":
 			foreach ( subelem in elem.choices )
 			{
-				//
+				                                                                        
 				ClRunConversationElement( player, subelem )
 			}
 			break
@@ -841,15 +838,15 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 	{
 		case "speech":
 			Assert( squad.len() > 0, "Can't do a speech conversation without using PlaySquadConversation" )
-			//
+			                           
 			entity guy = ChooseSpeakingAI( squad, expect int( elem.speakerIndex ) )
 
-			//
+			                   
 
 			if ( !guy )
 			{
-				//
-				//
+				                                                                                                                        
+				                     
 
 				if ( file.DebugLevel > 1 )
 					printl( " Bailing: no guy left to talk" )
@@ -860,8 +857,8 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 
 			if ( !IsAlive( guy ) || guy.ContextAction_IsMeleeExecution() )
 			{
-				//
-				//
+				                                                                                                        
+				                     
 
 				if ( file.DebugLevel > 1 )
 					printl( " Bailing: next guy is dead" )
@@ -870,10 +867,10 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				break
 			}
 
-			//
+			                                                                   
 			Assert( IsArray( elem.choices ) )
 
-			local dialogueChoice = elem.choices.getrandom() //
+			local dialogueChoice = elem.choices.getrandom()                                                                                                                                                              
 
 			AssertVoiceAliasDataIsValid( dialogueChoice )
 
@@ -881,20 +878,20 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				printt( "Speaking ai: " + guy.GetEntIndex() + " voice index " + guy.s.dialogue.voiceIndex )
 			table aliases = GetAliases( guy, dialogueChoice )
 			DoGuySpeechLine( guy, aliases )
-			//
+			                                                                                                             
 			break
 
 		case "dispatch":
 			Assert( squad.len() > 0, "Can't do a speech conversation without using PlaySquadConversation" )
-			//
+			                           
 			entity guy = squad[0]
 
-			//
+			                   
 
 			if ( !IsAlive( guy ) )
 			{
-				//
-				//
+				                                                                                                                        
+				                     
 
 				if ( file.DebugLevel > 1 )
 					printl( " Bailing: no guy left to talk" )
@@ -903,11 +900,11 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				break
 			}
 
-			//
+			                                                                   
 			Assert( IsArray( elem.choices ) )
 
-			local dialogueChoice = elem.choices.getrandom() //
-			//
+			local dialogueChoice = elem.choices.getrandom()                                                                                                                                                              
+			                          
 
 			if ( typeof dialogueChoice == "string" )
 			{
@@ -923,18 +920,18 @@ void function ClRunSquadConversationElement( entity player, elem, array<entity> 
 				DoGuySpeechLine( guy, aliases )
 			}
 
-			//
-			wait 0.3 //
+			                                                               
+			wait 0.3                              
 
-			//
-			//
+			                       
+			  	                                                            
 
 			break
 
 		case "multiple":
 			foreach ( subelem in elem.choices )
 			{
-				//
+				                                                                        
 				ClRunSquadConversationElement( player, subelem, squad )
 			}
 			break
@@ -951,7 +948,7 @@ float function DoGeneralRadioSound( string alias, entity sourceGuy, entity playe
 		printt( "Playing radio sound alias: " + alias + " to " + player.GetPlayerName() )
 	}
 
-	//
+	                                                                       
 	float duration = GetSoundDuration( alias )
 	EmitSoundOnEntity( player, alias )
 	thread EndPlayerSound( player, sourceGuy, alias, duration )
@@ -961,7 +958,7 @@ float function DoGeneralRadioSound( string alias, entity sourceGuy, entity playe
 
 void function EndPlayerSound( entity player, entity sourceGuy, string alias, float delay = 0 )
 {
-	//
+	                                                                      
 	player.EndSignal( "ConversationOver" )
 	player.EndSignal( "OnDestroy" )
 
@@ -976,8 +973,8 @@ void function EndPlayerSound( entity player, entity sourceGuy, string alias, flo
 		}
 	)
 
-	//
-	wait delay	//
+	                                       
+	wait delay	                                                    
 }
 
 float function DoPlayerMusic( entity player, string alias )
@@ -992,35 +989,35 @@ float function DoPlayerMusic( entity player, string alias )
 	return duration
 }
 
-/*
+                                          
+ 
+	                
+	                                 
 
+	                           
+	 
+		                     
+		 
+			                   
+			        
+		 
 
+		                
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+	            
+   
 
 entity function ChooseSpeakingAI( array<entity> squad, int speakerIndex )
 {
-	//
+	                             
 	if ( !IsAlive( squad[0] ) )
 		return null
 
 	if ( speakerIndex >= squad.len() )
 	{
-		//
-		for ( int i = squad.len() - 1; i > 0; i-- ) //
+		                                    
+		for ( int i = squad.len() - 1; i > 0; i-- )                                                                   
 		{
 			if ( IsAlive( squad[i] ) )
 				return squad[i]
@@ -1034,60 +1031,60 @@ entity function ChooseSpeakingAI( array<entity> squad, int speakerIndex )
 
 	return squad[ speakerIndex ]
 
-/*
+  
+	                                    
+	                                                      
 
+	                          
+		                
+	    
+		                                               
 
+	                      
+	                  
 
+	                                                        
+	                       
+	 
+		                                       
+			        
 
+		                        
+		                      
+		                                           
+		 
+			                      
+			 
+				                  
+				     
+			 
+			                                                                  
+				                
+		 
 
+		                  
+			        
 
+		                 
+			                         
 
+		                     
+		                         
+			     
+	 
 
+	                             
+		                     
 
+	                         
+		           
 
+	                               
 
+	                                        
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+	          
+	  
 }
 
 void function DoGuySound( entity guy, entity sourceGuy, string alias, float delay )
@@ -1100,7 +1097,7 @@ void function DoGuySound( entity guy, entity sourceGuy, string alias, float dela
 			if ( !IsValid( guy ) )
 				return
 
-			//
+			                                             
 			if ( !IsAlive( guy ) || guy.ContextAction_IsMeleeExecution() )
 				StopSoundOnEntity( guy, alias )
 		}
@@ -1145,47 +1142,47 @@ void function DoGuySpeechLine( entity guy, table aliases )
 	if ( file.DebugLevel > 1 )
 	{
 		printt( " Guy " + guy.GetTargetName() + ": " + radioAlias )
-		DebugDrawLine( GetLocalViewPlayer().GetOrigin(), guy.GetOrigin(), 255,255,255, true, 3.0 )
+		DebugDrawLine( GetLocalViewPlayer().GetOrigin(), guy.GetOrigin(), COLOR_WHITE, true, 3.0 )
 		DebugDrawText( guy.GetOrigin() + <0,0,60>, radioAlias, true, 6.0 )
 	}
 
 	waitthread DoGuySound( guy, guy, radioAlias, 0 )
 }
 
-/*
+  
+                                                                   
+ 
+	                         
+	 
+		                                                                     
+	 
+	    
+	 
+		                                       
+		                                                     
+		                                         
 
+		                  
+		                       
+		 
+			                                   
+				     
 
+			                                                                                           
+				     
 
+			                       
+				        
 
+			                                       
+				        
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+			                                                      
+			          
+		 
+	 
+ 
+  
 
 bool function GuyIsEligibleForDialogue( entity guy )
 {
@@ -1206,11 +1203,11 @@ bool function GuyIsEligibleForDialogue( entity guy )
 
 void function AssertVoiceAliasDataIsValid( aliasData )
 {
-	//
+	                                                                                                                                
 
 	Assert( IsArray( aliasData ) )
 	Assert( aliasData.len() == VOICE_COUNT )
-	//
+	                                                          
 	Assert( IsString( aliasData[0] ) )
 }
 
@@ -1409,7 +1406,7 @@ var function WaveformVideoSwitchTest()
 var function CreateWaveformVideo( string title, int team, float duration, entity speaker = null, bool radioIntercept = false )
 {
 	var waveformVideoRUI = file.waveformVideoRUI
-	float timeExtension = 0.2 //
+	float timeExtension = 0.2                               
 
 	if ( title != file.lastWaveformTalker || file.waveformVideoRUI == null )
 	{
@@ -1424,9 +1421,10 @@ var function CreateWaveformVideo( string title, int team, float duration, entity
 		entity player = GetLocalClientPlayer()
 		if ( IsValid( player ) )
 		{
-			if ( team == TEAM_MILITIA )
+			int playerTeam = player.GetTeam()
+			if ( IsFriendlyTeam( team, playerTeam ) )
 				EmitSoundOnEntity( player, "ui_callerid_chime_friendly" )
-			else if ( team == TEAM_IMC )
+			if ( IsEnemyTeam( team, playerTeam ) )
 				EmitSoundOnEntity( player, "ui_callerid_chime_enemy" )
 		}
 	}
@@ -1445,12 +1443,9 @@ var function CreateWaveformVideo( string title, int team, float duration, entity
 
 	file.lastWaveformTalker	= title
 
-	if ( team == TEAM_MILITIA )
-		RuiSetFloat3( waveformVideoRUI, "tintColor", HIGHLIGHT_COLOR_FRIENDLY )
-	else if ( team == TEAM_IMC )
-		RuiSetFloat3( waveformVideoRUI, "tintColor", HIGHLIGHT_COLOR_ENEMY )
-	else
-		RuiSetFloat3( waveformVideoRUI, "tintColor", HIGHLIGHT_COLOR_NEUTRAL )
+	                                                                         
+	                                                                      
+	RuiSetFloat3( waveformVideoRUI, "tintColor", HIGHLIGHT_COLOR_NEUTRAL )
 
 	asset video = GetVideoForName( title )
 	StartVideoOnChannel( file.videoChannel, video, false, 0.0 )
@@ -1466,7 +1461,7 @@ var function CreateWaveformVideo( string title, int team, float duration, entity
 		RuiTrackFloat3( waveformVideoRUI, "connectingLineWorldPos", speaker, RUI_TRACK_POINT_FOLLOW, attachment )
 	}
 
-	//
+	                                       
 	RuiTrackFloat( waveformVideoRUI, "level", null, RUI_TRACK_SOUND_METER, 0 )
 
 	file.waveformVideoRUI = waveformVideoRUI
@@ -1476,7 +1471,7 @@ var function CreateWaveformVideo( string title, int team, float duration, entity
 var function CreateWaveform( string title, float duration, asset specificImage = $"", entity speaker = null, bool radioIntercept = false )
 {
 	var waveformRUI = file.waveformRUI
-	float timeExtension = 0.2 //
+	float timeExtension = 0.2                               
 
 	if ( title != file.lastWaveformTalker || file.waveformRUI == null )
 	{
@@ -1492,7 +1487,7 @@ var function CreateWaveform( string title, float duration, asset specificImage =
 		if ( IsValid( player ) )
 		{
 			EmitSoundOnEntity( player, "ui_callerid_chime_friendly" )
-			//
+			                                                        
 		}
 	}
 	else
@@ -1509,11 +1504,8 @@ var function CreateWaveform( string title, float duration, asset specificImage =
 
 	file.lastWaveformTalker	= title
 
-	//
-	//
-	//
-	//
-	//
+	  	                                                                  
+	  	                                                               
 	RuiSetFloat3( waveformRUI, "tintColor", HIGHLIGHT_COLOR_NEUTRAL )
 
 	if ( specificImage != $"" )
@@ -1538,11 +1530,32 @@ var function CreateWaveform( string title, float duration, asset specificImage =
 		RuiTrackFloat3( waveformRUI, "connectingLineWorldPos", speaker, RUI_TRACK_POINT_FOLLOW, attachment )
 	}
 
-	//
+	                                       
 	RuiTrackFloat( waveformRUI, "level", null, RUI_TRACK_SOUND_METER, 0 )
 
 	file.waveformRUI = waveformRUI
 	return waveformRUI
+}
+
+var function CreateDialogPopup( string title, float duration, asset portraitImage, string displayText )
+{
+	if ( file.waveformRUI != null )
+		DestroyWaveform( file.waveformRUI, false )
+
+	var rui = RuiCreate( $"ui/ingame_dialogue_popup.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 500 )
+
+	entity player = GetLocalClientPlayer()
+	if ( IsValid( player ) )
+		EmitSoundOnEntity( player, "SQ_UI_InGame_CommChime" )
+
+	RuiSetImage( rui, "portraitImage", portraitImage )
+	RuiSetString( rui, "speakerName", title )
+	RuiSetString( rui, "displayText", displayText )
+	RuiSetFloat( rui, "soundDuration", duration )
+	RuiSetResolutionToScreenSize( rui )
+
+	file.waveformRUI = rui
+	return rui
 }
 
 void function DestroyWaveform_Immediate( var rui )
@@ -1554,7 +1567,11 @@ void function DestroyWaveform( var rui, bool doWait = true )
 {
 	EndSignal( clGlobal.levelEnt, "WaveformRuiExtended" )
 
-	//
+	entity player = GetLocalClientPlayer()
+	if ( IsValid( player ) )
+		EmitSoundOnEntity( player, "SQ_UI_InGame_CID_Close")
+
+	                                                                                  
 	if ( doWait )
 		wait WAVEFORM_FADE_DURATION
 
@@ -1564,9 +1581,9 @@ void function DestroyWaveform( var rui, bool doWait = true )
 	StopVideoOnChannel( 0 )
 }
 
-//
-//
-//
+                                                                                                                       
+                                                                                                      
+                                                                                                                                                                  
 void function PlayOneLinerConversationOnEntWithPriority( string conversationName, string soundAlias, entity ent, int priority )
 {
 	bool printDebug = GetDialogueDebugLevel() > 0
@@ -1584,7 +1601,7 @@ void function PlayOneLinerConversationOnEntWithPriority( string conversationName
 
 	SetConversationLastPlayedTime( conversationName, Time() )
 
-	thread PlayOneLinerConversationOnEntWithPriority_internal( soundAlias, ent, priority ) //
+	thread PlayOneLinerConversationOnEntWithPriority_internal( soundAlias, ent, priority )                                                                                       
 }
 
 void function PlayOneLinerConversationOnEntWithPriority_internal( string soundAlias, entity ent, int priority )
@@ -1597,7 +1614,7 @@ void function PlayOneLinerConversationOnEntWithPriority_internal( string soundAl
 	OnThreadEnd(
 	function() : ( soundAlias, ent )
 		{
-			//
+			                                                                                                                                   
 			level.CurrentPriority = 0
 			if ( IsValid( ent ) )
 				StopSoundOnEntity( ent, soundAlias )
@@ -1615,7 +1632,7 @@ void function PlayOneLinerConversationOnEntWithPriority_internal( string soundAl
 	WaitSignal( handle, "OnSoundFinished" )
 }
 
-void function PlayAnnouncerLineThroughDeathWithPriority( string conversationName, string soundAlias, int priority, string waveformName = "" ) //
+void function PlayAnnouncerLineThroughDeathWithPriority( string conversationName, string soundAlias, int priority, string waveformName = "" )                                                                                                              
 {
 	bool printDebug = GetDialogueDebugLevel() > 0
 	if ( printDebug )
@@ -1634,7 +1651,7 @@ void function PlayAnnouncerLineThroughDeathWithPriority( string conversationName
 
 	SetConversationLastPlayedTime( conversationName, Time() )
 
-	thread PlayAnnouncerLineThroughDeathWithPriority_internal( soundAlias, localClientPlayer, priority, waveformName ) //
+	thread PlayAnnouncerLineThroughDeathWithPriority_internal( soundAlias, localClientPlayer, priority, waveformName )                                                                                       
 }
 
 void function PlayAnnouncerLineThroughDeathWithPriority_internal( string soundAlias, entity localClientPlayer, int priority, string waveformName )
@@ -1650,7 +1667,7 @@ void function PlayAnnouncerLineThroughDeathWithPriority_internal( string soundAl
 	OnThreadEnd(
 	function() : ( rui, soundAlias, localClientPlayer )
 		{
-			//
+			                                                                                                                                                               
 			level.CurrentPriority = 0
 			if ( IsValid( localClientPlayer ) )
 				StopSoundOnEntity( localClientPlayer, soundAlias )

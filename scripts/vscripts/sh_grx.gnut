@@ -1,19 +1,27 @@
-//
+  
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global function ShGRX_LevelInit
 global function ShGRX_RegisterItemFlavor
 #endif
-#if(UI)
+#if UI
 global function ShGRX_LevelShutdown
 #endif
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global function IsValidItemFlavorGRXIndex
+global function GetGRXIndexByGRXRef
 global function GetItemFlavorByGRXIndex
 global function ItemFlavor_GetGRXMode
 global function ItemFlavor_GetGRXIndex
+global function ItemFlavor_GetGRXAlias
+global function ItemFlavor_GetGRXOwnershipTarget
+global function ItemFlavor_GetGRXOwnershipTargettedBy
 global function GRXCurrency_GetCurrencyIndex
+global function GRXCurrency_GetPurchaseSound
+global function GRXCurrency_GetPreviewModel
+global function GRXCurrency_GetRewardIcon
+global function GRXCurrencyBundle_GetCurrencyFlav
 global function GRXCurrencyBundle_GetValue
 global function GRX_IsInventoryReady
 global function GRX_HasInventoryEverBeenReady
@@ -21,35 +29,74 @@ global function GRX_IsItemOwnedByPlayer
 global function GRX_IsItemOwnedByPlayer_AllowOutOfDateData
 global function GRX_GetPlayerEdition
 global function GRX_IsOfferRestricted
-#if(DEV)
+global function GRX_HasUpToDateBundleOffers
+global function GRXPack_IsEphemeral
+global function GRXPack_IsExpectedToContainSingleItemWithCurrency
+global function GRXPack_GetTickModel
+global function GRXPack_GetTickModelSkin
+global function GRXPack_GetPackContents
+
+#if DEV
 global function GetItemFlavorByGRXRef
 #endif
 #endif
 
-#if(UI)
+#if UI
+global function GRXOffer_IsFullyClaimed
+global function GRXOffer_GetOwnedItemsCount
+global function GRXOffer_ContainsPack
+global function GRXOffer_ContainsEventPack
+global function GRXOffer_ContainsThematicPack
+global function GRXOffer_ContainsEventThematicPack
+global function GRXOffer_GetSpecialPackName
+global function GRXOffer_GetBundleOfferRestrictions
+global function GRXOffer_IsHeirloomPack
+global function GRX_PurchaseOffer
+global function GRX_MakeItemFlavorBagFromPriceArray
+global function GRX_CheckBundleAndUpdateOfferPrices
+global function GRXOffer_GetEventThematicPackCollectionInfo
+global function GRXOffer_GetEventThematicPackCollectionInfoFromScriptOffer
+global function GRX_IsLocationActive
+global function GRX_ScriptOfferFromCraftingOffer
+global function GRX_GetPostGameRewards
+global function GRX_MarkRewardAcknowledged
+#endif
+
+#if SERVER || UI
 global function GRXCurrency_GetPlayerBalance
 global function QueueGRXOperation
 global function IsGRXOperationDone
 #endif
 
-#if(false)
-
-
-
+#if SERVER
+                                                              
+                                                   
+                                
+                                               
+                                          
+                                          
+                                        
+                                                 
+                                         
+                                        
+                                            
 #endif
 
-#if(CLIENT)
-global function GRX_GetMostRecentPackOpeningResults
+#if CLIENT
+global function GRXPack_GetTickSoundAlias
 #endif
 
-#if(UI)
+#if UI
 global function GRX_GetAllPackFlavors
 global function GRX_GetPackCounts
 global function GRX_GetTotalPackCount
+global function GRX_GetLocationOffers
 global function GRX_GetItemDedicatedStoreOffers
-global function GRX_GetExclusiveOffers
-global function GRX_GetFeaturedOffers
 global function GRX_GetStoreOfferColumn
+global function GRX_GetStoreOfferColumnNumRows
+global function GRX_GetStoreOffers
+global function GRX_GetStoreOfferItems
+global function GRX_GetLocationOfferItems
 global function GRX_AreOffersReady
 global function GRX_GetItemPurchasabilityInfo
 global function GRX_IsItemCraftable
@@ -58,70 +105,100 @@ global function GRX_CanAffordDelta
 global function GRX_GetMaxCanAfford
 global function GRX_GetCurrencyArrayFromBag
 global function GRX_GetFormattedPrice
+global function GRX_GetPriceDisplayData
 global function GRX_IsCraftingPrice
 global function GRX_IsPremiumPrice
+global function GRX_GetNextCurrencyExpirationAmt
+global function GRX_GetNextCurrencyExpirationTime
+               
+                                          
+                                            
+      
 global function GetFormattedValueForCurrency
 global function AddCallbackAndCallNow_OnGRXInventoryStateChanged
+global function AddCallback_OnGRXInventoryStateChanged
 global function RemoveCallback_OnGRXInventoryStateChanged
 global function AddCallbackAndCallNow_OnGRXOffersRefreshed
+global function AddCallback_OnGRXOffersRefreshed
 global function RemoveCallback_OnGRXOffersRefreshed
+global function AddCallback_OnGRXBundlesRefreshed
+global function RemoveCallback_OnGRXBundlesRefreshed
+global function SortStoreOfferItems
 global function ShowGRXErrorDialogue
-global function CurrencyFlavor_GetRewardIcon
+global function DEV_GRX_DescribeOffer
 global function GRX_IsBadLuckProtectionActive
+global function GRXPack_GetOpenButtonIcon
 #endif
 
-#if(DEV)
-#if(false)
+#if CLIENT || UI
+global function GRX_GetMostRecentPackOpeningResults
+global function GRXPack_GetCustomColor
+global function GRXPack_GetCustomCountTextCol
+#endif
 
-#elseif(CLIENT)
+#if DEV
+#if SERVER
+                                              
+                                    
+                                        
+#elseif CLIENT
 global function DEV_GRX_ForcePackResults
-#elseif(UI)
+#elseif UI
+global function DEV_GRX_PrintStoreOfferLocations
+global function DEV_GRX_PrintNextCurrencyExpirationInfo
 global function DEV_GRX_TestOpenPack
 global function DEV_GRX_TestPurchase
-global function DEV_GRX_SetTimeDelta
 global function DEV_GRX_PreviewStoreItem
 #endif
 #endif
 
 
-//
-#if(false)
-
-
-
-
-
-#elseif(CLIENT)
+                   
+#if SERVER
+                                                 
+                                               
+                                              
+                                                       
+                                          
+                                                          
+                                    
+#elseif CLIENT
 global function UIToClient_GRXInventoryCleanStateChange
 global function ClientCodeCallback_GRXPackOpened
-#elseif(UI)
+#elseif UI
 global function ServerToUI_PROTO_YouAreGreenLightedForGRX
 global function ServerToUI_GRX_QueuedRewardsGiven
 global function DisplayQueuedRewardsGiven
 global function UICodeCallback_GRXOffersRefreshed
 global function UICodeCallback_GRXUserInfoUpdated
 global function UICodeCallback_GRXQueryCompleted
+global function UICodeCallback_GRXBundlesUpdated
 global function ShGRX_UIScriptResetComplete
+global function ClientToUI_WORKAROUND_GRXPackOpened_Start
+global function ClientToUI_WORKAROUND_GRXPackOpened_Entry
+global function ClientToUI_WORKAROUND_GRXPackOpened_Finish
 #endif
 
-const int QUEUED_REWARDS_MAX_COUNT = 6
+const int QUEUED_REWARDS_MAX_COUNT = 12
 const int QUEUED_REWARDS_MAX_ITEMS_COUNT = 1
 
 
-#if(false)//
-
-#elseif(UI)
+#if SERVER                                                                                                                              
+                                                     
+#elseif UI
 const int GRX_SCRIPT_QUERY_IDENTIFIER_START_INDEX = INT_MIN
 #endif
 
 const bool GRX_DEBUG_PRINTS = true
 
 
-//
-//
-//
-//
-//
+                      
+                      
+                      
+                      
+                      
+
+#if SERVER || CLIENT || UI
 global enum eItemFlavorGRXMode
 {
 	NONE = GRX_ITEMFLAVORMODE_NONE,
@@ -129,64 +206,220 @@ global enum eItemFlavorGRXMode
 	PACK = GRX_ITEMFLAVORMODE_PACK,
 	CONSUMABLE = GRX_ITEMFLAVORMODE_CONSUMABLE,
 	CURRENCY = GRX_ITEMFLAVORMODE_CURRENCY,
+	OWNERSHIP_TARGET = -1337,
 }
-//
+                                                                
+#endif
+
+#if UI
+global enum eStoreLocation
+{
+	SHOP,
+	SPECIALS,
+	SEASONAL,
+	_COUNT
+}
+#endif
+
+#if SERVER
+                          
+ 
+	    
+	          
+	          
+	      
+	              
+	          
+ 
+#endif
+
+#if SERVER
+
+                               
+ 
+	     
+	     
+ 
+                                
+ 
+	                            
+	                     
+	                   
+
+	                            
+	                                     
+	                                      
+	                                  
+	                                           
+
+	                                          
+	                                     
+	                                    
+	                                                 
+
+	                                                                 
+ 
+#endif
 
 
-#if(UI)
+#if UI
 global struct GRXScriptOffer
 {
 	array<ItemFlavorBag>  prices
-	ItemFlavorBag         output
+	ItemFlavorBag&        output
 	table<string, string> attributes
+	array<GRXStoreOfferItem> items
 
 	ItemFlavor ornull     prereq
 
 	bool isCraftingOffer = false
 
-	string titleText = "Offer Title"
-	string descText = "Description of offer"
-	string prereqText = ""
-	asset  image = $""
-	string tagText = ""
-	string seasonTag = ""
-	string tooltipTitle = ""
-	string tooltipDesc = ""
-	int    expireTime = 0
+	string               titleText = "Offer Title"
+	string               descText = "Description of offer"
+	string               offerAlias = ""
+	string               prereqText = ""
+	asset                image = $""
+	string               imageRef = ""
+	string               tagText = ""
+	string               seasonTag = ""
+	string               tooltipTitle = ""
+	string               tooltipDesc = ""
+	ItemFlavorBag ornull originalPrice = null
+	int                  offerType = GRX_OFFERTYPE_DEFAULT
+	int                  purchaseLimit = 1
+	int					 displayPriority = 0
+	int                  expireTime = 0
 
-	//
-	//
+	bool   isAvailable = true
+	string unavailableReason = "#UNAVAILABLE"
+	bool   isSKUOffer = false                                                                                     
+
+	                   
+	                 
+
+	ItemFlavor ornull WORKAROUND_claimedSentinel = null
+}
+
+global struct GRXScriptCraftingOffer
+{
+	ItemFlavor& flavor
+	int         craftingPrice
+	bool        isAvailable = true
+}
+#endif
+
+#if UI
+global struct PurchaseDialogDeepLinkConfig
+{
+	string ornull 		message = null
+	string ornull		priceText = null
+	void functionref()	onPurchaseCallback = null
+}
+#endif
+
+#if UI
+global struct PurchaseDialogConfig
+{
+	                     
+	ItemFlavor ornull     flav = null
+	GRXScriptOffer ornull offer = null
+
+	        
+	int           quantity = 1
+	bool          markAsNew = true
+	string ornull messageOverride = null
+	string ornull purchaseSoundOverride = null
+	string ornull purchaseOptionsMessage = null
+	PurchaseDialogDeepLinkConfig ornull deepLinkConfig = null
+
+	void functionref()                     onPurchaseStartCallback = null
+	void functionref( bool wasSuccessful ) onPurchaseResultCallback = null
 }
 #endif
 
 
-#if(UI)
+#if UI
 global struct ItemFlavorPurchasabilityInfo
 {
 	bool                                  isPurchasableAtAll = false
-	GRXScriptOffer ornull                 craftingOfferOrNull = null
+	GRXScriptCraftingOffer ornull         craftingOfferOrNull = null
 	table<string, array<GRXScriptOffer> > locationToDedicatedStoreOffersMap
-	table<string, array<GRXScriptOffer> > locationToBundledStoreOffersMap //
+}
+#endif
+
+#if UI
+global struct PriceDisplayData
+{
+	asset  symbol
+	string amount
 }
 #endif
 
 
-global ItemFlavor&[GRX_CURRENCY_COUNT] GRX_CURRENCIES = [{...}, {...}, {...}]
-global asset[GRX_CURRENCY_COUNT] GRX_CURRENCY_CONTAINERS = [$"", $"", $""]
-
-global ItemFlavor& GRX_BATTLEPASS_PURCHASE_PACK_BASIC
-global ItemFlavor& GRX_BATTLEPASS_PURCHASE_PACK_BUNDLE
+Assert( GRX_CURRENCY_COUNT == 5 )
+global ItemFlavor&[GRX_CURRENCY_COUNT] GRX_CURRENCIES = [{...}, {...}, {...}, {...}, {...}]
 
 global int GRX_DEV_ITEM = -1
 global int GRX_QA_ITEM = -1
 
+#if SERVER
+                                               
+ 
+	                                              
+	                                                              
+	                                                    
+	                                                                  
+	                                                                    
+	                                                    
+	                                            
+	                                                                                  
+	                                                                                        
+	                                                                                                  
+	                                                                    
+	                                                                                              
+	                                                                                            
+	                                                                                              
+	                                                                                                
+	                                                                                                
+	                                                    
+	                                            
+	                                                            
+	                                                                    
+	                                                  
+	                                                  
+	                                                                              
+	                                                                              
+	                                                                                    
 
-//
-//
-//
-//
-//
-#if(UI)
+ 
+#endif
+
+#if CLIENT
+global enum eGRXPackTickSoundKind
+{
+	TriadBounce
+	PuckLand
+	Unpack
+	DeployTriadExplo1
+	DeployTriadExplo2
+	DeployTriadExplo3
+}
+#endif
+
+#if UI
+global struct GRX_PackCollectionInfo
+{
+	int numCollected = 0
+	int numTotalInCollection = 0
+}
+#endif
+
+                       
+                       
+                       
+                       
+                       
+#if SERVER || UI
 global enum eScriptGRXOperationStatus
 {
 	INVALID,
@@ -197,17 +430,17 @@ global enum eScriptGRXOperationStatus
 	DONE_FAILED,
 }
 #endif
-#if(UI)
+#if SERVER || UI
 global struct ScriptGRXOperationInfo
 {
 	int id = -1
 	int expectedQueryGoal = -1
-	#if(false)
-
-#elseif(UI)
+	#if SERVER
+		                               
+	#elseif UI
 		bool shouldRetryOnInterrupt = true
 	#endif
-	bool _isAutoOperation = false //
+	bool _isAutoOperation = false                                                              
 
 	void functionref( int id )             doOperationFunc
 	void functionref( int status )         onDoneCallback
@@ -215,29 +448,32 @@ global struct ScriptGRXOperationInfo
 	int    status = eScriptGRXOperationStatus.INVALID
 	int    _codeQueryState = -1
 	string DEV_culprit = ""
+	string DEV_goalInfo = ""
 	float  DEV_queueTime = 0.0
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 struct PlayerGRXScriptState
-//
+                                                                                                                             
 {
-	#if(false)
+	#if SERVER
+		                                                  
+		                                                                             
+		                                               
+	#endif
 
-//
-
-#endif
-
-	#if CLIENT || UI 
+	#if SERVER || CLIENT || UI
 		bool isInventoryReady
+		bool isInventoryValidated = false
 		bool hasInventoryEverBeenClean = false
 		int  marketplaceEdition = -1
 		bool isOfferRestricted = false
+		bool hasUpToDateBundleOffers = false
 	#endif
 
-	#if(UI)
+	#if SERVER || UI
 		int          inventoryState = GRX_INVENTORYSTATE_UNINITIALIZED
 		array<int>   balances
 
@@ -249,31 +485,35 @@ struct PlayerGRXScriptState
 
 		GRXUserInfo& WORKAROUND_lastCodeUserInfo
 
-		#if(false)
-
-
-
-#elseif(UI)
+		#if SERVER
+			                                   
+			                                                                
+			                                                         
+		#elseif UI
 			bool areOffersReady
+			int nextCurrencyExpirationAmt = 0
+			int nextCurrencyExpirationTime = 0
+                 
+                               
+                                
+        
 		#endif
 	#endif
 }
 #endif
 
 
-#if(UI)
+#if UI
 struct FileStruct_LifetimeVM
 {
-	//
-	int                   WORKAROUND_delayedOffersState
-	array< GRXCodeOffer > WORKAROUND_delayedCraftingOffers
-	array< GRXCodeOffer > WORKAROUND_delayedStoreOffers
+	                                          
+	int                       WORKAROUND_delayedOffersState
+	array< GRXCraftingOffer > WORKAROUND_delayedCraftingOffers
+	array< GRXStoreOffer >    WORKAROUND_delayedStoreOffers
 
 	bool WORKAROUND_wasUserInfoUpdatedBeforeLevelInit = false
 
-	#if(DEV)
-		int grxTimeDeltaMinutes = 0
-
+	#if DEV
 		string grxStorePreviewItem = ""
 	#endif
 }
@@ -281,44 +521,50 @@ FileStruct_LifetimeVM& fileVM
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 struct FileStruct_LifetimeLevel
 {
 	array<ItemFlavor>      packFlavorList
 	table<ItemFlavor, int> currencyIndexMap
 	table<int, ItemFlavor> grxIndexItemFlavorMap
-	#if(DEV)
+	table<string, int>     grxRefToGRXIndexMap
+	#if DEV
 		table<string, ItemFlavor> grxRefItemFlavorMap
 	#endif
 
-	#if(false)
-
-
-#elseif CLIENT || UI 
+	#if SERVER
+		                                                     
+		                                                                               
+		                                                                    
+	#elseif CLIENT || UI
 		PlayerGRXScriptState localGRXState
 
-		#if(CLIENT)
-			ItemFlavorBag ornull mostRecentPackOpeningResultsOrNull = null
-		#elseif(UI)
+		ItemFlavorBag ornull mostRecentPackOpeningResultsOrNull = null
+
+		#if UI
 			bool WORKAROUND_isInLifetime = false
 
 			bool PROTO_serverHasGivenGreenLightForUIGRX = false
 
 			array<void functionref()> onGRXInventoryStateChangedCallbacks
 			array<void functionref()> onGRXOffersRefreshedCallbacks
+			array<void functionref()> onGRXBundlesRefreshedCallbacks
 
 			table<ItemFlavor, ItemFlavorPurchasabilityInfo> itemFlavorPurchasabilityInfoMap
 
-			array<GRXScriptOffer> storeExclusiveOffers
-			array<GRXScriptOffer> storeFeaturedOffers
+			table<string, array<GRXScriptOffer> > locationOffersMap
 
 			array<array<array<GRXScriptOffer> > > storeOfferColumns
+
+			array<array<array<GRXScriptOffer> > > specialsStoreOfferColumns
+
+			array<array<array<GRXScriptOffer> > > seasonalStoreOfferColumns
 
 			bool HACK_allowOneBadQueryCompleteCallBecauseOfUIScriptReset = false
 		#endif
 	#endif
 
-	#if(true)
+	#if GRX_DEBUG_PRINTS
 		bool GRX_DEBUG_PRINTS_disableTemporarily = false
 	#endif
 }
@@ -328,62 +574,73 @@ FileStruct_LifetimeLevel& fileLevel
 const float USERINFO_DIRTY_DEBOUNCE_DURATION = 0.3
 
 
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                         
+                         
+                         
+                         
+                         
+#if SERVER || CLIENT || UI
 void function ShGRX_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileLevel
-	#if(UI)
+	#if UI
 		newFileLevel.WORKAROUND_isInLifetime = true
 	#endif
 	fileLevel = newFileLevel
 
 	AddCallback_RegisterRootItemFlavors( void function() {
-		GRX_CURRENCIES[GRX_CURRENCY_PREMIUM] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/premium.rpak" )) //
-		GRX_CURRENCIES[GRX_CURRENCY_CREDITS] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/credits.rpak" )) //
-		GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/crafting.rpak" )) //
+		Assert( GRX_CURRENCY_COUNT == 5 )
+		GRX_CURRENCIES[GRX_CURRENCY_PREMIUM] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/premium.rpak" ))                        
+		GRX_CURRENCIES[GRX_CURRENCY_CREDITS] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/credits.rpak" ))                        
+		GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/crafting.rpak" ))                         
+		GRX_CURRENCIES[GRX_CURRENCY_SEASON02_EVENT01] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/season02_event01.rpak" ))                                 
+		                                                                                                               
+		GRX_CURRENCIES[GRX_CURRENCY_HEIRLOOM] = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_currency/heirloom.rpak" ))                         
 
-		GRX_CURRENCY_CONTAINERS[GRX_CURRENCY_PREMIUM] = $"rui/menu/store/feature_price_container_premium"
-		GRX_CURRENCY_CONTAINERS[GRX_CURRENCY_CREDITS] = $"rui/menu/store/feature_price_container_credits"
-		GRX_CURRENCY_CONTAINERS[GRX_CURRENCY_CRAFTING] = $"rui/menu/store/feature_price_container_crafting"
-
-		foreach( int currencyIndex, ItemFlavor flav in GRX_CURRENCIES )
-			fileLevel.currencyIndexMap[flav] <- currencyIndex
-
-		foreach( var block in IterateSettingsAssetArray( $"settings/itemflavlist/grx/packs.rpak", "list" ) )
+		foreach ( int currencyIndex, ItemFlavor flav in GRX_CURRENCIES )
 		{
-			ItemFlavor ornull flavOrNull = RegisterItemFlavorFromSettingsAsset( GetSettingsBlockAsset( block, "flavor" ) )
+			fileLevel.currencyIndexMap[ItemFlavor_GetGUIDString( flav )] <- currencyIndex
+			#if SERVER
+				                                                      
+				                        
+					                           
+			#endif
+		}
+
+		foreach ( asset packAsset in GetBaseItemFlavorsFromArray( "packs" ) )
+		{
+			ItemFlavor ornull flavOrNull = RegisterItemFlavorFromSettingsAsset( packAsset )
 			if ( flavOrNull != null )
 				fileLevel.packFlavorList.append( expect ItemFlavor(flavOrNull) )
 		}
 
-		foreach( var block in IterateSettingsAssetArray( $"settings/itemflavlist/grx/currency_bundles.rpak", "list" ) )
-		{
-			RegisterItemFlavorFromSettingsAsset( GetSettingsBlockAsset( block, "flavor" ) )
-		}
+		foreach ( asset currencyBundleAsset in GetBaseItemFlavorsFromArray( "currencyBundles" ) )
+			RegisterItemFlavorFromSettingsAsset( currencyBundleAsset )
 	} )
 	AddCallback_OnItemFlavorRegistered( eItemType.account_currency_bundle, AssertCurrencyBundlePlaylistVarsAreValid )
 	AddCallbackOrMaybeCallNow_OnAllItemFlavorsRegistered( OnAllItemFlavorsRegistered )
 
-	#if(CLIENT)
+	RegisterSignal( "ScriptGRXOperationDone" )
+
+	#if SERVER || CLIENT
 		Remote_RegisterUIFunction( "ServerToUI_PROTO_YouAreGreenLightedForGRX" )
 		Remote_RegisterUIFunction( "ServerToUI_GRX_QueuedRewardsGiven" )
+
+		Remote_RegisterServerFunction( "ClientCallback_acknowledge_reward", "int", 0, QUEUED_REWARDS_MAX_COUNT, "int", INT_MIN, INT_MAX )
 	#endif
 
-	#if(false)
+	#if SERVER
+		                                                            
+		       
+			                                           
+		      
+	#endif
 
+	#if UI
+		if ( !CanRunClientScript() )
+			return
 
-
-
-#endif
-
-	#if(UI)
-		Assert( CanRunClientScript() )
-		PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+		PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 		RunClientScript( "UIToClient_GRXInventoryCleanStateChange", scriptState.isInventoryReady, scriptState.WORKAROUND_lastCodeUserInfo.marketplaceEdition, scriptState.WORKAROUND_lastCodeUserInfo.isOfferRestricted )
 
 		if ( fileVM.WORKAROUND_wasUserInfoUpdatedBeforeLevelInit )
@@ -403,42 +660,61 @@ void function ShGRX_LevelInit()
 #endif
 
 
-#if(UI)
+#if UI
 void function ShGRX_LevelShutdown()
 {
+	FileStruct_LifetimeLevel newFileLevel
+	fileLevel = newFileLevel
+
 	fileLevel.WORKAROUND_isInLifetime = false
 
 	fileVM.WORKAROUND_delayedOffersState = GRX_OFFERSSTATE_UNINITIALIZED
 	fileVM.WORKAROUND_delayedCraftingOffers = []
 	fileVM.WORKAROUND_delayedStoreOffers = []
 
-	UpdatePlayerGRXScriptState( GetUIPlayer(), null )
+	UpdatePlayerGRXScriptState( GetLocalClientPlayer(), null )
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 void function ShGRX_RegisterItemFlavor( ItemFlavor flavor )
 {
-	string grxModeStr = GetGlobalSettingsString( flavor._____INTERNAL_settingsAsset, "grxMode" )
+	string grxModeStr = GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "grxMode" )
 	Assert( grxModeStr in eItemFlavorGRXMode, "Unknown item flavor GRX mode: " + grxModeStr )
 	flavor._____INTERNAL_grxMode = eItemFlavorGRXMode[grxModeStr]
 	if ( flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.REGULAR
-			|| flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.CONSUMABLE
-			|| flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.PACK )
+	|| flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.CONSUMABLE
+	|| flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.PACK
+	|| flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.CURRENCY )
 	{
 		string grxRef = ItemFlavor_GetGRXAlias( flavor )
-		Assert( grxRef != "" )
+		Assert( grxRef != "", "Item " + ItemFlavor_GetHumanReadableRef( flavor ) + " has GRX mode enabled but GRX ref is undefined." )
 
 		flavor._____INTERNAL_grxIndex = GRX_RegisterItem( grxRef, flavor._____INTERNAL_grxMode )
 
 		fileLevel.grxIndexItemFlavorMap[flavor._____INTERNAL_grxIndex] <- flavor
-		#if(DEV)
+		fileLevel.grxRefToGRXIndexMap[grxRef] <- flavor._____INTERNAL_grxIndex
+		#if DEV
+			bool duplicateGRXRefFound = grxRef in fileLevel.grxRefItemFlavorMap
+			Assert( !duplicateGRXRefFound, "Duplicate GRX ref found. Already used by " + ItemFlavor_GetHumanReadableRef( fileLevel.grxRefItemFlavorMap[grxRef] ) )
 			fileLevel.grxRefItemFlavorMap[grxRef] <- flavor
 		#endif
 	}
+	else if ( flavor._____INTERNAL_grxMode == eItemFlavorGRXMode.OWNERSHIP_TARGET )
+	{
+		ItemFlavor ornull ownershipTarget = ItemFlavor_GetGRXOwnershipTarget( flavor )
+		if ( ownershipTarget != null )
+		{
+			expect ItemFlavor(ownershipTarget)
+			if ( ownershipTarget._____INTERNAL_grxOwnershipTargettedBy == null )
+				ownershipTarget._____INTERNAL_grxOwnershipTargettedBy = []
+			array<int> targettedBy = expect array<int>(ownershipTarget._____INTERNAL_grxOwnershipTargettedBy)
+			targettedBy.append( flavor._____INTERNAL_guid )
+		}
+	}
 
-	#if(UI)
+	#if UI
 		ItemFlavorPurchasabilityInfo ifpi
 		fileLevel.itemFlavorPurchasabilityInfoMap[flavor] <- ifpi
 	#endif
@@ -447,27 +723,26 @@ void function ShGRX_RegisterItemFlavor( ItemFlavor flavor )
 
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 void function OnAllItemFlavorsRegistered()
 {
-	GRX_BATTLEPASS_PURCHASE_PACK_BASIC = GetItemFlavorByAsset( $"settings/itemflav/pack/battle_pass_season1_basic.rpak" )
-	GRX_BATTLEPASS_PURCHASE_PACK_BUNDLE = GetItemFlavorByAsset( $"settings/itemflav/pack/battle_pass_season1_bundle.rpak" )
+	  
 }
 #endif
 
 
 
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                          
+                          
+                          
+                          
+                          
+#if SERVER || CLIENT || UI
 bool function IsValidItemFlavorGRXIndex( int index, int validationBehavior = eValidation.DONT_ASSERT )
 {
 	bool good = (index in fileLevel.grxIndexItemFlavorMap)
 
-	if ( !good && validationBehavior == eValidation.ASSERT ) //
+	if ( !good && validationBehavior == eValidation.ASSERT )                                   
 	{
 		foreach ( int grxIndex, ItemFlavor flav in fileLevel.grxIndexItemFlavorMap )
 		{
@@ -481,7 +756,15 @@ bool function IsValidItemFlavorGRXIndex( int index, int validationBehavior = eVa
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+int function GetGRXIndexByGRXRef( string grxRef )
+{
+	return fileLevel.grxRefToGRXIndexMap[ grxRef ]
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 ItemFlavor function GetItemFlavorByGRXIndex( int index )
 {
 	IsValidItemFlavorGRXIndex( index, eValidation.ASSERT )
@@ -491,17 +774,17 @@ ItemFlavor function GetItemFlavorByGRXIndex( int index )
 #endif
 
 
-#if ( CLIENT || UI ) && DEV 
+#if (SERVER || CLIENT || UI) && DEV
 ItemFlavor function GetItemFlavorByGRXRef( string grxRef )
 {
-	//
+	                                                        
 
 	return fileLevel.grxRefItemFlavorMap[ grxRef ]
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function ItemFlavor_GetGRXMode( ItemFlavor flavor )
 {
 	Assert( IsItemFlavorStructValid( flavor, eValidation.ASSERT ) )
@@ -511,75 +794,151 @@ int function ItemFlavor_GetGRXMode( ItemFlavor flavor )
 #endif
 
 
-#if CLIENT || UI 
-int function ItemFlavor_GetGRXIndex( ItemFlavor flavor )
+#if SERVER || CLIENT || UI
+int function ItemFlavor_GetGRXIndex( ItemFlavor flavor, int validationBehavior = eValidation.ASSERT )
 {
 	Assert( IsItemFlavorStructValid( flavor, eValidation.ASSERT ) )
-	Assert( flavor._____INTERNAL_grxMode != eItemFlavorGRXMode.NONE, "Attempted to get the GRX index of a non-GRX item flavor: " + DEV_DescItemFlavor( flavor ) )
-
+	Assert( flavor._____INTERNAL_grxMode != eItemFlavorGRXMode.NONE || validationBehavior == eValidation.DONT_ASSERT, "Attempted to get the GRX index of a non-GRX item flavor: " + DEV_DescItemFlavor( flavor ) )
+	Assert( flavor._____INTERNAL_grxIndex >= 0 || validationBehavior == eValidation.DONT_ASSERT, format( "%s( %s ) has an invalid index (%d)", FUNC_NAME(), DEV_DescItemFlavor( flavor ), flavor._____INTERNAL_grxIndex ) )
 	return flavor._____INTERNAL_grxIndex
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 string function ItemFlavor_GetGRXAlias( ItemFlavor flavor )
 {
 	Assert( IsItemFlavorStructValid( flavor, eValidation.ASSERT ) )
 	Assert( flavor._____INTERNAL_grxMode != eItemFlavorGRXMode.NONE, "Attempted to get the GRX alias of a non-GRX item flavor: " + DEV_DescItemFlavor( flavor ) )
 
-	return GetGlobalSettingsString( flavor._____INTERNAL_settingsAsset, "grxRef" )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "grxRef" )
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+ItemFlavor ornull function ItemFlavor_GetGRXOwnershipTarget( ItemFlavor flavor )
+{
+	Assert( IsItemFlavorStructValid( flavor, eValidation.ASSERT ) )
+	if ( flavor._____INTERNAL_grxMode != eItemFlavorGRXMode.OWNERSHIP_TARGET )
+		return null
+
+	asset ownershipTargetFlavAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "ownershipTarget" )
+	if ( IsValidItemFlavorSettingsAsset( ownershipTargetFlavAsset ) )
+		return GetItemFlavorByAsset( ownershipTargetFlavAsset )
+
+	return null
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+array<ItemFlavor> function ItemFlavor_GetGRXOwnershipTargettedBy( ItemFlavor flavor )
+{
+	array<ItemFlavor> out = []
+	if ( flavor._____INTERNAL_grxOwnershipTargettedBy != null )
+	{
+		foreach ( int targeterGuid in expect array<int>(flavor._____INTERNAL_grxOwnershipTargettedBy) )
+		{
+			out.append( GetItemFlavorByGUID( targeterGuid ) )
+		}
+	}
+	return out
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 int function GRXCurrency_GetCurrencyIndex( ItemFlavor flav )
 {
 	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency )
-
-	return fileLevel.currencyIndexMap[flav]
+	return fileLevel.currencyIndexMap[ItemFlavor_GetGUIDString( flav )]
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+string function GRXCurrency_GetPurchaseSound( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "purchaseSound" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+asset function GRXCurrency_GetPreviewModel( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "previewMdl" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+asset function GRXCurrency_GetRewardIcon( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "rewardIcon" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+ItemFlavor function GRXCurrencyBundle_GetCurrencyFlav( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency_bundle )
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "currencyFlav" ) )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 int function GRXCurrencyBundle_GetValue( ItemFlavor flav )
 {
 	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency_bundle )
-
 	return GetCurrentPlaylistVarInt( "grx_" + ItemFlavor_GetHumanReadableRef( flav ) + "_count", -1 )
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function GRX_IsInventoryReady( entity player = null )
 {
-	#if(false)
-
-#elseif(UI)
-		player = GetUIPlayer()
+	#if SERVER
+		                        
+	#elseif UI
+		player = GetLocalClientPlayer()
 	#endif
 	return GetPlayerGRXScriptState( player ).isInventoryReady
 }
 #endif
 
+#if SERVER
+                                                       
+ 
+	                                                             
+ 
+#endif
 
-#if CLIENT || UI 
+#if SERVER
+                                                        
+ 
+	                                                             
+ 
+#endif
+
+#if SERVER || CLIENT || UI
 bool function GRX_HasInventoryEverBeenReady( entity player = null )
 {
-	if ( !GRX_IsGRXEnabled() )
-		return true
-
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                                             
+	#elseif CLIENT
 		if ( player == null )
 			player = GetLocalClientPlayer()
-	#elseif(UI)
+	#elseif UI
 		if ( player == null )
-			player = GetUIPlayer()
+			player = GetLocalClientPlayer()
 	#endif
 
 	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( player )
@@ -588,31 +947,24 @@ bool function GRX_HasInventoryEverBeenReady( entity player = null )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GRX_GetPlayerEdition( entity player = null )
 {
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                                             
+	#elseif CLIENT
 		if ( player == null )
 			player = GetLocalClientPlayer()
-	#elseif(UI)
+	#elseif UI
 		if ( player == null )
-			player = GetUIPlayer()
+			player = GetLocalClientPlayer()
 	#endif
 
-	int marketplaceEdition
-	if ( GRX_IsGRXEnabled() )
-	{
-		//
-		marketplaceEdition = GetPlayerGRXScriptState( player ).marketplaceEdition
-	}
-
-	return marketplaceEdition
+	return GetPlayerGRXScriptState( player ).marketplaceEdition
 }
 #endif
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function GRX_IsItemOwnedByPlayer( ItemFlavor flav, entity player = null )
 {
 	Assert( GetPlayerGRXScriptState( player ).isInventoryReady, "Called GRX_IsItemOwnedByPlayer while the player's inventory was not ready" )
@@ -622,77 +974,345 @@ bool function GRX_IsItemOwnedByPlayer( ItemFlavor flav, entity player = null )
 
 bool function GRX_IsItemOwnedByPlayer_AllowOutOfDateData( ItemFlavor flav, entity player = null )
 {
-	//
-	//
-	//
-	//
-	//
-	//
+	                                                                                      
+	                                                  
+	                                       
+	                                                                                                                                  
+	                                                                                                                                 
+	                                                                                                                                     
 
 	return IsItemOwnedByPlayerInternal( flav, player )
 }
 bool function IsItemOwnedByPlayerInternal( ItemFlavor flav, entity player = null )
 {
-	if ( !GRX_IsGRXEnabled() )
-		return true
-
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                                             
+	#elseif CLIENT
 		if ( player == null )
 			player = GetLocalClientPlayer()
-	#elseif(UI)
+	#elseif UI
 		if ( player == null )
-			player = GetUIPlayer()
+			player = GetLocalClientPlayer()
 	#endif
 
+	if ( ItemFlavor_AnyItemsHavePlaylistOverrides() )
+	{
+		if ( ItemFlavor_GetPlaylistAvailability( flav ) == eItemFlavorPlaylistAvailability.FORCE_UNLOCK_FOR_SPECIAL_EVENT )
+			return true
+	}
 
 	int grxMode = ItemFlavor_GetGRXMode( flav )
 
-	if ( ItemFlavor_HasUnlockFunc( flav ) )
+	if ( grxMode == eItemFlavorGRXMode.OWNERSHIP_TARGET )
 	{
-		Assert( grxMode == GRX_ITEMFLAVORMODE_NONE, "These entitlement unlocks shouldn't also be used in GRX mode." )
-		return ItemFlavor_PassesUnlockFunc( flav, player )
+		ItemFlavor ornull ownershipTargetOverride = ItemFlavor_GetGRXOwnershipTarget( flav )
+		if ( ownershipTargetOverride != null )
+			return IsItemOwnedByPlayerInternal( expect ItemFlavor(ownershipTargetOverride), player )
+
+		Warning( "Item flavor %s is set to use GRX ownership of another item but it isn't a valid item: %s", ItemFlavor_GetHumanReadableRef( flav ), string(GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "ownershipTarget" )) )
+		return false
 	}
+
+	                                   
+	if ( ItemFlavor_HasUnlockFunc( flav ) && grxMode == GRX_ITEMFLAVORMODE_NONE )
+		return ItemFlavor_PassesUnlockFunc( flav, player )
 
 	if ( grxMode == GRX_ITEMFLAVORMODE_NONE )
 		return true
 
-	if ( ItemFlavor_GetPlaylistOpinion( flav ) == eItemFlavorPlaylistOpinion.FORCE_UNLOCK_FOR_SPECIAL_EVENT )
-		return true
-
-	Assert( grxMode == GRX_ITEMFLAVORMODE_REGULAR, "Tried to call GRX_IsItemOwnedByPlayer on a non-regular GRX item" )
+	Assert( grxMode == GRX_ITEMFLAVORMODE_REGULAR, format( "Tried to call GRX_IsItemOwnedByPlayer on a non-regular GRX item: %s", ItemFlavor_GetHumanReadableRef( flav ) ) )
 
 	bool has
 	if ( !GRX_HasInventoryEverBeenReady( player ) )
 	{
+		#if SERVER
+		                                                                                                                                    
+		                         
+		 
+			                        
+			                                                       
+			                                                                                                                                  
+			                                                               
+
+			                                                                                                                             
+				                                                            
+		 
+		#endif
+
 		has = true
 	}
 	else
 	{
-		#if(false)
-
-#elseif CLIENT || UI 
-			#if(CLIENT)
+		#if SERVER
+			                                                        
+		#elseif CLIENT || UI
+			#if CLIENT
 				Assert( player == GetLocalClientPlayer() )
-			#elseif(UI)
-				Assert( player == GetUIPlayer() )
+			#elseif UI
+				Assert( player == GetLocalClientPlayer() )
 			#endif
 			has = GRX_HasItem( flav._____INTERNAL_grxIndex )
 		#endif
 	}
 
-	#if(DEV)
-		if ( EverythingUnlockedConVarEnabled() || GetCurrentPlaylistVarBool( "dev_force_everything_unlocked", false ) )
-			return true
-	#endif
+	if ( IsEverythingUnlocked() )
+		return true
 
 	return has
 }
 #endif
 
+#if UI
+GRX_PackCollectionInfo function GRXOffer_GetEventThematicPackCollectionInfoFromScriptOffer( GRXScriptOffer offerData )
+{
+	GRX_PackCollectionInfo packCollectionInfo
+	if ( offerData.output.flavors.len() == 1 && ItemFlavor_GetType( offerData.output.flavors[0] ) == eItemType.account_pack )
+	{
+		                                                                                                         
+		packCollectionInfo = GRXOffer_GetEventThematicPackCollectionInfo( offerData.output.flavors[0] )
 
-#if(UI)
+		                                                                                                                                  
+		if ( packCollectionInfo.numCollected > packCollectionInfo.numTotalInCollection )
+			packCollectionInfo.numCollected = packCollectionInfo.numTotalInCollection
+	}
+
+	return packCollectionInfo
+}
+#endif
+
+#if UI
+GRX_PackCollectionInfo function GRXOffer_GetEventThematicPackCollectionInfo( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack, "Tried to get Pack Info on an ItemFlavor that was NOT of type 'account_pack'" )
+
+	GRX_PackCollectionInfo data
+	if ( ItemFlavor_GetAccountPackType( flav ) != eAccountPackType.EVENT_THEMATIC )
+		return data
+
+	array<ItemFlavor> packContents = GRXPack_GetPackContents( flav )
+	Assert( packContents.len() > 0 )
+	int numOwned = 0
+	foreach ( packContent in packContents )
+	{
+		if ( GRX_IsItemOwnedByPlayer_AllowOutOfDateData( packContent, GetLocalClientPlayer() ) )
+			++numOwned
+	}
+
+	int ownedPackCount = GRX_GetPackCount( ItemFlavor_GetGRXIndex( flav ) )
+	numOwned += ownedPackCount
+
+	data.numCollected = numOwned
+	data.numTotalInCollection = packContents.len()
+	return data
+}
+
+bool function GRXOffer_IsFullyClaimed( GRXScriptOffer offer )
+{
+	if ( offer.WORKAROUND_claimedSentinel != null )
+	{
+		ItemFlavor sentinelFlav = expect ItemFlavor(offer.WORKAROUND_claimedSentinel)
+		if ( GRX_IsItemOwnedByPlayer( sentinelFlav ) )
+			return true
+	}
+
+	if( GRXOffer_GetBundleOfferRestrictions( offer ) != "" )
+		return true
+
+	foreach ( int outputIdx, ItemFlavor outputFlav in offer.output.flavors )
+	{
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.REGULAR )
+		{
+			if ( !GRX_IsItemOwnedByPlayer( outputFlav ) )
+				return false
+		}
+		else if ( ItemFlavor_GetType( outputFlav ) == eItemType.account_pack )
+		{
+			GRX_PackCollectionInfo packCollectionInfo = GRXOffer_GetEventThematicPackCollectionInfo( outputFlav )
+			if ( packCollectionInfo.numTotalInCollection > 0 )
+			{
+				if ( packCollectionInfo.numCollected < packCollectionInfo.numTotalInCollection )
+					return false
+			}
+			else
+			{
+				return false                                                                                
+			}
+		}
+		else
+		{
+
+					                                                                                                   
+			return false
+		}
+	}
+	return true
+}
+#endif
+
+
+#if UI
+int function GRXOffer_GetOwnedItemsCount( GRXScriptOffer offer )
+{
+	int count = 0
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+	{
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.REGULAR )
+		{
+			if ( GRX_IsItemOwnedByPlayer( outputFlav ) )
+				count = count + 1
+		}
+	}
+	return count
+}
+#endif
+
+
+#if UI
+bool function GRXOffer_IsHeirloomPack( GRXScriptOffer offer  )
+{
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+	{
+		if ( !ItemFlavor_HasQuality( outputFlav ) )
+			return false
+
+		if ( ItemFlavor_GetQuality( outputFlav ) != eRarityTier.HEIRLOOM )
+			return false
+	}
+
+	return true
+}
+
+bool function GRXOffer_ContainsPack( GRXScriptOffer offer )
+{
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.PACK )
+		{
+			                                                                                          
+			if ( !ItemFlavor_HasQuality( outputFlav ) || ItemFlavor_GetQuality( outputFlav ) != eRarityTier.HEIRLOOM )
+				return true
+		}
+
+	return false
+}
+#endif
+
+#if UI
+bool function GRXOffer_ContainsEventPack( GRXScriptOffer offer )
+{
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+	{
+		string grxRef = ItemFlavor_GetHumanReadableRef( outputFlav )
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.PACK && ItemFlavor_GetAccountPackType( outputFlav ) == eAccountPackType.EVENT )
+			return true
+	}
+
+	return false
+}
+#endif
+
+#if UI
+bool function GRXOffer_ContainsThematicPack( GRXScriptOffer offer )
+{
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+	{
+		string grxRef = ItemFlavor_GetHumanReadableRef( outputFlav )
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.PACK && ItemFlavor_GetAccountPackType( outputFlav ) == eAccountPackType.THEMATIC )
+			return true
+	}
+
+	return false
+}
+#endif
+
+#if UI
+bool function GRXOffer_ContainsEventThematicPack( GRXScriptOffer offer )
+{
+	                                                                                                           
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+	{
+		string grxRef = ItemFlavor_GetHumanReadableRef( outputFlav )
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.PACK && ItemFlavor_GetAccountPackType( outputFlav ) == eAccountPackType.EVENT_THEMATIC )
+			return true
+	}
+
+	return false
+}
+#endif
+
+#if UI
+string function GRXOffer_GetSpecialPackName( GRXScriptOffer offer )
+{
+	string specialPackName = ""
+	foreach ( ItemFlavor outputFlav in offer.output.flavors )
+	{
+		string grxRef = ItemFlavor_GetHumanReadableRef( outputFlav )
+		if ( ItemFlavor_GetGRXMode( outputFlav ) == eItemFlavorGRXMode.PACK && ItemFlavor_GetAccountPackType( outputFlav ) != eAccountPackType.APEX )
+			specialPackName = ItemFlavor_GetShortName( outputFlav )
+	}
+
+	return specialPackName
+}
+#endif
+
+
+#if UI
+string function GRXOffer_GetBundleOfferRestrictions( GRXScriptOffer offer )
+{
+	if( offer.output.flavors.len() <= 1 )
+		return ""
+
+	if ( GRXOffer_IsHeirloomPack( offer ) )                                                                            
+		return ""
+
+	if ( offer.isSKUOffer )
+		return ""
+
+	                                                                                             
+	                                                                                       
+	int itemsOwned = 0
+	int coreItemCount = 0
+	for ( int offerIndex = 0; offerIndex < offer.items.len(); ++offerIndex )
+	{
+		                                                                 
+		                                                                                                               
+		if ( offer.offerType != GRX_OFFERTYPE_BUNDLE || offer.items[offerIndex].itemType == GRX_OFFERITEMTYPE_CORE )
+		{
+			ItemFlavor coreItemFlav = GetItemFlavorByGRXIndex( offer.items[offerIndex].itemIdx )
+
+			                                                                                           
+			if( ItemFlavor_GetGRXMode( coreItemFlav ) != eItemFlavorGRXMode.REGULAR )
+			{
+				Assert( offer.items[offerIndex].itemType != GRX_OFFERITEMTYPE_CORE )                                                 
+				continue
+			}
+
+			                                                                                                                 
+			if( GRX_IsItemOwnedByPlayer( coreItemFlav ) )
+				itemsOwned++
+			coreItemCount++
+		}
+	}
+
+	bool lockout = false
+	if ( offer.offerType == GRX_OFFERTYPE_BUNDLE )
+		lockout = coreItemCount == itemsOwned
+	else
+		lockout = itemsOwned >= 1                                                                           
+
+	                                                                                                           
+	if ( lockout )
+	{
+		if ( itemsOwned == 1 )
+			return "#BUNDLE_BONUS_LOCKED"
+		else if ( itemsOwned > 1 )
+			return "#BUNDLE_BONUS_LOCKED_PLURAL"
+	}
+
+	return ""
+}
+#endif
+
+#if SERVER || UI
 void function QueueGRXOperation( entity player, ScriptGRXOperationInfo operationInfo, bool DEV_isDevOperation = false )
 {
 	Assert( IsLobby() || DEV_isDevOperation, "QueueGRXOperation should only be called when in the lobby." )
@@ -708,7 +1328,16 @@ void function QueueGRXOperation( entity player, ScriptGRXOperationInfo operation
 #endif
 
 
-#if(UI)
+#if SERVER
+                                                   
+ 
+	                                                                    
+	                                    
+	                                                                             
+ 
+#endif
+
+#if SERVER || UI
 bool function IsGRXOperationDone( ScriptGRXOperationInfo operationInfo )
 {
 	if ( operationInfo.status == eScriptGRXOperationStatus.DONE_SUCCESS )
@@ -725,15 +1354,19 @@ bool function IsGRXOperationDone( ScriptGRXOperationInfo operationInfo )
 #endif
 
 
-#if(UI)
+#if SERVER || UI
 void function QueueGRXOperationInternal( entity player, ScriptGRXOperationInfo operationInfo, PlayerGRXScriptState scriptState )
 {
-	#if(UI)
+	#if UI
 		Assert( scriptState.operationQueue.len() == 0, "Attempted to queue a UI GRX operation while one was already queued." )
 	#endif
 
 	operationInfo.DEV_culprit = FUNC_NAME( 2 )
+#if UI
+	operationInfo.DEV_queueTime = UITime()
+#else
 	operationInfo.DEV_queueTime = Time()
+#endif      
 
 	operationInfo.status = eScriptGRXOperationStatus.QUEUED
 	operationInfo.id = scriptState.nextScriptQueryId
@@ -752,7 +1385,7 @@ void function QueueGRXOperationInternal( entity player, ScriptGRXOperationInfo o
 #endif
 
 
-#if(UI)
+#if SERVER || UI
 int function GRXCurrency_GetPlayerBalance( entity player, ItemFlavor flav )
 {
 	Assert( ItemFlavor_GetType( flav ) == eItemType.account_currency )
@@ -760,13 +1393,49 @@ int function GRXCurrency_GetPlayerBalance( entity player, ItemFlavor flav )
 	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( player )
 	Assert( scriptState.isInventoryReady, "Tried to get player currency balance while their GRX inventory state was not ready" )
 
+	if( !scriptState.isInventoryReady || scriptState.balances.len() == 0 )
+		return 0
+
 	int currencyIndex = GRXCurrency_GetCurrencyIndex( flav )
 	return scriptState.balances[currencyIndex]
 }
 #endif
 
 
-#if(CLIENT)
+#if UI
+void function GRX_PurchaseOffer( int opId, int queryGoal, GRXScriptOffer offer, ItemFlavorBag price, int quantity )
+{
+	if ( offer.isCraftingOffer )
+	{
+		Assert( queryGoal == GRX_HTTPQUERYGOAL_CRAFT_ITEM )
+		Assert( quantity == 1 )
+		GRX_CraftItem( opId, ItemFlavor_GetGRXIndex( offer.output.flavors[0] ) )
+		return
+	}
+
+	Assert( offer.output.flavors.len() == offer.output.quantities.len() )
+	int numItems = offer.output.flavors.len()
+
+	array<int> grxIndices = []
+	array<int> grxQuantities = []
+	for ( int i = 0; i < numItems; i++ )
+	{
+		grxIndices.append( ItemFlavor_GetGRXIndex( offer.output.flavors[i] ) )
+		grxQuantities.append( offer.output.quantities[i] )
+	}
+
+	if ( offer.WORKAROUND_claimedSentinel != null )
+		grxIndices.append( ItemFlavor_GetGRXIndex( expect ItemFlavor(offer.WORKAROUND_claimedSentinel) ) )
+
+	if ( offer.offerType == GRX_OFFERTYPE_BUNDLE )
+		GRX_PurchaseBundleOffer( opId, queryGoal, offer.offerAlias, quantity, grxIndices, grxQuantities, GRX_GetCurrencyArrayFromBag( price ) )
+	else
+		GRX_PurchaseStoreOffer( opId, queryGoal, quantity, grxIndices, grxQuantities, GRX_GetCurrencyArrayFromBag( price ) )
+}
+#endif
+
+
+#if CLIENT || UI
 ItemFlavorBag function GRX_GetMostRecentPackOpeningResults()
 {
 	Assert( fileLevel.mostRecentPackOpeningResultsOrNull != null, "Tried to call GRX_GetMostRecentPackOpeningResults with no pack opening results available for use" )
@@ -778,7 +1447,7 @@ ItemFlavorBag function GRX_GetMostRecentPackOpeningResults()
 #endif
 
 
-#if(UI)
+#if UI
 array<ItemFlavor> function GRX_GetAllPackFlavors()
 {
 	return fileLevel.packFlavorList
@@ -786,10 +1455,10 @@ array<ItemFlavor> function GRX_GetAllPackFlavors()
 #endif
 
 
-#if(UI)
+#if UI
 table<ItemFlavor, int> function GRX_GetPackCounts()
 {
-	Assert( GetPlayerGRXScriptState( GetUIPlayer() ).isInventoryReady )
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).isInventoryReady )
 
 	table<ItemFlavor, int> packCountMap = {}
 
@@ -803,10 +1472,10 @@ table<ItemFlavor, int> function GRX_GetPackCounts()
 #endif
 
 
-#if(UI)
+#if UI
 int function GRX_GetTotalPackCount()
 {
-	Assert( GetPlayerGRXScriptState( GetUIPlayer() ).isInventoryReady )
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).isInventoryReady )
 
 	int count = 0
 	foreach ( ItemFlavor pack in GRX_GetAllPackFlavors() )
@@ -817,16 +1486,48 @@ int function GRX_GetTotalPackCount()
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                             
+ 
+	                                                                               
+	                                                                  
+ 
+#endif
 
-
-
-
-
+#if SERVER
+                                                                                  
+ 
+	                                                                    
+	                                                       
+ 
 #endif
 
 
-#if(UI)
+#if UI
+array<GRXScriptOffer> function GRX_GetLocationOffers( string location )
+{
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).areOffersReady, "Called GRX_GetLocationOffers when offers weren't ready" )
+
+	if ( location in fileLevel.locationOffersMap )
+		return fileLevel.locationOffersMap[location]
+
+	return []
+}
+#endif
+
+#if UI
+bool function GRX_IsLocationActive( string location )
+{
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).areOffersReady, "Called GRX_IsLocationActive when offers weren't ready" )
+
+	if ( location in fileLevel.locationOffersMap )
+		return fileLevel.locationOffersMap[location].len() > 0
+
+	return false
+}
+#endif
+
+#if UI
 array<GRXScriptOffer> function GRX_GetItemDedicatedStoreOffers( ItemFlavor flav, string location )
 {
 	ItemFlavorPurchasabilityInfo ifpi = GRX_GetItemPurchasabilityInfo( flav )
@@ -837,53 +1538,81 @@ array<GRXScriptOffer> function GRX_GetItemDedicatedStoreOffers( ItemFlavor flav,
 #endif
 
 
-#if(UI)
-array<GRXScriptOffer> function GRX_GetExclusiveOffers()
+#if UI
+int function GRX_GetStoreOfferColumnNumRows( int col, int storeLocation )
 {
-	Assert( GetPlayerGRXScriptState( GetUIPlayer() ).areOffersReady, "Called GRX_GetFeaturedOfferCount when offers weren't ready" )
-	return fileLevel.storeExclusiveOffers
-}
-#endif
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).areOffersReady, "Called GRX_GetStoreOfferColumnNumRows when offers weren't ready" )
 
+	int numRows = 0
+	array<array<array<GRXScriptOffer> > > storeOfferColumns
 
-#if(UI)
-array<GRXScriptOffer> function GRX_GetFeaturedOffers()
-{
-	Assert( GetPlayerGRXScriptState( GetUIPlayer() ).areOffersReady, "Called GRX_GetFeaturedOfferCount when offers weren't ready" )
-	return fileLevel.storeFeaturedOffers
-}
-#endif
+	if( storeLocation == eStoreLocation.SHOP )
+		storeOfferColumns = fileLevel.storeOfferColumns
+	else if( storeLocation == eStoreLocation.SPECIALS )
+		storeOfferColumns = fileLevel.specialsStoreOfferColumns
+	else if( storeLocation == eStoreLocation.SEASONAL )
+		storeOfferColumns = fileLevel.seasonalStoreOfferColumns
+	else
+		return 0
 
-
-#if(UI)
-array<GRXScriptOffer> function GRX_GetStoreOfferColumn( int col )
-{
-	Assert( GetPlayerGRXScriptState( GetUIPlayer() ).areOffersReady, "Called GRX_GetFeaturedOfferCount when offers weren't ready" )
-
-	array<GRXScriptOffer> offers
-	if ( col in fileLevel.storeOfferColumns )
+	if ( storeOfferColumns.isvalidindex( col ) )
 	{
-		if ( (0 in fileLevel.storeOfferColumns[col]) && fileLevel.storeOfferColumns[col][0].len() > 0 )
+		if ( storeOfferColumns[col].len() > 0 && storeOfferColumns[col][0].len() > 0 )
 		{
-			foreach ( offer in fileLevel.storeOfferColumns[col][0] )
+			foreach ( offer in storeOfferColumns[col][0] )
 			{
 				if ( offer.expireTime <= GetUnixTimestamp() )
 					continue
 
-				offers.append( offer )
+				numRows++
 				break
 			}
 		}
 
-		if ( (1 in fileLevel.storeOfferColumns[col]) && fileLevel.storeOfferColumns[col][1].len() > 0 )
+		if ( storeOfferColumns[col].len() > 1 && storeOfferColumns[col][1].len() > 0 )
 		{
-			foreach ( offer in fileLevel.storeOfferColumns[col][1] )
+			foreach ( offer in storeOfferColumns[col][1] )
+			{
+				if ( offer.expireTime <= GetUnixTimestamp() )
+					continue
+
+				numRows++
+				break
+			}
+		}
+	}
+
+	return numRows
+}
+#endif
+
+#if UI
+array<GRXScriptOffer> function GRX_GetStoreOfferColumn( int col, int row, int storeLocation )
+{
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).areOffersReady, "Called GRX_GetStoreOfferColumn when offers weren't ready" )
+
+	array<GRXScriptOffer> offers
+	array<array<array<GRXScriptOffer> > > storeOfferColumns
+
+	if( storeLocation == eStoreLocation.SHOP )
+		storeOfferColumns = fileLevel.storeOfferColumns
+	else if( storeLocation == eStoreLocation.SPECIALS )
+		storeOfferColumns = fileLevel.specialsStoreOfferColumns
+	else if( storeLocation == eStoreLocation.SEASONAL )
+		storeOfferColumns = fileLevel.seasonalStoreOfferColumns
+	else
+		return offers
+
+	if ( storeOfferColumns.isvalidindex( col ) )
+	{
+		if ( storeOfferColumns[col].isvalidindex( row ) && storeOfferColumns[col][row].len() > 0 )
+		{
+			foreach ( offer in storeOfferColumns[col][row] )
 			{
 				if ( offer.expireTime <= GetUnixTimestamp() )
 					continue
 
 				offers.append( offer )
-				break
 			}
 		}
 	}
@@ -893,16 +1622,59 @@ array<GRXScriptOffer> function GRX_GetStoreOfferColumn( int col )
 #endif
 
 
-#if(UI)
+#if UI
+array<GRXScriptOffer> function GRX_GetStoreOffers( int storeLocationn )
+{
+	Assert( GetPlayerGRXScriptState( GetLocalClientPlayer() ).areOffersReady, "Called GRX_GetStoreOffers when offers weren't ready" )
+
+	array<GRXScriptOffer> offers
+	for ( int col = 0; col < 5; col++ )                                 
+		for ( int row = 0; row < 2; row++ )
+			offers.extend( GRX_GetStoreOfferColumn( col, row, storeLocationn ) )
+
+	return offers
+}
+#endif
+
+
+#if UI
+array<ItemFlavor> function GRX_GetStoreOfferItems( int storeLocation )
+{
+	array<GRXScriptOffer> offers = GRX_GetStoreOffers( storeLocation )
+	array<ItemFlavor> items
+
+	foreach ( offer in offers )
+		items.append( offer.output.flavors[0] )
+
+	return items
+}
+#endif
+
+
+#if UI
+array<ItemFlavor> function GRX_GetLocationOfferItems( string location )
+{
+	array<GRXScriptOffer> offers = GRX_GetLocationOffers( location )
+	array<ItemFlavor> items
+
+	foreach ( offer in offers )
+		items.append( offer.output.flavors[0] )
+
+	return items
+}
+#endif
+
+
+#if UI
 bool function GRX_AreOffersReady()
 {
-	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 	return scriptState.isInventoryReady && scriptState.areOffersReady
 }
 #endif
 
 
-#if(UI)
+#if UI
 bool function GRX_IsBadLuckProtectionActive()
 {
 	if ( !GRX_IsInventoryReady() )
@@ -913,31 +1685,151 @@ bool function GRX_IsBadLuckProtectionActive()
 #endif
 
 
-#if(UI)
+#if CLIENT || UI
+asset function GRXPack_GetOpenButtonIcon( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "openButtonIcon" )
+}
+#endif
+
+
+#if CLIENT || UI
+vector ornull function GRXPack_GetCustomColor( ItemFlavor flav, int idx )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	if ( !GetGlobalSettingsBool( ItemFlavor_GetAsset( flav ), "useCustomColors" ) )
+		return null
+
+	return GetGlobalSettingsVector( ItemFlavor_GetAsset( flav ), format( "customCol%d", idx ) )
+}
+#endif
+
+
+#if CLIENT || UI
+vector ornull function GRXPack_GetCustomCountTextCol( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	if ( !GetGlobalSettingsBool( ItemFlavor_GetAsset( flav ), "useCustomColors" ) )
+		return null
+
+	return GetGlobalSettingsVector( ItemFlavor_GetAsset( flav ), "countTextCol" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+bool function GRXPack_IsEphemeral( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( flav ), "isEphemeral" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+bool function GRXPack_IsExpectedToContainSingleItemWithCurrency( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( flav ), "isExpectedToContainSingleItemWithCurrency" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+asset function GRXPack_GetTickModel( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "tickMdl" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+array<ItemFlavor> function GRXPack_GetPackContents( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	array<ItemFlavor> contents = []
+	foreach ( var contentsBlock in IterateSettingsAssetArray( ItemFlavor_GetAsset( flav ), "packContents" ) )
+	{
+		asset contentAsset = GetSettingsBlockAsset( contentsBlock, "flavor" )
+		if ( IsValidItemFlavorSettingsAsset( contentAsset ) )
+			contents.append( GetItemFlavorByAsset( contentAsset ) )
+	}
+	return contents
+}
+#endif
+
+
+#if CLIENT
+string function GRXPack_GetTickSoundAlias( ItemFlavor flav, int soundKind )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	switch ( soundKind )
+	{
+		case eGRXPackTickSoundKind.TriadBounce: return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "triadBounceSound" )
+
+		case eGRXPackTickSoundKind.PuckLand: return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "puckLandSound" )
+
+		case eGRXPackTickSoundKind.Unpack: return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "unpackSound" )
+
+		case eGRXPackTickSoundKind.DeployTriadExplo1: return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "deployTriadExplo1Sound" )
+
+		case eGRXPackTickSoundKind.DeployTriadExplo2: return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "deployTriadExplo2Sound" )
+
+		case eGRXPackTickSoundKind.DeployTriadExplo3: return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "deployTriadExplo3Sound" )
+	}
+	Assert( false )
+	return ""
+}
+#endif
+
+
+
+#if SERVER || CLIENT || UI
+string function GRXPack_GetTickModelSkin( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "tickMdlSkin" )
+}
+#endif
+
+
+#if UI
 ItemFlavorPurchasabilityInfo function GRX_GetItemPurchasabilityInfo( ItemFlavor flavor )
 {
-	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 	Assert( scriptState.isInventoryReady, "Called ItemFlavor_GetPurchasabilityInfo when the GRX inventory state was not ready" )
 	Assert( scriptState.areOffersReady, "Called ItemFlavor_GetPurchasabilityInfo when the GRX offers were not ready" )
+	Assert( flavor in fileLevel.itemFlavorPurchasabilityInfoMap, "Called ItemFlavor_GetPurchasabilityInfo when item was not in itemFlavorPurchasabilityInfoMap: " + ItemFlavor_GetHumanReadableRef( flavor ) )
 
 	return fileLevel.itemFlavorPurchasabilityInfoMap[flavor]
 }
 #endif
 
 
-#if(UI)
+#if UI
 bool function GRX_IsItemCraftable( ItemFlavor itemFlavor )
 {
 	ItemFlavorPurchasabilityInfo ifpi = GRX_GetItemPurchasabilityInfo( itemFlavor )
 	return (ifpi.craftingOfferOrNull != null)
 }
-#endif //
+#endif      
 
 
-#if(UI)
+#if UI
 bool function GRX_CanAfford( ItemFlavorBag price, int quantity )
 {
-	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 	Assert( scriptState.isInventoryReady, "Tried to check is the player can afford something while their GRX inventory state was not ready" )
 
 	foreach ( int costIndex, ItemFlavor costFlav in price.flavors )
@@ -945,7 +1837,7 @@ bool function GRX_CanAfford( ItemFlavorBag price, int quantity )
 		int costQuantity = quantity * price.quantities[costIndex]
 		Assert( ItemFlavor_GetType( costFlav ) == eItemType.account_currency, "NYI!" )
 
-		if ( costQuantity > GRXCurrency_GetPlayerBalance( GetUIPlayer(), costFlav ) )
+		if ( costQuantity > GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), costFlav ) )
 			return false
 	}
 
@@ -954,7 +1846,7 @@ bool function GRX_CanAfford( ItemFlavorBag price, int quantity )
 
 int function GRX_CanAffordDelta( ItemFlavorBag price, int quantity )
 {
-	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 	Assert( scriptState.isInventoryReady, "Tried to check is the player can afford something while their GRX inventory state was not ready" )
 
 	foreach ( int costIndex, ItemFlavor costFlav in price.flavors )
@@ -962,8 +1854,8 @@ int function GRX_CanAffordDelta( ItemFlavorBag price, int quantity )
 		int costQuantity = quantity * price.quantities[costIndex]
 		Assert( ItemFlavor_GetType( costFlav ) == eItemType.account_currency, "NYI!" )
 
-		if ( costQuantity > GRXCurrency_GetPlayerBalance( GetUIPlayer(), costFlav ) )
-			return costQuantity - GRXCurrency_GetPlayerBalance( GetUIPlayer(), costFlav )
+		if ( costQuantity > GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), costFlav ) )
+			return costQuantity - GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), costFlav )
 	}
 
 	return 0
@@ -971,10 +1863,10 @@ int function GRX_CanAffordDelta( ItemFlavorBag price, int quantity )
 #endif
 
 
-#if(UI)
+#if UI
 int function GRX_GetMaxCanAfford( ItemFlavorBag price, int quantity )
 {
-	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 	Assert( scriptState.isInventoryReady, "Tried to check is the player can afford something while their GRX inventory state was not ready" )
 
 	Assert( GRX_IsPremiumPrice( price ) )
@@ -983,7 +1875,7 @@ int function GRX_GetMaxCanAfford( ItemFlavorBag price, int quantity )
 		Assert( ItemFlavor_GetType( costFlav ) == eItemType.account_currency, "NYI!" )
 
 		int basePrice       = price.quantities[costIndex]
-		int currencyBalance = GRXCurrency_GetPlayerBalance( GetUIPlayer(), costFlav )
+		int currencyBalance = GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), costFlav )
 		int maxAfford       = int( floor( currencyBalance / float( basePrice ) ) )
 
 		return minint( maxAfford, quantity )
@@ -993,7 +1885,7 @@ int function GRX_GetMaxCanAfford( ItemFlavorBag price, int quantity )
 }
 #endif
 
-#if(UI)
+#if UI
 array<int> function GRX_GetCurrencyArrayFromBag( ItemFlavorBag bag )
 {
 	array<int> priceArray
@@ -1011,10 +1903,10 @@ array<int> function GRX_GetCurrencyArrayFromBag( ItemFlavorBag bag )
 #endif
 
 
-#if(UI)
+#if UI
 string function GRX_GetFormattedPrice( ItemFlavorBag bag, int quantity = 1 )
 {
-	array<int> priceArray = GRX_GetCurrencyArrayFromBag( bag ) //
+	array<int> priceArray = GRX_GetCurrencyArrayFromBag( bag )            
 	string formattedPrice = ""
 	foreach ( currencyIndex, price in priceArray )
 	{
@@ -1025,7 +1917,7 @@ string function GRX_GetFormattedPrice( ItemFlavorBag bag, int quantity = 1 )
 			formattedPrice = formattedPrice + " & "
 
 		ItemFlavor currency = GRX_CURRENCIES[currencyIndex]
-		formattedPrice = formattedPrice + "%$" + ItemFlavor_GetIcon( currency ) + "% " + ShortenNumber( string( price * quantity) )
+		formattedPrice = formattedPrice + "%$" + ItemFlavor_GetIcon( currency ) + "% " + FormatAndLocalizeNumber( "1", float(price * quantity), true )
 	}
 
 	return formattedPrice
@@ -1033,7 +1925,30 @@ string function GRX_GetFormattedPrice( ItemFlavorBag bag, int quantity = 1 )
 #endif
 
 
-#if(UI)
+#if UI
+                                                                                             
+PriceDisplayData function GRX_GetPriceDisplayData( ItemFlavorBag bag, int quantity = 1 )
+{
+	array<int> priceArray = GRX_GetCurrencyArrayFromBag( bag )            
+	PriceDisplayData data
+
+	foreach ( currencyIndex, price in priceArray )
+	{
+		if ( price == 0 )
+			continue
+
+		Assert( data.amount.len() == 0 )
+
+		data.symbol = ItemFlavor_GetIcon( GRX_CURRENCIES[currencyIndex] )
+		data.amount = FormatAndLocalizeNumber( "1", float(price * quantity), true )
+	}
+
+	return data
+}
+#endif
+
+
+#if UI
 bool function GRX_IsCraftingPrice( ItemFlavorBag bag )
 {
 	return (bag.flavors.len() == 1 && bag.flavors[0] == GRX_CURRENCIES[GRX_CURRENCY_CRAFTING])
@@ -1041,7 +1956,7 @@ bool function GRX_IsCraftingPrice( ItemFlavorBag bag )
 #endif
 
 
-#if(UI)
+#if UI
 bool function GRX_IsPremiumPrice( ItemFlavorBag bag )
 {
 	return (bag.flavors.len() == 1 && bag.flavors[0] == GRX_CURRENCIES[GRX_CURRENCY_PREMIUM])
@@ -1049,17 +1964,17 @@ bool function GRX_IsPremiumPrice( ItemFlavorBag bag )
 #endif
 
 
-#if(UI)
+#if UI
 string function GetFormattedValueForCurrency( int value, int currencyIndex )
 {
 	ItemFlavor currency = GRX_CURRENCIES[currencyIndex]
 
-	return "%$" + ItemFlavor_GetIcon( currency ) + "% " + ShortenNumber( string( value ) )
+	return "%$" + ItemFlavor_GetIcon( currency ) + "% " + FormatAndLocalizeNumber( "1", float( value ), true )
 }
 #endif
 
 
-#if(UI)
+#if UI
 void function AddCallbackAndCallNow_OnGRXInventoryStateChanged( void functionref() cb, bool HACK_dontErrorOnDuplicate = false )
 {
 	if ( fileLevel.onGRXInventoryStateChangedCallbacks.contains( cb ) )
@@ -1072,8 +1987,19 @@ void function AddCallbackAndCallNow_OnGRXInventoryStateChanged( void functionref
 }
 #endif
 
+#if UI
+void function AddCallback_OnGRXInventoryStateChanged( void functionref() cb, bool HACK_dontErrorOnDuplicate = false )
+{
+	if ( fileLevel.onGRXInventoryStateChangedCallbacks.contains( cb ) )
+	{
+		Assert( HACK_dontErrorOnDuplicate, "Tried to add a callback that was already added" )
+	}
+	fileLevel.onGRXInventoryStateChangedCallbacks.append( cb )
+}
+#endif
 
-#if(UI)
+
+#if UI
 void function RemoveCallback_OnGRXInventoryStateChanged( void functionref() cb )
 {
 	Assert( fileLevel.onGRXInventoryStateChangedCallbacks.contains( cb ), "Tried to remove a callback that was not added" )
@@ -1082,7 +2008,7 @@ void function RemoveCallback_OnGRXInventoryStateChanged( void functionref() cb )
 #endif
 
 
-#if(UI)
+#if UI
 void function AddCallbackAndCallNow_OnGRXOffersRefreshed( void functionref() cb, bool HACK_dontErrorOnDuplicate = false )
 {
 	if ( fileLevel.onGRXOffersRefreshedCallbacks.contains( cb ) )
@@ -1097,7 +2023,16 @@ void function AddCallbackAndCallNow_OnGRXOffersRefreshed( void functionref() cb,
 #endif
 
 
-#if(UI)
+#if UI
+void function AddCallback_OnGRXOffersRefreshed( void functionref() cb )
+{
+	Assert( !fileLevel.onGRXOffersRefreshedCallbacks.contains( cb ), "Tried to add a callback that was already added" )
+	fileLevel.onGRXOffersRefreshedCallbacks.append( cb )
+}
+#endif
+
+
+#if UI
 void function RemoveCallback_OnGRXOffersRefreshed( void functionref() cb )
 {
 	Assert( fileLevel.onGRXOffersRefreshedCallbacks.contains( cb ), "Tried to remove a callback that was not added" )
@@ -1106,26 +2041,56 @@ void function RemoveCallback_OnGRXOffersRefreshed( void functionref() cb )
 #endif
 
 
-
-//
-//
-//
-//
-//
-#if CLIENT || UI 
-bool function GRX_IsGRXEnabled()
+#if UI
+void function AddCallback_OnGRXBundlesRefreshed( void functionref() cb )
 {
-	if ( !GetCurrentPlaylistVarBool( "enable_grx", true ) )
-	{
-		Warning( "enable_grx (playlist var) is set to 0" )
-		return false
-	}
-	return true
+	Assert( !fileLevel.onGRXBundlesRefreshedCallbacks.contains( cb ), "Tried to add a callback that was already added" )
+	fileLevel.onGRXBundlesRefreshedCallbacks.append( cb )
+}
+#endif
+
+#if UI
+void function RemoveCallback_OnGRXBundlesRefreshed( void functionref() cb )
+{
+	Assert( fileLevel.onGRXBundlesRefreshedCallbacks.contains( cb ), "Tried to remove a callback that was not added" )
+	fileLevel.onGRXBundlesRefreshedCallbacks.fastremovebyvalue( cb )
 }
 #endif
 
 
-#if DEV && UI 
+
+                       
+                       
+                       
+                       
+                       
+#if DEV && UI
+void function DEV_GRX_PrintStoreOfferLocations()
+{
+	foreach ( ItemFlavor itemLocation, ItemFlavorPurchasabilityInfo ifpi in fileLevel.itemFlavorPurchasabilityInfoMap )
+	{
+		if ( ifpi.locationToDedicatedStoreOffersMap.len() == 0 )
+			continue
+
+		printf( "%s", ItemFlavor_GetHumanReadableRef( itemLocation ) )
+		foreach ( string storeLocation, array< GRXScriptOffer > locationOffers in ifpi.locationToDedicatedStoreOffersMap )
+		{
+			foreach ( GRXScriptOffer locationOffer in locationOffers )
+				printf( "\t[%s] %s", storeLocation, Localize( locationOffer.titleText ) )
+		}
+	}
+}
+
+void function DEV_GRX_PrintNextCurrencyExpirationInfo()
+{
+	PlayerGRXScriptState grxState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
+
+	int secondsToExpire = grxState.nextCurrencyExpirationTime - GetUnixTimestamp();                                                              
+	float SECPERDAY = 86400.0;                
+	float daysToExpire = secondsToExpire / SECPERDAY;
+	printt( "Next Currency Expiration Info:", grxState.nextCurrencyExpirationAmt, "AC expire in", daysToExpire, "days | expiretime =", grxState.nextCurrencyExpirationTime )
+}
+
 void function DEV_GRX_TestOpenPack( string ref = "pack_cosmetic_rare" )
 {
 	ItemFlavor pack = GetItemFlavorByHumanReadableRef( ref )
@@ -1136,28 +2101,64 @@ void function DEV_GRX_TestOpenPack( string ref = "pack_cosmetic_rare" )
 		GRX_OpenPack( opID, ItemFlavor_GetGRXIndex( pack ) )
 	})
 	operation.onDoneCallback = null
-	QueueGRXOperation( GetUIPlayer(), operation, true )
+	QueueGRXOperation( GetLocalClientPlayer(), operation, true )
 }
 #endif
 
 
-#if DEV && UI 
-void function DEV_GRX_TestPurchase( string ref = "pack_cosmetic_rare", array<int> price = [1, 0, 0], int qty = 1 )
+#if DEV && UI
+void function DEV_GRX_TestPurchase( string ref = "pack_cosmetic_rare", array<int> price = [1, 0, 0, 0, 0], int qty = 1 )
 {
 	ItemFlavor flav = GetItemFlavorByHumanReadableRef( ref )
 	ScriptGRXOperationInfo operation
-	operation.expectedQueryGoal = GRX_HTTPQUERYGOAL_PURCHASE_ITEM
+	operation.expectedQueryGoal = GRX_HTTPQUERYGOAL_PURCHASE_PACK
 	operation.doOperationFunc = (void function( int opID ) : ( flav, price, qty )
 	{
-		GRX_PurchaseItem( opID, GRX_HTTPQUERYGOAL_PURCHASE_ITEM, qty, ItemFlavor_GetGRXIndex( flav ), price )
+		GRX_PurchaseStoreOffer( opID, GRX_HTTPQUERYGOAL_PURCHASE_PACK, qty, [ItemFlavor_GetGRXIndex( flav )], [1], price )
 	})
 	operation.onDoneCallback = null
-	QueueGRXOperation( GetUIPlayer(), operation, true )
+	QueueGRXOperation( GetLocalClientPlayer(), operation, true )
 }
 #endif
 
 
-#if DEV && CLIENT 
+#if DEV && SERVER
+                                                                  
+ 
+	                                                           
+	                                             
+
+	                                
+	                                                         
+	                                                                               
+		                                          
+	  
+	                               
+	                               
+	                                            
+ 
+#endif
+
+
+#if DEV && SERVER
+                                                                                                               
+ 
+	                                                                    
+	                                                                      
+	                                                                      
+
+	                      
+	                                                                         
+	                           
+	                       
+	                             
+
+	                                            
+ 
+#endif
+
+
+#if DEV && CLIENT
 ItemFlavorBag ornull DEV_GRX_ForcePackResults_resultsOrNull
 void function DEV_GRX_ForcePackResults( int packError, ... )
 {
@@ -1180,368 +2181,398 @@ void function DEV_GRX_ForcePackResults( int packError, ... )
 #endif
 
 
-#if(true)
+                      
 string function GRX_DBG_PREFIX()
 {
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                
+	#elseif CLIENT
 		string vm = "CL"
-	#elseif(UI)
+	#elseif UI
 		string vm = "UI"
 	#endif
 	return "<><>GRX<><> " + vm + " " + FUNC_NAME( 1 )
 }
+        
+
+void function GRXDbg( entity player, string label, ... )
+{
+	table stackInfos = expect table(getstackinfos( 2 ))
+	string str       = format( "[GRXDbg %s %s %s %d %s] %s",
+		expect string(stackInfos.src),
+		SERVER ? "SV" : CLIENT ? "CL" : UI ? "UI" : "??",
+		expect string(stackInfos.func),
+		expect int(stackInfos.line),
+		string(player),
+		label
+	)
+	for ( int argIdx = 0; argIdx < vargc; argIdx += 2 )
+	{
+		if ( argIdx > 0 )
+			str += "; "
+
+		string key = expect string(vargv[argIdx + 0])
+		var val    = vargv[argIdx + 1]
+		str += key
+		str += "= "
+		str += string(val)
+	}
+	str += "\n"
+	print( str )
+	                
+}
+
+
+#if DEV && SERVER
+                                                             
+                                                                
+                                                       
+                                                       
+                                                  
+                                                        
+                                                                 
+                                                                
+                                                                       
+                                                                         
+                                                        
+                                                       
+                                                 
+                                              
+ 
+	                                                       
+	                                                           
+	 
+		                                                                    
+		      
+	 
+	                                                                       
+
+	                                                        
+	                                                                  
+
+	                              
+		                           
+			                                                     
+		      
+
+		                                                       
+		                                                                 
+	   
+
+	                                                                                     
+	                                                                                                                           
+
+	                                                                                           
+	                                                                                                                                    
+
+	                                                                                             
+	                                                                                                                          
+
+	                                                                                             
+	                                                                                                                          
+
+	                                                                                     
+	                                                                                                                      
+
+	                                                                                                   
+	                                                                                                                                           
+
+	                                                                                          
+	                                                                                                    
+	                                   
+	                                             
+	                                                           
+	                                                                  
+	                                                      
+	                                                    
+	  	                                                            
+	                                                                                    
+
+	                           
+		                                                    
+	      
+
+	                                                                                                                   
+
+	                                                   
+	                                                             
+
+	                                                                                                                            
+	               
+	                     
+
+	                                                                                                                     
+	 
+		                                                                     
+			           
+
+		                                                              
+			                                                                                                           
+		           
+	 
+
+	                                                               
+		           
+
+	                                                      
+	                                                                
+ 
+                                                                                                                               
+ 
+	                                                                       
+
+	                                                  
+
+	                                              
+	                         
+	                                             
+	                                          
+		                                    
+	                                 
+	                            
+
+	                                        
+		                                                  
+
+		                                                           
+		                                                             
+
+		                                              
+	   
+
+	                                                          
+
+	                                                                                                                  
+	               
+	                       
+
+	                                                                 
+
+	                                       
+		           
+
+	                        
+
+	                       
+	                                                                          
+	 
+		                                                                
+		                                                                         
+
+		                   
+		                  
+		                                                         
+		                                                                                                  
+		 
+			                                                           
+			 
+				            
+			 
+			                                                                             
+			 
+				                     
+				            
+			 
+		 
+		            
+		 
+			                                                                         
+			                                                                                           
+		 
+		    
+		 
+			                                                                                        
+		 
+		                                                     
+
+		                                       
+			           
+		                                     
+		                                       
+			           
+
+		                                                                                     
+		 
+			                                                 
+			                                                   
+				                                                                       
+				         
+				                                                   
+				                   
+				         
+				   
+			               
+			                     
+		 
+
+		                                    
+		                                                                 
+		                                                                                    
+			                                       
+		  
+		                                             
+
+		                                                                   
+			           
+		                                                                     
+		 
+			                                                 
+			                                                   
+				                                                                       
+				         
+				                
+				                              
+				               
+				         
+				   
+			               
+			                     
+		 
+		    
+		 
+			                 
+		 
+
+		                                                                          
+	 
+
+	           
+ 
+                                                                                                                                       
+ 
+	                                                                          
+	                                                                            
+
+	                                                 
+
+	                                                                                                                                                                                               
+	               
+	                       
+
+	                                                                                             
+	                                                                                                       
+	                                                                                                                                          
+	                                                                                                  
+	                                                                                   
+	                                                                                                                                           
+
+	                 
+
+	                                                                                  
+	 
+		                                                   
+		                                                 
+		                
+		 
+			                              
+			                             
+		 
+	 
+
+	                                        
+	 
+		                                                         
+		                          
+		                          
+	 
+
+	                                                 
+
+	                                                
+		                                                                          
+		          
+		             
+		          
+		       
+		       
+		   
+	               
+	                     
+
+	                                                         
+	 
+		                       
+		                                    
+			                                                                                
+
+		                                         
+			                                                                          
+			          
+			             
+			          
+			         
+			                                       
+			                           
+		               
+		                     
+	 
+ 
 #endif
 
 
-#if(false)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-//
-//
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
+                   
+                   
+                   
+                   
+                   
+#if SERVER
+                                                                
+ 
+	                                
+	                                    
+	                                                  
+
+	                                                                 
+ 
 #endif
 
 
-
-//
-//
-//
-//
-//
-#if(false)
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                             
+                                                            
+   
+  	                                               
+  		      
+  
+  	                                                                    
+  
+  	                                    
+  	                                                                                              
+  	                                                                                                  
+  	 
+  		                                                                                                              
+  	 
+  
+  	                            
+   
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
+#if SERVER
+                                                       
+ 
+	                
+	 
+		                                            
+			                                            
+	 
+ 
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 PlayerGRXScriptState function GetPlayerGRXScriptState( entity player )
 {
-	#if(false)
-
-#elseif CLIENT || UI 
-		#if(CLIENT)
+	#if SERVER
+		                                          
+	#elseif CLIENT || UI
+		#if CLIENT
 			Assert( player == GetLocalClientPlayer() )
-		#elseif(UI)
-			Assert( player == GetUIPlayer()
-					|| player == null /**/
-					|| GetUIPlayer() == null /**/ )
+		#elseif UI
+			Assert( player == GetLocalClientPlayer()
+			|| player == null                                            
+			|| GetLocalClientPlayer() == null                                             )
 		#endif
 
 		return fileLevel.localGRXState
@@ -1550,16 +2581,19 @@ PlayerGRXScriptState function GetPlayerGRXScriptState( entity player )
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                        
+                                
+ 
+	                                                                     
+		      
 
-//
+	                                                                                                                                           
+		                                                                                
 
-
-
-
-
-
-#elseif(UI)
+	                                                    
+ 
+#elseif UI
 void function UICodeCallback_GRXUserInfoUpdated( GRXUserInfo codeUserInfo )
 {
 	if ( !fileLevel.WORKAROUND_isInLifetime )
@@ -1568,7 +2602,7 @@ void function UICodeCallback_GRXUserInfoUpdated( GRXUserInfo codeUserInfo )
 		return
 	}
 
-	HandleGRXCodeUserInfoUpdated( GetUIPlayer(), codeUserInfo )
+	HandleGRXCodeUserInfoUpdated( GetLocalClientPlayer(), codeUserInfo )
 
 	if ( fileVM.WORKAROUND_delayedOffersState != GRX_OFFERSSTATE_UNINITIALIZED )
 	{
@@ -1582,31 +2616,40 @@ void function UICodeCallback_GRXUserInfoUpdated( GRXUserInfo codeUserInfo )
 #endif
 
 
-#if(UI)
+#if UI
 void function ShGRX_UIScriptResetComplete()
 {
 	fileLevel.HACK_allowOneBadQueryCompleteCallBecauseOfUIScriptReset = true
-	fileLevel.PROTO_serverHasGivenGreenLightForUIGRX = true //
+	fileLevel.PROTO_serverHasGivenGreenLightForUIGRX = true                  
 
 	GRXUserInfo codeUserInfo = GRX_GetUserInfo()
-	HandleGRXCodeUserInfoUpdated( GetUIPlayer(), codeUserInfo )
+	HandleGRXCodeUserInfoUpdated( GetLocalClientPlayer(), codeUserInfo )
 }
 #endif
 
 
-#if(UI)
+#if SERVER || UI
 void function HandleGRXCodeUserInfoUpdated( entity player, GRXUserInfo codeUserInfo )
 {
-	#if(true)
+	#if GRX_DEBUG_PRINTS
 		if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
 		{
-			printt( GRX_DBG_PREFIX(), "for", player, "(called from " + FUNC_NAME( 1 ) + ")" )
-			printt( GRX_DBG_PREFIX(), "GRXUserInfo.inventoryState", codeUserInfo.inventoryState, ((codeUserInfo.inventoryState == GRX_INVENTORYSTATE_CLEAN) ? "CLEAN" : "NON-CLEAN") )
-			printt( GRX_DBG_PREFIX(), "GRXUserInfo.balances", codeUserInfo.balances[0], codeUserInfo.balances[1], codeUserInfo.balances[2] )
-			printt( GRX_DBG_PREFIX(), "GRXUserInfo.queryGoal = ", codeUserInfo.queryGoal )
-			printt( GRX_DBG_PREFIX(), "GRXUserInfo.queryOwner = ", codeUserInfo.queryOwner, ((codeUserInfo.queryOwner == GRX_HTTPQUERYOWNER_CLIENT) ? "CLIENT" : "SERVER") )
-			printt( GRX_DBG_PREFIX(), "GRXUserInfo.queryState = ", codeUserInfo.queryState, ((codeUserInfo.queryState == GRX_HTTPQUERYSTATE_ACTIVE) ? "ACTIVE" : "NON-ACTIVE") )
-			printt( GRX_DBG_PREFIX(), "GRXUserInfo.querySeqNum = ", codeUserInfo.querySeqNum )
+			GRXDbg( player, "",
+				"inventoryState", string(codeUserInfo.inventoryState) + (codeUserInfo.inventoryState == GRX_INVENTORYSTATE_CLEAN ? "CLEAN" : "NON-CLEAN"),
+				"balances", codeUserInfo.balances.join( "," ),
+				"queryGoal", codeUserInfo.queryGoal,
+				"queryOwner", string(codeUserInfo.queryOwner) + (codeUserInfo.queryOwner == GRX_HTTPQUERYOWNER_CLIENT ? "CLIENT" : "SERVER"),
+				"queryState", string(codeUserInfo.queryState) + (codeUserInfo.queryState == GRX_HTTPQUERYSTATE_ACTIVE ? "ACTIVE" : "NON-ACTIVE"),
+				"querySeqNum", codeUserInfo.querySeqNum )
+
+			#if UI
+				if ( codeUserInfo.nextCurrencyExpirationAmt > 0 )
+				{
+					GRXDbg( player, "",
+						"nextCurrencyExpirationAmount", codeUserInfo.nextCurrencyExpirationAmt,
+						"nextCurrencyExpirationTime", codeUserInfo.nextCurrencyExpirationTime )
+				}
+			#endif
 		}
 	#endif
 
@@ -1615,24 +2658,27 @@ void function HandleGRXCodeUserInfoUpdated( entity player, GRXUserInfo codeUserI
 #endif
 
 
-#if(UI)
+#if SERVER || UI
 void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull codeUserInfo = null )
 {
-#if(true)
+#if GRX_DEBUG_PRINTS
 	if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
-		printt( GRX_DBG_PREFIX(), "for", player, "(called from " + FUNC_NAME( 1 ) + ")" )
+	{
+		GRXDbg( player, "",
+			"calledFrom", FUNC_NAME( 1 ) )
+	}
 #endif
 
-	#if(false)
+	#if SERVER
+		                         
+			      
+	#endif              
 
-
-#endif //
-
-	if ( codeUserInfo == null ) //
+	if ( codeUserInfo == null )                                                       
 	{
-		#if(false)
-
-#elseif(UI)
+		#if SERVER
+			                                        
+		#elseif UI
 			codeUserInfo = GRX_GetUserInfo()
 		#endif
 	}
@@ -1642,6 +2688,16 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 	scriptState.WORKAROUND_lastCodeUserInfo = codeUserInfo
 	scriptState.marketplaceEdition = codeUserInfo.marketplaceEdition
 	scriptState.isOfferRestricted = codeUserInfo.isOfferRestricted
+	scriptState.hasUpToDateBundleOffers = codeUserInfo.hasUpToDateBundleOffers
+#if UI
+	scriptState.nextCurrencyExpirationAmt = codeUserInfo.nextCurrencyExpirationAmt
+	scriptState.nextCurrencyExpirationTime = codeUserInfo.nextCurrencyExpirationTime
+
+               
+                                                                   
+                                                                       
+      
+#endif
 
 	bool wasConsideringInventoryReady = scriptState.isInventoryReady
 
@@ -1650,7 +2706,7 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 	{
 		willConsiderInventoryReady = true
 
-		#if(UI)
+		#if UI
 			if ( !fileLevel.PROTO_serverHasGivenGreenLightForUIGRX || !fileLevel.WORKAROUND_isInLifetime )
 				willConsiderInventoryReady = false
 		#endif
@@ -1667,26 +2723,45 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 			scriptState.balances = codeUserInfo.balances
 		}
 
+		#if SERVER
+			                                                                                                                         
+			 
+				                                                                          
+				                                                                          
+				                                                
+			 
+		#endif
+
 		if ( scriptState.isInventoryReady && !scriptState.hasInventoryEverBeenClean )
 		{
 			scriptState.hasInventoryEverBeenClean = true
 			isFirstTimeClean = true
-			#if(false)
+			#if SERVER
+				                                                                 
+				                
+				 
+					                                                                                              
+						            
 
-#endif
+					                                                                             
+					                                                                            
+					                                                                            
+					                           	                                
+				 
+			#endif
 		}
 
-		#if(false)
+		#if SERVER
+			                                                                        
+			 
+				                                                          
 
+				                                                                                                         
+					            
 
-
-
-
-
-
-
-
-#endif
+				                                                           
+			 
+		#endif
 
 		RunGRXOperations( player, scriptState )
 		if ( scriptState.activeOperationOrNull != null )
@@ -1699,47 +2774,70 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 		scriptState.balances.clear()
 	}
 
-#if(true)
+#if SERVER && GRX_DEBUG_PRINTS
 	if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
 	{
-		printt( GRX_DBG_PREFIX(), "PlayerGRXScriptState.isInventoryReady", scriptState.isInventoryReady )
-		printt( GRX_DBG_PREFIX(), "PlayerGRXScriptState.nextScriptQueryId", scriptState.nextScriptQueryId )
-		printt( GRX_DBG_PREFIX(), "PlayerGRXScriptState.operationQueue.len() = ", scriptState.operationQueue.len() )
-		printt( GRX_DBG_PREFIX(), "PlayerGRXScriptState.activeOperationOrNull = ", scriptState.activeOperationOrNull == null ? "null" : ("from " + (expect ScriptGRXOperationInfo(scriptState.activeOperationOrNull)).DEV_culprit) )
-		#if(false)
-
-
-#elseif(UI)
-			printt( GRX_DBG_PREFIX(), "PlayerGRXScriptState.areOffersReady = ", scriptState.areOffersReady )
-		#endif
+		GRXDbg( player, "",
+			"isInventoryReady", scriptState.isInventoryReady,
+			"nextScriptQueryId", scriptState.nextScriptQueryId,
+			"queueSize", scriptState.operationQueue.len(),
+			"activeOperation", scriptState.activeOperationOrNull == null ? "null" : ("from " + (expect ScriptGRXOperationInfo(scriptState.activeOperationOrNull)).DEV_culprit),
+			"isQueueingServersideScriptGRXOperations", scriptState.isQueueingServersideScriptGRXOperations,
+			"PROTO_haveWeGreenlightedUIForGRX", scriptState.PROTO_haveWeGreenlightedUIForGRX )
 	}
 #endif
 
-	#if(false)
 
+#if CLIENT && GRX_DEBUG_PRINTS
+	if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
+	{
+		GRXDbg( player, "",
+			"isInventoryReady", scriptState.isInventoryReady,
+			"nextScriptQueryId", scriptState.nextScriptQueryId,
+			"queueSize", scriptState.operationQueue.len(),
+			"activeOperation", scriptState.activeOperationOrNull == null ? "null" : ("from " + (expect ScriptGRXOperationInfo(scriptState.activeOperationOrNull)).DEV_culprit),
+			"areOffersReady", scriptState.areOffersReady )
+	}
+#endif
 
-//
+	                                                                                                                                                          
+	                    
+	             
 
+	#if SERVER
+		                                   
+		 
+			               
+			                                                        
+			 
+				                                                         
+				                                    
+					                                                                   
+				    
+					                                                    
 
+			 
+			                       
+			 
+				                                    
+					                                                                   
+				    
+					                                                    
+			 
+			               
 
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-#elseif(UI)
+			                                                     
+			 
+				                                                      
+				                                                                     
+			 
+		 
+		                                                                 
+			                                                    
+	#elseif UI
 		if ( willConsiderInventoryReady != wasConsideringInventoryReady )
 		{
-			foreach( void functionref() cb in fileLevel.onGRXInventoryStateChangedCallbacks )
+			foreach ( void functionref() cb in fileLevel.onGRXInventoryStateChangedCallbacks )
 				cb()
 
 			if ( CanRunClientScript() )
@@ -1750,7 +2848,7 @@ void function UpdatePlayerGRXScriptState( entity player, GRXUserInfo ornull code
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function UIToClient_GRXInventoryCleanStateChange( bool isClean, int marketplaceEdition, bool isOfferResticted )
 {
 	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
@@ -1758,21 +2856,33 @@ void function UIToClient_GRXInventoryCleanStateChange( bool isClean, int marketp
 	scriptState.marketplaceEdition = marketplaceEdition
 	scriptState.isOfferRestricted = isOfferResticted
 	if ( isClean )
+	{
 		scriptState.hasInventoryEverBeenClean = true
+
+		                                                                                 
+		ItemFlavor ornull activeBattlePass = GetActiveBattlePass()
+		if ( activeBattlePass == null )
+			return
+		
+		expect ItemFlavor( activeBattlePass )
+
+		ItemFlavor xpBoostFlav = BattlePass_GetXPBoostFlav( activeBattlePass )
+		SetConVarInt( "client_boostcount", GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( xpBoostFlav ) ) )
+	}	
 }
 #endif
 
 
-#if(UI)
+#if UI
 void function ServerToUI_PROTO_YouAreGreenLightedForGRX()
 {
 	fileLevel.PROTO_serverHasGivenGreenLightForUIGRX = true
-	UpdatePlayerGRXScriptState( GetUIPlayer() )
+	UpdatePlayerGRXScriptState( GetLocalClientPlayer() )
 }
 #endif
 
 
-#if(UI)
+#if UI
 void function ServerToUI_GRX_QueuedRewardsGiven()
 {
 	thread TryRunDialogFlowThread()
@@ -1780,70 +2890,96 @@ void function ServerToUI_GRX_QueuedRewardsGiven()
 #endif
 
 
-#if(UI)
+#if UI
 bool function DisplayQueuedRewardsGiven()
 {
-	//
+	                                                   
 
-	entity player = GetUIPlayer()
+	entity player = GetLocalClientPlayer()
+
+	if ( !IsLocalClientEHIValid() )
+		return false
+
 	for ( int persistentArrayIdx = 0; persistentArrayIdx < QUEUED_REWARDS_MAX_COUNT; persistentArrayIdx++ )
 	{
 		Assert( QUEUED_REWARDS_MAX_ITEMS_COUNT == 1 )
-		SettingsAssetGUID rewardItemFlavGUID = player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardGUIDs[0]", persistentArrayIdx ) )
-		if ( rewardItemFlavGUID == 0 )
+		SettingsAssetGUID ornull rewardItemFlavGUID = GetQueuedRewardOrNull( persistentArrayIdx )
+		if ( rewardItemFlavGUID == null)
 			continue
-		if ( !IsValidItemFlavorGUID( rewardItemFlavGUID, eValidation.ASSERT ) )
-			continue //
+
+		expect SettingsAssetGUID( rewardItemFlavGUID )
 		ItemFlavor rewardItemFlav = GetItemFlavorByGUID( rewardItemFlavGUID )
 
-		bool rewardGiven        = (player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardGiven", persistentArrayIdx ) ) > 0)
-		bool rewardAcknowledged = (player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardAcknowledged", persistentArrayIdx ) ) > 0)
-		Assert( !rewardAcknowledged )
-		if ( !rewardGiven )
-			continue
-
-		if ( !GRX_HasItem( ItemFlavor_GetGRXIndex( rewardItemFlav ) ) )
-		{
-			Assert( false )
-			return false
-		}
-
 		Assert( QUEUED_REWARDS_MAX_ITEMS_COUNT == 1 )
-		int quantity = player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].rewardQuantities[0]", persistentArrayIdx ) )
-		Assert( quantity == 1 )
+		int quantity = expect int(  GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].rewardQuantities[0]", persistentArrayIdx )  ) )                                                                                      
 
-		SettingsAssetGUID sourceItemFlavGUID   = player.GetPersistentVarAsInt( format( "grxQueuedRewards[%d].sourceGUID", persistentArrayIdx ) )
-		ItemFlavor ornull sourceItemFlavOrNull = null
-		if ( sourceItemFlavGUID != 0 && IsValidItemFlavorGUID( sourceItemFlavGUID, eValidation.ASSERT ) )
+		SettingsAssetGUID sourceItemFlavGUID   = expect int(  GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].sourceGUID", persistentArrayIdx ) )  )                                                                                      
+		int sourceItemExtraData                = expect int( GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].sourceGUID_extraData", persistentArrayIdx ) ) )                                                                                      
+		ItemFlavor ornull sourceItemFlav       = null
+		if ( sourceItemFlavGUID != 0 )
 		{
-			sourceItemFlavOrNull = GetItemFlavorByGUID( sourceItemFlavGUID )
+			if ( IsValidItemFlavorGUID( sourceItemFlavGUID ) )
+				sourceItemFlav = GetItemFlavorByGUID( sourceItemFlavGUID )
+			else
+				Warning( "Found unregistered ItemFlavorGUID " + string(sourceItemFlavGUID) + ". This is probably because the source asset has been deleted from Bakery." )
 		}
-		Assert( sourceItemFlavOrNull != null ) //
 
 		string titleText = "#GENERIC_REWARD_RECEIVED"
 		string descText  = ""
-		if ( sourceItemFlavOrNull != null )
+		string headerText = ""
+		bool noShowLow   = false
+		if ( sourceItemFlav != null )
 		{
-			ItemFlavor sourceItemFlav = expect ItemFlavor(sourceItemFlavOrNull)
+			expect ItemFlavor( sourceItemFlav )
 			switch( ItemFlavor_GetType( sourceItemFlav ) )
 			{
 				case eItemType.challenge:
 				{
-					//
-					titleText = "#LEGENDARY_HUNT_CHALLENGE_COMPLETED_HEADER" //
+					int tierIdx = sourceItemExtraData
 
-					//
-					for ( int tierIdx = 0; tierIdx < Challenge_GetTierCount( sourceItemFlav ); tierIdx++ )
+					int tierCount = Challenge_GetTierCount( sourceItemFlav )
+
+					if ( tierCount <= 0 )                                                                                         
 					{
-						if ( Challenge_GetItemRewards( sourceItemFlav, tierIdx ).flavors.contains( rewardItemFlav ) )
-						{
-							Assert( descText == "" )
-							descText = Challenge_GetDescription( sourceItemFlav, tierIdx )
-							#if(!ASSERTING)
-								break
-							#endif
-						}
+						descText = ""
 					}
+					else
+					{
+						descText = Challenge_GetDescription( sourceItemFlav, tierIdx )
+					}
+
+					if ( Challenge_GetTimeSpanKind( sourceItemFlav ) == eChallengeTimeSpanKind.EVENT_SPECIAL_2 )
+					{
+						titleText = ItemFlavor_GetShortDescription( sourceItemFlav )
+						descText = ItemFlavor_GetLongDescription( sourceItemFlav )
+					}
+					else
+					{
+						titleText = "#CHALLENGE_COMPLETED_HEADER"
+					}
+					break
+				}
+
+				case eItemType.calevent_collection:
+				{
+					titleText = ItemFlavor_GetLongName( sourceItemFlav )
+					descText = "#LOGIN_REWARD"
+
+					                                                                  
+					if ( ItemFlavor_GetType( rewardItemFlav ) == eItemType.music_pack )
+					{
+						thread (void function() : (rewardItemFlav) {
+							RequestSetItemFlavorLoadoutSlot( WaitForLocalClientEHI(), Loadout_MusicPack(), rewardItemFlav )
+						})()
+					}
+
+					break
+				}
+
+				case eItemType.calevent_login:
+				{
+					titleText = ItemFlavor_GetLongName( sourceItemFlav )
+					descText = ItemFlavor_GetLongDescription( sourceItemFlav )
 					break
 				}
 
@@ -1856,22 +2992,18 @@ bool function DisplayQueuedRewardsGiven()
 		rewardInfo.flav = rewardItemFlav
 		rewardInfo.quantity = quantity
 		ShowRewardCeremonyDialog(
-			"",
+			headerText,
 			titleText,
 			descText,
 			[rewardInfo],
-			false )
+			false,
+			false,
+			noShowLow,
+			true )
 
-		ClientCommand( format( "acknowledge_reward %d %d", persistentArrayIdx, rewardItemFlavGUID ) )
+		GRX_MarkRewardAcknowledged( rewardItemFlavGUID, persistentArrayIdx )
 
-		return true //
-
-		//
-		//
-		//
-		//
-		//
-		//
+		return true                                           
 	}
 
 	return false
@@ -1879,98 +3011,99 @@ bool function DisplayQueuedRewardsGiven()
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                                                
+ 
+	                           
+	                                                                               
+	 
+		               
+		      
+	 
 
+	                                             
+	                                                                                                                                
+	 
+		               
+		      
+	 
 
+	                                                                                                            
+	 
+		               
+		      
+	 
 
+	                                                                                                                   
+	 
+		               
+		      
+	 
 
+	                                                                                                                                                   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
+	                 
+	                                             
+	                                                                                             
+	                                                                                                       
+	                                                                                                 
+	                                                                                                      
+	                                                                                                  
+	                                                                                                         
+ 
 #endif
 
 
-#if(UI)
+#if SERVER || UI
 void function RunGRXOperations( entity player, PlayerGRXScriptState scriptState )
 {
-	if ( !GRX_IsGRXEnabled() )
-		return
-
 	if ( !scriptState.isInventoryReady )
 		return
 
 	if ( scriptState.activeOperationOrNull != null )
 		return
 
-	#if(false)
-
-#endif
+	#if SERVER
+		                                           
+	#endif
 
 	if ( scriptState.operationQueue.len() == 0 )
 	{
-		#if(false)
-
-
-
-
-
-#endif
+		#if SERVER
+			                                                    
+			 
+				                                                   
+				                                                                             
+			 
+		#endif
 		return
 	}
 
-	ScriptGRXOperationInfo operationInfo = scriptState.operationQueue[0] //
+	ScriptGRXOperationInfo operationInfo = scriptState.operationQueue[0]                                     
 	scriptState.activeOperationOrNull = operationInfo
 
 	operationInfo.status = eScriptGRXOperationStatus.RUNNING
-#if(true)
+
+#if GRX_DEBUG_PRINTS
 	if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
-		printt( GRX_DBG_PREFIX(), "started operation from " + operationInfo.DEV_culprit + " (id " + operationInfo.id + ", " + (Time() - operationInfo.DEV_queueTime) + " seconds old)" )
+	{
+#if UI
+		float time = UITime()
+#else
+		float time = Time()
+#endif      
+		GRXDbg( player, "script operation running",
+			"culprit", operationInfo.DEV_culprit,
+			"id", operationInfo.id,
+			"age", time - operationInfo.DEV_queueTime )
+	}
 #endif
 
-	//
-	//
-	#if(false)
-
-#endif
+	                                                   
+	                                                             
+	#if SERVER
+		                                        
+	#endif
 	thread WORKAROUND_CallOperationDoFuncOnFrameEnd( operationInfo )
 }
 void function WORKAROUND_CallOperationDoFuncOnFrameEnd( ScriptGRXOperationInfo operationInfo )
@@ -1979,35 +3112,35 @@ void function WORKAROUND_CallOperationDoFuncOnFrameEnd( ScriptGRXOperationInfo o
 
 	if ( operationInfo.status != eScriptGRXOperationStatus.RUNNING )
 	{
-		#if(true)
+		#if GRX_DEBUG_PRINTS
 			if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
 				printt( GRX_DBG_PREFIX(), "operationInfo.status != eScriptGRXOperationStatus.RUNNING", operationInfo.status )
 		#endif
 		return
 	}
 
-		#if(false)
-#endif
+		#if SERVER
+		#endif
 
-	//
-#if(false)
+	                                                                                         
+#if SERVER
+	                                                                                                                                               
+		           
 
-
-
-
-
-
-
-
-#elseif(UI)
-	float startTime = Time()
+	                                                  
+	 
+		                                                                                                                                       
+		      
+	 
+#elseif UI
+	float startTime = UITime()
 	while( GRX_GetUserInfo().queryState != GRX_HTTPQUERYSTATE_NONE )
 	{
-		#if(true)
-			if ( Time() - startTime > 5.0 )
+		#if GRX_DEBUG_PRINTS
+			if ( UITime() - startTime > 5.0 )
 			{
 				printt( GRX_DBG_PREFIX(), "while( GRX_GetUserInfo().queryState != GRX_HTTPQUERYSTATE_NONE ) running for more than 5.0s", GRX_GetUserInfo().queryState )
-				startTime = Time()
+				startTime = UITime()
 			}
 		#endif
 		WaitFrame()
@@ -2015,247 +3148,320 @@ void function WORKAROUND_CallOperationDoFuncOnFrameEnd( ScriptGRXOperationInfo o
 
 	if ( !fileLevel.WORKAROUND_isInLifetime )
 	{
-		//
+		                                                                           
 		return
 	}
 #endif
 
-	#if(false)
-
-
-
-
-
-
-#endif
+	#if SERVER
+		                                                                                             
+		                                                                        
+		 
+			                                                                                                                                                                                                                                                           
+			                                                                                                                                       
+			      
+		 
+	#endif
 
 	operationInfo.doOperationFunc( operationInfo.id )
 }
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
+#if SERVER
+                                                                                     
+ 
+	                 
+		      
+
+	                                                 
+		      
+
+	                                        
+		      
+
+
+	                                                                        
+	 
+		                                              
+		                                                                                              
+		                                                                                    
+		 
+			                                      
+				                                          
+		 
+
+		                                                          
+		 
+			                                                                         
+			 
+				                                
+				                                                             
+				                                                                               
+					                                                                
+				  
+				                                                                           
+					                                                                                                                             
+					                                                                                                              
+					                                                                             
+					                           
+					 
+						                                                 
+					 
+				  
+				                                 
+				                                                           
+
+				                                                              
+			 
+		 
+	 
+
+	                                                                                 
+	 
+		                                                                                                       
+		 
+			                                             
+			                                                                                                                                          
+			                              
+				        
+			                                                                       
+				                                                                                                                                                   
+			                                                                     
+
+			                                                                                                                                
+			                                                                                                                                       
+			                  
+			 
+				                             
+				        
+			 
+
+			                                             
+			                                                                                                                       
+			                       
+
+			                                                                                
+			                                                                                                                                   
+			 
+				                                                                                             
+				                                                                                                       
+				                                                                                                 
+				                                                                                                      
+				                                                                                                         
+				                                                                                                  
+
+				        
+			 
+
+			                                                                      
+			 
+				                                                                                                                                                
+				                                                     
+				                                                                                                 
+				                         
+				 
+					                                                                                             
+					                                                                                                       
+					                                                                                                 
+					                                                                                                      
+					                                                                                                  
+					                                                                                                         
+				 
+				        
+			 
+
+			                                                        
+			 
+				                                                                                             
+				                                                                                                       
+				                                                                                                 
+				                                                                                                      
+				                                                                                                         
+				                                                                                                  
+
+				        
+			 
+
+			                                
+			                                                         
+			                                                                                     
+				                                                       
+				                                          
+			  
+			                                                                                                                                           
+				                                                                   
+				                                                                             
+				                          
+				 
+					                                                  
+
+					                  
+					 
+						                                                     
+						                                                                                                 
+						                         
+						 
+							                                                                                             
+							                                                                                                       
+							                                                                                                 
+							                                                                                                      
+							                                                                                                  
+							                                                                                                         
+						 
+					 
+					    
+					 
+						                                                                                                                           
+							                                                                    
+						                           
+					 
+				 
+
+				                           
+				 
+					                                                                                                                                                                                         
+						                                                    
+					                                                 
+				 
+			  
+			                                 
+			                                                                         
+			                                                           
+
+			                                                              
+		 
+	 
+ 
 #endif
 
 
 
-#if(false)
-
-
-
-
-#elseif(UI)
+#if SERVER
+                                                                                                               
+ 
+	                                                                       
+ 
+#elseif UI
 void function UICodeCallback_GRXQueryCompleted( int queryScriptId, int queryGoal, int queryState )
 {
-	HandleGRXQueryCompleted( GetUIPlayer(), queryScriptId, queryGoal, queryState )
+	HandleGRXQueryCompleted( GetLocalClientPlayer(), queryScriptId, queryGoal, queryState )
+}
+#endif
+
+#if SERVER
+                                                                                                                     
+ 
+ 
+#endif
+
+#if UI
+void function UICodeCallback_GRXBundlesUpdated()
+{
+	foreach ( void functionref() cb in fileLevel.onGRXBundlesRefreshedCallbacks )
+		cb()
 }
 #endif
 
 
-#if(UI)
+#if SERVER || UI
 void function HandleGRXQueryCompleted( entity player, int queryScriptId, int queryGoal, int queryState )
-//
+                                                                      
 {
-	#if(true)
+	#if GRX_DEBUG_PRINTS
 		if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
-			printt( GRX_DBG_PREFIX(), player, queryScriptId, queryGoal, queryState )
+		{
+			GRXDbg( player, "",
+				"queryScriptId", queryScriptId,
+				"queryGoal", queryGoal,
+				"queryState", queryState )
+		}
 	#endif
 
-	if ( !GRX_IsGRXEnabled() )
-		return
+	  
+		                               
 
-	/*
+		   
+			                                         
+			                                                                   
+			                                                               
+			                                                                                                           
+			                                                                      
 
+		       
+			                                                                      
+			                                                                   
+			                                                        
+			                                                                
 
+		       
+			                                 
+			                             
+			                                     
+	  
 
+	#if SERVER
+		                                                                     
+			      
 
+		                                                                    
 
+		                                 
 
+		               
+		                                                                           
+		 
+			                                                                                                                                               
+			                                  
+			                               
+			                                                 
+			                                                    
+			                                                         
+			                                          
+			                                                       
+			                                                      
+			                                                       
+			                                                        
+			                                                        
+			                                  
+			                              
+			                              
+			                                       
+			                                         
+			                                  
+			                                          
+			                                 
+			                                               
+			                                               
+			                                                  
+			                                                                                   
+			                                                        
+			                           
+		 
+		               
 
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-	#if(false)
-
-
-
-
-
-
-
-//
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-//
-#else
+		                                                                                                       
+			                                       
+	#else
 		PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( player )
 	#endif
 
 	if ( queryScriptId == -1 || queryScriptId == 0 )
-		return //
+		return                                           
 
-#if(false)
-
-
-
-
-//
-
-#elseif(UI)
+#if SERVER
+	                        
+	 
+		                           
+			                                    
+		                                                         
+	 
+#elseif UI
 	if ( queryScriptId > 0 )
-		return //
+		return                                                        
 #endif
 
-	#if(UI)
+	#if UI
 		if ( fileLevel.HACK_allowOneBadQueryCompleteCallBecauseOfUIScriptReset && scriptState.activeOperationOrNull == null )
 		{
 			fileLevel.HACK_allowOneBadQueryCompleteCallBecauseOfUIScriptReset = false
@@ -2269,7 +3475,7 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 
 	Assert( operationInfo.id == queryScriptId )
 
-	Assert( queryGoal == operationInfo.expectedQueryGoal ) //
+	Assert( queryGoal == operationInfo.expectedQueryGoal )                   
 
 	operationInfo._codeQueryState = queryState
 
@@ -2279,10 +3485,13 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 	}
 	else if ( queryState == GRX_HTTPQUERYSTATE_ERROR )
 	{
-		#if(false)
-
-
-#endif
+		#if SERVER
+			                                                                          
+			 
+				                                                                       
+				                                                                                                                                                                                                  
+			 
+		#endif
 		operationInfo.status = eScriptGRXOperationStatus.DONE_FAILED
 	}
 	else
@@ -2290,14 +3499,20 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 		operationInfo.status = eScriptGRXOperationStatus.DONE_SUCCESS
 	}
 
-	#if(true)
+	#if GRX_DEBUG_PRINTS
 		if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
-			printt( GRX_DBG_PREFIX(), "Script operation from " + operationInfo.DEV_culprit + " done (id " + operationInfo.id + "): " + GetEnumString( "eScriptGRXOperationStatus", operationInfo.status ) )
+		{
+			GRXDbg( player, "script operation done",
+				"culprit", operationInfo.DEV_culprit,
+				"id", operationInfo.id,
+				"status", GetEnumString( "eScriptGRXOperationStatus", operationInfo.status ) )
+		}
 	#endif
 	if ( operationInfo.onDoneCallback != null )
 		operationInfo.onDoneCallback( operationInfo.status )
+	Signal( operationInfo, "ScriptGRXOperationDone" )
 
-	#if(UI)
+	#if UI
 		if ( operationInfo.status != eScriptGRXOperationStatus.DONE_SUCCESS )
 			ShowGRXErrorDialogue( "" )
 	#endif
@@ -2315,68 +3530,185 @@ void function HandleGRXQueryCompleted( entity player, int queryScriptId, int que
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                                                     
+ 
+	                                                     
+	 
+		                                                          
+		                                                                                         
+		                    
+			                                                     
+			 
+				                   
+					                                   
+					                                     
+					                            
+			 
+		      
+		                   
+			            
+	 
 
+	           
+ 
+                                                                                                                        
+ 
+	                   
+	                 
+	 
+		                                                                          
+		            
+	 
 
+	                                             
+	 
+		                                                                                                  
+		            
+	 
 
+	                                  
+	 
+		                                              
 
+		                     
+		                                                              
+		 
+			                                                                                                                        
+			 
+				                     
+				     
+			 
+		 
 
+		                                               
+		                                             
+		 
+			                                                                                                                                              
+			            
+		 
 
+		                                                            
+		                                                                                  
 
+		                              
+			                                                                                   
 
+		                                     
+			                                                                                                                            
 
+		                                                                                      
+	 
 
+	                                        
 
+	                                                                                      
+	 
+		                                                                                                                                                                     
+		            
+	 
 
+	                                                                              
+	 
+		                   
+		 
+			                                                                                                                                                
+			               
+			            
+		 
 
+		                                
+		                                                      
+		 
+			                          
+			                                                   
+			 
+				                                                                                                                                                                               
+				            
+			 
+		 
 
+		                                                       
+		 
+			                          
+			                                                   
+			 
+				                                                                                                                                                                                 
+				            
+			 
+			                                                                         
+			 
+				                                                                                                                                                                                         
+				            
+			 
+		 
+		                                                   
+		 
+			                          
+			                                                                                       
+			 
+				                                                                                                                                                                                                                 
+				            
+			 
+		 
 
+		                                                                         
+		 
+			                                                                                                                                                                   
+			            
+		 
+	 
 
+	                                                                                        
+	 
+		                                                                                                       
+		                                                                                                                      
+		 
+			                                                                                                                                                                                                
+                                       
+			            
+		 
 
+		                                                                                                                              
+		                                               
+		                                
+		 
+			                                                                   
+			                                   
+			 
+				                                                                  
+				                                     
+					                                         
+			 
+		 
 
+		                                         
+			        
 
+		                                                     
+		                                                                             
+		 
+			                                                                                                                                                                                                                                            
+			                                                          
+		 
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	           
+ 
 #endif
 
 
-#if(UI)
-void function UICodeCallback_GRXOffersRefreshed( int offersState, array< GRXCodeOffer > craftingOffers, array< GRXCodeOffer > storeOffers )
+#if UI
+void function UICodeCallback_GRXOffersRefreshed( int offersState, array< GRXCraftingOffer > craftingOffers, array< GRXStoreOffer > storeOffers )
 {
-	#if(true)
+	#if GRX_DEBUG_PRINTS
 		if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
-			printt( GRX_DBG_PREFIX(), "state:", offersState, "craftingOffers:", craftingOffers.len(), "storeOffers:", storeOffers.len() )
+		{
+			GRXDbg( null, "",
+				"offersState", offersState,
+				"craftingOffers", craftingOffers.len(),
+				"storeOffers", storeOffers.len() )
+		}
 	#endif
 
 	if ( fileLevel.WORKAROUND_isInLifetime )
@@ -2392,19 +3724,8 @@ void function UICodeCallback_GRXOffersRefreshed( int offersState, array< GRXCode
 }
 #endif
 
-#if(DEV)
-#if(UI)
-void function DEV_GRX_SetTimeDelta( int minutes )
-{
-	thread _DEV_GRX_SetTimeDelta( minutes )
-}
-
-void function _DEV_GRX_SetTimeDelta( int minutes )
-{
-	fileVM.grxTimeDeltaMinutes = minutes
-	thread _Force_Refresh_Offers()
-}
-
+#if DEV
+#if UI
 void function DEV_GRX_PreviewStoreItem( string grxRef )
 {
 	fileVM.grxStorePreviewItem = grxRef
@@ -2422,153 +3743,210 @@ void function _Force_Refresh_Offers()
 #endif
 
 
-#if(UI)
-void function HandleGRXOffersRefreshed( int offersState, array< GRXCodeOffer > craftingOffers, array< GRXCodeOffer > storeOffers )
+#if UI
+void function HandleGRXOffersRefreshed( int offersState, array< GRXCraftingOffer > craftingOffers, array< GRXStoreOffer > storeOffers )
 {
-	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetUIPlayer() )
+	PlayerGRXScriptState scriptState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
 	scriptState.areOffersReady = (offersState == GRX_OFFERSSTATE_READY)
+	bool isOfferRestricted = GRX_IsOfferRestricted()
 
-	fileLevel.storeExclusiveOffers.clear()
-	fileLevel.storeFeaturedOffers.clear()
 	fileLevel.storeOfferColumns.clear()
-
-	foreach ( GRXCodeOffer codeOffer in craftingOffers )
-	{
-		if ( !IsValidItemFlavorGRXIndex( codeOffer.itemIdx ) )
-			continue
-
-		ItemFlavor flav                   = GetItemFlavorByGRXIndex( codeOffer.itemIdx )
-		ItemFlavorPurchasabilityInfo ifpi = fileLevel.itemFlavorPurchasabilityInfoMap[flav]
-
-		Assert( codeOffer.prices.len() == 1 )
-		Assert( codeOffer.prices[0][GRX_CURRENCY_PREMIUM] == 0 )
-		Assert( codeOffer.prices[0][GRX_CURRENCY_CREDITS] == 0 )
-		if ( codeOffer.prices[0][GRX_CURRENCY_CRAFTING] <= 0 )
-		{
-			ifpi.craftingOfferOrNull = null
-		}
-		else
-		{
-			GRXScriptOffer scriptOffer
-			scriptOffer.isCraftingOffer = true
-
-			//
-			Assert( codeOffer.prices.len() == 1 )
-			foreach ( array<int> priceArray in codeOffer.prices )
-			{
-				ItemFlavorBag price
-				foreach ( int currencyIndex, int currencyQuantity in priceArray )
-				{
-					if ( currencyQuantity > 0 )
-					{
-						ItemFlavor currencyFlav = GRX_CURRENCIES[currencyIndex]
-						price.flavors.append( currencyFlav )
-						price.quantities.append( currencyQuantity )
-					}
-				}
-				scriptOffer.prices.append( price )
-			}
-
-			//
-			scriptOffer.output.flavors.append( flav )
-			scriptOffer.output.quantities.append( 1 )
-
-			//
-			scriptOffer.titleText = ItemFlavor_GetLongName( flav )
-			scriptOffer.descText = ItemFlavor_GetTypeName( flav )
-			scriptOffer.image = ItemFlavor_GetIcon( flav )
-			scriptOffer.tagText = ("tag" in codeOffer.attrs ? codeOffer.attrs.tag : "")
-			scriptOffer.seasonTag = ("seasontag" in codeOffer.attrs ? codeOffer.attrs.seasontag : "")
-			scriptOffer.tooltipDesc = ("tooltiptitle" in codeOffer.attrs ? codeOffer.attrs.tooltiptitle : "")
-			scriptOffer.tooltipTitle = ("tooltipdesc" in codeOffer.attrs ? codeOffer.attrs.tooltipdesc : "")
-			scriptOffer.expireTime = ("expireSeconds" in codeOffer.attrs ? int(codeOffer.attrs.expireSeconds) + GetUnixTimestamp() : 0)
-
-			ifpi.craftingOfferOrNull = scriptOffer
-		}
-
+	fileLevel.specialsStoreOfferColumns.clear()
+	fileLevel.seasonalStoreOfferColumns.clear()
+	fileLevel.locationOffersMap.clear()
+	foreach ( ItemFlavor itemFlavor, ItemFlavorPurchasabilityInfo ifpi in fileLevel.itemFlavorPurchasabilityInfoMap )
 		ifpi.locationToDedicatedStoreOffersMap.clear()
-		ifpi.locationToBundledStoreOffersMap.clear()
-	}
 
-	foreach( GRXCodeOffer codeOffer in storeOffers )
+	foreach ( GRXCraftingOffer codeOffer in craftingOffers )
 	{
 		if ( !IsValidItemFlavorGRXIndex( codeOffer.itemIdx ) )
-		{
-			printt( "!IsValidItemFlavorGRXIndex", codeOffer.itemIdx )
 			continue
-		}
 
 		ItemFlavor flav = GetItemFlavorByGRXIndex( codeOffer.itemIdx )
 
-		printt( "store", ItemFlavor_GetHumanReadableRef( flav ) )
+		ItemFlavorPurchasabilityInfo ifpi = fileLevel.itemFlavorPurchasabilityInfoMap[flav]
+
+		Assert( codeOffer.craftingPrice > 0 )
+		if ( codeOffer.craftingPrice > 0 )
+		{
+			GRXScriptCraftingOffer scriptOffer
+
+			if ( isOfferRestricted && GRX_IsItemCoveredByOfferRestrictions( flav ) )
+				scriptOffer.isAvailable = false
+
+			scriptOffer.craftingPrice = codeOffer.craftingPrice
+			scriptOffer.flavor = flav
+
+			ifpi.craftingOfferOrNull = scriptOffer
+		}
+		else
+		{
+			ifpi.craftingOfferOrNull = null
+		}
+	}
+
+	const bool TEMP_collapsePrereqOffers = false
+
+	array<GRXScriptOffer> tempPrereqOffers = []
+	foreach ( GRXStoreOffer codeOffer in storeOffers )
+	{
+		GRXScriptOffer scriptOffer
+
+		array<string> offerProblems = []
+		foreach ( GRXStoreOfferItem item in codeOffer.items )
+		{
+			if ( !IsValidItemFlavorGRXIndex( item.itemIdx ) )
+			{
+				offerProblems.append( format( "Invalid GRX index: %d", item.itemIdx ) )
+				continue
+			}
+
+			ItemFlavor outputFlav = GetItemFlavorByGRXIndex( item.itemIdx )
+
+			if ( isOfferRestricted && GRX_IsItemCoveredByOfferRestrictions( outputFlav ) )
+				scriptOffer.isAvailable = false
+
+			if ( ItemFlavor_GetType( outputFlav ) == eItemType.grx_sentinel )
+			{
+				scriptOffer.WORKAROUND_claimedSentinel = outputFlav
+				continue
+			}
+
+			scriptOffer.items.append( item )
+
+			bool foundMatchingOutputBagEntry = false
+			foreach ( int existingOutputIdx, ItemFlavor existingOutputFlav in scriptOffer.output.flavors )
+			{
+				if ( outputFlav == existingOutputFlav )
+				{
+					foundMatchingOutputBagEntry = true
+					scriptOffer.output.quantities[existingOutputIdx] += item.itemQuantity
+				}
+			}
+			if ( !foundMatchingOutputBagEntry )
+			{
+				scriptOffer.output.flavors.append( outputFlav )
+				scriptOffer.output.quantities.append( item.itemQuantity )
+			}
+		}
+
+		scriptOffer.attributes = clone codeOffer.attrs
+
+		if ( isOfferRestricted && GRX_IsOfferRestrictedByOfferAttributes( scriptOffer ) )
+			scriptOffer.isAvailable = false
+
+		if( scriptOffer.items.len() > 1 )
+			scriptOffer.items.sort( SortStoreOfferItems )
+
+		foreach ( int priceIdx, array<int> currencyArray in codeOffer.prices )
+		{
+			ItemFlavorBag price
+			foreach ( int currencyIndex, int currencyQuantity in currencyArray )
+			{
+				ItemFlavor currencyFlav = GRX_CURRENCIES[currencyIndex]
+
+				if ( currencyQuantity <= 0 )
+				{
+					if ( currencyQuantity < 0 )
+						offerProblems.append( format( "Price #%d currency '%s' has bad quantity: %d", priceIdx, ItemFlavor_GetHumanReadableRef( currencyFlav ), currencyQuantity ) )
+					continue
+				}
+
+				price.flavors.append( currencyFlav )
+				price.quantities.append( currencyQuantity )
+			}
+			if ( price.flavors.len() == 0 )
+				continue
+
+			scriptOffer.prices.append( price )
+		}
+
+		if ( scriptOffer.prices.len() == 0 )
+			offerProblems.append( "No prices" )
 
 		if ( !("location" in codeOffer.attrs) )
-			continue
+			offerProblems.append( "Missing 'location' attribute" )
 
-		string storeLocation = codeOffer.attrs.location
+		if ( offerProblems.len() > 0 )
+		{
+			Warning( "Offer %s has problems:\n - %s", DEV_GRX_DescribeOffer( scriptOffer ), offerProblems.join( "\n - " ) )
+			continue                                  
+		}
 
-
-		#if(DEV)
+		ItemFlavor flav = GetItemFlavorByGRXIndex( codeOffer.items[0].itemIdx )
+		#if DEV
 			if ( fileVM.grxStorePreviewItem != "" )
 				flav = GetItemFlavorByGRXRef( fileVM.grxStorePreviewItem )
 		#endif
 
+		string storeLocation              = codeOffer.attrs.location
 		ItemFlavorPurchasabilityInfo ifpi = fileLevel.itemFlavorPurchasabilityInfoMap[flav]
 		if ( !(storeLocation in ifpi.locationToDedicatedStoreOffersMap) )
 			ifpi.locationToDedicatedStoreOffersMap[storeLocation] <- []
 
-		GRXScriptOffer scriptOffer
+		scriptOffer.offerAlias = codeOffer.offerAlias
+		scriptOffer.offerType = codeOffer.offerType
 
-		//
-		foreach ( array<int> priceArray in codeOffer.prices )
+		                        
+		scriptOffer.titleText = ( "offertitle" in scriptOffer.attributes ? scriptOffer.attributes["offertitle"] : ItemFlavor_GetLongName( flav ) )
+
+		if ( "offerdescription" in scriptOffer.attributes )
 		{
-			ItemFlavorBag price
-			foreach ( int currencyIndex, int currencyQuantity in priceArray )
-			{
-				if ( currencyQuantity > 0 )
-				{
-					ItemFlavor currencyFlav = GRX_CURRENCIES[currencyIndex]
-					price.flavors.append( currencyFlav )
-					price.quantities.append( currencyQuantity )
-				}
-			}
-			scriptOffer.prices.append( price )
+			scriptOffer.descText = scriptOffer.attributes["offerdescription"]
+		}
+		else if ( scriptOffer.output.flavors.len() > 1 )
+		{
+			scriptOffer.descText= ItemFlavor_GetRewardShortDescription( flav )
+		}
+		else
+		{
+			scriptOffer.descText = ItemFlavor_GetTypeName( flav )
 		}
 
-		//
-		scriptOffer.output.flavors.append( flav )
-		scriptOffer.output.quantities.append( 1 )
+		if( GRX_HasUpToDateBundleOffers() )
+			GRX_CheckBundleAndUpdateOfferPrices( scriptOffer )
 
-		//
-		//
-		//
-		//
-		//
 
-		//
-		scriptOffer.titleText = ItemFlavor_GetLongName( flav )
-		scriptOffer.descText = ItemFlavor_GetTypeName( flav )
-		scriptOffer.image = ItemFlavor_GetIcon( flav )
+		scriptOffer.imageRef = ("imageref" in codeOffer.attrs ? codeOffer.attrs.imageref : "")
 		scriptOffer.tagText = ("tag" in codeOffer.attrs ? codeOffer.attrs.tag : "")
 		scriptOffer.seasonTag = ("seasontag" in codeOffer.attrs ? codeOffer.attrs.seasontag : "")
-		scriptOffer.tooltipDesc = ("tooltiptitle" in codeOffer.attrs ? codeOffer.attrs.tooltiptitle : "")
-		scriptOffer.tooltipTitle = ("tooltipdesc" in codeOffer.attrs ? codeOffer.attrs.tooltipdesc : "")
-		scriptOffer.expireTime = ("expireSeconds" in codeOffer.attrs ? int(codeOffer.attrs.expireSeconds) + GetUnixTimestamp() : 0)
-		if ( scriptOffer.expireTime > 0 )
+
+		if ( scriptOffer.offerType != GRX_OFFERTYPE_BUNDLE )
 		{
-			scriptOffer.expireTime -= SECONDS_PER_MINUTE * 30 //
-			#if(DEV)
-				scriptOffer.expireTime += (SECONDS_PER_MINUTE * fileVM.grxTimeDeltaMinutes)
-			#endif
+			scriptOffer.originalPrice = null
+
+			if ( "originalprice" in codeOffer.attrs )
+			{
+				Assert( scriptOffer.prices.len() == 1, "NYI!" )
+				Assert( scriptOffer.prices[0].flavors.len() == 1, "NYI!" )
+				ItemFlavor singleCurrencyFlav = scriptOffer.prices[0].flavors[0]
+
+				scriptOffer.originalPrice = MakeItemFlavorBag( {
+					[singleCurrencyFlav] = int(codeOffer.attrs.originalprice),
+				} )
+			}
 		}
+
+		scriptOffer.tooltipTitle = ("tooltiptitle" in codeOffer.attrs ? codeOffer.attrs.tooltiptitle : "")
+		scriptOffer.tooltipDesc = ("tooltipdesc" in codeOffer.attrs ? codeOffer.attrs.tooltipdesc : "")
+		scriptOffer.prereqText = ("prereqtext" in codeOffer.attrs ? codeOffer.attrs.prereqtext : "")
+		scriptOffer.purchaseLimit = ( "purchaselimit" in scriptOffer.attributes ? scriptOffer.attributes["purchaselimit"].tointeger() : 1 )
+		scriptOffer.displayPriority = ( "displaypriority" in codeOffer.attrs ? int(codeOffer.attrs.displaypriority) : 0 )
+		scriptOffer.expireTime = ("expireSeconds" in codeOffer.attrs ? int(codeOffer.attrs.expireSeconds) + GetUnixTimestamp() : 0)
+
+		if ( GetConVarBool( "assetdownloads_enabled" ) && IsLobby() && scriptOffer.imageRef != "" )
+			RunClientScript( "RequestDownloadedImagePakLoad", scriptOffer.imageRef, ePakType.DL_STORE_TALL )
 
 		ifpi.locationToDedicatedStoreOffersMap[storeLocation].append( scriptOffer )
-		if ( storeLocation == "loot" )
-		{
-			int i = 0;
-		}
 
-		if ( "prereq" in codeOffer.attrs )
+		if ( !(storeLocation in fileLevel.locationOffersMap) )
+			fileLevel.locationOffersMap[storeLocation] <- []
+
+		                                                                                  
+			fileLevel.locationOffersMap[storeLocation].append( scriptOffer )
+
+		bool hasPrereq = ("prereq" in codeOffer.attrs)
+		if ( hasPrereq )
 		{
 			string ref = codeOffer.attrs["prereq"]
 			Assert( IsValidItemFlavorHumanReadableRef( ref ), "Store offer has invalid prereq: " + ref )
@@ -2577,90 +3955,129 @@ void function HandleGRXOffersRefreshed( int offersState, array< GRXCodeOffer > c
 
 			ItemFlavor prereqFlavor = GetItemFlavorByHumanReadableRef( ref )
 			scriptOffer.prereq = prereqFlavor
+
+			if ( TEMP_collapsePrereqOffers )
+				tempPrereqOffers.append( scriptOffer )
 		}
 
-		if ( "slot" in codeOffer.attrs )
-		{
-			int storePageSlot = int( codeOffer.attrs.slot )
-			if ( storePageSlot > 3 )
-				fileLevel.storeExclusiveOffers.append( scriptOffer )
-			else
-				fileLevel.storeFeaturedOffers.append( scriptOffer )
-		}
 
-		if ( "storerow" in codeOffer.attrs && "storecolumn" in codeOffer.attrs )
-		{
-			int row = int( codeOffer.attrs["storerow"] )
-			int col = int( codeOffer.attrs["storecolumn"] )
+		if( !hasPrereq || !TEMP_collapsePrereqOffers )
+			ProcessColumnData( storeLocation, scriptOffer, codeOffer )
 
-			if ( row > 0 && col > 0 && scriptOffer.expireTime > GetUnixTimestamp() )
-			{
-				int colIdx = col - 1, rowIdx = row - 1
-
-				while ( fileLevel.storeOfferColumns.len() < colIdx + 1 )
-					fileLevel.storeOfferColumns.append( [] )
-
-				while ( fileLevel.storeOfferColumns[colIdx].len() < rowIdx + 1 )
-					fileLevel.storeOfferColumns[colIdx].append( [] )
-
-				fileLevel.storeOfferColumns[colIdx][rowIdx].append( scriptOffer )
-			}
-
-			printt( "store_offer", col, row, ItemFlavor_GetHumanReadableRef( scriptOffer.output.flavors[0] ), scriptOffer.expireTime, scriptOffer.descText, scriptOffer.titleText )
-		}
 	}
 
-	foreach ( colIdx, rowArray in fileLevel.storeOfferColumns )
+	foreach ( scriptOffer in tempPrereqOffers )
 	{
-		foreach ( rowIdx, offerArray in rowArray )
-		{
-			offerArray.sort( SortScriptOffer )
-			//
-			//
-			//
-			//
-		}
+		if( !ProcessPrereqOffer( scriptOffer, fileLevel.storeOfferColumns ) )
+			if( !ProcessPrereqOffer( scriptOffer, fileLevel.specialsStoreOfferColumns ) )
+				ProcessPrereqOffer( scriptOffer, fileLevel.seasonalStoreOfferColumns )
 	}
+
+	SortScriptOffers( fileLevel.storeOfferColumns )
+	SortScriptOffers( fileLevel.specialsStoreOfferColumns )
+	SortScriptOffers( fileLevel.seasonalStoreOfferColumns )
 
 	foreach ( int grxIndex, ItemFlavor flav in fileLevel.grxIndexItemFlavorMap )
 	{
 		ItemFlavorPurchasabilityInfo ifpi = fileLevel.itemFlavorPurchasabilityInfoMap[flav]
 
-		ifpi.isPurchasableAtAll = (ifpi.craftingOfferOrNull != null || ifpi.locationToDedicatedStoreOffersMap.len() > 0 || ifpi.locationToBundledStoreOffersMap.len() > 0)
+		ifpi.isPurchasableAtAll = (ifpi.craftingOfferOrNull != null || ifpi.locationToDedicatedStoreOffersMap.len() > 0)
 
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
+		                                             
+		                                              
+		   
+		  	                                                                               
+		  	                                                     
+		  	                                                                                       
+		   
+		                                                
+		   
+		  	                                                                 
+		  	                                                 
+		  	                                                         
+		   
+		                                                      
+		   
+		  	                                                                       
+		  	                                                 
+		  	                                                         
+		   
+		                                                    
+		   
+		  	                                                                     
+		  	                                                 
+		  	                                                         
+		   
 	}
 
 	foreach ( void functionref() cb in fileLevel.onGRXOffersRefreshedCallbacks )
 		cb()
 }
 
+GRXScriptOffer function GRX_ScriptOfferFromCraftingOffer( GRXScriptCraftingOffer craftOffer )
+{
+	ItemFlavor flav = craftOffer.flavor
+
+	GRXScriptOffer scriptOffer
+	scriptOffer.isCraftingOffer = true
+	scriptOffer.isAvailable = craftOffer.isAvailable
+
+	ItemFlavorBag price
+	price.flavors.append( GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] )
+	price.quantities.append( craftOffer.craftingPrice )
+	scriptOffer.prices.append( price )
+
+	         
+	scriptOffer.output.flavors.append( flav )
+	scriptOffer.output.quantities.append( 1 )
+
+	                        
+	scriptOffer.titleText = ItemFlavor_GetLongName( flav )
+	scriptOffer.descText = ItemFlavor_GetTypeName( flav )
+	scriptOffer.image = ItemFlavor_GetIcon( flav )
+
+	return scriptOffer
+}
+
+bool function ProcessPrereqOffer( GRXScriptOffer scriptOffer, array<array<array<GRXScriptOffer> > > storeOfferColumns )
+{
+	foreach ( colIdx, rowArray in storeOfferColumns )
+	{
+		for ( int rowIdx = 0; rowIdx < rowArray.len(); rowIdx++ )
+		{
+			array<GRXScriptOffer> offerArray = rowArray[rowIdx]
+
+			foreach ( flav in offerArray[0].output.flavors )
+			{
+				if ( flav != expect ItemFlavor( scriptOffer.prereq ) )
+					continue
+
+				fileLevel.storeOfferColumns[colIdx][rowIdx].append( scriptOffer )
+				return true
+			}
+		}
+	}
+	return false
+}
+
+void function SortScriptOffers( array<array<array<GRXScriptOffer> > > storeOfferColumns )
+{
+	foreach ( colIdx, rowArray in storeOfferColumns )
+	{
+		foreach ( rowIdx, offerArray in rowArray )
+		{
+			offerArray.sort( SortScriptOffer )
+		}
+	}
+}
+
 int function SortScriptOffer( GRXScriptOffer a, GRXScriptOffer b )
 {
+	if ( a.displayPriority > b.displayPriority )
+		return 1
+	else if ( b.displayPriority > a.displayPriority )
+		return -1
+
 	if ( a.expireTime > b.expireTime )
 		return 1
 	else if ( b.expireTime > a.expireTime )
@@ -2669,20 +4086,160 @@ int function SortScriptOffer( GRXScriptOffer a, GRXScriptOffer b )
 	return 0
 }
 
-
-#endif
-
-
-#if(UI)
-asset function CurrencyFlavor_GetRewardIcon( ItemFlavor flavor )
+void function ProcessColumnData( string storeLocation, GRXScriptOffer scriptOffer, GRXStoreOffer codeOffer )
 {
-	Assert( ItemFlavor_GetType( flavor ) == eItemType.account_currency )
-	return GetGlobalSettingsAsset( flavor._____INTERNAL_settingsAsset, "rewardIcon" )
+	if( storeLocation != "shop" && storeLocation != "specials" && storeLocation != "seasonal")
+		return
+
+	if( !( "storerow" in codeOffer.attrs ) || !( "storecolumn" in codeOffer.attrs ) )
+		return
+
+	int row = int( codeOffer.attrs["storerow"] )
+	int col = int( codeOffer.attrs["storecolumn"] )
+
+	if ( row > 0 && col > 0 && scriptOffer.expireTime > GetUnixTimestamp() )
+	{
+		int colIdx = col - 1, rowIdx = row - 1
+
+		if( storeLocation == "specials" )
+		{
+			while ( fileLevel.specialsStoreOfferColumns.len() < colIdx + 1 )
+				fileLevel.specialsStoreOfferColumns.append( [] )
+
+			while ( fileLevel.specialsStoreOfferColumns[colIdx].len() < rowIdx + 1 )
+				fileLevel.specialsStoreOfferColumns[colIdx].append( [] )
+
+			fileLevel.specialsStoreOfferColumns[colIdx][rowIdx].append( scriptOffer )
+		}
+		else if ( storeLocation == "seasonal" )
+		{
+			while ( fileLevel.seasonalStoreOfferColumns.len() < colIdx + 1 )
+				fileLevel.seasonalStoreOfferColumns.append( [] )
+
+			while ( fileLevel.seasonalStoreOfferColumns[colIdx].len() < rowIdx + 1 )
+				fileLevel.seasonalStoreOfferColumns[colIdx].append( [] )
+
+			fileLevel.seasonalStoreOfferColumns[colIdx][rowIdx].append( scriptOffer )
+		}
+		else
+		{
+			while ( fileLevel.storeOfferColumns.len() < colIdx + 1 )
+				fileLevel.storeOfferColumns.append( [] )
+
+			while ( fileLevel.storeOfferColumns[colIdx].len() < rowIdx + 1 )
+				fileLevel.storeOfferColumns[colIdx].append( [] )
+
+			fileLevel.storeOfferColumns[colIdx][rowIdx].append( scriptOffer )
+		}
+	}
+
+	#if GRX_DEBUG_PRINTS
+		if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
+		{
+			GRXDbg( null, "store_offer",
+				"col", col,
+				"row", row,
+				"flav", DEV_DescItemFlavor( scriptOffer.output.flavors[0] ),
+				"expireTime", scriptOffer.expireTime,
+				"descText", scriptOffer.descText,
+				"titleText", scriptOffer.titleText )
+		}
+	#endif
+
 }
 #endif
 
 
-#if(UI)
+#if UI
+const array<int> HIGH_PRIORITY_ITEM_TYPES = [
+	eItemType.battlepass,
+	eItemType.character,
+]
+
+                                                                                                          
+const table<int, int> ITEM_TYPE_PRIORITY_MAP = {
+	[eItemType.battlepass] = 110,
+	[eItemType.character] =  100,
+	[eItemType.character_skin] = 81,
+	[eItemType.character_execution] = 80,
+	[eItemType.melee_skin] = 72,
+	[eItemType.weapon_skin] = 71,
+	[eItemType.weapon_charm] = 70,
+	[eItemType.gladiator_card_stance] = 65,
+	[eItemType.gladiator_card_frame] = 64,
+	[eItemType.gladiator_card_intro_quip] = 63,
+	[eItemType.gladiator_card_kill_quip] = 62,
+	[eItemType.gladiator_card_stat_tracker] = 61,
+	[eItemType.gladiator_card_badge] = 60,
+	[eItemType.music_pack] = 52,
+	[eItemType.loadscreen] = 51,
+	[eItemType.skydive_emote] = 50,
+	[eItemType.emote_icon] = 40,
+	[eItemType.account_pack] = 1,
+	[eItemType.character_emote] = 45,
+}
+
+int function SortStoreOfferItems( GRXStoreOfferItem itemA, GRXStoreOfferItem itemB )
+{
+	ItemFlavor a = GetItemFlavorByGRXIndex( itemA.itemIdx )
+	ItemFlavor b = GetItemFlavorByGRXIndex( itemB.itemIdx )
+
+	int itemTypeA = ItemFlavor_GetType( a )
+	int itemTypeB = ItemFlavor_GetType( b )
+
+	                                                        
+	                                                        
+
+	Assert( itemTypeA in ITEM_TYPE_PRIORITY_MAP && itemTypeB in ITEM_TYPE_PRIORITY_MAP, "Found unsupported item type in store offer. Add it to itemTypePriorityMap if it should be supported." )
+
+	int itemTypePriorityA = ITEM_TYPE_PRIORITY_MAP[itemTypeA]
+	int itemTypePriorityB = ITEM_TYPE_PRIORITY_MAP[itemTypeB]
+
+	                                                                                  
+	bool hasHighestPriorityItemType = false
+	foreach ( int highPriorityType in HIGH_PRIORITY_ITEM_TYPES )
+		if ( itemTypeA == highPriorityType || itemTypeB == highPriorityType )
+			hasHighestPriorityItemType = true
+
+	int result = hasHighestPriorityItemType ? SortLowestFirst( itemTypePriorityA, itemTypePriorityB ) : 0
+	if ( result != 0 )
+		return result
+
+	result = SortLowestFirst( ItemFlavor_GetGRXMode( b ), ItemFlavor_GetGRXMode( a ) )
+	if ( result != 0 )
+		return result
+
+	result = SortLowestFirst( ItemFlavor_GetQuality( a ), ItemFlavor_GetQuality( b ) )
+	if ( result != 0 )
+		return result
+
+	return SortLowestFirst( itemTypePriorityA, itemTypePriorityB )
+}
+
+int function SortLowestFirst( int a, int b )
+{
+	if ( a < b )
+		return 1
+	else if ( b < a )
+		return -1
+
+	return 0
+}
+#endif
+
+
+#if UI
+string function DEV_GRX_DescribeOffer( GRXScriptOffer offer )
+{
+	array<string> priceDescs = []
+	foreach ( int priceIdx, ItemFlavorBag price in offer.prices )
+		priceDescs.append( format( "price%d= %s", priceIdx, DEV_DescribeItemFlavorBag( price ) ) )
+	return format( "[contents= %s; %s]", DEV_DescribeItemFlavorBag( offer.output ), priceDescs.join( "; " ) )
+}
+#endif
+
+
+#if UI
 void function ShowGRXErrorDialogue( string optionalMessage = "" )
 {
 	EmitUISound( "menu_deny" )
@@ -2701,12 +4258,31 @@ void function ShowGRXErrorDialogue( string optionalMessage = "" )
 #endif
 
 
-#if(CLIENT)
+#if UI
+ItemFlavorBag ornull WORKAROUND_GRXPackOpened_Contents = null
+void function ClientToUI_WORKAROUND_GRXPackOpened_Start( int associatedError )
+{
+	ItemFlavorBag bag
+	bag.associatedError = associatedError
+	WORKAROUND_GRXPackOpened_Contents = bag
+}
+void function ClientToUI_WORKAROUND_GRXPackOpened_Entry( int guid, int qty )
+{
+	ItemFlavorBag bag = expect ItemFlavorBag(WORKAROUND_GRXPackOpened_Contents)
+	bag.flavors.append( GetItemFlavorByGUID( guid ) )
+	bag.quantities.append( qty )
+}
+void function ClientToUI_WORKAROUND_GRXPackOpened_Finish()
+{
+	fileLevel.mostRecentPackOpeningResultsOrNull = WORKAROUND_GRXPackOpened_Contents
+	WORKAROUND_GRXPackOpened_Contents = null
+}
+#endif
+
+
+#if CLIENT
 void function ClientCodeCallback_GRXPackOpened( array<int> balanceDiffs, array<int> newItems, int packError )
 {
-	if ( !GRX_IsGRXEnabled() )
-		return
-
 	ItemFlavorBag bag
 
 	for ( int currencyIndex = 0; currencyIndex < GRX_CURRENCY_COUNT; currencyIndex++ )
@@ -2729,26 +4305,31 @@ void function ClientCodeCallback_GRXPackOpened( array<int> balanceDiffs, array<i
 		Newness_TEMP_MarkItemAsNewAndInformServer( flav )
 	}
 
-	#if(true)
+	#if GRX_DEBUG_PRINTS
 		if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
 		{
-			printt( GRX_DBG_PREFIX() )
-			foreach( int flavIndex, ItemFlavor flav in bag.flavors )
-				printt( GRX_DBG_PREFIX(), Localize( ItemFlavor_GetLongName( flav ) ) + " x" + bag.quantities[flavIndex] )
+			GRXDbg( null, "" )
+			foreach ( int flavIndex, ItemFlavor flav in bag.flavors )
+			{
+				GRXDbg( null, "",
+					"flav", DEV_DescItemFlavor( flav ),
+					"name", Localize( ItemFlavor_GetLongName( flav ) ),
+					"qty", bag.quantities[flavIndex] )
+			}
 		}
 	#endif
 
-	//
+	                                                                                                                                    
 	if ( packError != GRX_INVENTORYERROR_NONE )
 	{
 		bag.associatedError = packError
-		#if(true)
+		#if GRX_DEBUG_PRINTS
 			if ( !fileLevel.GRX_DEBUG_PRINTS_disableTemporarily )
-				printt( GRX_DBG_PREFIX(), "packError = " + packError )
+				GRXDbg( null, "", "packError", packError )
 		#endif
 	}
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_GRX_ForcePackResults_resultsOrNull != null )
 		{
 			printt( "PACK RESULTS FORCED!!" )
@@ -2756,157 +4337,447 @@ void function ClientCodeCallback_GRXPackOpened( array<int> balanceDiffs, array<i
 		}
 	#endif
 
+	RunUIScript( "ClientToUI_WORKAROUND_GRXPackOpened_Start", bag.associatedError )
+	foreach ( int flavIdx, ItemFlavor flav in bag.flavors )
+		RunUIScript( "ClientToUI_WORKAROUND_GRXPackOpened_Entry", ItemFlavor_GetGUID( flav ), bag.quantities[flavIdx] )
+	RunUIScript( "ClientToUI_WORKAROUND_GRXPackOpened_Finish" )
+
 	fileLevel.mostRecentPackOpeningResultsOrNull = bag
 }
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                      
+ 
+	                         
 
+	                                                                    
 
+	                            
+	                      
 
+	                                                                  
+	 
+		                                                   
+			                                                                                                                                       
 
+		                                            
 
+		                                                                                   
+		                                                                                
 
+		                                                                       
+		                
+		 
+			                                                                            
+			                                            
+		 
 
+		                
+		 
+			                                    
+			                                      
 
+			                                                                      
+			                                                                      
+			                                                                  
+			 
+				                                                                                                                 
+			 
+		 
+		    
+		 
+			                          
+				                                                                              
+				                                               
+			                                          
+			                                            
+		 
+	 
 
+	                    
+		                                                     
+		 
+			                   
+				                             
+				                                                              
+				                                                  
+				                                                   
+				                                       
+				                                 
+				                           
+				                                           
+				                                             
+				                                                           
+				                                                          
+		 
+	      
 
+	                                                                                  
+		                                                                                                                                                                  
+		                                                                                      
 
+	                                       
+	 
+		                                                                        
+		 
+			                                            
+			                                                           
+			 
+				                                                         
+			 
+		 
+	 
 
+	                                                                 
+	 
+		                                                                                                                                   
+			                      
+			                                                                                                 
 
+			                                  
+			 
+				                 
+			 
 
+			                                                                  
+			 
+				                                                                      
+				                                                                      
+				                                                                  
+				 
+					                                                                                                                                                                                          
+					             
+						                
 
+					                
+						                 
+				 
+			 
 
+			                            
+			                                                                         
+			 
+				                       
+				                                                       
 
+				                                                                                                              
+				 
+					                             
+						                                                                                                                                               
+					                                                                
+					              
+				 
 
+				                           
+				 
+					                                                                         
 
+					                                 
+					                                                                                                       
+					 
+						                                             
+						                                                                                                                      
+						                                               
+						 
+							                                                                                                                                         
+							                             
+						 
+						                                                               
+						 
+							                                             
+						 
+					 
 
+					                                    
+					 
+						                                             
+						                                                                                                                                                                                        
+						                                                                                                                               
+						                                                                                                                                                
+						                                                                                                                               
+						                                                                                                                        
+						                                                                                                                                   
+					 
+					                                          
+					 
+						                       
+						             
+							                                                                                                                                            
+								                                                                                              
 
+							                                                                                                       
+							 
+								                                             
+								                                    
+									                                                                                                                                                             
+									                                                                                                        
+								 
+							 
+							                       
+						      
 
+						                                                       
+						 
+							                                                                                                                 
+							                                                                                                                            
+							 
+								                                                                                                                                      
+								                                                                                                                                                     
+								                                                  
+								 
+									                                                                                                    
+									                                                                                                              
+									                                                                                                        
+									                                                                                                             
+									                                                                                                         
+									                                                                                                                
+								 
+							 
 
+							                                                                                                               
+							                                                                                                                                          
+							                                                                                   
+						 
 
+						                
+					 
+				 
+			 
+			                 
+		 
 
+		                                                                                                                 
+			                    
+				                                                                 
+		 
 
+		                                   
+		 
+			                        
+			                                                                          
+			                   
+			 
+				                      
+			 
+			    
+			 
+				                                                                                                                                                                                             
+			 
+		 
+		    
+		 
+			                 
+			 
+				                   
+				                                                                                                                  
+			 
 
+			                                                                            
+			                                                  
+			                                                 
+			                                                   
 
+			                                      
+			 
+				           
+				                                          
+				             
 
+				                              
+			 
+			                                          
+			 
+				          
+				                                 
+				             
 
+				                                    
+				 
+					          
+					                                                                                    
+					             
+					                                                                                                                                                                                                                                       
+					
+					                                               
+				 
 
+				                                                                                          
+				 
+					                          
+					              
+					                               
+				 
+				    
+				 
+					                               
+				 
+			 
+			                                          
+			 
+				          
+				                               
+				             
+				                                                                                                                                                                                                                                     
+				                                               
+			 
+			                
 
+			                                
+			                                          
+			 
+				                                                                                        
+						                                                                                        
+						                                                                                
+						                                                                                                                                                                           
+				                                                           
+			 
+			    
+			 
+				                                                                                    
+				                                                                                  
+			 
+			                                                                                                                
+			 
+				                                                                                                                                         
+			  
+			                                                                                                                              
+				                                                                       
 
+				                                                                                               
+				 
+					                      
+						                                                                         
+						                                                                                                                  
+					                     
+				 
 
+				                                             
+					                                               
 
+				                                        
+				 
+					                                                                                       
+					                                    
+				 
 
+				                       
+			  
+			                                      
+			                   
+		 
+	 
 
-
-
-
-
-
+	                                                                            
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                   
+ 
+	                                
 
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
+	                                                                    
+	                                             
+ 
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER
+                                                                                                                                                                 
+ 
+	                      
+	                                                                                                                                                           
+	        
+	                         
+	                                              
+	                          
+
+	                                                           
+	 
+		                                           
+		                                                               
+		 
+			                                                                 
+		 
+		    
+		 
+			                                   
+			 
+				                                                                                                                           
+					        
+
+				                                                   
+			 
+		 
+	 
+
+	                                                                                                                      
+ 
+#endif
+
+
+#if SERVER
+                                                                          
+ 
+	                                                                  
+		      
+
+	                                                 
+	                                                  
+
+	                  
+	 
+		                                                       
+	 
+ 
+#endif
+
+
+#if SERVER || CLIENT || UI
 void function AssertCurrencyBundlePlaylistVarsAreValid( ItemFlavor bundle )
 {
-	//
+	                                                                                                                                            
 	if ( GRXCurrencyBundle_GetValue( bundle ) <= 0 )
 		Warning( "Playlist must contain this var: %s", "grx_" + ItemFlavor_GetHumanReadableRef( bundle ) + "_count" )
 }
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                                                      
+ 
+	  
 
-
-//
-
-
-
-
-
-
+	       
+		                                                                
+			                                                                                        
+	      
+ 
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function GRX_IsOfferRestricted( entity player = null )
 {
-#if(CLIENT)
+#if CLIENT
 	if ( player == null )
 		player = GetLocalClientPlayer()
-#elseif(UI)
+#elseif UI
 	if ( player == null )
-		player = GetUIPlayer()
+		player = GetLocalClientPlayer()
 #endif
 
-	#if(false)
-
-
-#elseif(CLIENT)
+	#if SERVER
+		                        
+		                                                                 
+	#elseif CLIENT
 		Assert( player == GetLocalClientPlayer() )
 		PlayerGRXScriptState grxState = GetPlayerGRXScriptState( player )
 	#else
-		Assert( player == GetUIPlayer() )
+		Assert( player == GetLocalClientPlayer() )
 		PlayerGRXScriptState grxState = GetPlayerGRXScriptState( player )
 	#endif
 
@@ -2914,23 +4785,304 @@ bool function GRX_IsOfferRestricted( entity player = null )
 }
 #endif
 
+#if UI
+bool function GRX_IsOfferRestrictedByOfferAttributes( GRXScriptOffer scriptOffer )
+{
+	bool isOfferRestricted = false
+	bool hasUnavailableReason =  false
 
-#if(false)
+	if ( "unavailableReason" in scriptOffer.attributes )
+	{
+		hasUnavailableReason = true
+		scriptOffer.unavailableReason = scriptOffer.attributes.unavailableReason
+	}
 
+	if ( "restrict" in scriptOffer.attributes )
+	{
+		string restrictVal = scriptOffer.attributes["restrict"]
+		if ( restrictVal == "true" )
+			isOfferRestricted = true
+	}
 
+	return isOfferRestricted || hasUnavailableReason
+}
+#endif
 
+#if SERVER || CLIENT || UI
+bool function GRX_HasUpToDateBundleOffers( entity player = null )
+{
+#if SERVER
+	                                             
+#elseif CLIENT
+	if ( player == null )
+		player = GetLocalClientPlayer()
+#elseif UI
+	if ( player == null )
+		player = GetLocalClientPlayer()
+#endif
 
-
-
-
-
-
-
-
-
-
-
-
+	PlayerGRXScriptState grxState = GetPlayerGRXScriptState( player )
+	return grxState.hasUpToDateBundleOffers
+}
 #endif
 
 
+#if UI
+int function GRX_GetNextCurrencyExpirationAmt()
+{
+	PlayerGRXScriptState grxState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
+	return grxState.nextCurrencyExpirationAmt
+}
+#endif
+
+
+#if UI
+int function GRX_GetNextCurrencyExpirationTime()
+{
+	PlayerGRXScriptState grxState = GetPlayerGRXScriptState( GetLocalClientPlayer() )
+	return grxState.nextCurrencyExpirationTime
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+bool function GRX_IsItemCoveredByOfferRestrictions( ItemFlavor flav )
+{
+	if ( ItemFlavor_GetType( flav ) == eItemType.account_pack )
+	{
+		                                                                                                   
+		if ( ItemFlavor_GetQuality( flav, eRarityTier.NONE ) == eRarityTier.HEIRLOOM )
+			return false
+
+		                                                                                                           
+		ItemFlavor ornull activeBattlePass = GetActiveBattlePass()
+		if ( activeBattlePass != null )
+		{
+			expect ItemFlavor( activeBattlePass )
+			ItemFlavor basicPassPack = BattlePass_GetBasicPurchasePack( activeBattlePass )
+			ItemFlavor bundlePassPack = BattlePass_GetBundlePurchasePack( activeBattlePass )
+
+			if ( flav == basicPassPack || flav == bundlePassPack )
+				return false
+		}
+		return true
+	}
+
+	return false
+}
+#endif
+
+#if UI
+ItemFlavorBag function GRX_MakeItemFlavorBagFromPriceArray( array<int> prices )
+{
+	ItemFlavorBag priceBag
+	foreach ( int currencyIndex, int currencyQuantity in prices )
+	{
+		ItemFlavor currencyFlav = GRX_CURRENCIES[currencyIndex]
+
+		if ( currencyQuantity <= 0 )
+			continue
+
+		priceBag.flavors.append( currencyFlav )
+		priceBag.quantities.append( currencyQuantity )
+	}
+	return priceBag
+}
+#endif
+
+#if UI
+bool function GRX_CheckBundleAndUpdateOfferPrices( GRXScriptOffer offer )
+{
+	if ( offer.offerType != GRX_OFFERTYPE_BUNDLE )
+		return false
+
+	GRXBundleOffer bundle = GRX_GetUserBundleOffer( offer.offerAlias )
+
+	if ( bundle.ineligibleReason != "" )
+		return false
+
+	offer.prices.clear()
+
+	bool hasValidBundlePrices = false
+	bool hasValidOriginalPrices = false
+
+	ItemFlavorBag bundlePricesBag = GRX_MakeItemFlavorBagFromPriceArray( bundle.bundlePrices[0] )
+	if ( bundlePricesBag.flavors.len() > 0 )
+	{
+		offer.prices.append( bundlePricesBag )
+		hasValidBundlePrices = true
+	}
+
+	ItemFlavorBag originalPriceBag = GRX_MakeItemFlavorBagFromPriceArray( bundle.bundlePrices[1] )
+	if( originalPriceBag.flavors.len() > 0 )
+	{
+		offer.originalPrice = originalPriceBag
+		hasValidOriginalPrices = true
+	}
+
+	if ( hasValidBundlePrices && hasValidOriginalPrices && bundlePricesBag.flavors[0] == GRX_CURRENCIES[GRX_CURRENCY_PREMIUM] &&
+			bundlePricesBag.flavors[0] == originalPriceBag.flavors[0] && bundlePricesBag.quantities[0] > originalPriceBag.quantities[0] )
+	{
+		Assert( false, "Discount price for " + offer.offerAlias + " is higher than the normal price." )
+
+		offer.prices.clear()
+		offer.prices.append( originalPriceBag )
+		offer.originalPrice = bundlePricesBag
+	}
+
+	return true
+}
+#endif
+
+
+#if SERVER && DEV
+                               
+ 
+	                                              
+	                                         
+	                                                  
+	                                                                                      
+	                                                                                          
+	                                          
+	                                                 
+	                       
+
+	                                    
+	                                                                                                            
+
+	                           
+ 
+#endif
+
+#if SERVER
+                                                                                                                                                   
+ 
+	                 
+		      
+
+	                             
+
+	                                        
+	 
+		                                                  
+			      
+		                                                 
+		                                
+	 
+
+	                                
+	                                                            
+	                                                                                                       
+	 
+		                                                                  
+	  
+
+	                                             
+ 
+#endif
+
+#if SERVER
+                                                            
+ 
+	                                                                    
+	                          
+		                                                          
+		                                                                  
+		                                                                              
+		                                                             
+		                                                            
+		                                                                           
+	 
+
+	                       
+ 
+#endif
+
+
+#if UI
+table<int, int> function GRX_GetPostGameRewards()
+{
+	                                                                                                                       
+	                                                                                                                                         
+	table<int, int> postGameRewards = {}
+	entity player = GetLocalClientPlayer()
+
+	if ( !IsLocalClientEHIValid() )
+		return postGameRewards
+
+	for ( int persistentArrayIdx = 0; persistentArrayIdx < QUEUED_REWARDS_MAX_COUNT; persistentArrayIdx++ )
+	{
+		SettingsAssetGUID ornull rewardItemFlavGUID = GetQueuedRewardOrNull( persistentArrayIdx )
+		if ( rewardItemFlavGUID == null)
+			continue
+
+		expect SettingsAssetGUID( rewardItemFlavGUID )
+
+		SettingsAssetGUID sourceItemFlavGUID   = expect int( GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].sourceGUID", persistentArrayIdx ) ) )
+		if ( sourceItemFlavGUID != 0 && IsValidItemFlavorGUID( sourceItemFlavGUID, eValidation.ASSERT ) )
+		{
+			switch( ItemFlavor_GetType( GetItemFlavorByGUID( sourceItemFlavGUID ) ) )
+			{
+				case eItemType.challenge:                                                                 
+					if ( ItemFlavor_GetType( GetItemFlavorByGUID( rewardItemFlavGUID ) ) == eItemType.gladiator_card_badge )
+						postGameRewards[ rewardItemFlavGUID ] <- persistentArrayIdx
+
+					break
+			}
+		}
+	}
+
+	return postGameRewards
+}
+#endif
+
+#if UI
+SettingsAssetGUID ornull function GetQueuedRewardOrNull( int persistentArrayIdx )
+{
+	SettingsAssetGUID rewardItemFlavGUID = expect int( GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].rewardGUIDs[0]", persistentArrayIdx ) ) )
+	if ( rewardItemFlavGUID == 0 )
+		return null
+	if ( !IsValidItemFlavorGUID( rewardItemFlavGUID, eValidation.ASSERT ) )
+		return null                                                                                                                                           
+
+	bool rewardGiven        = expect bool( GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].rewardGiven", persistentArrayIdx )  ) )                                                                                      
+	bool rewardAcknowledged = expect bool( GetDialogFlowTablesValueOrPersistence( format( "grxQueuedRewards[%d].rewardAcknowledged", persistentArrayIdx )  )  )                                                                                      
+	if ( !rewardGiven || rewardAcknowledged )
+		return null
+
+	return rewardItemFlavGUID
+}
+#endif
+
+
+#if UI
+void function GRX_MarkRewardAcknowledged( int rewardItemFlavGUID, int persistentArrayIdx )
+{
+	SetDialogFlowPersistenceTables( format( "grxQueuedRewards[%d].sourceGUID", persistentArrayIdx ), 0 )
+	SetDialogFlowPersistenceTables( format( "grxQueuedRewards[%d].sourceGUID_extraData", persistentArrayIdx ), 0 )
+	SetDialogFlowPersistenceTables( format( "grxQueuedRewards[%d].rewardGUIDs[0]", persistentArrayIdx ), 0 )
+	SetDialogFlowPersistenceTables( format( "grxQueuedRewards[%d].rewardQuantities[0]", persistentArrayIdx ), 0 )
+	SetDialogFlowPersistenceTables( format( "grxQueuedRewards[%d].rewardGiven", persistentArrayIdx ), false )
+	SetDialogFlowPersistenceTables( format( "grxQueuedRewards[%d].rewardAcknowledged", persistentArrayIdx ), false )
+
+	Remote_ServerCallFunction( "ClientCallback_acknowledge_reward", persistentArrayIdx, rewardItemFlavGUID )
+}
+#endif
+
+               
+      
+                                         
+ 
+                                                                                  
+                                    
+ 
+      
+
+      
+                                           
+ 
+                                                                                  
+                                      
+ 
+      
+      

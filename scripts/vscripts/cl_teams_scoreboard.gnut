@@ -1,0 +1,478 @@
+global function Teams_RegisterSignals
+global function Teams_AddCallback_ScoreboardData
+global function Teams_AddCallback_PlayerScores
+global function Teams_AddCallback_SortScoreboardPlayers
+global function Teams_AddCallback_Header
+global function Teams_PopulatePlayerRow
+global function Teams_PopulateHeaderRui
+
+global function UICallback_ScoreboardMenu_BindTeamHeader
+global function UICallback_ScoreboardMenu_BindTeamRow
+global function UICallback_Scoreboard_OnReportClicked
+
+global function ClientCallback_Teams_SetScoreboardData
+global function ClientCallback_Teams_CloseScoreboard
+
+global struct ScoreboardData
+{
+	int             numScoreColumns
+	array< int > 	columnNumDigits
+	array< asset >  columnDisplayIcons
+	array< float >  columnDisplayIconsScale
+}
+
+                                   
+global struct TeamsScoreboardPlayerStats
+{
+	int score
+	int numDigits
+}
+
+global struct TeamsScoreboardPlayer
+{
+	EHI playerEHI                           
+
+	string playerName
+	string platformIcon
+
+	asset playerImage
+	asset playerBG
+
+	bool isRatingLeader
+	bool isKillLeader
+	bool isFriendly
+	bool isLocalPlayer
+	bool isAlive
+	bool isValid = false
+
+	vector customCharacterColor
+	bool useCustomCharacterColor
+
+	vector enemyBackgroundColor
+
+	array< TeamsScoreboardPlayerStats > stats
+	int team
+}
+
+struct
+{
+	table< int, array< TeamsScoreboardPlayer > > teamsOfPlayers
+} teamsScoreboardCachedData
+
+struct {
+	ScoreboardData functionref( ) Callback_ScoreboardData
+	array< int > functionref( entity ) Callback_PlayerScores
+	array< entity > functionref( array< entity >, ScoreboardData ) Callback_SortScoreboardPlayers
+	void functionref( var, var, int ) Callback_Header
+} file
+
+void function Teams_RegisterSignals()
+{
+	RegisterSignal( "Teams_HideScoreboard" )
+
+	AddCallback_GameStateEnter( eGameState.WinnerDetermined, Teams_OnWinnerDetermined )
+}
+
+
+           
+void function Teams_AddCallback_ScoreboardData( ScoreboardData functionref(  ) callbackFunc )
+{
+	Assert( !IsValid( file.Callback_ScoreboardData ), "ScoreboardData already has a callback function - " + string( callbackFunc ) + ", ensure this is only called once" )
+	file.Callback_ScoreboardData = callbackFunc
+}
+
+void function Teams_AddCallback_PlayerScores( array< int > functionref( entity ) callbackFunc )
+{
+	Assert( !IsValid( file.Callback_PlayerScores ), "PlayerScores already has a callback function - " + string( callbackFunc ) + ", ensure this is only called once" )
+	file.Callback_PlayerScores = callbackFunc
+}
+
+void function Teams_AddCallback_SortScoreboardPlayers(  array< entity > functionref( array< entity >, ScoreboardData ) callbackFunc )
+{
+	Assert( !IsValid( file.Callback_SortScoreboardPlayers ), "SortScoreboardPlayers already has a callback function - " + string( callbackFunc ) + ", ensure this is only called once" )
+	file.Callback_SortScoreboardPlayers = callbackFunc
+}
+
+void function Teams_AddCallback_Header(  void functionref( var, var, int ) callbackFunc )
+{
+	Assert( !IsValid( file.Callback_Header ), "_Header already has a callback function - " + string( callbackFunc ) + ", ensure this is only called once" )
+	file.Callback_Header = callbackFunc
+}
+
+         
+ScoreboardData function GetScoreboardData(){
+	if( IsValid(file.Callback_ScoreboardData) )
+	{
+		return file.Callback_ScoreboardData()
+	}
+	else
+	{
+		ScoreboardData data
+		data.numScoreColumns = 0
+
+		return data
+	}
+
+	unreachable
+}
+
+array<int> function GetPlayerScores( entity player ){
+	if( IsValid(file.Callback_PlayerScores) )
+	{
+		return file.Callback_PlayerScores( player )
+	}
+	else
+	{
+		array<int> empty = []
+
+		return empty
+	}
+
+	unreachable
+}
+
+TeamsScoreboardPlayer function GetPlayer( int teamIndex, int row )
+{
+	TeamsScoreboardPlayer data
+
+	if ( (GetGameState() >= eGameState.WinnerDetermined) )
+	{
+		if( teamsScoreboardCachedData.teamsOfPlayers.len() > teamIndex )
+		{
+			array<TeamsScoreboardPlayer> cachedTeamData = teamsScoreboardCachedData.teamsOfPlayers[teamIndex]
+			if ( cachedTeamData.len() > row )
+				data = cachedTeamData[ row ]
+		}
+	}
+	else
+	{
+		array<entity> teamPlayers = ScoreboardMenu_GetPlayersOnTeam( teamIndex )
+		if ( teamPlayers.len() > row )
+		{
+			entity player = teamPlayers[ row ]
+
+			if ( LoadoutSlot_IsReady( ToEHI( player ), Loadout_Character() ) )
+			{
+				data = GetTeamsScoreboardPlayer( player )
+			}
+		}
+	}
+
+	return data
+}
+
+array<entity> function ScoreboardMenu_GetPlayersOnTeam( int teamIndex )
+{
+	array<entity> teamPlayers =  []
+
+	if ( AllianceProximity_IsUsingAlliances() )
+	{
+		teamPlayers = AllianceProximity_GetAllPlayersInAlliance( teamIndex, false )
+	}
+	else
+	{
+		teamPlayers = GetPlayerArrayOfTeam( teamIndex + 2 )
+	}
+
+	if( IsValid(file.Callback_SortScoreboardPlayers) )
+	{
+		ScoreboardData data = GetScoreboardData()
+		teamPlayers = file.Callback_SortScoreboardPlayers( teamPlayers, data )
+	}
+
+	return teamPlayers
+}
+
+int function GetTeamCount()
+{
+	if ( AllianceProximity_IsUsingAlliances() )
+		return AllianceProximity_GetMaxNumAlliances()
+	else
+		return GetCurrentPlaylistVarInt( "max_teams", 2 )
+
+	unreachable
+}
+
+int function GetMaxTeamSize()
+{
+	if( AllianceProximity_IsUsingAlliances() )
+		return AllianceProximity_GetMaxNumPlayersPerAlliance()
+	else
+		return GetMaxTeamSizeForPlaylist( GetCurrentPlaylistName() )
+
+	unreachable
+}
+
+                  
+void function ClientCallback_Teams_SetScoreboardData( var panel )
+{
+	array<int> teams = GetAllValidPlayerTeams()
+	int maxTeamSize = GetMaxTeamSizeForPlaylist( GetCurrentPlaylistName() )
+
+	int localPlayerTeamIndex
+
+	entity localplayer = GetLocalClientPlayer()            
+	if ( localplayer.GetTeam() == TEAM_SPECTATOR )
+		localPlayerTeamIndex = -1
+	else
+	{
+		if( AllianceProximity_IsUsingAlliances() )
+			localPlayerTeamIndex = AllianceProximity_GetAllianceFromTeam( localplayer.GetTeam() )
+		else
+			localPlayerTeamIndex = localplayer.GetTeam() - 2
+	}
+
+	                                                                  
+	int mode = 0
+	if( IsArenaMode() )
+		mode = 1
+	else if( Control_IsModeEnabled() )
+		mode = 2
+                         
+                             
+          
+       
+                       
+                                         
+          
+       
+	RunUIScript( "UI_SetScoreboardTeamData", panel, GetTeamCount(), GetMaxTeamSize(), localPlayerTeamIndex, mode )
+
+}
+
+void function ClientCallback_Teams_CloseScoreboard( )
+{
+	Signal( clGlobal.levelEnt, "Teams_HideScoreboard" )
+}
+
+              
+void function UICallback_ScoreboardMenu_BindTeamHeader( var header, var frame, int teamIndex, float rowWidth )
+{
+	thread Thread_Teams_PopulateHeaderRui( header, frame, teamIndex, rowWidth )
+}
+
+void function UICallback_ScoreboardMenu_BindTeamRow( var panel, var button, int teamIndex, int row, float rowWidth )
+{
+	thread Threaded_PopulateRowForPlayer( panel, button, teamIndex, row, rowWidth )
+}
+
+void function UICallback_Scoreboard_OnReportClicked( var button, int teamIndex, int row )
+{
+	TeamsScoreboardPlayer data = GetPlayer( teamIndex, row )
+
+	if( data.isValid )
+		ReportPlayer( data.playerEHI )
+}
+
+            
+void function Teams_OnWinnerDetermined()
+{
+	                              
+	teamsScoreboardCachedData.teamsOfPlayers.clear()                                       
+
+	int teamCount = GetTeamCount()
+	int maxTeamSize = GetMaxTeamSize()
+
+	for( int i = 0; i < teamCount; i++ )
+	{
+		array<entity> teamPlayers = ScoreboardMenu_GetPlayersOnTeam( i )
+		array< TeamsScoreboardPlayer > players
+
+		for( int j = 0; j < teamPlayers.len(); j++ )
+		{
+			TeamsScoreboardPlayer playerData = GetTeamsScoreboardPlayer( teamPlayers[j] )
+			players.append( playerData )
+		}
+
+		teamsScoreboardCachedData.teamsOfPlayers[i] <- players
+	}
+}
+        
+void function Thread_Teams_PopulateHeaderRui(var header, var frame, int teamIndex, float rowWidth )
+{
+	EndSignal( clGlobal.levelEnt, "Teams_HideScoreboard" )
+
+	var headerRui = Hud_GetRui( header )
+	var frameRui = Hud_GetRui( frame )
+
+	while ( true )
+	{
+		ScoreboardData data = GetScoreboardData()
+		Teams_PopulateHeaderRui( headerRui, teamIndex, data, rowWidth )
+		Teams_PopulateFrameRui( frameRui, teamIndex, data, rowWidth )
+
+		TeamsScoreboardPlayer playerData = GetPlayer( teamIndex, 0 )
+		int team = -1
+
+		if( AllianceProximity_IsUsingAlliances() )
+		{
+			team = teamIndex
+		}
+		else
+		{
+			team = teamIndex + 2
+		}
+
+
+		if( IsValid(file.Callback_Header) )
+			file.Callback_Header( headerRui, frameRui, team )
+
+
+		WaitFrame()
+	}
+}
+void function Teams_PopulateHeaderRui( var scoreHeaderRui, int teamIndex, ScoreboardData data, float rowWidth )
+{
+	RuiSetInt( scoreHeaderRui, "numScoreColumns", data.numScoreColumns )
+
+	for( int i = 0; i < data.numScoreColumns; i++ )
+	{
+		RuiSetString( scoreHeaderRui, "playerScore" + ( i + 1 ) + "Image", data.columnDisplayIcons[i] )
+		RuiSetFloat( scoreHeaderRui, "playerScore" + ( i + 1 ) + "ImageScale", data.columnDisplayIconsScale[i] )
+		RuiSetInt( scoreHeaderRui, "playerScore" + ( i + 1 ) + "NumDigits", data.columnNumDigits[i] )
+	}
+
+	RuiSetString( scoreHeaderRui, "headerText", Localize( "#TEAM_NUMBERED", (teamIndex + 1) ) )
+	RuiSetFloat( scoreHeaderRui, "rowWidth", rowWidth )
+	RuiSetInt( scoreHeaderRui, "gameState", GetGameState() )
+
+	vector smokeColor = SrgbToLinear( GetSkydiveSmokeColorForTeam( teamIndex ) / 255.0 )
+	RuiSetColorAlpha( scoreHeaderRui, "teamColor", smokeColor, 1 )
+}
+
+void function Teams_PopulateFrameRui( var scoreFrameRui, int teamIndex, ScoreboardData data, float rowWidth )
+{
+	vector smokeColor = SrgbToLinear( GetSkydiveSmokeColorForTeam( teamIndex ) / 255.0 )
+	RuiSetColorAlpha( scoreFrameRui, "teamColor", smokeColor, 1 )
+}
+
+        
+  
+                                                                                                               
+  
+TeamsScoreboardPlayer function GetTeamsScoreboardPlayer( entity player )
+{
+	TeamsScoreboardPlayer data
+
+	EHI playerEHI = ToEHI( player )
+	entity localPlayer = GetLocalClientPlayer()
+	ItemFlavor character = LoadoutSlot_GetItemFlavor( playerEHI, Loadout_Character() )
+
+	data.playerEHI = playerEHI
+	data.playerName = GetPlayerNameFromEHI( playerEHI )
+	data.playerImage = CharacterClass_GetGalleryPortrait( character )
+	data.playerBG = CharacterClass_GetGalleryPortraitBackground( character )
+	data.isRatingLeader = GradeFlagsHas( player, eTargetGrade.EXP_LEADER )
+	data.isKillLeader = GradeFlagsHas( player, eTargetGrade.CHAMP_KILLLEADER )
+	data.isLocalPlayer = player == localPlayer
+	data.isAlive = IsAlive( player )
+
+	data.customCharacterColor = SrgbToLinear( GetPlayerInfoColor( player ) / 255.0 )
+	data.useCustomCharacterColor = localPlayer.GetTeam() == player.GetTeam()
+	data.enemyBackgroundColor =  SrgbToLinear( GetKeyColor( COLORID_ENEMY ) / 255.0 )
+
+                         
+                                                                                  
+       
+
+	if( AllianceProximity_IsUsingAlliances() )
+	{
+		data.team = AllianceProximity_GetAllianceFromTeam( player.GetTeam() )
+		data.isFriendly = AllianceProximity_GetAllianceFromTeam( player.GetTeam() ) == AllianceProximity_GetAllianceFromTeam( GetLocalClientPlayer().GetTeam() )
+		if ( (GetGameState() >= eGameState.WinnerDetermined) )
+		{
+			data.useCustomCharacterColor = AllianceProximity_GetOriginalPlayerTeam_FromPlayerEHI( ToEHI( localPlayer ) ) == AllianceProximity_GetOriginalPlayerTeam_FromPlayerEHI( playerEHI )
+		}
+	}
+	else
+	{
+		data.team = player.GetTeam()
+		data.isFriendly = player.GetTeam() == localPlayer.GetTeam()
+	}
+
+	data.isValid = true
+
+	array< int > scores = GetPlayerScores( player )
+	ScoreboardData gameData = GetScoreboardData()
+
+	for( int j = 0; j < gameData.numScoreColumns; j++ )
+	{
+		TeamsScoreboardPlayerStats stats
+		stats.score = scores[j]
+		stats.numDigits = gameData.columnNumDigits[j]
+
+		data.stats.append(stats)
+	}
+
+	return data
+}
+
+void function Threaded_PopulateRowForPlayer( var panel, var button, int teamIndex, int row, float rowWidth )
+{
+	var rui = Hud_GetRui( button )
+	EndSignal( clGlobal.levelEnt, "Teams_HideScoreboard" )
+
+	while( true )
+	{
+		TeamsScoreboardPlayer data = GetPlayer( teamIndex, row )
+		Hud_Show( button )
+		if ( data.isValid )
+		{
+			Hud_SetLocked( button, false )
+			                                         
+
+			RunUIScript( "UI_ToggleReportTooltip", button, !data.isLocalPlayer )
+			RuiSetBool( rui, "isEmpty", false )
+			RuiSetString( rui, "status", "" )
+			Teams_PopulatePlayerRow( rui, data, rowWidth )
+
+		}
+		else
+		{
+			RunUIScript( "UI_ToggleReportTooltip", button, false )
+			Hud_SetLocked( button, true )
+			RuiSetString( rui, "status", "" )
+			                                                          
+			RuiSetBool( rui, "isEmpty", true )
+			RuiSetString( rui, "playerName", "" )
+			RuiSetBool( rui, "isFriendly", true )
+			RuiSetBool( rui, "isRatingLeader", false )
+			RuiSetBool( rui, "isKillLeader", false )
+			RuiSetBool( rui, "isLocalPlayer", false )
+			RuiSetBool( rui, "useCustomCharacterColor", false )
+			RuiSetString( rui, "platformIcon", $"" )
+			RuiSetInt( rui, "numScoreColumns", 0 )
+		}
+
+
+		wait 0.2
+	}
+}
+
+void function Teams_PopulatePlayerRow( var rui, TeamsScoreboardPlayer data, float rowWidth )
+{
+	RuiSetFloat( rui, "rowWidth", rowWidth )
+	RuiSetInt( rui, "numScoreColumns", data.stats.len() )
+
+	for( int j = 0; j < data.stats.len(); j++ )
+	{
+		RuiSetInt( rui, "playerScore" + ( j + 1 ) , data.stats[j].score )
+		RuiSetInt( rui, "playerScore" + ( j + 1 ) + "NumDigits" , data.stats[j].numDigits )
+	}
+
+	if ( CrossplayEnabled() && CrossplayUserOptIn() )
+		RuiSetString( rui, "platformIcon", data.platformIcon )
+
+	RuiSetString( rui, "playerName", data.playerName )
+	RuiSetBool( rui, "isFriendly", data.isFriendly )
+	RuiSetImage( rui, "playerImage", data.playerImage )
+	RuiSetImage( rui, "playerBG", data.playerBG )
+	RuiSetBool( rui, "isRatingLeader", data.isRatingLeader )
+	RuiSetBool( rui, "isKillLeader", data.isKillLeader )
+	RuiSetBool( rui, "isLocalPlayer", data.isLocalPlayer )
+	RuiSetBool( rui, "isAlive", data.isAlive )
+	RuiSetColorAlpha( rui, "customCharacterColor", data.customCharacterColor, 1.0 )
+	RuiSetBool( rui, "useCustomCharacterColor", data.useCustomCharacterColor )
+
+	RuiSetColorAlpha( rui, "enemyBackgroundColor", data.enemyBackgroundColor, 1.0 )
+}

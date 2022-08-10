@@ -99,17 +99,17 @@ void function ControlPanelInit( entity panel )
 
 void function RegisterWithPanel( entity ent )
 {
-	//
+	                                                    
 	ent.EndSignal( "OnDestroy" )
 	entity panel = ent.GetControlPanel()
 
 	Assert( IsValid( panel ) )
 	Assert( "initiated" in panel.s )
-	/*
-
-
-
-*/
+	                                                                                                                
+	 
+		                                                                                                   
+		           
+	   
 
 	if ( !panel.s.targetArray.contains( ent ) )
 		panel.s.targetArray.append( ent )
@@ -150,7 +150,7 @@ void function ControlPanelRefresh( entity panel )
 
 	if ( CanUpdateVGUI( panel ) )
 	{
-		panel.s.VGUIFunc( panel )	//
+		panel.s.VGUIFunc( panel )	                                                                   
 		UpdateParticleSystem( panel )
 	}
 }
@@ -163,8 +163,8 @@ bool function CanUpdateVGUI( entity panel )
 	if ( panel.s.HudVGUI == null )
 		return false
 
-	//
-	//
+	                                        
+	   	            
 
 	return true
 }
@@ -177,22 +177,22 @@ void function Create_Display( entity panel )
 		panel.s.HudVGUI = null
 	}
 
-	//
-	//
+	                                                                
+	                                                              
 
-	//
+	                                                                                     
 
-	//
-	//
+	                                                           
+	                                                           
 
-	//
-	//
+	                                                                           
+	                                       
 
-	//
-	//
-	//
+	                                                                                                                           
+	                                                                                                           
+	                                                       
 
-	//
+	                                
 }
 
 void function VGUIUpdateSpectre( panel )
@@ -202,7 +202,7 @@ void function VGUIUpdateSpectre( panel )
 	controlledItem.SetText( "Spectre Drop" )
 	stateElement.SetText( "[READY]" )
 
-	//
+	                       
 	int show = int( Time() * 4 ) % 2
 	if ( show )
 		stateElement.Show()
@@ -222,7 +222,7 @@ function VGUIUpdateGeneric( panel )
 	expect entity( panel )
 	local state = panel.s.HudVGUI.s.state
 
-	//
+	                       
 	int show = int( Time() ) % 2
 	if ( show )
 		state.Show()
@@ -270,14 +270,14 @@ void function UpdateParticleSystem( entity panel )
 
 	if ( panel.s.particleEffect != null )
 	{
-		//
+		                                                       
 		if ( playerSameTeamAsPanel && panel.s.particleFlashingBlueToPlayer )
 			return
 
 		if ( !playerSameTeamAsPanel && !panel.s.particleFlashingBlueToPlayer )
 			return
 
-		//
+		                                                                      
 		if ( EffectDoesExist( panel.s.particleEffect ) )
 			EffectStop( panel.s.particleEffect, true, false )
 	}

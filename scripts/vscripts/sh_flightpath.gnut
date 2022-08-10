@@ -12,15 +12,15 @@ global function IsActiveNodeAnalysis
 
 global function AddDropshipFlightAnalysis
 
-#if(false)
-
+#if DEV && SERVER
+                              
 #endif
 
 global const DROP_MIN_X = 0.0
-global const ANALYSIS_STEPS = 8 //
+global const ANALYSIS_STEPS = 8                                                              
 global const ANALYSIS_YAW_STEP = 360.0 / ANALYSIS_STEPS
-global const SPAWNPOINT_USE_TIME = 10.0 //
-global const MAX_ANALYSIS_COUNT = 64 //
+global const SPAWNPOINT_USE_TIME = 10.0                       
+global const MAX_ANALYSIS_COUNT = 64                                                                           
 
 global const DROPSHIP_VERTICAL = "dropship_flyer_attack_vertical_successful"
 global const DROPSHIP_STRAFE = "gd_goblin_zipline_strafe"
@@ -29,11 +29,9 @@ global const DROPSHIP_FLYER_ATTACK_ANIM_VERTICAL = "dropship_flyer_attack_vertic
 global const DROPSHIP_DROP_ANIM = "gd_goblin_zipline_strafe"
 global const DROPSHIP_MODEL = $"mdl/vehicle/goblin_dropship/goblin_dropship.rmdl"
 global const DROPSHIP_MODEL_OLD = $"mdl/vehicle/goblin_dropship/goblin_dropship.rmdl"
-#if(false)
-
-#endif
-
-global const FX_HORNET_DEATH = $"P_veh_exp_hornet_HS"
+                       
+                                                                                                
+      
 
 global const AIRDROP_BASE_ANIM = "dp_droppod_idle"
 global const HOTDROP_TURBO_ANIM = "at_hotdrop_drop_2knee_turbo"
@@ -51,9 +49,9 @@ global enum eFlightPathAnalysisIndex
 	DROPPOD_AIRDROP_BASE_ANIM = 0,
 	CARE_PACKAGE_AIRDROP_IDLE = 1,
 	RESPAWN_DROPSHIP_FLYIN_MOVE = 2,
-	#if(false)
-
-#endif
+                        
+                            
+       
 	UNUSED4 = 4,
 	UNUSED5 = 5,
 	UNUSED6 = 6,
@@ -103,7 +101,7 @@ global struct CallinData
 	DropTable dropTable
 	entity    dropship
 
-	//
+	                             
 	string side = "both"
 	string anim
 	string customSnd
@@ -127,7 +125,6 @@ global struct AttachPoint
 }
 
 global NodeFP NullNodeFP
-global typedef nodeFPOrNull var
 
 global struct FlightPath
 {
@@ -149,49 +146,49 @@ global struct FlightPath
 }
 
 
-#if(false)
-//
+#if SERVER
+                                       
+                                   
+                       
+                                          
+      
+                                         
+                                        
+                                          
+                               
+                                           
+                                   
+                                             
+
+                                    
+                                    
+                                    
+
+                                    
+
+                                        
+                                  
+                                             
+                                   
 
 
+      
+ 
+	                                                                                     
+	                                                                                            
 
+	                                                    
 
+	                                                 
+	                                               
 
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+	                                     
+	                                      
+	                                       
+	                                         
+	                                                      
+      
+#endif          
 
 struct
 {
@@ -220,10 +217,10 @@ void function FlightpathShared_Init()
 	level.superCallinOffset[ DROPSHIP_MODEL_OLD ] <- 700.0
 
 	shFile.dropshipDropoffAnims.append( DROPSHIP_STRAFE )
-	//
+	                                                                               
 	shFile.dropshipDropoffAnims.append( DROPSHIP_VERTICAL )
 
-	//
+	                                                                                                                          
 
 	RegisterSignal( "ClearDisableTitanfall" )
 
@@ -233,75 +230,82 @@ void function FlightpathShared_Init()
 	AddCallback_EntitiesDidLoad( EntitiesDidLoad )
 }
 
+#if SERVER
+                         
+                                      
+     
+                                        
+      
+#endif
 
 void function EntitiesDidLoad()
 {
 	if ( IsMenuLevel() )
 		return
 
-	#if(false)
+	#if SERVER
+		                                          
 
+		 
+			                                                                                                           
 
+			                           
 
+			                                                                            
+			                                            
+			                                            
+			                                                                                                                              
 
+			                                                 
+			                                                               
+			                                                         
+		 
 
+		 
+			                                                        
+			                                                                         
+			                                                                                                                        
+			                                                                                                 
+			                                            
+			                                            
+			                                                                                                                              
 
+			                                                 
+			                                                                
+			                                                         
+		 
 
+                         
+    
+                                                               
+                                                                                                        
+                                                                                     
+                                                
+                                                
+                                                                                                                                  
 
+                                          
+                                                                          
+                                                             
+    
+        
 
-
-
-
-
-
-//
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-#endif //
+	#endif         
 }
 
-#if(false)
+#if SERVER
 
+                                                          
+ 
+	                                                                                      
+ 
 
-
-
-
-
-
-
-
-
-
-
+                                                      
+ 
+	                                                       
+	                 
+	            
+ 
 
 #endif
 
@@ -312,7 +316,7 @@ void function DrawAnalysis( FlightPath flightPath )
 	{
 		AttachPoint point1 = points[i - 1]
 		AttachPoint point2 = points[i]
-		DebugDrawLine( point1.origin, point2.origin, 255, 0, 0, true, 15.0 )
+		DebugDrawLine( point1.origin, point2.origin, COLOR_RED, true, 15.0 )
 	}
 }
 
@@ -375,16 +379,16 @@ FlightPath function InitializeFlightAnalysis( FlightPath Table, asset model, str
 
 	entity dropship = CreatePropDynamic( model, <0, 0, 0>, <0, 0, 0> )
 
-	//
-	#if(false)
-
-
-
-
-
-
-
-#endif
+	                                                                                                                                                 
+	#if SERVER
+		                   
+		 
+			                  
+			                                         
+			                         
+			                          
+		 
+	#endif
 
 	Table.points = FillFlightAnalysisPoints( dropship, anim )
 	if ( Table.points.len() )
@@ -395,17 +399,17 @@ FlightPath function InitializeFlightAnalysis( FlightPath Table, asset model, str
 		FillDeployForAnalysisForEvent( dropship, anim, event, Table, attachments )
 	}
 
-	/*
-
-
-
-
-
-*/
+	  
+	                           
+	                                            
+	 
+		                                                                            
+	 
+	  
 
 	dropship.Destroy()
 
-	//
+	                      
 	shFile.flightAnalysis[ model ][ anim ] <- Table
 	return Table
 }
@@ -421,18 +425,18 @@ void function CopyAttachPoint( AttachPoint source, AttachPoint destination )
 
 void function DrawAnalysisArray( Array )
 {
-	array< table<string, int> > colors
-	colors.append( { r = 255, g = 155, b = 10 } )
-	colors.append( { r = 55, g = 55, b = 250 } )
+	array< vector > colors
+	colors.append( <255, 155, 10> )
+	colors.append( <55, 55, 250> )
 
 	int index = 0
-	table<string, int> color
+	vector color
 	for ( int i = 0; i + 1 < Array.len(); i++ )
 	{
 		index++
 		index %= colors.len()
 		color = colors[ index ]
-		DebugDrawLine( Array[i].origin, Array[i + 1].origin, color.r, color.g, color.b, true, 15.0 )
+		DebugDrawLine( Array[i].origin, Array[i + 1].origin, color, true, 15.0 )
 	}
 }
 
@@ -441,7 +445,7 @@ array<AttachPoint> function FillFlightAnalysisPoints( entity dropship, string an
 {
 	dropship.Hide()
 
-	//
+	                                                                                              
 	string attachName = "ORIGIN"
 	int attachIndex   = dropship.LookupAttachment( attachName )
 	if ( attachIndex == 0 )
@@ -561,8 +565,8 @@ array<AttachPoint> function GetAttachPoints( FlightPath flightPath, string side 
 
 void function AddPreviewPoint( FlightPath flightPath, vector org, vector ang )
 {
-	//
-	//
+	                           
+	  	                  
 	AttachPoint point = flightPath.preview
 	point.origin = org
 	point.angles = ang
@@ -616,35 +620,35 @@ void function FillDeployForAnalysisForEvent( entity dropship, string anim, strin
 	}
 }
 
-#if(false)
+#if SERVER
+                                                                                                                    
+ 
+	                                              
+	                      
+ 
 
+                                                                                    
+ 
+	                                                                                           
 
+	                                       
+ 
 
+                                                                                                               
+ 
+	                                                     
+ 
 
+                                                                    
+ 
+	                                                    
+ 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+                                                                                    
+ 
+	                                                                                
+ 
+#endif          
 
 
 vector function GetAnalysisOffset( FlightPath flightPath )
@@ -658,7 +662,7 @@ vector function GetAnalysisOffset( FlightPath flightPath )
 
 void function MaskTester( int mask )
 {
-	printt( "called from " + DumpPreviousFunction() )
+	printt( "called from " + GetPreviousFunction() )
 	table Table
 	Table[" CONTENTS_EMPTY				"] <- CONTENTS_EMPTY
 	Table[" CONTENTS_SOLID				"] <- CONTENTS_SOLID
@@ -696,47 +700,57 @@ void function MaskTester( int mask )
 }
 
 
-#if(false)
+#if SERVER
+                                                                             
+ 
+	                                                      
 
+	                                                  
+	                                                          
 
+	                                               
 
+	                                  
+	                                       
 
+	                                               
 
+	                                
+		                   
+	    
+		                          
 
+	                 
+	                                                  
+	                                   
 
+	                        
+	 
+		                       
+		                                              
+	 
+	    
+	 
+		                                                     
+		                                             
 
+		                                                           
+		 
+			                                     
+			 
+				                                                   
+				                                                                                           
 
+				                                          
+			 
 
+			                                          
+		 
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-#endif //
+	            
+ 
+#endif          
 
 
 array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
@@ -745,7 +759,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 	array<table> Array
 
-	//
+	                                                                                              
 	int attachIndex = dropship.LookupAttachment( "ORIGIN" )
 	if ( attachIndex == 0 )
 		return Array
@@ -768,7 +782,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 		if ( pos.z < DROP_MIN_X )
 			pos.z = DROP_MIN_X
 
-		//
+		                    
 		point.origin <- pos
 		point.angles <- result.angle
 		point.skip <- stepper > 0 && i % stepper == 0
@@ -797,12 +811,12 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 
 			float dot = DotProduct( vec1, vec2 )
 
-			//
+			                    
 			if ( length < 100 )
 			{
 				if ( dot < -0.8 )
 				{
-					//
+					                        
 					Array.remove( i )
 					i--
 					smoothed = true
@@ -813,7 +827,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 			{
 				if ( dot < -0.99 )
 				{
-					//
+					                        
 					Array.remove( i )
 					i--
 					smoothed = true
@@ -824,7 +838,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 			{
 				if ( dot < -0.995 )
 				{
-					//
+					                        
 					Array.remove( i )
 					i--
 					smoothed = true
@@ -835,7 +849,7 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 			{
 				if ( dot < -0.999 )
 				{
-					//
+					                        
 					Array.remove( i )
 					i--
 					smoothed = true
@@ -851,282 +865,282 @@ array<table> function FillFlightAnalysisPoints2( entity dropship, string anim )
 	return Array
 }
 
-#if(false)
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+
+                                                                         
+ 
+	                                                                                                                                          
+	                                                 
+ 
+
+                                         
+ 
+	                              
+
+	                                                   
+		      
+
+	                                                                       
+	                                                                                  
+
+	                             
+	                                
+	                   
+
+	                                                   
+	 
+		                                 
+		 
+			                                                                   
+			                                         
+			               
+			                        
+			                      
+			                        
+			                          
+		 
+	 
+
+	                                         
+	 
+		                                
+		                              
+		                             
+
+		                           
+		 
+			                                                                                
+			                       
+			 
+				                
+				                                                
+				                                               
+			 
+		 
+
+		                       
+		 
+			                                                                                                                                                                                                      
+		 
+	 
+
+	                                                     
+		              
+
+	                                             
+		      
+
+	               
+	                                                            
+		      
+
+	                                    
+	                                                                             
+	                         
+	                                                  
+	 
+		                                                                               
+		                                
+		 
+			                       
+			     
+		 
+	 
+
+	                            
+		      
+
+	                                                                                   
+	                                     
+ 
+
+                                                                        
+ 
+	                                          
+	 
+		                                      
+	 
+
+	                                                 
+	                                                      
+ 
+
+                                                                       
+ 
+	                                                              
+	 
+		                                                 
+			           
+	 
+
+	            
+ 
+
+                                                                    
+ 
+	                 
+	                                           
+		                                                 
+	    
+		                     
+	                                                                                
+	                                              
+	                                                                          
+
+	                                                               
+	                                                            
+	                                        
+ 
+
+
+                       
+                                                                                           
+ 
+                                        
+              
+
+                                                          
+ 
+                                
+
+                                                                                    
+ 
+	                                       
+		            
+
+	                                                                               
+	                                            
+ 
+
+                                                                                     
+ 
+	          
+		                                                    
+			            
+	      
+
+	                                                                               
+	                                                     
+ 
+
+                                                         
+ 
+	        
+	                                                                               
+
+	                                          
+	                                                 
+	                                   
+	                                                  
+
+	             
+	                       
+	                      
+
+	                     
+	                                          
+	 
+		                                      
+		                                               
+		                                
+	 
+
+	                                           
+
+	            
+	                                               
+	 
+		                                    
+		                                                                         
+			        
+
+		                                          
+		 
+			                                                                                                                                             
+			                                                     
+			 
+				                                                                            
+				      
+			 
+			    
+			 
+				                                                                          
+			 
+		 
+	 
+
+	                                                     
+ 
+
+                       
+                                                                                    
+ 
+         
+                                                                             
+
+                                           
+                                                  
+                                    
+                                                   
+
+              
+                        
+                       
+
+                      
+                                           
+  
+                                        
+                                                 
+                           
+  
+
+                                            
+
+             
+                                                
+  
+                                      
+                                                                           
+           
+
+                                            
+   
+                                                                                                                                                
+                                                        
+    
+                                                                                                  
+                                                    
+                                                    
+
+                                                                    
+                                                                   
+                                                                      
+          
+    
+       
+    
+                                                                                     
+    
+   
+  
+
+                                                      
+ 
+                                
+
+                                                                                            
+ 
+	                                                     
+	                            
+	                                          
+	                                        
+	                                                                                                                         
+
+	            
+ 
+
+#endif          
 
 
 bool function IsActiveNodeAnalysis()
@@ -1134,66 +1148,66 @@ bool function IsActiveNodeAnalysis()
 	return shFile.activeNodeAnalysis
 }
 
-#if(false)
+#if SERVER
 
+                                                                                            
+ 
+	                                                         
+	                                       
+	 
+		                                  
+		                   
+		           
+		 
+			                                                                                    
+			                     
+			 
+				                             
+			 
+		 
 
+		                                                  
+			        
 
+		                 
+	 
+ 
 
+                                                                          
+ 
+	                                                      
+ 
 
+                                                          
+ 
+	                                                   
+	                                                
+ 
 
+                                                     
+ 
+	                                                   
+		            
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+	                                                      
+ 
+#endif          
 
 void function AddDropshipFlightAnalysis( int index, asset model, string anim, bool functionref( FlightPath, vector, float ) analysisFunc, string event = "" )
 {
 	shFile.dropshipDropoffAnims.append( anim )
 
-	//
-	//
+	                                              
+	  	                                          
 
-	#if(false)
+	#if SERVER
+		                                         
 
-
-
-
-
-
-//
-#endif
+		                                                                      
+		                                                
+		                                              
+		                                                       
+		                                                                
+	#endif
 }
 

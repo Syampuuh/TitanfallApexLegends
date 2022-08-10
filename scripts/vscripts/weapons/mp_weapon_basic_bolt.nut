@@ -1,17 +1,18 @@
 
 global function MpWeaponBasicBolt_Init
 
+global function BasicBoltPrecache
 global function OnWeaponActivate_weapon_basic_bolt
 global function OnWeaponPrimaryAttack_weapon_basic_bolt
 global function OnProjectileCollision_weapon_basic_bolt
 
-#if(CLIENT)
+#if CLIENT
 global function OnClientAnimEvent_weapon_basic_bolt
-#endif //
+#endif              
 
-#if(false)
-
-#endif //
+#if SERVER
+                                                          
+#endif              
 
 void function MpWeaponBasicBolt_Init()
 {
@@ -26,18 +27,18 @@ void function BasicBoltPrecache()
 
 void function OnWeaponActivate_weapon_basic_bolt( entity weapon )
 {
-#if(CLIENT)
+#if CLIENT
 	UpdateViewmodelAmmo( false, weapon )
-#endif //
+#endif              
 }
 
-#if(CLIENT)
+#if CLIENT
 void function OnClientAnimEvent_weapon_basic_bolt( entity weapon, string name )
 {
 	GlobalClientEventHandler( weapon, name )
 }
 
-#endif //
+#endif              
 
 var function OnWeaponPrimaryAttack_weapon_basic_bolt( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
@@ -46,14 +47,14 @@ var function OnWeaponPrimaryAttack_weapon_basic_bolt( entity weapon, WeaponPrima
 	return FireWeaponPlayerAndNPC( weapon, attackParams, true )
 }
 
-#if(false)
+#if SERVER
+                                                                                                                
+ 
+	                                                                
 
-
-
-
-
-
-#endif //
+	                                                            
+ 
+#endif              
 
 int function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attackParams, bool playerFired )
 {
@@ -61,7 +62,7 @@ int function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams at
 	if ( IsServer() || weapon.ShouldPredictProjectiles() )
 		shouldCreateProjectile = true
 
-	#if(CLIENT)
+	#if CLIENT
 		if ( !playerFired )
 			shouldCreateProjectile = false
 	#endif
@@ -72,29 +73,14 @@ int function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams at
 	return 1
 }
 
-void function OnProjectileCollision_weapon_basic_bolt( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_weapon_basic_bolt( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical, bool isPassthrough )
 {
-	#if(false)
+	#if SERVER
+		                                                                                                                                                   
+		                                                                                                      
+		                                                           
+			      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+		                                       
+	#endif
 }

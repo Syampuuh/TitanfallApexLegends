@@ -2,21 +2,31 @@
 global function InitPlayVideoMenu
 global function PlayVideoMenu
 global function SetVideoCompleteFunc
+global function TriggerVideoEnd
+global function IsPlayVideoMenuPlayingVideo
 
 const string INTRO_VIDEO = "intro"
+
+global enum eVideoSkipRule
+{
+	INSTANT,
+	HOLD,
+	NO_SKIP
+}
 
 struct
 {
 	var menu
 	string video
 	string milesAudio
-	bool skippable = true
+	int skipRule = eVideoSkipRule.INSTANT
 	var ruiSkipLabel
 	bool holdInProgress = false
 	void functionref() videoCompleteFunc
+	bool playingVideo = false
 } file
 
-void function InitPlayVideoMenu()
+void function InitPlayVideoMenu( var newMenuArg )                                               
 {
 	RegisterSignal( "PlayVideoMenuClosed" )
 	RegisterSignal( "SkipVideoHoldReleased" )
@@ -24,7 +34,6 @@ void function InitPlayVideoMenu()
 	var menu = GetMenu( "PlayVideoMenu" )
 	file.menu = menu
 
-	SetDialog( menu, true )
 	SetGamepadCursorEnabled( menu, false )
 
 	AddMenuEventHandler( menu, eUIEvent.MENU_OPEN, OnPlayVideoMenu_Open )
@@ -36,13 +45,14 @@ void function InitPlayVideoMenu()
 	file.ruiSkipLabel = Hud_GetRui( vguiSkipLabel )
 }
 
-void function PlayVideoMenu( string video, string milesAudio = "", bool skippable = true, void functionref() func = null )
+void function PlayVideoMenu( bool isDialog, string video, string milesAudio = "", int skipRule = eVideoSkipRule.INSTANT, void functionref() func = null )
 {
 	Assert( video != "" )
 
+	SetDialog( file.menu, isDialog )                                                                                                                           
 	file.video = video
 	file.milesAudio = milesAudio
-	file.skippable = skippable
+	file.skipRule = skipRule
 	file.videoCompleteFunc = func
 	AdvanceMenu( file.menu )
 }
@@ -65,17 +75,12 @@ void function OnPlayVideoMenu_Open()
 	DisableBackgroundMovie()
 	SetMouseCursorVisible( false )
 	StopVideos( eVideoPanelContext.UI )
-	uiGlobal.playingVideo = true
-	PlayContextualMenuMusic()
+	file.playingVideo = true
+	UIMusicUpdate()
 	PlayVideoFullScreen( file.video, file.milesAudio, forceUseCaptioning )
 
-	if ( file.skippable )
-	{
+	if ( file.skipRule == eVideoSkipRule.HOLD )
 		thread WaitForSkipInput()
-
-		if ( file.video == INTRO_VIDEO && IsIntroViewed() )
-			ShowAndFadeSkipLabel()
-	}
 
 	WaitSignal( uiGlobal.signalDummy, "PlayVideoEnded" )
 
@@ -94,8 +99,8 @@ void function OnPlayVideoMenu_Close()
 	file.milesAudio = ""
 	EnableBackgroundMovie()
 	SetMouseCursorVisible( true )
-	uiGlobal.playingVideo = false
-	PlayContextualMenuMusic()
+	file.playingVideo = false
+	UIMusicUpdate()
 
 	if ( file.videoCompleteFunc != null )
 		thread file.videoCompleteFunc()
@@ -103,7 +108,8 @@ void function OnPlayVideoMenu_Close()
 
 void function OnPlayVideoMenu_NavigateBack()
 {
-	//
+	if ( file.skipRule == eVideoSkipRule.INSTANT )
+		CloseActiveMenu()
 }
 
 void function WaitForSkipInput()
@@ -112,7 +118,7 @@ void function WaitForSkipInput()
 
 	array<int> inputs
 
-	//
+	          
 	inputs.append( BUTTON_A )
 	inputs.append( BUTTON_B )
 	inputs.append( BUTTON_X )
@@ -124,13 +130,13 @@ void function WaitForSkipInput()
 	inputs.append( BUTTON_BACK )
 	inputs.append( BUTTON_START )
 
-	//
+	                 
 	inputs.append( KEY_SPACE )
 	inputs.append( KEY_ESCAPE )
 	inputs.append( KEY_ENTER )
 	inputs.append( KEY_PAD_ENTER )
 
-	WaitFrame() //
+	WaitFrame()                                                                                                                         
 	foreach ( input in inputs )
 	{
 		if ( input == BUTTON_A || input == KEY_SPACE )
@@ -182,8 +188,8 @@ void function SkipButton_Press()
 
 	file.holdInProgress = true
 
-	float holdStartTime = Time()
-	table hold //
+	float holdStartTime = UITime()
+	table hold                                        
 	hold.completed <- false
 
 	EndSignal( uiGlobal.signalDummy, "SkipVideoHoldReleased" )
@@ -205,10 +211,23 @@ void function SkipButton_Press()
 	while ( holdDuration < 1.5 )
 	{
 		WaitFrame()
-		holdDuration = Time() - holdStartTime
+		holdDuration = UITime() - holdStartTime
 	}
 
 	hold.completed = true
+}
+
+void function TriggerVideoEnd()
+{
+
+	Signal( uiGlobal.signalDummy, "PlayVideoEnded" )
+	#if NX_PROG
+		                                                                                            
+		                                                                                         
+		                                                                                               
+		if ( GetActiveMenu() == file.menu )
+			thread CloseActiveMenu()
+	#endif
 }
 
 void function SkipButton_Release( var button )
@@ -218,6 +237,14 @@ void function SkipButton_Release( var button )
 
 void function ShowAndFadeSkipLabel()
 {
-	RuiSetGameTime( file.ruiSkipLabel, "initTime", Time() )
-	RuiSetGameTime( file.ruiSkipLabel, "startTime", Time() )
+	if ( GetBugReproNum() == 5555 )
+		printt( "IsControllerModeActive():", IsControllerModeActive() )
+
+	RuiSetGameTime( file.ruiSkipLabel, "initTime", UITime() )
+	RuiSetGameTime( file.ruiSkipLabel, "startTime", UITime() )
+}
+
+bool function IsPlayVideoMenuPlayingVideo()
+{
+	return file.playingVideo
 }

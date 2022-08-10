@@ -8,9 +8,10 @@ struct
 	asset contextImage
 	string headerText
 	string messageText
+	string SIDText
 } file
 
-void function InitErrorDialog()
+void function InitErrorDialog( var newMenuArg )                                               
 {
 	var menu = GetMenu( "ErrorDialog" )
 	file.menu = menu
@@ -25,7 +26,22 @@ void function InitErrorDialog()
 	AddMenuEventHandler( menu, eUIEvent.MENU_NAVIGATE_BACK, ErrorDialog_OnNavigateBack )
 
 	AddMenuFooterOption( menu, LEFT, BUTTON_A, true, "#A_BUTTON_CONTINUE", "#CONTINUE", Continue )
+
+#if DEV
+	AddMenuThinkFunc( menu, ErrorDialogAutomationThink )
+#endif       
 }
+
+#if DEV
+void function ErrorDialogAutomationThink( var menu )
+{
+	if (AutomateUi())
+	{
+		printt("ErrorDialogAutomationThink Continue()")
+		Continue(null)
+	}
+}
+#endif       
 
 void function Continue( var button )
 {
@@ -37,7 +53,16 @@ void function ErrorDialog_OnOpen()
 {
 	RuiSetAsset( file.contentRui, "contextImage", file.contextImage )
 	RuiSetString( file.contentRui, "headerText", file.headerText )
-	RuiSetString( file.contentRui, "messageText", file.messageText )
+
+	string messageText = file.messageText
+	if( !IsValid( messageText ) )
+	{
+		messageText = "ERROR MESSAGE TEXT WAS INVALID"
+	}
+	RuiSetString( file.contentRui, "messageText", messageText )
+
+	var label = Hud_GetChild( file.menu, "ServerID" )
+	Hud_SetText( label, file.SIDText )
 }
 
 void function ErrorDialog_OnClose()
@@ -56,6 +81,7 @@ void function OpenErrorDialogThread( string errorMessage )
 	file.contextImage = isIdleDisconnect ? $"ui/menu/common/dialog_notice" : $"ui/menu/common/dialog_error"
 	file.headerText = ( isIdleDisconnect ? Localize( "#DISCONNECTED_HEADER" ) : Localize( "#ERROR" ) ).toupper()
 	file.messageText = errorMessage
+	file.SIDText = "SID: " + GetServerDebugId()                                          
 
 	while ( GetActiveMenu() != GetMenu( "MainMenu" ) )
 		WaitSignal( uiGlobal.signalDummy, "OpenErrorDialog", "ActiveMenuChanged" )

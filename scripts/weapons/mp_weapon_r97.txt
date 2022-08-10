@@ -1,6 +1,12 @@
 #base "_base_smg.txt"
 #base "_base_mags_light.txt"
-#base "_base_barrels.txt"
+
+
+                         
+#base "_base_laser_sights.txt"
+     
+                         
+      
 
 WeaponData
 {
@@ -10,12 +16,15 @@ WeaponData
 	"description" 									"#WPN_R97_DESC"
 	"longdesc"										"#WPN_R97_LONGDESC"
 
-	"ammo_pool_type"								"bullet"
+	"weapon_type_flags"								"WPT_PRIMARY"
 
 	"menu_icon"										"rui/weapon_icons/r5/weapon_r97"
 	"hud_icon"										"rui/weapon_icons/r5/weapon_r97"
 
 	"fire_mode"   									"automatic"
+
+	"OnWeaponActivate"                              "OnWeaponActivate_weapon_r97"
+	"OnWeaponDeactivate"                            "OnWeaponDeactivate_weapon_r97"
 
 	// Menu
 	"menu_category"                                 "smg"
@@ -34,6 +43,7 @@ WeaponData
 	// Models
 	"viewmodel"   									"mdl/weapons/r97/ptpov_r97.rmdl"
 	"playermodel" 									"mdl/weapons/r97/w_r97.rmdl"
+	"holster_offset"								"2 0 0"
 
 	//"tracer_effect"   							"weapon_tracers_shotgun"
 
@@ -69,62 +79,51 @@ WeaponData
 	"damage_type" 									"bullet"
 
 	// Ammo
-	"ammo_clip_size"   								"18"
+                 
+                                
 
-	MP_BASE
-	{
-		"ammo_default_total"							"150"
-		"ammo_stockpile_max"							"150"
-		"ammo_no_remove_from_stockpile"					"1"
-		"ammo_min_to_fire"								"1"
+                                       
+                                                                                                                
+                                              
+                                  
+     
+	"ammo_clip_size"   								"20"
 
-		// Damage - When Used by Players
-		"damage_near_value"   							"12"
-		"damage_far_value"								"12"
-   	 	"damage_very_far_value"							"12"
-		"damage_near_value_titanarmor"					"12"
-		"damage_far_value_titanarmor" 					"12"
-		"damage_very_far_value_titanarmor" 				"12"
-		"damage_rodeo" 									"110"
+    "ammo_stockpile_max"					        "36"
+    "ammo_default_total"					        "0"
+    "ammo_no_remove_from_stockpile"			        "1"
+    "uses_ammo_pool"						        "1"
+    "ammo_pool_type"								"bullet"
+      
+    "ammo_min_to_fire"								"1"
+    "low_ammo_fraction" 					        "0.3"
 
-		// Damage - When Used by NPCs
-		"npc_damage_near_value_titanarmor"				"0"
-		"npc_damage_far_value_titanarmor" 				"0"
-		"npc_damage_near_value"   						"9"
-		"npc_damage_far_value"							"7"
+    // Damage - When Used by Players
+                 
+                                     
+                                  
+                                      
+                                           
+                                           
+                                               
+     
+    "damage_near_value"   							"11"
+    "damage_far_value"								"11"
+    "damage_very_far_value"							"11"
+    "damage_near_value_titanarmor"					"11"
+    "damage_far_value_titanarmor" 					"11"
+    "damage_very_far_value_titanarmor" 				"11"
+      
+    "damage_rodeo" 									"110"
 
-		"npc_max_range"   								"2000"
 
-		"damage_heavyarmor_nontitan_scale"				"0.35"
-	}
+    // Damage - When Used by NPCs
+    "npc_damage_near_value_titanarmor"				"0"
+    "npc_damage_far_value_titanarmor" 				"0"
+    "npc_damage_near_value"   						"9"
+    "npc_damage_far_value"							"7"
 
-	SP_BASE
-	{
-		"ammo_default_total"							"160"
-		"ammo_stockpile_max"							"280"
-		"ammo_no_remove_from_stockpile"					"0"
-		"ammo_min_to_fire"								"1"
-
-		// Damage - When Used by Players
-		"damage_near_value"   							"20"
-		"damage_far_value"								"14"
-		"damage_near_value_titanarmor"					"40"
-		"damage_far_value_titanarmor" 					"28"
-		"damage_very_far_value_titanarmor" 				"28"
-		"damage_rodeo" 									"110"
-
-   	 	"damage_very_far_value"							"<KEEP_DEFAULT>"
-
-		// Damage - When Used by NPCs
-		"npc_damage_near_value_titanarmor"				"<KEEP_DEFAULT>"
-		"npc_damage_far_value_titanarmor" 				"<KEEP_DEFAULT>"
-		"npc_damage_near_value"   						"9"
-		"npc_damage_far_value"							"7"
-
-		"npc_max_range"   								"4000"
-
-		"damage_heavyarmor_nontitan_scale"				"1"
-	}
+    "npc_max_range"   								"2000"
 
 	// NPC
 	"proficiency_poor_spreadscale"					"5.0"
@@ -179,7 +178,7 @@ WeaponData
 
 	"viewkick_yaw_base"   							"1.0"
 	"viewkick_yaw_random" 							"1.0"
-	"viewkick_yaw_random_innerexclude"				"0.0"
+	"viewkick_yaw_random_innerexclude"				"0.05"
     "viewkick_yaw_softScale"						"2.0"
     "viewkick_yaw_hardScale"						"0.4"
 
@@ -217,20 +216,6 @@ WeaponData
 	"viewmodel_shake_up"							"0.0"
 	"viewmodel_shake_right"							"0.0"
 
-	"spread_stand_hip"								"1.0"
-    "spread_stand_hip_run"							"1.5"
-    "spread_stand_hip_sprint"                       "2.5"
-    "spread_crouch_hip"   							"0.8"
-    "spread_air_hip"  								"3.5"
-
-    "spread_kick_on_fire_stand_hip"   				"0.18"
-    "spread_kick_on_fire_crouch_hip"  				"0.18"
-    "spread_kick_on_fire_air_hip" 					"0.18"
-
-    "spread_max_kick_stand_hip"   					"2.0"
-    "spread_max_kick_crouch_hip"  					"1.5"
-    "spread_max_kick_air_hip" 						"3.0"
-
 	//setting to "0" so it's tunable in Bakery
 	"sprintcycle_time"								"0"
 	"deployfirst_time"								"1.0"
@@ -243,65 +228,191 @@ WeaponData
     "clip_bodygroup_show_for_milestone_2"	"1"
     "clip_bodygroup_show_for_milestone_3"	"1"
 
-	Mods
-	{
-		survival_finite_ammo
+	"viewmodel_ads_rui_bottomleft_attachment"	"RUI_BL_CROSSHAIR_R99"
+	"viewmodel_ads_centerpoint_attachment"      "ADS_CENTER_SIGHT_R99"
+
+
+	// Custom flag to hide the reactive rui when an optic is equipped
+	// Since we are enabling the RUI in bakery, we cant turn it off
+	// in the weapon settings file when an optic is equipped, but we
+	// CAN pass in a value to make all the UI elements invisible
+	"custom_int_0"							"1"
+
+	// Custom body group for s07 reactive rui
+	"bodygroup3_name"	"reactive_rui"
+	"bodygroup3_set"	"1"
+
+
+
+    	Mods
+    	{
+                         
+    		laser_sight_l1
+            {
+    				"targeting_laser_enabled"						"1"
+    				"custom_laser_sight_color_enabled"				"1"
+
+            		"spread_stand_hip"								"*0.80"
+            		"spread_stand_hip_run"							"*0.80"
+            		"spread_stand_hip_sprint"                       "*0.80"
+            		"spread_crouch_hip"   							"*0.80"
+            		"spread_air_hip"  								"*0.80"
+
+            		// movement based crosshair bloom
+            		"spread_moving_increase_rate" 					"*0.90"
+            		"spread_moving_decay_rate" 						"*1.10"
+
+            		// firing based crosshair bloom
+            		"spread_decay_rate"   							"*1.10"
+            		"spread_decay_delay"  							"*0.90"
+
+            		"spread_max_kick_stand_hip"						"*0.80"
+            		"spread_max_kick_crouch_hip"					"*0.80"
+            		"spread_max_kick_air_hip"						"*0.80"
+                    "spread_kick_on_fire_stand_hip"   				"*0.80"
+                    "spread_kick_on_fire_crouch_hip"  				"*0.80"
+                    "spread_kick_on_fire_air_hip" 					"*0.80"
+
+
+
+            }
+
+            laser_sight_l2
+            {
+    				"targeting_laser_enabled"						"1"
+    				"custom_laser_sight_color_enabled"				"1"
+
+            		"spread_stand_hip"								"*0.60"
+            		"spread_stand_hip_run"							"*0.60"
+            		"spread_stand_hip_sprint"                       "*0.60"
+            		"spread_crouch_hip"   							"*0.60"
+            		"spread_air_hip"  								"*0.60"
+
+            		// movement based crosshair bloom
+            		"spread_moving_increase_rate" 					"*0.85"
+            		"spread_moving_decay_rate" 						"*1.15"
+
+            		// firing based crosshair bloom
+            		"spread_decay_rate"   							"*1.20"
+            		"spread_decay_delay"  							"*0.80"
+
+            		"spread_max_kick_stand_hip"						"*0.60"
+            		"spread_max_kick_crouch_hip"					"*0.60"
+            		"spread_max_kick_air_hip"						"*0.60"
+                    "spread_kick_on_fire_stand_hip"   				"*0.60"
+                    "spread_kick_on_fire_crouch_hip"  				"*0.60"
+                    "spread_kick_on_fire_air_hip" 					"*0.60"
+
+                    "bodygroup32_set"           	                "1"
+
+            }
+
+    		laser_sight_l3
+    		{
+    				"targeting_laser_enabled"						"1"
+    				"custom_laser_sight_color_enabled"				"1"
+
+                    "spread_stand_hip"								"*0.40"
+                    "spread_stand_hip_run"							"*0.40"
+                    "spread_stand_hip_sprint"                       "*0.40"
+                    "spread_crouch_hip"   							"*0.40"
+                    "spread_air_hip"  								"*0.40"
+
+                    // movement based crosshair bloom
+                    "spread_moving_increase_rate" 					"*0.80"
+                    "spread_moving_decay_rate" 						"*1.20"
+
+                    // firing based crosshair bloom
+                    "spread_decay_rate"   							"*1.30"
+                    "spread_decay_delay"  							"*0.70"
+
+                    "spread_max_kick_stand_hip"						"*0.40"
+                    "spread_max_kick_crouch_hip"					"*0.40"
+                    "spread_max_kick_air_hip"						"*0.40"
+                    "spread_kick_on_fire_stand_hip"   				"*0.40"
+                    "spread_kick_on_fire_crouch_hip"  				"*0.40"
+                    "spread_kick_on_fire_air_hip" 					"*0.40"
+
+                    "bodygroup32_set"           	                "1"
+
+    		}
+
+      
+
+	    crate
+	    {
+	    }
+
+                          
+                       
+      
+
+      
+      
+        gold_paintball
         {
-            "ammo_default_total"					"0"
-            "ammo_stockpile_max"					"36"
-            "ammo_no_remove_from_stockpile"			"0"
+           "impact_effect_table" 				"bullet_pb_Random"
 
-            "low_ammo_fraction" 					"0.3"
+           "projectile_trail_effect_0_1p" 		"P_tracer_projectile_pb"
+           "projectile_trail_effect_0_3p" 		"P_tracer_projectile_pb"
 
-	   		"uses_ammo_pool"						"1"
+           "reload_time"						"*0.75"
+           "reload_time_late1"					"*0.75"
+           "reload_time_late2"					"*0.75"
+           "reload_time_late3"					"*0.75"
+           "reload_time_late4"					"*0.75"
+           "reload_time_late5"					"*0.75"
+           "reloadempty_time"					"*0.75"
+           "reloadempty_time_late1"			"*0.75"
+           "reloadempty_time_late2"			"*0.75"
+           "reloadempty_time_late3"			"*0.75"
+           "reloadempty_time_late4"			"*0.75"
+           "reloadempty_time_late5"			"*0.75"
         }
 
         optic_cq_hcog_classic
         {
         	"bodygroup2_set" 						"0"
 			"ui2_enable" 							"0"
+			
+			// Custom r97 reactive hack to hide the ammo counter rui
+			"custom_int_0"							"0"
         }
 
         optic_cq_hcog_bruiser
         {
         	"bodygroup2_set" 						"0"
 			"ui2_enable" 							"0"
+			
+			// Custom r97 reactive hack to hide the ammo counter rui
+			"custom_int_0"							"0"
         }
 
         optic_cq_holosight
         {
         	"bodygroup2_set" 						"0"
 			"ui2_enable" 							"0"
+			
+			// Custom r97 reactive hack to hide the ammo counter rui
+			"custom_int_0"							"0"
         }
 
         optic_cq_holosight_variable
         {
         	"bodygroup2_set" 						"0"
 			"ui2_enable" 							"0"
+			
+			// Custom r97 reactive hack to hide the ammo counter rui
+			"custom_int_0"							"0"
         }
 
 		optic_cq_threat
 		{
 			"bodygroup2_set" 						"0"
 			"ui2_enable" 							"0"
-		}
-
-		optic_ranged_hcog
-		{
-			"bodygroup2_set" 						"0"
-			"ui2_enable" 							"0"
-		}
-
-		optic_ranged_aog_variable
-		{
-			"bodygroup2_set" 						"0"
-			"ui2_enable" 							"0"
-		}
-
-		barrel_stabilizer_l4_flash_hider
-        {
-        	"fx_muzzle_flash_view"					"wpn_muzzleflash_smg_sup_FP"
-			"fx_muzzle_flash_world"					"wpn_muzzleflash_smg_sup"
+			
+			// Custom r97 reactive hack to hide the ammo counter rui
+			"custom_int_0"							"0"
 		}
 
 		bullets_mag_l1
@@ -310,17 +421,32 @@ WeaponData
 		}
 		bullets_mag_l2
 		{
-			"ammo_clip_size"   							"26"
+			"ammo_clip_size"   							"24"
 		}
 		bullets_mag_l3
 		{
-			"ammo_clip_size"   							"30"
+			"ammo_clip_size"   							"27"
 		}
+        bullets_mag_l4
+        {
+            "ammo_clip_size"   							"27"
+        }
 
 		legendary1
 		{
 			"viewmodel"   									"mdl/weapons/r97/ptpov_r97_legendary_01.rmdl"
 			"playermodel" 									"mdl/weapons/r97/w_r97_legendary_01.rmdl"
+		}
+		
+		s07_reactive_holo_ironsight{
+			"ui2_enable"							"0"
+			"ui20_enable" 							"1"
+			"ui21_enable" 							"1"
+		}
+		s07_reactive_holo_ironsight_alt{
+			"ui2_enable"							"0"
+			"ui22_enable" 							"1"
+			"ui23_enable" 							"1"
 		}
 	}
 
@@ -336,6 +462,7 @@ WeaponData
 			vis							player_zoomfrac
 			ammo						weapon_ammo
 			clipSize					weapon_clipSize
+			centerOffset				weapon_ads_center_offset
 		}
 	}
 
@@ -350,6 +477,64 @@ WeaponData
 			ammo						weapon_ammo
 			clipSize					weapon_clipSize
 			clipCount					weapon_ammoClipCount
+		}
+	}
+	
+	// Season 07 Reactive Holo Ironsight RUI
+	"ui20_enable"		"0"
+	UiData20
+	{
+		"ui"							"ui/r97_reactive_holo_ironsight"
+		"mesh"							"models/weapons/attachments/smg_r97_react_ascension_post"
+		Args
+		{
+			vis							player_zoomfrac
+			ammo						weapon_ammo
+			clipSize					weapon_clipSize
+			hideReactiveRUI				eWeaponVar.custom_int_0
+		}
+	}
+	
+	// Season 07 Reactive Holo Ammo Counter RUI
+	"ui21_enable"		"0"
+	UiData21
+	{
+		"ui"							"ui/r97_reactive_ammo_counter"
+		"mesh"							"models/weapons/attachments/smg_r97_react_ascension_ammo_counter"
+		Args
+		{
+			ammo						weapon_ammo
+			clipSize					weapon_clipSize
+			hideReactiveRUI				eWeaponVar.custom_int_0
+		}
+	}
+	
+	// Season 07 Reactive Holo Ironsight RUI - Alternate Version
+	"ui22_enable"		"0"
+	UiData22
+	{
+		"ui"							"ui/r97_reactive_holo_ironsight_alt"
+		"mesh"							"models/weapons/attachments/smg_r97_react_ascension_post"
+		Args
+		{
+			vis							player_zoomfrac
+			ammo						weapon_ammo
+			clipSize					weapon_clipSize
+			hideReactiveRUI				eWeaponVar.custom_int_0
+		}
+	}
+	
+	// Season 07 Reactive Holo Ammo Counter RUI - Alternate Version
+	"ui23_enable"		"0"
+	UiData23
+	{
+		"ui"							"ui/r97_reactive_ammo_counter_alt"
+		"mesh"							"models/weapons/attachments/smg_r97_react_ascension_ammo_counter"
+		Args
+		{
+			ammo						weapon_ammo
+			clipSize					weapon_clipSize
+			hideReactiveRUI				eWeaponVar.custom_int_0
 		}
 	}
 
@@ -377,6 +562,7 @@ WeaponData
 			Args
 			{
 				//isFiring				weapon_is_firing
+				playerFov             player_fov
 			}
 		}
 	}

@@ -233,7 +233,8 @@ Resource/UI/HudScripted_mp.res
         ControlName             RuiPanel
         classname               "MenuButton"
         ypos                    12
-        wide                    300
+        xpos                    -10
+        wide                    500
         tall                    40
         visible                 0
 

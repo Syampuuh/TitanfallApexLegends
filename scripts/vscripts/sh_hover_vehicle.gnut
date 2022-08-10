@@ -1,0 +1,1836 @@
+global function HoverVehicle_Init
+global function HoverVehicle_RegisterNetworking
+
+global function HoverVehicle_IsHostileToTeam
+global function HoverVehicle_GetVehicleOccupiedByPlayer
+global function HoverVehicle_IsPlayerInAnyVehicle
+global function HoverVehicle_PlayerIsDriving
+global function EntIsHoverVehicle
+global function HoverVehicle_AttachEntToNearestAbilityAttachment
+global function HoverVehicle_IsVehicleEmpty
+
+global function CodeCallback_OnVehicleJumpPadLaunch
+
+global function HoverVehicle_GetTurretOperator
+global function HoverVehicle_GetExtendedPlayerArray
+
+#if SERVER
+                                            
+                                             
+
+                                             
+                                                 
+                                            
+                                            
+                                              
+                                      
+                                               
+                                                  
+                                                  
+                                                     
+                                          
+
+                                                                 
+                                                 
+
+                                                           
+
+                                                
+
+                                                        
+
+                                              
+                                                     
+                                                        
+
+                                                
+                                                                   
+
+       
+                                       
+             
+
+#endif
+
+#if CLIENT
+global function SCB_EjectedFromHoverVehicleForSeldDestruct
+global function ServerCallback_VehicleOccupancyChange
+                                                                                
+#endif
+
+const asset HOVER_VEHICLE_MODEL = $"mdl/vehicle/olympus_hovercraft/olympus_hovercraft_v2.rmdl"
+
+              
+const asset FX_VEHICLE_DAMAGE_SMOKE_WHITE = $"xo_health_smoke_white"
+const asset FX_VEHICLE_DAMAGE_SMOKE_BLACK = $"xo_health_smoke_black"
+const asset FX_VEHICLE_DAMAGE_FIRE_SMALL = $"P_fire_small_FULL"
+const asset FX_VEHICLE_DAMAGE_FIRE_LARGE = $"fire_LG_base_alt"
+const asset FX_VEHICLE_DAMAGE_EXP_SMALL = $"P_veh_crow_exp_sml"
+const asset FX_VEHICLE_DEATH_FX = $"P_deathfx_hover_hv1"
+
+              
+const asset FX_VEHICLE_JET_REAR = $"P_veh_hv1_jet1_full_CP1"
+const asset FX_VEHICLE_JET_SIDE = $"P_veh_hv1_jet_sm_CP1"
+const asset FX_VEHICLE_JET_BASE = $"P_veh_hv1_jet_base"
+const asset FX_VEHICLE_TRAILS = $"P_veh_contrails_01_CP1"
+const asset FX_VEHICLE_TRAILS_BOOST = $"P_veh_contrails_boost"
+const asset FX_VEHICLE_BOOST = $"P_veh_hv1_afterburn"
+const asset FX_VEHICLE_BOOST_SML = $"P_veh_hv1_afterburn_sml"
+const asset FX_VEHICLE_AIR_BRAKE = $"P_veh_airbrake_SM"
+const string FX_VEHICLE_JETWASH = "jetwash_hv1"
+
+            
+const asset FX_VEHICLE_IDLE = $"P_hv1_idle_refract"
+const asset FX_VEHICLE_IDLE_REAR = $"P_hv1_idle_refract_rear"
+const asset FX_LIGHT_HEAD = $"P_veh_hv1_headlight"
+const asset FX_LIGHT_HEAD_TOP = $"P_veh_hv1_headlight_top"
+const asset FX_LIGHT_BRAKE = $"P_veh_light_hv1_brake"
+const asset FX_LIGHT_BRAKE_IDLE = $"P_veh_light_hv1_brake_idle"
+
+          
+const asset FX_VEHICLE_SPAWN_POINT = $"P_veh_vh1_spawnpoint"		                    
+const asset FX_VEHICLE_LAUNCHPAD_LAUNCH = $"P_launchpad_launch_vehicle"
+const asset FX_VEHICLE_EJECT_PILOT_TRAILS = $"P_veh_hover_pilot_eject_trail"
+const asset FX_VEHICLE_EJECT_PILOT_SCREEN = $"P_screen_pilot_eject"
+
+#if SERVER
+                                                                  
+                                                                         
+                                                             
+                                                               
+
+                                                                    
+
+                                                                                            
+#endif
+
+                                                                                                    
+global const asset HOVER_VEHICLE_SPAWNPOINT_ICON = $"rui/hud/gametype_icons/survival/sur_hovercar_spawnpoint"
+
+const string SIG_DRIVER_EMBARK_FINISHED = "VEHICLE_DRIVER_EMBARK_FINISHED"
+global const string SIG_VEHICLE_EMBARK_BEGIN	= "VEHICLE_EMBARK_BEGIN"
+
+const float VEHICLE_DIALOGUE_DEBOUNCE_TIME = 7.0
+
+struct
+{
+	array<void functionref( entity )> callbacks_OnVehicleDisembark
+	table< entity, table< string, float > > playerLastSaidVehicleLineTime
+
+	array<entity> vehicleArray
+} file
+
+const string CONVAR_HOVER_VEHICLE_SPEED = "hover_vehicle_speed"
+const string CONVAR_HOVER_VEHICLE_BOOST_MIN = "hover_vehicle_boost_speed_min"
+const string CONVAR_HOVER_VEHICLE_BOOST_MAX = "hover_vehicle_boost_speed_max"
+const string CONVAR_HOVER_VEHICLE_BOOST_COOLDOWN = "hover_vehicle_boost_cooldown"
+
+bool function HoverVehiclesAreEnabled()
+{
+	return GetCurrentPlaylistVarBool( "hover_vehicles_enabled", true )
+}
+
+void function HoverVehicle_Init()
+{
+	RegisterSignal( SIG_VEHICLE_EMBARK_BEGIN )
+
+	if ( !HoverVehiclesAreEnabled() )
+		return
+
+	if( GetMapName().find( "mp_rr_canyonlands" ) > -1 )
+		return
+	else if ( GetMapName().find( "mp_rr_desertlands" ) > -1 )
+		return
+
+	PrecacheModel( HOVER_VEHICLE_MODEL )
+
+	PrecacheParticleSystem( FX_VEHICLE_BOOST )
+	PrecacheParticleSystem( FX_VEHICLE_BOOST_SML )
+	PrecacheParticleSystem( FX_VEHICLE_AIR_BRAKE )
+	PrecacheParticleSystem( FX_VEHICLE_JET_REAR )
+	PrecacheParticleSystem( FX_VEHICLE_JET_SIDE )
+	PrecacheParticleSystem( FX_VEHICLE_JET_BASE )
+	PrecacheParticleSystem( FX_VEHICLE_TRAILS )
+	PrecacheParticleSystem( FX_VEHICLE_TRAILS_BOOST )
+	PrecacheImpactEffectTable( FX_VEHICLE_JETWASH )
+
+	PrecacheParticleSystem( FX_VEHICLE_DAMAGE_SMOKE_WHITE )
+	PrecacheParticleSystem( FX_VEHICLE_DAMAGE_SMOKE_BLACK )
+	PrecacheParticleSystem( FX_VEHICLE_DAMAGE_FIRE_SMALL )
+	PrecacheParticleSystem( FX_VEHICLE_DAMAGE_FIRE_LARGE )
+	PrecacheParticleSystem( FX_VEHICLE_DAMAGE_EXP_SMALL )
+	PrecacheParticleSystem( FX_VEHICLE_DEATH_FX )
+
+	PrecacheParticleSystem( FX_VEHICLE_IDLE )
+	PrecacheParticleSystem( FX_VEHICLE_IDLE_REAR )
+	PrecacheParticleSystem( FX_LIGHT_HEAD )
+	PrecacheParticleSystem( FX_LIGHT_HEAD_TOP )
+	PrecacheParticleSystem( FX_LIGHT_BRAKE )
+	PrecacheParticleSystem( FX_LIGHT_BRAKE_IDLE )
+
+	PrecacheParticleSystem( FX_VEHICLE_LAUNCHPAD_LAUNCH )
+	PrecacheParticleSystem( FX_VEHICLE_EJECT_PILOT_TRAILS )
+	PrecacheParticleSystem( FX_VEHICLE_EJECT_PILOT_SCREEN )
+	PrecacheParticleSystem( FX_VEHICLE_SPAWN_POINT )
+
+	HoverVehicle_InitFX()
+
+#if SERVER
+	                                                                
+	                                                                    
+	                                                                    
+	                                                                       
+	                                                                 
+	                                                                 
+	                                                                                
+	                                                                     
+
+	                                                                                                          
+
+	                                            
+	                                                         
+
+	                                                                                      
+	                                                               
+	                                                                                 
+	                        
+	                                                          
+#endif
+
+#if CLIENT
+	AddCreateCallback( "player_vehicle", Client_OnVehicleCreated )
+	RegisterMinimapPackages()
+	AddCallback_OnClientScriptInit( LaunchVehicleHudManagement )
+	AddCallback_FullUpdate( OnFullUpdate )
+	AddCallback_GameStateEnter( eGameState.Playing, HoverVehicle_OnGameStartPlaying )
+
+	RegisterSignal( "OnVehicleRuiEnd" )
+#endif
+
+	AddCallback_CanStartCustomWeaponActivity( ACT_VM_WEAPON_INSPECT, CanWeaponInspect )
+	Remote_RegisterClientFunction( "ServerCallback_VehicleOccupancyChange", "entity" )
+
+	InitVehicleHorn()
+}
+
+#if SERVER
+                                                    
+ 
+	                                                  
+	 
+		                                       
+	 
+ 
+#endif
+
+#if SERVER
+                                      
+ 
+	                                                                                                            
+	                                                                                                           
+	                                                                                                            
+	                                                                                                            
+	                                                                                                           
+	                                                                                                           
+
+	                                                                                                                                                    
+	                                                                                                                                                            
+	                                                                                                                                                    
+	                                                                                                                                                              
+	                                                                                                                                                        
+	                                                                                                                                                    
+
+	                                                                                                                                                   
+	                                                                                                                                                       
+	                                                                                                                                                             
+	                                                                                                                                                   
+	                                                                                                                                                           
+	                                                                                                                                                   
+
+	                                                                                                                                                
+	                                                                                                                                                  
+	  
+	                                                                                                                                                       
+	                                                                                                                                                         
+	                                                                                                                                                       
+	  
+	                                                                                                                                                      
+	                                                                                                                                                        
+	                                                                                                                                                      
+ 
+#endif
+
+
+void function HoverVehicle_InitFX()
+{
+#if CLIENT
+
+	ModelFX_BeginData( "hoverEngineIdle", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFX( "ORIGIN", FX_VEHICLE_JET_BASE )
+		ModelFX_AddTagSpawnFX( "FX_LIGHT_FRONT_L", FX_LIGHT_HEAD )
+		ModelFX_AddTagSpawnFX( "FX_LIGHT_FRONT_L_TOP", FX_LIGHT_HEAD_TOP )
+		ModelFX_AddTagSpawnFX( "FX_LIGHT_FRONT_R", FX_LIGHT_HEAD )
+		ModelFX_AddTagSpawnFX( "FX_LIGHT_FRONT_R_TOP", FX_LIGHT_HEAD_TOP )
+		ModelFX_AddTagSpawnFX( "FX_BRAKE", FX_LIGHT_BRAKE_IDLE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_FRONT_L", FX_VEHICLE_IDLE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_FRONT_R", FX_VEHICLE_IDLE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR_L", FX_VEHICLE_IDLE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR_R", FX_VEHICLE_IDLE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR", FX_VEHICLE_IDLE_REAR )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "brakelight_on", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFX( "FX_BRAKE", FX_LIGHT_BRAKE )
+		ModelFX_AddTagSpawnFX( "FX_AIRBRAKE_L", FX_VEHICLE_AIR_BRAKE )
+		ModelFX_AddTagSpawnFX( "FX_AIRBRAKE_R", FX_VEHICLE_AIR_BRAKE )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "hoverEngineForward", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR", FX_VEHICLE_JET_REAR )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "hoverEngineReverse", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFX( "EXHAUST_FRONT_L", FX_VEHICLE_JET_SIDE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_FRONT_R", FX_VEHICLE_JET_SIDE )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "turn_left", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFXAndSound( "WING_TIP_R", FX_VEHICLE_TRAILS, "HoverVehicle_Turning" )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR_R", FX_VEHICLE_JET_SIDE )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "turn_right", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFXAndSound( "WING_TIP_L", FX_VEHICLE_TRAILS, "HoverVehicle_Turning" )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR_L", FX_VEHICLE_JET_SIDE )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "strafe_left", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR_R", FX_VEHICLE_JET_SIDE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_FRONT_R", FX_VEHICLE_JET_SIDE )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "strafe_right", HOVER_VEHICLE_MODEL, "all", false )
+		ModelFX_AddTagSpawnFX( "EXHAUST_REAR_L", FX_VEHICLE_JET_SIDE )
+		ModelFX_AddTagSpawnFX( "EXHAUST_FRONT_L", FX_VEHICLE_JET_SIDE )
+	ModelFX_EndData()
+
+	ModelFX_BeginData( "hoverHealth", HOVER_VEHICLE_MODEL, "all", true )
+		ModelFX_AddTagHealthFX( 0.80, "driver", FX_VEHICLE_DAMAGE_EXP_SMALL, true )
+		ModelFX_AddTagHealthFXAndSound( 0.80, "EXHAUST_REAR", FX_VEHICLE_DAMAGE_SMOKE_WHITE, false, "", "HoverVehicle_DamageState_1" )
+		ModelFX_AddTagHealthFX( 0.60, "driver", FX_VEHICLE_DAMAGE_EXP_SMALL, true )
+		ModelFX_AddTagHealthFXAndSound( 0.60, "EXHAUST_REAR", FX_VEHICLE_DAMAGE_SMOKE_BLACK, false, "", "HoverVehicle_DamageState_2" )
+		ModelFX_AddTagHealthFX( 0.20, "driver", FX_VEHICLE_DAMAGE_EXP_SMALL, true )
+		ModelFX_AddTagHealthFXAndSound( 0.20, "EXHAUST_REAR", FX_VEHICLE_DAMAGE_FIRE_SMALL, false, "", "HoverVehicle_DamageState_3" )
+		ModelFX_AddTagHealthFX( 0.00, "driver", FX_VEHICLE_DAMAGE_EXP_SMALL, true )
+		ModelFX_AddTagHealthFX( 0.00, "EXHAUST_REAR", FX_VEHICLE_DAMAGE_FIRE_LARGE, false )
+	ModelFX_EndData()
+
+	vector groundWashOffset = < 64, 0, 0>
+	HoverVehicle_GroundWashEffectSet( FX_VEHICLE_JETWASH, groundWashOffset )
+
+	HoverVehicle_BoostNotReadySoundSet( "HoverVehicle_Boost_NotReady" )
+#endif
+}
+
+
+void function HoverVehicle_SetEffects( entity vehicle )
+{
+
+	vehicle.HoverVehicle_AddBoostEffect( FX_VEHICLE_BOOST, "EXHAUST_REAR" )
+	vehicle.HoverVehicle_AddBoostEffect( FX_VEHICLE_BOOST_SML, "EXHAUST_REAR_L" )
+	vehicle.HoverVehicle_AddBoostEffect( FX_VEHICLE_BOOST_SML, "EXHAUST_REAR_R" )
+	vehicle.HoverVehicle_AddBoostEffect( FX_VEHICLE_TRAILS_BOOST, "WING_TIP_L" )
+	vehicle.HoverVehicle_AddBoostEffect( FX_VEHICLE_TRAILS_BOOST, "WING_TIP_R" )
+
+	vehicle.HoverVehicle_SetBoostSound( "HoverVehicle_Boost" )
+	vehicle.HoverVehicle_SetForwardAccelerationStartSound( "HoverVehicle_Engine_Thruststart" )
+	vehicle.HoverVehicle_SetHornSound( "HoverVehicle_Horn_Default" )
+	vehicle.HoverVehicle_SetAirbrakeSound( "HoverVehicle_AirBrakes" )
+}
+
+
+void function HoverVehicle_RegisterNetworking()
+{
+	if ( !HoverVehiclesAreEnabled() )
+		return
+
+	                                 
+
+	Remote_RegisterClientFunction( "SCB_EjectedFromHoverVehicleForSeldDestruct" )
+}
+
+
+bool function EntIsHoverVehicle( entity ent )
+{
+	if ( IsValid( ent ) && ent.IsPlayerVehicle() && ent.IsHoverVehicle() )
+		return true
+	return false
+}
+
+
+
+
+                                
+#if SERVER
+                                                  
+ 
+	                                 
+	 
+		                 
+		      
+	 
+
+	                                                               
+	                          
+
+	                                   
+	                                       
+	                                       
+	                            
+	                                   
+	                        
+	                                
+	                                                         
+	                                                   
+	                                                                          
+
+	                                          
+	 
+		                                                               
+		                            
+	 
+
+	                                           
+
+	                           
+	                        
+	                                       
+	                                      
+	                              
+
+	                                       
+	                                      
+
+	                        
+
+	                   
+	                                                                                               
+	                                                                                                  
+	                                                                        
+
+	                          
+	                                  
+	                        
+
+	                                             
+
+	                                   
+	                                   
+
+	                                                             
+	                                                      
+
+	                                                                   
+
+	                                                        
+		                                                                                          
+
+	                                                           
+		                                                                                                
+ 
+                                                                        
+ 
+	                                                                             
+	                                                                         
+	 
+		                                           
+		 
+			                                                
+			 
+				             
+				     
+			 
+		 
+
+		                 
+		      
+	 
+
+	                             
+	                          
+		      
+
+	                                        
+
+	                             
+ 
+
+                                                                
+ 
+	                            
+	                                      
+	                                                                  
+	                                       
+ 
+                                       
+                                                             
+ 
+	                                            
+
+	                                     
+	                            
+	                                                    
+
+	                                
+	                                                                 
+	                                                                 
+	                                                                                    
+	                                        
+ 
+                                                             
+ 
+	                                         
+		         
+
+	                                    
+ 
+
+                                                  
+ 
+	                             
+	 
+		           
+		                          
+			      
+
+		                                                                      
+		                    
+		                                           
+		               
+		                                           
+		 
+			                                                
+			 
+				              
+				                                                                                                                                                                                                   
+
+				     
+			 
+		 
+
+		                          
+			                          
+
+		                                                       
+			                      
+				              
+			                        
+				                
+
+			                          
+				                     
+		   
+
+		                                 
+		                                                
+		             
+	   
+
+	  
+ 
+
+                                                                  
+ 
+	                                                                                 
+	                                     
+	                                                                                 
+	                                           
+	                                               
+
+	          
+ 
+
+                                                            
+ 
+	                                                                      
+	                         
+		                      
+
+	                            
+	 
+		                                        
+			                       
+	 
+	                           
+ 
+
+                                                             
+ 
+	                                                 
+	                                                               
+	                                                        
+	                                                                                                                                                                                                    
+
+	                                             
+	 
+		                                                                                                                                    
+		                              
+		                 
+		      
+	 
+
+	                                                                                                              
+
+	                                                                      
+	                         
+		      
+
+	  
+	                                                      
+	                                              
+	                                                                           
+		      
+	                                                
+	                                                                             
+		      
+
+	  
+	                    
+	                                                                                                                       
+	 
+		                                                                                                                   
+	 
+	    
+	 
+		                                                                                                               
+	                                                                                                      
+	                                                                                                    
+	                                                                                               
+		                                           
+	 
+
+	                                              
+	                                                                             
+	 
+		              
+		                           
+			      
+
+		                            
+		 
+			                         
+				        
+			                                                                   
+		 
+	   
+ 
+
+                                                                            
+ 
+	                    
+	                                     
+	                                       
+	 
+		                          
+			        
+
+		                                          
+		                                         
+			                        
+	 
+
+	             
+ 
+#endif
+
+#if CLIENT
+void function Client_OnVehicleCreated( entity vehicle )
+{
+	                                            
+	SetCallback_CanUseEntityCallback( vehicle, VehicleCanUseEntityCallback )
+	HoverVehicle_SetEffects( vehicle )
+	SetMapFeatureItem( 1000, "#HOVER_VEHICLE", "#HOVER_VEHICLE_DESC", HOVER_VEHICLE_SPAWNPOINT_ICON )
+}
+#endif
+
+#if CLIENT
+void function ServerCallback_VehicleOccupancyChange( entity vehicle )
+{
+	ManageHighlightEntity( vehicle )
+}
+#endif
+
+bool function VehicleHasRoomForNormalOccupants( entity vehicle )
+{
+	if ( !IsValid( vehicle.HoverVehicle_GetOccupantForSeat( HOVER_VEHICLE_SEAT_DRIVER ) ) )
+		return true
+	if ( !IsValid( vehicle.HoverVehicle_GetOccupantForSeat( HOVER_VEHICLE_SEAT_PASSENGER_LEFT ) ) )
+		return true
+	if ( !IsValid( vehicle.HoverVehicle_GetOccupantForSeat( HOVER_VEHICLE_SEAT_PASSENGER_RIGHT ) ) )
+		return true
+	return false
+}
+
+bool function HoverVehicle_IsHostileToTeam( entity vehicle, int teamNum )
+{
+	foreach( entity player in HoverVehicle_GetExtendedPlayerArray( vehicle ) )
+	{
+		if ( IsEnemyTeam( player.GetTeam(), teamNum ) )
+			return true
+	}
+	return false
+}
+
+bool function HoverVehicle_IsVehicleEmpty( entity vehicle )
+{
+	return (HoverVehicle_GetExtendedPlayerArray( vehicle ).len() == 0)
+}
+
+bool function VehicleCanUseEntityCallback( entity player, entity vehicle, int useFlags )
+{
+	if ( Bleedout_IsBleedingOut( player ) )
+		return false
+	if ( player.ContextAction_IsActive() )
+		return false
+	if ( player.Player_IsSkywardLaunching() || player.Player_IsSkywardFollowing() )
+		return false
+	if ( !PlayerCommonItemPickupCheck( player ) )
+		return false
+	if ( !VehicleHasRoomForNormalOccupants( vehicle ) )
+		return false
+
+	                                     
+	if ( HoverVehicle_GetExtendedPlayerArray( vehicle ).contains( player ) )
+		return false
+
+	if ( HoverVehicle_IsHostileToTeam( vehicle, player.GetTeam() ) )
+		return false
+
+	return true
+}
+
+entity function HoverVehicle_GetTurretEnt( entity vehicle )
+{
+	array<entity> children = vehicle.GetChildren()
+	foreach( entity child in children )
+	{
+		if ( IsValid( child ) && child.IsTurretEnt() )
+			return child
+	}
+	return null
+}
+
+entity function HoverVehicle_GetTurretOperator( entity vehicle )
+{
+	entity turret = HoverVehicle_GetTurretEnt( vehicle )
+	if ( !IsValid( turret ) )
+		return null
+
+	return turret.GetDriver()
+}
+
+array<entity> function HoverVehicle_GetExtendedPlayerArray( entity vehicle )
+{
+	array<entity> results = vehicle.VehicleGetPlayerArray()
+
+	entity turretOperator = HoverVehicle_GetTurretOperator( vehicle )
+	if ( IsValid( turretOperator ) )
+		results.append( turretOperator )
+
+	return results
+}
+
+
+#if SERVER
+                                                                              
+ 
+	                            
+
+                        
+	                               
+                              
+	 
+		                                          
+	 
+
+	                                          
+	                                                                                
+	 
+		                                                                                                 
+		                                                            
+	 
+	    
+	 
+		                                          
+		                                            
+			                                                                                                        
+	 
+
+	                                                           
+ 
+
+                                                                                          
+ 
+	                                                         
+	 
+		                                  
+		                          
+		                                                         
+	 
+	                                                                        
+	 
+		                                                         
+	 
+
+	                                                                                                   
+	 
+		                                                               
+		                                                            
+	 
+ 
+
+                                                                                 
+ 
+	                                        
+		                                             
+ 
+
+                                 
+ 
+	                
+	                      
+ 
+                        
+ 
+	                                                           
+ 
+                                                          
+
+                                                                                                    
+ 
+	                           
+	                                      
+
+	                                              
+	 
+		                          
+		                                              
+	 
+	                                                               
+
+	                                                
+	 
+		                                   
+		                                              
+	 
+	                                                                     
+	            
+ 
+
+                                                                            
+ 
+	                           
+	                                      
+
+	                                              
+		            
+	                                                               
+	                                                
+		            
+
+	           
+ 
+
+                                                                                     
+ 
+	                                                        
+		          
+
+	                                                                                          
+	                                       
+ 
+
+                                                                                        
+ 
+	                                                        
+		          
+
+	                                                                                          
+	                                  
+ 
+
+                                                                                       
+ 
+	                                                         
+
+	                                     
+	 
+		                                         
+
+		                                                            
+		                                             
+		                              
+		                                 
+
+		                                                                                          
+		                              
+		                               
+
+		                                           
+
+		                                    
+		         
+		 
+			                                                                   
+				     
+
+			                                   
+			                                         
+			                                   
+			 
+				                                   
+				                                                                   
+				                
+			 
+
+			                                 
+		 
+	   
+ 
+
+                                                                                 
+ 
+	                                                                                     
+
+	                                                                
+	                                                       
+		                                                                                                
+ 
+                                                                                    
+ 
+	                                          
+	                         
+		                                                            
+
+	                                                    
+		               
+
+	                            
+ 
+
+                                                                                     
+ 
+	                                                     
+	                                   
+	 
+		                        
+		                                                               
+	 
+
+	              
+ 
+
+                                                  
+ 
+	                                                   
+	                          
+		           
+
+	                                                              
+	 
+		                                                    
+		                                                    
+		                      
+			         
+		                      
+			        
+		        
+	   
+	                  
+ 
+
+       
+                                                                     
+ 
+	                                                        
+	                          
+		      
+
+	                                                           
+ 
+             
+
+                                                   
+ 
+	                                       
+	                                      
+
+	                                                                      
+	                                                                                          
+	                                              
+
+	                                          
+	                        
+		                                                                                         
+
+	                                                                               
+	                                            
+	 
+		                                                         
+		 
+			                                        
+
+			                                         
+
+			                                                               
+			                                                                       
+			                                   
+			                                  
+
+			                                                                                                                                                                                                   
+			                                                                                        
+			                               
+
+			                                                                                     
+
+			                     
+			                                           
+			 
+				                               
+				                             
+
+				                          
+				                                          
+				 
+					                                                            
+						                                
+				   
+				                              
+
+				          
+				 
+					           
+					                                           
+					 
+						                              
+						 
+							                          
+							                          
+						 
+						     
+					 
+				 
+
+				                                       
+					      
+				                                                          
+					      
+
+				                                
+				                            
+				                                                                                
+			   
+		 
+	 
+ 
+
+                                         
+                                                          
+ 
+	                                        
+		                                   
+	                                   
+ 
+                                                              
+ 
+	                                        
+		                                   
+	                                     
+ 
+                                                                                
+ 
+	                                                  
+		           
+
+	                                                             
+	                  
+		           
+
+	            
+ 
+
+                                                                 
+ 
+	                                        
+	                            
+	 
+		                                         
+			           
+	 
+
+	            
+ 
+
+                                                                                  
+ 
+	                         
+		      
+	                         
+		      
+	                                                                  
+	                          
+		      
+
+	                                         
+	                                                                       
+
+	                                     
+	                              
+	 
+		                       
+		      
+	 
+
+	                                                    
+ 
+                                                                
+ 
+	                                                                   
+ 
+                                                                                                 
+ 
+	                                                                    
+ 
+                                                              
+ 
+	                                                                     
+ 
+                                                            
+ 
+	                                                                     
+ 
+                                                           
+ 
+	                                                                    
+ 
+                                                             
+ 
+	                                                                      
+ 
+
+                                                                         
+ 
+	                                       
+		      
+	                         
+		      
+
+	                                                                      
+ 
+
+                                                                        
+ 
+	                                
+	 
+		                                                
+			                                               
+		                                             
+			                                                      
+		                                            
+			                                                     
+		                                                 
+			                                                  
+	 
+
+	                                                                     
+	                                                  
+ 
+                                                                                      
+ 
+	                                                                                      
+ 
+
+                                                 
+ 
+	                                                      
+	                                  
+	 
+		                           
+
+		                                        
+		                               
+			                                                                                        
+	 
+ 
+#endif
+
+
+
+
+
+
+
+                                    
+#if SERVER
+  
+                                                                
+ 
+	                	                                    
+	              		                                        
+	               		                     
+
+	                                       
+	 
+		                            
+	 
+
+	                                                      
+	                                    
+	                                                                        
+		                                                                      
+			                                           
+			                                             
+			                                   
+			                                        
+			                                     
+			                                   
+			                                                  
+ 
+
+                                                 
+ 
+	                                                                               
+	                                     
+	 
+		                                                                                   
+	 
+
+	                     
+	                                                                                                 
+
+	                                          
+ 
+
+                                                        
+ 
+	                                 
+
+	            
+	                                                                                             
+
+	                                                                       
+		                              
+
+	                                
+	                 
+ 
+  
+
+                                                       
+ 
+	                                     
+
+	                              
+
+	                                              
+
+	                                            
+	                                                                                                
+	                                                                                                
+	                                                                                                               
+	                                                                                              
+
+	                  
+	                            
+	                       
+	                                                               
+	                           
+	                                             
+	                                                                   
+	                                                                                               
+	                                                                                                                                                                                                              
+ 
+#endif
+
+#if CLIENT
+void function SCB_EjectedFromHoverVehicleForSeldDestruct()
+{
+	entity player = GetLocalViewPlayer()
+	if ( !IsAlive( player ) )
+		return
+
+	                                                                   
+
+	int screenFX = StartParticleEffectOnEntity( player, GetParticleSystemIndex( FX_VEHICLE_EJECT_PILOT_SCREEN ), FX_PATTACH_POINT_FOLLOW, player.GetCockpit().LookupAttachment( "CAMERA" ) )
+	EffectSetIsWithCockpit( screenFX, true )
+
+}
+
+                                                                 
+   
+  	                                       
+   
+
+                                                       
+   
+  	                                 
+  
+  	                                           
+  	                                                      
+  		                                          
+  
+  	                                                               
+  	                                    
+  	                                              
+  	                                          
+  	                                                                        
+  	                                                    
+  	                                                 
+  
+  	            
+  		                    
+  		 
+  			                 
+  		 
+  	 
+  
+  	                                  
+   
+#endif
+
+
+
+                                      
+void function HoverVehicle_OnGameStartPlaying()
+{
+
+}
+
+
+#if SERVER
+                                                           
+ 
+	                                 
+		      
+
+	                           
+	                           
+
+	                                                 
+
+	                                              
+	                                       
+
+	                        
+	                             
+
+	                                                                                                               
+	                                               
+	                                                           
+ 
+
+                                                           
+ 
+	                                                 
+	                        
+
+	                        
+	                             
+	              
+ 
+#endif
+
+
+                       
+#if CLIENT
+
+array<entity> function GetAllARWalls()
+{
+	return GetEntArrayByScriptName( "vehicle_fence_01" )                                                                     
+}
+
+void function OnFullUpdate()
+{
+	                           
+	{
+		array<entity> arWalls = GetAllARWalls()
+		foreach( wall in arWalls )
+			wall.DisableDraw()
+	}
+}
+
+void function LaunchVehicleHudManagement( entity playerOnInit )
+{
+	  
+	thread function() : ()
+	{
+		           
+		{
+			array<entity> arWalls = GetAllARWalls()
+			foreach( wall in arWalls )
+				wall.DisableDraw()
+		}
+
+		entity latestPlayer = null
+		entity latestVehicle = null
+		bool wasDriving = false
+		bool hudIsActive = false
+		for( ;; )
+		{
+			WaitFrame()
+
+			entity player = GetLocalViewPlayer()
+			entity vehicle = HoverVehicle_GetVehicleOccupiedByPlayer( player )
+			bool isDriving = IsValid( vehicle ) ? vehicle.VehicleIsDriver( player ) : false
+
+			if ( (vehicle == latestVehicle) && (isDriving == wasDriving) )
+				continue
+
+			bool drivingChanged = isDriving != wasDriving
+			if ( hudIsActive && (!IsValid( vehicle ) || (player != latestPlayer) || drivingChanged) )
+			{
+				hudIsActive = false
+				VehicleHudShutdown( player )
+				array<entity> arWalls = GetAllARWalls()
+				foreach( wall in arWalls )
+				{
+					wall.DisableDraw()
+					StopSoundOnEntity( wall, "Olympus_Emit_EXT_Vehicle_Caution_Hum" )
+				}
+			}
+
+			if ( IsValid( vehicle ) )
+			{
+				VehicleHudStartup( player, vehicle, isDriving )
+				if ( isDriving )
+				{
+					array<entity> arWalls = GetAllARWalls()
+					foreach( wall in arWalls )
+					{
+						wall.EnableDraw()
+						EmitSoundOnEntity( wall, "Olympus_Emit_EXT_Vehicle_Caution_Hum"  )
+					}
+				}
+				hudIsActive = true
+			}
+
+			latestPlayer = player
+			latestVehicle = vehicle
+			wasDriving = isDriving
+		}
+	}()
+}
+
+var s_hoverVehicleHudRui = null
+void function ClearVehicleHudRUIIfItExists()
+{
+	if ( s_hoverVehicleHudRui == null )
+		return
+
+	RuiDestroyIfAlive( s_hoverVehicleHudRui )
+	s_hoverVehicleHudRui = null
+}
+
+void function VehicleHudShutdown( entity player )
+{
+	Signal( clGlobal.signalDummy, "OnVehicleRuiEnd" )
+}
+
+void function VehicleHudStartup( entity player, entity vehicle, bool isDriving )
+{
+	ClearVehicleHudRUIIfItExists()
+
+	if ( isDriving )
+		thread ManageHudForDriver( vehicle, player )
+	else
+		thread ManageHudForPassenger( vehicle, player )
+}
+
+void function ManageHudForDriver( entity vehicle, entity player )
+{
+	s_hoverVehicleHudRui = CreatePermanentCockpitPostFXRui( $"ui/hover_vehicle_ui.rpak" )
+
+	thread function() : (vehicle, player)
+	{
+		EndSignal( clGlobal.signalDummy, "OnVehicleRuiEnd" )
+		vehicle.EndSignal( "OnDestroy" )
+
+		OnThreadEnd( function() : ()
+		{
+			if ( s_hoverVehicleHudRui != null )
+				RuiSetBool( s_hoverVehicleHudRui, "isFinished", true )
+		} )
+
+		float smoothedSpeed = 800
+		float boostChargeCooldown = 5.0
+
+		float frameTime = Time()
+		float lastFrameTime = Time()
+		float dt
+
+		  
+		float topSpeedSetting = GetConVarFloat( CONVAR_HOVER_VEHICLE_SPEED )
+		float maxDisplaySpeed = (topSpeedSetting - 50.0)
+		float minDisplaySpeedBoosted = topSpeedSetting
+		float maxDisplaySpeedBoosted = topSpeedSetting + (GetConVarFloat( CONVAR_HOVER_VEHICLE_BOOST_MIN ) * 0.7)
+		float boostCooldownTime = GetConVarFloat( CONVAR_HOVER_VEHICLE_BOOST_COOLDOWN )
+		while ( IsValid( vehicle ) )
+		{
+			frameTime = Time()
+			dt = frameTime - lastFrameTime
+
+			vector vel = vehicle.GetVehicleVelocity()
+			vector vel2d = <vel.x, vel.y, 0.0>
+			float speed2d = vel2d.Length()
+
+			float timeUntilBoostReady = vehicle.HoverVehicle_BoostTimeUntilAvailable()
+			float timeInBoostCooldown = (boostCooldownTime - timeUntilBoostReady)
+			float speedRatio = GetFractionClamped( speed2d, 5.0, maxDisplaySpeed )
+			if ( (timeInBoostCooldown < 5.0) && (speedRatio > 0.999) )
+				speedRatio = 1.0 + GetFractionClamped( speed2d, minDisplaySpeedBoosted, maxDisplaySpeedBoosted )
+
+			RuiSetFloat( s_hoverVehicleHudRui, "displaySpeedRaw", speed2d )
+			RuiSetFloat( s_hoverVehicleHudRui, "displaySpeedRatio", speedRatio )
+			RuiSetFloat( s_hoverVehicleHudRui, "timeUntilBoostReady", timeUntilBoostReady )
+			RuiSetFloat( s_hoverVehicleHudRui, "boostCooldownTime", boostCooldownTime )
+			RuiSetBool( s_hoverVehicleHudRui, "isStunned", (vehicle.HoverVehicle_StunTimeRemaining() > FLT_EPSILON) )
+
+			UpdateVehicleOccupantInfosForRui( s_hoverVehicleHudRui, vehicle )
+
+			WaitFrame()
+		}
+	}()
+}
+
+void function ManageHudForPassenger( entity vehicle, entity player )
+{
+	s_hoverVehicleHudRui = CreatePermanentCockpitPostFXRui( $"ui/hover_vehicle_passenger_ui.rpak" )
+
+	thread function() : (vehicle, player)
+	{
+		EndSignal( clGlobal.signalDummy, "OnVehicleRuiEnd" )
+		vehicle.EndSignal( "OnDestroy" )
+
+		OnThreadEnd( function() : ()
+		{
+			if ( s_hoverVehicleHudRui != null )
+				RuiSetBool( s_hoverVehicleHudRui, "isFinished", true )
+		} )
+
+		while ( IsValid( vehicle ) )
+		{
+			UpdateVehicleOccupantInfosForRui( s_hoverVehicleHudRui, vehicle )
+			WaitFrame()
+		}
+	}()
+}
+
+int function GetTeamMemberIndexForEnt( entity ent )
+{
+	if ( !IsValid( ent ) )
+		return -1
+
+	entity viewPlayer = GetLocalViewPlayer()
+	if ( viewPlayer.GetTeam() != ent.GetTeam() )
+		return -1
+
+	return ent.GetTeamMemberIndex()
+}
+int function GetTeamMemberIndexForSeatPosition( entity vehicle, int seatIndex )
+{
+	entity occupant = vehicle.HoverVehicle_GetOccupantForSeat( seatIndex )
+	return GetTeamMemberIndexForEnt( occupant )
+}
+int function GetTeamMemberIndexForTurretGunnerPosition( entity vehicle )
+{
+	entity turret = HoverVehicle_GetTurretEnt( vehicle )
+	if ( !IsValid( turret ) )
+		return -1
+	return GetTeamMemberIndexForEnt( turret.GetDriver() )
+}
+void function UpdateVehicleOccupantInfosForRui( var rui, entity vehicle )
+{
+	RuiSetInt( rui, "seatTeamMemberIndexDriver", GetTeamMemberIndexForSeatPosition( vehicle, HOVER_VEHICLE_SEAT_DRIVER ) )
+	RuiSetInt( rui, "seatTeamMemberIndexPassengerLeft", GetTeamMemberIndexForSeatPosition( vehicle, HOVER_VEHICLE_SEAT_PASSENGER_LEFT ) )
+	RuiSetInt( rui, "seatTeamMemberIndexPassengerRight", GetTeamMemberIndexForSeatPosition( vehicle, HOVER_VEHICLE_SEAT_PASSENGER_RIGHT ) )
+	RuiSetInt( rui, "seatTeamMemberIndexSpecialGunner", GetTeamMemberIndexForTurretGunnerPosition( vehicle ) )
+}
+
+float function GetDisplaySpeed( float speed )
+{
+	return speed * 0.0568182 * 2.0
+}
+
+void function DisplayRuiForHoverVehicle( entity ent, entity player, var rui, ExtendedUseSettings settings )
+{
+	DisplayRuiForHoverVehicle_Internal( rui, settings.icon, Time(), Time() + settings.duration, settings.hint )
+}
+
+void function DisplayRuiForHoverVehicle_Internal( var rui, asset icon, float startTime, float endTime, string hint )
+{
+	RuiSetBool( rui, "isVisible", true )
+	RuiSetImage( rui, "icon", icon )
+	RuiSetGameTime( rui, "startTime", startTime )
+	RuiSetGameTime( rui, "endTime", endTime )
+	RuiSetString( rui, "hintKeyboardMouse", hint )
+	RuiSetString( rui, "hintController", hint )
+}
+
+void function RegisterMinimapPackages()
+{
+	RegisterMinimapPackage( "prop_script", eMinimapObject_prop_script.HOVER_VEHICLE_SPAWNPOINT, MINIMAP_OBJECT_RUI, MinimapPackage_HoverVehicleSpawnpoint, FULLMAP_OBJECT_RUI, MinimapPackage_HoverVehicleSpawnpoint )
+}
+void function MinimapPackage_HoverVehicleSpawnpoint( entity ent, var rui )
+{
+	RuiSetImage( rui, "defaultIcon", HOVER_VEHICLE_SPAWNPOINT_ICON )
+	                                                            
+	                                         
+	RuiSetImage( rui, "clampedDefaultIcon", $"" )
+	RuiSetBool( rui, "useTeamColor", false )
+
+	const float ICON_SCALE = 1.25
+	RuiSetFloat2( rui, "iconScale", <ICON_SCALE, ICON_SCALE, 0> )
+}
+#endif
+
+entity function GetValidParentOrGrandparentHoverVehicle( entity player )
+{
+	entity parentEnt = player.GetParent()
+	if ( EntIsHoverVehicle( parentEnt ) )
+		return parentEnt
+
+	if ( IsValid( parentEnt ) && parentEnt.IsTurretEnt() )
+	{
+		entity grandEnt = parentEnt.GetParent()
+		if ( EntIsHoverVehicle( grandEnt ) )
+			return grandEnt
+	}
+
+	return null
+}
+entity function HoverVehicle_GetVehicleOccupiedByPlayer( entity player )
+{
+	return GetValidParentOrGrandparentHoverVehicle( player )
+}
+entity function GetHoverVehicleDrivenByPlayer( entity player )
+{
+	entity vehicle = HoverVehicle_GetVehicleOccupiedByPlayer( player )
+	if ( !IsValid( vehicle ) )
+		return null
+	if ( !vehicle.VehicleIsDriver( player ) )
+		return null
+
+	return vehicle
+}
+bool function HoverVehicle_PlayerIsDriving( entity player )
+{
+	entity vehicle = GetHoverVehicleDrivenByPlayer( player )
+	return IsValid( vehicle )
+}
+
+bool function HoverVehicle_IsPlayerInAnyVehicle( entity player )
+{
+	entity vehicle = HoverVehicle_GetVehicleOccupiedByPlayer( player )
+	return IsValid( vehicle )
+}
+
+               
+              
+bool function HoverVehicle_AttachEntToNearestAbilityAttachment( entity ent, entity vehicle, bool useAttachment, bool onlyUseBackAttachment, vector offset )
+{
+	const int ABILITY_ATTACHMENT_COUNT = 2
+	const string[ABILITY_ATTACHMENT_COUNT] ABILITY_ATTACHMENT_NAMES = [                                                       
+		"ability_attachment_front",
+		"ability_attachment_back"		                               
+	]
+	const int VEHICLE_BACK_ATTACHMENT_SLOT = 1
+
+	int bestSlot = -1
+	int bestAttachIdx = -1
+	float bestDistSq = FLT_MAX
+	foreach( int slot, string name in ABILITY_ATTACHMENT_NAMES )
+	{
+		if ( onlyUseBackAttachment && (slot != VEHICLE_BACK_ATTACHMENT_SLOT) )
+			continue
+		if ( IsValid( vehicle.HoverVehicle_GetAbilityAttachmentEntity( slot ) ) )
+			continue
+
+		int attachIdx = vehicle.LookupAttachment( name )
+		vector attachPos = vehicle.GetAttachmentOrigin( attachIdx )
+		float distSq = DistanceSqr( ent.GetOrigin(), attachPos )
+		if ( distSq > bestDistSq )
+			continue
+
+		bestDistSq = distSq
+		bestAttachIdx = attachIdx
+		bestSlot = slot
+	}
+
+	if ( bestSlot < 0 )
+		return false
+
+	vector origin = vehicle.GetAttachmentOrigin( bestAttachIdx )
+	vector angles = vehicle.GetAttachmentAngles( bestAttachIdx )
+
+	vector forward = AnglesToForward( angles )
+	vector right = AnglesToRight( angles )
+	vector normal = AnglesToUp( angles )
+
+	vector adjustedOffset = forward * offset.x + right * offset.y + normal * offset.z
+	origin += adjustedOffset
+
+	ent.SetOrigin( origin )
+	ent.SetAngles( angles )
+
+	                                                        
+	if ( !IsValid( ent ) )
+		return false
+
+	if ( useAttachment )
+	{
+		ent.SetParent( vehicle, ABILITY_ATTACHMENT_NAMES[bestSlot], true )
+	}
+	else
+	{
+		ent.SetParent( vehicle )
+	}
+
+	#if SERVER
+		                                                                
+	#endif          
+	return true
+}
+
+#if SERVER
+                                                                                                         
+ 
+	                                   
+	 
+		                                                                       
+		 
+			                                                              
+			     
+		 
+	 
+ 
+#endif          
+
+float s_lastTimeDidJumpPadFX = 0.0
+void function CodeCallback_OnVehicleJumpPadLaunch( entity vehicle, entity trigger )
+{
+	float timeNow = Time()
+	if ( (timeNow - s_lastTimeDidJumpPadFX) < 1.0 )
+		return
+
+	entity jumpPad = trigger.GetOwner()
+	if ( IsValid( jumpPad ) )
+	{
+		StartParticleEffectOnEntity( jumpPad, GetParticleSystemIndex( FX_VEHICLE_LAUNCHPAD_LAUNCH ), FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
+		EmitSoundOnEntity_Predicted( jumpPad, "JumpPad_LaunchVehicle_3p" )
+	}
+
+	s_lastTimeDidJumpPadFX = timeNow
+}
+
+               
+
+bool function CanWeaponInspect( entity player, int activity )
+{
+	if ( HoverVehicle_PlayerIsDriving( player ) )
+		return false
+
+	return true
+}
+
+
+               
+               
+
+const string CMDNAME_VEHICLE_HORN = "ClientCallback_VehicleHorn"
+
+void function InitVehicleHorn()
+{
+	Remote_RegisterServerFunction( CMDNAME_VEHICLE_HORN )
+
+#if CLIENT
+	RegisterConCommandTriggeredCallback( "+scriptCommand5", OnPressHornButton )
+#endif          
+}
+
+#if SERVER
+                                   
+                                                         
+ 
+	                                    
+ 
+                                            
+                                                          
+ 
+	                         
+		      
+	                                                        
+	                          
+		      
+
+	                       
+	 
+		                                           
+			                                      
+		                                                                
+		                                        
+			      
+
+		                                        
+	 
+
+	  
+	                                                                                             
+
+	              
+	                                                                   
+
+	                                                  
+	 
+		          
+		                                                                                                            
+
+		        
+		 
+			                                                                                                                       
+			                    
+			 
+				                                                    
+				                       
+			 
+		 
+	 
+ 
+#endif          
+
+#if CLIENT
+void function OnPressHornButton( entity player )
+{
+	if ( !IsValid( player ) || !IsAlive( player ) )
+		return
+	if ( (player != GetLocalViewPlayer()) || (player != GetLocalClientPlayer()) )
+		return
+
+	if ( IsControllerModeActive() )
+	{
+		if ( TryOnscreenPromptFunction( player, "quickchat" ) )
+			return
+	}
+
+	if ( !HoverVehicle_PlayerIsDriving( player ) )
+		return
+	Remote_ServerCallFunction( CMDNAME_VEHICLE_HORN )
+}
+#endif          
+
+#if SERVER
+                                                                                                  
+ 
+	                                                          
+		                                                
+ 
+#endif

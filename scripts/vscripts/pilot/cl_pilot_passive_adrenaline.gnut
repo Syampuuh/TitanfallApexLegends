@@ -10,7 +10,7 @@ struct
 	int ScreenFxId
 } file
 
-//
+                                                                                                                                
 void function CLPassiveAdrenaline_Init()
 {
 	file.ScreenFxId = PrecacheParticleSystem( SMOKE_SCREEN_FX )
@@ -37,7 +37,7 @@ void function PassiveAdrenaline_StartVisualEffect( entity ent, int statusEffect,
 	CreatePassiveAdrenalineRUI()
 	thread PassiveAdrenaline_UpdatePlayerScreenColorCorrection( viewPlayer )
 
-	int fxHandle = StartParticleEffectOnEntityWithPos( viewPlayer, file.ScreenFxId, FX_PATTACH_ABSORIGIN_FOLLOW, -1, viewPlayer.EyePosition(), <0,0,0> )
+	int fxHandle = StartParticleEffectOnEntityWithPos( viewPlayer, file.ScreenFxId, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID, viewPlayer.EyePosition(), <0,0,0> )
 	EffectSetIsWithCockpit( fxHandle, true )
 
 	thread PassiveAdreneline_ScreenEffectThread( viewPlayer, fxHandle, statusEffect )
@@ -57,7 +57,7 @@ void function PassiveAdrenaline_StopVisualEffect( entity ent, int statusEffect, 
 
 void function CreatePassiveAdrenalineRUI()
 {
-	//
+	                                                       
 	var rui = CreateTransientCockpitRui( $"ui/passive_bangalore_triggered.rpak", HUD_Z_BASE )
 }
 
@@ -73,9 +73,6 @@ void function PassiveAdrenaline_UpdatePlayerScreenColorCorrection( entity player
 	OnThreadEnd(
 		function() : ( player )
 		{
-			//
-			//
-
 			ColorCorrection_SetWeight( file.colorCorrection, 0.0 )
 			ColorCorrection_SetExclusive( file.colorCorrection, false )
 		}
@@ -84,20 +81,16 @@ void function PassiveAdrenaline_UpdatePlayerScreenColorCorrection( entity player
 	ColorCorrection_SetExclusive( file.colorCorrection, true )
 	ColorCorrection_SetWeight( file.colorCorrection, 1.0 )
 
-	const FOV_SCALE = 1.2
-	const LERP_IN_TIME = 0.0125	//
+	const LERP_IN_TIME = 0.0125	                                                                     
 	float startTime = Time()
 
 	while ( true )
 	{
-		//
+		                                             
 		float weight = StatusEffect_GetSeverity( player, eStatusEffect.adrenaline_visuals )
-		//
+		                  
 		weight = GraphCapped( Time() - startTime, 0, LERP_IN_TIME, 0, weight )
 		ColorCorrection_SetWeight( file.colorCorrection, weight )
-
-		float fovScale = GraphCapped( weight, 0, 1, 1, FOV_SCALE )
-		//
 
 		WaitFrame()
 	}
@@ -122,7 +115,7 @@ void function PassiveAdreneline_ScreenEffectThread( entity viewPlayer, int fxHan
 	while( true )
 	{
 		float severity = StatusEffect_GetSeverity( viewPlayer, statusEffect )
-		//
+		                                                        
 
 		if ( !EffectDoesExist( fxHandle ) )
 			break

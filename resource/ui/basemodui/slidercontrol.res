@@ -4,6 +4,7 @@ Resource/UI/SliderControl.res
     {
         ControlName				RuiPanel
         tall					60
+        tall_nx_handheld		80 		[$NX]
         zpos					3
         visible					1
         enabled					1

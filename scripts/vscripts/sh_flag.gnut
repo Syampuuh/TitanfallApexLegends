@@ -24,13 +24,13 @@ global function FlagSetOnFlag
 global function FlagClearOnFlag
 global function GetTriggerEnabled
 
-#if(false)
+#if SERVER
+	                                     
 
-
-
-
-
-
+	      
+	 
+		                  
+	      
 #endif
 
 
@@ -41,20 +41,20 @@ struct
 
 void function Flags_Init()
 {
-	#if(DEV)
-		//
+	#if DEV
+		                         
 	#endif
 
-	#if(false)
-
-#endif
+	#if SERVER
+	                                                   
+	#endif
 
 	RegisterSignal( "deathflag" )
 }
 
 void function FlagInit( string msg, bool isSet = false )
 {
-	//
+	                                                 
 	if ( msg in shFile.flags )
 		return
 
@@ -67,9 +67,9 @@ void function FlagSet( string msg )
 {
 	Assert( msg in shFile.flags, "flag " + msg + " not initialized yet" )
 
-	#if(DEV)
-		//
-		//
+	#if DEV
+		                     
+		  	                                
 	#endif
 
 	__FlagSetValue( msg, true )
@@ -117,7 +117,7 @@ void function FlagToggle( string msg )
 	}
 }
 
-//
+                                                
 void function FlagWait( string msg )
 {
 		Assert( msg in shFile.flags, "flag " + msg + " not initialized yet" )
@@ -128,7 +128,7 @@ void function FlagWait( string msg )
 	}
 }
 
-//
+                                                
 void function FlagWaitAll( ... )
 {
 	array<string> args
@@ -148,7 +148,7 @@ void function FlagWaitAll( ... )
 
 		loop = false
 
-		//
+		                                                              
 		foreach ( i, msg in args )
 		{
 			if ( Flag( msg ) )
@@ -160,7 +160,7 @@ void function FlagWaitAll( ... )
 	}
 }
 
-//
+                                                
 void function FlagWaitWithTimeout( string flag, float timeout )
 {
 	string newFlag = "FlagWaitAny" + UniqueString()
@@ -190,7 +190,7 @@ void function __FlagWaitTime( float timeout, string newFlag )
 	FlagSet( newFlag )
 }
 
-//
+                                                
 void function FlagWaitAny( ... )
 {
 	string newFlag = "FlagWaitAny" + UniqueString()
@@ -210,7 +210,7 @@ void function FlagWaitAny( ... )
 	FlagWait( newFlag )
 }
 
-//
+                                                
 void function FlagWaitClear( string msg )
 {
 	Assert( msg in shFile.flags, "flag " + msg + " not initialized yet" )
@@ -221,7 +221,7 @@ void function FlagWaitClear( string msg )
 	}
 }
 
-//
+                                                
 void function FlagWaitClearAll( ... )
 {
 	array<string> args
@@ -245,7 +245,7 @@ void function FlagWaitClearAllArray( array<string> flags )
 
 		loop = false
 
-		//
+		                                                              
 		foreach ( flag in flags )
 		{
 			if ( !Flag( flag ) )
@@ -257,7 +257,7 @@ void function FlagWaitClearAllArray( array<string> flags )
 	}
 }
 
-//
+                                                
 void function FlagWaitClearAny( ... )
 {
 	string newFlag = "FlagWaitAny" + UniqueString()
@@ -277,7 +277,7 @@ void function FlagWaitClearAny( ... )
 	FlagWait( newFlag )
 }
 
-//
+                                                                       
 void function __FlagWaitAny( string msg, string newFlag )
 {
 	EndSignal( level, newFlag )
@@ -287,7 +287,7 @@ void function __FlagWaitAny( string msg, string newFlag )
 	FlagSet( newFlag )
 }
 
-//
+                                                                       
 void function __FlagWaitClearAny( string msg, string newFlag )
 {
 	EndSignal( level, newFlag )
@@ -304,11 +304,11 @@ void function __FlagSetValue( string msg, bool val )
 
 	shFile.flags[ msg ] = val
 
- 	#if(false)
+ 	#if SERVER
+	                                        
+	#endif
 
-#endif
-
-	//
+	                                                                         
 	Signal( level, msg )
 }
 
@@ -400,89 +400,89 @@ bool function GetTriggerEnabled( entity trigger )
 
 array<string> function GetFlagsFromField( entity ent, string field )
 {
-	return split( ent.kv[ field ], " " )
+	return split( ent.kv[ field ], WHITESPACE_CHARACTERS )
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-//
-
-
-
-
-//
-
-
-
-//
-
-//
-
-
-//
-
-
-
+#if SERVER
+                                               
+ 
+	                                     
+		      
+
+	                                    
+		      
+
+	                                        
+ 
+
+                                                      
+ 
+	                              
+	                                                                        
+	                                                                                
+
+	                                            
+	                
+	                
+	                   
+ 
+
+                                                 
+ 
+	                                
+
+	           
+	             
+	                       
+	 
+		                                                
+		                                            
+		                                              
+		                                                      
+	 
+	    
+	 
+		                                            
+		                                                 
+		                        
+	 
+	                                                                                             
+	                
+
+	                                     
+		                               
+
+	                                                                                         
+	                                       
+
+	                                                                                                                                      
+	                       
+		      
+
+	                                                                                                                                                                               
+	                                 
+	                                                                                                                                   
+		                                                      
+
+	                                                                                      
+	                                                      
+	                                                  
+
+	                                                                                                       
+
+	                                                                                
+	                                           
+	 
+		                                               
+		               
+	 
+ 
 #endif
 
 
 bool function FlagExists( string msg )
 {
-	//
+	                                                 
 	if ( msg in shFile.flags )
 		return true
 

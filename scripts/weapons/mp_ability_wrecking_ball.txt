@@ -1,0 +1,276 @@
+#base "_base_ability_ultimate.txt"
+
+WeaponData
+{
+	// General
+	"printname"   									"#WPN_WRECKING_BALL"
+	"shortprintname"   								"#WPN_WRECKING_BALL_SHORT"
+	"description" 									"#WPN_WRECKING_BALL_DESC"
+	"longdesc"										"#WPN_WRECKING_BALL_LONGDESC"
+
+	"menu_icon"										"rui/hud/ultimate_icons/ultimate_maggie"
+	"hud_icon"										"rui/hud/ultimate_icons/ultimate_maggie"
+
+	"offhand_active_slot"                           "mainHand"
+	"offhand_default_inventory_slot"				"1"
+	"offhand_keep_primary_in_hand"					"0"
+	"offhand_holster_primary"						"1"
+    "hide_holstered_sidearm_when_active"			"1"
+    "offhand_interupts_weapon_anims"				"1"
+    "offhand_cancelled_by_melee"					"1"
+
+    "OnWeaponAttemptOffhandSwitch"                  "OnWeaponAttemptOffhandSwitch_ability_WreckingBall"
+    "OnWeaponTossPrep"								"OnWeaponTossPrep_WeaponWreckingBall"
+    "OnWeaponTossReleaseAnimEvent"					"OnWeaponTossReleaseAnimEvent_WeaponWreckingBall"
+    "OnProjectileCollision"							"OnProjectileCollision_ability_WreckingBall"
+    "OnWeaponRegenEnd"                              "OnWeaponRegenEndGeneric"
+
+	// Character-Specific
+    "fire_in_real_world_while_phased"				"1"
+    "trophy_system_ignores"                         "friendlyOnly"
+
+	// Models
+	"viewmodel"										"mdl/weapons/madmaggie_ultimate_ball/ptpov_madmaggie_ultimate_ball.rmdl" 
+    "playermodel" 									"mdl/weapons/madmaggie_ultimate_ball/w_madmaggie_ultimate_ball.rmdl"  //"mdl/weapons/gibraltar_bubbleshield/w_gibraltar_bubbleshield.rmdl"
+	"projectilemodel" 								"mdl/props/madmaggie_ultimate_ball/madmaggie_ultimate_ball.rmdl" //madmaggie_ultimate_ball_projectile
+
+	"bone_merge_world_model"						"1"
+
+	"fire_mode"   									"offhand"
+    "fire_rate"   									"10.0"
+    "deploy_time" 									"1.0"  // Not sure if this is valid for toss weapons - adding "toss_pullout_time"
+    "zoom_effects"                                  "0"
+	"allow_empty_fire"								"0"
+	"damage_type"                                   "none" // Necessary, otherwise it defaults to "bullet" which makes code fire something. DUMB I HATE THIS DUMB DUMB DUMB
+	"should_destroy_doors"							"1"
+    "toss_pullout_time"								"0.15"  // .01 Timing allows for quick release throw.  Uses animation transition for longer pullout animation. 0.13
+
+	//"raise_time"                                    "1.7"  //"0.2"
+    //"raise_from_sprint_time"	                    "1.7" //"0.15"
+
+	// Behavior - Firing
+	"is_toss_weapon"								"1"
+	"grenade_inherit_owner_velocity"				"1"
+	"grenade_disc_throw"							"0"
+	"projectile_adjust_to_gun_barrel"				"0"
+    "projectile_adjust_to_hand"						"1"
+
+    "projectile_launch_speed"                       "600"
+    "projectile_inherit_owner_velocity_scale"       "0.2"
+
+	// Animation
+	"fire_anim_rate"  								"1.0"
+
+	// Ammo - Regen
+	"regen_ammo_refill_rate"						"1"
+	"regen_ammo_refill_start_delay"					"0.1"
+
+    // Reload
+    "reload_enabled"  								"0"
+    "allow_empty_click"   							"0"                                                                 //? not sure, but NOT the error sound that plays when an ability is still on CD
+    "empty_reload_only"   							"0"
+
+	// Behavior - Aim Assist
+    "aimassist_disable_hipfire"                     "1"
+    "aimassist_disable_ads"                         "1"
+
+	// Effects
+	//"bounce_effect_table"							"PROTO_mm_ball" // For Sound, this is the first hit only. -AK
+	//"impact_effect_table"							"PROTO_mm_ball"  // For Sound, removing this made no difference. -AK
+
+	// Sounds
+	//"sound_throw_1p"								"Maggie_Ult_Throw_1p"  // This is tagged to animation sequesnces - AK
+	"sound_deploy_1p"								"Maggie_Ult_Deploy_1p"
+	"idle_sound_player_1p"							"Maggie_Ult_Idle_1p"
+	"sound_throw_3p"								"Maggie_Ult_Throw_3p"
+	"sound_deploy_3p"								"Maggie_Ult_Deploy_3p"
+	"sound_grenade_projectile"						""
+	"sound_dryfire"									"Survival_UI_Ability_NotReady"
+
+    // Ammo
+    "ammo_clip_size"   								"90"                                                               //how much ammo is in a clip of the weapon
+    "ammo_default_total"							"0"                                                                 //? how much ammo comes with the weapon in total, clip + "stockpile". Doesn't seem to do anything without "uses_ammo_pool" 0
+    "ammo_stockpile_max"							"90"                                                               //how much ammo can be held in "stockpile", seems to be the place where Red (crated) weapons have their ammo reserves. Otherwise weapons seem to use "uses_ammo_pool" and "ammo_pool_type" for shared, held ammo normal to Apex. See mp_weapon_mastiff as an example.
+    "ammo_display"									"count"                                                             //? either "count" or "bar"
+    "ammo_min_to_fire"								"90"                                                               //? minimum ammont of ammo in the clip in order to fire?
+    "ammo_per_shot"									"90"                                                               //ammo spent on activation
+    "ammo_no_remove_from_stockpile"					"0"                                                                 //? appears to define whether or not reloading drains ammo from the stockpile to put into the clip. With this set to 1, reserve ammo is infinite, Overwatch-style. Need to ask mayampolsky about this.
+	"cooldown_type"                                 "ammo_instant"                                                      //? either "ammo_instant" or "vortex_drain"
+
+	// Grenade
+    "show_grenade_indicator"						"1"
+	"grenade_arc_indicator_show_from_hip"			"1"
+    "grenade_arc_indicator_bounce_count"			"1"
+    "grenade_arc_indicator_effect"					"P_mm_ult_arc"
+    "grenade_arc_indicator_effect_first"			"P_mm_ult_arc"
+    "grenade_arc_impact_indicator_effect"			"P_mm_ult_arc_end"
+    "grenade_touch_triggers_on_impact"				"1"
+	"max_cook_time"									"-1"
+    "grenade_fuse_time"								"0"
+    "start_fuse_on_launch"                          "1"
+    "grenade_ignition_time"							"0.0"
+    "grenade_hull_mins"                             "-16.0 -16.0 -16.0"
+    "grenade_hull_maxs"                             "16.0 16.0 16.0"
+	"grenade_view_launch_offset"					"-5.0 7.0 -10.0" //"-5.0 10.0 0.0"
+	// Rumble
+	"fire_rumble"									"rumble_pistol_heavy"
+
+	// Damage - need this in order to prevent damage errors?
+    "damage_type" 									"burn"
+    "damage_near_distance"							"128"
+    "damage_far_distance" 							"128"
+    "damage_near_value"   							"0"
+    "damage_far_value"								"0"
+    "damage_near_value_titanarmor"					"0"
+    "damage_far_value_titanarmor" 					"0"
+    "damage_flags"									"DF_RAGDOLL | DF_EXPLOSION"
+	
+	"dof_nearDepthStart"							"0.0"
+	"dof_nearDepthEnd"								"0.0"
+	
+	"projectile_launch_pitch_offset"				"25"
+//	"projectile_first_person_offset_fraction"		"1"
+
+
+	// Bob
+	"bob_cycle_time"  								"0.4"
+	"bob_vert_dist"   								"0.19"
+	"bob_horz_dist"   								"0.1"
+	"bob_max_speed"   								"150"
+	//"bob_pitch"   									"0.75"
+	//"bob_yaw" 										"-1.7"
+	//"bob_roll"										"1.2"
+
+	// Bob zoomed
+	"bob_cycle_time_zoomed"  								"0.4"
+	"bob_vert_dist_zoomed"   								"0.19"
+	"bob_horz_dist_zoomed"   								"0.1"
+	"bob_max_speed_zoomed"   								"150"
+
+	// View Drift
+	"viewdrift_hipfire_stand_scale_pitch" 			"0.325"
+	"viewdrift_hipfire_crouch_scale_pitch"			"0.275"
+	"viewdrift_hipfire_air_scale_pitch"   			"0.5"
+	"viewdrift_hipfire_stand_scale_yaw"   			"0.12"
+	"viewdrift_hipfire_crouch_scale_yaw"  			"0.10"
+	"viewdrift_hipfire_air_scale_yaw" 				"0.22"
+	"viewdrift_hipfire_speed_pitch"   				"0.6"
+	"viewdrift_hipfire_speed_yaw" 					"1.22"
+
+	// Rumble
+	"rumble"  										"3"
+
+	// Sway
+	"sway_rotate_attach"  							"jx_c_pov"
+	"sway_min_x"  									"-0.3"
+	"sway_min_y"  									"-0.5"
+	"sway_min_z"  									"-0.5"
+	"sway_max_x"  									"0.3"
+	"sway_max_y"  									"0.5"
+	"sway_max_z"  									"0.1"
+	"sway_min_pitch"  								"-3"
+	"sway_min_yaw"									"-3.5"
+	"sway_min_roll"   								"-1"
+	"sway_max_pitch"  								"3"
+	"sway_max_yaw"									"3.5"
+	"sway_max_roll"   								"2"
+	"sway_translate_gain" 							"4"
+	"sway_rotate_gain"								"7"
+	"sway_move_forward_translate_x"   				"0"
+	"sway_move_forward_translate_z"   				"-0.5"
+	"sway_move_back_translate_x"  					"-2"
+	"sway_move_back_translate_z"  					"-1"
+	"sway_move_left_translate_y"  					"-1"
+	"sway_move_left_translate_z"  					"-0.5"
+	"sway_move_left_rotate_roll"  					"-1"
+	"sway_move_right_translate_y" 					"1"
+	"sway_move_right_translate_z" 					"-0.5"
+	"sway_move_right_rotate_roll" 					"2"
+	"sway_move_up_translate_z"						"-1"
+	"sway_move_down_translate_z"  					"1"
+	"sway_turn_left_rotate_yaw"   					"-2"
+	"sway_turn_right_rotate_yaw"  					"2"
+	"sway_turn_up_rotate_pitch"   					"2"
+	"sway_turn_down_rotate_pitch" 					"-2"
+	"sway_turn_angle_factor"  						"-0.5"
+	"sway_turn_origin_factor" 						"0"
+	"sway_turn_angle_factor_zoomed"   				"0"
+	"sway_turn_origin_factor_zoomed"  				"0.05"
+	"sway_move_angle_factor"  						"0.5"
+	"sway_move_origin_factor" 						"0.5"
+	"sway_move_angle_factor_zoomed"   				"0"
+	"sway_move_origin_factor_zoomed"  				"0.03"
+	"sway_gain"   									"15.0"
+
+	"sway_rotate_attach_zoomed"  							"jx_c_pov"
+	"sway_min_x_zoomed"  									"-0.3"
+	"sway_min_y_zoomed"  									"-0.5"
+	"sway_min_z_zoomed"  									"-0.5"
+	"sway_max_x_zoomed"  									"0.3"
+	"sway_max_y_zoomed"  									"0.5"
+	"sway_max_z_zoomed"  									"0.1"
+	"sway_min_pitch_zoomed"  								"-3"
+	"sway_min_yaw_zoomed"									"-3.5"
+	"sway_min_roll_zoomed"   								"-1"
+	"sway_max_pitch_zoomed"  								"3"
+	"sway_max_yaw_zoomed"									"3.5"
+	"sway_max_roll_zoomed"  								"2"
+	"sway_translate_gain_zoomed" 							"4"
+	"sway_rotate_gain_zoomed"								"7"
+	"sway_move_forward_translate_x_zoomed"   				"0"
+	"sway_move_forward_translate_z_zoomed"   				"-0.5"
+	"sway_move_back_translate_x_zoomed"  					"-2"
+	"sway_move_back_translate_z_zoomed"  					"-1"
+	"sway_move_left_translate_y_zoomed"  					"-1"
+	"sway_move_left_translate_z_zoomed"  					"-0.5"
+	"sway_move_left_rotate_roll_zoomed"  					"-1"
+	"sway_move_right_translate_y_zoomed" 					"1"
+	"sway_move_right_translate_z_zoomed" 					"-0.5"
+	"sway_move_right_rotate_roll_zoomed" 					"2"
+	"sway_move_up_translate_z_zoomed"						"-1"
+	"sway_move_down_translate_z_zoomed"  					"1"
+	"sway_turn_left_rotate_yaw_zoomed"   					"-2"
+	"sway_turn_right_rotate_yaw_zoomed"  					"2"
+	"sway_turn_up_rotate_pitch_zoomed"   					"2"
+	"sway_turn_down_rotate_pitch_zoomed" 					"-2"
+	"sway_turn_angle_factor_zoomed"  						"-0.5"
+	"sway_turn_origin_factor_zoomed" 						"0"
+	"sway_move_angle_factor_zoomed"  						"0.5"
+	"sway_move_origin_factor_zoomed" 						"0.5"
+	"sway_gain_zoomed"   									"15.0"
+	"sway_turn_angle_factor_zoomed"   				"0"
+	"sway_turn_origin_factor_zoomed"  				"0.05"
+	"sway_move_angle_factor_zoomed"   				"0"
+	"sway_move_origin_factor_zoomed"  				"0.03"
+
+
+	Mods
+	{
+	    survival_armor_cooldown_mod
+        {
+            "regen_ammo_refill_rate"    "*1.25"
+        }
+	}
+
+	"ordnance_crosshair_always_on_start_index"	"0"
+
+	RUI_CrosshairData
+	{
+		DefaultArgs
+		{
+			crosshairMovementX          crosshair_movement_x
+		    crosshairMovementY          crosshair_movement_y
+		}
+
+		Crosshair_2
+		{
+			"ui"						"ui/crosshair_tactical"
+			Args
+			{
+			    regenRate               "eWeaponVar.regen_ammo_refill_rate"
+			    ammoFrac                "progress_weapon_clip_ammo_frac"
+			    dryfireTime             "weapon_latest_dryfire_time"
+			}
+		}
+	}
+}

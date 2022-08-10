@@ -150,7 +150,10 @@ Scheme
 		RichText.SelectedTextColor			OffWhite
 		RichText.SelectedBgColor			LightBlue
 		RichText.InsetX						20
-		RichText.InsetY						0
+		RichText.InsetY						0		[!$NX && !$NX_UI_PC]
+		RichText.InsetY						15		[$NX || $NX_UI_PC]
+		RichText.JoystickDeadZone		    0.15
+
 
 		Chat.FriendlyFontColor				"55 233 255 255"
 		Chat.EnemyFontColor					"230 83 14 255"
@@ -159,6 +162,7 @@ Scheme
 		Chat.RuiAsianFont					DefaultAsianFont
 		Chat.RuiFontHeight					28
 		Chat.RuiMinFontHeight				16
+		Chat.RuiAsianBoxHeight				36
 
 		ScrollBar.Wide						16
 
@@ -229,7 +233,6 @@ Scheme
 		Logo.Width							240
 		Logo.Height							60
 
-		FooterPanel.ButtonFont				GameUIButtonsMini
 		FooterPanel.ButtonFontRui 			DefaultRegularFont
 		FooterPanel.ButtonFontHeightRui		40
 		FooterPanel.TextFont				DialogButton
@@ -268,7 +271,6 @@ Scheme
 		Dialog.PinFromLeft					75	[$GAMECONSOLE && (!$GAMECONSOLEWIDE || $ANAMORPHIC)]
 		Dialog.PinFromLeft					100	[!$GAMECONSOLE && $WIN32WIDE]
 		Dialog.PinFromLeft					75	[!$GAMECONSOLE && !$WIN32WIDE]
-		Dialog.ButtonFont					GameUIButtonsMini
 
 		// Other properties defined in SliderControl.res
 		SliderControl.InsetX				-68
@@ -279,6 +281,17 @@ Scheme
 		SliderControl.ForegroundFocusColor	"255 255 255 0"
 		SliderControl.BackgroundFocusColor	"0 0 0 0"
         SliderControl.CursorPriority        2
+
+        // Other properties defined in ColorSlider.res
+        ColorSlider.InsetX				    -30
+        ColorSlider.MarkColor				"105 118 132 255"
+        ColorSlider.MarkFocusColor		    "105 118 132 255"
+        ColorSlider.ForegroundColor		    "232 232 232 0"
+        ColorSlider.BackgroundColor	       	"0 0 0 0"
+        ColorSlider.ForegroundFocusColor	"255 255 255 0"
+        ColorSlider.BackgroundFocusColor	"0 0 0 0"
+        ColorSlider.CursorPriority          2
+
 
 		Slider.NobColor						"108 108 108 255"
 		Slider.TextColor					"127 140 127 255"
@@ -332,7 +345,7 @@ Scheme
 		// Special case properties for only a few menus
 		HybridButton.LockedColor					Disabled
 		HybridButton.BorderColor 					"0 0 0 255"
-		HybridButton.RuiFont 						MetronicProRegularFont
+		HybridButton.RuiFont 						DefaultRegularFont
 		HybridButton.RuiFontHeight 					25
 
 		RuiLabel.CursorPriority						-1
@@ -355,7 +368,8 @@ Scheme
 		//MainMenuButton.Style						1   // BUTTON_MAINMENU - Obsolete
 
 		SliderButton.Style					    	2   // BUTTON_LEFTINDIALOG - inside a dialog, left aligned, optional RHS component anchored to right edge. Used primarily in slider controls
-		SliderButton.CursorHeight			    	60
+		SliderButton.CursorHeight			    	60		[!$NX && !$NX_UI_PC]
+		SliderButton.CursorHeight			    	80 		[$NX || $NX_UI_PC]
 		SliderButton.TextInsetX				    	12
 		SliderButton.TextInsetY					    4
         SliderButton.CursorPriority                 1
@@ -377,113 +391,21 @@ Scheme
 		//MixedCaseDefaultButton.Style				9   // BUTTON_MIXEDCASEDEFAULT - not used
 		//BitmapButton.Style						10  // BUTTON_BITMAP - not used or useful
 
-		RuiButton.Style                             0
-		RuiButton.CursorHeight		                0
-		RuiButton.TextColor                         Blank
-		RuiButton.LockedColor                       Blank
-		RuiButton.FocusColor                        Blank
-		RuiButton.SelectedColor                     Blank
-		RuiButton.DisabledColor                     Blank
-		RuiButton.FocusDisabledColor                Blank
-
-		LoadoutButton.Style							0
-		LoadoutButton.CursorHeight					40
-		LoadoutButton.TextInsetX					12
-		LoadoutButton.TextInsetY					3
-
-		CompactButton.Style							0
-		CompactButton.CursorHeight					40
-		CompactButton.TextInsetX					79
-		CompactButton.TextInsetY					4
-
 		SmallButton.Style							0
 		SmallButton.CursorHeight					40
 		SmallButton.TextInsetX						12
 		SmallButton.TextInsetY						4
 
-		RuiSmallButton.Style						0
-		RuiSmallButton.CursorHeight					40
-		RuiSmallButton.TextInsetX					12
-		RuiSmallButton.TextInsetY					4
-		RuiSmallButton.TextColor                    Blank
-		RuiSmallButton.LockedColor                  Blank
-		RuiSmallButton.FocusColor					Blank
-		RuiSmallButton.SelectedColor				Blank
-		RuiSmallButton.DisabledColor				Blank
-		RuiSmallButton.FocusDisabledColor			Blank
-
 		RuiFooterButton.Style						0
 		RuiFooterButton.CursorHeight				36
-		RuiFooterButton.TextInsetX					12 // ?
-		RuiFooterButton.TextInsetY					4 // ?
+		RuiFooterButton.TextInsetX					0
+		RuiFooterButton.TextInsetY					0
 		RuiFooterButton.TextColor                   Blank
 		RuiFooterButton.LockedColor                 Blank
 		RuiFooterButton.FocusColor					Blank
 		RuiFooterButton.SelectedColor				Blank
 		RuiFooterButton.DisabledColor				Blank
 		RuiFooterButton.FocusDisabledColor			Blank
-
-		ComboButton.Style							0
-		ComboButton.CursorHeight					40
-		ComboButton.TextInsetY						50
-//		ComboButton.TextColor                       "160 160 160 255"
-//		ComboButton.FocusColor                      "255 255 255 255"
-
-		LargeButton.Style							0
-		LargeButton.Font							Default_44
-		LargeButton.TextInsetX						12
-		LargeButton.TextInsetY						0
-		LargeButton.CursorHeight					56
-
-		CenterButton.Style 							0
-		CenterButton.TextInsetX 					0
-		CenterButton.TextInsetY						7
-
-		SubmenuButton.Style 						0
-		SubmenuButton.TextInsetX					79
-		SubmenuButton.TextInsetY					7
-
-		KeyBindingsButton.Style 					0
-		KeyBindingsButton.TextInsetX				11
-        KeyBindingsButton.TextInsetY				0
-		KeyBindingsButton.CursorHeight				36
-
-		StatsLevelListButton.Style 					0
-		StatsLevelListButton.AllCaps				1
-		StatsLevelListButton.CursorHeight			135
-		StatsLevelListButton.TextColor 				"204 234 255 255"
-		StatsLevelListButton.FocusColor 			"0 0 0 255"
-		StatsLevelListButton.SelectedColor 			"255 255 255 255"
-		StatsLevelListButton.DisabledColor 			"204 234 255 255"
-		StatsLevelListButton.FocusDisabledColor		"204 234 255 255"
-		StatsLevelListButton.TextInsetX				79
-		StatsLevelListButton.TextInsetY				7
-
-		LobbyPlayerButton.Style						0
-		LobbyPlayerButton.Font						Default_27
-		LobbyPlayerButton.TextInsetX				48
-		LobbyPlayerButton.TextInsetY				2
-		LobbyPlayerButton.CursorHeight				37
-		LobbyPlayerButton.SelectedColor				"210 170 0 255"
-
-		ChatroomPlayerLook.Style					0
-		ChatroomPlayerLook.Font						Default_27
-		ChatroomPlayerLook.TextInsetX				32
-		ChatroomPlayerLook.TextInsetY				-2
-		ChatroomPlayerLook.CursorHeight				27
-		ChatroomPlayerLook.SelectedColor			"210 170 0 255"
-
-		CommunityItemLook.Style						0
-		CommunityItemLook.Font						Default_27
-		CommunityItemLook.TextInsetX				32
-		CommunityItemLook.TextInsetY				-2
-		CommunityItemLook.CursorHeight				27
-		CommunityItemLook.SelectedColor				"210 170 0 255"
-
-		MapButton.Style								0
-		MapButton.CursorHeight						89
-		MapButton.TextInsetX						79
-		MapButton.TextInsetY						7
 
 		PCFooterButton.Style						0
 		PCFooterButton.CursorHeight					36
@@ -501,15 +423,6 @@ Scheme
 
 		Test2Button.Style 					    	0
 		Test2Button.CursorHeight			    	96
-
-		CoopStoreButton.Style 						0
-		CoopStoreButton.CursorHeight				56
-		CoopStoreButton.TextInsetX					79
-		CoopStoreButton.TextInsetY					7
-
-		// used by MenuArrowButton
-	 	MenuArrowButtonStyle.Style					0
-	 	MenuArrowButtonStyle.CursorHeight			90
 	}
 
 	//////////////////////// CRITICAL FONTS ////////////////////////////////
@@ -567,14 +480,6 @@ Scheme
 		}
 	}
 
-	//////////////////////// BITMAP FONT FILES /////////////////////////////
-	// Bitmap Fonts are ****VERY*** expensive static memory resources so they are purposely sparse
-	BitmapFontFiles
-	{
-		ControllerButtons		"materials/vgui/fonts/controller_buttons.vbf"			[$DURANGO || $WINDOWS]
-		ControllerButtons		"materials/vgui/fonts/controller_buttons_ps4.vbf"		[$PS4]
-	}
-
 	//////////////////////// FONTS /////////////////////////////
 	// Font Options
 	// tall: 		The font size. At 1080, character glyphs will be this many pixels tall including linespace above and below.
@@ -625,28 +530,6 @@ Scheme
 				name		Default
 				tall		12
 				weight		1000
-			}
-		}
-
-		DefaultRegularFont_28
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultRegularFont
-				tall		28
-				antialias	1
-			}
-		}
-
-		TitleRegularFont_28
-		{
-			isproportional	only
-			"1"
-			{
-				name		TitleRegularFont
-				tall		28
-				antialias	1
 			}
 		}
 
@@ -845,39 +728,6 @@ Scheme
 			}
 		}
 
-		GameUIButtons
-		{
-			"1"
-			{
-				bitmap		1
-				name		ControllerButtons
-				scalex		0.4
-				scaley		0.4
-			}
-		}
-
-		GameUIButtonsMini
-		{
-			"1"
-			{
-				bitmap		1
-				name		ControllerButtons
-				scalex		0.74
-				scaley		0.74
-			}
-		}
-
-		GameUIButtonsTiny
-		{
-			"1"
-			{
-				bitmap		1
-				name		ControllerButtons
-				scalex		0.56
-				scaley		0.56
-			}
-		}
-
 		// the title heading for a primary menu
 		DialogTitle
 		{
@@ -971,17 +821,6 @@ Scheme
 			}
 		}
 
-		InstructorButtons
-		{
-			"1"
-			{
-				bitmap		1
-				name		ControllerButtons
-				scalex		0.4
-				scaley		0.4
-			}
-		}
-
 		InstructorKeyBindings
 		{
 			isproportional	only
@@ -1028,49 +867,6 @@ Scheme
 			}
 		}
 
-		Default_16
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		16
-				antialias	1
-			}
-		}
-
-		Default_17
-		{
-			isproportional	only
-			"1"
-			{
-				name 		Default
-				tall		17
-				antialias	1
-			}
-		}
-		Default_17_Italic
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		17
-				antialias 	1
-				italic		1
-			}
-		}
-
-		Default_19
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		19
-				antialias	1
-			}
-		}
 		Default_19_DropShadow
 		{
 			isproportional	only
@@ -1104,50 +900,6 @@ Scheme
 				shadowglow	7
 			}
 		}
-		Default_21_Outline
-		{
-			isproportional	only
-			"1"
-			{
-				name 		Default
-				tall		21
-				antialias	1
-				outline 	1
-			}
-		}
-		Default_21_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		21
-				antialias	1
-				dropshadow	1
-			}
-		}
-		Default_21_Italic
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		21
-				antialias 	1
-				italic		1
-			}
-		}
-
-		Default_22
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		22
-				antialias	1
-			}
-		}
 
 		Default_23
 		{
@@ -1157,17 +909,6 @@ Scheme
 				name		Default
 				tall		23
 				antialias	1
-			}
-		}
-		Default_23_Outline
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		23
-				antialias	1
-				outline 	1
 			}
 		}
 
@@ -1192,17 +933,6 @@ Scheme
 				shadowglow	4
 			}
 		}
-		Default_27_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		27
-				antialias	1
-				dropshadow 	1
-			}
-		}
 
 		Default_28
 		{
@@ -1225,50 +955,7 @@ Scheme
 				shadowglow	4
 			}
 		}
-		Default_28_Outline
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		28
-				antialias	1
-				outline 	1
-			}
-		}
-		Default_28_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		28
-				antialias	1
-				dropshadow	1
-			}
-		}
 
-		Default_29
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		29
-				antialias	1
-			}
-		}
-
-		Default_31
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		31
-				antialias	1
-			}
-		}
 		Default_31_ShadowGlow
 		{
 			isproportional	only
@@ -1278,17 +965,6 @@ Scheme
 				tall		31
 				antialias	1
 				shadowglow	7
-			}
-		}
-		Default_31_Outline
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		31
-				antialias	1
-				outline 	1
 			}
 		}
 
@@ -1314,94 +990,6 @@ Scheme
 			}
 		}
 
-		Default_38
-		{
-			isproportional	only
-			"1"
-			{
-				name 		Default
-				tall		38
-				antialias	1
-			}
-		}
-
-		Default_39
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		39
-				antialias	1
-			}
-		}
-
-		Default_41
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		41
-				antialias	1
-			}
-		}
-
-		Default_43
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		43
-				antialias	1
-			}
-		}
-		Default_43_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		43
-				antialias	1
-				dropshadow	1
-			}
-		}
-
-		Default_44
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		44
-				antialias	1
-			}
-		}
-		Default_44_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		44
-				antialias	1
-				dropshadow	1
-			}
-		}
-
-		Default_49
-		{
-			isproportional	only
-			"1"
-			{
-				name 		Default
-				tall		49
-				antialias	1
-			}
-		}
-
 		Default_59
 		{
 			isproportional	only
@@ -1413,74 +1001,7 @@ Scheme
 			}
 		}
 
-		Default_69_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		69
-				antialias 	1
-				dropshadow	1
-			}
-		}
-
 		//////////////////////////////////// Default bold font variations ////////////////////////////////////
-
-		DefaultBold_17
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		17
-				antialias	1
-			}
-		}
-
-		DefaultBold_21
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		21
-				antialias	1
-			}
-		}
-
-		DefaultBold_22
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		22
-				antialias	1
-			}
-		}
-
-		DefaultBold_23
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		23
-				antialias	1
-			}
-		}
-		DefaultBold_23_Outline
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		23
-				antialias	1
-				outline 	1
-			}
-		}
 
 		DefaultBold_27_DropShadow
 		{
@@ -1505,39 +1026,6 @@ Scheme
 			}
 		}
 
-		DefaultBold_33
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		33
-				antialias	1
-			}
-		}
-
-		DefaultBold_34
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		34
-				antialias 	1
-			}
-		}
-
-		DefaultBold_38
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		38
-				antialias	1
-			}
-		}
-
 		DefaultBold_41
 		{
 			isproportional	only
@@ -1546,95 +1034,6 @@ Scheme
 				name		DefaultBold
 				tall		41
 				antialias	1
-			}
-		}
-
-		DefaultBold_43
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		43
-				antialias	1
-			}
-		}
-
-		DefaultBold_44
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		44
-				antialias	1
-			}
-		}
-		DefaultBold_44_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		44
-				antialias 	1
-				dropshadow	1
-			}
-		}
-
-		DefaultBold_49
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		49
-				antialias	1
-			}
-		}
-
-		DefaultBold_51
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		51
-				antialias	1
-			}
-		}
-
-		DefaultBold_51_Outline
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		51
-				antialias	1
-				outline 	1
-			}
-		}
-
-		DefaultBold_53
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		53
-				antialias	1
-			}
-		}
-		DefaultBold_53_DropShadow
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		53
-				antialias	1
-				dropshadow 	1
 			}
 		}
 
@@ -1649,18 +1048,6 @@ Scheme
 			}
 		}
 
-		DefaultBold_65_ShadowGlow
-		{
-			isproportional	only
-			"1"
-			{
-				name		DefaultBold
-				tall		65
-				antialias	1
-				shadowglow	7
-			}
-		}
-
 		DefaultBold_80
 		{
 			isproportional	only
@@ -1668,45 +1055,6 @@ Scheme
 			{
 				name		DefaultBold
 				tall		80
-				antialias	1
-			}
-		}
-
-		//////////////////////////////////// Titanfall font variations ////////////////////////////////////
-
-		Titanfall_67
-		{
-			isproportional	only
-			"1"
-			{
-				name 		Titanfall
-				tall		67
-				antialias	1
-			}
-		}
-
-		//////////////////////////////////// Special-case definitions ////////////////////////////////////
-
-		LoadScreenMapDesc
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		28 [!$JAPANESE]
-				tall		20 [$JAPANESE]
-				antialias	1
-			}
-		}
-
-		PlaylistHeaderFont
-		{
-			isproportional	only
-			"1"
-			{
-				name		Default
-				tall		43 [!$JAPANESE]
-				tall		30 [$JAPANESE]
 				antialias	1
 			}
 		}
@@ -2258,111 +1606,6 @@ Scheme
 			chatEntryBgColorFocused	"24 27 30 200"
 		}
 
-		CreditsJobTitle
-		{
-			ControlName				Label
-			xpos					c-686
-			ypos					0
-			wide					300
-			tall					45
-			textAlignment			"east"
-			//bgcolor_override		"60 60 60 255"
-			fgcolor_override		"160 224 250 255"
-			font					Default_28
-			visible 				0
-			labelText				"Title"
-		}
-
-		CreditsName
-		{
-			ControlName				Label
-			xpos					22
-			wide					674
-			tall					45
-			textAlignment			"west"
-			//bgcolor_override		"60 60 100 255"
-			font					Default_28
-			pin_corner_to_sibling	TOP_LEFT
-			pin_to_sibling_corner	TOP_RIGHT
-			visible 				0
-			labelText				"First Last"
-		}
-
-		CreditsCentered
-		{
-			ControlName				Label
-			xpos					c-674
-			wide					1349
-			tall					45
-			textAlignment			center
-			//bgcolor_override		"60 60 100 255"
-			font					Default_28
-			visible 				0
-			labelText				"First Last"
-		}
-
-		CreditsDepartment
-		{
-			ControlName				Label
-			xpos					c-461
-			ypos					0
-			zpos					100
-			wide					922
-			tall					67
-			textAlignment			"center"
-			//bgcolor_override		"100 60 60 255"
-			fgcolor_override		"255 180 75 255"
-			font					DefaultBold_34
-			visible 				0
-			labelText				"Department"
-		}
-
-		CreditsDepartmentScan
-		{
-			ControlName				ImagePanel
-			ypos 					27
-			zpos					90
-			wide					922
-			tall					67
-			image					"vgui/HUD/flare_announcement"
-			visible					0
-			scaleImage				1
-			pin_corner_to_sibling	CENTER
-			pin_to_sibling_corner	CENTER
-		}
-
-		EndMenuCongratsLine
-		{
-			ControlName				Label
-			xpos					0
-			ypos					0
-			wide					600
-			tall					30
-			textAlignment			"west"
-			fgcolor_override		"160 224 250 255"
-			//fgcolor_override		"255 180 75 255"
-			//bgcolor_override		"100 60 60 100"
-			font					Default_17
-			visible 				0
-		}
-
-		EndMenuCongratsLineShadow
-		{
-			ControlName				Label
-			xpos					-2
-			ypos					-2
-			zpos 					-1
-			wide					600
-			tall					30
-			textAlignment			"west"
-			fgcolor_override		"40 40 40 150"
-			font					Default_17
-			visible 				0
-
-			pin_corner_to_sibling	TOP_LEFT
-			pin_to_sibling_corner	TOP_LEFT
-		}
-
 		DefaultButton
 		{
 			wide					674
@@ -2377,59 +1620,6 @@ Scheme
 			childGroupNew			DefaultButtonNewGroup
 		}
 
-		CompactButton
-		{
-			wide					674
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					CompactButton
-			childGroupNormal		CompactButtonNormalGroup
-			childGroupFocused		CompactButtonFocusGroup
-			childGroupLocked		CompactButtonLockedGroup
-			childGroupNew			CompactButtonNewGroup
-			childGroupSelected		CompactButtonSelectedGroup
-		}
-
-		SmallButton
-		{
-			wide					540
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					SmallButton
-			childGroupNormal		SmallButtonNormalGroup
-			childGroupFocused		SmallButtonFocusGroup
-			childGroupSelected		SmallButtonSelectedGroup
-			childGroupLocked        SmallButtonLockedGroup
-		}
-
-		SpotlightButtonLarge
-		{
-			wide					540
-			tall					254
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/spotlight_button_large.rpak"
-			labelText				""
-			style					RuiButton
-		}
-
-		SpotlightButtonSmall
-		{
-			wide					267
-			tall					124
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/spotlight_button_small.rpak"
-			labelText				""
-			style	                RuiButton
-		}
-
 		RuiSmallButton
 		{
 			wide					540
@@ -2442,253 +1632,27 @@ Scheme
 			style					SmallButton
 		}
 
-		RuiInboxButton
+		RuiDevMenuButton
 		{
-			wide					660
-			tall					68
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/menu_inbox_button.rpak"
-			labelText				""
-			style					RuiButton
-		}
-
-		RuiKNBSubjectButton
-		{
-			wide					540
-			tall					48
-			zpos					3
-			visible					1
-			enabled					1
-            rui						"ui/knb_subject_button.rpak"
-			labelText				""
-			style					RuiButton
-		}
-
-		RuiMixtapeChecklistButton
-		{
-			wide					620
-			tall					60
-			zpos					3
-			visible					1
-			enabled					1
-            rui						"ui/mixtape_checklist_button.rpak"
-			labelText				""
-			style					RuiButton
-		}
-
-		RuiMixtapeChecklistIconButton
-		{
-			wide					96
-			tall					120
-			zpos					3
-			visible					1
-			enabled					1
-            rui						"ui/mixtape_checklist_small_button.rpak"
-			labelText				""
-			style					RuiButton
+		    wide					405
+            tall					40
+            zpos					3 // Needed or clicking on the background can hide this
+            visible					1
+            enabled					1
+            rui						"ui/test_button.rpak"
+            labelText				""
+            style					SmallButton
 		}
 
 		RuiGamepadBindButton
 		{
 			wide					500
 			tall					60
+			tall_nx_handheld		80		[$NX || $NX_UI_PC]
 			zpos					3
 			visible					1
 			enabled					1
             rui						"ui/gamepad_bindlist_button.rpak"
-			labelText				""
-			style					RuiButton
-		}
-
-		RuiStartMatchButton
-		{
-			wide					500
-			tall					56
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/start_match_button.rpak"
-			labelText				""
-			style					RuiButton
-		}
-
-		RuiStoreButtonFront
-		{
-			wide					720
-			tall					60
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/store_button_front.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiStoreButtonBundle
-		{
-			wide					900
-			tall					60
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/store_button_bundle.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiStoreButtonWeaponSkinSet
-		{
-			wide					900
-			tall					60
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/store_button_weapon_skin_set.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiStoreButtonWeapon
-		{
-			wide					800
-			tall					60
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/store_button_weapon.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiStoreButtonPrime
-		{
-			wide					680
-			tall					60
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/store_button_prime.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiStoreBuyButton
-		{
-			wide					320
-			tall					128
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/store_buy_button.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiMenuButtonSmall
-		{
-			wide					288
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/menu_button_small.rpak"
-			labelText				""
-			style					RuiSmallButton
-            clip 					0
-			childGroupLocked        SmallButtonLockedGroup
-		}
-
-		StoreMenuButtonSmall
-		{
-			wide					288
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/menu_button_small.rpak"
-			labelText				""
-			style					RuiSmallButton
-            clip 					0
-		}
-
-		RuiLoadoutSelectionButton
-		{
-			wide					224
-			tall					56
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/loadout_selection_button.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiPilotSelectionButton
-		{
-			wide					224
-			tall					75
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/pilot_selection_button.rpak"
-			labelText				""
-			style					RuiButton
-            clip 					0
-		}
-
-		RuiComboSelectButton
-		{
-			wide					288
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-            rui						"ui/combo_select_button.rpak"
-			labelText				""
-			style					RuiSmallButton
-            clip 					0
-		}
-
-		RuiLoadoutType
-		{
-			wide					800
-			tall					27
-			visible					1
-            rui						"ui/loadout_type_label.rpak"
-		}
-
-		RuiLoadoutLabel
-		{
-			wide					800
-			tall					27
-			visible					1
-            rui						"ui/loadout_label.rpak"
-		}
-
-		RuiBindLabel
-		{
-			wide					600
-			tall					27
-			visible					1
-            rui						"ui/bind_label.rpak"
-		}
-
-		RuiCheckBox
-		{
-			wide					40
-			tall					40
-			visible					1
-			enabled					1
-            rui						"ui/button_checkbox.rpak"
 			labelText				""
 			style					RuiButton
 		}
@@ -2707,110 +1671,6 @@ Scheme
 			tall					106
 			visible					1
             rui						"ui/dialog_spinner.rpak"
-		}
-
-		ComboButtonLarge
-		{
-            auto_wide_tocontents    1
-			tall				    100
-            textAlignment			west
-			zpos					3 // Needed or clicking on the background can hide this
-			font					Default_28 [!$JAPANESE && !$TCHINESE]
-			font					Default_38 [$TCHINESE]
-			font					Default_38 [$JAPANESE]
-			enabled					1
-			TextInsetX              30
-			allCaps                 0
-			style					ComboButton
-			visible					0
-			childGroupAlways        ComboButtonLargeAlways
-//			fgcolor_override        "255 255 0 64"
-//			bgcolor_override        "255 255 0 64"
-//			drawColor               "255 255 0 64"
-            clip 					0
-		}
-
-		ComboButtonTitleLarge
-		{
-            wide                    560
-            tall                    70
-			font					DefaultBold_51_Outline
-			textAlignment			north-west
-			allcaps					1
-			visible					0
-			zpos                    4
-
-			pin_corner_to_sibling	TOP_LEFT
-			pin_to_sibling_corner	TOP_LEFT
-		}
-
-		LoadoutButton
-		{
-			wide					540
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					LoadoutButton
-			childGroupNormal		LoadoutButtonNormalGroup
-			childGroupFocused		LoadoutButtonFocusGroup
-			//childGroupLocked		DefaultButtonLockedGroup
-			//childGroupNew			DefaultButtonNewGroup
-		}
-
-		LargeButton
-		{
-			wide					540
-			tall					56
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					LargeButton
-			childGroupNormal		LargeButtonNormalGroup
-			childGroupFocused		LargeButtonFocusGroup
-			childGroupLocked		LargeButtonLockedGroup
-			childGroupNew	        LargeButtonNewGroup
-		}
-
-		SubmenuButton
-		{
-			wide					540
-			tall					45
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					SubmenuButton
-			childGroupNormal		SubmenuButtonNormalGroup
-			childGroupFocused		SubmenuButtonFocusGroup
-			childGroupLocked		SubmenuButtonLockedGroup
-			childGroupNew			SubmenuButtonNewGroup
-			childGroupSelected		SubmenuButtonSelectedGroup
-		}
-
-		DialogButton
-		{
-			wide					780
-			tall					45
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					DefaultButton
-			textAlignment			center
-			childGroupNormal		DialogButtonNormalGroup
-			childGroupFocused		DialogButtonFocusGroup
-		}
-
-		CenterButton
-		{
-			wide					450
-			tall					45
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					CenterButton
-			textAlignment			center
-			childGroupNormal		CenterButtonNormalGroup
-			childGroupFocused		CenterButtonFocusGroup
 		}
 
         FullSizer
@@ -2901,6 +1761,7 @@ Scheme
 		{
 			wide					1040
 			tall					60
+			tall_nx_handheld		80 		[$NX || $NX_UI_PC]
 			visible					1
 			enabled					1
 			style					SmallButton
@@ -2928,6 +1789,7 @@ Scheme
 			font                    Default_28
 			wide					1040
 			tall					60
+			tall_nx_handheld		80 		[$NX || $NX_UI_PC]
 			zpos					3
 			ypos                    2
 			visible					1
@@ -2945,6 +1807,7 @@ Scheme
 			font                    Default_28
 			wide					1040
 			tall					60
+			tall_nx_handheld		80 		[$NX || $NX_UI_PC]
 			zpos					3
 			ypos                    2
 			visible					1
@@ -2957,43 +1820,65 @@ Scheme
             cursorVelocityModifier  0.7
 		}
 
-		SwitchButtonThin
-		{
-			font                    Default_28
-			wide					1040
-			tall					40
-			zpos					3
-			ypos                    4
-			visible					1
-			enabled					1
-			style					DialogListButton
-			rui						"ui/settings_base_button.rpak"
-			clipRui					1
-			labelText               ""
-			nonDefaultColor	"244 213 166 255"
+		SwitchButtonCompact
+        {
+            font                    Default_28
+            wide					512
+            tall					60
+            tall_nx_handheld		80 		[$NX || $NX_UI_PC]
+            zpos					3
+            ypos                    2
+            visible					1
+            enabled					1
+            style					DialogListButton
+            rui						"ui/settings_compact_button.rpak"
+            clipRui					0
+            labelText               "Test"
+            nonDefaultColor	"244 213 166 255"
             cursorVelocityModifier  0.7
-		}
+        }
+
+        SwitchButtonClubInvite
+        {
+            font                    Default_28
+            wide					414
+            tall					50
+            tall_nx_handheld		80 		[$NX || $NX_UI_PC]
+            zpos					3
+            ypos                    2
+            visible					1
+            enabled					1
+            style					DialogListButton
+            rui						"ui/settings_compact_button.rpak"
+            clipRui					0
+            labelText               "Test"
+            nonDefaultColor	"244 213 166 255"
+            cursorVelocityModifier  0.7
+        }
 
 		SliderControl
 		{
 			wide					1040
-			tall					60
+            tall					60
+            tall_nx_handheld		80 		[$NX || $NX_UI_PC]
 			zpos					3 // Needed or clicking on the background can hide this
 			ypos                    2
 			visible					1
 			enabled					1
             cursorVelocityModifier  0.7
+            soundRepeatsOnLeftRightHeld 1
 		}
-
-		SliderControlThin
+		ColorSlider
 		{
-			wide					1040
-			tall					40
-			zpos					3 // Needed or clicking on the background can hide this
-			ypos                    4
-			visible					1
-			enabled					1
+            wide					858
+            tall					76
+            zpos					3 // Needed or clicking on the background can hide this
+            ypos                    2
+            visible					1
+            enabled					1
             cursorVelocityModifier  0.7
+	        controlSettingsName		ColorSlider
+	        soundRepeatsOnLeftRightHeld 0
 		}
 
 		SliderControlTextEntry
@@ -3002,6 +1887,7 @@ Scheme
             zpos					100 // This works around input weirdness when the control is constructed by code instead of VGUI blackbox.
             wide					48
             tall					48
+            tall_nx_handheld		68 		[$NX || $NX_UI_PC]
             visible					1
             enabled					1
             textHidden				0
@@ -3022,190 +1908,6 @@ Scheme
             cursorVelocityModifier  0.7
 		}
 
-		CommunityEditButton
-		{
-			wide					840
-			tall					40
-			zpos					3
-			visible					1
-			enabled					1
-			style					DialogListButton
-			rui						"ui/wide_button.rpak"
-			clipRui					1
-			labelText               ""
-		}
-
-		AdvocateLine
-		{
-			classname 				AdvocateLine
-			tall					36
-			auto_wide_tocontents	1
-			visible					1
-			font					Default_28
-			textAlignment			west
-			fgcolor_override		"204 234 255 255"
-			labelText				"--"
-		}
-
-		RankedPlayDetailsProperties
-		{
-			classname 				RankedPlayDetails
-			wide					386
-			zpos					40
-			ypos					4
-
-			auto_tall_tocontents 	1
-			wrap					1
-			visible 				1
-			font 					DefaultSmall
-			allcaps					0
-			fgcolor_override		"163 187 204 255"
-			textAlignment			north-west
-		}
-
-		SwitchCommunityList
-		{
-			wide					1163
-			tall					595
-			paintborder				0
-			NoWrap					0
-			panelBorder				0
-			clip 					0
-		}
-
-		SwitchCommunityListButton
-		{
-			wide					1163
-			tall					27
-			visible					1
-			enabled					1
-			scaleImage				1
-			style					CommunityItemLook
-			childGroupAlways		CommunityAlwaysGroup
-			childGroupNormal		CommunityNormalGroup
-			childGroupFocused		CommunityFocusGroup
-			clip 					0
-		}
-
-		LobbyPlayerListBackground
-		{
-			wide					500
-			tall					312
-		}
-
-		LobbyPlayerList
-		{
-			wide					476
-			tall					288
-			paintborder				0
-			NoWrap					0
-			panelBorder				0
-			clip 					0
-			bgcolor_override		"0 0 0 0"
-		}
-
-		LobbyNeutralSlot
-		{
-			wide					476
-			tall					35
-			visible					1
-			scaleImage				1
-			image 					"ui/menu/lobby/neutral_slot"
-		}
-
-		LobbyFriendlySlot
-		{
-			inheritProperties LobbyNeutralSlot
-			image 					"ui/menu/lobby/friendly_slot"
-		}
-
-		LobbyEnemySlot
-		{
-			inheritProperties LobbyNeutralSlot
-			image 					"ui/menu/lobby/enemy_slot"
-		}
-
-		LobbyFriendlyButton
-		{
-			wide					476
-			tall					37
-			visible					1
-			enabled					1
-			style					LobbyPlayerButton
-			scriptid				PlayerListButton
-			childGroupAlways		LobbyFriendlyAlwaysGroup
-			childGroupNormal		LobbyPlayerNormalGroup
-			childGroupFocused		LobbyFriendlyFocusGroup
-			clip 					0
-		}
-
-		ChatroomPlayerButton
-		{
-			wide					259
-			tall					27
-			visible					1
-			enabled					1
-			scaleImage				1
-			style					ChatroomPlayerLook
-			childGroupAlways		ChatroomAlwaysGroup
-			childGroupNormal		ChatroomNormalGroup
-			childGroupFocused		ChatroomFocusGroup
-			clip 					0
-		}
-
-		LobbyEnemyButton
-		{
-			wide					476
-			tall					37
-			visible					1
-			enabled					1
-			style					LobbyPlayerButton
-			scriptid				PlayerListButton
-			childGroupAlways		LobbyEnemyAlwaysGroup
-			childGroupNormal		LobbyPlayerNormalGroup
-			childGroupFocused		LobbyEnemyFocusGroup
-			clip 					0
-		}
-
-		MapButton
-		{
-			wide					158
-			tall					89
-			zpos					3 // Needed or clicking on the background can hide this
-			visible					1
-			enabled					1
-			style					MapButton
-			allcaps					1
-			childGroupAlways		MapButtonAlwaysGroup
-			childGroupNormal		MapButtonNormalGroup
-			childGroupFocused		MapButtonFocusGroup
-			childGroupLocked		MapButtonLockedGroup
-		}
-
-		TabButton
-		{
-			classname				TabButtonClass
-			wide					300
-			tall					40
-			visible					1
-			enabled					1
-			style					RuiButton
-            rui						"ui/tab_button.rpak"
-			labelText				""
-			cursorVelocityModifier  0.7
-		}
-
-		TabShoulder
-		{
-            wide                    72
-            tall					68
-            visible					1
-            rui                     "ui/shoulder_navigation_shortcut.rpak"
-            activeInputExclusivePaint	gamepad
-
-			style					RuiButton
-		}
-
 		TabButtonLobby
 		{
 			classname				TabButtonClass
@@ -3222,11 +1924,29 @@ Scheme
 			sound_accept            "UI_Menu_ApexTab_Select"
 		}
 
+		TabButtonSeasonSubNav
+		{
+			classname				TabButtonClass
+			wide					284
+    		polyShape               "0.253 0.0 1.0 0.0 0.747 1.0 0.0 1.0" // height / width to determine offsets
+			tall					72
+			visible					1
+			enabled					1
+			style					RuiButton
+            rui						"ui/tab_button_season_subnav.rpak"
+			labelText				""
+			cursorVelocityModifier  0.7
+			sound_focus             "UI_Menu_Focus_Large"
+			sound_accept            "UI_Menu_ApexTab_Select"
+		}
+
 		TabButtonStore
 		{
 			classname				TabButtonClass
 			wide					260
+			wide_nx_handheld		280			[$NX || $NX_UI_PC]
 			tall					44
+			tall_nx_handheld		65			[$NX || $NX_UI_PC]
     		polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
 			visible					1
 			enabled					1
@@ -3243,7 +1963,9 @@ Scheme
 		{
 			classname				TabButtonClass
 			wide					260
+			wide_nx_handheld		280			[$NX || $NX_UI_PC]
 			tall					44
+			tall_nx_handheld		65			[$NX || $NX_UI_PC]
 			polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
 			visible					1
 			enabled					1
@@ -3254,6 +1976,56 @@ Scheme
 			sound_accept            "UI_Menu_LegendTab_Select"
 		}
 
+		TabButtonReticleCustomize
+        {
+            classname				TabButtonClass
+            wide					260
+            wide_nx_handheld		280			[$NX || $NX_UI_PC]
+            tall					44
+            tall_nx_handheld		65			[$NX || $NX_UI_PC]
+            polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
+            visible					1
+            enabled					1
+            style					RuiButton
+            rui						"ui/tab_button_reticle_customize.rpak"
+            labelText				""
+            cursorVelocityModifier  0.7
+            sound_accept            "UI_Menu_LegendTab_Select"
+        }
+                         
+        TabButtonLaserSightCustomize
+        {
+            classname				TabButtonClass
+            wide					260
+            wide_nx_handheld		280			[$NX || $NX_UI_PC]
+            tall					44
+            tall_nx_handheld		65			[$NX || $NX_UI_PC]
+            polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
+            visible					1
+            enabled					1
+            style					RuiButton
+            rui						"ui/tab_button_laser_sight_customize.rpak"
+            labelText				""
+            cursorVelocityModifier  0.7
+            sound_accept            "UI_Menu_LegendTab_Select"
+        }
+      
+		TabButtonGameModeRules
+        {
+            classname				TabButtonClass
+            wide					260
+            wide_nx_handheld		280			[$NX || $NX_UI_PC]
+            tall					44
+            tall_nx_handheld		65			[$NX || $NX_UI_PC]
+            polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
+            visible					1
+            enabled					1
+            style					RuiButton
+            rui						"ui/tab_button_rules.rpak"
+            labelText				""
+            cursorVelocityModifier  0.7
+            sound_accept            "UI_Menu_LegendTab_Select"
+        }
 		TabButtonSettings
 		{
 			classname				TabButtonClass
@@ -3274,7 +2046,9 @@ Scheme
 		{
 			classname				TabButtonClass
 			wide					260
+			wide_nx_handheld		280			[$NX || $NX_UI_PC]
 			tall					44
+			tall_nx_handheld		65			[$NX || $NX_UI_PC]
 			polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
 			visible					1
 			enabled					1
@@ -3284,6 +2058,21 @@ Scheme
 			cursorVelocityModifier  0.7
 			sound_accept            "UI_Menu_ArmoryTab_Select"
 		}
+
+		TabButtonClubLobby
+        {
+            classname				TabButtonClass
+            wide					250
+            tall					60
+            polyShape               "0.0 0.0 0.831 0.0 1.0 1.0 0.169 1.0" // height / width to determine offsets
+            visible					1
+            enabled					1
+            style					RuiButton
+            rui						"ui/club_lobby_tab_button.rpak"
+            labelText				""
+            cursorVelocityModifier  0.7
+            sound_accept            "UI_Menu_LegendTab_Select"
+        }
 
 		InviteButton
 		{
@@ -3300,11 +2089,28 @@ Scheme
             sound_accept            "UI_Menu_InviteFriend_Open"
 		}
 
+		StoryButton
+        {
+            wide					180
+            tall					148
+            rui                     "ui/story_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+
+            proportionalToParent    1
+
+            sound_focus             "UI_Menu_Focus"
+            sound_accept            "UI_Menu_InviteFriend_Open"
+        }
+
 		CornerButton
 		{
 			classname               MenuButton
             wide					60
+			wide_nx_handheld		100 	[$NX || $NX_UI_PC]
             tall					60
+            tall_nx_handheld		100 	[$NX || $NX_UI_PC]
             rui                     "ui/generic_icon_button.rpak"
             labelText               ""
             visible					1
@@ -3327,106 +2133,6 @@ Scheme
             sound_accept            "UI_Menu_LootPreview"
         }
 
-		StatsLevelListButton
-		{
-			xpos					0
-			ypos					0
-			zpos					100
-			wide					337
-			tall					135
-			visible					1
-			enabled					1
-			style					StatsLevelListButton
-			allcaps					1
-			textAlignment			center
-			labelText				""
-			childGroupNormal		StatsLevelListButtonNormalGroup
-			childGroupFocused		StatsLevelListButtonFocusedGroup
-			childGroupSelected		StatsLevelListButtonSelectedGroup
-			childGroupDisabled		StatsLevelListButtonNormalGroup
-		}
-
-		SP_Level_Button
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					TitanDecalButton
-			allcaps					0
-			textAlignment			left
-            rui						"ui/mission_select_button.rpak"
-			labelText 				""
-		}
-
-		SP_Difficulty_Select
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					TitanDecalButton
-			allcaps					0
-			textAlignment			left
-            rui						"ui/sp_difficulty_select.rpak"
-			labelText 				""
-		}
-
-		SP_TitanLoadout
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			childGroupAlways		SP_TitanLoadout_Always
-			childGroupFocused		SP_Level_Hover
-			childGroupLocked		SP_Level_Locked
-		}
-
-		Playlist_Button
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					TitanDecalButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-            rui						"ui/playlist_button.rpak"
-		}
-
-		PvE_Button
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					TitanDecalButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-            rui						"ui/pve_button.rpak"
-		}
-
 		GridButton
 		{
 			xpos					0
@@ -3447,87 +2153,6 @@ Scheme
 			childGroupNew			GridButtonNewGroup
 		}
 
-		BurnCardButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/burn_card_button.rpak"
-		}
-
-		BoostStoreButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/boost_store_button.rpak"
-		}
-
-		CamoButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/camo_button.rpak"
-		}
-
-		CustomizeGridButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/prototype_customize_grid_button.rpak"
-		}
-
-		SurvivalInventoryButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					32
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/survival_inventory_button.rpak"
-			rightClickEvents		1
-		}
-
 		SurvivalInventoryGridButton
 		{
 			xpos					0
@@ -3543,6 +2168,7 @@ Scheme
 			labelText 				""
 			rui						"ui/survival_inventory_grid_button_v2.rpak"
 			rightClickEvents		1
+			middleClickEvents       1
 
 			cursorVelocityModifier  0.6
 
@@ -3569,6 +2195,35 @@ Scheme
 			rightClickEvents		1
 
 			cursorVelocityModifier  0.6
+		}
+
+		SurvivalGroundListCategoryHeader
+		{
+			rui						"ui/survival_ground_list_category_header.rpak"
+			xpos					0
+			ypos					0
+			wide                    0
+			tall                    0
+			zpos                    5
+			enabled					1
+			visible					0
+			rightClickEvents		1
+			cursorVelocityModifier  0.6
+		}
+
+		SurvivalGroundListItemButton
+		{
+			rui						"ui/survival_ground_list_item_button.rpak"
+			xpos					0
+			ypos					0
+			wide                    0
+			tall                    0
+			zpos                    4
+			enabled					1
+			visible					0
+			rightClickEvents		1
+			cursorVelocityModifier  0.6
+			hasScriptSound          1
 		}
 
 		SurvivalUpgradeCounter
@@ -3633,7 +2288,6 @@ Scheme
 			cursorVelocityModifier  0.6
 		}
 
-
         PaginationButton
         {
             classname               "PaginationButton MenuButton"
@@ -3643,14 +2297,15 @@ Scheme
             visible					1
         }
 
-
 		FriendGridButton
 		{
 			xpos					0
 			ypos					0
 			zpos					2
 			wide					400
+			wide_nx_handheld		400			[$NX || $NX_UI_PC]
 			tall					80
+			tall_nx_handheld		86			[$NX || $NX_UI_PC]
 			visible					1
 			enabled					1
 			style					RuiButton
@@ -3662,6 +2317,22 @@ Scheme
 			cursorVelocityModifier  0.7
             //sound_accept            "UI_Menu_InviteFriend_Send" // Buttons are always disabled?
 		}
+
+        StoreInspectGridButton
+        {
+            xpos					0
+            ypos					0
+            zpos					2
+            wide					100
+            tall					100
+            visible					1
+            enabled					1
+            style					RuiButton
+            textAlignment			left
+            labelText 				""
+            rui						"ui/store_inspect_grid_button.rpak"
+            cursorVelocityModifier  0.7
+        }
 
         ToolTip
         {
@@ -3675,70 +2346,6 @@ Scheme
 
             proportionalToParent    1
         }
-
-		CallsignIconButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					32
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/callsign_icon_button.rpak"
-		}
-
-		CallsignIconStore
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					32
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/callsign_icon_store.rpak"
-		}
-
-		CallsignCardButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/callsign_card_button.rpak"
-		}
-
-		FactionButton
-		{
-			xpos					0
-			ypos					0
-			zpos					2
-			wide					64
-			tall					64
-			visible					1
-			enabled					1
-			style					RuiButton
-			allcaps					0
-			textAlignment			left
-			labelText 				""
-			rui						"ui/faction_button.rpak"
-		}
 
 		GridPageCircleButton
 		{
@@ -3826,91 +2433,21 @@ Scheme
 		{
 			classname               UserInfo
 			rui                     "ui/userinfo.rpak"
-			wide                    394
+			wide                    200
 			tall                    84
 			visible                 1
 			sound_focus             ""
 			sound_accept            ""
 		}
 
-        ItemDetails
-        {
-            wide                    650
-			tall					650
-            rui						"ui/item_details.rpak"
-        }
-
-        NameProperties
-        {
-            tall 					48
-            font					Default_43
-            labelText				"ITEM NAME"
-            fgcolor_override		"254 184 0 255"
-            visible					1
-        }
-
-		UnlockReqProperties
-		{
-			ControlName             Label
-	        wide                    650
-	        tall                    27
-	        visible                 1
-	        font                    Default_23
-	        wrap                    1
-	        fgcolor_override        "255 184 0 255"
-	        labelText               ""
-	        textAlignment           north-west
-		}
-
-		LoadoutButtonLarge
-		{
-			wide					224
-			tall					112
-			visible					1
-			enabled					1
-			style					RuiButton
-            rui						"ui/loadout_button_large.rpak"
-			labelText 				""
-		}
-
-		LoadoutButtonMedium
-		{
-			wide					96
-			tall					96
-			visible					1
-			enabled					1
-			style					RuiButton
-            rui						"ui/loadout_button_medium.rpak"
-			labelText 				""
-		}
-
-		LoadoutButtonSmall
-		{
-			wide					72
-			tall					72
-			visible					1
-			enabled					1
-			style					RuiButton
-			rui						"ui/loadout_button_small.rpak"
-			labelText 				""
-		}
-
-		SurvivalAbilityButton
-		{
-			wide					224
-			tall					112
-			visible					1
-			enabled					1
-			style					RuiButton
-            rui						"ui/survival_ability_button.rpak"
-			labelText 				""
-		}
-
 		LobbyCharacterButton
 		{
+            classname               CharacterButtonClass
 			wide					194
+			wide_nx_handheld		237 		[$NX || $NX_UI_PC]
 			tall					126
-			visible					1
+			tall_nx_handheld		154 		[$NX || $NX_UI_PC]
+			visible					0
 			enabled					1
             rui						"ui/lobby_character_button.rpak"
 			labelText				""
@@ -3920,42 +2457,61 @@ Scheme
 			middleClickEvents       1
 			sound_focus             "UI_Menu_Focus"
 			sound_accept			""
+            cursorVelocityModifier  0.7
+
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+		}
+
+		MatchCharacterButton
+		{
+            zpos					10
+			wide					194
+			wide_nx_handheld		262 		[$NX || $NX_UI_PC]
+			tall					126
+			tall_nx_handheld		170 		[$NX || $NX_UI_PC]
+			visible					0
+			enabled					1
+            rui						"ui/character_select_class_button_new.rpak"
+			labelText				""
+			style					RuiButton
+			polyShape               "0.375 0.0 1.0 0.0 0.625 1.0 0.0 1.0"
+			rightClickEvents		1
+			enterClickEvents		0
+			sound_focus             "UI_Menu_Focus_LegendSelectScreen"
+			sound_accept			""
+            cursorVelocityModifier  0.7
+
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
 		}
 
 		StoreCharacterButton
 		{
-			wide					280//194
-			tall					183//126
-			visible					1
+			classname               CharacterButtonClass
+			wide					194
+			wide_nx_handheld		319 		[$NX || $NX_UI_PC]
+			tall					126
+			tall_nx_handheld		211 		[$NX || $NX_UI_PC]
+			visible					0
 			enabled					1
             rui						"ui/store_character_button.rpak"
 			labelText				""
 			style					RuiButton
 			polyShape               "0.375 0.0 1.0 0.0 0.625 1.0 0.0 1.0"
 			rightClickEvents		1
-		}
+			cursorVelocityModifier  0.7
 
-		BonusCharacterButton
-		{
-			wide					242
-			tall					158
-			visible					1
-			enabled					1
-//            rui						"ui/lobby_character_button.rpak"
-            rui                     "ui/bonus_character_button.rpak"
-			labelText				""
-			style					RuiButton
-			polyShape               "0.375 0.0 1.0 0.0 0.625 1.0 0.0 1.0"
-			rightClickEvents		1
-			middleClickEvents       1
-			sound_focus             "UI_Menu_Focus"
-			sound_accept			""
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
 		}
 
 		WeaponCategoryButton
 		{
-            wide					572
-            tall					275
+            wide					457
+			wide_nx_handheld		550 		[$NX || $NX_UI_PC]
+            tall					220
+            tall_nx_handheld		264	 		[$NX || $NX_UI_PC]
 			visible					1
 			enabled					1
             rui						"ui/weapon_category_button.rpak"
@@ -3965,28 +2521,6 @@ Scheme
 			sound_focus             "UI_Menu_Focus"
 			sound_accept            "UI_Menu_WeaponClass_Select"
 			cursorVelocityModifier  0.7
-		}
-
-		UltimateButton
-		{
-			wide					112
-			tall					112
-			visible					1
-			enabled					1
-			style					RuiButton
-            rui						"ui/suit_button.rpak"
-			labelText 				""
-		}
-
-		TacticalButton
-		{
-			wide					224
-			tall					112
-			visible					1
-			enabled					1
-			style					RuiButton
-            rui						"ui/suit_button.rpak"
-			labelText 				""
 		}
 
 		Test2Button
@@ -4000,42 +2534,6 @@ Scheme
 			childGroupAlways		Test2ButtonAlwaysGroup
 			childGroupFocused		Test2ButtonFocusedGroup
 			childGroupNew			Test2ButtonNewGroup
-		}
-
-		CoopStoreButton
-		{
-			xpos					-4
-			ypos					0
-			zpos					110
-			wide					56
-			tall					56
-			visible					1
-			enabled					1
-			style					CoopStoreButton
-			allcaps					0
-			textAlignment			center
-			labelText 				""
-			childGroupAlways		CoopStoreButtonAlwaysGroup
-			childGroupFocused		CoopStoreButtonFocusedGroup
-			childGroupSelected		CoopStoreButtonSelectedGroup
-			childGroupLocked		CoopStoreButtonLockedGroup
-			childGroupNew			CoopStoreButtonNewGroup
-		}
-
-		KeyBindingsButton
-		{
-			zpos					30
-			auto_wide_tocontents 	1
-			tall					36
-			labelText				"DEFAULT"
-			font					Default_28
-			textinsetx				22
-			use_proportional_insets	1
-			enabled					1
-			visible					1
-			style					KeyBindingsButton
-			childGroupFocused		KeyBindingsButtonFocusGroup
-			activeInputExclusivePaint	keyboard
 		}
 
 		MenuTopBar
@@ -4074,11 +2572,6 @@ Scheme
 			classname				MenuTitle
 		}
 
-		MenuScreenFrame
-		{
-			disableMouseFocus		1
-		}
-
 		FooterButtons
 		{
 			xpos					0
@@ -4098,6 +2591,16 @@ Scheme
             tall					60
             visible					1
             controlSettingsFile		"resource/ui/menus/panels/dialog_footer_buttons.res"
+        }
+
+        DialogFooterButtonsHighPriority
+        {
+            xpos					-211
+            ypos                    -32
+            wide					f0
+            tall					60
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/dialog_footer_buttons_highpriority.res"
         }
 
         PromoFooterButtons
@@ -4120,32 +2623,12 @@ Scheme
             controlSettingsFile		"resource/ui/menus/panels/dialog_footer_buttons_r2.res"
         }
 
-		R2_ContentDescriptionTitle
-		{
-			xpos					0
-			ypos					65
-			zpos					3 // Needed or clicking on the background can hide this
-			auto_wide_tocontents 	1
-			tall					60
-			visible					1
-			font					DefaultBold_44_DropShadow
-			allcaps					1
-			fgcolor_override		"245 245 245 255"
-		}
-
 		R2_ContentDescription
 		{
 			visible					1
 			font					Default_27
 			allcaps					0
 			fgcolor_override		"245 245 245 255"
-		}
-
-		R2_ContentBackground
-		{
-			scaleImage				1
-			image					"vgui/HUD/white"
-			drawColor				"0 0 0 150"
 		}
 
 		AdvControlsLabel
@@ -4156,19 +2639,11 @@ Scheme
 			fgcolor_override		"244 213 166 255"
 		}
 
-		SubheaderBackground
-		{
-			wide 					660
-			tall					45
-			visible					1
-			image 					"ui/menu/common/menu_header_bar"
-			visible					1
-			scaleImage				1
-		}
 		SubheaderBackgroundWide
 		{
             wide 					%60
 			tall					45
+			tall_nx_handheld		65 		[$NX || $NX_UI_PC]
 			visible					1
 			image 					"ui/menu/common/menu_header_bar_wide"
 			visible					1
@@ -4179,9 +2654,11 @@ Scheme
 			zpos					3 // Needed or clicking on the background can hide this
 			auto_wide_tocontents 	1
 			tall					40
+			tall_nx_handheld		60 		[$NX || $NX_UI_PC]
 			visible					1
 			font					DefaultBoldFont
 			fontHeight 				30
+			fontHeight_nx_handheld	45 		[$NX || $NX_UI_PC]
 			allcaps					1
 			fgcolor_override		"245 245 245 255"
 		}
@@ -4218,7 +2695,7 @@ Scheme
             ruiDefaultHeight        36
             fontHeight              32
 		}
-
+		
 		RightRuiFooterButton
 		{
 		    classname				RightRuiFooterButtonClass
@@ -4235,7 +2712,7 @@ Scheme
             ruiDefaultHeight        36
             fontHeight              32
 		}
-
+		
 		MouseFooterButton
 		{
 			classname				MouseFooterButtonClass
@@ -4254,29 +2731,6 @@ Scheme
 			activeInputExclusivePaint	keyboard
 		}
 
-		SubitemSelectItemName
-		{
-			wide 					697
-			tall 					45
-			zpos					7
-			visible					1
-			font					Default_23
-			allcaps					1
-			fgcolor_override		"204 234 255 255"
-		}
-
-		AbilityDesc
-		{
-			wide 					360
-			tall 					64
-			zpos					4 // Needed or clicking on the background can hide this
-			visible					1
-			textAlignment			north-west
-			font					Default_26
-			wrap 					1
-			fgcolor_override		"64 64 64 255"
-		}
-
 		ButtonTooltip
 		{
 			classname				ButtonTooltip
@@ -4289,166 +2743,23 @@ Scheme
 			controlSettingsFile		"resource/UI/menus/button_locked_tooltip.res"
 		}
 
-		LobbyFriendlyBackground
-		{
-			wide					476
-			tall					35
-			image 					"ui/menu/lobby/friendly_player"
-			visible					1
-			scaleImage				1
-		}
-
-		LobbyEnemyBackground
-		{
-			wide					476
-			tall					35
-			image 					"ui/menu/lobby/enemy_player"
-			visible					1
-			scaleImage				1
-		}
-
-		ChatroomPlayerBackground
-		{
-			wide					259
-			tall					28
-			image 					"ui/menu/lobby/chatroom_player"
-			visible					1
-			scaleImage				1
-		}
-
-		ChatroomPlayerFocus
-		{
-			zpos 					5
-			wide					259
-			tall					28
-			visible					1
-			image					"ui/menu/lobby/chatroom_hover"
-			scaleImage				1
-		}
-
-		ChatroomPlayerMic
-		{
-			zpos 					4
-			wide					28
-			tall					28
-			visible					1
-			image					"ui/icon_mic_active"
-			scaleImage				1
-		}
-
-		CommunityBackground
-		{
-			wide					1163
-			tall					30
-			image 					"ui/menu/lobby/chatroom_player"
-			visible					1
-			scaleImage				1
-		}
-
-		CommunityFocus
-		{
-			zpos 					5
-			wide					1163
-			tall					28
-			image					"ui/menu/lobby/chatroom_hover"
-			visible					1
-			scaleImage				1
-		}
-
-		LobbyNeutralBackground
-		{
-			wide					476
-			tall					35
-			image 					"ui/menu/lobby/neutral_player"
-			visible					1
-			scaleImage				1
-		}
-
-		LobbyColumnLine
-		{
-			wide 					2
-			tall					45
-			visible					1
+        TabButtonSeason
+        {
+            classname               TabButtonClass
+            xpos					148
+            ypos					0
+            //zpos					10
+            wide					636
+            tall					84
+            visible					1
+            enabled					1
+			style					RuiButton
+            rui 					"ui/tab_button_season.rpak"
 			labelText				""
-			bgcolor_override 		"18 22 26 255"
-			//bgcolor_override 		"255 0 255 127"
-		}
-
-		LobbyPlayerMic
-		{
-			zpos 					4
-			wide					47
-			tall					35
-			visible					1
-			image					"ui/icon_mic_active"
-			scaleImage				1
-		}
-
-		LobbyPlayerPartyLeader
-		{
-			zpos 					4
-			wide					4
-			tall					35
-			visible					0
-			image					"vgui/hud/white"
-			drawColor				"179 255 204 255"
-			scaleImage				1
-		}
-
-		LobbyPlayerGenImage
-		{
-			zpos 					3
-			wide				 	0
-			tall				 	45
-			visible					1
-			image					"ui/menu/generation_icons/generation_1"
-			scaleImage				1
-			fillcolor				"0 0 0 255"
-		}
-
-		LobbyPlayerGenOverlayImage
-		{
-			zpos 					4
-			wide				 	0
-			tall				 	45
-			visible					1
-			image					""
-			scaleImage				1
-		}
-
-		LobbyPlayerGenLabel
-		{
-			zpos 					5
-			wide				 	0
-			tall				 	45
-			visible					1
-			font					Default_31_ShadowGlow
-			labelText				""
-			textAlignment			"center"
-			fgcolor_override 		"230 230 230 255"
-		}
-
-		LobbyPlayerLevel
-		{
-			zpos 					4
-			wide				 	0
-			tall				 	45
-			visible					1
-			font					Default_27
-			labelText				"99"
-			textAlignment			"center"
-			bgcolor_override		"0 0 0 255"
-		}
-
-		LobbyPlayerFocus
-		{
-			zpos 					5
-			wide					476
-			tall					35
-			visible					1
-			image					"ui/menu/lobby/player_hover"
-			scaleImage				1
-		}
+			cursorVelocityModifier  0.7
+			sound_focus             "UI_Menu_Focus_Large"
+			sound_accept            "UI_Menu_ApexTab_Select"
+        }
 
         Logo
         {
@@ -4463,191 +2774,36 @@ Scheme
             rui 					"ui/tab_logo.rpak"
         }
 
-		MenuArrowButtonUp
-		{
-			zpos					3 // Needed or clicking on the background can hide this
-			wide					90
-			visible					1
-			enabled					1
-			style					MenuArrowButtonStyle
-			labelText				""
-			allcaps					1
-			childGroupNormal		MenuArrowChildGroupUpNormal
-			childGroupFocused		MenuArrowChildGroupUpFocused
-		}
-
-		MenuArrowButtonDown
-		{
-			zpos					3 // Needed or clicking on the background can hide this
-			wide					90
-			visible					1
-			enabled					1
-			style					MenuArrowButtonStyle
-			labelText				""
-			allcaps					1
-			childGroupNormal		MenuArrowChildGroupDownNormal
-			childGroupFocused		MenuArrowChildGroupDownFocused
-		}
-
-		StatName
-		{
-			xpos 					0
-			ypos 					0
-			zpos					200
-			tall					14
-			wide 					110
-			visible					1
-			font					Default_21
-			textAlignment			west
-			allcaps					1
-			labelText				"[stat name]"
-			fgcolor_override		"204 234 255 255"
-			//bgcolor_override		"255 0 0 255"
-		}
-
-		StatValue
-		{
-			xpos 					0
-			ypos					0
-			zpos					200
-			wide					70
-			tall					14
-			visible					1
-			font					Default_21
-			textAlignment			east
-			labelText				"[stat value]"
-			allcaps					1
-			fgcolor_override		"230 161 23 255"
-			//bgcolor_override		"0 255 0 255"
-		}
-
-		OptionMenuTooltip
-		{
-			font					Default_27_ShadowGlow
-			allCaps					0
-			tall					562
-			wide 					719
-			xpos					-854
-			ypos					31
-			zpos					0
-			wrap					1
-			labelText				""
-			textAlignment			"north-west"
-			fgcolor_override		"192 192 192 255"
-			bgcolor_override		"0 0 0 60"
-			visible					1
-			enabled					1
-		}
-
-		MenuTooltipLarge
-		{
-			rui						"ui/control_options_description.rpak"
-			tall					370
-			wide 					844
-
-			xpos					975
-			ypos					193
-		}
-
-		ScoreboardTeamLogo
-		{
-			zpos				1012
-			wide				72
-			tall				72
-			visible				1
-			scaleImage			1
-			//border				ScoreboardTeamLogoBorder
-			//drawColor			"255 255 255 255"
-		}
-
-        PostGameScoreboardRow
-        {
-            classname               PostGameScoreboardRowClass
-            wide				    852
-            tall				    35
-            visible				    1
-            enabled					1
-            style					RuiButton
-            rui					    "ui/postgame_scoreboard_row.rpak"
-            labelText 				""
-        }
-
         MatchmakingStatus
         {
             classname		        MatchmakingStatusRui
             wide                    560
+            wide_nx_handheld        644		[$NX || $NX_UI_PC]
             tall                    82
+            tall_nx_handheld        94		[$NX || $NX_UI_PC]
             visible			        1
             rui                     "ui/matchmaking_status.rpak"
         }
+
+		DeathScreenRecapBlock
+		{
+			wide					540
+			tall					55
+			tall_nx_handheld        33      [$NX || $NX_UI_PC]
+			rui                     "ui/death_recap_damage_block.rpak"
+			xpos                    0
+			ypos                    3
+			zpos                    0
+			visible                 1
+			enabled                 1
+			cursorVelocityModifier  0.6
+			pin_corner_to_sibling   BOTTOM
+			pin_to_sibling_corner   TOP
+		}
 	}
 
 	ButtonChildGroups
 	{
-		MenuArrowChildGroupUpNormal
-		{
-			Arrow
-			{
-				ControlName				ImagePanel
-				wide					47
-				tall					47
-				xpos					22
-				ypos					40
-				zpos					10
-				visible					1
-				image					"ui/menu/common/menu_arrow_up_off"
-				scaleImage				1
-			}
-		}
-
-		MenuArrowChildGroupUpFocused
-		{
-			Arrow
-			{
-				ControlName				ImagePanel
-				wide					47
-				tall					47
-				xpos					22
-				ypos					40
-				zpos					10
-				visible					1
-				image					"ui/menu/common/menu_arrow_up_on"
-				scaleImage				1
-			}
-		}
-
-		MenuArrowChildGroupDownNormal
-		{
-			Arrow
-			{
-				ControlName				ImagePanel
-				wide					47
-				tall					47
-				xpos					22
-				ypos					40
-				zpos					10
-				visible					1
-				image					"ui/menu/common/menu_arrow_down_off"
-				scaleImage				1
-			}
-		}
-
-		MenuArrowChildGroupDownFocused
-		{
-			Arrow
-			{
-				ControlName				ImagePanel
-				wide					47
-				tall					47
-				xpos					22
-				ypos					40
-				zpos					10
-				visible					1
-				image					"ui/menu/common/menu_arrow_down_on"
-				scaleImage				1
-			}
-		}
-
 		DefaultButtonNormalGroup
 		{
 			FocusFade
@@ -4706,308 +2862,7 @@ Scheme
 			}
 		}
 
-		LoadoutButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim_new"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		LoadoutButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_new"
-				scaleImage				1
-			}
-		}
-
-		CompactButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					636
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		CompactButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					636
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default"
-				scaleImage				1
-			}
-		}
-		CompactButtonLockedGroup
-		{
-			TestImage1
-			{
-				ControlName				ImagePanel
-				xpos					27
-				ypos					0
-				wide					45
-				tall					45
-				visible					1
-				image					"ui/menu/common/locked_icon"
-				scaleImage				1
-			}
-		}
-		CompactButtonNewGroup
-		{
-			NewIcon
-			{
-				ControlName				ImagePanel
-				xpos					27
-				ypos					0
-				wide					45
-				tall					45
-				visible					1
-				image					"ui/menu/common/newitemicon"
-				scaleImage				1
-			}
-		}
-		CompactButtonSelectedGroup
-		{
-			TestImage1
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					636
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default"
-				scaleImage				1
-				drawColor				"255 255 255 40"
-			}
-		}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		SmallButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim_new"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		SmallButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_new"
-				scaleImage				1
-			}
-		}
-		SmallButtonSelectedGroup
-		{
-			TestImage1
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					40
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_new"
-				scaleImage				1
-				drawColor				"255 255 255 40"
-			}
-		}
-        SmallButtonLockedGroup
-        {
-            LockImage
-            {
-                ControlName				ImagePanel
-                xpos					-44
-                ypos					0
-                wide					48
-                tall					48
-                visible					1
-                image					"ui/menu/common/locked_icon"
-                scaleImage				1
-            }
-        }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		LargeButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-	    		wide					540
-    			tall					56
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim_new"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		LargeButtonFocusGroup
-		{
-			FocusImage
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-	    		wide					540
-    			tall					56
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_new"
-				scaleImage				1
-			}
-		}
-
-		ComboButtonLargeAlways
-		{
-			RuiLabel
-			{
-				ControlName				RuiPanel
-                rui                     "ui/combo_button_large.rpak"
-				classname 				"ComboButtonAlways"
-				ypos                    0
-	    		wide					512
-    			tall                    100
-    			zpos                    -100
-    			enabled                 0
-				visible					1
-			}
-		}
-
-		LargeButtonLockedGroup
-		{
-			TestImage1
-			{
-				ControlName				ImagePanel
-				xpos					27
-				ypos					4
-				wide					45
-				tall					45
-				visible					1
-				image					"ui/menu/common/locked_icon"
-				scaleImage				1
-			}
-		}
-		LargeButtonNewGroup
-		{
-			NewIcon
-			{
-				ControlName				ImagePanel
-				xpos					27
-				ypos					4
-				wide					45
-				tall					45
-				visible					1
-				image					"ui/menu/common/newitemicon"
-				scaleImage				1
-			}
-		}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		DialogButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					780
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		DialogButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					780
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_center_controls"
-				scaleImage				1
-			}
-		}
-
-		CenterButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					450
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		CenterButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					450
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_center_controls"
-				scaleImage				1
-			}
-		}
 
 		// TODO: %100 should size automatically based on parent
 		PCFooterButtonFocusGroup
@@ -5021,286 +2876,6 @@ Scheme
 				visible					1
 		        bgcolor_override		"255 255 255 127"
         		paintbackground 		1
-			}
-		}
-
-		KeyBindingsButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				Label
-				wide					180
-				tall					36
-				labelText				""
-				visible					1
-		        bgcolor_override		"255 255 255 127"
-        		paintbackground 		1
-			}
-		}
-
-		LobbyPlayerNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					450
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-
-		LobbyFriendlyAlwaysGroup
-		{
-			ImgBackground
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyFriendlyBackground
-			}
-			ImgBackgroundNeutral
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyNeutralBackground
-			}
-			ImgMic
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerMic
-				pin_to_sibling			ImgBackground
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			ColumnLineMic
-			{
-				ControlName				Label
-				InheritProperties		LobbyColumnLine
-				pin_to_sibling			ImgMic
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ImgGen
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerGenImage
-				pin_to_sibling			ColumnLineMic
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ImgGenOverlay
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerGenOverlayImage
-				pin_to_sibling			ImgGen
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			LblGen
-			{
-				ControlName				Label
-				InheritProperties		LobbyPlayerGenLabel
-				pin_to_sibling			ImgGen
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			LblLevel
-			{
-				ControlName				Label
-				InheritProperties		LobbyPlayerLevel
-				pin_to_sibling			ImgGen
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			CoopIcon
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerMic
-				pin_to_sibling			ImgBackground
-				pin_corner_to_sibling	TOP_RIGHT
-				pin_to_sibling_corner	TOP_RIGHT
-				visible					0
-				enabled					0
-			}
-			ColumnLineLevel
-			{
-				ControlName				Label
-				InheritProperties		LobbyColumnLine
-				pin_to_sibling			LblLevel
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ImgPartyLeader
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerPartyLeader
-				pin_to_sibling			ImgBackground
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-		}
-
-		LobbyFriendlyFocusGroup
-		{
-			ImgFocused
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerFocus
-			}
-		}
-
-		LobbyEnemyAlwaysGroup
-		{
-			ImgBackground
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyEnemyBackground
-			}
-			ImgBackgroundNeutral
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyNeutralBackground
-			}
-			ImgMic
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerMic
-				pin_to_sibling			ImgBackground
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			ColumnLineMic
-			{
-				ControlName				Label
-				InheritProperties		LobbyColumnLine
-				pin_to_sibling			ImgMic
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ImgGen
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerGenImage
-				pin_to_sibling			ColumnLineMic
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ImgGenOverlay
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerGenOverlayImage
-				pin_to_sibling			ImgGen
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			LblGen
-			{
-				ControlName				Label
-				InheritProperties		LobbyPlayerGenLabel
-				pin_to_sibling			ImgGen
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			LblLevel
-			{
-				ControlName				Label
-				InheritProperties		LobbyPlayerLevel
-				pin_to_sibling			ImgGen
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ColumnLineLevel
-			{
-				ControlName				Label
-				InheritProperties		LobbyColumnLine
-				pin_to_sibling			LblLevel
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-			ImgPartyLeader
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerPartyLeader
-				pin_to_sibling			ImgBackground
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-		}
-
-		LobbyEnemyFocusGroup
-		{
-			ImgFocused
-			{
-				ControlName				ImagePanel
-				InheritProperties		LobbyPlayerFocus
-			}
-		}
-
-		ChatroomNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					450
-				tall					27
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-
-		ChatroomAlwaysGroup
-		{
-			ImgBackground
-			{
-				ControlName				ImagePanel
-				InheritProperties		ChatroomPlayerBackground
-			}
-			ImgMic
-			{
-				ControlName				ImagePanel
-				InheritProperties		ChatroomPlayerMic
-				pin_to_sibling			ImgBackground
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_LEFT
-			}
-			ColumnLineMic
-			{
-				ControlName				Label
-				InheritProperties		LobbyColumnLine
-				pin_to_sibling			ImgMic
-				pin_corner_to_sibling	TOP_LEFT
-				pin_to_sibling_corner	TOP_RIGHT
-			}
-		}
-
-		ChatroomFocusGroup
-		{
-			ImgFocused
-			{
-				ControlName				ImagePanel
-				InheritProperties		ChatroomPlayerFocus
-			}
-		}
-
-		CommunityNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					1163
-				tall					27
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
 			}
 		}
 
@@ -5322,7 +2897,9 @@ Scheme
                     isRightOption       1
                 }
                 wide					178
+                wide_nx_handheld		238 		[$NX || $NX_UI_PC]
                 tall					60
+                tall_nx_handheld		80 			[$NX || $NX_UI_PC]
                 visible					1
                 enabled					1
                 style					DefaultButton
@@ -5343,7 +2920,9 @@ Scheme
                 rui						"ui/settings_choice_button.rpak"
                 xpos                    4
                 wide					178
+                wide_nx_handheld		238 	[$NX || $NX_UI_PC]
                 tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
                 visible					1
                 enabled					1
                 style					DefaultButton
@@ -5393,11 +2972,96 @@ Scheme
                     isRightOption       1
                 }
                 wide					60
+                wide_nx_handheld		90  	[$NX || $NX_UI_PC]
                 tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
                 visible					1
                 enabled					1
                 style					DefaultButton
                 zpos                    4
+
+                sound_accept			""
+
+                command                 "DialogListNext"
+
+                pin_corner_to_sibling	RIGHT
+                pin_to_sibling			FULL
+                pin_to_sibling_corner	RIGHT
+
+                cursorVelocityModifier  0.7
+            }
+
+            LeftButton
+            {
+                ControlName				RuiButton
+                rui						"ui/settings_change_button.rpak"
+                wide					60
+                wide_nx_handheld		90		[$NX || $NX_UI_PC]
+                tall					60
+                tall_nx_handheld		80		[$NX || $NX_UI_PC]
+                visible					1
+                enabled					1
+                style					DefaultButton
+                zpos                    4
+                xpos                    4
+
+                sound_accept			""
+
+                command                 "DialogListPrev"
+
+                pin_corner_to_sibling	TOP_RIGHT
+                pin_to_sibling			ValueButton
+                pin_to_sibling_corner	TOP_LEFT
+
+                cursorVelocityModifier  0.7
+            }
+
+            ValueButton
+            {
+                ControlName				RuiPanel
+                rui						"ui/settings_multichoice_value.rpak"
+                xpos                    4
+                wide					232
+                wide_nx_handheld		292  	[$NX || $NX_UI_PC]
+                tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
+                visible					1
+                enabled					1
+                style					DefaultButton
+                zpos                    4
+
+                pin_corner_to_sibling	TOP_RIGHT
+                pin_to_sibling			RightButton
+                pin_to_sibling_corner	TOP_LEFT
+            }
+		}
+
+		MultiChoiceButtonWideAlways
+        {
+            FULL
+            {
+                ControlName         RuiPanel
+                InheritProperties   FullSizer
+                zpos                -1
+            }
+
+            RightButton
+            {
+                ControlName				RuiButton
+                rui						"ui/settings_change_button.rpak"
+                ruiArgs
+                {
+                    isRightOption       1
+                }
+                wide					60
+                tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
+                visible					1
+                enabled					1
+                style					DefaultButton
+                zpos                    4
+
+                sound_accept			""
 
                 command                 "DialogListNext"
 
@@ -5414,14 +3078,16 @@ Scheme
                 rui						"ui/settings_change_button.rpak"
                 wide					60
                 tall					60
+                tall_nx_handheld		80		[$NX || $NX_UI_PC]
                 visible					1
                 enabled					1
                 style					DefaultButton
                 zpos                    4
                 xpos                    4
 
-                command                 "DialogListPrev"
+                sound_accept			""
 
+                command                 "DialogListPrev"
 
                 pin_corner_to_sibling	TOP_RIGHT
                 pin_to_sibling			ValueButton
@@ -5434,9 +3100,16 @@ Scheme
             {
                 ControlName				RuiPanel
                 rui						"ui/settings_multichoice_value.rpak"
+                ruiArgs
+                {
+                    showWiderText           1
+                }
+
                 xpos                    4
-                wide					232
+                wide					400
+                wide_nx_handheld		420  	[$NX || $NX_UI_PC]
                 tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
                 visible					1
                 enabled					1
                 style					DefaultButton
@@ -5446,241 +3119,92 @@ Scheme
                 pin_to_sibling			RightButton
                 pin_to_sibling_corner	TOP_LEFT
             }
-		}
+        }
 
-		SliderControlAlways
-		{
-            BtnDropButton
+        MultiChoiceButtonClubsInviteSelectorAlways
+        {
+            FULL
+            {
+                ControlName         RuiPanel
+                InheritProperties   FullSizer
+                zpos                -1
+            }
+
+            LeftButton
             {
                 ControlName				RuiButton
-                InheritProperties		SwitchButton
-                clip 					0
-                autoResize				1
-                pinCorner				0
+                rui						"ui/settings_change_button.rpak"
+                wide					60
+                tall					60
+                tall_nx_handheld		80		[$NX || $NX_UI_PC]
                 visible					1
                 enabled					1
-                style					SliderButton
-                command					""
+                style					DefaultButton
+                zpos                    4
+                xpos                    8
+
+                sound_accept			""
+
+                command                 "DialogListPrev"
+
+                pin_corner_to_sibling	LEFT
+                pin_to_sibling			FULL
+                pin_to_sibling_corner	LEFT
 
                 cursorVelocityModifier  0.7
             }
 
-            LblSliderText
+            RightButton
             {
-                ControlName				Label
-                fieldName				LblSliderText
-                wide					450
-                tall					60
-                autoResize				0
-                pinCorner				0
-                visible					1
-                enabled					1
-                tabPosition				0
-                labelText				""
-            }
-
-            PrgValue
-            {
-                ControlName				RuiPanel
-                fieldName				PrgValue
-                zpos					5
-                wide					296
-                tall					60
-                visible					1
-                enabled					1
-                tabPosition				0
-                rui                     "ui/settings_slider.rpak"
-            }
-
-            PnlDefaultMark
-            {
-                ControlName				RuiPanel
-                ypos 					0
-                zpos					10
-                wide					12
-                tall					60
-                rui                     "ui/settings_slider_default.rpak"
+                ControlName				RuiButton
+                rui						"ui/settings_change_button.rpak"
                 ruiArgs
                 {
-                    basicImageAlpha     0.15
+                    isRightOption       1
                 }
+                wide					60
+                tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
                 visible					1
-                scaleImage				1
-                pin_corner_to_sibling	CENTER
-                pin_to_sibling_corner	CENTER
+                enabled					1
+                style					DefaultButton
+                zpos                    4
+
+                sound_accept			""
+
+                command                 "DialogListNext"
+
+                pin_corner_to_sibling	TOP_LEFT
+                pin_to_sibling			ValueButton
+                pin_to_sibling_corner	TOP_RIGHT
+
+                cursorVelocityModifier  0.7
             }
-		}
 
-		CommunityAlwaysGroup
-		{
-			ImgBackground
-			{
-				ControlName				ImagePanel
-				InheritProperties		CommunityBackground
-			}
-		}
+            ValueButton
+            {
+                ControlName				RuiPanel
+                rui						"ui/settings_multichoice_value.rpak"
+                ruiArgs
+                {
+                    showWiderText           1
+                }
 
-		CommunityFocusGroup
-		{
-			ImgFocused
-			{
-				ControlName				ImagePanel
-				InheritProperties		CommunityFocus
-			}
-		}
+                wide					280
+                wide_nx_handheld		345  	[$NX || $NX_UI_PC]
+                tall					60
+                tall_nx_handheld		80 		[$NX || $NX_UI_PC]
+                visible					1
+                enabled					1
+                style					DefaultButton
+                xpos                    0
+                zpos                    4
 
-		MapButtonAlwaysGroup
-		{
-			MapImage
-			{
-				ControlName				ImagePanel
-				classname 				MapImageClass
-				wide					158
-				tall					89
-				visible					1
-				scaleImage				1
-			}
-		}
-		MapButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				zpos 					1
-				wide					158
-				tall					89
-				visible					1
-				scaleImage				1
-				image					"ui/menu/campaign_menu/map_button_hover"
-				drawColor				"255 255 255 0"
-			}
-		}
-		MapButtonFocusGroup
-		{
-			MapNameBG
-			{
-				ControlName				ImagePanel
-				xpos					1
-				ypos					1
-				zpos 					2
-				wide					156
-				tall					32
-				visible					0
-				scaleImage				1
-				image					"ui/menu/campaign_menu/map_name_background"
-			}
-
-			MapName
-			{
-				ControlName				Label
-				ypos 					7
-				zpos					3
-				wide					158
-				tall					89
-				visible					0
-				labelText				"Name"
-				font 					Default_9
-				textAlignment			north
-				allcaps					1
-				fgcolor_override		"204 234 255 255"
-			}
-
-			Focus
-			{
-				ControlName				ImagePanel
-				zpos 					1
-				wide					158
-				tall					89
-				visible					1
-				scaleImage				1
-				image					"ui/menu/campaign_menu/map_button_hover"
-			}
-		}
-		MapButtonLockedGroup
-		{
-			DarkenOverlay
-			{
-				ControlName				ImagePanel
-				wide					158
-				tall					89
-				visible					1
-				scaleImage				1
-				image					"ui/menu/campaign_menu/map_button_darken_overlay"
-			}
-		}
-
-		SubmenuButtonNormalGroup
-		{
-			FocusFade
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default_anim"
-				scaleImage				1
-				drawColor				"255 255 255 0"
-			}
-		}
-		SubmenuButtonFocusGroup
-		{
-			Focus
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default"
-				scaleImage				1
-			}
-		}
-		SubmenuButtonLockedGroup
-		{
-			TestImage1
-			{
-				ControlName				ImagePanel
-				xpos					27
-				ypos					0
-				wide					45
-				tall					45
-				visible					1
-				image					"ui/menu/common/locked_icon"
-				scaleImage				1
-			}
-		}
-		SubmenuButtonNewGroup
-		{
-			NewIcon
-			{
-				ControlName				ImagePanel
-				xpos					27
-				ypos					0
-				wide					45
-				tall					45
-				visible					1
-				image					"ui/menu/common/newitemicon"
-				scaleImage				1
-			}
-		}
-		SubmenuButtonSelectedGroup
-		{
-			TestImage1
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					540
-				tall					45
-				visible					1
-				image					"ui/menu/common/menu_hover_left_default"
-				scaleImage				1
-				drawColor				"255 255 255 40"
-			}
-		}
+                pin_corner_to_sibling	TOP_LEFT
+                pin_to_sibling			LeftButton
+                pin_to_sibling_corner	TOP_RIGHT
+            }
+        }
 
 		GridPageCircleButtonAlways
 		{
@@ -5728,84 +3252,6 @@ Scheme
 				image 					"vgui/gradient_circle"
 				visible					1
 				scaleImage				1
-			}
-		}
-
-		SP_TitanLoadout_Always
-		{
-			LevelImage
-			{
-				ControlName				ImagePanel
-				wide					%100
-				tall					%100
-				xpos 					0
-				ypos					0
-				zpos					100
-				image					"loadscreens/mp_arid_widescreen"
-				drawColor				"255 255 255 255"
-				visible					1
-				scaleImage				1
-			}
-
-			LevelImageFade
-			{
-				ControlName				ImagePanel
-				wide					%100
-				tall					%100
-				xpos 					0
-				ypos					0
-				zpos					100
-				image					"vgui/HUD/vignette"
-				drawColor				"255 255 255 0"
-				visible					1
-				scaleImage				1
-
-				pin_to_sibling			LevelImage
-				pin_corner_to_sibling	CENTER
-				pin_to_sibling_corner	CENTER
-			}
-
-		}
-
-		SP_Level_Hover
-		{
-			LevelImageHover
-			{
-				ControlName				ImagePanel
-				wide					%100
-				tall					%75
-				xpos 					0
-				ypos					3
-				zpos					100
-				image					"vgui/HUD/vignette"
-				drawColor				"255 255 255 255"
-				visible					1
-				scaleImage				1
-
-				pin_to_sibling			LevelImage
-				pin_corner_to_sibling	CENTER
-				pin_to_sibling_corner	CENTER
-			}
-		}
-
-		SP_Level_Locked
-		{
-			LevelImageLocked
-			{
-				ControlName				ImagePanel
-				wide					%100
-				tall					%75
-				xpos 					0
-				ypos					3
-				zpos					100
-				image					"vgui/HUD/capture_point_status_c_locked"
-				drawColor				"255 255 255 150"
-				visible					1
-				scaleImage				1
-
-				pin_to_sibling			LevelImage
-				pin_corner_to_sibling	CENTER
-				pin_to_sibling_corner	CENTER
 			}
 		}
 
@@ -5954,203 +3400,5 @@ Scheme
 				scaleImage				1
 			}
         }
-
-		CoopStoreButtonAlwaysGroup
-		{
-			BackgroundNormal
-			{
-				ControlName				ImagePanel
-				wide					56
-				tall					56
-				xpos 					0
-				ypos					0
-				zpos					101
-				image 					"ui/menu/titanDecal_menu/decalSlot_default"
-				visible					1
-				scaleImage				1
-			}
-
-			UnlockNormal
-			{
-				ControlName				ImagePanel
-				wide					40
-				tall					40
-				xpos 					8
-				ypos					8
-				zpos					110
-				image 					"models/titans/custom_decals/decal_pack_01/wings_custom_decal_menu"
-				visible					1
-				scaleImage				1
-			}
-		}
-
-		CoopStoreButtonFocusedGroup
-		{
-			BackgroundFocused
-			{
-				ControlName				ImagePanel
-				wide					56
-				tall					56
-				xpos 					0
-				ypos					0
-				zpos					102
-				image 					"ui/menu/titanDecal_menu/decalSlot_hover"
-				visible					1
-				scaleImage				1
-			}
-		}
-
-		CoopStoreButtonSelectedGroup
-		{
-			BackgroundSelected
-			{
-				ControlName				ImagePanel
-				wide					56
-				tall					56
-				xpos 					0
-				ypos					0
-				zpos					103
-				image 					"ui/menu/titanDecal_menu/decalSlot_selected"
-				visible					1
-				scaleImage				1
-			}
-		}
-
-		CoopStoreButtonLockedGroup
-		{
-			LockIcon
-			{
-				ControlName				ImagePanel
-				wide					30
-				tall					30
-				xpos					0
-				ypos					26
-				zpos 					120
-				image					"ui/menu/common/locked_icon"
-				visible					1
-				scaleImage				1
-			}
-		}
-
-		CoopStoreButtonNewGroup
-		{
-			NewIcon
-			{
-				ControlName				ImagePanel
-				wide					26
-				tall					26
-				xpos					2
-				ypos					28
-				zpos 					119
-				image					"ui/menu/coop_store/maxedItemIcon"
-				visible					1
-				scaleImage				1
-			}
-		}
-
-		StatsLevelListButtonNormalGroup
-		{
-			Image1
-			{
-				ControlName				ImagePanel
-				xpos					34
-				ypos					22
-				wide					202
-				tall					90
-				visible					1
-				image					"ui/menu/personal_stats/weapon_stats/ps_w_thumbnail_back"
-				scaleImage				1
-			}
-
-			LevelImageNormal
-			{
-				ControlName				ImagePanel
-				xpos					34
-				ypos					22
-				wide					202
-				tall					90
-				visible					1
-				image 					"ui/menu/challenges/challenge_box_dim_overlay"
-				scaleImage				1
-			}
-
-			DimOverlay
-			{
-				ControlName				ImagePanel
-				xpos					31
-				ypos					11
-				wide					207
-				tall					112
-				visible					1
-				image 					"ui/menu/challenges/challenge_box_dim_overlay"
-				scaleImage				1
-			}
-		}
-
-		StatsLevelListButtonFocusedGroup
-		{
-			Image1
-			{
-				ControlName				ImagePanel
-				xpos					34
-				ypos					22
-				wide					202
-				tall					90
-				visible					1
-				image					"ui/menu/personal_stats/weapon_stats/ps_w_thumbnail_back"
-				scaleImage				1
-			}
-
-			LevelImageFocused
-			{
-				ControlName				ImagePanel
-				xpos					34
-				ypos					22
-				wide					202
-				tall					90
-				visible					1
-				image 					"ui/menu/challenges/challenge_box_dim_overlay"
-				scaleImage				1
-			}
-		}
-
-		StatsLevelListButtonSelectedGroup
-		{
-			Image1
-			{
-				ControlName				ImagePanel
-				xpos					0
-				ypos					0
-				wide					315
-				tall					135
-				visible					1
-				image					"ui/menu/personal_stats/weapon_stats/ps_w_thumbnail_indicator"
-				scaleImage				1
-			}
-
-			LevelImageSelected
-			{
-				ControlName				ImagePanel
-				xpos					34
-				ypos					22
-				wide					202
-				tall					90
-				visible					1
-				image 					"ui/menu/challenges/challenge_box_dim_overlay"
-				scaleImage				1
-			}
-
-			Arrow
-			{
-				ControlName				ImagePanel
-				xpos					263
-				ypos					34
-				wide					45
-				tall					67
-				visible					1
-				image 					"ui/menu/personal_stats/weapon_stats/ps_w_main_arrow"
-				scaleImage				1
-			}
-		}
 	}
 }

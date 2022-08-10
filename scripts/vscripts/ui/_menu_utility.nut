@@ -28,7 +28,6 @@ global function Hud_SetKeyValue
 global function Hud_GetValueForKey
 
 global function TEMP_CursorInElementBounds
-global function PointInBounds
 
 global function GetMapImageForMapName
 
@@ -102,8 +101,8 @@ void function FlashElement( var menu, var element, int numberFlashes = 4, float 
 	Signal( element, "ElemFlash" )
 	EndSignal( element, "ElemFlash" )
 
-	int startAlpha = Hud_GetAlpha( element )
-	float flashInTime = 0.2 / speedScale
+	int startAlpha     = Hud_GetAlpha( element )
+	float flashInTime  = 0.2 / speedScale
 	float flashOutTime = 0.4 / speedScale
 
 	OnThreadEnd(
@@ -122,7 +121,7 @@ void function FlashElement( var menu, var element, int numberFlashes = 4, float 
 		wait flashInTime
 
 		if ( numberFlashes == 0 )
-			flashOutTime = 1.0    //
+			flashOutTime = 1.0                                   
 
 		Hud_FadeOverTime( element, 25, flashOutTime )
 		numberFlashes--
@@ -154,7 +153,7 @@ void function FancyLabelFadeIn( var menu, var label, int xOffset = 0, int yOffse
 	if ( delay > 0 )
 		wait delay
 
-	//
+	       
 	Hud_SetPos( label, basePos.x + xOffset, basePos.y + yOffset )
 	Hud_SetAlpha( label, 0 )
 	Hud_Show( label )
@@ -163,7 +162,7 @@ void function FancyLabelFadeIn( var menu, var label, int xOffset = 0, int yOffse
 		EmitUISound( soundAlias )
 
 	int goalAlpha = Hud_GetBaseAlpha( label )
-	//
+	          
 	if ( isPanel )
 		thread SetPanelAlphaOverTime( label, goalAlpha, duration )
 	else
@@ -195,7 +194,7 @@ void function FancyLabelFadeOut( var menu, var label, int xOffset = 0, int yOffs
 		}
 	)
 
-	//
+	          
 	if ( isPanel )
 		thread SetPanelAlphaOverTime( label, 0, duration )
 	else
@@ -238,9 +237,9 @@ void function SetTextCountUp( var menu, var label, value, string tickAlias = "",
 	if ( delay > 0 )
 		wait delay
 
-	float currentTime = Time()
+	float currentTime = UITime()
 	float startTime   = currentTime
-	float endTime     = Time() + duration
+	float endTime     = UITime() + duration
 
 	if ( tickAlias != "" )
 		thread LoopSoundForDuration( menu, tickAlias, duration )
@@ -259,7 +258,7 @@ void function SetTextCountUp( var menu, var label, value, string tickAlias = "",
 			Hud_SetText( label, str )
 
 		WaitFrame()
-		currentTime = Time()
+		currentTime = UITime()
 	}
 }
 
@@ -292,13 +291,13 @@ void function SetPanelAlphaOverTime( var panel, int alpha, float duration )
 	Signal( panel, "PanelAlphaOverTime" )
 	EndSignal( panel, "PanelAlphaOverTime" )
 
-	float startTime = Time()
-	float endTime = startTime + duration
-	int startAlpha = Hud_GetPanelAlpha( panel )
+	float startTime = UITime()
+	float endTime   = startTime + duration
+	int startAlpha  = Hud_GetPanelAlpha( panel )
 
-	while ( Time() <= endTime )
+	while ( UITime() <= endTime )
 	{
-		float a = GraphCapped( Time(), startTime, endTime, startAlpha, alpha )
+		float a = GraphCapped( UITime(), startTime, endTime, startAlpha, alpha )
 		Hud_SetPanelAlpha( panel, a )
 		WaitFrame()
 	}
@@ -365,10 +364,10 @@ void function PlotPointsOnGraph( var menu, int maxPoints, string dotNames, strin
 	int pointCount = minint( maxPoints, expect int( values.len() ) )
 	Assert( pointCount >= 2 )
 
-	//
-	//
+	                                                        
+	                      
 
-	//
+	                    
 	array<var> dots
 	array<var> lines
 	for ( int i = 0; i < maxPoints; i++ )
@@ -377,41 +376,41 @@ void function PlotPointsOnGraph( var menu, int maxPoints, string dotNames, strin
 		lines.append( GetElem( menu, lineNames + i ) )
 	}
 
-	//
-	//
-	int graphWidth = REPLACEHud_GetBasePos( dots[1] ).x - REPLACEHud_GetBasePos( dots[0] ).x
-	int graphHeight = REPLACEHud_GetBasePos( dots[0] ).y - REPLACEHud_GetBasePos( dots[1] ).y
+	                   
+	                                                                                                             
+	int graphWidth    = REPLACEHud_GetBasePos( dots[1] ).x - REPLACEHud_GetBasePos( dots[0] ).x
+	int graphHeight   = REPLACEHud_GetBasePos( dots[0] ).y - REPLACEHud_GetBasePos( dots[1] ).y
 	UIPos graphOrigin = REPLACEHud_GetBasePos( dots[0] )
 	graphOrigin.x += int( Hud_GetBaseWidth( dots[0] ) * 0.5 )
 	graphOrigin.y += int( Hud_GetBaseHeight( dots[0] ) * 0.5 )
 	float dotSpacing = graphWidth / float( pointCount - 1 )
 
-	//
-	//
+	                                     
+	                                     
 
-	//
-	/*
+	                                  
+	  
+	                          
+	 
+		                
+		                         
+		                                               
+		                           
+		 
+			                             
+				                      
+		 
+		                                      
+	 
+	  
 
+	  
+	                                                                 
+	                                                  
+	                                       
+	  
 
-
-
-
-
-
-
-
-
-
-
-*/
-
-	/*
-
-
-
-*/
-
-	//
+	                
 	array<float[2]> dotPositions
 	for ( int i = 0; i < maxPoints; i++ )
 	{
@@ -435,25 +434,25 @@ void function PlotPointsOnGraph( var menu, int maxPoints, string dotNames, strin
 		dotPositions.append( dotPosition )
 	}
 
-	/*
+	  
+	                                         
+	                                                                                   
+	                                                                                         
+	                                       
+	                                                                                                             
+	                                    
+	                      
 
+	                             
+	                                                                                   
+	                                                                               
+	                                       
+	                                                                                                             
+	                                    
+	                      
+	  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-	//
+	                              
 	for ( int i = 1; i < maxPoints; i++ )
 	{
 		var line = lines[i]
@@ -464,21 +463,21 @@ void function PlotPointsOnGraph( var menu, int maxPoints, string dotNames, strin
 			continue
 		}
 
-		//
-		float[2] startPos = dotPositions[i-1]
-		float[2] endPos = dotPositions[i]
-		float offsetX = endPos[0] - startPos[0]
-		float offsetY = endPos[1] - startPos[1]
-		float angle = atan( offsetX / offsetY ) * ( 180 / PI )
+		                                          
+		float[2] startPos = dotPositions[i - 1]
+		float[2] endPos   = dotPositions[i]
+		float offsetX     = endPos[0] - startPos[0]
+		float offsetY     = endPos[1] - startPos[1]
+		float angle       = atan( offsetX / offsetY ) * (180 / PI)
 
-		//
+		                  
 		float length = sqrt( offsetX * offsetX + offsetY * offsetY )
 
-		//
-		int posX = int( endPos[0] - ( offsetX / 2.0 ) - ( length / 2.0 ) )
-		int posY = int( endPos[1] - ( offsetY / 2.0 ) - ( Hud_GetBaseHeight( line ) / 2.0 ) )
+		                                                
+		int posX = int( endPos[0] - (offsetX / 2.0) - (length / 2.0) )
+		int posY = int( endPos[1] - (offsetY / 2.0) - (Hud_GetBaseHeight( line ) / 2.0) )
 
-		//
+		                            
 		Hud_SetWidth( line, int( length ) )
 		Hud_SetRotation( line, angle + 90.0 )
 		Hud_SetPos( line, posX, posY )
@@ -486,20 +485,20 @@ void function PlotPointsOnGraph( var menu, int maxPoints, string dotNames, strin
 	}
 }
 
-//
+                                                                                    
 void function PlotKDPointsOnGraph( var menu, int graphIndex, array<float> values, float dottedAverage )
 {
-	//
-	//
+	                     
+	                      
 
-	var background = GetElem( menu, "KDRatioLast10Graph" + graphIndex )
-	int graphHeight = Hud_GetBaseHeight( background )
+	var background    = GetElem( menu, "KDRatioLast10Graph" + graphIndex )
+	int graphHeight   = Hud_GetBaseHeight( background )
 	UIPos graphOrigin = REPLACEHud_GetAbsPos( background )
 	graphOrigin.y += graphHeight
 	float dotSpacing = Hud_GetBaseWidth( background ) / 9.0
 	array<float[2]> dotPositions
 
-	//
+	                                  
 	float graphMin = 0.0
 	float graphMax = max( dottedAverage, 1.0 )
 	foreach ( value in values )
@@ -509,11 +508,11 @@ void function PlotKDPointsOnGraph( var menu, int graphIndex, array<float> values
 	}
 	graphMax += graphMax * 0.1
 
-	var maxLabel = GetElem( menu, "Graph" + graphIndex + "ValueMax" )
+	var maxLabel          = GetElem( menu, "Graph" + graphIndex + "ValueMax" )
 	string maxValueString = format( "%.1f", graphMax )
 	Hud_SetText( maxLabel, maxValueString )
 
-	//
+	                
 	for ( int i = 0; i < MAX_DOTS_ON_GRAPH; i++ )
 	{
 		var dot = GetElem( menu, "Graph" + graphIndex + "Dot" + i )
@@ -525,38 +524,37 @@ void function PlotKDPointsOnGraph( var menu, int graphIndex, array<float> values
 		}
 
 		float dotOffset = GraphCapped( values[i], graphMin, graphMax, 0, graphHeight )
-		int posX = int( graphOrigin.x - ( Hud_GetBaseWidth( dot ) * 0.5 ) + ( dotSpacing * i ) )
-		int posY = int( graphOrigin.y - ( Hud_GetBaseHeight( dot ) * 0.5 ) - dotOffset )
+		int posX        = int( graphOrigin.x - (Hud_GetBaseWidth( dot ) * 0.5) + (dotSpacing * i) )
+		int posY        = int( graphOrigin.y - (Hud_GetBaseHeight( dot ) * 0.5) - dotOffset )
 		Hud_SetPos( dot, posX, posY )
 		Hud_Show( dot )
 
 		float[2] dotPosition
-		dotPosition[0] = posX + ( Hud_GetBaseWidth( dot ) * 0.5 )
-		dotPosition[1] = posY + ( Hud_GetBaseHeight( dot ) * 0.5 )
+		dotPosition[0] = posX + (Hud_GetBaseWidth( dot ) * 0.5)
+		dotPosition[1] = posY + (Hud_GetBaseHeight( dot ) * 0.5)
 		dotPositions.append( dotPosition )
 	}
-
 	{
-		//
-		var dottedLine = GetElem( menu, "KDRatioLast10Graph" + graphIndex + "DottedLine0" )
+		                                         
+		var dottedLine         = GetElem( menu, "KDRatioLast10Graph" + graphIndex + "DottedLine0" )
 		float dottedLineOffset = GraphCapped( dottedAverage, graphMin, graphMax, 0, graphHeight )
-		int posX = graphOrigin.x
-		int posY = graphOrigin.y - int( ( Hud_GetBaseHeight( dottedLine ) * 0.5 ) - dottedLineOffset )
+		int posX               = graphOrigin.x
+		int posY               = graphOrigin.y - int( (Hud_GetBaseHeight( dottedLine ) * 0.5) - dottedLineOffset )
 		Hud_SetPos( dottedLine, posX, posY )
 		Hud_Show( dottedLine )
 	}
 
 	{
-		//
-		var dottedLine = GetElem( menu, "KDRatioLast10Graph" + graphIndex + "DottedLine1" )
+		                             
+		var dottedLine         = GetElem( menu, "KDRatioLast10Graph" + graphIndex + "DottedLine1" )
 		float dottedLineOffset = GraphCapped( 0.0, graphMin, graphMax, 0, graphHeight )
-		int posX = graphOrigin.x
-		int posY = graphOrigin.y - int( ( Hud_GetBaseHeight( dottedLine ) * 0.5 ) - dottedLineOffset )
+		int posX               = graphOrigin.x
+		int posY               = graphOrigin.y - int( (Hud_GetBaseHeight( dottedLine ) * 0.5) - dottedLineOffset )
 		Hud_SetPos( dottedLine, posX, posY )
 		Hud_Show( dottedLine )
 	}
 
-	//
+	                              
 	for ( int i = 1; i < MAX_DOTS_ON_GRAPH; i++ )
 	{
 		var line = GetElem( menu, "Graph" + graphIndex + "Line" + i )
@@ -567,21 +565,21 @@ void function PlotKDPointsOnGraph( var menu, int graphIndex, array<float> values
 			continue
 		}
 
-		//
+		                                          
 		float[2] startPos = dotPositions[i - 1]
-		float[2] endPos = dotPositions[i]
-		float offsetX = endPos[0] - startPos[0]
-		float offsetY = endPos[1] - startPos[1]
-		float angle = atan( offsetX / offsetY ) * (180 / PI)
+		float[2] endPos   = dotPositions[i]
+		float offsetX     = endPos[0] - startPos[0]
+		float offsetY     = endPos[1] - startPos[1]
+		float angle       = atan( offsetX / offsetY ) * (180 / PI)
 
-		//
+		                  
 		float length = sqrt( offsetX * offsetX + offsetY * offsetY )
 
-		//
+		                                                
 		int posX = int( endPos[0] - (offsetX / 2.0) - (length / 2.0) )
 		int posY = int( endPos[1] - (offsetY / 2.0) - (Hud_GetBaseHeight( line ) / 2.0) )
 
-		//
+		                            
 		Hud_SetWidth( line, int( length ) )
 		Hud_SetRotation( line, angle + 90.0 )
 		Hud_SetPos( line, posX, posY )
@@ -612,6 +610,7 @@ void function RHud_SetText( var element, string text )
 		Hud_SetText( element, text )
 }
 
+
 void function ButtonsSetSelected( array<var> buttons, bool selected )
 {
 	foreach ( button in buttons )
@@ -632,32 +631,20 @@ var function Hud_GetValueForKey( var element, string keyName )
 	return element.s[keyName]
 }
 
+
 bool function TEMP_CursorInElementBounds( var element )
 {
-	vector cursorPos = GetCursorPosition()
+	vector cursorPos  = GetCursorPosition()
 	UISize screenSize = GetScreenSize()
 	cursorPos.x *= screenSize.width / 1920.0
 	cursorPos.y *= screenSize.height / 1080.0
 
 	UISize elementSize = REPLACEHud_GetSize( element )
-	UIPos elementPos = REPLACEHud_GetAbsPos( element )
+	UIPos elementPos   = REPLACEHud_GetAbsPos( element )
 
 	return PointInBounds( cursorPos, elementPos, elementSize )
 }
 
-bool function PointInBounds( vector point, UIPos pos, UISize size )
-{
-	if ( point.x < pos.x )
-		return false
-	if ( point.y < pos.y )
-		return false
-	if ( point.x > pos.x + size.width )
-		return false
-	if ( point.y > pos.y + size.height )
-		return false
-
-	return true
-}
 
 asset function GetMapImageForMapName( string mapName )
 {
@@ -666,3 +653,5 @@ asset function GetMapImageForMapName( string mapName )
 
 	return $""
 }
+
+

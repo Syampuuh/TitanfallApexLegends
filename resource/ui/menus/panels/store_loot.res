@@ -22,10 +22,14 @@
 		ControlName			RuiButton
 		classname           "MenuButton"
 		xpos			    0
+		xpos_nx_handheld    176   [$NX || $NX_UI_PC]
 		ypos			    16
+		ypos_nx_handheld    12   [$NX || $NX_UI_PC]
 		zpos			    4
 		wide			    832
+		wide_nx_handheld    620  [$NX || $NX_UI_PC]
 		tall			    96
+		tall_nx_handheld    104  [$NX || $NX_UI_PC]
 		visible			    1
 		labelText           ""
         rui					"ui/generic_loot_button.rpak"
@@ -45,8 +49,12 @@
 	{
 	    ControlName             RuiPanel
 		ypos			        -32
+		ypos_nx_handheld        -22  [$NX || $NX_UI_PC]
+		xpos_nx_handheld        58   [$NX || $NX_UI_PC]
         wide					832
+        wide_nx_handheld		852  [$NX || $NX_UI_PC]
         tall					768
+        tall_nx_handheld		788  [$NX || $NX_UI_PC]
         rui                     "ui/store_panel_loot_art.rpak"
         visible					1
 
@@ -60,9 +68,13 @@
 	{
 		ControlName			CNestedPanel
 		ypos			    -32
+		ypos_nx_handheld    -22  [$NX || $NX_UI_PC]
+		xpos_nx_handheld    60   [$NX || $NX_UI_PC]
 		zpos			    4
 		wide			    832
+		wide_nx_handheld    970  [$NX || $NX_UI_PC]
 		tall			    656
+		tall_nx_handheld    788  [$NX || $NX_UI_PC]
 		visible			    1
 		labelText           ""
 		proportionalToParent	1

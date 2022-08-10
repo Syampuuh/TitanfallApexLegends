@@ -28,7 +28,9 @@ resource/ui/menus/panels/tabs_settings.res
 		ControlName				RuiPanel
 		xpos                    -80
 		wide                    76
+		wide_nx_handheld        116  [$NX || $NX_UI_PC]
 		tall					28
+		tall_nx_handheld		38   [$NX || $NX_UI_PC]
 		visible					1
 		rui                     "ui/shoulder_navigation_shortcut_angle.rpak"
 		activeInputExclusivePaint	gamepad
@@ -44,6 +46,7 @@ resource/ui/menus/panels/tabs_settings.res
 		InheritProperties		TabButtonSettings
 		scriptID				0
 		xpos                    -650 //-700
+		xpos_nx_handheld        -400   [$NX || $NX_UI_PC]
 		pin_to_sibling			Anchor
 		pin_corner_to_sibling	TOP_LEFT
 		pin_to_sibling_corner	TOP
@@ -143,9 +146,12 @@ resource/ui/menus/panels/tabs_settings.res
 	RightNavButton
 	{
 		ControlName				RuiPanel
-		xpos                    56
+		xpos                    -23
+		xpos_nx_handheld        -33   [$NX || $NX_UI_PC]
 		wide                    76
+		wide_nx_handheld        116   [$NX || $NX_UI_PC]
 		tall					28
+		tall_nx_handheld		38    [$NX || $NX_UI_PC]
 		visible					1
 		rui                     "ui/shoulder_navigation_shortcut_angle.rpak"
 		activeInputExclusivePaint	gamepad

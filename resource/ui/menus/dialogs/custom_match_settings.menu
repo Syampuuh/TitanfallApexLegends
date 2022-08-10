@@ -1,0 +1,204 @@
+resource/ui/menus/dialogs/custom_match_settings.menu
+{
+	menu
+	{
+		ControlName				Frame
+		xpos					0
+		ypos					0
+		zpos					3
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		PaintBackgroundType		1
+		infocus_bgcolor_override	"64 64 64 0"
+		outoffocus_bgcolor_override	"64 64 64 0"
+
+        ScreenFrame
+        {
+            ControlName				Label
+            wide					%100
+            tall					%100
+            labelText				""
+            visible				    0
+            bgcolor_override        "255 255 0 10"
+            paintbackground         1
+        }
+
+        PanelFrame
+        {
+            ControlName				Label
+            xpos                    0
+            ypos                    -60
+			wide					1800
+			tall					980
+            labelText				""
+            visible				    0
+            bgcolor_override        "255 255 0 64"
+            paintbackground         1
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        ScreenBlur
+        {
+            ControlName				Label
+            labelText               ""
+            visible                 0
+        }
+
+        UpperPanel
+        {
+            ControlName				Label
+			wide					1800
+			tall					72
+            labelText				""
+            visible				    0
+            bgcolor_override        "255 255 0 64"
+            paintbackground         1
+
+            pin_to_sibling			PanelFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        LowerPanel
+        {
+            ControlName				Label
+            ypos                    30
+			wide					1800
+			tall					820
+            labelText				""
+            visible				    0
+            bgcolor_override        "255 255 0 64"
+            paintbackground         1
+
+            pin_to_sibling			UpperPanel
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	BOTTOM
+        }
+
+        LowerPanelBg
+        {
+            ControlName				ImagePanel
+			wide					1832
+			tall					820
+            visible					1
+            enabled 				1
+            scaleImage				1
+            image					"vgui/HUD/white"
+            drawColor				"0 0 0 191"
+
+            pin_to_sibling			LowerPanel
+            pin_corner_to_sibling	CENTER
+            pin_to_sibling_corner	CENTER
+        }
+
+		MenuHeader
+        {
+            ControlName				RuiPanel
+            wide					1800
+            tall					208
+            visible				    1
+            rui                     "ui/generic_menu_header.rpak"
+
+            ruiArgs
+            {
+                menuName            "#CUSTOM_MATCH_SETTINGS_TITLE"
+            }
+
+            pin_to_sibling			UpperPanel
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        NameChangePanel
+        {
+            ControlName				CNestedPanel
+            wide					480
+            tall					80
+            visible					1
+            enabled 				1
+
+            pin_to_sibling			UpperPanel
+            pin_corner_to_sibling	LEFT
+            pin_to_sibling_corner	LEFT
+
+            controlSettingsFile     "resource/ui/menus/panels/custom_match_name_change.res"
+        }
+
+        ModeSelectPanel
+        {
+            ControlName				CNestedPanel
+            xpos					0
+            ypos					0
+            wide                    500
+            wide_nx_handheld        340			[$NX || $NX_UI_PC]
+            tall					772
+            visible					1
+            enabled 				1
+
+            navDown                 SubmitButton
+
+            pin_to_sibling			LowerPanel
+            pin_corner_to_sibling	LEFT
+            pin_to_sibling_corner	LEFT
+
+            controlSettingsFile     "resource/ui/menus/panels/custom_match_mode_select.res"
+        }
+
+        SettingsDivider
+        {
+            ControlName				ImagePanel
+            xpos                    10
+            ypos                    0
+			wide					2
+			tall					720
+            visible					1
+            enabled 				1
+            scaleImage				1
+            image					"vgui/HUD/white"
+            drawColor				"255 255 255 127"
+
+            pin_to_sibling			ModeSelectPanel
+            pin_corner_to_sibling	CENTER
+            pin_to_sibling_corner	RIGHT
+        }
+
+        SettingsSelectPanel
+        {
+            ControlName				CNestedPanel
+            xpos					20
+            ypos					0
+            wide                    1290
+            wide_nx_handheld        1440 		[$NX || $NX_UI_PC]
+            tall					772
+            visible					1
+            enabled 				1
+
+            navDown                 SubmitButton
+
+            pin_to_sibling			ModeSelectPanel
+            pin_corner_to_sibling	LEFT
+            pin_to_sibling_corner	RIGHT
+
+            controlSettingsFile     "resource/ui/menus/panels/custom_match_settings_select.res"
+        }
+
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			InheritProperties       FooterButtons
+		}
+
+	    ToolTip
+	    {
+	        ControlName				RuiPanel
+	        InheritProperties       ToolTip
+	    }
+	}
+}

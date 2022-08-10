@@ -37,6 +37,21 @@ resource/ui/menus/lobby.menu
             ControlName				Label
 			wide					%95
 			tall					%87.32
+			tall_nx_handheld		%89       [$NX || $NX_UI_PC]
+			labelText				""
+            bgcolor_override        "0 0 0 0"
+            paintbackground         1
+
+			pin_to_sibling			TabsCommon
+			pin_corner_to_sibling	TOP
+			pin_to_sibling_corner	BOTTOM
+        }
+
+        PanelFrame
+        {
+            ControlName				Label
+			wide					1824
+			tall					%87.32
 			labelText				""
             bgcolor_override        "0 0 0 0"
             paintbackground         1
@@ -56,16 +71,62 @@ resource/ui/menus/lobby.menu
 		{
 			ControlName				CNestedPanel
 			classname				"TabsCommonClass"
-			zpos					1
-			wide					f0
+			zpos					3
+			wide					1920//f0
 			tall					84
 			visible					1
 			controlSettingsFile		"resource/ui/menus/panels/tabs_lobby.res"
+			clip					0
 
 			pin_to_sibling			ScreenFrame
 			pin_corner_to_sibling	TOP
 			pin_to_sibling_corner	TOP
 		}
+
+		TEMPTab0ButtonExtender
+		{
+			ControlName				RuiButton
+			wide        500
+			tall        118
+			ypos        0
+			rui         "ui/blank_button.rpak"
+
+			visible     0
+			enabled     1
+			zpos        2
+
+			pin_to_sibling          TabsCommon
+			pin_corner_to_sibling	TOP_LEFT
+			pin_to_sibling_corner	TOP_LEFT
+		}
+
+                 
+        MinimapCoords
+        {
+            ControlName				RuiPanel
+	        wide					%100
+	        tall					%100
+	        zpos					10
+	        visible					0
+	        enabled 				0
+	        scaleImage				1
+	        rui                     "ui/minimap_square_coords.rpak"
+	        drawColor				"255 255 255 255"
+        }
+
+		MinimapID
+		{
+            ControlName				RuiPanel
+	        wide					%100
+	        tall					%100
+	        zpos					11
+	        visible					0
+	        enabled 				0
+	        scaleImage				1
+	        rui                     "ui/minimap_id.rpak"
+	        drawColor				"255 255 255 255"
+		}
+      
 
         Logo
         {
@@ -75,6 +136,8 @@ resource/ui/menus/lobby.menu
             pin_to_sibling			TabsCommon
             pin_corner_to_sibling	TOP_LEFT
             pin_to_sibling_corner	TOP_LEFT
+
+            visible					0
         }
 
         ToolTip
@@ -87,7 +150,7 @@ resource/ui/menus/lobby.menu
 		{
 			ControlName             RuiButton //RuiPanel can't get focus for tooltips
 			InheritProperties       UserInfo
-	        xpos                    "%-2.5"
+			ypos_nx_handheld        0     [$NX || $NX_UI_PC]
 	        zpos                    4
 
 	        pin_to_sibling			TabsCommon
@@ -99,12 +162,30 @@ resource/ui/menus/lobby.menu
 		{
 			ControlName				CNestedPanel
 			InheritProperties       FooterButtons
-			zpos					0
+			zpos					1
+			mouseEnabled			0
 			//ypos					r300
 			//wide                    %35 // override default width otherwise some panel buttons overlap and can't be clicked
 		}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	    SeasonPanel
+	    {
+		    ControlName				CNestedPanel
+		    classname				"TabPanelClass"
+		    xpos					0
+		    ypos					0
+			wide					%100
+			tall					904
+		    visible					0
+		    tabPosition             1
+		    controlSettingsFile		"resource/ui/menus/panels/season.res"
+
+			pin_to_sibling			TabsCommon
+			pin_corner_to_sibling	TOP
+			pin_to_sibling_corner	BOTTOM
+	    }
 
 	    PlayPanel
 	    {
@@ -112,8 +193,10 @@ resource/ui/menus/lobby.menu
 		    classname				"TabPanelClass"
 		    xpos					0
 		    ypos					0
-			wide					%95
+			wide					1824//%95
+			wide_nx_handheld		%99			[$NX || $NX_UI_PC]
 			tall					%87.32
+			tall_nx_handheld		%91.5		[$NX || $NX_UI_PC]
 		    visible					0
 		    tabPosition             1
 		    controlSettingsFile		"resource/ui/menus/panels/play.res"
@@ -123,6 +206,24 @@ resource/ui/menus/lobby.menu
 			pin_to_sibling_corner	BOTTOM
 	    }
 
+        ClubLandingPanel
+        {
+            ControlName				CNestedPanel
+            classname				"TabPanelClass"
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					884     [!$NX && !$NX_UI_PC]
+            tall					1200    [$NX || $NX_UI_PC]
+            visible					0
+            tabPosition             1
+            controlSettingsFile		"resource/ui/menus/panels/club_landing.res"
+
+            pin_to_sibling			TabsCommon
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	BOTTOM
+        }
+
 	    CharactersPanel
 	    {
 		    ControlName				CNestedPanel
@@ -131,6 +232,7 @@ resource/ui/menus/lobby.menu
 		    ypos					0
 			wide					1824
 			tall					904
+			tall_nx_handheld		1200    [$NX || $NX_UI_PC]
 		    visible					0
 		    tabPosition             1
 		    controlSettingsFile		"resource/ui/menus/panels/characters.res"
@@ -146,8 +248,10 @@ resource/ui/menus/lobby.menu
 		    classname				"TabPanelClass"
 		    xpos					0
 		    ypos					0
+		    ypos_nx_handheld		-50	    [$NX || $NX_UI_PC]
 			wide					1824
 			tall					904
+			tall_nx_handheld		1004    [$NX || $NX_UI_PC]
 		    visible					0
 		    tabPosition             1
 		    controlSettingsFile		"resource/ui/menus/panels/armory.res"
@@ -164,7 +268,7 @@ resource/ui/menus/lobby.menu
 		    xpos					0
 		    ypos					0
 			wide					%100
-			tall					864
+			tall					%100
 		    visible					0
 		    tabPosition             1
 		    controlSettingsFile		"resource/ui/menus/panels/store.res"
@@ -174,40 +278,69 @@ resource/ui/menus/lobby.menu
 			pin_to_sibling_corner	BOTTOM
 	    }
 
-	    PassPanel
-	    {
-		    ControlName				CNestedPanel
-		    classname				"TabPanelClass"
-		    xpos					0
-		    ypos					0
-			wide					1824
-			tall					904
-		    visible					1
-		    tabPosition             1
-		    controlSettingsFile		"resource/ui/menus/panels/battlepass.res"
-
-			pin_to_sibling			TabsCommon
-			pin_corner_to_sibling	TOP
-			pin_to_sibling_corner	BOTTOM
-	    }
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	    LobbyServerIDText
+	    {
+	        ControlName				Label
+	        auto_wide_tocontents	1
+	        tall					27
+	        visible					1
+	        labelText				""
+	        font					DefaultBold_27_DropShadow
+	        allcaps					0
+	        fgcolor_override		"222 222 222 255"
+
+	        ypos                    10
+	        xpos                    0
+	        zpos					5
+
+	        pin_to_sibling			PanelFrame
+	        pin_corner_to_sibling	TOP_LEFT
+	        pin_to_sibling_corner	BOTTOM_LEFT
+	    }
 
         GameMenuButton
         {
             ControlName				RuiButton
             InheritProperties		CornerButton
+            zpos                    5
+			xpos_nx_handheld		40		[$NX || $NX_UI_PC]
+			ypos_nx_handheld		45		[$NX || $NX_UI_PC]
 
-            pin_to_sibling			MarginFrame
+            pin_to_sibling			PanelFrame
             pin_corner_to_sibling	BOTTOM_RIGHT
             pin_to_sibling_corner	BOTTOM_RIGHT
         }
+
+        DirectX12BetaText
+	    {
+	        ControlName				Label
+	        auto_wide_tocontents	1
+	        tall					27
+	        visible					1
+	        labelText				""
+	        font					DefaultBold_27_DropShadow
+	        allcaps					0
+	        fgcolor_override		"222 222 222 255"
+
+	        ypos                    10
+	        xpos                    0
+	        zpos					5
+
+	        pin_to_sibling			GameMenuButton
+	        pin_corner_to_sibling	TOP_RIGHT
+	        pin_to_sibling_corner	BOTTOM_RIGHT
+	    }
+
 
         SocialButton
         {
             ControlName				RuiButton
             InheritProperties		CornerButton
             xpos                    13
+            xpos_nx_handheld        11		[$NX || $NX_UI_PC]
+            zpos                    5
 
             pin_to_sibling			GameMenuButton
             pin_corner_to_sibling	BOTTOM_RIGHT
@@ -219,10 +352,27 @@ resource/ui/menus/lobby.menu
             ControlName				RuiButton
             InheritProperties		CornerButton
             xpos                    13
+            xpos_nx_handheld        11		[$NX || $NX_UI_PC]
+            zpos                    5
 
             pin_to_sibling			SocialButton
             pin_corner_to_sibling	BOTTOM_RIGHT
             pin_to_sibling_corner	BOTTOM_LEFT
+        }
+
+        NewsButtonStatusIcon
+        {
+            ControlName				RuiPanel
+            xpos					-30
+            ypos                    30
+            zpos                    7
+            rui                     "ui/promo_status_icon.rpak"
+            wide					30
+            tall					30
+
+            pin_to_sibling			NewsButton
+            pin_corner_to_sibling	TOP_RIGHT
+            pin_to_sibling_corner	TOP_RIGHT
         }
 
         PostGameButton
@@ -230,22 +380,48 @@ resource/ui/menus/lobby.menu
             ControlName				RuiButton
             InheritProperties		CornerButton
             xpos                    13
+            xpos_nx_handheld        11		[$NX || $NX_UI_PC]
+            zpos                    5
 
             pin_to_sibling			NewsButton
             pin_corner_to_sibling	BOTTOM_RIGHT
             pin_to_sibling_corner	BOTTOM_LEFT
         }
 
-        DatacenterButton
-        {
-            ControlName				RuiButton
-            InheritProperties		CornerButton
-            xpos                    13
+        //DatacenterButton
+        //{
+        //    ControlName				RuiButton
+        //    InheritProperties		CornerButton
+        //    xpos                    13
+        //    xpos_nx_handheld        11		[$NX || $NX_UI_PC]
+        //    zpos                    5
+        //    visible                 0
+        //    pin_to_sibling			PostGameButton
+        //    pin_corner_to_sibling	BOTTOM_RIGHT
+        //    pin_to_sibling_corner	BOTTOM_LEFT
+        //}
 
-            pin_to_sibling			PostGameButton
-            pin_corner_to_sibling	BOTTOM_RIGHT
-            pin_to_sibling_corner	BOTTOM_LEFT
-        }
+        BonusXp
+		{
+			ControlName			    RuiButton
+			xpos                    13
+			xpos_nx_handheld        11		[$NX || $NX_UI_PC]
+			zpos                    5
+
+			sound_focus             "" // this isn't a button, but RUIPanel can't get/lose focus for tooltips
+			sound_accept            ""
+
+			wide				    70
+			wide_nx_handheld	    115		[$NX || $NX_UI_PC]
+			tall				    70
+			tall_nx_handheld 	    115		[$NX || $NX_UI_PC]
+			visible				    1
+			rui 					"ui/lobby_xp_bonus.rpak"
+
+			pin_to_sibling			PostGameButton
+			pin_corner_to_sibling	BOTTOM_RIGHT
+			pin_to_sibling_corner	BOTTOM_LEFT
+		}
 
         MatchmakingStatus
         {
@@ -257,27 +433,21 @@ resource/ui/menus/lobby.menu
             pin_to_sibling_corner	BOTTOM
         }
 
-        AccessibilityHint
+        SocialPopupPanel
         {
-            ControlName             RuiPanel
-            classname               "MenuButton"
-            ypos                    12
-            wide                    300
-            tall                    40
-            visible                 1
+			ControlName				CNestedPanel
+			xpos					0
+			ypos					-220
+			zpos					5
+			wide					560
+			tall					184
+			visible					0
+			controlSettingsFile		"resource/ui/menus/panels/social_popup.res"
+			clip					1
 
-            rui                     "ui/accessibility_hint.rpak"
-
-            ruiArgs
-            {
-                buttonText          "#MENU_ACCESSIBILITY_CHAT_HINT" [!$PC]
-                buttonText          "#MENU_ACCESSIBILITY_CHAT_HINT_PC" [$PC] // controller chat option only on console
-                buttonTextPC        "#MENU_ACCESSIBILITY_CHAT_HINT_PC"
-            }
-
-            pin_to_sibling			GameMenuButton
-            pin_corner_to_sibling	BOTTOM_RIGHT
-            pin_to_sibling_corner	TOP_RIGHT
+			pin_to_sibling			TabsCommon
+			pin_corner_to_sibling	TOP_LEFT
+			pin_to_sibling_corner	TOP_LEFT
         }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

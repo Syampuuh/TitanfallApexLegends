@@ -1,0 +1,1831 @@
+global function SeasonQuest_SharedInit
+global function SeasonQuest_RegisterNetworking
+global function SeasonQuest_GetStatusForComicPageIndex
+global function SeasonQuest_GetStatusForMissionIndex
+global function SeasonQuest_AllTreasurePacksHaveBeenCollectedForPlayer
+
+global function SeasonQuest_GetActiveSeasonQuest
+global function SeasonQuest_GetGet
+
+global function SeasonQuest_GetTreasurePacksLatestPickupTimeForPlayer
+
+global function SeasonQuest_GetComicPagesMaxCount
+global function SeasonQuest_GetComicPageForIndex
+global function SeasonQuest_GetComicPanelDataForIndex
+global function SeasonQuest_GetComicPagesReadByPlayer
+global function SeasonQuest_GetComicPagesUnlockedByPlayer
+                          
+global function SeasonQuest_GetUnlockTimeForComicIndex
+      
+
+global function SeasonQuest_GetMissionsMaxCount
+global function SeasonQuest_GetCompletionRewards
+global function SeasonQuest_GetMissionRewardsForIndex
+global function SeasonQuest_GetPlaylistForMissionIndex
+global function SeasonQuest_GetMissionIndexForPlaylistName
+global function SeasonQuest_GetMissionsCompletedForPlayer
+global function SeasonQuest_GetUnlockTimeForMissionIndex
+global function SeasonQuest_GetTreasurePacksMaxCount
+global function SeasonQuest_GetTreasurePacksMaxPurchableCountForPlayer
+global function SeasonQuest_GetTreasurePackIndexRequiredForMission
+global function SeasonQuest_GetTreasurePackIndexRequiredForComicPage
+global function SeasonQuest_GetTreasurePacksCountForPlayer
+global function SeasonQuest_HaveStartedQuest
+global function SeasonQuest_GetEarnedTreasurePacksCountForPlayer
+global function SeasonQuest_GetPurchasedTreasurePacksCountForPlayer
+global function SeasonQuest_GetGRXOfferLocation
+global function SeasonQuest_GetTreasureBoxPurchaseFlav
+global function SeasonQuest_GetTreasurePackRewardsForIndex
+global function SeasonQuest_GetGoalModel
+global function SeasonQuest_GetMissionForIndex
+global function SeasonQuest_GetLastMissionUnlockTime
+
+global function SeasonQuest_GetLoreSequencePrologue
+global function SeasonQuest_GetLoreSequenceEpilogue
+global function SeasonQuest_GetLoreSequenceStoryChapterDataForMissionIndex
+global function SeasonQuest_GetLoreSequenceStoryChapterNameForMissionIndex
+global function SeasonQuest_GetLoreSequenceQuestItemDataForMissionIndex
+global function SeasonQuest_GetLoreSequenceQuestItemNameForMissionIndex
+global function SeasonQuest_GetQuestItemNameForMissionIndex
+global function SeasonQuest_GetQuestItemDescForMissionIndex
+global function SeasonQuest_GetQuestItemIconForMissionIndex
+
+global function SeasonQuest_Tab_GetLongDesc
+global function SeasonQuest_Tab_GetCornerImage
+global function SeasonQuest_Tab_GetBasicInfoHeader
+global function SeasonQuest_Tab_GetBasicInfoItemText
+global function SeasonQuest_Tab_GetArtifactProgressHeader
+
+global function Comic_GetPreviewImage
+
+#if SERVER
+                                                                   
+                                                          
+                                                                     
+                                                
+
+                                                             
+                                                       
+                                                         
+                                                                  
+                                                           
+#endif          
+
+#if CLIENT
+global function SeasonQuest_UpdateMinimapRui
+global function SeasonQuest_GetCurrentPackCountDesc
+global function SCB_DoGotTreasurePackNotify
+#endif          
+
+#if UI
+global function SeasonQuest_GetComicPagesIconForIndex
+
+global function SeasonQuest_GetMissionIconForMissionIndex
+global function TryDisplayTreasureBoxRewards
+global function DisplayTreasureBoxRewards
+global function DisplayQuestMissionRewards
+global function TryDisplayQuestFinalRewards
+global function DisplayQuestFinalRewards
+global function SeasonQuest_AcknowledgeHaveStartedQuest
+global function SeasonQuest_AcknowledgeQuestComicRead
+global function SeasonQuest_AcknowledgeQuestMissionRead
+global function FillTooltipDataForMissionButton
+global function PopulateRewardButtonWithArtifact
+global function PopulateRewardButtonWithLore
+global function IsSelectedPlaylistQuestMission
+#endif      
+
+#if (UI && DEV)
+global function SetupDevMenu_SeasonQuests
+#endif               
+
+#if (SERVER && DEV)
+                                     
+#endif                   
+
+global const SHOW_UNKNOWN_ARTIFACTS = true	                                                                    
+
+global enum eQuestMissionStatus
+{
+	                                           
+	INVALID = -1,
+	LOCKED,
+	UNLOCKED_BUT_TOO_EARLY,
+	UNLOCKED_BUT_NOT_NEXT,
+
+	LAUNCHABLE,
+	COMPLETED
+}
+
+struct {
+	table< ItemFlavor, array< ItemFlavor > > questMissions
+	table< ItemFlavor, array< ItemFlavor > > questComicPages
+} file
+
+const string FUNCNAME_DoGotTreasurePackNotify = "SCB_DoGotTreasurePackNotify"
+const string FUNCNAME_UpdatePanelData = "SCB_UpdateQuestPanelData"
+void function SeasonQuest_RegisterNetworking()
+{
+	Remote_RegisterClientFunction( FUNCNAME_DoGotTreasurePackNotify )
+	Remote_RegisterUIFunction( FUNCNAME_UpdatePanelData )
+}
+
+const string CC_TreasureBoxDisplayAcknowledged = "ClientCallback_TreasureBoxDisplayAcknowledged"
+const string CC_QuestStartedAcknowledged = "ClientCallback_QuestStartedAcknowledged"
+const string CC_QuestComicReadAcknowledged = "ClientCallback_QuestComicReadAcknowledged"
+const string CC_QuestComicRewardDisplayAcknowledged = "ClientCallback_QuestComicRewardDisplayAcknowledged"
+const string CC_QuestMissionReadAcknowledged = "ClientCallback_QuestMissionReadAcknowledged"
+
+void function SeasonQuest_SharedInit()
+{
+	#if SERVER || CLIENT
+		Remote_RegisterServerFunction( CC_TreasureBoxDisplayAcknowledged, "string" )
+		Remote_RegisterServerFunction( CC_QuestStartedAcknowledged, "string" )
+		Remote_RegisterServerFunction( CC_QuestComicReadAcknowledged, "string", "int", INT_MIN, INT_MAX )
+		Remote_RegisterServerFunction( CC_QuestComicRewardDisplayAcknowledged, "string" )
+		Remote_RegisterServerFunction( CC_QuestMissionReadAcknowledged, "string", "int", INT_MIN, INT_MAX )
+	#endif
+
+	#if SERVER
+		                                                                                        
+		                                                                                    
+		                                                                                      
+		                                                                          
+
+		                                                                        
+
+
+		       
+			                     
+			                                                    
+		             
+	#endif          
+
+	AddCallback_OnItemFlavorRegistered( eItemType.quest, OnQuestRegistered )
+}
+
+
+void function OnQuestRegistered( ItemFlavor quest )
+{
+	array<ItemFlavor> comicPages = RegisterReferencedItemFlavorsFromArray( quest, "comicPages", "flavor" )
+	file.questComicPages[ quest ] <- comicPages
+
+	array<ItemFlavor> missions = RegisterReferencedItemFlavorsFromArray( quest, "missions", "flavor" )
+	file.questMissions[ quest ] <- missions
+
+	RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_sentinel/s05_quest_mission_dummy.rpak" )
+	RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/grx_sentinel/s06_quest_comic_dummy.rpak" )
+
+	#if SERVER || CLIENT
+		                       
+		                                                           
+		                                  
+	#endif
+}
+
+
+bool function SeasonQuest_AllTreasurePacksHaveBeenCollectedForPlayer( entity player, ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	int packCount = SeasonQuest_GetTreasurePacksCountForPlayer( player, quest )
+	return (packCount >= SeasonQuest_GetTreasurePacksMaxCount( quest ))
+}
+
+
+int function SeasonQuest_GetStatusForComicPageIndex( entity player, ItemFlavor quest, int index )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+
+	                                                      
+
+	if ( IsEverythingUnlocked() )
+		return eQuestMissionStatus.COMPLETED
+
+	                                                                                                                  
+	                                                                     
+	                                          
+	   
+	  	                                                                                   
+	  	                                                  
+	  		                                     
+	  	                                 
+	   
+
+                           
+                             
+                                                                                
+                                                                                                         
+
+                                                              
+
+                                                                             
+
+                                           
+  
+                                                                                                                    
+                                   
+  
+
+                                                        
+                                   
+     
+	int unlockTime = SeasonQuest_GetUnlockTimeForComicIndex( quest, index )
+	if ( unlockTime > GetUnixTimestamp() )
+		return eQuestMissionStatus.UNLOCKED_BUT_TOO_EARLY
+      
+
+	int comicsPagesRead = SeasonQuest_GetComicPagesReadByPlayer( player, quest )
+	if ( index < comicsPagesRead )
+		return eQuestMissionStatus.COMPLETED
+
+	if ( index > (comicsPagesRead) )
+		return eQuestMissionStatus.UNLOCKED_BUT_NOT_NEXT
+
+	return eQuestMissionStatus.LAUNCHABLE
+}
+
+
+int function SeasonQuest_GetStatusForMissionIndex( entity player, ItemFlavor quest, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+
+	if ( IsEverythingUnlocked() )
+		return eQuestMissionStatus.COMPLETED
+	if ( GetCurrentPlaylistVarBool( "seasonquest_force_missions_unlocked", false ) )
+		return eQuestMissionStatus.COMPLETED
+
+	int missionsTotalMax = SeasonQuest_GetMissionsMaxCount( quest )
+
+	int missionsDone = SeasonQuest_GetMissionsCompletedForPlayer( player, quest )
+	if ( missionIndex < missionsDone )
+		return eQuestMissionStatus.COMPLETED
+
+
+	int unlockTime = SeasonQuest_GetUnlockTimeForMissionIndex( quest, missionIndex )
+	if ( unlockTime > GetUnixTimestamp() )
+		return eQuestMissionStatus.UNLOCKED_BUT_TOO_EARLY
+
+	if ( missionIndex > (missionsDone) )
+		return eQuestMissionStatus.UNLOCKED_BUT_NOT_NEXT
+
+	return eQuestMissionStatus.LAUNCHABLE
+}
+
+#if UI
+void function FillTooltipDataForMissionButton( entity player, ItemFlavor quest, int missionIndex, ToolTipData tt )
+{
+	int packsInSeason = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	int packIndexRequiredForMission = SeasonQuest_GetTreasurePackIndexRequiredForMission( quest, missionIndex )
+	int packsFoundRequired = (packIndexRequiredForMission + 1)
+	int packsFound = SeasonQuest_GetTreasurePacksCountForPlayer( player, quest )
+	if ( packsFound < packsFoundRequired )
+		tt.titleText = Localize( "#QUEST_MISSION_TOOLTIP_PACKS", string( packsFoundRequired - packsFound ) )
+	else
+		tt.titleText = ""
+
+	int timeNow = GetUnixTimestamp()
+	int unlockTime = SeasonQuest_GetUnlockTimeForMissionIndex( quest, missionIndex )
+	int delta = (unlockTime - timeNow)
+	if ( delta < 0 )
+	{
+		tt.descText = "#QUEST_MISSION_TOOLTIP_AVAILABLE_NOW"
+		return
+	}
+
+	int days = (delta / SECONDS_PER_DAY)
+	int hours = (delta - (days * SECONDS_PER_DAY)) / SECONDS_PER_HOUR
+	tt.descText = Localize( "#QUEST_MISSION_TOOLTIP_AVAILABLE_DAYS", string( days ), string( hours ) )
+}
+#endif   
+
+#if SERVER
+                                         
+                                                                 
+ 
+	                            
+	 
+		                                
+
+		                                                     
+			      
+		                                  
+		 
+			                                                   
+		   
+		                                            
+
+		                                         
+			           
+
+		                                                                          
+		 
+			                                        
+				        
+
+			                                                                    
+			                                                                
+				                                                 
+
+			                                                             
+				                                                 
+		 
+	   
+ 
+                                                                                 
+ 
+	                                               
+		      
+
+	                                   
+		              
+		                                                    
+		                                                           
+		                                     
+	 
+ 
+
+                                                                                 
+ 
+	                                               
+		      
+
+	                                                                      
+	                                      
+		      
+
+	                                                                         
+	                                                                       
+	                           
+		      
+
+                          
+	                                            
+	                                                                           
+	                                                                               
+		      
+     
+                                                          
+                                                                                
+                                 
+        
+
+                                                                        
+                             
+        
+      
+
+	                                
+	                                           
+	                                                                                                  
+	 
+		                                                                                              
+	  
+	                                                                            
+	 
+		                                                                             
+		                          
+		 
+			                                                 
+		 
+	   
+	                                      
+ 
+
+                                                                      
+                   
+ 
+	         
+	            
+ 
+                                                         
+                                
+                       
+                    
+                                                                         
+ 
+ 
+	                                                                       
+	                                                
+
+	                          
+	                                       
+	                                                                                        
+	 
+		                                                       
+		                                                            
+		                                                 
+
+		                                                                          
+		                                
+		 
+			                                                          
+			                                                             
+			 
+				                                            
+
+				                                     
+				                                                                
+			 
+		 
+
+		                              
+	 
+
+	                                         
+
+	                                                                             
+	 
+		                                
+		                                                                                  
+		                                                                                                                                      
+		 
+			                                                                                                                            
+		  
+
+		                                                                                    
+			                                                                             
+			                           
+				      
+
+			                                                                
+				                                          
+		  
+
+		                                      
+
+		                                          
+			           
+
+		                                                                 
+			                                                   
+	 
+
+	                
+	                 
+	                               
+	          
+ 
+#endif          
+
+             
+             
+
+const string VARBLOCKNAME_QuestDatas = "questDatas"
+const string VARNAME_TB_lastPickupTime = "treasureBox_lastPickupTime"
+const string VARNAME_TB_totalPickups = "treasureBox_totalPickups"
+const string VARNAME_TB_displayStartNum = "treasureBox_displayStartNum"
+const string VARNAME_TB_displayCount = "treasureBox_displayCount"
+const string VARNAME_CP_displayFinalRewards = "comicPanel_displayFinalRewards"
+const string VARNAME_missionProgress = "missionProgress"
+const string VARNAME_comicPagesRead = "comicPagesRead"
+const string VARNAME_haveStartedQuest = "haveStartedQuest"
+const string VARNAME_TB_lastSeenPurchased = "treasureBox_lastSeenPurchased"
+const string VARNAME_lastMissionUnlockTime = "lastMissionUnlockTime"
+
+string function BuildPersistentVarName( ItemFlavor quest, string varName )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return format( "%s[%s].%s", VARBLOCKNAME_QuestDatas, ItemFlavor_GetGUIDString( quest ), varName )
+}
+
+
+int function GetPersistentQuestVarInt( entity player, ItemFlavor quest, string varName )
+{
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, varName ) )
+}
+
+#if SERVER
+                                             
+                                                                     
+ 
+	                            
+	 
+		                                
+
+		                                                         
+			      
+		                                  
+		 
+			                                                       
+		   
+		                                                
+
+		                                         
+			           
+
+		                                                                          
+		 
+			                                        
+				        
+
+			                                                     
+		 
+	   
+ 
+
+                                                                                     
+ 
+	                                               
+		      
+
+	                                                      
+		              
+		                                                         
+		                                                            
+		                                          
+	 
+
+	                    
+		                                                                     
+ 
+
+                                                                                        
+ 
+	                                                                                                  
+ 
+
+                                                                                                     
+ 
+	                                                                                                
+	                                                                                          
+ 
+
+                                                                                                    
+ 
+	                                                                        
+	                                     
+		      
+	                                              
+	                                                     
+		      
+
+	                                                  
+ 
+
+                                                                                               
+ 
+	                                                                        
+	                                     
+		      
+	                                              
+	                                                     
+		      
+
+	                                                  
+ 
+
+
+                                                                                         
+ 
+	                                                                        
+	                                     
+		      
+	                                              
+	                                                     
+		      
+
+	                                       
+	                                                  
+
+	                                                          
+ 
+
+                                                                                                          
+ 
+	                                                                        
+	                                     
+		      
+	                                              
+	                                                     
+		      
+
+	                                                                              
+	                                 
+		      
+
+	                                                                      
+	                                                          
+ 
+
+                                                                                                               
+ 
+	                                                                        
+	                                     
+		      
+	                                              
+	                                                     
+		      
+
+	                                                               
+	                                       
+		      
+
+	                                                                                    
+	                                                          
+ 
+
+#endif          
+
+#if UI
+void function TryDisplayTreasureBoxRewards()
+{
+	WaitEndFrame()
+	if ( !IsConnected() )
+		return
+	if ( !IsPersistenceAvailable() )
+		return
+
+	DisplayTreasureBoxRewards()
+}
+
+bool function DisplayTreasureBoxRewards()
+{
+	array<ItemFlavor> quests = GetAllItemFlavorsOfType( eItemType.quest )
+	foreach ( ItemFlavor quest in quests )
+	{
+		if ( IsConnected() )
+		{
+			if ( HasQuestStarted( quest ) == false )
+				continue
+		}
+
+		Newness_IfNecessaryMarkItemFlavorAsNoLongerNewAndInformServer( quest )
+
+		int count = expect int( GetDialogFlowTablesValueOrPersistence( BuildPersistentVarName( quest, VARNAME_TB_displayCount ) ) )                                                                                                                                  
+		if ( count <= 0 )
+			continue
+		int startNum = expect int( GetDialogFlowTablesValueOrPersistence( BuildPersistentVarName( quest, VARNAME_TB_displayStartNum )  )  )                                                                                      
+
+		array<BattlePassReward> rewards
+
+		for ( int idx = 0; idx < count; ++idx )
+		{
+			int sequenceNumNext = (startNum + idx + 1)
+
+			int boxIndex            = (sequenceNumNext - 1)                                            
+			ItemFlavorBag rewardBag = SeasonQuest_GetTreasurePackRewardsForIndex( quest, boxIndex )
+
+			foreach ( int itemsIndex, ItemFlavor item in rewardBag.flavors )
+			{
+				if ( ItemFlavor_GetType( item ) == eItemType.grx_sentinel )
+					continue
+
+				BattlePassReward info
+				info.level = -1
+				info.flav = item
+				info.quantity = rewardBag.quantities[itemsIndex]                         
+				rewards.append( info )
+			}
+		}
+
+		bool isForBattlePass = false
+		bool isForQuest = true
+
+		ShowRewardCeremonyDialog(
+			"",
+			"#TREASUREBOX_REWARD_SPLASH_TITLE",
+			"#TREASUREBOX_REWARD_SPLASH_DETAILS",
+			rewards,
+			isForBattlePass,
+			isForQuest,
+			true,
+			true
+		)
+
+		SetDialogFlowPersistenceTables( BuildPersistentVarName( quest, VARNAME_TB_displayStartNum ), 0  )                                                                                      
+		SetDialogFlowPersistenceTables( BuildPersistentVarName( quest, VARNAME_TB_displayCount ), 0  )                                                                                      
+
+		Remote_ServerCallFunction( CC_TreasureBoxDisplayAcknowledged, ItemFlavor_GetGUIDString( quest ) )
+		return true
+	}
+
+	return false
+}
+
+
+bool function DisplayQuestMissionRewards( ItemFlavor quest, int missionIndex )
+{
+	array<BattlePassReward> rewards
+	ItemFlavorBag rewardBag = SeasonQuest_GetMissionRewardsForIndex( quest, missionIndex )
+	foreach( int index, ItemFlavor reward in rewardBag.flavors )
+	{
+		rewards.append( ItemFlavorBagToBattlePassRewardByIndex( rewardBag, index ) )
+	}
+
+	bool isForBattlePass = false
+	bool isForQuest = true
+
+	ShowRewardCeremonyDialog(
+		"",
+		"QUEST_REWARD_SPLASH_TITLE",
+		"",
+		rewards,
+		isForBattlePass,
+		isForQuest,
+		true,
+		true
+	)
+
+	return true
+}
+
+void function TryDisplayQuestFinalRewards()
+{
+	WaitEndFrame()
+	if ( !IsConnected() )
+		return
+	if ( !IsPersistenceAvailable() )
+		return
+
+	DisplayQuestFinalRewards()
+}
+
+bool function DisplayQuestFinalRewards()
+{
+	                                                                                                                  
+	if ( GetActiveMenu() == GetMenu( "RewardCeremonyMenu" ) )
+		return false
+
+	array<ItemFlavor> questsToAcknowledge
+	array<BattlePassReward> rewards
+
+	foreach ( ItemFlavor quest in GetAllItemFlavorsOfType( eItemType.quest ) )
+	{
+		if ( IsConnected() )
+		{
+			if ( HasQuestStarted( quest ) == false )
+				continue
+		}
+
+		if ( GetPersistentVar( BuildPersistentVarName( quest, VARNAME_CP_displayFinalRewards ) ) )
+		{
+			ItemFlavorBag rewardBag = SeasonQuest_GetCompletionRewards( quest )
+			foreach ( int index, ItemFlavor reward in rewardBag.flavors )
+			{
+				rewards.append( ItemFlavorBagToBattlePassRewardByIndex( rewardBag, index ) )
+			}
+
+			questsToAcknowledge.append( quest )
+		}
+	}
+
+	if ( rewards.len() == 0 )
+		return false
+
+	bool isForBattlePass = false
+	bool isForQuest = true
+
+	ShowRewardCeremonyDialog(
+		"",
+		"QUEST_REWARD_SPLASH_TITLE",
+		"",
+		rewards,
+		isForBattlePass,
+		isForQuest,
+		true,
+		true
+	)
+
+	foreach ( quest in questsToAcknowledge )
+		Remote_ServerCallFunction( CC_QuestComicRewardDisplayAcknowledged, ItemFlavor_GetGUIDString( quest ) )
+
+	return true
+}
+#endif      
+
+
+ItemFlavor ornull function SeasonQuest_GetActiveSeasonQuest( int timeNow )
+{
+	ItemFlavor ornull season = GetActiveSeason( timeNow )
+	if ( season == null )
+		return null
+	expect ItemFlavor( season )
+	return SeasonQuest_GetQuestForSeason( season )
+}
+
+
+ItemFlavor function SeasonQuest_GetGet()
+{
+	return expect ItemFlavor( SeasonQuest_GetActiveSeasonQuest( GetUnixTimestamp() ) )
+}
+
+
+asset function SeasonQuest_GetGoalModel( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	asset modelAsset = GetSettingsBlockAsset( settingsBlock, "questModel" )
+	return modelAsset
+}
+
+
+string function GetRewardSequenceMarketplaceVarForTreasurePacks( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, "treasurePacksSequenceMarketplaceVar" )
+}
+
+string function SeasonQuest_Tab_GetLongDesc( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, "questTabLongDesc" )
+}
+
+asset function SeasonQuest_Tab_GetCornerImage( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockAsset( settingsBlock, "questTabCornerImage" )
+}
+
+string function SeasonQuest_Tab_GetBasicInfoHeader( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, "questTabBasicInfoHeader" )
+}
+string function SeasonQuest_Tab_GetBasicInfoItemText( ItemFlavor quest, int index )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+
+	string fieldName
+	switch( index )
+	{
+		case 0:
+			fieldName = "questTabBasicInfoItemText0"
+			break
+		case 1:
+			fieldName = "questTabBasicInfoItemText1"
+			break
+		case 2:
+			fieldName = "questTabBasicInfoItemText2"
+			break
+		case 3:
+			fieldName = "questTabBasicInfoItemText3"
+			break
+	}
+
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, fieldName )
+}
+
+string function SeasonQuest_Tab_GetArtifactProgressHeader( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, "questTabArtifactProgressHeader" )
+}
+
+string function GetRewardSequenceMarketplaceVarForMissions( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, "missionRewardsSequenceMarketplaceVar" )
+}
+
+string function GetRewardSequenceMarketplaceVarForComic( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( quest )
+	return GetSettingsBlockString( settingsBlock, "comicPageRewardsSequenceMarketplaceVar" )
+}
+
+int function SeasonQuest_GetComicPagesMaxCount( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return file.questComicPages[ quest ].len()
+}
+
+
+int function SeasonQuest_GetMissionsMaxCount( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return file.questMissions[ quest ].len()
+}
+
+
+int function SeasonQuest_GetComicPagesReadByPlayer( entity player, ItemFlavor quest )
+{
+	int forcedPagesRead = -1                                                                                                                  
+	if ( forcedPagesRead >= 0 )
+	{
+		int countMax = SeasonQuest_GetComicPagesMaxCount( quest )
+		return minint( forcedPagesRead, countMax )
+	}
+
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_comicPagesRead ) )                          
+}
+
+
+int function SeasonQuest_GetComicPagesUnlockedByPlayer( entity player, ItemFlavor quest )
+{
+	int pageCount = SeasonQuest_GetComicPagesMaxCount( quest )
+	for( int index = 0; index < pageCount; index++ )
+	{
+                          
+		if ( SeasonQuest_GetStatusForComicPageIndex( player, quest, index ) < eQuestMissionStatus.UNLOCKED_BUT_NOT_NEXT )
+     
+                                                                                                     
+      
+			return index
+	}
+	return pageCount
+}
+
+
+int function SeasonQuest_GetMissionsCompletedForPlayer( entity player, ItemFlavor quest )
+{
+	int forcedMissionsCleared = GetConVarInt( "seasonquest_force_missionscleared_count" )
+	if ( forcedMissionsCleared >= 0 )
+	{
+		int countMax = SeasonQuest_GetMissionsMaxCount( quest )
+		return minint( forcedMissionsCleared, countMax )
+	}
+
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_missionProgress ) )
+}
+
+#if SERVER
+                                                                                                      
+ 
+	                                
+	                                                                                                  
+
+	                                                                   
+	 
+		                              
+	 
+
+	           
+ 
+#endif          
+
+#if SERVER
+                                                                                                                        
+ 
+	                                                                                
+	                                               
+	 
+		                                                                                                                                                                                                                                
+		            
+	 
+
+	                                               
+	                                                                                                           
+	           
+ 
+#endif          
+
+#if SERVER
+                                                                                                                                                                          
+ 
+	                                                                                
+	                     
+		      
+
+	                          
+
+	                                                                                                   
+	                                    
+
+	                                            
+		      
+
+	                                                                                                                                                                                                                          
+
+	                                                                                                                                     
+
+	                                                                                        
+ 
+#endif
+
+string function SeasonQuest_GetPlaylistForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return SeasonQuestMission_GetPlaylistName( file.questMissions[ flav ][missionIndex] )
+}
+
+#if UI
+asset function SeasonQuest_GetComicPagesIconForIndex( ItemFlavor flav, int comicIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return ItemFlavor_GetIcon( file.questComicPages[ flav ][comicIndex] )
+}
+#endif     
+
+#if UI
+asset function SeasonQuest_GetMissionIconForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return ItemFlavor_GetIcon( file.questMissions[ flav ][missionIndex] )
+}
+#endif     
+
+int function SeasonQuest_GetMissionIndexForPlaylistName( ItemFlavor flav, string playlist )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	playlist = playlist.tolower()
+
+	foreach ( int missionIndex, ItemFlavor mission in file.questMissions[ flav ] )
+	{
+		if ( SeasonQuestMission_GetPlaylistName( mission ) == playlist )
+			return missionIndex
+	}
+
+	return -1
+}
+
+
+int function SeasonQuest_GetUnlockTimeForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return SeasonQuestMission_GetUnlockTime( file.questMissions[ flav ][missionIndex] )
+}
+
+                          
+int function SeasonQuest_GetUnlockTimeForComicIndex( ItemFlavor flav, int comicIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return SeasonQuestComic_GetUnlockTime( file.questComicPages[ flav ][comicIndex] )
+}
+
+int function SeasonQuestComic_GetUnlockTime( ItemFlavor comic )
+{
+	Assert( ItemFlavor_GetType( comic ) == eItemType.quest_comic )
+	var settingsBlock    = ItemFlavor_GetSettingsBlock( comic )
+	string unlockTimeStr = GetSettingsBlockString( settingsBlock, "unlockTime" )
+
+	int ornull ut = DateTimeStringToUnixTimestamp( unlockTimeStr )
+	if ( ut != null )
+		return expect int(ut)
+	return INT_MAX
+}
+      
+
+ItemFlavorBag function SeasonQuest_GetMissionRewardsForIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	ItemFlavorBag rewards = SeasonQuestMission_GetRewards( file.questMissions[ flav ][missionIndex] )
+	return rewards
+}
+
+
+ItemFlavor function SeasonQuest_GetComicPageForIndex( ItemFlavor quest, int index )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return file.questComicPages[quest][index]
+}
+
+
+ItemFlavor function SeasonQuest_GetMissionForIndex( ItemFlavor quest, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return file.questMissions[quest][missionIndex]
+}
+
+
+int function SeasonQuest_GetTreasurePacksMaxCount( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return GetSettingsArraySize( GetSettingsBlockArray( ItemFlavor_GetSettingsBlock( quest ), "treasurePacksSchedule" ) )
+}
+
+int function GetDayIndexOfActiveSeason()
+{
+	int timeNow = GetUnixTimestamp()
+	ItemFlavor ornull seasonNow = GetActiveSeason( timeNow )
+	if ( seasonNow == null )
+		return -1
+	expect ItemFlavor( seasonNow )
+
+	int seasonStartTime = CalEvent_GetStartUnixTime( seasonNow )
+	return ((timeNow - seasonStartTime) / SECONDS_PER_DAY)
+}
+
+int function SeasonQuest_GetTreasurePacksMaxPurchableCountForPlayer( entity player, ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	const NO_TREASURE_PACKS_TO_BUY = -1
+
+	int timestamp = GetUnixTimestamp()
+
+	int completeDays = GetDayIndexOfActiveSeason()
+	int maxPacks = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	int maxCatchupIndex = minint( completeDays, maxPacks )
+	int currentCount    = SeasonQuest_GetTreasurePacksCountForPlayer( player, quest )
+	return maxint( (maxCatchupIndex - currentCount), 0 )
+}
+
+
+int function GetMissionIndexByUnixTimestamp( ItemFlavor quest, int timestamp )
+{
+	int maxMissions = SeasonQuest_GetMissionsMaxCount( quest )
+
+	for ( int missionIndex = 0; missionIndex < maxMissions; missionIndex++ )
+	{
+		int unlockTime = SeasonQuest_GetUnlockTimeForMissionIndex( quest, missionIndex )
+		if ( unlockTime > timestamp )
+			return missionIndex - 1
+	}
+
+	                                                                                                                                           
+	return maxMissions - 2
+}
+
+
+int function SeasonQuest_GetTreasurePackIndexRequiredForComicPage( ItemFlavor quest, int index )
+{
+	int packsInSeason               = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	int packIndexRequiredForComicPage = -1
+
+	ItemFlavor comicPage = file.questComicPages[ quest ][ index ]
+	for ( int packIndex = 0; packIndex < packsInSeason; packIndex++ )
+	{
+		array<ItemFlavor> items
+		array<int> itemCounts
+		ItemFlavorBag rewards = SeasonQuest_GetTreasurePackRewardsForIndex( quest, packIndex )
+
+		if ( rewards.flavors.contains( comicPage ) )
+		{
+			packIndexRequiredForComicPage = packIndex
+			break
+		}
+	}
+
+	return packIndexRequiredForComicPage
+}
+
+
+int function SeasonQuest_GetTreasurePackIndexRequiredForMission( ItemFlavor quest, int missionIndex )
+{
+	int packsInSeason               = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	int packIndexRequiredForMission = -1
+
+	ItemFlavor mission = file.questMissions[ quest ][ missionIndex ]
+	for ( int packIndex = 0; packIndex < packsInSeason; packIndex++ )
+	{
+		array<ItemFlavor> items
+		array<int> itemCounts
+		ItemFlavorBag rewards = SeasonQuest_GetTreasurePackRewardsForIndex( quest, packIndex )
+
+		if ( rewards.flavors.contains( mission ) )
+		{
+			packIndexRequiredForMission = packIndex
+			break
+		}
+	}
+
+	return packIndexRequiredForMission
+}
+
+
+ItemFlavorBag function SeasonQuest_GetTreasurePackRewardsForIndex( ItemFlavor flav, int boxIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( flav )
+
+	ItemFlavorBag rewards
+
+	var treasurePackScheduleBlockArray = GetSettingsBlockArray( settingsBlock, "treasurePacksSchedule" )
+	int packCount                      = GetSettingsArraySize( treasurePackScheduleBlockArray )
+	Assert( boxIndex < packCount, "You have bad persistence data, please run mp_rr_box and run script ResetQuestPersistence() from the console." )
+	var boxInfoBlock      = GetSettingsArrayElem( treasurePackScheduleBlockArray, boxIndex )
+	var rewardsBlockArray = GetSettingsBlockArray( boxInfoBlock, "rewards" )
+	foreach ( int rewardIndex, var rewardBlock in IterateSettingsArray( rewardsBlockArray ) )
+	{
+		asset flavorAsset = GetSettingsBlockAsset( rewardBlock, "flavor" )
+		int quantity      = GetSettingsBlockInt( rewardBlock, "quantity" )
+
+		if ( !IsValidItemFlavorSettingsAsset( flavorAsset ) )
+		{
+			Warning( "Skipping item reward #%d of quest '%s' because the asset is not a valid item flavor: '%s'", rewardIndex, ItemFlavor_GetHumanReadableRef( flav ), string(flavorAsset) )
+			continue
+		}
+
+		rewards.flavors.append( GetItemFlavorByAsset( flavorAsset ) )
+		rewards.quantities.append( quantity )
+	}
+
+	return rewards
+}
+
+
+int function SeasonQuest_GetTreasurePacksLatestPickupTimeForPlayer( entity player, ItemFlavor quest )
+{
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_TB_lastPickupTime ) )
+}
+
+
+int function SeasonQuest_GetTreasurePacksCountForPlayer( entity player, ItemFlavor quest )
+{
+	#if DEV
+		if ( DEV_ShouldIgnorePersistence() )
+			return 0
+	#endif
+
+	int maxPacks = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	if ( GetCurrentPlaylistVarBool( "seasonquest_force_all_treasurepacks_collected", false ) )
+		return maxPacks
+
+	int forcedPacks = GetConVarInt( "seasonquest_force_treasurepacks_count" )
+	if ( forcedPacks >= 0 )
+		return minint( forcedPacks, maxPacks )
+
+	int earned    = SeasonQuest_GetEarnedTreasurePacksCountForPlayer( player, quest )
+	int purchased = SeasonQuest_GetPurchasedTreasurePacksCountForPlayer( player, quest )
+
+	return minint( earned + purchased, SeasonQuest_GetTreasurePacksMaxCount( quest ) )
+}
+
+
+int function SeasonQuest_GetEarnedTreasurePacksCountForPlayer( entity player, ItemFlavor quest )
+{
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_TB_totalPickups ) )
+}
+
+int function SeasonQuest_GetPurchasedTreasurePacksCountForPlayer( entity player, ItemFlavor quest )
+{
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_TB_lastSeenPurchased ) )
+}
+
+int function SeasonQuest_GetLastMissionUnlockTime( entity player, ItemFlavor quest )
+{
+	return player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_lastMissionUnlockTime ) )
+}
+
+#if SERVER
+                                                                                        
+ 
+	                                                                                                                    
+ 
+#endif
+
+#if SERVER
+                                                                   
+ 
+	                            
+	 
+		                                
+
+		                                         
+			           
+
+		                                                                                
+		                    
+			      
+
+		                          
+		                                                                                    
+		                                                                                                           
+
+		                                                                                                           
+	   
+ 
+#endif         
+#if SERVER
+                                                       
+ 
+	                            
+	 
+		                                
+
+		                                         
+			           
+
+		                                                                                
+		                    
+			      
+
+		                          
+		                                                                                                     
+		 
+			                                                                          
+			                                                                                       
+			                                                            
+
+			                                                                                                                             
+			 
+				                                                                
+				                                                        
+			 
+		 
+	   
+ 
+#endif         
+
+
+string function SeasonQuest_GetGRXOfferLocation( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( quest ), "grxOfferLocation" )
+}
+
+
+ItemFlavor function SeasonQuest_GetTreasureBoxPurchaseFlav( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( quest ), "treasureBoxPurchaseFlav" ) )
+}
+
+
+#if SERVER
+                                                                                                    
+ 
+	                                
+	                                                                               
+	                                                                                                 
+	                                                                                              
+
+	                                                        
+ 
+#endif          
+
+bool function SeasonQuest_HaveStartedQuest( entity player, ItemFlavor quest )
+{
+	return (player.GetPersistentVarAsInt( BuildPersistentVarName( quest, VARNAME_haveStartedQuest ) ) != 0)
+}
+
+#if SERVER
+                                                                       
+ 
+	                                                                                          
+ 
+#endif          
+
+asset function SeasonQuest_GetComicPanelDataForIndex( ItemFlavor quest, int index )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	ItemFlavor comicPage = SeasonQuest_GetComicPageForIndex( quest, index )
+	return Comic_GetPanelData( comicPage )
+}
+
+asset function Comic_GetPanelData( ItemFlavor comicPage )
+{
+	Assert( ItemFlavor_GetType( comicPage ) == eItemType.quest_comic )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( comicPage ), "comicChapterDT" )
+}
+
+asset function Comic_GetPreviewImage( ItemFlavor comicPage )
+{
+	Assert( ItemFlavor_GetType( comicPage ) == eItemType.quest_comic )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( comicPage ), "comicChapterPreviewImage" )
+}
+
+asset function SeasonQuest_GetLoreSequencePrologue( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( quest ), "loreSequencePrologueDT" )
+}
+
+
+asset function SeasonQuest_GetLoreSequenceEpilogue( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( quest ), "loreSequenceEpilogueDT" )
+}
+
+
+asset function Mission_GetLoreSequenceStoryChapterData( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( mission ), "loreSequenceChapterPostSuccessDT" )
+}
+string function Mission_GetLoreSequenceStoryChapterName( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( mission ), "loreSequenceChapterPostSuccessName" )
+}
+asset function Mission_GetLoreSequenceQuestItemData( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( mission ), "loreSequenceQuestItemDT" )
+}
+string function Mission_GetLoreSequenceQuestItemName( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( mission ), "loreSequenceQuestItemName" )
+}
+
+asset function SeasonQuest_GetLoreSequenceStoryChapterDataForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return Mission_GetLoreSequenceStoryChapterData( file.questMissions[ flav ][missionIndex] )
+}
+string function SeasonQuest_GetLoreSequenceStoryChapterNameForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return Mission_GetLoreSequenceStoryChapterName( file.questMissions[ flav ][missionIndex] )
+}
+asset function SeasonQuest_GetLoreSequenceQuestItemDataForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return Mission_GetLoreSequenceQuestItemData( file.questMissions[ flav ][missionIndex] )
+}
+string function SeasonQuest_GetLoreSequenceQuestItemNameForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return Mission_GetLoreSequenceQuestItemName( file.questMissions[ flav ][missionIndex] )
+}
+
+string function Mission_GetQuestItemName( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( mission ), "questItemName" )
+}
+string function Mission_GetQuestItemDesc( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( mission ), "questItemDesc" )
+}
+
+string function SeasonQuest_GetQuestItemNameForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return Mission_GetQuestItemName( file.questMissions[ flav ][missionIndex] )
+}
+string function SeasonQuest_GetQuestItemDescForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return Mission_GetQuestItemDesc( file.questMissions[ flav ][missionIndex] )
+}
+asset function SeasonQuest_GetQuestItemIconForMissionIndex( ItemFlavor flav, int missionIndex )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.quest )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( file.questMissions[ flav ][missionIndex] ), "questItemIcon" )
+}
+
+string function SeasonQuestMission_GetPlaylistName( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	var settingsBlock = ItemFlavor_GetSettingsBlock( mission )
+	return GetSettingsBlockString( settingsBlock, "playlistName" )
+}
+
+
+int function SeasonQuestMission_GetUnlockTime( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+	var settingsBlock    = ItemFlavor_GetSettingsBlock( mission )
+	string unlockTimeStr = GetSettingsBlockString( settingsBlock, "unlockTime" )
+
+	int ornull ut = DateTimeStringToUnixTimestamp( unlockTimeStr )
+	if ( ut != null )
+		return expect int(ut)
+	return INT_MAX
+}
+
+
+ItemFlavorBag function SeasonQuest_GetCompletionRewards( ItemFlavor quest )
+{
+	Assert( ItemFlavor_GetType( quest ) == eItemType.quest )
+
+	ItemFlavorBag rewards
+	foreach ( int rewardIdx, var rewardData in IterateSettingsAssetArray( ItemFlavor_GetAsset( quest ), "completionRewards" ) )
+	{
+		asset rewardAsset = GetSettingsBlockAsset( rewardData, "flavor" )
+		if ( !IsValidItemFlavorSettingsAsset( rewardAsset ) )
+		{
+			Warning( "Skipping completion reward #%d of quest '%s' because the asset is not a valid item flavor: '%s'", rewardIdx, ItemFlavor_GetHumanReadableRef( quest ), string(rewardAsset) )
+			continue
+		}
+
+		rewards.flavors.append( GetItemFlavorByAsset( rewardAsset ) )
+		rewards.quantities.append( GetSettingsBlockInt( rewardData, "quantity" ) )
+	}
+
+	return rewards
+}
+
+
+ItemFlavorBag function SeasonQuestMission_GetRewards( ItemFlavor mission )
+{
+	Assert( ItemFlavor_GetType( mission ) == eItemType.quest_mission )
+
+	ItemFlavorBag rewards
+	foreach ( int rewardIdx, var rewardData in IterateSettingsAssetArray( ItemFlavor_GetAsset( mission ), "rewards" ) )
+	{
+		asset rewardAsset = GetSettingsBlockAsset( rewardData, "flavor" )
+		if ( !IsValidItemFlavorSettingsAsset( rewardAsset ) )
+		{
+			Warning( "Skipping item reward #%d of quest mission '%s' because the asset is not a valid item flavor: '%s'", rewardIdx, ItemFlavor_GetHumanReadableRef( mission ), string(rewardAsset) )
+			continue
+		}
+
+		rewards.flavors.append( GetItemFlavorByAsset( rewardAsset ) )
+		rewards.quantities.append( GetSettingsBlockInt( rewardData, "quantity" ) )
+	}
+
+	return rewards
+}
+
+#if UI
+void function SeasonQuest_AcknowledgeHaveStartedQuest( ItemFlavor quest )
+{
+	Remote_ServerCallFunction( CC_QuestStartedAcknowledged, ItemFlavor_GetGUIDString( quest ) )
+}
+
+void function SeasonQuest_AcknowledgeQuestComicRead( ItemFlavor quest, int pageIndex )
+{
+	entity player = GetLocalClientPlayer()
+	int pagesRead = SeasonQuest_GetComicPagesReadByPlayer( player, quest )
+	if ( pagesRead > pageIndex )
+		return
+
+	Remote_ServerCallFunction( CC_QuestComicReadAcknowledged, ItemFlavor_GetGUIDString( quest ), pageIndex )
+}
+
+void function SeasonQuest_AcknowledgeQuestMissionRead( ItemFlavor quest, int pageIndex )
+{
+	entity player = GetLocalClientPlayer()
+	int pagesRead = SeasonQuest_GetMissionsCompletedForPlayer( player, quest )
+	if ( pagesRead > pageIndex )
+		return
+
+	Remote_ServerCallFunction( CC_QuestMissionReadAcknowledged, ItemFlavor_GetGUIDString( quest ), pageIndex )
+}
+#endif      
+
+           
+             
+
+#if DEV
+const string CMD_GIVETREASUREBOX_1 = "seasonquest_give_treasurebox_1"
+const string CMD_GIVETREASUREBOX_5 = "seasonquest_give_treasurebox_5"
+const string CMD_FINISHMISSION = "seasonquest_finish_mission"
+
+#if UI
+void function SetupDevMenu_SeasonQuests()
+{
+	if ( !IsLobby() )
+		return
+
+	SetupDevMenu( "Season Quest", void function( var _ )
+	{
+		thread ChangeToThisMenu( void function()
+		{
+			SetupDevCommand( "Give 1 Treasure Pack", CMD_GIVETREASUREBOX_1 )
+			SetupDevCommand( "Give 5 Treasure Packs", CMD_GIVETREASUREBOX_5 )
+			SetupDevCommand( "Complete Next Mission", CMD_FINISHMISSION )
+		} )
+	} )
+}
+#endif      
+
+#if SERVER && DEV
+                                     
+ 
+	                                                                                
+	                          
+
+	                                                                                      
+	                                                                                    
+	                                                                                       
+	                                                                                    
+	                                                                                    
+	                                                                                          
+
+	                                                                                   
+ 
+#endif          
+
+#if SERVER
+                                   
+ 
+	                                                                                                           
+	 
+		                                                      
+	   
+
+	                                                                                                           
+	 
+		                                                      
+	   
+
+	                                                                                                       
+	 
+		                                                                                
+		                    
+		 
+			                                                    
+			      
+		 
+		                          
+
+		                                                                                 
+		                                                               
+		                                       
+			      
+
+		                                                                                    
+		                                            
+	   
+ 
+
+                                                                                   
+ 
+	                                      
+		      
+
+	                                                                                
+	                    
+		      
+	                          
+
+	                                                                                   
+	                                                                                         
+	                                                                                            
+	                                                                     
+	                                                                                        
+	                                                      
+		                                                                    
+	                                                
+ 
+
+                                        
+ 
+	                     
+	 
+		                            
+		                                
+		                                                                              
+		 
+			                                                         
+			                                                                   
+		 
+		                                                                                     
+	 
+
+	                                                                        
+	                                                     
+	                                                   
+	                                                      
+	                                                   
+	                                                           
+	                                                   
+	                                                        
+	                                                         
+
+	                                                  
+	                                                     
+
+	                       
+
+	                                                  
+	                                                                                            
+	  
+	 
+		                        
+		                                                                              
+		 
+			                                                            
+			                                                                                                                
+			                                                                                                                 
+			                                                                                                                   
+		 
+		                                   
+			                                     
+	 
+	                           
+ 
+
+                                                                    
+ 
+	                                             
+		      
+	                    
+ 
+#endif          
+#endif       
+
+#if CLIENT
+string function SeasonQuest_GetCurrentPackCountDesc()
+{
+	ItemFlavor ornull quest = SeasonQuest_GetActiveSeasonQuest( GetUnixTimestamp() )
+	if ( quest == null )
+		return ""
+	expect ItemFlavor( quest )
+
+	entity player = GetLocalClientPlayer()
+	int packsHave = SeasonQuest_GetTreasurePacksCountForPlayer( player, quest )
+	int packsMax = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	return Localize( "#QUEST_MAP_INFOBOX_XOFY", packsHave, packsMax )
+}
+
+void function SeasonQuest_UpdateMinimapRui( var rui )
+{
+	                                
+	if ( !IsConnected() )
+		return
+
+	ItemFlavor ornull quest = SeasonQuest_GetActiveSeasonQuest( GetUnixTimestamp() )
+	if ( quest == null )
+	{
+		RuiSetBool( rui, "shouldDraw", false )
+		return
+	}
+	expect ItemFlavor( quest )
+
+	RuiSetBool( rui, "shouldDraw", true )
+	RuiSetString( rui, "headerText", Localize( "#QUEST_MAP_INFOBOX_TITLE" ) )
+
+	entity player = GetLocalClientPlayer()
+	int packsHave = SeasonQuest_GetTreasurePacksCountForPlayer( player, quest )
+	int packsMax = SeasonQuest_GetTreasurePacksMaxCount( quest )
+	if ( packsHave >= packsMax )
+	{
+		RuiSetString( rui, "detailsText", Localize( "#QUEST_MAP_INFOBOX_HAVEALL" ) )
+		RuiSetString( rui, "timerText", Localize( "#QUEST_MAP_INFOBOX_XOFY", packsHave, packsMax ) )
+		return
+	}
+
+	int seconds = TreasureBox_SecondsUntilNextPickup( player, quest )
+	if ( seconds > 0 )
+	{
+		RuiSetString( rui, "detailsText", Localize( "#QUEST_MAP_INFOBOX_HAVECOOLDOWN" ) )
+		RuiSetString( rui, "timerText", TreasureBox_GetCooldownDesc( player, quest ) )
+		return
+	}
+
+	RuiSetString( rui, "detailsText", Localize( "#QUEST_MAP_INFOBOX_NEEDONE" ) )
+	RuiSetString( rui, "timerText", Localize( "#QUEST_MAP_INFOBOX_XOFY", packsHave, packsMax ) )
+}
+
+void function SCB_DoGotTreasurePackNotify()
+{
+	         
+	{
+		AnnouncementData announcement = Announcement_Create( "" )
+		Announcement_SetStyle( announcement, ANNOUNCEMENT_STYLE_GOT_TREASURE_PACK )
+		Announcement_SetPurge( announcement, true )
+		Announcement_SetOptionalTextArgsArray( announcement, [Localize("#TREASUREPACK_COLLECTED_NOTIFY"), SeasonQuest_GetCurrentPackCountDesc() ] )
+		Announcement_SetPriority( announcement, 200 )
+		Announcement_SetSoundAlias( announcement, "Season51_loot_pickup_TreasurePack" )
+		announcement.duration = 4.0
+		AnnouncementFromClass( GetLocalViewPlayer(), announcement )
+	}
+}
+#endif          
+
+#if UI
+void function PopulateRewardButtonWithArtifact( var rewardButton, ItemFlavor quest, int missionIndex, bool isOwned )
+{
+	var btnRui
+	if ( rewardButton != null )
+		btnRui = Hud_GetRui( rewardButton )
+
+	Assert( btnRui != null )
+
+	RuiSetBool( btnRui, "isOwned", isOwned )
+	RuiSetInt( btnRui, "rarity", eRarityTier.EPIC )
+
+	asset rewardImage = SeasonQuest_GetQuestItemIconForMissionIndex( quest, missionIndex )
+	if ( !isOwned && SHOW_UNKNOWN_ARTIFACTS  )
+		rewardImage = $"rui/menu/quest/artifact_unknown"
+
+	RuiSetImage( btnRui, "buttonImage", rewardImage )
+}
+#endif      
+
+#if UI
+void function PopulateRewardButtonWithLore( var rewardButton, ItemFlavor quest, bool isOwned )
+{
+	var btnRui
+	if ( rewardButton != null )
+		btnRui = Hud_GetRui( rewardButton )
+
+	Assert( btnRui != null )
+
+	RuiSetBool( btnRui, "isOwned", isOwned )
+	RuiSetInt( btnRui, "rarity", eRarityTier.RARE )
+
+	asset rewardImage = $"rui/menu/lobby/speech_bubble_icon"
+	RuiSetImage( btnRui, "buttonImage", rewardImage )
+}
+#endif      
+
+#if UI
+bool function IsSelectedPlaylistQuestMission()
+{
+	string playlist = Lobby_GetSelectedPlaylist()
+	return GetPlaylistVarBool( playlist, "freelance_mode", false )
+}
+#endif      
+
+bool function HasQuestStarted( ItemFlavor quest )
+{
+	ItemFlavor ornull season = SeasonQuest_GetSeasonForQuest( quest )
+	if ( season == null )
+	{
+		Assert( false, "No season is associated with this quest." )
+		return false
+	}
+	else if ( CalEvent_HasStarted( expect ItemFlavor( season ), GetUnixTimestamp() ) == false )
+	{
+		return false
+	}
+
+	return true
+}

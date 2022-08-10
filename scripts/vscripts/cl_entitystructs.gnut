@@ -13,26 +13,29 @@ global struct SegmentedHealthBar
 	var healthBarDoomed
 }
 
-global struct BurnMeterHudStruct //
+global struct BurnMeterHudStruct
+                                                                      
 {
-	var burnMeterProgressBar
-	var burnMeterRewardTypeIcon
-	var burnMeterLabel
-	int burnMeterRewardID
+	var   burnMeterProgressBar
+	var   burnMeterRewardTypeIcon
+	var   burnMeterLabel
+	int   burnMeterRewardID
 	float burnMeterRewardProgress
 }
 
 
-//
+                                               
 global struct ClientEntityStruct
 {
 	EHIScriptStruct& ehiss
 
-	//
+	              
 	entity mainVGUI
 	entity body
 
-	//
+	bool hudVisible = false
+
+	               
 	var rodeoAlertIcon
 	var rodeoAlertLabel
 	var safeArea
@@ -45,46 +48,79 @@ global struct ClientEntityStruct
 
 	var overheadRui
 
-	table<string,AnimEventData> animEventDataForEntity
-	array emergencyIcons
-	array emergencyRings
+	table<string, AnimEventData> animEventDataForEntity
+	table<string, TokenizedAnimEventData> tokenizedAnimEventDataForEntity
+	array                        emergencyIcons
+	array                        emergencyRings
 
 	float localPingBeginTime = -999.0
-	int predictedUseCount = 0
-	bool predictedUseSuccess = true
+	int   predictedUseCount = 0
+	bool  predictedUseSuccess = true
 
 	float lastVocalizedCommsTime = -999.0
 
-	array<DamageHistoryStruct> recentDamageHistory
+	array<DamageHistoryStruct>       recentDamageHistory
 	string functionref( entity ent ) entTextOverrideCallback
 
-	bool functionref( entity player, entity ent ) canUseEntityCallback = null
+	bool functionref( entity player, entity ent, int useFlags ) canUseEntityCallback = null
+	bool functionref( entity player, entity ent ) shouldUseBlockReloadCallback = null
 
 	array<void functionref( entity ent, entity player, int useInputType )> onUseEntityCallbacks
-	array<void functionref( entity vehicle )> onVehicleLaunchCallbacks
-	array<void functionref( entity vehicle )> onVehicleCollideCallbacks
-	array<void functionref( entity vehicle )> onPlayerUseButtonPressed
-	array<void functionref( entity vehicle )> onPlayerUseButtonReleased
-	array<void functionref( entity )> onEntityDestroyedCallbacks
+	array<void functionref( entity vehicle )>                              onVehicleLaunchCallbacks
+	array<void functionref( entity vehicle )>                              onVehicleCollideCallbacks
+	array<void functionref( entity vehicle )>                              onPlayerUseButtonPressed
+	array<void functionref( entity vehicle )>                              onPlayerUseButtonReleased
+	array<void functionref( entity )>                                      onEntityDestroyedCallbacks
 
 	string enemyHighlight = ""
 
+	bool  isSelected
 	float lastUseTime
-	bool isBusy
+	bool  isBusy
 
 	int __itemFlavorNetworkId
+	int charmItemFlavorNetworkId
 
-	bool canBeMeleed = true
-
-	//
-	void functionref( entity, entity, var ) Callback_VortexTriggerBulletHit
+	                               
+	void functionref( entity, entity, var )                    Callback_VortexTriggerBulletHit
 	void functionref( entity, entity, entity, entity, vector ) Callback_VortexTriggerProjectileHit
 
-	#if(false)
-//
-//
+                 
+                                              
+                                                                                                    
+                            
+                           
 
-#endif //
+	int cameraMaxRangeFXHandle = -1
+
+                  
+		bool castleWallIsEnergized = false
+       
+
+                  
+                              
+                                  
+       
+
+	bool                       eyeForQuality_isScanned
+	bool                       blackMarket_haveSeenReady
+	bool                       ignorePingTrace = false
+
+	string clientEntMinimapClassName
+	int    clientEntMinimapCustomState
+	int    clientEntMinimapFlags
+	float  clientEntMinimapScale = 1.0
+	int    clientEntMinimapZOrder
+
+	int deathBoxMenu_lastSeenClipCount
+
+
+	EncodedEHandle ornull gladCardPropOwnerPlayerEEH = null
+	ItemFlavor ornull     animWindowCosmeticItemFlavor = null
+	ItemFlavor ornull     animWindowSkinItemFlavor = null
+                        
+                          
+       
 }
 
 
@@ -95,126 +131,189 @@ global struct TitanCockpitRUI
 }
 
 
-//
+                                               
 global struct ClientPlayerStruct
 {
-	entity rodeoBatteryCrosshairEntity
+	entity                  rodeoBatteryCrosshairEntity
 	BurnMeterHudStruct[ 1 ] burnMeterHudStructs
 
 	float grenadePulloutTime
 
-	//
+	                                                                                                                                  
 	bool isDisembarking = false
 
 	float disembarkPressTime
 	float ejectEnableTime
 	float ejectPressTime
-	int ejectPressCount
-	bool playerScriptsInitialized
+	int   ejectPressCount
+	bool  playerScriptsInitialized
 
 	int smartCoreKills = 0
+
+                    
+                                     
+       
 
 	entity previousWeapon
 
 	entity knife = null
 
-	bool pilotEjecting = false
-
 	float nextAllowWarningTime = 0.0
 
 	entity previousRiderEnt = null
-	bool allowCoreMessages = true
+	bool   allowCoreMessages = true
 
-	string sayLineLatestSound
-	float sayLineLatestTime = -99.0
-	int lastSaidCommsAction
-	int lastCanceledCommsAction
-	table<int,float> commActionFlavorDebounceTimes
-	float commActionFlavorGlobalDebounceTime = -30.0
+	string            sayLineLatestSound
+	float             sayLineLatestTime = -99.0
+	int               lastSaidCommsAction
+	int               lastCanceledCommsAction
+	table<int, float> commActionFlavorDebounceTimes
+	float             commActionFlavorGlobalDebounceTime = -30.0
 
 	array<TitanCockpitRUI> titanCockpitRUIs
-	#if(false)
-
-#endif
-	bool isInExtendedUse = false
-	table<string,int> requiredLootTypes = {}
+	entity                 cryptoActiveCamera
+	bool                   isInExtendedUse = false
+	table<string, int>     requiredLootTypes = {}
 
 	string lastEventNotificationText
-
-	entity TEMP_lastMeleeInputWeapon = null
 
 	int mapPingTicketID = -1
 
 	array<int> freefallContrailFXHandles
-	int freefallWindEffectHandle = -1
+	int        freefallWindEffectHandle = -1
+
+	float nextTraceCheckTime
+
+	bool classActuallyChanged
+
+	table<entity, int> reconScannedByThisPlayerRefCount
+	                                                                      
+	                                                                  
+	                                                                   
+	                
+	table<entity, var> reconScanRUIs
+	                                                                         
+	                                      
+
+
+	float lastTimeDeactivatedJetpack
+	float nextAllowUseValkUltTime
+	bool inSkydiveAfterUlt
+
+                         
+                                    
+                          
+       
+
+               
+                                      
+       
+
+                  
+                    
+       
 }
 
 
 
-//
+                                                
 global struct ClientAIStruct
 {
 	int gruntVoiceIndex = 0
+                    
+		entity primaryWaypoint
+		entity secondaryWaypoint
+       
 }
 
 
 
-//
+                                
 global struct ClientWeaponStruct
 {
 	float startChargeTime = 0.0
-	bool wasCharged = false
-	bool initialized = false
-	#if(false)
+	bool  wasCharged = false
+	bool  initialized = false
+                             
+                                   
+                                          
+       
 
-
-#endif
-
-	entity weaponOwner
+	entity     weaponOwner
 	array<int> statusEffects
-	float lastFireTime
+	float      lastFireTime
 
 	float PROTO_lastFireAttemptTime = -1.0
 
-	#if(false)
+	bool useRapidHitbeep = false
+
+	string activeOptic = ""
+	var    sentinelEnergizeHintRui = null
+
+	            
+	entity translocate_predictedInitialProjectile = null
+	entity translocate_predictedRedirectedProjectile = null
+	table ornull translocate_impactRumbleObj = null
+	                   
+	bool   translocate_isADSForced = false
+
+                 
+                                 
+       
 
 
-#endif
+	array<WeaponMissileMultipleTargetData>   valkTac_targetData
+	float                      valkUltStartTime
+	array<entity>			   valkAlliesWaitingForLaunch
+
+	bool isWhiteset = false
+	bool isBlueset = false
+	bool isPurpleset = false
+	bool isGoldset = false
 }
 
 
-//
+                                   
 global struct ClientProjectileStruct
 {
+	vector savedOrigin
 	vector savedDir
-	float savedShotTime
-	int projectileBounceCount = 0
+	float  savedShotTime
+	int    projectileBounceCount = 0
+	float  detonateDist
+	bool   useHighDetailCollisionTraceForPlaceStickyEnt = false
+	bool   ignoreOwnerForPlaceStickyEnt = false
 
-	#if(false)
+                             
+                                   
+                                 
+                                        
+       
 
 
+	vector valkTacMissileStartPos
+	EHI valkTacGrenadeEHI
 
-#endif
+	bool                                                  isPlanted = false
+	void functionref( entity, DeployableCollisionParams ) bounceFunc
+	void functionref( entity, DeployableCollisionParams ) deployFunc
 }
 
 
-//
+                                   
 global struct ClientTitanSoulStruct
 {
-	bool titanUpgradesAnnounced = false
-	entity lastOwner
-	int upgradeCount = 0
 }
 
 
-//
+                                    
 global struct ClientPlayerDecoyStruct
 {
 	array<int> particleIndexes
-	bool decoyHasStealthPassive = false
+	bool       decoyHasStealthPassive = false
 }
 
-//
+            
 global struct ClientPlayerWaypoint
 {
 	var ruiMinimap
@@ -223,14 +322,16 @@ global struct ClientPlayerWaypoint
 
 	array<int> fxHandles
 
+	bool isHiddenOnLocalHUD = false
 	bool haveConfirmed
 
 	entity highlightEnt
 
-#if(false)
-
-
-#endif //
+	int                           objectiveGroupIndex = -1
+	string                        objectiveGroupName
+	bool                          objectiveGroup_thisWasVisible = false
+	void functionref( entity wp ) objectiveGroupOnVisibleTrueFunc = null
+	void functionref( entity wp ) objectiveGroupOnVisibleFalseFunc = null
 }
 
 global struct ClientFirstPersonProxyStruct

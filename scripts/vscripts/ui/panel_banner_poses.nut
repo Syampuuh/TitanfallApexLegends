@@ -22,10 +22,10 @@ void function InitCardPosesPanel( var panel )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK_LEGEND", "#X_BUTTON_UNLOCK_LEGEND", null, CustomizeMenus_IsFocusedItemParentItemLocked )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_EQUIP", "#X_BUTTON_EQUIP", null, CustomizeMenus_IsFocusedItemEquippable )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK", "#X_BUTTON_UNLOCK", null, CustomizeMenus_IsFocusedItemLocked )
-	//
-	//
-	//
-	//
+	                                                                                                                                           
+	                                                                                                                     
+	                                                                                                                       
+	                                                                                                                        
 }
 
 
@@ -49,7 +49,7 @@ void function CardPosesPanel_Update( var panel )
 {
 	var scrollPanel = Hud_GetChild( file.listPanel, "ScrollPanel" )
 
-	//
+	          
 	foreach ( int flavIdx, ItemFlavor unused in file.cardPoseList )
 	{
 		var button = Hud_GetChild( scrollPanel, "GridButton" + flavIdx )
@@ -59,7 +59,7 @@ void function CardPosesPanel_Update( var panel )
 
 	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.STANCE, -1, null )
 
-	//
+	                                  
 	if ( IsPanelActive( file.panel ) )
 	{
 		LoadoutEntry entry = Loadout_GladiatorCardStance( GetTopLevelCustomizeContext() )
@@ -69,7 +69,7 @@ void function CardPosesPanel_Update( var panel )
 		foreach ( int flavIdx, ItemFlavor flav in file.cardPoseList )
 		{
 			var button = Hud_GetChild( scrollPanel, "GridButton" + flavIdx )
-			CustomizeButton_UpdateAndMarkForUpdating( button, entry, flav, PreviewCardPose, CanEquipCanBuyCharacterItemCheck )
+			CustomizeButton_UpdateAndMarkForUpdating( button, [entry], flav, PreviewCardPose, CanEquipCanBuyCharacterItemCheck )
 		}
 	}
 }
@@ -77,7 +77,7 @@ void function CardPosesPanel_Update( var panel )
 
 void function CardPosesPanel_OnFocusChanged( var panel, var oldFocus, var newFocus )
 {
-	if ( !IsValid( panel ) ) //
+	if ( !IsValid( panel ) )                  
 		return
 	if ( GetParentMenu( panel ) != GetActiveMenu() )
 		return

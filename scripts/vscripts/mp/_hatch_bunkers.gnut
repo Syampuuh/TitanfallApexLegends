@@ -1,0 +1,438 @@
+#if SERVER || CLIENT
+global function InitHatchBunkers
+global function GetHatchDataGroupsById
+global function GetHatchDataGroupByDoorModel
+global function GetAllHatchDataGroups
+global function IsCanyonlandsBunkersEnabled
+global function IsHatchBunkerUnlocked
+#endif
+
+#if SERVER
+                                          
+#endif
+
+#if SERVER || CLIENT
+global const array<string> HATCH_ZONE_IDS = ["16", "6", "5", "12", "12_treasure"]
+
+global const string HATCH_DOOR_ENTRANCE_SCRIPTNAME = "hatch_bunker_entrance_model_z%s"
+global const string HATCH_DOOR_LEAVE_SCRIPTNAME = "hatch_bunker_exit_model_z%s"
+const string HATCH_PANEL_SCRIPTNAME = "bunker_hatch_panel_model"
+
+const string ZIPLINE_TARGET_SCRIPTNAME = "hatch_special_zipline_start_target"
+#endif                    
+
+#if SERVER
+                                                      
+                                                           
+
+                                                        
+                                                  
+                                      
+                                                                             
+#endif
+
+
+#if SERVER || CLIENT
+global enum eHatchState
+{
+	LOCKED,
+	UNLOCKED,
+	COUNTDOWN,
+	OPEN
+}
+#endif
+
+
+#if SERVER || CLIENT
+global struct HatchData
+{
+	string zoneId
+	bool   isEntranceHatch = false
+	int    hatchState
+
+	entity doorModel
+	entity panelModel
+
+	#if SERVER
+		                                        
+	#endif
+}
+#endif
+
+struct
+{
+	array<string> hatchIdsToCountdown
+	array<string> hatchIdsUnlocked
+	int           countdownTargetUnixTime
+
+
+	table <string, array<HatchData> > hatchIdDataGroups
+	table <entity, HatchData >        hatchModelDataGroups
+} file
+
+
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+  
+                               
+                            
+                            
+                            
+                            
+                            
+                            
+  
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+
+
+#if SERVER || CLIENT
+void function InitHatchBunkers()
+{
+	#if SERVER
+		                                        
+		                                              
+	#endif
+
+	file.hatchIdsUnlocked = HATCH_ZONE_IDS
+
+	AddCallback_EntitiesDidLoad( EntitiesDidLoad )
+}
+#endif                    
+
+#if SERVER || CLIENT
+void function EntitiesDidLoad()
+{
+	if ( !IsCanyonlandsBunkersEnabled() )
+		return
+
+	                                            
+	array<HatchData> hatchEntranceDatas
+	array<HatchData> hatchLeaveDatas
+	foreach ( int hatchIndex, string id in HATCH_ZONE_IDS )
+	{
+		HatchData entranceHatchData
+		HatchData leaveHatchData
+		bool isQuestHatch = id == "12_treasure"
+
+		if ( !isQuestHatch )
+		{
+			entranceHatchData.doorModel = GetEntByScriptName( format( HATCH_DOOR_ENTRANCE_SCRIPTNAME, id ) )
+			entranceHatchData.zoneId = id
+			entranceHatchData.isEntranceHatch = true
+		}
+
+		leaveHatchData.doorModel = GetEntByScriptName( format( HATCH_DOOR_LEAVE_SCRIPTNAME, id ) )
+		leaveHatchData.zoneId = id
+		leaveHatchData.isEntranceHatch = false
+
+		#if SERVER
+			                                     
+		#endif
+
+		if ( !isQuestHatch )
+			hatchEntranceDatas.append( entranceHatchData )
+
+		hatchLeaveDatas.append( leaveHatchData )
+
+		#if SERVER
+			                        
+			                                                                            
+			 
+				                                                                               
+				                             
+				            
+				                                                                                        
+
+				                    
+				                                                                         
+
+				                                                                                                                                
+
+				                                                                               
+				                                                                      
+
+				                                               
+					                                                               
+
+				                                                                                     
+				                                                
+
+				                                         
+					                                                                                                          
+			 
+		#endif          
+
+		array<HatchData> hatchDataArray
+		file.hatchIdDataGroups[ id ] <- hatchDataArray
+	}
+
+	array<HatchData> allHatchDatas
+	allHatchDatas.extend( hatchEntranceDatas )
+	allHatchDatas.extend( hatchLeaveDatas )
+
+	                                              
+	foreach ( HatchData data in allHatchDatas )
+	{
+		                                   
+		#if SERVER
+		                                                                                                                              
+		#endif
+
+		array<entity> linkEnts = data.doorModel.GetLinkEntArray()
+
+		foreach ( entity doorLinkEnt in linkEnts )
+		{
+			string linkEntScriptName = doorLinkEnt.GetScriptName()
+
+			if ( linkEntScriptName == HATCH_PANEL_SCRIPTNAME )
+			{
+				data.panelModel = doorLinkEnt
+			}
+			else if ( linkEntScriptName == ZIPLINE_TARGET_SCRIPTNAME )
+			{
+				#if SERVER
+					                                                                 
+					                     
+				#endif
+			}
+		}
+
+		if ( IsValid( data.panelModel ) )
+		{
+			#if SERVER
+				                            
+				                             
+				                                                   
+				                           
+				                                                                                                              
+				                                                        
+
+				                            
+					                                     
+			#endif
+
+			if ( data.isEntranceHatch )
+			{
+				if ( file.hatchIdsUnlocked.contains( data.zoneId ) )
+				{
+					data.hatchState = eHatchState.UNLOCKED
+
+					#if SERVER
+						                            
+					#endif
+				}
+				else if ( file.hatchIdsToCountdown.contains( data.zoneId ) )
+				{
+					data.hatchState = eHatchState.COUNTDOWN
+				}
+				else
+				{
+					data.hatchState = eHatchState.LOCKED
+				}
+			}
+			else
+			{
+				data.hatchState = eHatchState.UNLOCKED
+
+				#if SERVER
+					                            
+				#endif
+			}
+
+			#if CLIENT
+				AddEntityCallback_GetUseEntOverrideText( data.panelModel, CreateHatchPanelOverrideTextFunc( data ) )
+			#endif
+
+			if ( data.hatchState == eHatchState.UNLOCKED )
+				AddCallback_OnUseEntity_ClientServer( data.panelModel, CreateHatchPanelFunc( data ) )
+		}
+
+		file.hatchIdDataGroups[ data.zoneId ].append( data )
+		file.hatchModelDataGroups[ data.doorModel ] <- data
+	}
+}
+#endif                    
+
+
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+  
+                                     
+                                     
+                                     
+                                     
+                                     
+                                     
+                                     
+  
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+
+
+#if CLIENT
+string functionref( entity panel ) function CreateHatchPanelOverrideTextFunc( HatchData data )
+{
+	return string function( entity panel ) : ( data )
+	{
+		if ( data.hatchState == eHatchState.UNLOCKED )
+		{
+			return "#BUNKER_PANEL_UNLOCKED_HINT"
+		}
+		else if ( data.hatchState == eHatchState.COUNTDOWN )
+		{
+			int currentUnixTime  = GetUnixTimestamp()
+			int timeDelta        = file.countdownTargetUnixTime - currentUnixTime
+			string timeString    = GetDaysHoursMinutesSecondsString( timeDelta )
+			string displayString = Localize( "#BUNKER_PANEL_COUNTDOWN_HINT", timeString )
+
+			return displayString
+		}
+
+		return "#BUNKER_PANEL_DISABLED_HINT"
+	}
+}
+#endif          
+
+
+#if SERVER || CLIENT
+void functionref( entity panel, entity player, int useInputFlags ) function CreateHatchPanelFunc( HatchData data )
+{
+	return void function( entity panel, entity player, int useInputFlags ) : ( data )
+	{
+		thread OnHatchPanelActivate( data )
+
+		#if SERVER
+			                                                             
+		#endif
+	}
+}
+#endif                    
+
+
+#if SERVER || CLIENT
+void function OnHatchPanelActivate( HatchData data )
+{
+	#if SERVER
+		                             
+		                            
+	#endif
+
+	data.hatchState = eHatchState.OPEN
+
+	#if SERVER
+		                            
+		                                                                        
+			                                               
+
+		                                        
+	#endif          
+}
+#endif                    
+
+
+#if SERVER
+                                                                               
+ 
+	     
+	                                                                                  
+	                                                                           
+
+	                                                                                                                                                                       
+
+	                     
+	                                               
+	                                                                                                                             
+
+	                                   
+	                     
+	 
+		                                                                                                   
+		                                                                   
+		                                                                           
+		                                      
+	 
+ 
+#endif
+
+
+#if SERVER
+                                                     
+ 
+	             
+	                                                                                                                                                     
+	                                                                    
+	                                                               
+	                                                                                   
+	                                                               
+ 
+#endif          
+
+
+#if SERVER || CLIENT
+array<HatchData> function GetHatchDataGroupsById( string zoneId )
+{
+	Assert( zoneId in file.hatchIdDataGroups, "Zone id not contained in any hatch data." )
+
+	return file.hatchIdDataGroups[ zoneId ]
+}
+#endif                    
+
+
+#if SERVER || CLIENT
+HatchData function GetHatchDataGroupByDoorModel( entity model )
+{
+	Assert( model in file.hatchModelDataGroups, "Model not contained in any hatch data." )
+
+	return file.hatchModelDataGroups[ model ]
+}
+#endif                    
+
+
+#if SERVER || CLIENT
+table <string, array<HatchData> > function GetAllHatchDataGroups()
+{
+	return file.hatchIdDataGroups
+}
+#endif                    
+
+
+#if SERVER || CLIENT
+bool function IsCanyonlandsBunkersEnabled()
+{
+	if ( GetCurrentPlaylistVarBool( "canyonlands_bunkers_enabled", true ) )
+	{
+		foreach ( string zoneId in HATCH_ZONE_IDS )
+		{
+			array<entity> entranceHatches = GetEntArrayByScriptName( format( HATCH_DOOR_ENTRANCE_SCRIPTNAME, zoneId ) )
+			array<entity> leaveHatches    = GetEntArrayByScriptName( format( HATCH_DOOR_LEAVE_SCRIPTNAME, zoneId ) )
+
+			if ( zoneId != "12_treasure" && entranceHatches.len() != 1 )
+				return false
+
+			if ( leaveHatches.len() != 1 )
+				return false
+		}
+
+		return true
+	}
+
+	return false
+}
+
+bool function IsHatchBunkerUnlocked( string hatchId )
+{
+	if ( hatchId == "12_treasure" )
+		return false
+
+	return file.hatchIdsUnlocked.contains( hatchId )
+}
+#endif                    

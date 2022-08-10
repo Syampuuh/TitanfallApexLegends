@@ -1,0 +1,1049 @@
+global function Entitlements_LevelInit
+global function Entitlement_GetEntitlementEnumVal
+global function Entitlement_GetMenuTitleText
+
+#if UI
+global function Entitlement_GetSKUStoreTitle
+global function Entitlement_GetSKUStoreDesc
+global function Entitlement_GetSKUStoreLink
+global function Entitlement_GetSKUStoreImage
+global function Entitlement_GetSKUStoreApexCoinFlav
+global function Entitlement_GetSKUStoreCalEvent
+global function TryEntitlementMenus
+global function UICodeCallback_GRXFirstPartyBundlePurchased
+global function UICodeCallback_ActivateRootPanel
+global function Entitlement_IsSKUBundleOwned
+#endif
+
+#if UI || CLIENT
+global function Entitlement_GetSKUStoreApexCoinAmount
+global function Entitlement_GetSKUStoreApexCoinTierImage
+global function Entitlement_GetSKUStoreApexCoinCardBaseImage
+
+#endif
+
+#if UI && DEV
+global function OpenEntitlementMenu
+global function DEV_OpenHijackedEntitlementRedeemPopup
+#endif
+#if SERVER
+                                       
+                                                      
+                                             
+                                                       
+#endif
+
+table<entity, bool> checkedPlayerRewardsSet = {}
+
+global table<string, array< ItemFlavor > > eaAccessRewardRefs
+global table<string, array< ItemFlavor > > psPlusRewardRefs
+
+global table< int, table<ItemFlavor, array< ItemFlavor > > > entitlementRewardMap
+
+global table<entity, bool> playersToCheckForUpgrade
+global array< ItemFlavor > upgradableAccessRewardRefs
+
+#if UI
+struct DialogQueueEntry
+{
+	asset assetRef
+	int entitlementGUID
+	string persistenceVarName
+}
+array< DialogQueueEntry > dialogQueue
+#endif
+
+const string GENERIC_ACKNOWLEDGEMENT_PVAR = "genericEntitlementsAcknowledgement"
+
+enum eEntitlementType
+{
+	FIRSTPARTY,
+	TWITCH_PRIME,
+	TWITCH_DROPS,
+	_COUNT
+}
+
+struct FileStruct_LifetimeLevel
+{
+#if UI
+	bool hasRunMenuEntitlementsFirstTime = false
+#endif
+}
+FileStruct_LifetimeLevel& fileLevel
+
+void function Entitlements_LevelInit()
+{
+	FileStruct_LifetimeLevel newFileLevel
+	fileLevel = newFileLevel
+
+	entitlementRewardMap.clear()
+	for ( int entitlementType = 0; entitlementType < eEntitlementType._COUNT; entitlementType++ )
+	{
+		entitlementRewardMap[entitlementType] <- {}
+	}
+
+	                                                            
+	                                                           
+	                                                                      
+	                                                                  
+
+	                                           
+	                                           
+
+	AddCallback_RegisterRootItemFlavors( void function() {
+		array<asset> entitlementAssetArray = GetBaseItemFlavorsFromArray( "entitlements" )
+		entitlementAssetArray.reverse()                                                                                                    
+		foreach ( asset entitlementAsset in entitlementAssetArray )
+			RegisterItemFlavorFromSettingsAsset( entitlementAsset )
+
+		foreach ( asset apexCoinAsset in GetBaseItemFlavorsFromArray( "apexCoinAmounts" ) )
+			RegisterItemFlavorFromSettingsAsset( apexCoinAsset )
+	} )
+
+	AddCallback_OnItemFlavorRegistered( eItemType.character_skin, UnlockFuncRegister )
+	AddCallback_OnItemFlavorRegistered( eItemType.weapon_skin, UnlockFuncRegister )
+	AddCallback_OnItemFlavorRegistered( eItemType.gladiator_card_frame, UnlockFuncRegister )
+	AddCallback_OnItemFlavorRegistered( eItemType.gladiator_card_badge, UnlockFuncRegister )
+
+	AddCallback_OnItemFlavorRegistered( eItemType.entitlement, EntitlementRegister )
+
+	#if SERVER && DEV
+		                                                    
+	#endif
+
+	#if SERVER || CLIENT
+	Remote_RegisterServerFunction( "ClientCallback_MarkEntitlementMenuSeen", "int", 0, INT_MAX )
+	#endif
+
+	#if SERVER
+		                                                                            
+		                                                                              
+	#endif
+}
+
+#if SERVER
+                                                                      
+ 
+	                                        
+		      
+
+	                                       
+
+	                                                                                      
+		                                                             
+
+	                                                                
+
+	                                                  
+
+	                                                                                                                     
+	                                                         
+		                                             
+
+	                       
+
+	                       
+
+	                                                                         
+		                                              
+ 
+#endif
+
+#if SERVER
+                                                                              
+ 
+	                                                                     
+	 
+		                                                                                              
+		  
+		                                                                                                                                            
+		                                                                                         
+		                                                                                                                                           
+		                                                                                                                        
+		  
+		                                                                                                     
+
+		                                                               
+		 
+			       
+			                                                                                                                                     
+				                                                                                                                           
+
+			                        
+			                      
+
+			                                                           
+			 
+				                                                                                                                                                                                        
+
+				                                         
+				 
+					                                                            
+					                                                                                                           
+						        
+					                                                                             
+						        
+				 
+
+				                  
+				                                                              
+				 
+					                
+					        
+				 
+
+				                                
+				                                                         
+				                                                                           
+				 
+					                                                                  
+				  
+				                                                                              
+					                                                                                                                  
+					                                                                             
+					                           
+						      
+
+					                                            
+				  
+				                                                                 
+				                                             
+			 
+
+			                                         
+				                                                      
+		 
+	 
+
+	                                       
+ 
+#endif
+
+#if SERVER
+                                            
+ 
+	                            
+	                                                                                                                           
+	 
+		                                                                        
+		                                                              
+			        
+
+		                                         
+		 
+			                                                                                                                                       
+			                                                              
+				        
+
+			                                
+			                                                         
+			                                                                           
+			 
+				                                                                  
+			  
+			                                                                                              
+				                                                                             
+				                           
+					      
+
+				                                            
+
+				                                                                                         
+				                                                      
+			  
+			                                                                 
+			                                             
+		 
+	 
+ 
+#endif
+
+#if SERVER
+                                            
+ 
+	                            
+	                                                                                                
+	                                                                                    
+	                                                                                   
+
+	                                         
+	 
+		                                                                         
+		                                    
+		                                          
+
+		                                                                                                                           
+		 
+			                                                                          
+			                                                                        
+			                                                                       
+
+			                                         
+			 
+				                                                                                                                                       
+				                                                                                 
+
+				                                     
+				                      
+				 
+					                          
+					 
+						                                                 
+						                                
+						                                                         
+						                                                                           
+						 
+							                                                                  
+						  
+						                                                                                                                
+							                                                                               
+							                           
+								      
+
+							                                                                                 
+
+							                                
+							                                                                                     
+							                                                          
+								                                                 
+
+							                                                                    
+							                                            
+						  
+						                                                                 
+						                                             
+					 
+				 
+				                        
+				 
+					                         
+					 
+						                              
+						                                                             
+						                                                
+						                                             
+					 
+				 
+			 
+		 
+
+		                                                                                                
+		 
+			                                
+			                                                            
+			                                                                                                        
+			 
+				                                                                       
+			  
+
+			                                                                    
+			 
+				                                                       
+					      
+
+				                        
+					                                  
+			  
+
+			                                             
+		 
+	 
+ 
+#endif
+
+#if SERVER
+                                                            
+ 
+	                                
+
+	                                         
+		           
+
+	                                                          
+	                               
+	 
+		                                     
+
+		                                                                     
+		                                                                                                                                 
+		                                                                                                                                   
+
+		                                                                                          
+		 
+			                                                                             
+			                                                              
+
+			                                
+			                                                                     
+			                                                                                                   
+			 
+				                                                                                                                                   
+				                                                                 
+				                                                                                                                     
+			  
+			                                                                                    
+				                                                                             
+				                           
+					      
+				                                                                   
+
+			  
+			                                             
+		 
+	 
+ 
+#endif
+
+
+#if SERVER
+                                                            
+ 
+	                 
+		      
+
+	                                                                                                                         
+	 
+		                                                                  
+		                                          
+			        
+
+		                                        
+			        
+
+		                                         
+		 
+			                                                                                                                                       
+			                                                              
+				        
+
+			                                
+			                                                         
+			                                                                           
+			 
+				                                                                  
+			  
+			                                                                                       
+				                                                                             
+				                           
+					      
+
+				                                            
+
+				                                             
+			  
+			                                                                 
+			                                             
+		 
+	 
+ 
+#endif
+
+#if SERVER
+
+                                                                                                                                    
+ 
+	                            
+	                                              
+	 
+		                                                       
+	 
+
+	                                                 
+
+	                                                       
+	                                                                                                                                      
+	                                              
+	 
+		                               
+		                                                     
+		                                                           
+	 
+
+	                                                                              
+	                                                           
+	 
+		       
+		                                                                                     
+		                                                          
+			                                                 
+	 
+ 
+
+#endif
+
+#if SERVER
+                                                                  
+ 
+	                 
+		      
+
+	                                    
+	                                          
+
+	                                                                                                                         
+	 
+		                                                                                
+
+		                            
+		                                       
+		 
+			                             
+			                                                                  
+			                                        
+			 
+				                                                                                                                  
+				                                         
+				 
+					                                                                                                                                       
+
+					                                                              
+					 
+						                       
+						                              
+					 
+				 
+
+				                       
+					                                             
+			 
+		 
+	 
+
+	                              
+	 
+		                                
+		                                                            
+		                                                                                                        
+		 
+			                                                                       
+		  
+
+		                                                                    
+		 
+			                                                       
+				      
+
+			                        
+				                                  
+		  
+
+		                                             
+	 
+ 
+#endif          
+
+
+#if SERVER || CLIENT || UI
+void function UnlockFuncRegister( ItemFlavor flavor )
+{
+	if ( !ItemFlavor_HasUnlockFunc( flavor ) )
+		return
+
+	string unlockFuncKey = ItemFlavor_GetUnlockFuncKey( flavor )
+	if ( unlockFuncKey in eaAccessRewardRefs )
+		eaAccessRewardRefs[unlockFuncKey].append( flavor )
+	else if ( unlockFuncKey in psPlusRewardRefs )
+		psPlusRewardRefs[unlockFuncKey].append( flavor )
+	else if ( unlockFuncKey == "origin_access_on_pc" || unlockFuncKey == "ea_access_on_xbox" )
+		upgradableAccessRewardRefs.append( flavor )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Entitlement_GetEntitlementType( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+
+	string typeString = GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "entitlementType" )
+	switch ( typeString )
+	{
+		case "firstparty":
+			return eEntitlementType.FIRSTPARTY
+
+		case "twitch_prime":
+			return eEntitlementType.TWITCH_PRIME
+
+		case "twitch_drops":
+			return eEntitlementType.TWITCH_DROPS
+	}
+
+	Assert( false, "Unhandled entitlement type '" + typeString + "' for " + ItemFlavor_GetHumanReadableRef( flavor ) )
+	return -1
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Entitlement_GetEntitlementEnumVal( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+
+	string enumString = GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "enum" )
+
+	Assert( enumString in getconsttable() )
+	return expect int( getconsttable()[ enumString ] )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+string function Entitlement_GetEntitlementEnumValAsString( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+
+	string enumString = GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "enum" )
+	Assert( enumString != "" )
+
+	return enumString
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+string function Entitlement_GetMenuTitleText( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "menuTitleText" )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+                                                              
+string function Entitlement_GetTwitchPrimeRef( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+
+	string twitchRef = GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "twitchRef" )
+	Assert( twitchRef != "" )
+
+	return twitchRef
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+string function Entitlement_GetMenuPersistenceVarName( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+
+	asset entitlementAsset = ItemFlavor_GetAsset( flavor )
+
+	if ( GetGlobalSettingsBool( entitlementAsset, "isMenuEnabled" ) == false )
+		return GENERIC_ACKNOWLEDGEMENT_PVAR
+
+	string persistenceVarName = GetGlobalSettingsString( entitlementAsset, "menuPersistenceVarName" )
+	if ( persistenceVarName == "" )
+	{
+		switch ( Entitlement_GetEntitlementType( flavor ) )
+		{
+			case eEntitlementType.FIRSTPARTY:
+				persistenceVarName = Entitlement_GetEntitlementEnumValAsString( flavor )
+				break
+
+			case eEntitlementType.TWITCH_PRIME:
+				persistenceVarName = Entitlement_GetTwitchPrimeRef( flavor )
+				break
+
+			case eEntitlementType.TWITCH_DROPS:
+				persistenceVarName = Entitlement_GetTwitchPrimeRef( flavor )
+				break
+
+			default:
+				Assert( false, "Unhandled entitlement type for " + ItemFlavor_GetHumanReadableRef( flavor ) )
+		}
+
+		persistenceVarName += "Acknowledged"
+	}
+
+	return persistenceVarName
+}
+#endif
+
+
+#if UI
+string function Entitlement_GetSKUStoreTitle( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "productTitle" )
+}
+#endif
+
+
+#if UI
+string function Entitlement_GetSKUStoreDesc( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "productDesc" )
+}
+#endif
+
+
+#if UI
+string function Entitlement_GetSKUStoreLink( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "productLink" )
+}
+#endif
+
+
+#if UI
+asset function Entitlement_GetSKUStoreImage( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "productImage" )
+}
+#endif
+
+
+#if UI
+ItemFlavor ornull function Entitlement_GetSKUStoreApexCoinFlav( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	asset coinsAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "apexCoinsFlavor" )
+	if( IsValidItemFlavorSettingsAsset( coinsAsset ) )
+		return GetItemFlavorByAsset( coinsAsset )
+
+	return null
+}
+#endif
+
+
+#if UI
+ItemFlavor ornull function Entitlement_GetSKUStoreCalEvent( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.entitlement )
+	asset calEventAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "productVisibilityCalEvent" )
+	if ( IsValidItemFlavorSettingsAsset( calEventAsset ) )
+		return GetItemFlavorByAsset( calEventAsset )
+
+	return null
+}
+#endif
+
+
+#if UI || CLIENT
+string function Entitlement_GetSKUStoreApexCoinAmount( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.apex_coins )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "apexCoinAmount" )
+}
+#endif
+
+
+#if UI || CLIENT
+asset function Entitlement_GetSKUStoreApexCoinTierImage( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.apex_coins )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "apexCoinTierImage" )
+}
+#endif
+
+
+#if UI || CLIENT
+asset function Entitlement_GetSKUStoreApexCoinCardBaseImage( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.apex_coins )
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "apexCoinCardBaseImage" )
+}
+#endif
+
+
+#if UI
+void function UICodeCallback_ActivateRootPanel()
+{
+	printt( "ActivateRootPanel: " + GetActiveMenuName())
+	
+	bool showLobbyTab = false
+	if ( GetActiveMenu() != null && GetActiveMenuName() != "VCPopUp" )
+		showLobbyTab = true
+
+	if ( GetActiveMenu() != null && GetActiveMenuName() != "LobbyMenu" )
+		CloseActiveMenu()
+
+	if( showLobbyTab )
+	{
+		TabData lobbyTabData = GetTabDataForPanel( GetMenu( "LobbyMenu" ) )
+		ActivateTab( lobbyTabData, Tab_GetTabIndexByBodyName( lobbyTabData, "PlayPanel" ) )	
+	}	
+}
+
+void function UICodeCallback_GRXFirstPartyBundlePurchased( string bundleEnum )
+{	
+	printt( "Checking for first party purchase: " + bundleEnum )
+
+	if ( bundleEnum == "BLOODHOUND_LIFELINE_PACK" )
+	{
+		UICodeCallback_GRXFirstPartyBundlePurchased( "BLOODHOUND_SKU" )
+		UICodeCallback_GRXFirstPartyBundlePurchased( "LIFELINE_SKU" )
+		return
+	}
+
+	foreach ( ItemFlavor entitlementFlav, array<ItemFlavor> itemList in (entitlementRewardMap[eEntitlementType.FIRSTPARTY]) )
+	{
+		if ( GetGlobalSettingsString( ItemFlavor_GetAsset( entitlementFlav ), "productLink" ) == bundleEnum )
+		{
+			bool hasAll = true
+
+			foreach ( ItemFlavor flavor in itemList )
+			{
+				                                                                                                                                         
+				if ( !GRX_HasItem( ItemFlavor_GetGRXIndex( flavor ) ) )
+				{
+					hasAll = false
+					break
+				}
+			}
+			if ( hasAll )
+			{
+				if ( IsPersistenceAvailable() )
+				{
+					string persistenceVarName = Entitlement_GetMenuPersistenceVarName( entitlementFlav )
+
+					Assert( persistenceVarName != GENERIC_ACKNOWLEDGEMENT_PVAR, "SKU Bundles should always be explicitly acknowledged. Do not use the generic ack pvar." )
+
+					if ( GetDialogFlowTablesValueOrPersistence( persistenceVarName ) == false )
+					{
+						asset entitlementAsset = ItemFlavor_GetAsset( entitlementFlav )
+						int guid = ItemFlavor_GetGUID( entitlementFlav )
+						QueueEntitlementMenu( entitlementAsset, persistenceVarName, guid )
+					}
+				}
+			}
+		}
+
+	}
+}
+#endif
+
+#if SERVER || CLIENT || UI
+void function EntitlementRegister( ItemFlavor flavor )
+{
+	int entitlementType = Entitlement_GetEntitlementType( flavor )
+	entitlementRewardMap[entitlementType][flavor] <- []
+}
+#endif
+
+
+#if SERVER
+                                    
+ 
+	                                                                                          
+	 
+		                                                                       
+		                                                                                                    
+		 
+			                                                                                        
+			                                                                           
+		 
+	 
+ 
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function GetEntitlementForString( string entitlementString )
+{
+	Assert( entitlementString in getconsttable() )
+	return expect int( getconsttable()[ entitlementString ] )
+}
+#endif
+
+#if UI
+bool function TryEntitlementMenus()
+{
+	Assert( IsPersistenceAvailable() )
+
+	if ( fileLevel.hasRunMenuEntitlementsFirstTime )
+		return false
+
+	foreach ( ItemFlavor entitlementFlav in GetAllItemFlavorsOfType( eItemType.entitlement ) )
+	{
+		asset entitlementAsset = ItemFlavor_GetAsset( entitlementFlav )
+
+		if ( !GetGlobalSettingsBool( entitlementAsset, "isMenuEnabled" ) )
+			continue
+
+		int entitlementType = Entitlement_GetEntitlementType( entitlementFlav )
+
+		bool hasEntitlement = false
+		if ( entitlementType == eEntitlementType.FIRSTPARTY )
+			hasEntitlement = LocalPlayerHasEntitlement( Entitlement_GetEntitlementEnumVal( entitlementFlav ) )
+		else if ( entitlementType == eEntitlementType.TWITCH_PRIME )
+			hasEntitlement = DoesUserHaveTwitchPrimeReward( Entitlement_GetTwitchPrimeRef( entitlementFlav ) )
+		else if ( entitlementType == eEntitlementType.TWITCH_DROPS )
+			hasEntitlement = DoesUserHaveTwitchDrops( Entitlement_GetTwitchPrimeRef( entitlementFlav ) )
+		else
+			Assert( false, "Unknown entitlementType: " + entitlementType )
+
+		string persistenceVarName = Entitlement_GetMenuPersistenceVarName( entitlementFlav )
+		int guid = ItemFlavor_GetGUID( entitlementFlav )
+
+		if ( hasEntitlement && GetDialogFlowTablesValueOrPersistence( persistenceVarName ) == false )
+		{
+			SetDialogFlowPersistenceTables( persistenceVarName, true )
+			Remote_ServerCallFunction( "ClientCallback_MarkEntitlementMenuSeen", guid )
+			Remote_ServerCallFunction( "ClientCallback_lastSeenPremiumCurrency" )
+			OpenEntitlementMenu( entitlementAsset )
+			IncrementNumDialogFlowDialogsDisplayed()
+
+			return true
+		}
+	}
+
+	if ( dialogQueue.len() > 0 )
+	{
+		DialogQueueEntry dqe = dialogQueue.pop()
+
+		SetDialogFlowPersistenceTables( dqe.persistenceVarName, true )
+		Remote_ServerCallFunction( "ClientCallback_MarkEntitlementMenuSeen", dqe.entitlementGUID )
+		Remote_ServerCallFunction( "ClientCallback_lastSeenPremiumCurrency" )
+		if ( GetGlobalSettingsBool( dqe.assetRef, "isMenuEnabled" ) )
+		{
+			OpenEntitlementMenu( dqe.assetRef )
+			IncrementNumDialogFlowDialogsDisplayed()
+		}
+		return true
+	}
+
+	fileLevel.hasRunMenuEntitlementsFirstTime = true
+
+	return false
+}
+#endif      
+
+#if UI
+bool function Entitlement_IsSKUBundleOwned( int bundleEnum, ItemFlavor bundleFlav )
+{
+	string persistenceVarName = Entitlement_GetMenuPersistenceVarName( bundleFlav )
+
+	Assert( persistenceVarName != GENERIC_ACKNOWLEDGEMENT_PVAR, "SKU Bundles should not use the generic ack pvar." )
+
+	if ( GetPersistentVarAsInt( persistenceVarName ) )
+		return true
+	
+	return LocalPlayerHasEntitlement( bundleEnum )
+}
+#endif      
+
+
+#if UI
+void function OpenEntitlementMenu( asset entitlementAsset )
+{
+	Assert( GetGlobalSettingsBool( entitlementAsset, "isMenuEnabled" ) )
+
+	string titleText = Localize( GetGlobalSettingsString( entitlementAsset, "menuTitleText" ) )
+	string descText = Localize( GetGlobalSettingsString( entitlementAsset, "menuDescText" ) )
+	string imageName = GetGlobalSettingsString( entitlementAsset, "menuImageName" )
+	imageName = GetCurrentPlaylistVarString( imageName + "_image_override", imageName )
+
+	printt ( "open dialog: " + titleText )
+	PromoDialog_OpenHijackedUM( titleText, descText, imageName )
+}
+#endif      
+
+#if UI
+void function QueueEntitlementMenu( asset entitlementAsset, string persistenceVarName, int guid )
+{
+	DialogQueueEntry dqe
+	dqe.assetRef = entitlementAsset
+	dqe.persistenceVarName = persistenceVarName
+	dqe.entitlementGUID = guid
+	dialogQueue.append( dqe )
+}
+#endif      
+
+#if SERVER
+                                                                                          
+ 
+	                                               
+		      
+
+	                                                                                                                          
+	                                      
+	 
+		                                                      
+		      
+	 
+
+	                                       
+	 
+		                                                      
+		      
+	 
+	                    
+
+	                                                
+		      
+
+	                                                        
+
+	                                                             
+		      
+
+	                                                                         
+
+	                                                   
+ 
+#endif          
+
+
+#if SERVER && DEV
+                                        
+ 
+	                                                      
+
+	                                           
+	                                                                                          
+	 
+		                                                                                                
+			        
+
+		                                                                                    
+		                                                                                                                                                                                                                                 
+
+		                                               
+	 
+
+	                                                         
+
+	                           
+ 
+#endif                 
+
+
+#if DEV && UI
+                                                                                                           
+void function DEV_OpenHijackedEntitlementRedeemPopup( string entitlementEnumName )
+{
+	foreach ( ItemFlavor entitlementFlav in GetAllItemFlavorsOfType( eItemType.entitlement ) )
+	{
+		int type = Entitlement_GetEntitlementType( entitlementFlav )
+		string enumValName
+
+		if ( type == eEntitlementType.FIRSTPARTY )
+			enumValName = Entitlement_GetEntitlementEnumValAsString( entitlementFlav )
+
+		if ( type == eEntitlementType.TWITCH_PRIME )
+			enumValName = Entitlement_GetTwitchPrimeRef( entitlementFlav )
+
+		if ( type == eEntitlementType.TWITCH_DROPS)
+			enumValName = Entitlement_GetTwitchPrimeRef( entitlementFlav )
+
+		if ( enumValName == entitlementEnumName )
+		{
+			asset entitlementAsset = ItemFlavor_GetAsset( entitlementFlav )
+			OpenEntitlementMenu( entitlementAsset )
+		}
+	}
+}
+#endif
+
+
+#if SERVER
+                                       
+ 
+	                            
+ 
+#endif

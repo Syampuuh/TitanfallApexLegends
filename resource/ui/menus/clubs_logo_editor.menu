@@ -1,0 +1,203 @@
+resource/ui/menus/clubs_logo_editor.menu
+{
+	menu
+	{
+		ControlName				Frame
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		PaintBackgroundType		0
+		infocus_bgcolor_override	"0 0 0 0"
+		outoffocus_bgcolor_override	"0 0 0 0"
+
+        ScreenFrame
+        {
+            ControlName				Label
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            labelText				""
+            visible				    1
+            bgcolor_override        "0 0 0 191"
+            paintbackground         1
+        }
+		PanelFrame
+        {
+            ControlName				Label
+            xpos					0
+            ypos					0
+            wide					1920
+            tall					%100
+            labelText				""
+            visible				    1
+
+            pin_to_sibling          ScreenFrame
+            pin_corner_to_sibling   CENTER
+            pin_to_sibling_corner   CENTER
+        }
+        ScreenBlur
+        {
+            ControlName				Label
+            labelText               ""
+        }
+
+        ToolTip
+        {
+            ControlName				RuiPanel
+            InheritProperties       ToolTip
+            zpos                    999
+        }
+
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			InheritProperties       FooterButtons
+		}
+
+        MatchmakingStatus
+        {
+            ControlName		        RuiPanel
+            InheritProperties		MatchmakingStatus
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	BOTTOM
+            pin_to_sibling_corner	BOTTOM
+        }
+
+        MenuHeader
+        {
+            ControlName				RuiPanel
+			ypos					-48
+			ypos_nx_handheld		-28		[$NX || $NX_UI_PC]
+            wide					1800
+            tall					208
+            visible				    1
+            rui                     "ui/generic_menu_header.rpak"
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+// LOGO EDITING PANELS BELOW
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ClubLogoCanvasPanel
+        {
+            ControlName				CNestedPanel
+
+            xpos                    -218
+            ypos                    -91
+            zpos                    10
+
+            wide                    650
+            tall                    650
+
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/clubs_logo_editor_canvas.res"
+
+            pin_to_sibling          PanelFrame
+            pin_corner_to_sibling   RIGHT
+            pin_to_sibling_corner   RIGHT
+        }
+
+        TopLayerSelector
+        {
+            ControlName				CNestedPanel
+
+            xpos                    -415
+            ypos                    %-25
+            ypos_nx_handheld        %-28	[$NX || $NX_UI_PC]
+            zpos                    10
+
+            wide                    640
+            wide_nx_handheld        940		[$NX || $NX_UI_PC]
+            tall                    200
+
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/clubs_logo_editor_element_selector.res"
+
+            pin_to_sibling          PanelFrame
+            pin_corner_to_sibling   CENTER
+            pin_to_sibling_corner   CENTER
+        }
+
+        MidLayerSelector
+        {
+            ControlName				CNestedPanel
+
+            xpos                    0
+            ypos                    52
+            ypos_nx_handheld        92		[$NX || $NX_UI_PC]
+            zpos                    10
+
+            wide                    640
+            wide_nx_handheld        740		[$NX || $NX_UI_PC]
+            tall                    200
+
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/clubs_logo_editor_element_selector.res"
+
+            pin_to_sibling          TopLayerSelector
+            pin_corner_to_sibling   TOP
+            pin_to_sibling_corner   BOTTOM
+        }
+
+        BaseLayerSelector
+        {
+            ControlName				CNestedPanel
+
+            xpos                    0
+            ypos                    52
+            ypos_nx_handheld        92		[$NX || $NX_UI_PC]
+            zpos                    10
+
+            wide                    640
+            wide_nx_handheld        740		[$NX || $NX_UI_PC]
+            tall                    200
+
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/clubs_logo_editor_element_selector.res"
+
+            pin_to_sibling          MidLayerSelector
+            pin_corner_to_sibling   TOP
+            pin_to_sibling_corner   BOTTOM
+        }
+
+        SubmitLogoButton
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+
+            xpos                    -288
+            ypos                    276
+            ypos_nx_handheld        316		[$NX || $NX_UI_PC]
+            zpos                    15
+
+            wide					512
+            tall					120
+            rui                     "ui/generic_bar_button.rpak"
+            visible					1
+            cursorVelocityModifier  0.7
+
+
+            proportionalToParent    1
+
+            pin_to_sibling          PanelFrame
+            pin_corner_to_sibling   RIGHT
+            pin_to_sibling_corner   RIGHT
+
+            sound_focus             "UI_Menu_Focus_Large"
+            sound_accept            "UI_Menu_Clubs_LogoEditor_Save"
+        }
+	}
+}

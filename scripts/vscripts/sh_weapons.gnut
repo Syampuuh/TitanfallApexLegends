@@ -8,6 +8,10 @@ global function WeaponItemFlavor_GetStatsCategory
 global function WeaponItemFlavor_GetArmoryScale
 global function WeaponItemFlavor_GetLootCeremonyScale
 global function WeaponItemFlavor_GetBattlePassScale
+global function WeaponItemFlavor_GetItemInspectScale
+global function WeaponItemFlavor_GetHudIcon
+global function WeaponCategoryFlavor_GetStatsKey
+global function WeaponCategoryFlavor_GetMenuZoomOffset
 global function GetWeaponItemFlavorByClass
 global function GetAllWeaponItemFlavors
 global function GetAllWeaponCategories
@@ -15,27 +19,27 @@ global function GetWeaponsInCategory
 global function GetAllWeaponsInCategory
 global function MainWeapon_GetIsShippingWeapon
 
-#if(CLIENT)
+#if SERVER || CLIENT
 global function ShowDefaultBodygroupsOnFakeWeapon
 #endif
 
 
-//
-//
-//
-//
-//
-//
+                      
+                      
+                      
+                      
+                      
+  
 
-//
+                                                                                                    
 
 global const string WEAPON_STAT_CATEGORY_GOLD_WEAPON = "crate_unique"
 
-//
-//
-//
-//
-//
+                       
+                       
+                       
+                       
+                       
 struct FileStruct_LifetimeLevel
 {
 	table<string, ItemFlavor> weaponClassnameItemFlavorMap
@@ -44,39 +48,38 @@ FileStruct_LifetimeLevel& fileLevel
 
 
 
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                        
+                        
+                        
+                        
+                        
+#if SERVER || CLIENT || UI
 void function ShWeapons_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileLevel
 	fileLevel = newFileLevel
 
-	#if(false)
+	#if SERVER && DEV
+		                                               
+	#endif
 
-#endif
-
-	#if(CLIENT)//
+	#if (SERVER || CLIENT)                                                                                                             
 		PrecacheWeapon( $"weapon_cubemap" )
 	#endif
 
 	AddCallback_RegisterRootItemFlavors( void function() {
-		//
-		foreach( asset weaponAsset in WORKAROUND_GetAllLootMainWeaponFlavorAssets() )
+		foreach ( asset weaponAsset in GetBaseItemFlavorsFromArray( "weapons" ) )
 			RegisterItemFlavorFromSettingsAsset( weaponAsset )
 
-		foreach( var block in IterateSettingsAssetArray( $"settings/itemflavlist/weapon_categories.rpak", "list" ) )
-			RegisterItemFlavorFromSettingsAsset( GetSettingsBlockAsset( block, "flavor" ) )
+		foreach ( asset categoryAsset in GetBaseItemFlavorsFromArray( "weaponCategories" ) )
+			RegisterItemFlavorFromSettingsAsset( categoryAsset )
 	} )
 	AddCallback_OnItemFlavorRegistered( eItemType.loot_main_weapon, OnItemFlavorRegistered_WeaponItemFlavor )
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 void function OnItemFlavorRegistered_WeaponItemFlavor( ItemFlavor weaponFlavor )
 {
 	string classname = WeaponItemFlavor_GetClassname( weaponFlavor )
@@ -87,11 +90,11 @@ void function OnItemFlavorRegistered_WeaponItemFlavor( ItemFlavor weaponFlavor )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 void function RegisterWeaponForUse( string weaponClassname )
 {
-	//
-	#if(CLIENT)
+	                                                                   
+	#if SERVER || CLIENT
 		PrecacheWeapon( weaponClassname )
 		RegisterWeaponDamageSource( weaponClassname )
 	#endif
@@ -100,11 +103,11 @@ void function RegisterWeaponForUse( string weaponClassname )
 
 
 
-//
-//
-//
-//
-//
+                          
+                          
+                          
+                          
+                          
 string function WeaponItemFlavor_GetClassname( ItemFlavor weapon )
 {
 	Assert( ItemFlavor_GetType( weapon ) == eItemType.loot_main_weapon )
@@ -148,7 +151,7 @@ float function WeaponItemFlavor_GetArmoryScale( ItemFlavor weapon )
 
 float function WeaponItemFlavor_GetLootCeremonyScale( ItemFlavor weapon )
 {
-	Assert( ItemFlavor_GetType( weapon ) == eItemType.loot_main_weapon )
+	Assert( ItemFlavor_GetType( weapon ) == eItemType.loot_main_weapon || ItemFlavor_GetType( weapon ) == eItemType.melee_skin )
 
 	return GetGlobalSettingsFloat( ItemFlavor_GetAsset( weapon ), "lootCeremonyScale" )
 }
@@ -156,9 +159,41 @@ float function WeaponItemFlavor_GetLootCeremonyScale( ItemFlavor weapon )
 
 float function WeaponItemFlavor_GetBattlePassScale( ItemFlavor weapon )
 {
-	Assert( ItemFlavor_GetType( weapon ) == eItemType.loot_main_weapon )
+	Assert( ItemFlavor_GetType( weapon ) == eItemType.loot_main_weapon || ItemFlavor_GetType( weapon ) == eItemType.melee_skin)
 
 	return GetGlobalSettingsFloat( ItemFlavor_GetAsset( weapon ), "battlePassScale" )
+}
+
+
+float function WeaponItemFlavor_GetItemInspectScale( ItemFlavor weapon )
+{
+	Assert( ItemFlavor_GetType( weapon ) == eItemType.loot_main_weapon )
+
+	return GetGlobalSettingsFloat( ItemFlavor_GetAsset( weapon ), "itemInspectScale" )
+}
+
+
+asset function WeaponItemFlavor_GetHudIcon( ItemFlavor weapon )
+{
+	string weaponName = WeaponItemFlavor_GetClassname( weapon )
+
+	return GetWeaponInfoFileKeyFieldAsset_Global( weaponName, "hud_icon" )
+}
+
+
+vector function WeaponCategoryFlavor_GetMenuZoomOffset( ItemFlavor weaponCategory )
+{
+	Assert( ItemFlavor_GetType( weaponCategory ) == eItemType.weapon_category )
+
+	return GetGlobalSettingsVector( ItemFlavor_GetAsset( weaponCategory ), "menuZoomOffset" )
+}
+
+
+string function WeaponCategoryFlavor_GetStatsKey( ItemFlavor weaponCategory )
+{
+	Assert( ItemFlavor_GetType( weaponCategory ) == eItemType.weapon_category )
+
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( weaponCategory ), "statsKey" )
 }
 
 
@@ -182,9 +217,9 @@ array<ItemFlavor> function GetWeaponsInCategory( ItemFlavor category )
 	array<ItemFlavor> categoryWeapons
 
 	entity player = null
-	#if(UI)
-		player = GetUIPlayer()
-	#elseif(CLIENT)
+	#if UI
+		player = GetLocalClientPlayer()
+	#elseif CLIENT
 		player = GetLocalClientPlayer()
 	#endif
 
@@ -227,44 +262,57 @@ bool function MainWeapon_GetIsShippingWeapon( ItemFlavor flavor )
 
 
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function ShowDefaultBodygroupsOnFakeWeapon( entity ent, string weaponClassName )
 {
 	SetBodyGroupsForWeaponConfig( ent, weaponClassName, [] )
+	if ( weaponClassName == "mp_weapon_bow" )
+	{
+		int idx = ent.FindBodygroup( "release_aid" )
+		if ( idx < 0 )
+			return
+
+		ent.SetBodygroupModelByIndex( idx, 1 )
+	}
 }
 #endif
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+                      
+                                                                               
+   
+  	                                          
+  	 
+  		                                               
+  		                          
+  		 
+  			                                                 
+  		 
+  	 
+   
+        
 
 
 
-//
-//
-//
-//
-//
-#if(false)
+                   
+                   
+                   
+                   
+                   
+#if SERVER && DEV
+                                   
+ 
+	                                                      
+	                                
+	                                    
 
-
-//
-
-
-
-
-
+	                                                          
+	 
+		                                                           
+		                                                                         
+	 
+	                                                                                                                                                    
+ 
 #endif
 
 

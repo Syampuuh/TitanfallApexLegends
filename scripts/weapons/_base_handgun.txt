@@ -1,6 +1,10 @@
 #base "_base_handgun_optics.txt"
 #base "_base_character_mods.txt"
 
+#base "ap_settings/_ap_weapon_base.txt"
+#base "ap_settings/_ap_weapon_range_short.txt"
+#base "ap_settings/_ap_weapon_pattern_semi.txt"
+
 WeaponData
 {
     MP_BASE
@@ -16,12 +20,13 @@ WeaponData
     }
 
     // General
-    "weaponClass" 									"human"
+    "weapon_type_flags"								"WPT_PRIMARY"
     "weaponSubClass"								"sidearm"
     "body_type"										"light"
 
-	"activitymodifier"								"pistol"
+	"activitymodifier3p"							"pistol"
 	"holster_type"									"pistol"
+	"thirdperson_fire_from_mount_point"				"1"
 
 	// Don't want blanket pistol fast swap, it crushes the holster settings for the weapon being swapped out
 	"fast_swap_to"									"0"
@@ -34,9 +39,6 @@ WeaponData
 	// Script - Callbacks
     "OnWeaponActivate"								"OnWeaponActivate_weapon_basic_bolt"
     "OnClientAnimEvent"								"OnClientAnimEvent_weapon_basic_bolt"
-    "OnWeaponPrimaryAttack"							"OnWeaponPrimaryAttack_weapon_basic_bolt"
-    "OnWeaponNpcPrimaryAttack"						"OnWeaponNpcPrimaryAttack_weapon_basic_bolt"
-    "OnProjectileCollision"							"OnProjectileCollision_weapon_basic_bolt"
 
 	// Sounds
 	"sound_dryfire"									"pistol_dryfire"
@@ -61,6 +63,7 @@ WeaponData
 
     // Ammo
 	"ammo_suck_behavior"							"primary_weapons"
+	"secondary_ammo_pool_type"                      ""
 
 	// Rumble
 	"fire_rumble"									"rumble_pistol"
@@ -160,7 +163,8 @@ WeaponData
 	// Projectile - General
     "projectile_drag_coefficient"                   "0.0025"
     "projectilemodel" 								"mdl/dev/empty_model.rmdl"
-    "projectile_trail_effect_0" 					"P_tracer_projectile_smg"
+    "projectile_trail_effect_0_1p" 					"P_tracer_projectile_smg"
+    "projectile_trail_effect_0_3p" 					"P_tracer_projectile_smg"
     "projectile_damages_owner"						"0"
     "projectile_ricochet_max_count"					"0"
     "projectile_do_predict_impact_effects"          "1"
@@ -254,8 +258,8 @@ WeaponData
 	"sway_rotate_attach_blend_time_zoomed"			"0.2"
 	"sway_rotate_gain_zoomed"						"5"
 
-	"sway_min_yaw_zoomed"							"-0.04"
-	"sway_max_yaw_zoomed"							"0.04"
+	"sway_min_yaw_zoomed"							"-0.0225"
+	"sway_max_yaw_zoomed"							"0.0225"
 	"sway_turn_left_rotate_yaw_zoomed"				"-0.085"
 	"sway_turn_right_rotate_yaw_zoomed"				"0.085"
 
@@ -267,8 +271,8 @@ WeaponData
 	"sway_move_right_rotate_roll_zoomed" 			"0.2"
 	"sway_move_left_rotate_roll_zoomed"  			"-0.2"
 
-	"sway_min_pitch_zoomed"  						"-0.03"
-	"sway_max_pitch_zoomed"  						"0.03"
+	"sway_min_pitch_zoomed"  						"-0.015"
+	"sway_max_pitch_zoomed"  						"0.02"
 	"sway_turn_up_rotate_pitch_zoomed"				"0.07"
 	"sway_turn_down_rotate_pitch_zoomed"			"-0.07"
 
@@ -289,4 +293,33 @@ WeaponData
 
 	//	"viewdrift_ads_delay"							"1"
 	//	"viewdrift_ads_delay_debounce_time"				"3"
+
+	"trophy_system_ignores"                          "always"
+
+	Mods
+	{
+        elevator_shooter
+        {
+           "viewkick_air_scale_ads"						"1.0"
+
+           // Hipfire Spread
+           "spread_air_hip"  								"2.2"
+
+           "spread_kick_on_fire_air_hip" 					"0.0"
+
+           "spread_max_kick_air_hip" 						"3.5"
+
+           "spread_air_ads"  								"0"
+
+           "spread_kick_on_fire_air_ads" 					"0"
+
+           "spread_max_kick_air_ads" 						"0"
+
+            "viewdrift_ads_air_scale_pitch"   			"0.8"
+            "viewdrift_ads_air_scale_yaw" 				"0.6"
+
+            "viewdrift_hipfire_air_scale_pitch"	            "0.0"
+            "viewdrift_hipfire_air_scale_yaw"               "0.0"
+        }
+    }
 }

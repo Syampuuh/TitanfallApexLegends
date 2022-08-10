@@ -1,0 +1,47 @@
+global function CLPassiveRepair_Init
+
+void function CLPassiveRepair_Init()
+{
+	RegisterSignal( "passive_repair_stop_ability" )
+}
+
+void function PassiveRepair_CreateHUDMarker( entity ent, float iconHeight )
+{
+	entity localClientPlayer = GetLocalClientPlayer()
+
+	ent.EndSignal( "OnDestroy" )
+
+	if ( !PassiveRepair_ShouldShowIcon( localClientPlayer, ent ) )
+		return
+
+	vector pos = ent.GetOrigin() + <0,0,iconHeight>
+	var rui = CreateCockpitRui( $"ui/cover_wall_marker_icons.rpak", RuiCalculateDistanceSortKey( localClientPlayer.EyePosition(), pos ) )
+	RuiTrackFloat( rui, "healthFrac", ent, RUI_TRACK_HEALTH )
+	RuiTrackFloat3( rui, "pos", ent, RUI_TRACK_OVERHEAD_FOLLOW )
+	RuiKeepSortKeyUpdated( rui, true, "pos" )
+
+	OnThreadEnd(
+		function() : ( rui )
+		{
+			RuiDestroy( rui )
+		}
+	)
+
+	WaitForever()
+}
+
+bool function PassiveRepair_ShouldShowIcon( entity localPlayer, entity ent )
+{
+	if ( !GamePlayingOrSuddenDeath() )
+		return false
+
+  	                                  
+  	                        
+  		            
+
+  	                                               
+  		            
+
+	return true
+}
+

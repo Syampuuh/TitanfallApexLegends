@@ -4,13 +4,26 @@ global function OnWeaponDeactivate_ReactiveKillEffects
 global function WeaponHasReactiveKillTrackingForCurrentSkin
 global function WeaponReactiveKillTracking_GetKillsForPlayerWithWeapon
 global function SCB_UpdatePlayerWeaponReactiveEffects
-global function WeaponReactiveKillEffects_ClearAllFX
+global function WeaponReactiveEffects_ClearAllFX
 
-#if(false)
-
+#if DEV
+global function DEV_PrintFileReactiveEffects
 #endif
 
+#if SERVER
+                                                        
+                                                       
+                                                   
+#endif
+
+#if CLIENT
+global function MenuWeaponModel_ApplyReactiveSkinBodyGroup
+global function MenuWeaponModel_StartReactiveEffects
+global function MenuWeaponModel_ClearReactiveEffects
+#endif          
+
 const bool WEAPON_REACTIVE_EFFECTS_PRINTS = true
+const bool MENU_WEAPON_REACTIVE_EFFECTS = false
 
 global enum eReactiveEffectUpdateType
 {
@@ -27,52 +40,57 @@ struct WeaponReactiveKillActiveFXGroup
 	bool isPersistent = false
 	asset fx1p
 	asset fx3p
+	entity weapon
 }
 
 
-#if(false)
-
-
-
-
-
-
-
+#if SERVER
+                                     
+ 
+	                               
+	             
+	             
+	                      
+ 
 #endif
 
 
 struct
 {
 	array<WeaponReactiveKillActiveFXGroup> activeReactiveKillFX
+	#if CLIENT
+		table<entity, array<int> > activeMenuWeaponReactiveEffects
+	#endif          
 } file
 
 
 void function WeaponReactiveEffects_Init()
 {
-	#if(false)
-
-
-
-#endif
+	#if SERVER
+		                                                                                       
+		                                                                         
+		                                                                         
+		                                                                                     
+	#endif
 }
 
 void function OnWeaponActivate_ReactiveKillEffects( entity weapon )
 {
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                  
+	#endif
 }
 
 void function OnWeaponDeactivate_ReactiveKillEffects( entity weapon )
 {
-	WeaponReactiveKillEffects_ClearAllFX( weapon )
+	WeaponReactiveEffects_ClearAllFX( weapon )
 }
 
-#if(false)
-
-
-
-
+#if SERVER
+                                                                                                                          
+ 
+	                                                  
+ 
 #endif
 
 void function WeaponReactiveKillTracking_InitForWeapon( entity weapon )
@@ -86,13 +104,13 @@ void function WeaponReactiveKillTracking_InitForWeapon( entity weapon )
 
 	int numKills = WeaponReactiveKillTracking_GetKillsForPlayerWithWeapon( player, weapon )
 
-	#if(false)
+	#if SERVER
+	                                                                                     
+		                                  
 
-
-
-
-
-#endif
+	                    
+		                                                                         
+	#endif
 
 	UpdatePlayerWeaponReactiveEffects( weapon, eReactiveEffectUpdateType.INIT )
 }
@@ -113,10 +131,10 @@ bool function WeaponHasReactiveKillTrackingForCurrentSkin( entity weapon )
 	if ( !IsValid( weapon ) )
 		return false
 
-	if ( !IsValidItemFlavorNetworkIndex_DEPRECATED( weapon.GetGrade(), eValidation.DONT_ASSERT ) )
+	if ( !IsValidItemFlavorNetworkIndex( weapon.GetGrade(), eValidation.DONT_ASSERT ) )
 		return false
 
-	ItemFlavor weaponSkin = GetItemFlavorByNetworkIndex_DEPRECATED( weapon.GetGrade() )
+	ItemFlavor weaponSkin = GetItemFlavorByNetworkIndex( weapon.GetGrade() )
 	if ( !WeaponSkin_DoesReactToKills( weaponSkin ) )
 		return false
 
@@ -128,119 +146,157 @@ int function WeaponReactiveKillTracking_GetKillsForPlayerWithWeapon( entity play
 	if ( !WeaponHasReactiveKillTrackingForCurrentSkin( weapon ) )
 		return -1
 
-	ItemFlavor weaponSkin = GetItemFlavorByNetworkIndex_DEPRECATED( weapon.GetGrade() )
+	ItemFlavor weaponSkin = GetItemFlavorByNetworkIndex( weapon.GetGrade() )
 
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                                                                    
+	#elseif CLIENT
 		return weapon.GetProScreenIntValForIndex( PRO_SCREEN_IDX_MATCH_KILLS )
 	#endif
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+                                                                                                         
+ 
+	                                                   
+	                                                                                       
+ 
+
+                                                                                                           
+ 
+	                                              
+	                                                                                       
+ 
+
+                                                                                                              
+ 
+	                                              
+	                                                                                  
+		      
+
+	                                                                                              
+ 
+
+                                                    
+ 
+	                      
+		            
+
+	                          
+		           
+
+	                                 
+		           
+
+	                                  
+
+	            
+ 
+
+                                                                                                          
+ 
+	                                      
+ 
+
+                                                                  
+ 
+	                                      
+ 
+
+                                                                                                                                                       
+ 
+	                                             
+	                                           
+
+	                     
+	 
+		                                                                                       
+		                                 
+		 
+			                                        
+			                                                              
+			                                                                 
+			                                                                       
+		 
+	 
+
+	                          
+	 
+		                                                  
+
+		                                                                                 
+		 
+			                                                                        
+
+			                                                      
+			 
+				                              
+				                            
+				                                    
+			 
+		 
+	 
+
+	                                                                                 
+	                                                       
+	                                                                     
+		                                                                                   
+ 
+
+                                                                                                                          
+ 
+	                              
+		      
+
+	                                                            
+		      
+
+	                                                                               
+	                                                  
+	 
+		                                                                               
+
+		                                                                                       
+
+		                                  
+			                                                            
+		      
+	 
+
+	                             
+	 
+		                                                                                                                
+		                              
+			                                          
+
+		                                                           
+	 
+ 
+
+                                                                                                              
+ 
+	                                                          
+	                                                             
+		                                                    
+
+	            
+	                                                    
+
+	                        
+	 
+		                    
+		                                                                                                                              
+	 
+ 
+
+                                                                                            
+ 
+	                                                             
+		        
+
+	                                                      
+ 
+#endif         
 
 void function SCB_UpdatePlayerWeaponReactiveEffects( entity weapon, int updateType )
 {
@@ -249,6 +305,9 @@ void function SCB_UpdatePlayerWeaponReactiveEffects( entity weapon, int updateTy
 
 void function UpdatePlayerWeaponReactiveEffects( entity weapon, int updateType )
 {
+	if ( GetConVarBool( "enable_code_weapon_reactive" ) )
+		return
+
 	if ( !WeaponHasReactiveKillTrackingForCurrentSkin( weapon ) )
 		return
 
@@ -256,20 +315,28 @@ void function UpdatePlayerWeaponReactiveEffects( entity weapon, int updateType )
 	if ( !IsAlive( player ) || !player.IsPlayer() )
 		return
 
-	ItemFlavor weaponSkin = GetItemFlavorByNetworkIndex_DEPRECATED( weapon.GetGrade() )
+	ItemFlavor weaponSkin = GetItemFlavorByNetworkIndex( weapon.GetGrade() )
 
 	int numKills = WeaponReactiveKillTracking_GetKillsForPlayerWithWeapon( player, weapon )
 	int reactiveKillLevel = WeaponSkin_GetReactToKillsLevelIndexForKillCount( weaponSkin, numKills )
 
-	//
-	WeaponReactiveKillEffects_ClearPersistentFX( weapon )
-	WeaponReactiveKillEffects_StopPersistentSounds( weapon, weaponSkin)
+	                               
+	WeaponReactiveEffects_ClearPersistentFX( weapon )
+	WeaponReactiveEffects_StopPersistentSounds( weapon, weaponSkin)
 
-	//
+	                                                                              
 	if ( reactiveKillLevel > -1 )
 	{
-		WeaponReactiveKillEffects_PlayPersistentFX( weapon, weaponSkin, reactiveKillLevel )
-		WeaponReactiveKillEffects_PlayPersistentSounds( weapon, weaponSkin, reactiveKillLevel )
+		WeaponReactiveEffects_PlayPersistentFX( weapon, weaponSkin, reactiveKillLevel )
+		WeaponReactiveEffects_PlayPersistentSounds( weapon, weaponSkin, reactiveKillLevel )
+		WeaponReactiveEffects_SetEmissiveIntensity( weapon, weaponSkin, reactiveKillLevel )
+		#if SERVER
+			                                                                           
+			                                                                            
+		#endif         
+		#if CLIENT
+		WeaponReactiveEffects_SetPoseParameter( weapon, weaponSkin, reactiveKillLevel )
+		#endif         
 	}
 
 	bool doOneShotEffects = false
@@ -278,11 +345,6 @@ void function UpdatePlayerWeaponReactiveEffects( entity weapon, int updateType )
 	switch ( updateType )
 	{
 		case eReactiveEffectUpdateType.KNOCKDOWN:
-			//
-			if ( oneShotEffectsLevel < 0 )
-				oneShotEffectsLevel = 0
-
-			//
 		case eReactiveEffectUpdateType.KILL:
 			doOneShotEffects = true
 			break
@@ -290,18 +352,23 @@ void function UpdatePlayerWeaponReactiveEffects( entity weapon, int updateType )
 
 	if ( doOneShotEffects )
 	{
-		WeaponReactiveKillEffects_PlayOneShotFx( weapon, weaponSkin, oneShotEffectsLevel )
-		WeaponReactiveKillEffects_PlayOneShotSounds( weapon, weaponSkin, oneShotEffectsLevel )
+		WeaponReactiveEffects_PlayOneShotFx( weapon, weaponSkin, oneShotEffectsLevel )
+		WeaponReactiveEffects_PlayOneShotSounds( weapon, weaponSkin, oneShotEffectsLevel )
 	}
 
-	#if(false)
-//
-
-#endif
+	#if SERVER
+		                       
+		                                                                                                 
+	#endif
 }
 
-void function WeaponReactiveKillEffects_PlayOneShotSounds( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
+void function WeaponReactiveEffects_PlayOneShotSounds( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
 {
+#if CLIENT
+	if ( !weapon.IsPredicted() )
+		return;
+#endif
+
 	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
 
 	string sound1p = rtked.killSoundEvent1p
@@ -312,13 +379,18 @@ void function WeaponReactiveKillEffects_PlayOneShotSounds( entity weapon, ItemFl
 
 	weapon.EmitWeaponSound_1p3p( sound1p, sound3p )
 
-	#if(true)
+	#if WEAPON_REACTIVE_EFFECTS_PRINTS
 		printt( "playing one-shot sounds", sound1p, sound3p )
 	#endif
 }
 
-void function WeaponReactiveKillEffects_PlayPersistentSounds( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
+void function WeaponReactiveEffects_PlayPersistentSounds( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
 {
+#if CLIENT
+	if ( !weapon.IsPredicted() )
+		return;
+#endif
+
 	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
 
 	string sound1p = rtked.persistentSoundEvent1p
@@ -329,12 +401,12 @@ void function WeaponReactiveKillEffects_PlayPersistentSounds( entity weapon, Ite
 
 	weapon.EmitWeaponSound_1p3p( sound1p, sound3p )
 
-	#if(true)
+	#if WEAPON_REACTIVE_EFFECTS_PRINTS
 		printt( "playing persistent sounds", sound1p, sound3p )
 	#endif
 }
 
-void function WeaponReactiveKillEffects_StopPersistentSounds( entity weapon, ItemFlavor weaponSkin )
+void function WeaponReactiveEffects_StopPersistentSounds( entity weapon, ItemFlavor weaponSkin )
 {
 	int numLevels = WeaponSkin_GetReactToKillsLevelCount( weaponSkin )
 	for ( int i = 0; i < numLevels; i++ )
@@ -353,13 +425,21 @@ void function WeaponReactiveKillEffects_StopPersistentSounds( entity weapon, Ite
 		if ( sound3p != "" )
 			weapon.StopWeaponSound( sound3p )
 
-		#if(true)
+		#if WEAPON_REACTIVE_EFFECTS_PRINTS
 			printt( "stopping persistent sound(s)", sound1p, sound3p )
 		#endif
 	}
 }
 
-void function WeaponReactiveKillEffects_PlayOneShotFx( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
+void function WeaponReactiveEffects_SetEmissiveIntensity( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
+{
+	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
+	float intensity = rtked.emissiveIntensity
+
+	weapon.kv.intensity = intensity
+}
+
+void function WeaponReactiveEffects_PlayOneShotFx( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
 {
 	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
 
@@ -370,15 +450,15 @@ void function WeaponReactiveKillEffects_PlayOneShotFx( entity weapon, ItemFlavor
 
 		weapon.PlayWeaponEffect( fx1p, fx3p, attachmentName )
 
-		#if(true)
+		#if WEAPON_REACTIVE_EFFECTS_PRINTS
 			printt( "playing flash FX", fx1p, fx3p, attachmentName )
 		#endif
 
-		WeaponReactiveKillEffects_AddActiveFXGroup( weaponSkin, reactiveKillLevel, fx1p, fx3p )
+		WeaponReactiveEffects_AddActiveFXGroup( weapon, weaponSkin, reactiveKillLevel, fx1p, fx3p )
 	}
 }
 
-void function WeaponReactiveKillEffects_PlayPersistentFX( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
+void function WeaponReactiveEffects_PlayPersistentFX( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
 {
 	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
 
@@ -389,15 +469,112 @@ void function WeaponReactiveKillEffects_PlayPersistentFX( entity weapon, ItemFla
 
 		weapon.PlayWeaponEffect( fx1p, fx3p, attachmentName, true )
 
-		#if(true)
+		#if WEAPON_REACTIVE_EFFECTS_PRINTS
 			printt( "playing persistent FX", fx1p, fx3p, attachmentName )
 		#endif
 
-		WeaponReactiveKillEffects_AddActiveFXGroup( weaponSkin, reactiveKillLevel, fx1p, fx3p, true )
+		WeaponReactiveEffects_AddActiveFXGroup( weapon, weaponSkin, reactiveKillLevel, fx1p, fx3p, true )
 	}
 }
 
-void function WeaponReactiveKillEffects_AddActiveFXGroup( ItemFlavor weaponSkin, int reactiveKillLevel, asset fx1p, asset fx3p, bool isPersistent = false )
+#if CLIENT
+void function WeaponReactiveEffects_SetPoseParameter( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel )
+{
+	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
+
+	if ( rtked.poseParameter >= 0.0 )
+	{
+		#if WEAPON_REACTIVE_EFFECTS_PRINTS
+			printt( "updating script pose parameter to ", rtked.poseParameter )
+		#endif
+
+		weapon.SetScriptPoseParam0( rtked.poseParameter )
+	}
+}
+#endif         
+
+#if SERVER
+                                                                                                               
+ 
+	                                       
+	                     
+		      
+
+	                                                                                                       
+
+	                                                                              
+	 
+		                                                        
+		                               
+			        
+
+		                                                                    
+		                                                       
+			                                                                                                                                                                                                                              
+
+		                                  
+			                                                                              
+		      
+
+		                                                                
+	 
+ 
+
+                                                                                                                
+ 
+	                                                                                                       
+
+	                                                        
+	 
+		                                                                                                                                                                                                                               
+		                                 
+			                             
+	 
+
+	                                                     
+	 
+		                                                                                                                                                                                                                          
+		                                  
+			                          
+	 
+ 
+
+                                                                      
+ 
+	                                                             
+		      
+
+	                                                                        
+	                                                                                                              
+		      
+
+	                                                                   
+ 
+
+                                                                                                   
+ 
+	                                                                                   
+	 
+		                                                                                       
+
+		                                                     
+		 
+			                                                                                                                                                                                                                                                 
+			                                 
+				                             
+		 
+
+		                                                        
+		 
+			                                                                                                                                                                                                                                        
+			                                  
+				                          
+		 
+	 
+ 
+#endif         
+
+void function WeaponReactiveEffects_AddActiveFXGroup( entity weapon, ItemFlavor weaponSkin, int reactiveKillLevel, asset fx1p, asset fx3p, bool isPersistent = false )
 {
 	WeaponReactiveKillActiveFXGroup fxGroup
 	fxGroup.weaponSkin = weaponSkin
@@ -405,41 +582,140 @@ void function WeaponReactiveKillEffects_AddActiveFXGroup( ItemFlavor weaponSkin,
 	fxGroup.isPersistent = isPersistent
 	fxGroup.fx1p = fx1p
 	fxGroup.fx3p = fx3p
+	fxGroup.weapon = weapon
 
 	file.activeReactiveKillFX.append( fxGroup )
 }
 
-void function WeaponReactiveKillEffects_ClearPersistentFX( entity weapon )
+void function WeaponReactiveEffects_ClearFX( entity weapon, bool clearPersistentOnly )
 {
-	array<int> idxsToRemove
-	foreach ( int idx, fxGroup in file.activeReactiveKillFX )
+	for( int idx = file.activeReactiveKillFX.len() - 1; idx >= 0; --idx )
 	{
-		if ( fxGroup.isPersistent )
+		WeaponReactiveKillActiveFXGroup fxGroup = file.activeReactiveKillFX[idx]
+		if ( !clearPersistentOnly || fxGroup.isPersistent )
 		{
-			#if(true)
-				printt( "removing effect", fxGroup.fx1p, fxGroup.fx3p )
+			#if WEAPON_REACTIVE_EFFECTS_PRINTS
+				printt( "removing  effect", fxGroup.fx1p, fxGroup.fx3p )
 			#endif
 
-			weapon.StopWeaponEffect( fxGroup.fx1p, fxGroup.fx3p )
-			idxsToRemove.append( idx )
+			if ( !IsValid( fxGroup.weapon ) || weapon == fxGroup.weapon )
+			{
+				weapon.StopWeaponEffect( fxGroup.fx1p, fxGroup.fx3p )
+				file.activeReactiveKillFX.remove( idx )
+			}
 		}
 	}
-
-	foreach ( removeIdx in idxsToRemove )
-		if ( removeIdx in file.activeReactiveKillFX )
-			file.activeReactiveKillFX.remove( removeIdx )
 }
 
-void function WeaponReactiveKillEffects_ClearAllFX( entity weapon )
+void function WeaponReactiveEffects_ClearPersistentFX( entity weapon )
 {
-	foreach ( int idx, fxGroup in file.activeReactiveKillFX )
-	{
-		#if(true)
-			printt( "removing effect", fxGroup.fx1p, fxGroup.fx3p )
-		#endif
+	                                
+	WeaponReactiveEffects_ClearFX( weapon, true )
+}
 
-		weapon.StopWeaponEffect( fxGroup.fx1p, fxGroup.fx3p )
+void function WeaponReactiveEffects_ClearAllFX( entity weapon )
+{
+	                                
+	WeaponReactiveEffects_ClearFX( weapon, false )
+}
+
+#if CLIENT
+void function MenuWeaponModel_ApplyReactiveSkinBodyGroup( ItemFlavor weaponSkinFlavor, ItemFlavor weaponFlavor, entity weaponModel )
+{
+	var skinBlock           = ItemFlavor_GetSettingsBlock( weaponSkinFlavor )
+	var reactsToKillsLevels = GetSettingsBlockArray( skinBlock, "featureReactsToKillsLevels" )
+	int numLevels           = GetSettingsArraySize( reactsToKillsLevels )
+	int highestIdx          = numLevels - 1
+
+	                                  
+	WeaponReactiveKillsData bodyGroupData
+	bool foundBodyGroup = false
+
+	for ( int idx = highestIdx; idx >= 0; idx-- )
+	{
+		if ( !foundBodyGroup )
+		{
+			bodyGroupData = WeaponSkin_GetReactToKillsDataForLevel( weaponSkinFlavor, idx )
+
+			if ( bodyGroupData.bodygroupSubmodelIdxMap.len() > 0 )
+				foundBodyGroup = true
+		}
+
+		if ( foundBodyGroup )
+			break
 	}
 
-	file.activeReactiveKillFX.clear()
+	                    
+	if ( foundBodyGroup )
+	{
+		foreach ( string bodygroup, int submodelIdx in bodyGroupData.bodygroupSubmodelIdxMap )
+		{
+			int bodygroupIdx = weaponModel.FindBodygroup( bodygroup )
+			if ( bodygroupIdx < 0 )
+				break
+
+			weaponModel.SetBodygroupModelByIndex( bodygroupIdx, submodelIdx )
+		}
+	}
+	else
+	{
+		ShowDefaultBodygroupsOnFakeWeapon( weaponModel, WeaponItemFlavor_GetClassname( weaponFlavor ) )
+	}
 }
+
+void function MenuWeaponModel_StartReactiveEffects( entity weaponModel, ItemFlavor weaponSkin )
+{
+	#if !MENU_WEAPON_REACTIVE_EFFECTS
+		return
+	#endif
+
+	int reactiveKillLevel = WeaponSkin_GetReactToKillsLevelCount( weaponSkin ) - 1             
+	WeaponReactiveKillsData rtked = WeaponSkin_GetReactToKillsDataForLevel( weaponSkin, reactiveKillLevel )
+
+	foreach ( int persistentFXIdx, string attachmentName in rtked.persistentFXAttachmentList )
+	{
+		                                                                                                                                
+		                                                                    
+		asset fx = rtked.persistentFX3PList[persistentFXIdx]              
+
+		if ( fx != "" )
+		{
+			int fxHandle = StartParticleEffectOnEntity( weaponModel, GetParticleSystemIndex( fx ), FX_PATTACH_POINT_FOLLOW, weaponModel.LookupAttachment( attachmentName ) )
+			if ( weaponModel in file.activeMenuWeaponReactiveEffects )
+				file.activeMenuWeaponReactiveEffects[weaponModel].append( fxHandle )
+			else
+				file.activeMenuWeaponReactiveEffects[weaponModel] <- [ fxHandle ]
+		}
+	}
+}
+
+void function MenuWeaponModel_ClearReactiveEffects( entity weaponModel )
+{
+	#if !MENU_WEAPON_REACTIVE_EFFECTS
+		return
+	#endif
+
+	if ( weaponModel in file.activeMenuWeaponReactiveEffects )
+	{
+		foreach ( fxHandle in file.activeMenuWeaponReactiveEffects[weaponModel] )
+		{
+			if ( EffectDoesExist( fxHandle ) )
+				EffectStop( fxHandle, false, true )
+		}
+
+		delete file.activeMenuWeaponReactiveEffects[weaponModel]
+	}
+}
+#endif          
+
+#if DEV
+void function DEV_PrintFileReactiveEffects()
+{
+	printt( "\nNum Effects " + file.activeReactiveKillFX.len() )
+
+	foreach ( int idx, fxGroup in file.activeReactiveKillFX )
+	{
+		printt( "\nEffect " + fxGroup.fx1p + "; index " + idx + "; weapon " + fxGroup.weapon )
+	}
+}
+#endif

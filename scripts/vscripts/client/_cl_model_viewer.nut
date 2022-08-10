@@ -1,6 +1,6 @@
-//
+  
 
-#if(DEV)
+#if DEV
 untyped
 #endif
 
@@ -8,7 +8,7 @@ global function ServerCallback_MVUpdateModelBounds
 global function ServerCallback_MVEnable
 global function ServerCallback_MVDisable
 
-#if(DEV)
+#if DEV
 global function ClModelViewInit
 global function ModelViewerSpawnModel
 global function SelectNextModel
@@ -72,8 +72,8 @@ struct {
 	entity bestModelToSelect = null
 	bool modelSelectionBoundsVisible = false
 	float modelSelectionBoundsHideTime = -1.0
-	float modelSectionBoundsShowTime = 7.5 //
-	float modelNewSectionBoundsShowTime = 2.0 //
+	float modelSectionBoundsShowTime = 7.5                                                    
+	float modelNewSectionBoundsShowTime = 2.0                                                     
 
 	vector colorSelected = <160,160,0>
 	vector colorUnselected = <60,0,0>
@@ -90,7 +90,9 @@ struct {
 
 	int noclipState = 0
 
-	var hudGrpController
+	array<var> hudModelNames
+	array<var> hudController
+
 	var controllerBG
 	var hudTriggerLeft
 	var hudTriggerRight
@@ -103,9 +105,6 @@ struct {
 	var hudStickLeft
 	var hudStickRight
 	var hudDPad
-
-	var hudGrpModelNames
-	array hudModelNames
 
 	int lastEnablematchending
 	int lastEnabletimelimit
@@ -134,19 +133,31 @@ void function CreateControllerHud()
 
 	file.controllerHudCreated = true
 
-	file.hudGrpController = HudElementGroup( "Controller" )
-	file.controllerBG = file.hudGrpController.CreateElement( "ModelViewerControllerImage" )
-	file.hudTriggerLeft = file.hudGrpController.CreateElement( "ModelViewerTriggerLeftLabel" )
-	file.hudTriggerRight = file.hudGrpController.CreateElement( "ModelViewerTriggerRightLabel" )
-	file.hudShoulderLeft = file.hudGrpController.CreateElement( "ModelViewerShoulderLeftLabel" )
-	file.hudShoulderRight = file.hudGrpController.CreateElement( "ModelViewerShoulderRightLabel" )
-	file.hudButtonY = file.hudGrpController.CreateElement( "ModelViewerButtonYLabel" )
-	file.hudButtonX = file.hudGrpController.CreateElement( "ModelViewerButtonXLabel" )
-	file.hudButtonB = file.hudGrpController.CreateElement( "ModelViewerButtonBLabel" )
-	file.hudButtonA = file.hudGrpController.CreateElement( "ModelViewerButtonALabel" )
-	file.hudStickLeft = file.hudGrpController.CreateElement( "ModelViewerStickLeftLabel" )
-	file.hudStickRight = file.hudGrpController.CreateElement( "ModelViewerStickRightLabel" )
-	file.hudDPad = file.hudGrpController.CreateElement( "ModelViewerStickDPadLabel" )
+	file.controllerBG = HudElement( "ModelViewerControllerImage" )
+	file.hudTriggerLeft = HudElement( "ModelViewerTriggerLeftLabel" )
+	file.hudTriggerRight = HudElement( "ModelViewerTriggerRightLabel" )
+	file.hudShoulderLeft = HudElement( "ModelViewerShoulderLeftLabel" )
+	file.hudShoulderRight = HudElement( "ModelViewerShoulderRightLabel" )
+	file.hudButtonY = HudElement( "ModelViewerButtonYLabel" )
+	file.hudButtonX = HudElement( "ModelViewerButtonXLabel" )
+	file.hudButtonB = HudElement( "ModelViewerButtonBLabel" )
+	file.hudButtonA = HudElement( "ModelViewerButtonALabel" )
+	file.hudStickLeft = HudElement( "ModelViewerStickLeftLabel" )
+	file.hudStickRight = HudElement( "ModelViewerStickRightLabel" )
+	file.hudDPad = HudElement( "ModelViewerStickDPadLabel" )
+
+	file.hudController.append( file.controllerBG )
+	file.hudController.append( file.hudTriggerLeft )
+	file.hudController.append( file.hudTriggerRight )
+	file.hudController.append( file.hudShoulderLeft )
+	file.hudController.append( file.hudShoulderRight )
+	file.hudController.append( file.hudButtonY )
+	file.hudController.append( file.hudButtonX )
+	file.hudController.append( file.hudButtonB )
+	file.hudController.append( file.hudButtonA )
+	file.hudController.append( file.hudStickLeft )
+	file.hudController.append( file.hudStickRight )
+	file.hudController.append( file.hudDPad )
 
 	Hud_EnableKeyBindingIcons( file.hudTriggerLeft )
 	Hud_EnableKeyBindingIcons( file.hudTriggerRight )
@@ -159,20 +170,18 @@ void function CreateControllerHud()
 	Hud_EnableKeyBindingIcons( file.hudStickLeft )
 	Hud_EnableKeyBindingIcons( file.hudStickRight )
 
-	file.hudGrpModelNames = HudElementGroup( "ModelNames" )
-	file.hudModelNames = [ file.hudGrpModelNames.CreateElement( "ModelViewerModelName0" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName1" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName2" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName3" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName4" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName5" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName6" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName7" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName8" ),
-							file.hudGrpModelNames.CreateElement( "ModelViewerModelName9" ) ]
+	file.hudModelNames.append( HudElement( "ModelViewerModelName0" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName1" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName2" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName3" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName4" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName5" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName6" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName7" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName8" ) )
+	file.hudModelNames.append( HudElement( "ModelViewerModelName9" ) )
 
-	file.hudModelNames[ 0 ].SetColor( 255, 255, 128 )
-
+	Hud_SetColor( file.hudModelNames[0], 255, 255, 128 )
 
 	file.lastEnablematchending = 1
 	file.lastEnabletimelimit = 1
@@ -180,69 +189,75 @@ void function CreateControllerHud()
 
 void function ShowControllerHud()
 {
-	file.hudGrpController.Show()
-	file.hudGrpModelNames.Show()
+	foreach ( elem in file.hudController )
+		Hud_Show( elem )
+
+	foreach ( elem in file.hudModelNames )
+		Hud_Show( elem )
 }
 
 void function HideControllerHud()
 {
-	file.hudGrpController.Hide()
-	file.hudGrpModelNames.Hide()
+	foreach ( elem in file.hudController )
+		Hud_Hide( elem )
+
+	foreach ( elem in file.hudModelNames )
+		Hud_Hide( elem )
 }
 
 void function RefreshHudLabels()
 {
 	if ( file.selectedModels.len() == 0 )
 	{
-		file.hudTriggerLeft.SetText( "" )
-		file.hudTriggerRight.SetText( "" )
-		file.hudShoulderLeft.SetText( "" )
-		file.hudShoulderRight.SetText( "" )
-		file.hudButtonY.SetText( "%[Y_BUTTON|]% Next Model" )
-		file.hudButtonX.SetText( "Select %[X_BUTTON|]%" )
-		file.hudButtonB.SetText( "" )
-		file.hudButtonA.SetText( "%[A_BUTTON|]% Toggle noclip" )
-		file.hudStickLeft.SetText( "" )
-		file.hudStickRight.SetText( "%[STICK2|]% View Snap" )
-		file.hudDPad.SetText( "Drop Model" )
+		Hud_SetText( file.hudTriggerLeft, "" )
+		Hud_SetText( file.hudTriggerRight, "" )
+		Hud_SetText( file.hudShoulderLeft, "" )
+		Hud_SetText( file.hudShoulderRight, "" )
+		Hud_SetText( file.hudButtonY, "%[Y_BUTTON|]% Next Model" )
+		Hud_SetText( file.hudButtonX, "Select %[X_BUTTON|]%" )
+		Hud_SetText( file.hudButtonB, "" )
+		Hud_SetText( file.hudButtonA, "%[A_BUTTON|]% Toggle noclip" )
+		Hud_SetText( file.hudStickLeft, "" )
+		Hud_SetText( file.hudStickRight, "%[STICK2|]% View Snap" )
+		Hud_SetText( file.hudDPad, "Drop Model" )
 	}
 	else if ( file.tumbleModeActive )
 	{
-		file.hudTriggerLeft.SetText( "" )
-		file.hudTriggerRight.SetText( "" )
-		file.hudShoulderLeft.SetText( "" )
-		file.hudShoulderRight.SetText( "" )
-		file.hudButtonY.SetText( "%[Y_BUTTON|]% Swap Model" )
-		file.hudButtonX.SetText( "" )
-		file.hudButtonB.SetText( "%[B_BUTTON|]% Deselect" )
-		file.hudButtonA.SetText( "" )
-		file.hudStickLeft.SetText( "Tumble/Reset %[STICK1|]%" )
-		file.hudStickRight.SetText( "" )
-		file.hudDPad.SetText( "" )
+		Hud_SetText( file.hudTriggerLeft, "" )
+		Hud_SetText( file.hudTriggerRight, "" )
+		Hud_SetText( file.hudShoulderLeft, "" )
+		Hud_SetText( file.hudShoulderRight, "" )
+		Hud_SetText( file.hudButtonY, "%[Y_BUTTON|]% Swap Model" )
+		Hud_SetText( file.hudButtonX, "" )
+		Hud_SetText( file.hudButtonB, "%[B_BUTTON|]% Deselect" )
+		Hud_SetText( file.hudButtonA, "" )
+		Hud_SetText( file.hudStickLeft, "Tumble/Reset %[STICK1|]%" )
+		Hud_SetText( file.hudStickRight, "" )
+		Hud_SetText( file.hudDPad, "" )
 	}
 	else
 	{
-		file.hudTriggerLeft.SetText( "Move Down %[L_TRIGGER|]%" )
-		file.hudTriggerRight.SetText( "%[R_TRIGGER|]% Move Up" )
-		file.hudShoulderLeft.SetText( "Rotate CCW %[L_SHOULDER|]%" )
-		file.hudShoulderRight.SetText( "%[R_SHOULDER|]% Rotate CW" )
+		Hud_SetText( file.hudTriggerLeft, "Move Down %[L_TRIGGER|]%" )
+		Hud_SetText( file.hudTriggerRight, "%[R_TRIGGER|]% Move Up" )
+		Hud_SetText( file.hudShoulderLeft, "Rotate CCW %[L_SHOULDER|]%" )
+		Hud_SetText( file.hudShoulderRight, "%[R_SHOULDER|]% Rotate CW" )
 		if ( file.selectedModels.len() == 1 )
-			file.hudButtonY.SetText( "%[Y_BUTTON|]% Swap Model" )
+			Hud_SetText( file.hudButtonY, "%[Y_BUTTON|]% Swap Model" )
 		else
-			file.hudButtonY.SetText( "" )
-		file.hudButtonX.SetText( "Select %[X_BUTTON|]%" )
-		file.hudButtonB.SetText( "%[B_BUTTON|]% Deselect" )
-		file.hudButtonA.SetText( "%[A_BUTTON|]% Toggle noclip" )
-		file.hudStickLeft.SetText( "Tumble %[STICK1|]%" )
-		file.hudStickRight.SetText( "%[STICK2|]% View Snap" )
-		file.hudDPad.SetText( "Move X/Y" )
+			Hud_SetText( file.hudButtonY, "" )
+		Hud_SetText( file.hudButtonX, "Select %[X_BUTTON|]%" )
+		Hud_SetText( file.hudButtonB, "%[B_BUTTON|]% Deselect" )
+		Hud_SetText( file.hudButtonA, "%[A_BUTTON|]% Toggle noclip" )
+		Hud_SetText( file.hudStickLeft, "Tumble %[STICK1|]%" )
+		Hud_SetText( file.hudStickRight, "%[STICK2|]% View Snap" )
+		Hud_SetText( file.hudDPad, "Move X/Y" )
 	}
 }
-#endif //
+#endif       
 
 void function ServerCallback_MVUpdateModelBounds( int index, float minX, float minY, float minZ, float maxX, float maxY, float maxZ )
 {
-	#if(DEV)
+	#if DEV
 		table<string, vector> tab = { mins = <minX,minY,minZ>, maxs = <maxX,maxY,maxZ> }
 
 		if ( index < file.modelBounds.len() )
@@ -258,12 +273,12 @@ void function ServerCallback_MVUpdateModelBounds( int index, float minX, float m
 
 			file.modelBounds.append( tab )
 		}
-	#endif //
+	#endif       
 }
 
 void function ServerCallback_MVEnable()
 {
-	#if(DEV)
+	#if DEV
 		if ( !SetModelViewerMode( MODELVIEWERMODE_GAMEPAD ) )
 			return
 
@@ -307,17 +322,17 @@ void function ServerCallback_MVEnable()
 		RegisterButtonReleasedCallback( BUTTON_STICK_RIGHT, ControlsStickRightReleased )
 
 		file.lastEnablematchending = GetConVarInt( "mp_enablematchending" )
-		GetLocalClientPlayer().ClientCommand( "mp_enablematchending 0" )
+		GetLocalClientPlayer().ClientCommand( "mp_enablematchending 0" )       
 		file.lastEnabletimelimit = GetConVarInt( "mp_enabletimelimit" )
-		GetLocalClientPlayer().ClientCommand( "mp_enabletimelimit 0" )
+		GetLocalClientPlayer().ClientCommand( "mp_enabletimelimit 0" )       
 
 		ModelViewerModeEnabled()
-	#endif //
+	#endif       
 }
 
 void function ServerCallback_MVDisable()
 {
-	#if(DEV)
+	#if DEV
 		file.modelViewerMode = MODELVIEWERMODE_INACTIVE
 
 		UpdateMainHudVisibility( GetLocalViewPlayer() )
@@ -354,14 +369,14 @@ void function ServerCallback_MVDisable()
 		DeregisterButtonReleasedCallback( BUTTON_STICK_LEFT, ControlsStickLeftReleased )
 		DeregisterButtonReleasedCallback( BUTTON_STICK_RIGHT, ControlsStickRightReleased )
 
-		delaythread( 0.5 ) RestoreNoclip() //
+		delaythread( 0.5 ) RestoreNoclip()                                                       
 
-		GetLocalClientPlayer().ClientCommand( "mp_enablematchending " + file.lastEnablematchending )
-		GetLocalClientPlayer().ClientCommand( "mp_enabletimelimit " + file.lastEnabletimelimit )
-	#endif //
+		GetLocalClientPlayer().ClientCommand( "mp_enablematchending " + file.lastEnablematchending )       
+		GetLocalClientPlayer().ClientCommand( "mp_enabletimelimit " + file.lastEnabletimelimit )       
+	#endif       
 }
 
-#if(DEV)
+#if DEV
 void function ReloadShared()
 {
 	file.modelViewerModels = GetModelViewerList()
@@ -377,7 +392,7 @@ void function ReloadShared()
 		if ( modelPath.len() >= 2 )
 			name = modelPath[ modelPath.len() - 2 ]
 
-		elem.SetText( name )
+		Hud_SetText( elem, name )
 	}
 
 	for ( int i = file.spawnedModels.len() - 1; i >= 0; i-- )
@@ -391,14 +406,16 @@ void function ReloadShared()
 	}
 
 	file.modelToDropIndex = 0
-	file.hudGrpModelNames.SetColor( 255, 255, 255, 255 )
-	file.hudModelNames[0].SetColor( 255, 255, 128 )
+
+	foreach ( elem in file.hudModelNames )
+		Hud_SetColor( elem, 255, 255, 255, 255 )
+	Hud_SetColor( file.hudModelNames[0], 255, 255, 128 )
 }
 
 void function RestoreNoclip()
 {
 	if ( file.noclipState == 1 )
-		GetLocalClientPlayer().ClientCommand( "noclip" )
+		GetLocalClientPlayer().ClientCommand( "noclip" )       
 }
 
 function ControlsDPadUpPressed( player )
@@ -528,8 +545,9 @@ function ControlsButtonYPressed( player )
 	if ( file.modelToDropIndex >= file.modelViewerModels.len() )
 		file.modelToDropIndex = 0
 
-	file.hudGrpModelNames.SetColor( 255, 255, 255, 255 )
-	file.hudModelNames[ file.modelToDropIndex ].SetColor( 255, 255, 128 )
+	foreach ( elem in file.hudModelNames )
+		Hud_SetColor( elem, 255, 255, 255, 255 )
+	Hud_SetColor( file.hudModelNames[file.modelToDropIndex], 255, 255, 128 )
 
 	SwapSelectedModel()
 }
@@ -558,7 +576,7 @@ function ControlsButtonAPressed( player )
 	if ( file.tumbleModeActive )
 		return
 
-	player.ClientCommand( "noclip" )
+	player.ClientCommand( "noclip" )       
 
 	file.noclipState = file.noclipState == 0 ? 1 : 0
 }
@@ -606,7 +624,7 @@ void function TumbleModel( entity player )
 	if ( file.selectedModels.len() <= 0 )
 		return
 
-	player.ClientCommand( "ModelViewer freeze_player" )
+	player.ClientCommand( "ModelViewer freeze_player" )       
 
 	RefreshHudLabels()
 
@@ -673,7 +691,7 @@ void function TumbleModel( entity player )
 		RefreshHudLabels()
 	}
 
-	player.ClientCommand( "ModelViewer unfreeze_player" )
+	player.ClientCommand( "ModelViewer unfreeze_player" )       
 }
 
 void function DropModelStartTrace()
@@ -695,7 +713,7 @@ void function DropModelStartTrace()
 
 		file.dropModelTraceResult = TraceLine( traceStartPos, traceEndPos, null, TRACE_MASK_NPCWORLDSTATIC, TRACE_COLLISION_GROUP_NONE )
 
-		DebugDrawCircle( file.dropModelTraceResult.endPos, <0,0,0>, 16.0, 255, 0, 0, true, 0.02 )
+		DebugDrawCircle( file.dropModelTraceResult.endPos, <0,0,0>, 16.0, COLOR_RED, true, 0.02 )
 
 		wait( 0.0 )
 	}
@@ -763,8 +781,9 @@ void function SelectModel( entity model )
 
 	file.modelToDropIndex = file.modelViewerModels.find( model.GetModelName().tolower() )
 
-	file.hudGrpModelNames.SetColor( 255, 255, 255, 255 )
-	file.hudModelNames[ file.modelToDropIndex ].SetColor( 255, 255, 128 )
+	foreach ( elem in file.hudModelNames )
+		Hud_SetColor( elem, 255, 255, 255, 255 )
+	Hud_SetColor( file.hudModelNames[file.modelToDropIndex], 255, 255, 128 )
 }
 
 void function TrySelectAllModels()
@@ -868,7 +887,7 @@ void function ShowModelSectionBounds()
 
 			float dot = diff.Dot( player.GetViewVector() )
 
-			if ( /**/ dot > bestDot )
+			if (                   dot > bestDot )
 			{
 				bestDot = dot
 				file.bestModelToSelect = model
@@ -920,11 +939,7 @@ void function ShowModelSectionBounds()
 				vector mins = ( modelIndex >= file.modelBounds.len() || modelIndex < 0 ) ? <-32,-32,-32> : file.modelBounds[ modelIndex ].mins
 				vector maxs = ( modelIndex >= file.modelBounds.len() || modelIndex < 0 ) ? <32,32,32> : file.modelBounds[ modelIndex ].maxs
 
-				int r = int( color.x )
-				int g = int( color.y )
-				int b = int( color.z )
-
-				DrawAngledBox( model.GetOrigin(), model.GetAngles(), mins, maxs, r, g, b, true, 0.02 )
+				DrawAngledBox( model.GetOrigin(), model.GetAngles(), mins, maxs, color, true, 0.02 )
 			}
 		}
 		wait( 0.0 )
@@ -1171,7 +1186,7 @@ void function SelectNextModel()
 		nextIndex = 0
 
 	SelectModel( file.spawnedModels[ nextIndex ] )
-	//
+	                                 
 
 	SnapViewToModel( file.selectedModels[ 0 ] )
 }
@@ -1189,7 +1204,7 @@ void function SelectPreviousModel()
 		previousIndex = file.spawnedModels.len() - 1
 
 	SelectModel( file.spawnedModels[ previousIndex ] )
-	//
+	                                 
 
 	SnapViewToModel( file.selectedModels[ 0 ] )
 }
@@ -1226,11 +1241,11 @@ void function SnapViewToModel( entity model )
 		playerPos = modelOrg + viewOffsets[i]
 		playerEyePos = playerPos + <0,0,60>
 
-		//
+		                          
 		TraceResults trace = TraceLineHighDetail( playerPos, playerPos - <0,0,256>, player, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 		scores[i] = ( 1 - trace.fraction ) * 2.0
 
-		//
+		                      
 		trace = TraceLineHighDetail( playerEyePos, modelOrg + <0,0,16>, player, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 		if ( trace.fractionLeftSolid != 1 )
 			scores[i] += 0.25
@@ -1240,7 +1255,7 @@ void function SnapViewToModel( entity model )
 			scores[i] += 0.25
 		scores[i] += trace.fraction * 0.25
 
-		//
+		                      
 		trace = TraceLineHighDetail( playerEyePos, modelCenter, player, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 		if ( trace.fractionLeftSolid != 1 )
 			scores[i] += 0.25
@@ -1267,8 +1282,8 @@ void function SnapViewToModel( entity model )
 	playerEyePos = playerPos + <0,0,60>
 	viewAng = VectorToAngles( modelCenter - playerEyePos )
 
-	player.ClientCommand( "setpos " + playerPos.x + " " + playerPos.y + " " + playerPos.z )
-	player.ClientCommand( "setang " + viewAng.x + " " + viewAng.y + " " + viewAng.z )
+	player.ClientCommand( "setpos " + playerPos.x + " " + playerPos.y + " " + playerPos.z )       
+	player.ClientCommand( "setang " + viewAng.x + " " + viewAng.y + " " + viewAng.z )       
 }
 
 string function ReplaceStringCharacter( string msg, string findChar, string replaceChar )
@@ -1323,7 +1338,7 @@ void function ClientCodeCallback_LevelEd_SetPositionThread( string script_name, 
 	if ( !SetModelViewerMode( MODELVIEWERMODE_LEVELED ) )
 		return
 
-	wait 0.05 //
+	wait 0.05                                     
 
 	file.leveled_positionReceived = true
 	file.leveled_origin = origin
@@ -1331,7 +1346,7 @@ void function ClientCodeCallback_LevelEd_SetPositionThread( string script_name, 
 
 	if ( script_name != "model_viewer" )
 	{
-		//
+		                                   
 		array<entity> ents = GetEntArrayByScriptName( script_name )
 		if ( ents.len() == 1 )
 		{
@@ -1375,7 +1390,7 @@ void function ClientCodeCallback_HLMV_ModelChanged_Thread( asset modelName )
 		file.hlmv_modelData[ modelName ] <- data
 		data.precaching = true
 
-		//
+		                                  
 		DisablePrecacheErrors()
 		wait 0.25
 
@@ -1397,7 +1412,7 @@ void function ClientCodeCallback_HLMV_ModelChanged_Thread( asset modelName )
 
 	if ( file.leveled_positionReceived )
 	{
-		//
+		                                                      
 		data.model.SetOrigin( file.leveled_origin )
 		data.model.SetAngles( file.leveled_angles )
 		data.parentEnt.SetOrigin( file.leveled_origin )
@@ -1459,7 +1474,7 @@ void function DisplayPreviewModelAtCursor( HlmvModelData data )
 		vector previewAngles = GetFreecamAngles()
 		previewAngles.x = 0
 		previewAngles.z = 0
-		//
+		                                                           
 
 		vector dest = ClampToMap( result.endPos )
 		data.parentEnt.SetOrigin( dest )
@@ -1479,11 +1494,11 @@ void function ClientCodeCallback_HLMV_SequenceChanged( string sequence )
 
 	printl( "HLMV CALLBACK sequence: " + sequence )
 
-	//
+	               
 	if ( file.hlmv_lastModel == $"" )
 		return
 
-	//
+	                              
 	if ( sequence == "ref" )
 		return
 
@@ -1519,14 +1534,14 @@ void function ClientCodeCallback_HLMV_SequenceChanged_Thread( HlmvModelData data
 	vector origin = model.GetOrigin()
 	vector angles = model.GetAngles()
 
-	//
+	                
 	if ( model.LookupAttachment( "ref" ) == 0 )
 	{
 		Warning( "Can't animate without ref attachment: " + model.GetModelName() )
 		return
 	}
 
-	//
+	                                                                                     
 	thread MapLimitsProtect( model )
 
 	for ( ;; )
@@ -1621,4 +1636,4 @@ void function ClientCodeCallback_LevelEd_ClearPreviewEntity()
 	file.hlmv_modelData = {}
 	file.hlmv_lastModel = $""
 }
-#endif //
+#endif       

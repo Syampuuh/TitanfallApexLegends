@@ -1,0 +1,239 @@
+#base "_base_ability_ultimate.txt"
+
+WeaponData
+{
+	// General
+	"printname"   									"#WPN_MORTAR_RING"
+	"shortprintname"   								"#WPN_MORTAR_RING_SHORT"
+	"description" 									"#WPN_MORTAR_RING_DESC"
+	"longdesc"									    "#WPN_MORTAR_RING_LONGDESC"
+
+	"weapon_type_flags"								"WPT_ULTIMATE"
+	"weaponClass" 									"human"
+	"weaponType" 									"shoulder"
+	"fire_mode"   									"offhand"
+	"offhand_active_slot"                           "mainHand"
+
+	"menu_icon"										"rui/pilot_loadout/suit/hardcover"
+	"hud_icon"										"rui/hud/ultimate_icons/ultimate_fuse" 
+
+    "OnWeaponRegenEnd"                              "OnWeaponRegenEndGeneric"
+    "OnProjectileCollision"							"OnProjectileCollision_ability_mortar_ring_missile"
+
+    "offhand_interupts_weapon_anims"				"1"
+    "is_semi_auto"								    "1"
+    "charge_time" 									"0.5"
+    "charge_remain_full_when_fired" 				"0"
+    "charge_require_input"							"1"
+    "charge_cooldown_time"							"0.5"
+    "charge_cooldown_delay"   						"0.1"
+    "charge_end_forces_fire"						"0"
+    "charge_attack_min_charge_required"    		    "1.0"
+    "offhand_hybrid_switch_on_attack"				"1"
+    "offhand_hybrid_block_switch_if_empty"          "0"
+    "offhand_switch_on_charge_end_no_attack"        "0"
+    "offhand_switch_force_draw"						"0"
+    "projectile_launch_speed"						"1" //Actual speed set in script
+    "uses_indirect_fire"							"1"
+    "projectile_inherit_base_velocity_scale"	    "0"
+
+    "damage_flags"									"DF_RAGDOLL | DF_EXPLOSION"
+
+    "critical_hit"									"0"
+
+    // Damage - When Used by Players
+    "explosion_damage"								"0"
+    "explosion_damage_heavy_armor"					"0"
+
+    "explosion_inner_radius"  						"350"
+    "explosionradius" 								"350"
+    "impulse_force"   								"30000"
+
+    //"explosion_damage"								"60"
+    //"explosion_damage_heavy_armor"					"60"
+    //"explosion_inner_radius"						"420"
+    //"explosionradius"								"420"
+//
+    //"impulse_force"									"500"
+    //"impulse_force_explosions"						"50000"
+    //"explosion_shake_radius"						"500"
+    //"explosion_shake_amplitude"						"60"
+    //"explosion_shake_frequency"						"45"
+    //"explosion_shake_duration"						"0.75"
+
+
+    //Using this as hack to cancel the charge on demand
+    "shared_energy_charge_cost"						"1"
+
+	MP_BASE
+	{
+		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
+	}
+	SP_BASE
+	{
+		"enable_highlight_networking_on_creation"		"1"
+	}
+
+	// Models
+	"viewmodel"                                     "mdl/weapons/empty_handed/w_empty_handed_human.rmdl"
+	"playermodel"									"mdl/weapons/empty_handed/w_empty_handed_human.rmdl"
+
+	// Effects
+	"charge_sound_1p"								""
+	"charge_sound_3p"								""
+
+    "charge_effect_attachment"						"muzzle_flash"
+	"charge_effect_1p"								"P_gun_shield_gibraltar_FP"
+
+    "zoom_effects"									"1"
+    "zoom_fov"									    "19.8583" // 4x ZOOM @ 70 FOV
+    //"zoom_fov"	                                "13.3128" // 6x ZOOM @ 70 FOV
+    //"zoom_toggle_fov"								"8.01071" // 10x ZOOM @ 70 FOV
+    //"zoom_toggle_lerp_time"							"0.15"
+    "zoom_time_in"									"0.3"
+    "zoom_time_out"   								"0.3"
+
+    "aimassist_disable_hipfire"						"1"
+	//"aimassist_disable_ads"							"1"
+
+	"bounce_effect_table"							"bounce_mortar_ring_missle"
+    "impact_effect_table"							"exp_mortar_ring_missle"
+    "projectile_trail_effect_0_1p"					"P_mortar_projectile_contrail"
+    "projectile_trail_effect_0_3p"					"P_mortar_projectile_contrail"
+    "projectilemodel"								"mdl/props/fuse_mortar_shell/fuse_mortar_shell.rmdl"
+    "vortex_absorb_effect"							"wpn_vortex_projectile_frag_FP"
+    "vortex_absorb_effect_third_person"				"wpn_vortex_projectile_frag"
+    "vortex_absorb_sound"							"Vortex_Shield_AbsorbBulletLarge"
+    "vortex_absorb_sound_1p_vs_3p"					"Vortex_Shield_AbsorbBulletLarge_1P_VS_3P"
+    "projectile_adjust_to_gun_barrel"				"0"
+    "projectile_adjust_to_hand"						"0"
+    "fire_in_real_world_while_phased"				"1"
+
+	// Rumble
+	"rumble"  										"-1"
+
+	// Ammo
+	"ammo_default_total"							"120"
+	"ammo_clip_size"   								"120"
+    "ammo_display"									"count"
+    "ammo_min_to_fire"								"120"
+    "ammo_per_shot"									"120"
+    "ammo_stockpile_max"							"120"
+    "regen_ammo_refill_rate"						"1"
+    "regen_ammo_refill_start_delay"					"0.0"
+
+    // Damage Settings
+	"damage_near_distance"							"0"
+	"damage_far_distance" 							"0"
+	"damage_near_value"   							"0"
+	"damage_far_value"								"0"
+
+	// Behavior
+	"fire_rate"   									"10.0" // TODO OT: This needs to be high because the code for offhandHybridSwitchOnAttack waits for the weapon to be ready again before switching out. Maybe add a offhandHybridSwitchOnAttackImmediate variable to fix this properly
+	//"holster_time"									".1"
+	"deploy_time" 									"0.0"
+	"lower_time"  									".5"
+	"raise_time"  									".5"
+	"vortex_refire_behavior"  						"absorb"
+	"play_offhand_charging_anim"  					"1"
+	"offhand_blocks_sprint"							"0"
+	"allow_empty_fire"								"1"
+	"reload_enabled"  								"0"
+	"allow_empty_click"   							"0"
+	"empty_reload_only"   							"0"
+	"trigger_snipercam"   							"0"
+	"allow_headshots" 								"0"
+	"enable_hud_alert"								"0"
+	"cooldown_type"                                 "ammo_instant"
+
+	"projectile_trail_start_from_origin"							"1"
+
+	// Sway
+	"sway_rotate_attach"  							"jx_c_pov"
+	"sway_min_x"  									"-0.3"
+	"sway_min_y"  									"-0.5"
+	"sway_min_z"  									"-0.5"
+	"sway_max_x"  									"0.3"
+	"sway_max_y"  									"0.5"
+	"sway_max_z"  									"0.1"
+	"sway_min_pitch"  								"-3"
+	"sway_min_yaw"									"-3.5"
+	"sway_min_roll"   								"-1"
+	"sway_max_pitch"  								"3"
+	"sway_max_yaw"									"3.5"
+	"sway_max_roll"   								"2"
+	"sway_translate_gain" 							"4"
+	"sway_rotate_gain"								"7"
+	"sway_move_forward_translate_x"   				"0"
+	"sway_move_forward_translate_z"   				"-0.5"
+	"sway_move_back_translate_x"  					"-2"
+	"sway_move_back_translate_z"  					"-1"
+	"sway_move_left_translate_y"  					"-1"
+	"sway_move_left_translate_z"  					"-0.5"
+	"sway_move_left_rotate_roll"  					"-1"
+	"sway_move_right_translate_y" 					"1"
+	"sway_move_right_translate_z" 					"-0.5"
+	"sway_move_right_rotate_roll" 					"2"
+	"sway_move_up_translate_z"						"-1"
+	"sway_move_down_translate_z"  					"1"
+	"sway_turn_left_rotate_yaw"   					"-2"
+	"sway_turn_right_rotate_yaw"  					"2"
+	"sway_turn_up_rotate_pitch"   					"2"
+	"sway_turn_down_rotate_pitch" 					"-2"
+
+	// WeaponED Unhandled Key/Values and custom script Key/Values
+	"sway_turn_angle_factor"  						"-0.5"
+	"sway_turn_origin_factor" 						"0"
+	"sway_turn_angle_factor_zoomed"   				"0"
+	"sway_turn_origin_factor_zoomed"  				"0.05"
+	"sway_move_angle_factor"  						"0.5"
+	"sway_move_origin_factor" 						"0.5"
+	"sway_move_angle_factor_zoomed"   				"0"
+	"sway_move_origin_factor_zoomed"  				"0.03"
+	"sway_gain"   									"15.0"
+
+	"activitymodifier3p"							"rocket"
+    "sprint_fractional_anims"						"0"
+    "fire_rumble"									"rumble_antititan"
+    "viewkick_spring" 								"launcher"
+    "viewkick_pitch_base" 							"1"
+    "viewkick_pitch_random"   						"-3.0"
+    "viewkick_pitch_softScale"						"-1.3"
+    "viewkick_pitch_hardScale"						"-2.0"
+    "viewkick_yaw_base"   							"0.0"
+    "viewkick_yaw_random" 							"3.0"
+    "viewkick_yaw_softScale"  						"1.3"
+    "viewkick_yaw_hardScale"  						"1.0"
+    "viewkick_roll_base"  							"0.0"
+    "viewkick_roll_randomMin" 						"0.5"
+    "viewkick_roll_randomMax" 						"0.7"
+    "viewkick_roll_softScale" 						"0.2"
+    "viewkick_roll_hardScale" 						"1.0"
+    "viewkick_hipfire_weaponFraction" 				"0.5"
+    "viewkick_hipfire_weaponFraction_vmScale" 		"0.5"
+    "viewkick_ads_weaponFraction" 					"0.0"
+    "viewkick_ads_weaponFraction_vmScale" 			"1.0"
+    "viewkick_perm_pitch_base" 						"0.0"
+    "viewkick_perm_pitch_random"   					"0.0"
+    "viewkick_perm_yaw_base"   						"0.0"
+    "viewkick_perm_yaw_random" 						"0.0"
+    "viewpunch_multiplier"							"0.0"
+    "bob_cycle_time"  								"0.45"
+    "bob_vert_dist"   								"0.1"
+    "bob_horz_dist"   								"0.1"
+    "bob_max_speed"   								"150"
+    "bob_pitch"   									"0.75"
+    "bob_yaw" 										"0.5"
+    "bob_roll"										"-0.75"
+    "bob_cycle_time_zoomed"  						"0.4"
+    "bob_vert_dist_zoomed"   						"0.01"
+    "bob_horz_dist_zoomed"   						"0.01"
+    "bob_max_speed_zoomed"   						"150"
+
+	Mods
+	{
+	    survival_armor_cooldown_mod
+	    {
+	    }
+	}
+}

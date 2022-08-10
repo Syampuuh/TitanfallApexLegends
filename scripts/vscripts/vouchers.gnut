@@ -1,0 +1,539 @@
+  
+
+#if SERVER || CLIENT || UI
+global function Vouchers_LevelInit
+global function Voucher_GetEffectBattlepassLevels
+global function Voucher_GetEffectBattlepassStars
+global function Voucher_GetEffectStatRef
+global function Voucher_GetEffectStatAmount
+global function Voucher_GetModel
+#endif
+
+
+                   
+#if SERVER
+                                                  
+                                          
+#endif
+
+
+                      
+                      
+                      
+                      
+                      
+
+#if SERVER || CLIENT || UI
+global enum eVoucherBehavior
+{
+	IMMEDIATE
+	GRX_STACKABLE
+	STACKABLE_SCRIPT_DRIVEN
+	GRX_CONSUMABLE_INSTANT
+	GRX_CONSUMABLE_OVER_TIME
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+global enum eVoucherOverTimeExpiryBehavior
+{
+	DURATION
+	MATCHES_PLAYED
+	SCRIPT_CONTROLLED
+}
+#endif
+
+
+
+                       
+                       
+                       
+                       
+                       
+
+#if SERVER || CLIENT || UI
+struct FileStruct_LifetimeLevel
+{
+	table<asset, int functionref( entity player )> voucherFlavGetActiveQuantityFuncMap
+}
+#endif
+#if SERVER || CLIENT
+FileStruct_LifetimeLevel fileLevel                             
+#elseif UI
+FileStruct_LifetimeLevel& fileLevel                             
+
+struct {
+	  
+} fileVM                            
+#endif
+
+
+
+                         
+                         
+                         
+                         
+                         
+
+#if SERVER || CLIENT || UI
+void function Vouchers_LevelInit()
+{
+	#if UI
+		FileStruct_LifetimeLevel newFileLevel
+		fileLevel = newFileLevel
+	#endif
+
+	InitScriptDrivenVoucherCallbacks()
+
+	AddCallback_RegisterRootItemFlavors( void function() {
+		foreach ( asset voucherAsset in GetBaseItemFlavorsFromArray( "vouchers" ) )
+		{
+			ItemFlavor ornull flav = RegisterItemFlavorFromSettingsAsset( voucherAsset )
+			if ( flav == null )
+				continue
+
+			#if SERVER
+				                         
+
+				                                      
+				                   
+					                      
+			#endif
+		}
+	})
+
+	#if SERVER
+		                                                                          
+
+		       
+			                                                 
+		             
+	#endif
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+void function InitScriptDrivenVoucherCallbacks()
+{
+	                                                                                                                                            
+	  
+	   
+}
+#endif
+
+
+#if SERVER && DEV
+                                     
+ 
+	                                                                                                                 
+
+	                                    
+	                                                                                  
+	 
+		                                                                                   
+		                          
+			        
+
+		                            
+		                                                                                                                                                                                
+
+		                                       
+	 
+
+	                           
+ 
+#endif
+                          
+                          
+                          
+                          
+                          
+#if SERVER
+                                                       
+ 
+	                                                                                  
+	 
+		                                                     
+			        
+
+		                                                                                   
+		                          
+			        
+
+		                            
+		                                                                
+		                                                                  
+
+		                                   
+			                                                                                  
+	 
+ 
+#endif
+
+#if SERVER || CLIENT || UI
+ItemFlavor ornull function Voucher_GetCalEventFlav( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	asset calEventAsset = WORKAROUND_AssetAppend( GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "calEventFlav" ), ".rpak" )
+	if ( IsValidItemFlavorSettingsAsset( calEventAsset ) )
+		return GetItemFlavorByAsset( calEventAsset )
+	return null
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetBehavior( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return eVoucherBehavior[GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "behavior" )]
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+string ornull function Voucher_GetPDefVarNameToIncrement( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	string val = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "effectPersistenceName" )
+	return val == "" ? null : val
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetPDefVarNameToIncrementAmount( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+	Assert( Voucher_GetPDefVarNameToIncrement( flav ) != null )
+
+	return GetGlobalSettingsInt( ItemFlavor_GetAsset( flav ), "effectPersistenceAmount" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+string ornull function Voucher_GetConsumableUseCountPDefVarName( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	string val = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "consumableUseCountPDefVarName" )
+	return val == "" ? null : val
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+bool function Voucher_GetShouldShowToPlayer( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( flav ), "shouldShowToPlayer" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+bool function Voucher_GetShouldAllowPlayerToActivate( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( flav ), "shouldAllowPlayerToActivate" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetOverTimeExpiryBehavior( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return eVoucherOverTimeExpiryBehavior[GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "overTimeExpiryBehavior" )]
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+float function Voucher_GetOverTimeExpiryDurationHours( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsFloat( ItemFlavor_GetAsset( flav ), "overTimeExpiryDurationHours" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetOverTimeExpiryMatchCount( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsInt( ItemFlavor_GetAsset( flav ), "overTimeExpiryMatchCount" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+string function Voucher_GetOverTimeExpiryDescLocKey( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "overTimeExpiryDescLocKey" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetEffectBattlepassLevels( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsInt( ItemFlavor_GetAsset( flav ), "effectBattlepassLevels" )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetEffectBattlepassStars( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsInt( ItemFlavor_GetAsset( flav ), "effectBattlepassStars" )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+string ornull function Voucher_GetEffectStatRef( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	string val = GetGlobalSettingsString( ItemFlavor_GetAsset( flav ), "effectStatRef" )
+	return val == "" ? null : val
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function Voucher_GetEffectStatAmount( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+	Assert( Voucher_GetEffectStatRef( flav ) != null )
+
+	return GetGlobalSettingsInt( ItemFlavor_GetAsset( flav ), "effectStatAmount" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+asset function Voucher_GetModel( ItemFlavor flav )
+{
+	Assert( ItemFlavor_GetType( flav ) == eItemType.voucher )
+
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flav ), "model" )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function GetVoucherActiveCount( entity player, ItemFlavor voucherFlav )
+{
+	switch ( Voucher_GetBehavior( voucherFlav ) )
+	{
+		case eVoucherBehavior.IMMEDIATE:
+			return 0
+
+		case eVoucherBehavior.STACKABLE_SCRIPT_DRIVEN:
+			if ( !(ItemFlavor_GetAsset( voucherFlav ) in fileLevel.voucherFlavGetActiveQuantityFuncMap) )
+			{
+				Assert( false, format( "Voucher %s registered with type eVoucherBehavior.STACKABLE_SCRIPT_DRIVEN but doesn't have a voucherFlavGetActiveQuantityFuncMap", ItemFlavor_GetHumanReadableRef( voucherFlav ) ) )
+				return 0
+			}
+
+			return fileLevel.voucherFlavGetActiveQuantityFuncMap[ItemFlavor_GetAsset( voucherFlav )]( player )
+
+		case eVoucherBehavior.GRX_STACKABLE:
+#if SERVER
+			                                                                              
+#else
+			return GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( voucherFlav ) )
+#endif
+
+		case eVoucherBehavior.GRX_CONSUMABLE_INSTANT:
+#if SERVER
+			                                                                              
+#else
+			return GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( voucherFlav ) )
+#endif
+
+		case eVoucherBehavior.GRX_CONSUMABLE_OVER_TIME:
+			return 0           
+	}
+	Assert( false )
+	return 0
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function GetVoucherRedeemedCount( entity player, ItemFlavor voucherFlav )
+{
+	switch ( Voucher_GetBehavior( voucherFlav ) )
+	{
+		case eVoucherBehavior.IMMEDIATE:
+		case eVoucherBehavior.STACKABLE_SCRIPT_DRIVEN:
+		case eVoucherBehavior.GRX_STACKABLE:
+			return 0       
+
+		case eVoucherBehavior.GRX_CONSUMABLE_INSTANT:
+			string ornull pDefVarName = Voucher_GetConsumableUseCountPDefVarName( voucherFlav )
+			Assert( pDefVarName != null )
+
+			expect string( pDefVarName )
+			return player.GetPersistentVarAsInt( pDefVarName )
+
+		case eVoucherBehavior.GRX_CONSUMABLE_OVER_TIME:
+			return 0           
+	}
+	Assert( false )
+	return 0
+}
+#endif
+
+
+#if SERVER
+                                                                                                         
+ 
+	                                                                  
+	                          
+
+	                                                                                   
+	                             
+	                                                                                     
+ 
+#endif
+
+
+#if SERVER
+                                                                                             
+ 
+	                                                                                  
+
+	                                   
+
+	                                                       
+	                                                                      
+	                                                                               
+
+	                                                                                 
+ 
+#endif
+
+
+                       
+                       
+                       
+                       
+                       
+
+                          
+
+
+
+                   
+                   
+                   
+                   
+                   
+
+
+#if SERVER
+                                                                          
+ 
+	                           
+	                                             
+	 
+		                                
+			                                                                                                                                                                                                                                                                                                                                                
+			     
+
+		                                              
+			                                                                                                                                                          
+			     
+
+		                                    
+		                                             
+		                                               
+			                                                                                                                                                                                                                                                                                                                                                      
+			                     
+			     
+
+		        
+			               
+			     
+	 
+	                     
+ 
+#endif
+
+#if SERVER
+                                                                                          
+ 
+	                                                                          
+	                                                         
+ 
+#endif
+
+#if SERVER
+                                                                                                    
+ 
+	                                                                                    
+	                           
+	 
+		                                                                        
+		                               
+		 
+			                                   
+			                                                     
+		 
+		    
+		 
+			                                                                                                                                                                            
+		 
+	 
+
+	                                                                        
+	                
+	 
+		                                                                        
+		                               
+			                           
+		    
+			                                                                                                                                                             
+	 
+
+	                                                               
+	                      
+	 
+		                                                                        
+		                                                                                            
+	 
+
+	                                                                                        
+	                                      
+	 
+		                                                             
+	 
+
+	                                                                                   
+	                          
+	 
+		                                                                   
+	 
+ 
+#endif
+
+

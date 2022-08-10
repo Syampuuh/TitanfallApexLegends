@@ -28,22 +28,18 @@ void function ClIndicatorsHud_Init()
 	AddCreateCallback( "npc_spectre", FriendIconAddEntity )
 	AddCreateCallback( "npc_soldier", FriendIconAddEntity )
 	AddCreateCallback( "npc_dropship", FriendIconAddEntity )
+	AddCreateCallback( "npc_frag_drone", FriendIconAddEntity )
 
 	PrecacheParticleSystem( OVERHEAD_ICON_AI_FRIENDLY )
 
 	RegisterSignal( "FriendIconAddEntity_Thread" )
 	RegisterSignal( "OutOfBoundsDeadTimeChanged" )
 
-	PrecacheHUDMaterial( $"vgui/hud/sram/sram_targeting_inner_ring" )
-	PrecacheHUDMaterial( $"vgui/hud/sram/sram_targeting_outer_ring" )
-	PrecacheHUDMaterial( $"vgui/hud/sram/sram_targeting_inner_ring_reverse_rotate" )
-	PrecacheHUDMaterial( $"vgui/hud/sram/sram_targeting_outer_ring_reverse_rotate" )
-
 	AddLocalPlayerFunc( OutOfBoundsOverlayHUD_AddPlayer )
 	AddCallback_KillReplayEnded( DeactivateOutOfBoundsIndicator )
 
-	//
-	//
+	                                                                            
+	                                                           
 }
 
 void function DeathIcon_LocalClientPlayerSpawned( entity player )
@@ -52,7 +48,7 @@ void function DeathIcon_LocalClientPlayerSpawned( entity player )
 	{
 		vector pos = expect vector( player.cv.deathOrigin ) + DEATH_ICON_OFFSET
 		var rui = CreateCockpitRui( $"ui/death_icons.rpak", RuiCalculateDistanceSortKey( player.EyePosition(), pos ) )
-		//
+		                                                                                                                                     
 		RuiSetGameTime( rui, "startTime", Time() )
 		RuiSetFloat3( rui, "pos", pos )
 		RuiKeepSortKeyUpdated( rui, true, "pos" )
@@ -70,7 +66,7 @@ void function DeathIcon_OnDeathCallback( entity player )
 
 	vector pos = player.GetOrigin() + DEATH_ICON_OFFSET
 	var rui = CreateCockpitRui( $"ui/death_icons.rpak", RuiCalculateDistanceSortKey( localClientPlayer.EyePosition(), pos ) )
-	//
+	                                                                                                                                     
 	RuiSetGameTime( rui, "startTime", Time() )
 	RuiSetFloat3( rui, "pos", pos )
 	RuiKeepSortKeyUpdated( rui, true, "pos" )
@@ -136,7 +132,7 @@ void function FriendIconAddEntity_Thread( entity ent )
 	ent.EndSignal( "FriendIconAddEntity_Thread" )
 	ent.EndSignal( "OnDestroy" )
 
-	WaitEndFrame() //
+	WaitEndFrame()                                                                                        
 
 	if ( !IsAlive( ent ) )
 		return
@@ -148,10 +144,18 @@ void function FriendIconAddEntity_Thread( entity ent )
 
 	int attachIdx = ent.LookupAttachment( "HEADSHOT" )
 
-	if ( attachIdx == 0 )
-		ent.s.fxHandle = StartParticleEffectOnEntity( ent, GetParticleSystemIndex( OVERHEAD_ICON_AI_FRIENDLY ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
-	else
+	if ( attachIdx != 0 )
+	{
 		ent.s.fxHandle = StartParticleEffectOnEntity( ent, GetParticleSystemIndex( OVERHEAD_ICON_AI_FRIENDLY ), FX_PATTACH_POINT_FOLLOW, attachIdx )
+	}
+	else
+	{
+		vector offset = <0, 0, 0>
+		if ( IsFragDrone( ent ) )
+			offset = <0, 0, 48>
+
+		ent.s.fxHandle = StartParticleEffectOnEntityWithPos( ent, GetParticleSystemIndex( OVERHEAD_ICON_AI_FRIENDLY ), FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID, offset, <0,0,0> )
+	}
 
 	OnThreadEnd(
 		function() : ( ent )
@@ -167,14 +171,14 @@ void function FriendIconAddEntity_Thread( entity ent )
 
 	while ( IsAlive( ent ) )
 	{
-		//
+		                                                                                
 		if ( ent.GetParent() )
 		{
 			if ( EffectDoesExist( ent.s.fxHandle ) )
 				EffectStop( ent.s.fxHandle, false, true )
 
 			if ( attachIdx == 0 )
-				ent.s.fxHandle = StartParticleEffectOnEntity( ent, GetParticleSystemIndex( OVERHEAD_ICON_AI_FRIENDLY ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+				ent.s.fxHandle = StartParticleEffectOnEntity( ent, GetParticleSystemIndex( OVERHEAD_ICON_AI_FRIENDLY ), FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
 			else
 				ent.s.fxHandle = StartParticleEffectOnEntity( ent, GetParticleSystemIndex( OVERHEAD_ICON_AI_FRIENDLY ), FX_PATTACH_POINT_FOLLOW, attachIdx )
 		}
@@ -210,10 +214,10 @@ void function OutOfBoundsOverlayHUD_AddPlayer( entity player )
 
 void function OutOfBoundsDeadTime_Changed( entity player )
 {
-	if ( player != GetLocalViewPlayer() ) //
+	if ( player != GetLocalViewPlayer() )                                                                                                                                                        
 	{
-		//
-		//
+		                                                        
+		                                                     
 		return
 	}
 
@@ -258,8 +262,8 @@ void function ActivateOutOfBoundsIndicator()
 
 	thread OutOfBoundsDeadTime_ColorChange( player, player.hudElems.OutOfBoundsWarning_Message, player.hudElems.OutOfBoundsWarning_Timer )
 
-	//
-	if ( IsWatchingReplay() ) //
+	                                                                                                                                                                 
+	if ( IsWatchingReplay() )                                                                                                                                                                                                                                        
 	{
 		player.EndSignal( "OnDestroy" )
 		OnThreadEnd(
@@ -286,7 +290,7 @@ void function OutOfBoundsDeadTime_ColorChange( entity player, elem1, elem2 )
 		}
 	)
 
-	//
+	                                                                     
 
 	while ( IsValid( player ) )
 	{

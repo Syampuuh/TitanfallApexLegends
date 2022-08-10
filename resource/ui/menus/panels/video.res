@@ -14,13 +14,13 @@
 		drawColor				"255 0 0 200"
 	}
 
-    LblTextureStreamWarning
+    LblMemoryWarning
     {
         ControlName				Label
         font					Default_27_ShadowGlow
         pin_to_sibling			LblAdvVideoSubheaderText
-        pin_corner_to_sibling	BOTTOM_LEFT
-        pin_to_sibling_corner	BOTTOM_RIGHT
+        pin_corner_to_sibling	LEFT
+        pin_to_sibling_corner	RIGHT
         xpos                    16
         ypos                    0
         tall                    50
@@ -100,7 +100,7 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SldBrightness
-        navDown					SwchSprintCameraSmoothing
+        navDown					SwchFOVAbilityScaling
         minValue				1.0
         maxValue				1.55
         stepSize				0.0275
@@ -116,20 +116,19 @@
         pin_to_sibling_corner	RIGHT
     }
 
-    SwchColorBlindMode
+    SwchFOVAbilityScaling
     {
-        ControlName				RuiButton
-        InheritProperties		SwitchButton
-        classname				"AdvancedVideoButtonClass"
-        style					DialogListButton
-        pin_to_sibling			SldFOV
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	BOTTOM_LEFT
+        ControlName             RuiButton
+        InheritProperties       SwitchButton
+        classname               "AdvancedVideoButtonClass"
+        style                   DialogListButton
+        pin_to_sibling          SldFOV
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
         navUp					SldFOV
         navDown					SwchSprintCameraSmoothing
         // list is populated by code
-        childGroupAlways        MultiChoiceButtonAlways
-        visible                 0
+        childGroupAlways        ChoiceButtonAlways
     }
 
     SwchSprintCameraSmoothing
@@ -138,10 +137,10 @@
         InheritProperties		SwitchButton
         //classname				"AdvancedVideoButtonClass"
         style					DialogListButton
-        pin_to_sibling			SldFOV
+        pin_to_sibling			SwchFOVAbilityScaling
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SldFOV
+        navUp					SwchFOVAbilityScaling
         navDown					SwchVSync
         // list is populated by code
         childGroupAlways        ChoiceButtonAlways
@@ -155,8 +154,7 @@
         InheritProperties		SubheaderBackgroundWide
         xpos					0
         ypos					6
-        pin_to_sibling			SwchColorBlindMode
-        //pin_to_sibling			SldFOV
+        pin_to_sibling			SwchSprintCameraSmoothing
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
     }
@@ -180,6 +178,20 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchSprintCameraSmoothing
+        navDown					SwchReflex
+        // list is populated by code
+        childGroupAlways        MultiChoiceButtonAlways
+    }
+	SwchReflex 
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        classname				"AdvancedVideoButtonClass"
+        style					DialogListButton
+        pin_to_sibling			SwchVSync
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SwchVSync
         navDown					SldAdaptiveRes
         // list is populated by code
         childGroupAlways        MultiChoiceButtonAlways
@@ -189,12 +201,12 @@
         ControlName				SliderControl
         InheritProperties		SliderControl
         classname				"AdvancedVideoButtonClass"
-        pin_to_sibling			SwchVSync
+        pin_to_sibling			SwchReflex
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         minValue				0
         stepSize				1
-        navUp					SwchVSync
+        navUp					SwchReflex
         navDown					SwchAdaptiveSupersample
     }
     TextEntryAdaptiveRes
@@ -327,9 +339,24 @@
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
         navUp                   SwchSpotShadowDetail
-        navDown                 SwchDynamicSpotShadows
+        navDown                 SwchVolumetricFog [$CVAR_developer]
+        navDown                 SwchDynamicSpotShadows [!$CVAR_developer]
         // list is populated by code
         childGroupAlways        ChoiceButtonAlways
+    }
+    SwchVolumetricFog [$CVAR_developer]
+    {
+        ControlName             RuiButton
+        InheritProperties       SwitchButton
+        classname               "AdvancedVideoButtonClass"
+        style                   DialogListButton
+        pin_to_sibling          SwchVolumetricLighting
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
+        navUp                   SwchVolumetricLighting
+        navDown                 SwchDynamicSpotShadows
+        // list is populated by code
+        childGroupAlways        MultiChoiceButtonAlways
     }
     SwchDynamicSpotShadows
     {
@@ -337,10 +364,12 @@
         InheritProperties		SwitchButton
         classname				"AdvancedVideoButtonClass"
         style					DialogListButton
-        pin_to_sibling			SwchVolumetricLighting
+        pin_to_sibling          SwchVolumetricFog [$CVAR_developer]
+        pin_to_sibling			SwchVolumetricLighting [!$CVAR_developer]
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchVolumetricLighting
+        navUp                   SwchVolumetricFog [$CVAR_developer]
+        navUp					SwchVolumetricLighting [!$CVAR_developer]
         navDown					SwchModelDetail
         // list is populated by code
         childGroupAlways        ChoiceButtonAlways

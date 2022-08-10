@@ -1,6 +1,6 @@
 global function Sh_PassiveVoices_Init
 
-#if(CLIENT)
+#if CLIENT
 global function ServerCallback_PlayPassiveVoice
 #endif
 
@@ -15,10 +15,10 @@ struct VoiceData
 
 struct
 {
-	//
+	                   
 	table< string, VoiceData > voiceData
 
-	#if(CLIENT)
+	#if CLIENT
 	float allowWarnTeammatesTime
 	int warnTeammatesCatId
 	var warnRui
@@ -83,11 +83,11 @@ const table<int,string> passiveEnumToStringMap = {
 }
 
 
-//
-//
-//
-//
-//
+                                                                                                                  
+                                                                       
+                                                                    
+                                                                        
+                                                                                                    
 
 void function Sh_PassiveVoices_Init()
 {
@@ -96,7 +96,7 @@ void function Sh_PassiveVoices_Init()
 	PrecacheParticleSystem( WRAITH_SENSE_FX )
 
 	var dataTable = GetDataTable( $"datatable/wraith_voices.rpak" )
-	int rows = GetDatatableRowCount( dataTable )
+	int rows = GetDataTableRowCount( dataTable )
 
 	string currentCategory = ""
 
@@ -127,9 +127,9 @@ void function Sh_PassiveVoices_Init()
 	foreach ( key,data in file.voiceData )
 		data.voiceDescriptors.randomize()
 
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                                                    
+	#endif
 }
 
 bool function IsViewTypeCategory( int catId )
@@ -145,195 +145,198 @@ bool function IsViewTypeCategory( int catId )
 	return false
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-//
-//
-//
-
-//
-
-
-//
-
-
-//
-//
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-//
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-//
-
-
-//
-//
-
-
-//
-
-
-//
-
-
-
-
-//
-
-
-//
-
-
-
+#if SERVER
+                                                                                                     
+ 
+	              
+	 
+		                                                 
+		                                                       
+	 
+
+	             
+		                                               
+ 
+
+                                                             
+ 
+	                                                
+	                             
+	                               
+	                                                    
+
+	                                                       
+	 
+		                                                 
+			      
+
+		           
+	 
+
+	                                        
+
+	                     
+	                                                                                                                   
+	                                                                                                                                                                   
+	                                                                                                                                                                      
+
+	                          
+	                                                                                                                              
+	                                                                                                                                                                          
+	                                                                                                                                                                            
+
+	       
+	                                                                                                                     
+
+	          
+	                                                                                                                         
+
+	       
+	                                                                                                                    
+
+	          
+	                                                                                                                          
+
+	                            
+	                                                                                                                                     
+	                                                                                                                             
+
+	                                       
+		      
+
+	                                        
+	                                      
+	                                          
+	 
+		                                              
+	 
+ 
+
+                                                                                                   
+ 
+	                                                 
+	  	                                                                                          
+ 
+
+                               
+                                                                                                        
+ 
+	                         
+	 
+		                    
+			                                                                                     
+			                                                                                          
+			     
+		                  
+			                                                                                   
+			                                                                                        
+			     
+		                    
+			                                                                                    
+			                                                                                         
+			     
+	 
+ 
+
+                                                                                                                         
+ 
+	                                                                                                                 
+
+	                                                                                        
+
+ 
+
+                                                                                                                          
+ 
+	                                                                                                                  
+	                                                                                         
+ 
+
+                                    
+                                                                                                             
+ 
+	                                                      
+ 
+
+                                                                                                                 
+ 
+	                                                      
+ 
+
+                                                                                                                  
+ 
+	                                                      
+ 
+
+                
+                                                                                                    
+ 
+	                                                                  
+	                                                                                      
+ 
+
+                  
+                                                                                                      
+ 
+	                                                                    
+	                         
+ 
+
+                  
+                                                                                                 
+ 
+	                                                                  
+
+	                                                                                      
+ 
+
+                    
+                                                                                                     
+ 
+	                                                                      
+
+	                                                                                          
+ 
 
 #endif
 
 void function PassiveVoices_PlayRandomDescriptorFromCategory( entity player, int catId )
 {
-	#if(false)
+	#if SERVER
+
+		                                             
+
+		                 
+		 
+			                                                 
+				      
+		 
+
+		                                                         
+			      
+
+		                                 
+			      
+
+		                 
+			                                                          
+
+		                                                        
+
+		                                                                       
+		 
+			                                                    
+			                                                    
+			                                                                                                       
+			                     
+			                                                                              	                     
+			                                                   
+		 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-#else
+		                                                                              
+		                                            
+	#else
 		string category = passiveEnumToStringMap[ catId ]
 		array<string> descriptors = file.voiceData[ category ].voiceDescriptors
 		string descriptor = descriptors.remove( 0 )
@@ -343,7 +346,7 @@ void function PassiveVoices_PlayRandomDescriptorFromCategory( entity player, int
 	#endif
 }
 
-#if(CLIENT)
+#if CLIENT
 void function ServerCallback_PlayPassiveVoice( int catId )
 {
 	entity player = GetLocalViewPlayer()
@@ -351,9 +354,12 @@ void function ServerCallback_PlayPassiveVoice( int catId )
 	if ( !IsAlive( player ) )
 		return
 
+	if ( PlayerIsInCombat( player ) )
+		return
+
 	PassiveVoices_PlayRandomDescriptorFromCategory( GetLocalViewPlayer(), catId )
 
-	//
+	                                           
 	if ( GetPlayerArrayOfTeam_Alive( player.GetTeam() ).len() <= 1 )
 		return
 
@@ -361,7 +367,7 @@ void function ServerCallback_PlayPassiveVoice( int catId )
 		return
 
 	file.warnTeammatesCatId = catId
-	AddPingBlockingFunction( "quickchat", TryWraithWarnTeammates, WARN_TEAMMATES_DELAY,"#WRAITH_WARN_TEAMMATES", 100 )
+	AddOnscreenPromptFunction( "quickchat", TryWraithWarnTeammates, WARN_TEAMMATES_DELAY,"#WRAITH_WARN_TEAMMATES", 100 )
 }
 
 void function TryWraithWarnTeammates( entity player )

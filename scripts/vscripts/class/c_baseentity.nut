@@ -3,22 +3,22 @@ untyped
 global function CodeCallback_RegisterClass_C_BaseEntity
 
 
-//
-//
-//
-//
+                                                           
+               
+                                                                           
+                                                           
 
 var function CodeCallback_RegisterClass_C_BaseEntity()
 {
-	//
+	                                        
 
 	C_BaseEntity.ClassName <- "C_BaseEntity"
 
-	//
-	//
+	                                                                                                         
+	                                                                              
 	C_BaseEntity.s <- null
-	//
-	//
+	                         
+	                         
 	C_BaseEntity.hudElems <- null
 	C_BaseEntity.hudVisible <- null
 
@@ -31,7 +31,7 @@ var function CodeCallback_RegisterClass_C_BaseEntity()
 		this.s = {}
 		this.hudElems = {}
 		this.hudVisible = false
-		//
+		                                                   
 	}
 
 	function C_BaseEntity::Get( val )
@@ -60,8 +60,6 @@ var function CodeCallback_RegisterClass_C_BaseEntity()
 
 		this.hudVisible = true
 
-		VisGroup_Show( clGlobal.menuVisGroup )
-
 		foreach ( element in this.hudElems )
 			element.UpdateVisibility()
 	}
@@ -72,8 +70,6 @@ var function CodeCallback_RegisterClass_C_BaseEntity()
 			return
 
 		this.hudVisible = false
-
-		VisGroup_Hide( clGlobal.menuVisGroup )
 
 		foreach ( element in this.hudElems )
 			element.UpdateVisibility()
@@ -98,5 +94,5 @@ var function CodeCallback_RegisterClass_C_BaseEntity()
 	{
 		this.Destroy()
 	}
-	#document("C_BaseEntity::Kill_Deprecated_UseDestroyInstead","Kill this entity; deprecated: use ent.Destroy() instead")
+	#document( "C_BaseEntity::Kill_Deprecated_UseDestroyInstead", "Kill this entity; deprecated: use ent.Destroy() instead" )
 }

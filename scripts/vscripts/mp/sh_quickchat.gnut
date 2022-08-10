@@ -1,8 +1,22 @@
+  
+
+#if SERVER || CLIENT || UI
 global function ShQuickchat_Init
-#if(CLIENT)
+#endif
+
+
+#if SERVER || CLIENT
+global function AddCallback_OnQuickchatEvent
+global function PlayerDeliveryShouldBeUrgent
+global function PlayerIsInCombat
+#endif
+
+
+#if CLIENT
 global function Quickchat
 global function QuickchatToLivingAndDead
-global function BroadcastCommsActionToTeam
+global function HandleBroadcastCommsAction
+global function ServerToClient_BroadcastCommsActionToTeam
 global function GetChatTitleColorForPlayer
 global function GetMenuOptionTextForCommsAction
 global function GetShortTextForCommsAction
@@ -10,17 +24,25 @@ global function GetDefaultIconForCommsAction
 global function GetPingAssetForCommsAction
 global function ShouldMuteCommsActionForCooldown
 global function SetCommsDialogueEnabled
-global function AddCallback_OnQuickchatEvent
-#endif //
-
-#if(false)
-
+global function PlaySoundForCommsAction
 #endif
 
-#if(DEV)
-global function DEV_ReloadCommsTable
-#endif //
 
+#if SERVER
+                                          
+                                                      
+                                        
+                                           
+#endif
+
+
+#if DEV && (SERVER || CLIENT || UI)
+global function DEV_ReloadCommsTable
+const bool DEBUG_PLAYER_IS_IN_COMBAT = false
+#endif
+
+
+#if SERVER || CLIENT
 global enum eCommsFlags
 {
 	NONE = 0,
@@ -29,15 +51,24 @@ global enum eCommsFlags
 	FORCE_FAR = (1 << 1),
 	SILENCE = (1 << 2),
 	INCLUDE_DEAD = (1 << 3),
+	BROADCAST_TO_WAYPOINT_OWNER = (1 << 4),
+	NO_TEXT = (1 << 5),
 
-	_flagCount = 4
+	_flagCount = 6
 }
+#endif
 
-struct CommsAction
+
+#if SERVER || CLIENT
+global struct CommsAction
 {
+	int index
+
 	string menuText
 	string shortText
 	string chatText
+
+	array<string> attachmentPoints
 
 	string aliasSubname
 	bool   hasCalm
@@ -49,125 +80,215 @@ struct CommsAction
 
 	asset defaultIcon
 	asset pingAsset
-}
 
+	bool hasForcedTempVoice
+}
+#endif
+
+
+#if CLIENT
+global struct CommsOptions
+{
+	bool isFirstPerson
+	bool isFar
+	bool isUrgent
+	bool pauseQueue
+}
+#endif
+
+
+#if SERVER || CLIENT
 struct
 {
 	bool                    quickchatInitialized = false
 	table<int, CommsAction> actions
-#if(CLIENT)
-	bool					commsDialogueEnabled = true
-	float 					flavorDebounceTime = 120.0 //
-	float 					flavorGlobalDebounceTime = 30.0 //
-	table< int , array<void functionref( entity player, int eventId )> >	onQuickchatCallbacks
-#endif //
-} file
+	#if CLIENT
+		bool  commsDialogueEnabled = true
+		float flavorDebounceTime = 120.0                                      
+		float flavorGlobalDebounceTime = 30.0                              
+		array<int> alwaysPlayFlavorActions = [ eCommsAction.FLAVOR_LOOT_DIBS ]
+		table< int, int > replyMap
+		table< int, int > altMap
+	#endif          
+	table< int, array<void functionref( entity player, int eventId, entity subjectEnt )> >    onQuickchatCallbacks
 
+	#if SERVER
+		                               
+	#endif
+} file
+#endif
+
+
+#if SERVER || CLIENT || UI
 void function LoadCommsActionsFromDatatable()
 {
 	var dt = GetDataTable( $"datatable/comms_actions.rpak" )
 
-	int col_featureFlag  = GetDataTableColumnByName( dt, "featureFlag" )
-	int col_event        = GetDataTableColumnByName( dt, "event" )
-	int col_menuText     = GetDataTableColumnByName( dt, "menuText" )
-	int col_shortText    = GetDataTableColumnByName( dt, "shortText" )
-	int col_chatText     = GetDataTableColumnByName( dt, "chatText" )
-	int col_aliasSubname = GetDataTableColumnByName( dt, "aliasSubname" )
-	int col_hasCalm      = GetDataTableColumnByName( dt, "hasCalm" )
-	int col_hasCalmFar   = GetDataTableColumnByName( dt, "hasCalmFar" )
-	int col_hasUrgent    = GetDataTableColumnByName( dt, "hasUrgent" )
-	int col_hasUrgentFar = GetDataTableColumnByName( dt, "hasUrgentFar" )
-	int col_subEvent     = GetDataTableColumnByName( dt, "subEvent" )
-	int col_flavorEvent  = GetDataTableColumnByName( dt, "flavorEvent" )
-	int col_defaultIcon  = GetDataTableColumnByName( dt, "defaultIcon" )
-	int col_pingAsset    = GetDataTableColumnByName( dt, "pingAsset" )
+	int col_event            = GetDataTableColumnByName( dt, "event" )
+	int col_menuText         = GetDataTableColumnByName( dt, "menuText" )
+	int col_shortText        = GetDataTableColumnByName( dt, "shortText" )
+	int col_chatText         = GetDataTableColumnByName( dt, "chatText" )
+	int col_attachmentPoints = GetDataTableColumnByName( dt, "attachmentPoints" )
+	int col_aliasSubname     = GetDataTableColumnByName( dt, "aliasSubname" )
+	int col_hasCalm          = GetDataTableColumnByName( dt, "hasCalm" )
+	int col_hasCalmFar       = GetDataTableColumnByName( dt, "hasCalmFar" )
+	int col_hasUrgent        = GetDataTableColumnByName( dt, "hasUrgent" )
+	int col_hasUrgentFar     = GetDataTableColumnByName( dt, "hasUrgentFar" )
+	int col_subEvent         = GetDataTableColumnByName( dt, "subEvent" )
+	int col_flavorEvent      = GetDataTableColumnByName( dt, "flavorEvent" )
+	int col_defaultIcon  		= GetDataTableColumnByName( dt, "defaultIcon" )
+	int col_pingAsset    		= GetDataTableColumnByName( dt, "pingAsset" )
+	int col_hasForcedTempVoice 	= GetDataTableColumnByName( dt, "hasForcedTempVoice" )
 
-	for ( int row = 0; row < GetDatatableRowCount( dt ); row++ )
+	for ( int row = 0; row < GetDataTableRowCount( dt ); row++ )
 	{
-		string commsActionName 	= GetDataTableString( dt, row, col_event )
+		string commsActionName = GetDataTableString( dt, row, col_event )
 
-		string featureFlagRef = GetDataTableString( dt, row, col_featureFlag )
-		if ( featureFlagRef != "" && !GetFeatureFlagByString( featureFlagRef ) )
-		{
-			printf( "Skipping comms action %s because feature flag %s is off.", commsActionName, featureFlagRef )
-			continue
-		}
+		asset pingAsset = GetDataTableAsset( dt, row, col_pingAsset )
+		if ( pingAsset != $"" )
+			RegisterItemFlavorFromSettingsAsset( pingAsset )
 
-		int commsAction        	= eCommsAction[commsActionName]
+		#if SERVER || CLIENT
+			int commsAction = eCommsAction[commsActionName]
 
-		CommsAction action
-		action.menuText		 	= GetDataTableString( 	dt, row, col_menuText )
-		action.shortText 		= GetDataTableString( 	dt, row, col_shortText )
-		action.chatText 		= GetDataTableString( 	dt, row, col_chatText )
-		action.aliasSubname 	= GetDataTableString( 	dt, row, col_aliasSubname )
-		action.hasCalm 			= GetDataTableBool( 	dt, row, col_hasCalm )
-		action.hasCalmFar 		= GetDataTableBool( 	dt, row, col_hasCalmFar )
-		action.hasUrgent 		= GetDataTableBool( 	dt, row, col_hasUrgent )
-		action.hasUrgentFar 	= GetDataTableBool( 	dt, row, col_hasUrgentFar )
-		action.subEvent 		= GetDataTableString( 	dt, row, col_subEvent )
-		action.flavorEvent 		= GetDataTableString( 	dt, row, col_flavorEvent )
-		action.defaultIcon 		= GetDataTableAsset( 	dt, row, col_defaultIcon )
-		action.pingAsset 		= GetDataTableAsset( 	dt, row, col_pingAsset )
+			CommsAction action
+			action.menuText = GetDataTableString( dt, row, col_menuText )
+			action.shortText = GetDataTableString( dt, row, col_shortText )
+			action.chatText = GetDataTableString( dt, row, col_chatText )
+			action.attachmentPoints = split( GetDataTableString( dt, row, col_attachmentPoints ), WHITESPACE_CHARACTERS )
+			action.aliasSubname = GetDataTableString( dt, row, col_aliasSubname )
+			action.hasCalm = GetDataTableBool( dt, row, col_hasCalm )
+			action.hasCalmFar = GetDataTableBool( dt, row, col_hasCalmFar )
+			action.hasUrgent = GetDataTableBool( dt, row, col_hasUrgent )
+			action.hasUrgentFar = GetDataTableBool( dt, row, col_hasUrgentFar )
+			action.subEvent = GetDataTableString( dt, row, col_subEvent )
+			action.flavorEvent = GetDataTableString( dt, row, col_flavorEvent )
+			action.defaultIcon = GetDataTableAsset( dt, row, col_defaultIcon )
+			action.hasForcedTempVoice = GetDataTableBool( dt, row, col_hasForcedTempVoice )
+			action.pingAsset = pingAsset
+			action.index = commsAction
 
-		if ( action.pingAsset != $"" )
-			RegisterItemFlavorFromSettingsAsset( action.pingAsset )
-		file.actions[commsAction] <- action
+			file.actions[commsAction] <- action
+
+		#endif
 	}
 }
+#endif
 
 
+#if SERVER || CLIENT || UI
 void function ShQuickchat_Init()
 {
 	AddCallback_RegisterRootItemFlavors( LoadCommsActionsFromDatatable )
 
-	#if(false)
-
-#endif //
-
-	#if(CLIENT)
-		file.flavorDebounceTime = GetCurrentPlaylistVarFloat( "comms_actions_flavor_debounce_time", 120.0 )
-		file.flavorGlobalDebounceTime = GetCurrentPlaylistVarFloat( "comms_actions_flavor_global_debounce_time", 30.0 )
+	#if SERVER
+		                                     
 	#endif
 
-	file.quickchatInitialized = true
+	#if SERVER || CLIENT
+		Remote_RegisterServerFunction( "ClientCallback_Quickchat_UI", "int", 0, eCommsAction._count, "int", 0, 1 << eCommsFlags._flagCount, "string" )
+		Remote_RegisterServerFunction( "ClientCallback_Quickchat", "int", 0, eCommsAction._count, "int", 0, 1 << eCommsFlags._flagCount, "entity", "string" )
+	#endif          
+
+	#if CLIENT
+		file.flavorDebounceTime = GetCurrentPlaylistVarFloat( "comms_actions_flavor_debounce_time", 150.0 )
+		file.flavorGlobalDebounceTime = GetCurrentPlaylistVarFloat( "comms_actions_flavor_global_debounce_time", 90.0 )
+
+		file.replyMap[ eCommsAction.REPLY_THANKS ] <- eCommsAction.REPLY_WELCOME
+		file.replyMap[ eCommsAction.REPLY_REVIVE_THANKS ] <- eCommsAction.REPLY_REVIVE_WELCOME
+
+		file.altMap[ eCommsAction.REPLY_WELCOME ] <- eCommsAction.REPLY_WELCOME_ALT
+		file.altMap[ eCommsAction.REPLY_REVIVE_WELCOME ] <- eCommsAction.REPLY_REVIVE_WELCOME_ALT
+
+                    
+                                                                         
+                                                                        
+        
+	#endif
+
+	#if SERVER || CLIENT
+		file.quickchatInitialized = true
+	#endif
 }
+#endif
 
+#if SERVER
+                                                   
+ 
+	                                                                                              
+	                                                                                                       
 
+	                                  
+	                                                               
+	 
+		                                                              
+	 
+
+	                                                                  
+ 
+#endif
+
+#if DEV && (SERVER || CLIENT || UI)
 void function DEV_ReloadCommsTable()
 {
-	file.actions.clear()
+	#if SERVER || CLIENT
+		file.actions.clear()
+	#endif
 	LoadCommsActionsFromDatatable()
 }
+#endif
 
-#if(CLIENT)
-void function Quickchat( entity player, int index )
+
+#if CLIENT
+void function Quickchat( entity player, int index, entity subject = null )
 {
 	if ( !file.quickchatInitialized )
 		return
-	player.ClientCommand( "ClientCommand_Quickchat " + index )
-}
 
-void function QuickchatToLivingAndDead( entity player, int index )
+	Remote_ServerCallFunction( "ClientCallback_Quickchat", index, eCommsFlags.NONE, subject, "" )
+}
+#endif
+
+
+#if CLIENT
+void function QuickchatToLivingAndDead( entity player, int index, entity subject = null )
 {
 	if ( !file.quickchatInitialized )
 		return
-	player.ClientCommand( "ClientCommand_Quickchat " + index + " " + eCommsFlags.INCLUDE_DEAD )
-}
 
+	Remote_ServerCallFunction( "ClientCallback_Quickchat", index, eCommsFlags.INCLUDE_DEAD, subject, "" )
+}
+#endif
+
+
+#if CLIENT
 vector function GetChatTitleColorForPlayer( entity player )
 {
 	entity localPlayer = GetLocalClientPlayer()
 	if ( player == localPlayer )
 		return OBITUARY_COLOR_LOCALPLAYER
-	if ( IsPartyMember( player ) )
-		return OBITUARY_COLOR_PARTY
 
 	if ( localPlayer.GetTeam() == player.GetTeam() )
-		return OBITUARY_COLOR_FRIENDLY
+	{
+		if ( GetCurrentPlaylistVarBool( "show_team_color_obituary", false ) )
+		{
+			return GetPlayerInfoColor( player )
+		}
+		else
+		{
+			return OBITUARY_COLOR_FRIENDLY
+		}
+	}
+
+	if ( AllianceProximity_IsUsingAllianceProximity() && IsValid( localPlayer ) && IsValid( player ) && IsFriendlyTeam( localPlayer.GetTeam(), player.GetTeam() ) )
+		return TEAM_COLOR_FRIENDLY
 
 	return OBITUARY_COLOR_ENEMY
 }
+#endif
 
+
+#if CLIENT
 table< entity, table<int, float> > s_playerToActionTimesMap
 void function SetPlayerLastSaid( entity player, int actionIndex )
 {
@@ -177,8 +298,12 @@ void function SetPlayerLastSaid( entity player, int actionIndex )
 		s_playerToActionTimesMap[player][actionIndex] <- 0.0
 
 	s_playerToActionTimesMap[player][actionIndex] = Time()
+	SetTeamLastSaid( player.GetTeam(), actionIndex )
 }
+#endif
 
+
+#if CLIENT
 float function GetPlayerLastSaid( entity player, int actionIndex )
 {
 	float baseline = 0.0
@@ -191,40 +316,86 @@ float function GetPlayerLastSaid( entity player, int actionIndex )
 	float result = (Time() - baseline)
 	return result
 }
+#endif
 
-struct CommsOptions
+#if CLIENT
+table< int, table<int, float> > s_teamToActionTimesMap
+void function SetTeamLastSaid( int team, int actionIndex )
 {
-	bool isFirstPerson
-	bool isFar
-	bool isUrgent
-}
+	if ( !(team in s_teamToActionTimesMap) )
+		s_teamToActionTimesMap[team] <- {}
+	if ( !(actionIndex in s_teamToActionTimesMap[team]) )
+		s_teamToActionTimesMap[team][actionIndex] <- 0.0
 
-string function GetSubjectNameForCommsAction( int commsAction, entity subjectEnt )
+	s_teamToActionTimesMap[team][actionIndex] = Time()
+}
+#endif
+
+
+#if CLIENT
+float function GetTeamLastSaid( int team, int actionIndex )
+{
+	float baseline = 0.0
+	if ( team in s_teamToActionTimesMap )
+	{
+		if ( actionIndex in s_teamToActionTimesMap[team] )
+			baseline = s_teamToActionTimesMap[team][actionIndex]
+	}
+
+	float result = (Time() - baseline)
+	return result
+}
+#endif
+
+#if CLIENT
+array<string> function GetSubjectNamesForCommsAction( int commsAction, entity subjectEnt, string itemRef )
 {
 	if ( !IsValid( subjectEnt ) )
-		return ""
+	{
+		if ( itemRef != "" )
+			return [SURVIVAL_Loot_GetLootDataByRef( itemRef ).pickupString]
+		else
+			return [""]
+	}
 
 	if ( subjectEnt.IsPlayer() )
-		return subjectEnt.GetPlayerName()
+		return [subjectEnt.GetPlayerName()]
 
 	switch ( subjectEnt.GetNetworkedClassName() )
 	{
 		case "prop_survival":
 		{
 			LootData ld = SURVIVAL_Loot_GetLootDataByIndex( subjectEnt.GetSurvivalInt() )
-			return ld.pickupString
+			return [ld.pickupString]
 		}
 
 		case "weaponx":
 			string weaponClassName = subjectEnt.GetWeaponClassName()
-			if ( commsAction == eCommsAction.INVENTORY_NEED_WEAPONATTACHMENT_HOPUP )
+			array<string> commsActionAttachmentPoints = file.actions[commsAction].attachmentPoints
+			if ( commsActionAttachmentPoints.contains( "hopup") || commsActionAttachmentPoints.contains( "hopupMulti_a" ) || commsActionAttachmentPoints.contains( "hopupMulti_b" ) )
 			{
-				array<string> attachmentRefs = GetAttachmentsForPoint( "hopup", weaponClassName )
-				LootData attachmentData      = SURVIVAL_Loot_GetLootDataByRef( attachmentRefs[0] )
-				return attachmentData.pickupString
+				array<string> possibleHopups = []
+				array<string> supportedAttachments = SURVIVAL_GetLootDataFromWeapon( subjectEnt ).supportedAttachments
+				array<string> attachmentRefs = []
+				foreach ( string attachmentPoint in commsActionAttachmentPoints )
+				{
+					if ( !supportedAttachments.contains( attachmentPoint ) )
+						continue
+
+					attachmentRefs = GetAttachmentsForPoint( attachmentPoint, weaponClassName )
+					foreach ( string ref in attachmentRefs )
+					{
+						LootData lootData = SURVIVAL_Loot_GetLootDataByRef( ref )
+
+						if ( !lootData.lootTags.contains ( "FakeHopup" ) )
+							possibleHopups.append( SURVIVAL_Loot_GetLootDataByRef( ref ).pickupString )
+					}
+				}
+
+				return possibleHopups
 			}
 
-			return string( subjectEnt.GetWeaponPrintName() )
+			return [string( subjectEnt.GetWeaponPrintName() )]
 
 	}
 
@@ -232,26 +403,114 @@ string function GetSubjectNameForCommsAction( int commsAction, entity subjectEnt
 	{
 		entity bossPlayer = subjectEnt.GetBossPlayer()
 		if ( IsValid( bossPlayer ) )
-			return bossPlayer.GetPlayerName()
-		return "<decoyUnk:[" + subjectEnt + "]>"
+			return [bossPlayer.GetPlayerName()]
+		return ["<decoyUnk:[" + subjectEnt + "]>"]
 	}
 
 	if ( subjectEnt.IsNPC() )
 	{
 		if ( commsAction == eCommsAction.PING_NPC_LOOT_TICK )
-			return Localize( "#NPC_LOOT_TICK_UI_TITLE" )
-		return format( "enemy [%s]", subjectEnt.GetTitleForUI() )
+		{
+			return [Localize( "#NPC_LOOT_TICK_UI_TITLE" )]
+		}
+		else if ( commsAction == eCommsAction.PING_ENEMY_NPC_PROWLER )
+		{
+			return [Localize( "#NPC_PROWLER_UI_TITLE" )]
+		}
+		else if ( commsAction == eCommsAction.PING_ENEMY_NPC_SPIDER )
+		{
+			return [Localize( "#NPC_SPIDER_UI_TITLE" )]
+		}
+		else if ( commsAction == eCommsAction.PING_ENEMY_NPC_SPECTRE )
+		{
+			return [Localize( "#NPC_SPECTRE" )]
+		}
+		else if ( commsAction == eCommsAction.PING_NPC_MARVIN_LOOT  || commsAction == eCommsAction.PING_NPC_MARVIN_STORY )
+		{
+			return [Localize( "#NPC_MARVIN_UI_TITLE" )]
+		}
+		return [Localize( "#PING_ENEMY_GENERIC", subjectEnt.GetTitleForUI() )]
 	}
 
-	return "<subjectUnk:[" + subjectEnt + "]>"
-}
+	if ( commsAction == eCommsAction.PING_LOOT_DRONE )
+	{
+		return [Localize( "#LOOT_DRONE_UI_TITLE" )]
+	}
 
-vector function GetSubjectColorForCommsAction( entity subjectEnt )
+	if ( commsAction == eCommsAction.PING_LOOT_ROLLER )
+	{
+		return [Localize( "#LOOT_ROLLER_UI_TITLE" )]
+	}
+
+               
+		if ( IsVaultPanel( subjectEnt ) )
+		{
+			UniqueVaultData vaultData = GetUniqueVaultData( subjectEnt )
+
+			if ( commsAction == vaultData.commsPingVault || commsAction == vaultData.commsPingVaultOpen || commsAction == vaultData.commsPingVaultHasKeySquad || commsAction == vaultData.commsPingVaultHasKeySelf )
+			{
+				return [Localize( vaultData.vaultUITitleString )]
+			}
+		}
+                    
+		else if ( IsVaultDoor( subjectEnt ) )
+		{
+			if ( commsAction == eCommsAction.PING_SHIP_VAULT || commsAction == eCommsAction.PING_SHIP_VAULT_HAS_KEY_SQUAD || commsAction == eCommsAction.PING_SHIP_VAULT_HAS_KEY_SELF )
+				return [Localize( "#SHIP_VAULT_UI_TITLE" )]
+		}
+                          
+       
+
+                                                
+		if ( IsShadowRoyaleMode() || IsFallLTM() )
+		{
+			if ( commsAction == eCommsAction.PING_LOOT_CREEP_INFECTED )
+			{
+				return [Localize( "#LOOT_CREEP_INFECTED_UI_TITLE" )]
+			}
+
+			if ( commsAction == eCommsAction.PING_LOOT_CREEP_SPIDER )
+			{
+				return [Localize( "#LOOT_CREEP_SPIDER_UI_TITLE" )]
+			}
+		}
+
+       
+
+                         
+		if ( Control_IsModeEnabled() )
+		{
+			if ( commsAction == eCommsAction.PING_CONTROL_OBJECTIVE_ATTACK || commsAction == eCommsAction.PING_CONTROL_OBJECTIVE_DEFEND )
+			{
+				if ( IsValid( subjectEnt ) && IsValid( subjectEnt.GetOwner() ) && !subjectEnt.GetOwner().IsPlayer() )
+				{
+					int objectiveID = subjectEnt.GetOwner().GetWaypointInt( INT_OBJECTIVE_ID )
+					return [ Control_GetObjectiveNameFromObjectiveID_Localized( objectiveID ) ]
+				}
+				else if ( IsValid( subjectEnt ) && IsValid( subjectEnt.GetOwner() ) && subjectEnt.GetOwner().IsPlayer() )
+				{
+					int objectiveID = subjectEnt.GetWaypointInt( INT_OBJECTIVE_ID )
+					return [ Control_GetObjectiveNameFromObjectiveID_Localized( objectiveID ) ]
+				}
+			}
+		}
+       
+
+	return ["<subjectUnk:[" + subjectEnt + "]>"]
+}
+#endif              
+
+
+#if CLIENT
+vector function GetSubjectColorForCommsAction( entity subjectEnt, string itemRef, entity player )
 {
 	const vector DEFAULT_RESULT = <255, 255, 255>
 
-	if ( !IsValid( subjectEnt ) )
-		return DEFAULT_RESULT
+	if ( itemRef != "" )
+		return GetKeyColor( COLORID_TEXT_LOOT_TIER0, SURVIVAL_Loot_GetLootDataByRef( itemRef ).tier )
+
+	if ( !IsValid( subjectEnt ))
+		return BURN_COLOR
 
 	if ( subjectEnt.IsPlayer() )
 		return GetChatTitleColorForPlayer( subjectEnt )
@@ -263,6 +522,27 @@ vector function GetSubjectColorForCommsAction( entity subjectEnt )
 
 		case "weaponx":
 			return BURN_COLOR
+
+                        
+		case PLAYER_WAYPOINT_CLASSNAME:
+			if ( Control_IsModeEnabled() && subjectEnt.GetWaypointType() == eWaypoint.CONTROL_OBJECTIVE )
+			{
+				if ( subjectEnt.GetWaypointInt( CONTROL_INT_OBJ_TEAM_OWNER ) == ALLIANCE_NONE )
+				{
+					return CONTROL_OBJECTIVE_RED
+				}
+				else if ( IsTeamInAlliance( player.GetTeam(), subjectEnt.GetWaypointInt( CONTROL_INT_OBJ_TEAM_OWNER ) ) )
+				{
+					return CONTROL_OBJECTIVE_GREEN
+				}
+				else if ( !IsTeamInAlliance( player.GetTeam(), subjectEnt.GetWaypointInt( CONTROL_INT_OBJ_TEAM_OWNER ) ) )
+				{
+					return CONTROL_OBJECTIVE_RED
+				}
+			}
+			break
+      
+
 	}
 
 	if ( subjectEnt.IsPlayerDecoy() )
@@ -271,21 +551,86 @@ vector function GetSubjectColorForCommsAction( entity subjectEnt )
 		if ( IsValid( bossPlayer ) )
 			return GetChatTitleColorForPlayer( bossPlayer )
 	}
+	
+	if( IsValid( GetHealDroneForHitEnt( subjectEnt ) ) )
+	{
+		return GetChatTitleColorForPlayer( player )
+	}
 
 	return DEFAULT_RESULT
 }
 
-string function GetSubjectLootTierForCommsAction( entity subjectEnt )
+                                                                                                                                     
+vector function GetSecondarySubjectColorForCommsAction( entity subjectEnt, entity player )
+{
+	const vector DEFAULT_RESULT = <255, 255, 255>
+
+	if ( !IsValid( subjectEnt ))
+		return DEFAULT_RESULT
+
+	if ( subjectEnt.IsPlayer() )
+		return DEFAULT_RESULT
+
+	switch ( subjectEnt.GetNetworkedClassName() )
+	{
+                        
+		case PLAYER_WAYPOINT_CLASSNAME:
+			if ( Control_IsModeEnabled() && subjectEnt.GetWaypointType() == eWaypoint.CONTROL_OBJECTIVE )
+			{
+				if ( subjectEnt.GetWaypointInt( CONTROL_INT_OBJ_TEAM_OWNER ) == ALLIANCE_NONE )
+				{
+					return GetKeyColor( COLORID_TEXT_LOOT_TIER0 )
+				}
+				else if ( IsTeamInAlliance( player.GetTeam(), subjectEnt.GetWaypointInt( CONTROL_INT_OBJ_TEAM_OWNER ) ) )
+				{
+					return CONTROL_OBJECTIVE_GREEN
+				}
+				else if ( !IsTeamInAlliance( player.GetTeam(), subjectEnt.GetWaypointInt( CONTROL_INT_OBJ_TEAM_OWNER ) ) )
+				{
+					return CONTROL_OBJECTIVE_RED
+				}
+			}
+			break
+      
+	}
+
+	return DEFAULT_RESULT
+}
+#endif              
+
+
+#if CLIENT
+string function GetSubjectLootTierForCommsAction( entity subjectEnt, string itemRef )
 {
 	int tier = 0
 
+	if ( itemRef != "" )
+		return string( SURVIVAL_Loot_GetLootDataByRef( itemRef ).tier )
+
 	if ( !IsValid( subjectEnt ) || subjectEnt.GetNetworkedClassName() != "prop_survival" )
+	{
+		                                                               
+                
+			if ( IsVaultDoor( subjectEnt ) || IsVaultPanel( subjectEnt ) )
+			{
+				entity playerWithKey = VaultPanel_GetTeammateWithKey( GetLocalClientPlayer().GetTeam() )
+				string playerWithKeyName
+				if ( IsValid( playerWithKey ) )
+					playerWithKeyName = VaultPanel_GetTeammateWithKey( GetLocalClientPlayer().GetTeam() ).GetPlayerName()
+				if ( playerWithKeyName != "" )
+					return playerWithKeyName
+			}
+        
+
 		return string( tier )
+	}
 
 	tier = SURVIVAL_Loot_GetLootDataByIndex( subjectEnt.GetSurvivalInt() ).tier
 	return string( tier )
 }
+#endif
 
+#if CLIENT
 bool function GetCommsActionIsFar( entity player, entity subjectEnt, vector subjectPos, int commsFlags )
 {
 	const float FAR_DIST_THRESHOLD = 2048.0
@@ -296,12 +641,15 @@ bool function GetCommsActionIsFar( entity player, entity subjectEnt, vector subj
 		return true
 	}
 
-	vector actionPos = subjectPos    //
+	vector actionPos = subjectPos                                                                  
 	float dist       = Distance( actionPos, player.GetOrigin() )
 	bool result      = (dist > FAR_DIST_THRESHOLD)
 	return result
 }
+#endif
 
+
+#if SERVER || CLIENT
 float function GetEffectiveDeltaSince( float timeThen )
 {
 	if ( timeThen <= 0.0001 )
@@ -309,8 +657,11 @@ float function GetEffectiveDeltaSince( float timeThen )
 
 	return (Time() - timeThen)
 }
+#endif                   
 
-bool function PlayerDeliveryShouldBeUrgent_Common( entity player )
+
+#if SERVER || CLIENT
+bool function PlayerIsInCombat( entity player )
 {
 	const float TEAMMATE_NEAR_SPOTTED_ENEMY = 2048.0
 	const float LAST_DAMAGED_BY_PLAYER_OR_NPC = 30.0
@@ -319,43 +670,64 @@ bool function PlayerDeliveryShouldBeUrgent_Common( entity player )
 	if ( Bleedout_IsBleedingOut( player ) )
 		return true
 
-	//
+	  
 	if ( GetEffectiveDeltaSince( player.GetLastTimeDamagedByOtherPlayer() ) < LAST_DAMAGED_BY_PLAYER_OR_NPC )
 	{
-		printt( "Urgent [YES] <- Last damaged by other player" )
+		#if DEV
+		if ( DEBUG_PLAYER_IS_IN_COMBAT )
+			printt( "Urgent [YES] <- Last damaged by other player" )
+		#endif      
 		return true
 	}
 
 	if ( GetEffectiveDeltaSince( player.GetLastTimeDamagedByNPC() ) < LAST_DAMAGED_BY_PLAYER_OR_NPC )
 	{
-		printt( "Urgent [YES] <- Last damaged by NPC" )
+		#if DEV
+		if ( DEBUG_PLAYER_IS_IN_COMBAT )
+			printt( "Urgent [YES] <- Last damaged by NPC" )
+		#endif      
 		return true
 	}
 
-	//
+	  
 	if ( GetEffectiveDeltaSince( player.GetLastTimeDidDamageToOtherPlayer() ) < LAST_DID_DAMAGE_TO_PLAYER_OR_NPC )
 	{
-		printt( "Urgent [YES] <- Last did damage to other player" )
+		#if DEV
+		if ( DEBUG_PLAYER_IS_IN_COMBAT )
+			printt( "Urgent [YES] <- Last did damage to other player" )
+		#endif      
 		return true
 	}
 
 	if ( GetEffectiveDeltaSince( player.GetLastTimeDidDamageToNPC() ) < LAST_DID_DAMAGE_TO_PLAYER_OR_NPC )
 	{
-		printt( "Urgent [YES] <- Last did damage to NPC" )
+		#if DEV
+		if ( DEBUG_PLAYER_IS_IN_COMBAT )
+			printt( "Urgent [YES] <- Last did damage to NPC" )
+		#endif      
 		return true
 	}
 
-	//
+	  
+#if SERVER
+	                                                                                                              
+#elseif CLIENT
 	if ( Waypoint_AnyEnemySpottedNearPoint( player.EyePosition(), TEAMMATE_NEAR_SPOTTED_ENEMY ) )
+#endif
 	{
-		printt( "Urgent [YES] <- Any teammate near spotted enemy" )
+		#if DEV
+		if ( DEBUG_PLAYER_IS_IN_COMBAT )
+			printt( "Urgent [YES] <- Any teammate near spotted enemy" )
+		#endif      
 		return true
 	}
 
 	return false
 }
+#endif                    
 
-bool function PlayerDeliveryShouldBeUrgent( entity player, vector subjectPos, int commsFlags )
+#if SERVER || CLIENT
+bool function PlayerDeliveryShouldBeUrgent( entity player, vector subjectPos, int commsFlags = eCommsFlags.NONE )
 {
 	const float TEAMMATE_NEAR_PLAYER = 2048.0
 	const float TEAMMATE_NEAR_SUBJECT_POS = 1024.0
@@ -370,7 +742,7 @@ bool function PlayerDeliveryShouldBeUrgent( entity player, vector subjectPos, in
 	vector eyePos             = player.EyePosition()
 	int team                  = player.GetTeam()
 	array<entity> teamPlayers = GetPlayerArrayOfTeam_Alive( team )
-	foreach( entity teamPlayer in teamPlayers )
+	foreach ( entity teamPlayer in teamPlayers )
 	{
 		if ( teamPlayer != player )
 		{
@@ -380,20 +752,25 @@ bool function PlayerDeliveryShouldBeUrgent( entity player, vector subjectPos, in
 				continue
 		}
 
-		if ( PlayerDeliveryShouldBeUrgent_Common( teamPlayer ) )
+		if ( PlayerIsInCombat( teamPlayer ) )
 			return true
 	}
 
+	  
+#if SERVER
+	                                                                                                   
+#elseif CLIENT
 	if ( Waypoint_AnyEnemySpottedNearPoint( subjectPos, SUBJECT_NEAR_SPOTTED_ENEMY ) )
+#endif
 	{
 		printt( "Urgent [YES] <- Waypoint near spotted enemy" )
 		return true
 	}
 
-	if ( DeathField_IsActive() )
+	if ( DeathField_IsActive( player.DeathFieldIndex() ) )
 	{
-		const float START_PLAYING_DIST = -30.0        //
-		float stormDist = DeathField_PointDistanceFromFrontier( eyePos )
+		const float START_PLAYING_DIST = -30.0                                               
+		float stormDist = DeathField_PointDistanceFromFrontier( eyePos, player.DeathFieldIndex() )
 		if ( stormDist < START_PLAYING_DIST )
 		{
 			printt( "Urgent [YES] <- Inside deathfield" )
@@ -401,7 +778,7 @@ bool function PlayerDeliveryShouldBeUrgent( entity player, vector subjectPos, in
 		}
 	}
 
-	//
+	  
 	float stim = StatusEffect_GetSeverity( player, eStatusEffect.stim_visual_effect )
 	if ( stim > 0.001 )
 	{
@@ -411,7 +788,10 @@ bool function PlayerDeliveryShouldBeUrgent( entity player, vector subjectPos, in
 
 	return false
 }
+#endif                    
 
+
+#if CLIENT
 float function GetCooldownTimeForCommsAction( int commsAction )
 {
 	switch( commsAction )
@@ -419,16 +799,33 @@ float function GetCooldownTimeForCommsAction( int commsAction )
 		case eCommsAction.PING_ENEMY_SPOTTED_SPECIFIC:
 		case eCommsAction.PING_ENEMY_TRAP:
 		case eCommsAction.PING_ENEMY_SMOKE:
+		case eCommsAction.PING_TOXIC_GAS:
 		case eCommsAction.PING_ENEMY_SHIELD:
 		case eCommsAction.PING_ENEMY_TELEPORTER:
 			return 1.5
+               
+		case eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_1:
+		case eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_2:
+		case eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_3:
+		case eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_4:
+		case eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_5:
+			return 0.7
+      
+                         
+                                                     
+             
+      
 	}
 
 	return 4.0
 }
+#endif
+
+
+#if CLIENT
 bool function ShouldMuteCommsActionForCooldown( entity player, int commsAction, entity subjectEnt )
 {
-	if ( IsValid( subjectEnt ) && (subjectEnt.GetNetworkedClassName() == "prop_survival") )
+	if ( IsValid( subjectEnt ) && (subjectEnt.GetNetworkedClassName() == "prop_survival") && commsAction != eCommsAction.REPLY_LOOT_DIBS )
 	{
 		float delta = (Time() - subjectEnt.e.lastVocalizedCommsTime)
 		if ( delta < 3.0 )
@@ -441,20 +838,43 @@ bool function ShouldMuteCommsActionForCooldown( entity player, int commsAction, 
 	if ( delta < cooldownTime )
 		return true
 
+                                         
+		if ( commsAction == eCommsAction.QUICKCHAT_SKYDIVE_ENEMIES_NEARBY )
+		{
+			float teamDelta = GetTeamLastSaid( player.GetTeam(), commsAction )
+			if ( teamDelta < cooldownTime )
+				return true
+		}
+       
+
 	return false
 }
+#endif
 
+
+#if CLIENT
 string function GetNameForCommsAction( int commsAction )
 {
-	foreach( string key, int val in eCommsAction )
+	foreach ( string key, int val in eCommsAction )
 	{
 		if ( val == commsAction )
 			return key
 	}
 	return ""
 }
+#endif
 
-void function BroadcastCommsActionToTeam( entity player, int commsAction, entity subjectEnt, vector subjectPos, int commsFlags )
+
+#if CLIENT
+void function ServerToClient_BroadcastCommsActionToTeam( entity player, int commsAction, entity subjectEnt, vector subjectPos, int commsFlags, string itemRef, int subjectCount, int secondaryCommsAction, float creationTime )
+{
+	HandleBroadcastCommsAction( player, commsAction, subjectEnt, subjectPos, commsFlags, itemRef, subjectCount, secondaryCommsAction, creationTime )
+}
+#endif
+
+
+#if CLIENT
+void function HandleBroadcastCommsAction( entity player, int commsAction, entity subjectEnt, vector subjectPos, int commsFlags, string itemRef, int subjectCount, int secondaryCommsAction, float creationTime = 0.0)
 {
 	if ( !file.quickchatInitialized )
 		return
@@ -462,46 +882,204 @@ void function BroadcastCommsActionToTeam( entity player, int commsAction, entity
 	if ( !IsAlive( player ) && (commsFlags & eCommsFlags.INCLUDE_DEAD) == 0 )
 		return
 
+	if ( !player.IsPlayer() )
+		return
+
 	if ( ShouldMuteCommsActionForCooldown( player, commsAction, subjectEnt ) )
+		return
+
+	bool shouldUseAllianceCommsBehaviour = false
+	bool shouldUseTeamCommsBehaviour = true
+
+                         
+		bool isControlObjectivePing = false
+		if ( Control_IsModeEnabled() )
+		{
+			if ( !IsValid( player ) || !IsValid( GetLocalViewPlayer() ) )
+				return
+
+			                                                                                                                                              
+			if ( player.GetTeam() != GetLocalViewPlayer().GetTeam() )
+			{
+				shouldUseTeamCommsBehaviour = false
+			}
+			
+			                                                                                         
+			if ( commsAction == eCommsAction.PING_CONTROL_OBJECTIVE_ATTACK || commsAction == eCommsAction.PING_CONTROL_OBJECTIVE_DEFEND )
+			{
+				if ( IsValid( subjectEnt ) && IsValid( subjectEnt.GetOwner() ) && IsPlayerWaypoint( subjectEnt.GetOwner() ) && subjectEnt.GetOwner().GetWaypointType() == eWaypoint.CONTROL_OBJECTIVE )
+				{
+					if ( AllianceProximity_GetAllianceFromTeam( player.GetTeam() ) == AllianceProximity_GetAllianceFromTeam( GetLocalViewPlayer().GetTeam() ) )
+					{
+						shouldUseAllianceCommsBehaviour = true
+						isControlObjectivePing = true
+					}
+
+					                                                                                                                              
+					if ( GetCommsWaypointSoundsEnabled() && shouldUseTeamCommsBehaviour || shouldUseAllianceCommsBehaviour )
+					{
+						int pingType = commsAction == eCommsAction.PING_CONTROL_OBJECTIVE_ATTACK ? ePingType.CONTROL_OBJECTIVE_ATTACK : ePingType.CONTROL_OBJECTIVE_DEFEND
+						string pingSound = Ping_GetSoundForLocationPing( subjectEnt.GetOwner(), pingType, ( player == GetLocalViewPlayer() ), true )
+						if ( pingSound != "" )
+							EmitSoundOnEntity( subjectEnt.GetOwner(), pingSound )
+					}
+				}
+			}
+		}
+       
+
+	                                                                                                                                                                                   
+	if ( AllianceProximity_IsUsingAllianceProximity() )
+	{
+		if ( !IsValid( player ) || !IsValid( GetLocalViewPlayer() ) )
+			return
+
+		if ( player.GetTeam() != GetLocalViewPlayer().GetTeam() )
+		{
+			                                                                                                                                              
+			shouldUseTeamCommsBehaviour = false
+
+			                                                                                                                                                               
+			if ( !shouldUseAllianceCommsBehaviour )
+			{
+				if ( AllianceProximity_GetLivingAllianceMembersInProximity( player.GetTeam(), player.GetOrigin() ).contains( GetLocalViewPlayer() ) )
+					shouldUseAllianceCommsBehaviour = true
+			}
+		}
+	}
+
+	if ( !shouldUseTeamCommsBehaviour && !shouldUseAllianceCommsBehaviour )
 		return
 
 	if ( IsValid( subjectEnt ) )
 		subjectEnt.e.lastVocalizedCommsTime = Time()
 
-	CommsAction act = file.actions[commsAction]
+
+	CommsAction act = GetCommsAction( commsAction )
 
 	CommsOptions opt
 	opt.isFirstPerson = (player == GetLocalViewPlayer())
 	opt.isFar = GetCommsActionIsFar( player, subjectEnt, subjectPos, commsFlags )
 	opt.isUrgent = PlayerDeliveryShouldBeUrgent( player, subjectPos, commsFlags )
+	opt.pauseQueue = true
 
-	PlaySoundForCommsAction( player, commsAction, opt )
-
-	if ( commsAction in file.onQuickchatCallbacks )
+	                                                                               
+	if ( shouldUseTeamCommsBehaviour )
 	{
-		foreach ( func in file.onQuickchatCallbacks[ commsAction ] )
+		if ( (GetPlayerVoice( player ) == SILENT_PLAYER_VOICE) )
 		{
-			func( player, commsAction )
+			if ( act.menuText != "" )
+			{
+				PrintDummieTeamChat( player, Localize( act.menuText ) )
+			}
+			else
+			{
+				array<string> subjectNames = GetSubjectNamesForCommsAction( commsAction, subjectEnt, itemRef )
+				foreach ( subjectName in subjectNames )
+					PrintDummieTeamChat( player, Localize( subjectName ) )
+			}
+		}
+		else
+		{
+			PlaySoundForCommsAction( player, subjectEnt, act, opt,  secondaryCommsAction > 0 ? GetNameForCommsAction( secondaryCommsAction ) : "")
 		}
 	}
 
-	string chatText = act.chatText
-	if ( chatText != "" )
-	{
-		string playerName   = opt.isFirstPerson ? Localize( "#OBITUARY_YOU" ) : player.GetPlayerName()
-		vector playerColor  = GetChatTitleColorForPlayer( player )
-		string subjectName  = Localize( GetSubjectNameForCommsAction( commsAction, subjectEnt ) )
-		vector subjectColor = GetSubjectColorForCommsAction( subjectEnt )
-		string subjectTier  = GetSubjectLootTierForCommsAction( subjectEnt )
+	RunQuickChatCallbacks( player, commsAction, subjectEnt )
 
-		if ( !PlayerIsPingMuted( player) )
-			Obituary_Print_Localized( Localize( chatText, playerName, subjectName, subjectTier ), playerColor, subjectColor, <255, 255, 255>, <0, 0, 0>, 0.5 )
+	string chatText = act.chatText
+	if ( chatText != "" && ! ( commsFlags & eCommsFlags.NO_TEXT ) )
+	{
+		string playerName          = opt.isFirstPerson ? Localize( "#OBITUARY_YOU" ) : player.GetPlayerName()
+		vector playerColor         = GetChatTitleColorForPlayer( player )
+
+		array<string> subjectNames = GetSubjectNamesForCommsAction( commsAction, subjectEnt, itemRef )
+		vector subjectColor        = GetSubjectColorForCommsAction( subjectEnt, itemRef, player )
+		vector secondarySubjectColor = GetSecondarySubjectColorForCommsAction( subjectEnt, player )
+		string subjectTier         = GetSubjectLootTierForCommsAction( subjectEnt, itemRef )
+
+                          
+			if ( Control_IsModeEnabled() )
+			{
+				                                                                                                                                        
+				if ( isControlObjectivePing )
+				{
+					subjectColor = GetSubjectColorForCommsAction( subjectEnt.GetOwner(), itemRef, player )
+					secondarySubjectColor = GetSecondarySubjectColorForCommsAction( subjectEnt.GetOwner(), player )
+
+					int pingCount = Control_GetPingCountForObjectiveForAlliance( subjectEnt.GetOwner(), subjectEnt.GetTeam() )
+					pingCount--                                                                                           
+					if ( pingCount > 0 )
+					{
+						subjectTier = "+" + pingCount
+					}
+					else
+					{
+						subjectTier = ""
+					}
+				}
+			}
+                                
+
+                 
+			if ( commsAction == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_1 ||
+					commsAction == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_2 ||
+					commsAction == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_3 ||
+					commsAction == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_4 ||
+					commsAction == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_5 )
+			{
+				ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( subjectEnt ), Loadout_Character() )
+				string name = ItemFlavor_GetShortName( character )
+				subjectNames = [  name ]
+
+				            
+				int armorTier = EquipmentSlot_GetEquipmentTier( subjectEnt, "armor" )
+				subjectTier  = string ( armorTier )
+				secondarySubjectColor = GetKeyColor( COLORID_TEXT_LOOT_TIER0, armorTier )
+
+				            
+				array<entity> teamPlayers = GetPlayerArrayOfTeam( subjectEnt.GetTeam() )
+				int teamCount = teamPlayers.len()
+				subjectCount = teamCount
+			}
+        
+
+		string countText		   = ( subjectCount >= 0 ) ? string ( subjectCount ) : ""
+
+		if ( !PlayerIsPingMuted( player ) )
+		{
+			int elapseTime = int(Time() - creationTime)
+			foreach ( string subjectName in subjectNames )
+			{
+				string locText = Localize( chatText, playerName, Localize( subjectName ), subjectTier, countText, elapseTime)
+                           
+				if ( Control_IsModeEnabled() )
+				{
+					if ( isControlObjectivePing )
+					{
+						Obituary_Print_Control_ObjectivePing( subjectEnt, locText, playerColor, subjectColor, secondarySubjectColor, <0, 0, 0>, 0.5 )
+					}
+					else
+					{
+						Obituary_Print_Control_Ping( locText, shouldUseAllianceCommsBehaviour, playerColor, subjectColor, secondarySubjectColor, <0, 0, 0>, 0.5 )
+					}
+				}
+				else
+                                 
+				{
+					Obituary_Print_Localized( locText, playerColor, subjectColor, secondarySubjectColor, <0, 0, 0>, 0.5 )
+				}
+			}
+		}
 	}
 
 	SetPlayerLastSaid( player, commsAction )
 }
+#endif
 
-void function PlaySoundForCommsAction( entity player, int commsAction, CommsOptions opt, string flavorEventOverride = "" )
+
+#if CLIENT
+void function PlaySoundForCommsAction( entity player, entity subjectEnt, CommsAction act, CommsOptions opt, string flavorEventOverride = "" )
 {
 	if ( PlayerIsPingMuted( player ) )
 		return
@@ -509,10 +1087,18 @@ void function PlaySoundForCommsAction( entity player, int commsAction, CommsOpti
 	if ( !file.commsDialogueEnabled )
 		return
 
-	string sound = GetPlayerDialogSound( player, commsAction, opt )
+	if ( ShouldCommsActionDialogBeMuted( subjectEnt, act ) )
+		return
+
+	                                         
+	                                                                          
+		      
+	  
+
+	string sound = GetPlayerDialogSound( player, subjectEnt, act, opt )
 	if ( sound != "" )
 	{
-		printt( format( "Comms: '%s' #%d    base:'%s'   (%s) far:%d urgent:%d    :  '%s'", GetNameForCommsAction( commsAction ), commsAction, file.actions[commsAction].aliasSubname, (opt.isFirstPerson ? "1p" : "3p"), (opt.isFar ? 1 : 0), (opt.isUrgent ? 1 : 0), sound ) )
+		printt( format( "Comms: '%s' #%d    base:'%s'   (%s) far:%d urgent:%d    :  '%s'", GetNameForCommsAction( act.index ), act.index, act.aliasSubname, (opt.isFirstPerson ? "1p" : "3p"), (opt.isFar ? 1 : 0), (opt.isUrgent ? 1 : 0), sound ) )
 
 		float sincePlastPlayed = (Time() - player.p.sayLineLatestTime)
 		if ( (sincePlastPlayed < 30.0) && (player.p.sayLineLatestSound != "") )
@@ -520,41 +1106,110 @@ void function PlaySoundForCommsAction( entity player, int commsAction, CommsOpti
 			player.p.lastCanceledCommsAction = player.p.lastSaidCommsAction
 			StopSoundOnEntity( player, player.p.sayLineLatestSound )
 		}
+		else
+			player.p.lastCanceledCommsAction = eCommsAction.BLANK
 
-		//
-		//
+		                                                                                                                                                              
+		                                                                                                                             
 		var soundHandle = EmitSoundOnEntity( player, sound )
-		thread SuspendDialogueQueueForDurationOfSound( player, soundHandle )
 
-		//
-		RemovePlayerDialogueEventsFromDialogueQueue( player )
+		if ( opt.pauseQueue )
+			thread SuspendMainDialogueQueueForDurationOfSound( player, soundHandle )
+
+		                                                                     
+		RemovePlayerDialogueEventsFromMainDialogueQueue( player )
+
+		if ( act.index in file.replyMap && IsValid( subjectEnt ) && subjectEnt.IsPlayer() && subjectEnt == GetLocalViewPlayer() )
+		{
+			bool subjectIsConAltTarget = sound.find( "_cond" + GetPlayerVoice( subjectEnt ) ) >= 0
+			thread PromptReplyWhenPrimaryFinishes( player, act.index, subjectEnt, soundHandle, subjectIsConAltTarget )
+		}
+
+		if ( sound.find( "_cond" ) >= 0 || sound.find( "_flavor" ) >= 0 )  {
+			Remote_ServerCallFunction("ClientCallback_SendDynDiagPIN", sound)
+		}
 
 		player.p.sayLineLatestSound = sound
 		player.p.sayLineLatestTime = Time()
-		player.p.lastSaidCommsAction = commsAction
+		player.p.lastSaidCommsAction = act.index
 
-		string subEvent = file.actions[commsAction].subEvent
-		string flavorEvent = flavorEventOverride == "" ? file.actions[commsAction].flavorEvent : flavorEventOverride
-		if ( subEvent != "" )
+		string subEventString    = act.subEvent
+		int subEvent = GetCommsActionEnumForName( subEventString )
+                 
+		if ( act.index == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_1 ||
+				act.index == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_2 ||
+				act.index == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_3 ||
+				act.index == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_4 ||
+				act.index == eCommsAction.PING_VANTAGE_ENEMY_SPOTTED_5 )
 		{
-			thread PlaySoundForSubActionWhenPrimaryFinishes( soundHandle, commsAction, GetCommsActionForName( subEvent ), player, opt, flavorEvent )
+			                                                                             
+			subEvent = eCommsAction.SUB_TYPE_VANTAGE_TEAM_1
+			array<entity> teamPlayers = GetPlayerArrayOfTeam( subjectEnt.GetTeam() )
+			int teamCount = teamPlayers.len()
+			if ( teamCount == 2 )
+				subEvent = eCommsAction.SUB_TYPE_VANTAGE_TEAM_2
+			else if ( teamCount > 2 )
+				subEvent = eCommsAction.SUB_TYPE_VANTAGE_TEAM_3
+		}
+        
+		string flavorEvent = flavorEventOverride == "" ? act.flavorEvent : flavorEventOverride
+
+		if ( subEvent != eCommsAction.BLANK )
+		{
+			thread PlaySoundForSubActionWhenPrimaryFinishes( soundHandle, act, file.actions[ subEvent ], player, subjectEnt, opt, flavorEvent )
 		}
 		else if ( flavorEvent != "" )
 		{
-			int flavorAction = GetCommsActionForName( flavorEvent )
-			string flavorSound = GetPlayerDialogSound( player, flavorAction, opt )
+			int flavorAction   = GetCommsActionEnumForName( flavorEvent )
+			CommsAction fAct   = GetCommsAction( flavorAction )
+			string flavorSound = GetPlayerDialogSound( player, subjectEnt, fAct, opt )
 			if ( DoesAliasExist( flavorSound ) && ShouldPlayFlavorAction( player, flavorAction ) )
 			{
-				thread PlaySoundForSubActionWhenPrimaryFinishes( soundHandle, commsAction, flavorAction, player, opt )
+				thread PlaySoundForSubActionWhenPrimaryFinishes( soundHandle, act, fAct, player, subjectEnt, opt )
 			}
 		}
 	}
 }
+#endif
 
+
+#if CLIENT
+bool function ShouldCommsActionDialogBeMuted( entity subjectEnt, CommsAction act )
+{
+	if ( IsValid( subjectEnt ) )
+	{
+		if ( subjectEnt.GetScriptName() == BLACK_MARKET_SCRIPTNAME )
+		{
+			if ( act.index == eCommsAction.ABILITY_BLACK_MARKET_NEUTRAL && GradeFlagsHas( subjectEnt, eGradeFlags.IS_BUSY ) )
+				return true
+		}
+	}
+
+	return false
+}
+#endif
+
+
+#if CLIENT
+CommsAction function GetCommsAction( int index )
+{
+	CommsAction blankAction
+	if ( (index < 0) || (index >= eCommsAction._count) )
+		return blankAction
+
+	return file.actions[ index ]
+}
+#endif
+
+
+#if CLIENT
 bool function ShouldPlayFlavorAction( entity player, int flavorAction )
 {
 	if ( GetCurrentPlaylistVarInt( "disable_flavor_lines", 0 ) > 0 )
 		return false
+
+	if ( file.alwaysPlayFlavorActions.contains( flavorAction ) )
+		return true
 
 	if ( Time() - player.p.commActionFlavorGlobalDebounceTime < file.flavorGlobalDebounceTime )
 		return false
@@ -563,8 +1218,8 @@ bool function ShouldPlayFlavorAction( entity player, int flavorAction )
 	{
 		if ( Time() - player.p.commActionFlavorDebounceTimes[flavorAction] > file.flavorDebounceTime )
 		{
-			player.p.commActionFlavorDebounceTimes[flavorAction] = Time()
-			player.p.commActionFlavorGlobalDebounceTime = Time()
+			player.p.commActionFlavorDebounceTimes[flavorAction] = Time() + RandomFloatRange( 10.0, 30.0 )
+			player.p.commActionFlavorGlobalDebounceTime = Time() + RandomFloatRange( 10.0, 30.0 )
 			return true
 		}
 		else
@@ -574,70 +1229,168 @@ bool function ShouldPlayFlavorAction( entity player, int flavorAction )
 	}
 	else
 	{
-		player.p.commActionFlavorDebounceTimes[flavorAction] <- Time()
-		player.p.commActionFlavorGlobalDebounceTime = Time()
+		player.p.commActionFlavorDebounceTimes[flavorAction] <- Time() + RandomFloatRange( 10.0, 30.0 )
+		player.p.commActionFlavorGlobalDebounceTime = Time() + RandomFloatRange( 10.0, 30.0 )
 		return true
 	}
 
 	unreachable
 }
+#endif
 
-void function PlaySoundForSubActionWhenPrimaryFinishes( var primarySoundHandle, int primaryCommsAction, int subCommsAction, entity player, CommsOptions opt, string flavorEvent = "" )
+
+#if CLIENT
+void function PlaySoundForSubActionWhenPrimaryFinishes( var primarySoundHandle, CommsAction primaryAct, CommsAction subCommsAction, entity player, entity subjectEnt, CommsOptions opt, string flavorEvent = "" )
 {
 	EndSignal( player, "OnDestroy" )
 	EndSignal( player, "OnDeath" )
 
-	PauseDialogueQueue()
+	PauseMainDialogueQueue()
 
 	OnThreadEnd(
 		function()
 		{
-			ResumeDialogueQueue()
+			ResumeMainDialogueQueue()
 		}
 	)
 
 	WaitSignal( primarySoundHandle, "OnSoundFinished" )
 
-	if ( player.p.lastCanceledCommsAction != primaryCommsAction )
-		PlaySoundForCommsAction( player, subCommsAction, opt, flavorEvent )
+	if ( player.p.lastCanceledCommsAction != primaryAct.index )
+		PlaySoundForCommsAction( player, subjectEnt, subCommsAction, opt, flavorEvent )
 }
+#endif
 
+#if CLIENT
+void function PromptReplyWhenPrimaryFinishes( entity playerSpeakingPrimary, int primaryCommsAction, entity playerToReply, var soundHandle, bool wasConAlt )
+{
+	EndSignal( playerSpeakingPrimary, "OnDestroy" )
+	EndSignal( playerSpeakingPrimary, "OnDeath" )
+	EndSignal( playerToReply, "OnDestroy" )
+	EndSignal( playerToReply, "OnDeath" )
+
+	WaitSignal( soundHandle, "OnSoundFinished" )
+
+	int replyCommsAction = file.replyMap[ primaryCommsAction ]
+
+	bool isReplyForcePlay = ShouldForcePlayConditionalAlt( GetConditionalAltDialogue( file.actions[ replyCommsAction ].aliasSubname, playerToReply, playerSpeakingPrimary, true ) )
+	
+	if ( wasConAlt || isReplyForcePlay )
+		replyCommsAction = file.altMap[ replyCommsAction ]
+
+	string locString = ""
+	switch ( replyCommsAction )
+	{
+		case eCommsAction.REPLY_WELCOME:
+		case eCommsAction.REPLY_WELCOME_ALT:
+		case eCommsAction.REPLY_REVIVE_WELCOME:
+		case eCommsAction.REPLY_REVIVE_WELCOME_ALT:
+			locString = Localize( "#PING_SAY_WELCOME" )
+			break
+		default:
+			locString = ""
+	}
+
+	if ( ShouldMuteCommsActionForCooldown( GetLocalViewPlayer(), replyCommsAction, null ) )
+		return
+
+	AddOnscreenPromptFunction( "quickchat", CreateQuickchatFunction( replyCommsAction, playerSpeakingPrimary ), 6.0, Localize( locString ) )
+}
+#endif
+
+#if CLIENT
 string function GetMenuOptionTextForCommsAction( int commsAction )
 {
 	Assert( commsAction < eCommsAction._count )
 	CommsAction data = file.actions[commsAction]
 	return Localize( data.menuText )
 }
+#endif
 
+
+#if CLIENT
 string function GetShortTextForCommsAction( int commsAction )
 {
 	Assert( commsAction < eCommsAction._count )
 	CommsAction data = file.actions[commsAction]
 	return Localize( data.shortText )
 }
+#endif
 
+
+#if CLIENT
 asset function GetDefaultIconForCommsAction( int commsAction )
 {
 	Assert( commsAction < eCommsAction._count )
 	CommsAction data = file.actions[commsAction]
 	return data.defaultIcon
 }
+#endif
 
+
+#if CLIENT
 asset function GetPingAssetForCommsAction( int commsAction )
 {
 	Assert( commsAction < eCommsAction._count )
+	string enumStr = IsValidEnumValue( "eCommsAction", commsAction ) ? GetEnumString( "eCommsAction", commsAction ) : "Unknown eCommsAction!"
+	Assert( commsAction in file.actions, "Unhandled commsAction " + enumStr + " (" + commsAction + ")" )                                                                                                                        
 	CommsAction data = file.actions[commsAction]
 	return data.pingAsset
 }
+#endif
 
-string function GetPlayerDialogSound( entity player, int index, CommsOptions options )
+#if CLIENT
+string function GetShadowDialogSoundForAction( CommsAction act, CommsOptions options )
+{
+	                                                                                   
+	string perspective = options.isFirstPerson ? "_1p" : "_3p"
+	string prefix = "diag_mp_shadowsquad_ping_spotDefault_"
+
+	string suffix
+	string aliasSubname = act.aliasSubname
+	switch( aliasSubname )
+	{
+		case "ping_spotEnemy":
+		case "ping_cluePresence":
+			suffix = "enemy"
+			break
+		case "ping_spotDefault":
+		case "ping_exploreGoPlayer":
+		case "ping_attackingHere":
+		case "ping_defendingHere":
+		case "ping_watchingHere":
+		case "ping_lootingHere":
+			suffix = "location"
+			break
+		case "ping_carePackage":
+			suffix = "item"
+			break
+		default:
+			if ( aliasSubname.find( "ping_found" ) >= 0 )
+				suffix = "item"
+			else
+				suffix = "item"                                        
+			break
+	}
+
+	string result = prefix + suffix + perspective
+
+	return result
+
+}
+#endif
+
+#if CLIENT
+string function GetPlayerDialogSound( entity player, entity subjectEnt, CommsAction act, CommsOptions options )
 {
 	if ( !file.quickchatInitialized )
 		return ""
-	if ( (index < 0) || (index >= eCommsAction._count) )
-		return ""
 
-	CommsAction act = file.actions[index]
+                               
+		if ( IsShadowRoyaleMode() && IsPlayerShadowZombie( player ) )
+			return GetShadowDialogSoundForAction( act, options )
+       
+
 	string subAlias = act.aliasSubname
 	if ( subAlias == "" )
 		return ""
@@ -654,96 +1407,362 @@ string function GetPlayerDialogSound( entity player, int index, CommsOptions opt
 	else
 		ext = ""
 
-	string result = GetBattleChatterAlias1P3P( player, (subAlias + ext), options.isFirstPerson )
+	if ( act.index == eCommsAction.FLAVOR_LOOT_DIBS )
+		ext = TryPrependDibsExtension( player, subjectEnt, act, options, ext )
 
-#if(DEV)
-	if ( ShouldTryToReplaceMissingVoiceWithTempVoice() )
+                                 
+
+		bool stompConAlt = ( act.index == eCommsAction.REPLY_WELCOME ) || ( act.index == eCommsAction.REPLY_REVIVE_WELCOME )
+		bool forceConAlt = ( act.index == eCommsAction.REPLY_WELCOME_ALT ) || ( act.index == eCommsAction.REPLY_REVIVE_WELCOME_ALT )
+
+		ext = GetConditionalAltPingExtension( player, subjectEnt, act.aliasSubname, ext, forceConAlt, stompConAlt )
+
+                                       
+
+	string result
 	{
-		if ( !DoesAliasExist( result ) )
-		{
+		if ( act.hasForcedTempVoice )
 			result = GetBattleChatterAlias1P3PWithTempVoice( (subAlias + ext), options.isFirstPerson )
-
-			if ( !DoesAliasExist( result ) )
-				Warning( "Attempted to fall back to temp voice \"" + TEMP_VOICE + "\", but resulting alias \"" + result + "\" does not exist in miles."  )
-		}
+		else
+			result = GetBattleChatterAlias1P3P( player, (subAlias + ext), options.isFirstPerson )
 	}
-#endif //
+
+	#if DEV
+		if ( ShouldTryToReplaceMissingVoiceWithTempVoice() )
+		{
+			if ( !DoesAliasExist( result ) )
+			{
+				result = GetBattleChatterAlias1P3PWithTempVoice( (subAlias + ext), options.isFirstPerson )
+
+				if ( !DoesAliasExist( result ) )
+					Warning( "Attempted to fall back to temp voice \"" + TEMP_VOICE + "\", but resulting alias \"" + result + "\" does not exist in miles." )
+			}
+		}
+	#endif       
 
 	return result
 }
+#endif
 
+#if CLIENT
+const string WEAPON_HEADER = "mp_weapon_"
+const string ABILITY_HEADER = "mp_ability_"
+const string CLASS_SUFFIX = "Class"
+
+string function TryPrependDibsExtension( entity player, entity subjectEnt, CommsAction act, CommsOptions options, string currExt )
+{
+	if ( !IsValid( player ) )
+		return currExt
+
+	if ( !IsValidAndStandardGrabbableLootEnt( subjectEnt ) )
+		return currExt
+
+	LootData data = SURVIVAL_Loot_GetLootDataByIndex( subjectEnt.GetSurvivalInt() )
+
+	                                                                                                 
+	if ( !( data.lootType == eLootType.MAINWEAPON || data.lootType == eLootType.ORDNANCE ) )
+		return currExt
+
+	string itemName = data.ref
+	string itemClassName = ""
+
+	if ( data.lootType == eLootType.MAINWEAPON )
+	{
+		if ( data.baseWeapon != "" )
+			itemName = data.baseWeapon
+
+		itemClassName = data.lootTags[0] + CLASS_SUFFIX
+	}
+
+	if ( itemName.find( WEAPON_HEADER ) == 0 )
+	{
+		itemName = itemName.slice( WEAPON_HEADER.len() )
+	}
+
+	if ( itemName.find( ABILITY_HEADER ) == 0 )
+	{
+		itemName = itemName.slice( ABILITY_HEADER.len() )
+	}
+
+	string ext = currExt
+
+	if ( PlayerHasFlavorDibsLineForItem( player, itemName ) )
+	{
+		ext = "_" + itemName + currExt
+	}
+
+	else if ( itemClassName != "" && PlayerHasFlavorDibsLineForItem( player, itemClassName ) )
+	{
+		ext = "_" + itemClassName + currExt
+	}
+
+	return ext
+}
+#endif
+
+#if CLIENT
 void function SetCommsDialogueEnabled( bool value )
 {
 	file.commsDialogueEnabled = value
 }
+#endif
 
-//
 
-void function AddCallback_OnQuickchatEvent( int index, void functionref(entity,int) func )
+                                                                                                                                        
+
+
+#if SERVER || CLIENT
+void function AddCallback_OnQuickchatEvent( int index, void functionref(entity, int, entity) func )
 {
-	if ( !( index in file.onQuickchatCallbacks ) )
+	if ( !(index in file.onQuickchatCallbacks) )
 		file.onQuickchatCallbacks[ index ] <- []
 
 	Assert( !file.onQuickchatCallbacks[ index ].contains( func ) )
 	file.onQuickchatCallbacks[ index ].append( func )
 }
-#endif //
-
-#if(false)
+#endif
 
 
+                                                                                                                                        
 
 
+#if SERVER
+                                                                                                      
+ 
+	                     
+	                   
+	              
+	                                                        
+	 
+		                                                                     
+
+		                                                  
+			                                                              
+
+		                                                                     
+		 
+			                                                                     
+			                                                                  
+			                                                 
+		 
+
+		                   
+	 
+
+	                                                                      
+ 
+
+                                                                                                                 
+ 
+	                                            
+		      
+
+	                                             
+	 
+		                                                
+		                                                  
+		                                               
+		 
+
+			                       
+			 
+				                                                             
+				                                                                                                   
+				      
+			 
+			     
+		 
+
+		        
+			     
+	 
+
+	                                                                                                                                                                  
+
+	                                                                                            
+ 
+#endif
 
 
+#if SERVER
+                                                                                                                                                                                                                
+ 
+                   
+                                             
+                                                                 
+       
+
+	                                                        
+	 
+		                                                                                            
+		      
+	 
+
+	                                                                              
+
+	                                                                                                                                                                                
+	                                                   
+	 
+		                                
+		 
+			                                                                                                                                            
+			 
+				                                 
+			 
+		 
+	 
+
+                         
+		                              
+		 
+			                                                                                    
+			                                                                                                                             
+			 
+				                                                                                                                                                                                                                                            
+				 
+					               
+					                                                                                
+					                                             
+					 
+						                                                                                                                 
+							                                
+					 
+				 
+			 
+		 
+       
+
+	                                                                
+
+	                                                                                           
+
+	                                            
+	 
+		                                                          
+
+		                             
+			                                                                                                   
+				                                                         
+				                                                  
+
+		      
+	 
+
+	                                                           
+	 
+		                             
+
+		                           
+		 
+			                            
+				                                
+
+			                           
+			 
+				                           
+				 
+					                                                                                                   
+						                                                         
+						                                                  
+				 
+			 
+		 
+
+		      
+	 
+
+	                             
+		                                                                                                
+			                                                         
+			                                                  
+ 
 
 
+                                                                                
+ 
+	                                      
+	 
+		                                                        
+			                                              
+	 
+ 
+
+                                                                                               
+ 
+	                                                                         
+	                                                                                                   
+	                                                                                             
+
+	              
+
+	                         
+		            
+
+	                      
+	 
+		                                             
+                          
+		                                           
+       
+			                                                       
+
+		                                              
+                          
+		                                            
+       
+			                                                        
+
+		                                              
+                          
+		                                            
+       
+			                                                        
+
+		                                              
+                          
+		                                            
+       
+			                                                        
+
+		                                             
+                          
+		                                           
+       
+			                                                       
+
+		                                             
+                          
+		                                           
+       
+			                                                       
+
+                             
+		                                                  
+		                                               
+			                                                                                                                                
+       
+                         
+                                                     
+                                                              
+      
+	 
+
+	            
+ 
+#endif
 
 
+#if SERVER || CLIENT
+void function RunQuickChatCallbacks( entity player, int commsAction, entity subjectEnt )
+{
+	if ( commsAction in file.onQuickchatCallbacks )
+	{
+		foreach ( func in file.onQuickchatCallbacks[ commsAction ] )
+		{
+			func( player, commsAction, subjectEnt )
+		}
+	}
+}
+#endif
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //

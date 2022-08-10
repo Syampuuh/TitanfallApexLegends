@@ -4,6 +4,7 @@ global function InitFooterOptions
 global function AddMenuFooterOption
 global function AddPanelFooterOption
 global function UpdateFooterOptions
+global function UpdateFooterLabels
 global function SetFooterText
 global function ClearMenuFooterOptions
 
@@ -20,12 +21,10 @@ void function InitFooterOptions()
 		foreach ( elem in sizerElems )
 			Hud_EnableKeyBindingIcons( elem )
 
-		#if(PC_PROG)
-			array<var> buttonElems = GetElementsByClassname( menu, "LeftRuiFooterButtonClass" )
-			buttonElems.extend( GetElementsByClassname( menu, "RightRuiFooterButtonClass" ) )
-			foreach ( elem in buttonElems )
-				Hud_AddEventHandler( elem, UIE_CLICK, OnFooterOption_Activate )
-		#endif //
+		array<var> buttonElems = GetElementsByClassname( menu, "LeftRuiFooterButtonClass" )
+		buttonElems.extend( GetElementsByClassname( menu, "RightRuiFooterButtonClass" ) )
+		foreach ( elem in buttonElems )
+			Hud_AddEventHandler( elem, UIE_CLICK, OnFooterOption_Activate )
 	}
 
 	thread UpdateFooterSizes()
@@ -33,27 +32,27 @@ void function InitFooterOptions()
 
 InputDef function AddMenuFooterOption( var menu, int alignment, int input, bool clickable, string gamepadLabel, string mouseLabel = "", void functionref( var ) activateFunc = null, bool functionref() conditionCheckFunc = null, void functionref( InputDef ) updateFunc = null )
 {
-	//
-	//
+	                          
+	  	                                                                                                                                                                                       
 
 	if ( input == BUTTON_B )
 	{
 		if ( activateFunc == null )
 		{
-			//
+			                                                      
 			activateFunc = PCBackButton_Activate
-			//
+			                                                                           
 		}
 
-		//
+		                                                                                                                                 
 	}
 
 	array<InputDef> footerData = uiGlobal.menuData[ menu ].footerData
 
 	foreach ( entry in footerData )
 	{
-		//
-		//
+		                                                                                       
+		                                                    
 
 		if ( entry.input == input )
 			Assert( entry.conditionCheckFunc != null, "Duplicate footer input found with no conditional! Duplicates require a conditional." )
@@ -82,16 +81,16 @@ void function ClearMenuFooterOptions( var menu )
 
 InputDef function AddPanelFooterOption( var panel, int alignment, int input, bool clickable, string gamepadLabel, string mouseLabel = "", void functionref( var ) activateFunc = null, bool functionref() conditionCheckFunc = null, void functionref( InputDef ) updateFunc = null )
 {
-	//
-	//
+	                          
+	  	                                                                                                                                                                                       
 
 	if ( input == BUTTON_B )
 	{
 		if ( activateFunc == null )
 		{
-			//
+			                                                      
 			activateFunc = PCBackButton_Activate
-			//
+			                                                                           
 		}
 
 		Assert( activateFunc == PCBackButton_Activate, "Footer input BUTTON_B can only use PCBackButton_Activate() for activateFunc!" )
@@ -101,8 +100,8 @@ InputDef function AddPanelFooterOption( var panel, int alignment, int input, boo
 
 	foreach ( entry in footerData )
 	{
-		//
-		//
+		                                                                                       
+		                                                    
 
 		if ( entry.input == input )
 			Assert( entry.conditionCheckFunc != null, "Duplicate footer input found with no conditional! Duplicates require a conditional." )
@@ -132,13 +131,13 @@ void function ClearRegisteredInputs()
 
 		foreach ( int input, void functionref( var ) func in registeredInput )
 		{
-			if ( input != BUTTON_B && input != -1 ) //
+			if ( input != BUTTON_B && input != -1 )                   
 			{
-				//
+				                                                                            
 				DeregisterButtonPressedCallback( input, func )
 			}
 
-			deleteList.append( input ) //
+			deleteList.append( input )                                                                 
 		}
 
 		foreach ( input in deleteList )
@@ -152,13 +151,13 @@ void function ClearRegisteredInputs()
 
 		foreach ( int input, void functionref( var ) func in registeredInput )
 		{
-			if ( input != BUTTON_B && input != -1 ) //
+			if ( input != BUTTON_B && input != -1 )                   
 			{
-				//
+				                                                                            
 				DeregisterButtonPressedCallback( input, func )
 			}
 
-			deleteList.append( input ) //
+			deleteList.append( input )                                                                 
 		}
 
 		foreach ( input in deleteList )
@@ -166,7 +165,7 @@ void function ClearRegisteredInputs()
 	}
 }
 
-void function UpdateFooterOptions()
+void function UpdateFooter_Internal( bool shouldUpdateInputCallbacks )
 {
 	var menu = GetActiveMenu()
 	if ( menu == null )
@@ -181,11 +180,14 @@ void function UpdateFooterOptions()
 			panel = topActivePanel
 	}
 
-	//
-	ClearRegisteredInputs()
-	Signal( uiGlobal.signalDummy, "EndFooterUpdateFuncs" )
+	                                      
+	if ( shouldUpdateInputCallbacks )
+	{
+		ClearRegisteredInputs()
+		Signal( uiGlobal.signalDummy, "EndFooterUpdateFuncs" )
+	}
 
-	if ( !Hud_HasChild( menu, "FooterButtons" ) ) //
+	if ( !Hud_HasChild( menu, "FooterButtons" ) )                                                                                                                                                          
 		return
 
 	array<InputDef> footerData
@@ -193,7 +195,7 @@ void function UpdateFooterOptions()
 	if ( panel != null )
 	{
 		footerData = uiGlobal.panelData[ panel ].footerData
-		//
+		                                                     
 		registeredInput = uiGlobal.panelData[ panel ].registeredInput
 	}
 	else
@@ -222,34 +224,37 @@ void function UpdateFooterOptions()
 
 		if ( isValid )
 		{
-			if ( input in registeredInput ) //
+			if ( shouldUpdateInputCallbacks )
 			{
-				if ( input != BUTTON_B && input != -1 ) //
+				if ( input in registeredInput )                                                            
 				{
-					DeregisterButtonPressedCallback( input, registeredInput[ input ] )
-					//
+					if ( input != BUTTON_B && input != -1 )                   
+					{
+						DeregisterButtonPressedCallback( input, registeredInput[ input ] )
+						                                                                                                             
+					}
+
+					delete registeredInput[ input ]
 				}
 
-				delete registeredInput[ input ]
-			}
-
-			void functionref( var ) activateFunc = footerData[i].activateFunc
-			if ( activateFunc != null )
-			{
-				if ( input != BUTTON_B && input != -1 ) //
+				void functionref( var ) activateFunc = footerData[i].activateFunc
+				if ( activateFunc != null )
 				{
-					RegisterButtonPressedCallback( input, activateFunc )
-					//
-				}
+					if ( input != BUTTON_B && input != -1 )                   
+					{
+						RegisterButtonPressedCallback( input, activateFunc )
+						                                                                                               
+					}
 
-				registeredInput[ input ] <- activateFunc
+					registeredInput[ input ] <- activateFunc
+				}
 			}
 
-			//
+			                                                                                                      
 
 			Assert( footerData[i].alignment == LEFT || footerData[i].alignment == RIGHT )
 
-			if ( footerData[i].gamepadLabel != "" ) //
+			if ( footerData[i].gamepadLabel != "" )                                                                                                                      
 			{
 				if ( footerData[i].alignment == LEFT )
 				{
@@ -263,7 +268,7 @@ void function UpdateFooterOptions()
 				}
 			}
 
-			if ( footerData[i].mouseLabel != "" ) //
+			if ( footerData[i].mouseLabel != "" )                                                                                                                        
 			{
 				if ( footerData[i].alignment == LEFT )
 				{
@@ -286,6 +291,16 @@ void function UpdateFooterOptions()
 
 	array<var> rightElems = GetElementsByClassname( menu, "RightRuiFooterButtonClass" )
 	UpdateFooterElems( menu, rightElems, footerData, rightGamepadInfo, rightMouseInfo )
+}
+
+void function UpdateFooterOptions()
+{
+	UpdateFooter_Internal( true )
+}
+
+void function UpdateFooterLabels()
+{
+	UpdateFooter_Internal( false )
 }
 
 void function UpdateFooterElems( var menu, array<var> elems, array<InputDef> footerData, array<int> gamepadInfo, array<int> mouseInfo )
@@ -323,10 +338,10 @@ void function UpdateFooterElems( var menu, array<var> elems, array<InputDef> foo
 				SetFooterText( menu, footerDataEntry.alignment, index, Localize( text ) )
 			}
 
-			//
+			                      
 			elem.s.input <- footerDataEntry.input
 
-			if ( isControllerModeActive || !footerDataEntry.clickable )
+			if ( ( isControllerModeActive && !IsGamepadCursorEnabled( menu ) ) || !footerDataEntry.clickable )
 				Hud_SetEnabled( elem, false )
 			else
 				Hud_SetEnabled( elem, true )
@@ -352,7 +367,7 @@ void function SetFooterText( var menu, int alignment, int index, string text )
 
 	if ( alignment == LEFT )
 	{
-		array<var> sizerElems = GetElementsByClassname( menu, "LeftFooterSizerClass" ) //
+		array<var> sizerElems = GetElementsByClassname( menu, "LeftFooterSizerClass" )                                          
 		if ( index < sizerElems.len() )
 			Hud_SetText( sizerElems[index], text )
 
@@ -382,7 +397,7 @@ void function UpdateFooterSizes()
 				InitButtonRCP( Hud_GetChild( panel, "LeftRuiFooterButton0" ) )
 				InitButtonRCP( Hud_GetChild( panel, "LeftRuiFooterButton1" ) )
 			}
-			else if ( Hud_HasChild( activeMenu, "DialogFooterButtons" ) ) //
+			else if ( Hud_HasChild( activeMenu, "DialogFooterButtons" ) )                                                          
 			{
 				var panel = Hud_GetChild( activeMenu, "DialogFooterButtons" )
 				Hud_SetWidth( Hud_GetChild( panel, "LeftRuiFooterButton0" ), Hud_GetWidth( Hud_GetChild( panel, "LeftFooterSizer0" ) ) )
@@ -396,11 +411,19 @@ void function UpdateFooterSizes()
 
 void function OnFooterOption_Activate( var button )
 {
-	//
+	                      
 	if ( "input" in button.s )
 	{
 		int input = expect int( button.s.input )
 		var menu = GetParentMenu( button )
+
+		                                                                                                      
+		if  ( IsControllerModeActive() && !AllowControllerFooterClick( menu ) )
+		{
+			                                                                                                      
+			if ( !IsDialog( menu ) || !IsGamepadCursorEnabled( menu ) )
+				return
+		}
 
 		void functionref( var ) activateFunc = null
 
@@ -424,7 +447,7 @@ void function OnFooterOption_Activate( var button )
 
 		if ( activateFunc != null )
 		{
-			//
+			                                                     
 			activateFunc( button )
 		}
 	}

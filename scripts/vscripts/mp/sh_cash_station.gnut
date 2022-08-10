@@ -1,0 +1,603 @@
+global function ShCashStation_Init
+global function ShCashStation_RegisterNetworking
+
+global function IsCashStationEnt
+
+#if SERVER
+                                      
+                                 
+                                      
+#endif
+
+#if CLIENT
+global function ServerToClient_CashStationStartUse
+global function ServerToClient_CashStationStopUse
+global function ServerToClient_OnUseCashStationSmall
+
+const asset CASH_STATION_ICON = $"rui/hud/gametype_icons/survival/crafting_harvester"
+const asset CASH_STATION_SMALL_ICON = $"rui/hud/gametype_icons/survival/crafting_small_harvester"
+const asset CASH_STATION_WORLD_ICON = $"rui/hud/gametype_icons/survival/crafting_currency"
+#endif
+
+global const string CASH_STATION_TARGETNAME = "cash_station"
+global const string CASH_STATION_SCRIPTNAME = "cash_station_spawned"
+global const string CASH_STATION_SMALL_SCRIPTNAME = "cash_station_small_spawned"
+
+const string CASH_STATION_COLLECT_1P = "Crafting_Extractor_Collect_1P"
+const string CASH_STATION_COLLECT_3P = "Crafting_Extractor_Collect_3P"
+
+global const asset CASH_STATION_MODEL = $"mdl/Robots/mobile_hardpoint/mobile_hardpoint_static.rmdl"
+global const asset CASH_STATION_MODEL_SMALL = $"mdl/props/crafting_siphon/crafting_siphon.rmdl"
+
+const float CASH_STATION_HOLO_EFFECT_HEIGHT = 75.0
+const float CASH_STATION_USE_TIME = 7.5
+
+                                                                                       
+                                                                                       
+
+global const asset CASH_STATION_EMITTER_FX = $"P_campfire_holo"
+                                                                      
+
+global const asset CASH_STATION_OVERHEAD_ICON = $"rui/hud/gametype_icons/survival/crafting_workbench"
+global const asset CASH_STATION_DEFEND_ICON = $"rui/hud/gametype_icons/obj_defend"
+const string SOUND_HOLOGRAM_LOOP = "Survival_Emit_RespawnChamber"
+
+const float CASH_STATION_ICON_FADE_DIST_NEAR = 600.0
+const float CASH_STATION_ICON_FADE_DIST_FAR = 1000.0
+
+const float CASH_STATION_CAPTURE_DISTANCE		= 250.0
+const float CASH_STATION_CAPTURE_DISTANCE_SQR	= CASH_STATION_CAPTURE_DISTANCE * CASH_STATION_CAPTURE_DISTANCE
+global const int CASH_STATION_CASH_AWARD = 30
+const float CASH_STATION_ANNOUNCE_MSG_DURATION = 5.0
+
+struct
+{
+	array<entity> spawnedCashStations
+
+	#if CLIENT
+		array<var>         respawnChamberRuis
+		table<entity, int> chamberToBeamFX
+		var                useProgressRui
+		table<entity, var> worldIcons
+		array<EHI>         consumedStations
+	#endif
+}
+file
+
+void function ShCashStation_Init()
+{
+	PrecacheModel( CASH_STATION_MODEL )
+	PrecacheModel(CASH_STATION_MODEL_SMALL )
+	PrecacheParticleSystem( CASH_STATION_EMITTER_FX )
+	PrecacheParticleSystem( RESPAWN_BEACON_SCAN_FX )
+
+	#if CLIENT
+		RegisterSignal( "SpectatorShowRespawnRui" )
+
+		AddCreateCallback( "prop_dynamic", CashStationEntitySpawned )
+		AddCreateCallback( "prop_script", CashStationEntitySpawned )
+		AddCreateCallback( "prop_script", CashStationSmallEntitySpawned )
+
+		RegisterMinimapPackages()
+
+	#elseif SERVER
+		                                                            
+		                                                           
+	#endif
+}
+
+void function ShCashStation_RegisterNetworking()
+{
+	Remote_RegisterClientFunction( "ServerToClient_CashStationStartUse", "entity", "int", TEAM_ANY, INT_MAX )
+	Remote_RegisterClientFunction( "ServerToClient_CashStationStopUse", "entity" )
+
+	Remote_RegisterClientFunction( "ServerToClient_OnUseCashStationSmall", "entity", "int", 0, 500 )
+}
+
+#if CLIENT
+
+void function UpdateCashStationRuis( var rui )
+{
+	RuiSetFloat( rui, "distanceFade", CASH_STATION_ICON_FADE_DIST_NEAR )
+	RuiSetBool( rui, "pinToEdge", false )
+	RuiSetBool( rui, "showClampArrow", false )
+}
+#endif          
+
+bool function AreCashStationsEnabled()
+{
+	return IsArenaMode()
+}
+
+bool function IsCashStationEnt( entity ent )
+{
+	switch ( ent.GetTargetName() )
+	{
+		case CASH_STATION_TARGETNAME:
+			return true
+	}
+
+	return false
+}
+
+void function CashStationEntitySpawned( entity ent )
+{
+	if ( !IsCashStationEnt( ent ) )
+		return
+
+	if ( !AreCashStationsEnabled() && IsValid( ent ) )
+	{
+		ent.Destroy()
+		return
+	}
+
+	#if CLIENT
+		var rui
+
+		if( GetLocalClientPlayer().GetTeam() != ent.GetTeam() )
+		{
+			rui = AddOverheadIcon( ent, CASH_STATION_OVERHEAD_ICON, false, $"ui/overhead_icon_respawn_beacon.rpak" )
+			RuiSetString( rui, "hint", "CAPTURE"                          )
+
+			int beamIndex       = GetParticleSystemIndex( FX_AIRDROP_BEAM_CP )
+			file.chamberToBeamFX[ ent ] <- StartParticleEffectInWorldWithHandle( beamIndex, ent.GetOrigin(), ent.GetAngles() + <0, 180, 0> )
+			EffectSetControlPointColorById( file.chamberToBeamFX[ ent ], 1, COLORID_AIRDROP_CRAFTING_COLOR )
+		}
+		else
+		{
+			rui = AddOverheadIcon( ent, CASH_STATION_DEFEND_ICON, false, $"ui/overhead_icon_respawn_beacon.rpak" )
+			RuiSetString( rui, "hint", "DEFEND"                          )
+		}
+
+		RuiSetFloat2( rui, "iconSize", <80, 80, 0> )
+		RuiSetFloat( rui, "distanceFade", CASH_STATION_ICON_FADE_DIST_FAR )
+		RuiSetBool( rui, "adsFade", true )
+
+		thread ManageCashStationData( ent, rui )
+
+		if ( ent.GetTargetName() == CASH_STATION_TARGETNAME )
+			thread AddRadarToCashStation( ent )
+
+	#elseif SERVER
+		                                    
+
+		                        
+		                 
+
+		                                   
+		                                   
+		                                                                        
+		                                         
+
+		                                     
+			                                   
+	#endif
+}
+
+#if SERVER
+
+                                                                      
+ 
+	                                                                                                 
+	                                                          
+	                                   
+
+	                       
+	                                                                   
+	                                       
+	                                           
+
+	                                           
+	                                                                             
+	                                       
+	                                      
+	 
+		                                      
+	 
+	                                                 
+
+	                                                                         
+
+	                                              
+
+	                  
+ 
+
+                                                                                             
+ 
+	                                                                                              
+	                                                     
+	                                                    
+	                                   
+
+	                      
+		                            
+	    
+		                                                             
+
+	                            
+	                                              
+	                                    
+
+	                  
+ 
+
+                                                                                            
+ 
+	                         
+	                                               
+	                                                                             
+	                                                                               
+	                                                                                         
+	                                             
+	                                                                        
+
+	                                            
+	                                                                  
+	 
+		                                                                                                      
+	 
+
+	                                                                                                    
+	                                                             
+	                                                              
+	 
+		                                                                                                 
+	 
+
+	                                 
+	 
+		                                             
+	 
+ 
+
+                                      
+ 
+	                                              
+	                                                          
+		                     
+ 
+
+                                                  
+ 
+	                            
+
+	                                   
+	                                       
+	               
+
+	             
+	 
+		                                 
+		                                           
+		 
+			                                      
+				        
+
+			                                                                                           
+			 
+				                                    
+				 
+					                              
+
+					                                        
+					                                                                          
+						                             
+				 
+				                                          
+				 
+					                            
+					                             
+					     
+				 
+			 
+		 
+
+		                                      
+		 
+			                                                                    
+			 
+				                  
+				                           
+
+				                                
+					                                                                                            
+			 
+		 
+		                                       
+		 
+			                           
+
+			                                
+				                                                                            
+		 
+		                                                     
+		 
+			                                
+				                                                                            
+
+			                                   
+			                               
+		 
+
+		           
+	 
+ 
+
+#endif          
+
+#if CLIENT
+bool function IsCashStationSmallEnt( entity ent )
+{
+	switch ( ent.GetScriptName() )
+	{
+		case CASH_STATION_SMALL_SCRIPTNAME:
+			return true
+	}
+
+	return false
+}
+
+bool function CashStationWasUsed( entity ent )
+{
+	EHI entKey = ToEHI(ent)
+	foreach ( EHI entry in file.consumedStations )
+	{
+		if ( entry == entKey )
+			return true
+	}
+
+	return false
+}
+
+void function CashStationSmallEntitySpawned( entity ent )
+{
+	if ( !IsCashStationSmallEnt( ent ) )
+		return
+
+	if ( !AreCashStationsEnabled() && IsValid( ent ) )
+	{
+		ent.Destroy()
+		return
+	}
+
+	if ( CashStationWasUsed( ent ) ){
+		return
+	}
+
+	entity localViewPlayer = GetLocalViewPlayer()
+	vector pos             = ent.GetOrigin() + (ent.GetUpVector() * 50)
+	var rui                = CreateCockpitRui( $"ui/survey_beacon_marker_icon.rpak", RuiCalculateDistanceSortKey( localViewPlayer.EyePosition(), pos ) )
+	RuiSetImage( rui, "beaconImage", CASH_STATION_WORLD_ICON )
+	RuiSetGameTime( rui, "startTime", Time() )
+	RuiSetFloat3( rui, "pos", pos )
+	RuiSetFloat( rui, "sizeMin", 40 )
+	RuiSetFloat( rui, "sizeMax", 80 )
+	RuiSetFloat( rui, "minAlphaDist", 1000 )
+	RuiSetFloat( rui, "maxAlphaDist", 3000 )
+	RuiSetBool( rui, "shouldHideNearCrosshairs", true )
+	RuiKeepSortKeyUpdated( rui, true, "pos" )
+
+	file.worldIcons[ ent ] <- rui
+
+	thread ManageCashStationWorldIcon( ent )
+}
+
+void function ManageCashStationWorldIcon( entity ent )
+{
+	ent.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function() : ( ent )
+		{
+			if( ent in file.worldIcons )
+			{
+				RuiDestroy( file.worldIcons[ ent ] )
+				delete file.worldIcons[ ent ]
+			}
+		}
+	)
+
+	WaitForever()
+}
+
+void function ManageCashStationData( entity ent, var rui )
+{
+	file.respawnChamberRuis.append( rui )
+	ent.EndSignal( "OnDestroy" )
+
+	UpdateCashStationRuis( rui )
+
+	OnThreadEnd(
+		function() : ( ent, rui )
+		{
+			if ( ent in file.chamberToBeamFX )
+			{
+				if ( EffectDoesExist( file.chamberToBeamFX[ ent ] ) )
+					EffectStop( file.chamberToBeamFX[ ent ], true, true )
+
+				delete file.chamberToBeamFX[ ent ]
+			}
+
+			file.respawnChamberRuis.fastremovebyvalue( rui )
+			if( file.useProgressRui != null )
+			{
+				RuiDestroy( file.useProgressRui )
+				file.useProgressRui = null
+			}
+		}
+	)
+
+	WaitForever()
+}
+
+void function AddRadarToCashStation( entity ent )
+{
+
+	vector fwd    = AnglesToForward( ent.GetAngles() )
+	vector up     = AnglesToUp( ent.GetAngles() )
+	vector rgt    = AnglesToRight( ent.GetAngles() )
+	vector offset = up * 100
+	vector angles = AnglesCompose( ent.GetAngles(), <0, 0, -10> )
+
+	ent.EndSignal( "OnDestroy" )
+
+	float height = CASH_STATION_HOLO_EFFECT_HEIGHT
+
+	entity fxHolder = CreateClientsideScriptMover( $"mdl/dev/empty_model.rmdl", ent.GetOrigin() + up * height, <-90, 0, 0> )
+
+	array<int> fx
+	fx.append( StartParticleEffectOnEntity( fxHolder, GetParticleSystemIndex( CASH_STATION_EMITTER_FX ), FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID ) )
+	EmitSoundOnEntity( fxHolder, SOUND_HOLOGRAM_LOOP )
+
+	OnThreadEnd(
+		function() : ( fx, fxHolder )
+		{
+			                                        
+			foreach ( effect in fx )
+			{
+				EffectStop( effect, false, true )
+			}
+			fxHolder.Destroy()
+		}
+	)
+
+	WaitForever()
+}
+
+void function ServerToClient_CashStationStartUse( entity ent, int capturingTeam )
+{
+	entity localPlayer = GetLocalClientPlayer()
+	bool isMyTeam = localPlayer.GetTeam() == capturingTeam
+	string announceMsg		= isMyTeam ? "Your team is capturing the bonus!" : "Other team is capturing the bonus!"
+	vector announceColor	= isMyTeam ? <220,220,220> : <220,55,55>
+	entity localViewPlayer = GetLocalViewPlayer()
+
+	AnnouncementMessageSweep( localViewPlayer, "Bonus", announceMsg, announceColor, $"", SFX_HUD_ANNOUNCE_QUICK, CASH_STATION_ANNOUNCE_MSG_DURATION )
+
+	if( isMyTeam )
+		DisplayRuiForCashStation( ent, localViewPlayer )
+
+	EmitSoundOnEntity( ent, RESPAWN_BEACON_LOOP_SOUND )
+}
+
+void function ServerToClient_OnUseCashStationSmall( entity station, int amount )
+{
+	if( station in file.worldIcons )
+	{
+		RuiDestroy( file.worldIcons[ station ] )
+		delete file.worldIcons[ station ]
+	}
+
+	file.consumedStations.append( ToEHI( station ) )
+
+	if( amount <= 0 )
+		return
+
+	AnnouncementMessageRight( GetLocalClientPlayer(), Localize( "#CRAFTING_HARVESTER_AWARD", amount ), "", <214,214,214>, $"", 2, "" )
+}
+
+void function ServerToClient_CashStationStopUse( entity ent )
+{
+	if( file.useProgressRui != null )
+	{
+		RuiDestroy( file.useProgressRui )
+		file.useProgressRui = null
+	}
+
+	if( IsValid( ent ) )
+		StopSoundOnEntity( ent, RESPAWN_BEACON_LOOP_SOUND )
+}
+
+void function DisplayRuiForCashStation( entity ent, entity player )
+{
+	var rui = CreateCockpitRui( $"ui/health_use_progress.rpak" )
+
+	float startTime = Time()
+	float endTime = startTime + CASH_STATION_USE_TIME
+	string hint = "Claiming " + CASH_STATION_CASH_AWARD + " For Team"
+	bool isVisible = DistanceSqr( ent.GetOrigin(), player.GetOrigin() ) < CASH_STATION_CAPTURE_DISTANCE_SQR
+
+	RuiSetBool( rui, "isVisible", isVisible )
+	RuiSetImage( rui, "icon", CASH_STATION_OVERHEAD_ICON )
+	RuiSetGameTime( rui, "startTime", startTime )
+	RuiSetGameTime( rui, "endTime", endTime )
+	RuiSetString( rui, "hintKeyboardMouse", hint )
+	RuiSetString( rui, "hintController", hint )
+
+	if( file.useProgressRui != null )
+		RuiDestroy( file.useProgressRui )
+	file.useProgressRui = rui
+}
+
+void function RegisterMinimapPackages()
+{
+	RegisterMinimapPackage( "prop_script", eMinimapObject_prop_script.RESPAWN_CHAMBER, MINIMAP_OBJECT_RUI, MinimapPackage_CashStation, FULLMAP_OBJECT_RUI, MinimapPackage_CashStation )
+	RegisterMinimapPackage( "prop_script", eMinimapObject_prop_script.CASH_STATION, MINIMAP_OBJECT_RUI, MinimapPackage_CashStationSmall, FULLMAP_OBJECT_RUI, FullmapPackage_CashStationSmall )
+}
+
+void function MinimapPackage_CashStation( entity ent, var rui )
+{
+	asset icon = CASH_STATION_OVERHEAD_ICON
+	if( GetLocalClientPlayer().GetTeam() == ent.GetTeam() )
+		icon = CASH_STATION_DEFEND_ICON
+
+	RuiSetImage( rui, "defaultIcon", icon )
+	RuiSetImage( rui, "smallIcon", icon )
+	RuiSetBool( rui, "hasSmallIcon", true )
+	RuiSetImage( rui, "clampedDefaultIcon", $"" )
+	RuiSetBool( rui, "useTeamColor", false )
+}
+#endif          
+
+#if SERVER
+                                                          
+ 
+	                                     
+	 
+		                                              
+		      
+	 
+
+	                                                                    
+	                                    
+	 
+		                                                 
+		                                                                
+	 
+
+	                                                                                     
+
+	                                                           
+
+	                                       
+	                                    
+	                                    
+
+	                                                                        
+	                                                                                                                                                            
+
+	             
+ 
+#endif          
+
+#if CLIENT
+void function FullmapPackage_CashStationSmall( entity ent, var rui )
+{
+	RuiSetImage( rui, "defaultIcon", CASH_STATION_ICON )
+	RuiSetImage( rui, "clampedDefaultIcon", $"" )
+	RuiSetBool( rui, "useTeamColor", false )
+
+	RuiSetBool( rui, "hasSmallIcon", false )
+}
+
+void function MinimapPackage_CashStationSmall( entity ent, var rui )
+{
+	RuiSetImage( rui, "defaultIcon", CASH_STATION_ICON )
+	RuiSetImage( rui, "clampedDefaultIcon", $"" )
+	RuiSetBool( rui, "useTeamColor", false )
+
+	RuiSetImage( rui, "smallIcon", CASH_STATION_SMALL_ICON )
+	RuiSetBool( rui, "hasSmallIcon", true )
+}
+#endif

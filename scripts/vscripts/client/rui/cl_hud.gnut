@@ -6,30 +6,47 @@ global function ScoreEvents_SetEnabled
 global function AddGenericQueueMessage
 global function AddScoreEventMessage
 
+global function AddCallback_ModifyDamageFlyoutForScriptName
+
 global function DEV_DamageFlyout
+
+                        
+global function ServerCallback_ControlScoreEvent
+                              
+
+                       
+                                               
+                             
+
+                         
+                       
+                                     
+                                                                                 
+                                                      
+      
 
 const bool RUI_ENABLED = true
 
-/*
+  
+		                                                                                
 
+                        
+                                                                                  
+                                                                                
 
+                                                       
+		                                
+                                              
+                                            
+                                           
+                                             
+                                                                                           
+                                              
+                                                                               
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+                               
+                            
+  
 
 struct MessageData
 {
@@ -88,6 +105,8 @@ struct
 	table<entity, DamageFlyoutData> entityDamageFlyouts
 
 	var rui_hitIndicator
+
+	table< string, vector functionref( entity, vector ) > modifyDamageFlyoutForScriptNameCallbacks
 } file
 
 
@@ -95,6 +114,16 @@ void function CLHud_Init()
 {
 }
 
+void function AddCallback_ModifyDamageFlyoutForScriptName( string scriptName, vector functionref( entity, vector ) callbackFunc )
+{
+	if ( scriptName in file.modifyDamageFlyoutForScriptNameCallbacks )
+	{
+		Assert( 0, "Callback for " + scriptName + " already exists in modifyDamageFlyoutForScriptNameCallbacks" )
+		return
+	}
+
+	file.modifyDamageFlyoutForScriptNameCallbacks[ scriptName ] <- callbackFunc
+}
 
 void function AddGenericQueueMessage( string messageText, float duration = 4.0 )
 {
@@ -135,7 +164,7 @@ int function SortPendingMedals( MessageData eventA, MessageData eventB )
 
 void function QueueMessageThink()
 {
-	//
+	                                                      
 	file.eventQueueActive = true
 	WaitEndFrame()
 
@@ -148,16 +177,22 @@ void function QueueMessageThink()
 
 		messageData.startTime = Time()
 
+		asset ruiAsset = $""
 		var rui
-		if ( messageData.messageScale > 1.0 )
-			rui = CreateCockpitPostFXRui( $"ui/centerevent_info.rpak" )
+		if ( GetScoreMessageRuiAssetForMode() != $"" )
+			ruiAsset = GetScoreMessageRuiAssetForMode()
+		else if ( messageData.messageScale > 1.0 )
+			ruiAsset = $"ui/centerevent_info.rpak"
 		else
-			rui = CreateCockpitPostFXRui( $"ui/pickup_info.rpak" )
+			ruiAsset = $"ui/pickup_info.rpak"
+
+		rui = CreateCockpitPostFXRui( ruiAsset )
 
 		RuiSetGameTime( rui, "startTime", messageData.startTime )
 		RuiSetFloat( rui, "duration", messageData.duration )
 		RuiSetString( rui, "messageText", Localize( messageData.messageText ) )
 		RuiSetBool( rui, "isBigText", messageData.messageScale > 1.0 )
+		RuiSetAsset( rui, "messageIcon", messageData.icon)
 
 		messageData.rui = rui
 		thread MessageThink( messageData )
@@ -204,7 +239,18 @@ void function MessageThink( MessageData messageData )
 }
 
 
-//
+asset function GetScoreMessageRuiAssetForMode()
+{
+                         
+	if ( GameRules_GetGameMode() == GAMEMODE_CONTROL )
+		return $"ui/control_score_info.rpak"
+       
+
+	return $""
+}
+
+
+  
 void function DEV_DamageFlyout( entity victim )
 {
 	DamageFlyout( 15, victim.GetWorldSpaceCenter(), victim, eHitType.NORMAL )
@@ -212,11 +258,16 @@ void function DEV_DamageFlyout( entity victim )
 
 
 const GIBRALTAR_PASSIVE_ICON = $"rui/hud/character_abilities/gibraltar_passive_transparent"
+const RAMPART_AMPED_WALL_ICON = $"rui/hud/character_abilities/rampart_amped_wall_transparent"
+
+const STUN_GRENADE_ICON = $"rui/hud/character_abilities/fuse_stun_indicator" 
+const float STUN_GRENADE_ICON_TIMESCALE = 0.3
+
+
 void function DamageFlyout( float damageAmount, vector damagePosition, entity victim, int hitType, int damageFlags = 0, int damageType = 0, entity weapon = null )
 {
 	if ( !file.damageFlyoutEnabled )
 		return
-
 	if ( !IsValid( victim ) )
 		return
 
@@ -231,41 +282,117 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 	bool showStackingDamageText = (styleSetting == DAMAGE_TEXT_STYLE_STACKING_ONLY || styleSetting == DAMAGE_TEXT_STYLE_BOTH)
 	bool showFloatingDamageText = (styleSetting == DAMAGE_TEXT_STYLE_FLOATING_ONLY || styleSetting == DAMAGE_TEXT_STYLE_BOTH)
 
-	bool isShieldShot    = (damageType & DF_SHIELD_DAMAGE) ? true : false
-	bool isCritShot      = (damageType & DF_CRITICAL) ? true : false
-	bool isHeadShot      = (damageType & DF_HEADSHOT) ? true : false
-	bool isKillShot      = (damageType & DF_KILLSHOT) ? true : false
-	bool isKOShieldShot  = (damageType & DAMAGEFLAG_VICTIM_HAS_VORTEX) ? true : false
-	bool isKnockdownShot = (damageType & DF_KNOCKDOWN) ? true : false
-	bool isShieldBreak   = (damageType & DF_SHIELD_BREAK) ? true : false
+	bool isShieldShot     = (damageType & DF_SHIELD_DAMAGE) ? true : false
+	bool isCritShot       = (damageType & DF_CRITICAL) ? true : false
+	bool isHeadShot       = (damageType & DF_HEADSHOT) ? true : false
+	bool isKillShot       = (damageType & DF_KILLSHOT) ? true : false
+	bool isKOShieldShot   = (damageType & DAMAGEFLAG_VICTIM_HAS_VORTEX) ? true : false
+	bool isKnockdownShot  = (damageType & DF_KNOCKDOWN) ? true : false
+	bool isShieldBreak    = (damageType & DF_SHIELD_BREAK) ? true : false
+	bool isShadowShot     = (damageType & DF_SHADOW_DAMAGE) ? true: false
+	bool isOvershieldShot = (damageType & DF_OVERSHIELD) ? true : false
+	bool isSourShot 	  = (damageType & DF_SOUR) ? true : false
+	bool isStunned        = false                                                                    
+
 
 	int sortKey = (file.lastSortKey++) % 100
 
 	asset shieldIcon = $""
 	int shieldLevel  = 0
+	bool overshield = false
+	float timeScale = 1.0 	
+	float shieldFrac = -1.0
 	if ( victim.IsPlayer() && (isShieldShot || isShieldBreak || hitType == eHitType.ARMOR) )
 	{
 		LootData shieldData = EquipmentSlot_GetEquippedLootDataForSlot( victim, "armor" )
 		shieldIcon = shieldData.hudIcon
-		shieldLevel = shieldData.tier//
+		shieldLevel = shieldData.tier                                             
 	}
+
+	if ( victim.IsPlayer() && isShadowShot )
+	{
+		                        
+	}
+
 	if ( !victim.IsPlayer() && (isKOShieldShot || hitType == eHitType.VORTEX) )
 	{
 		entity shieldOwner = victim.GetOwner()
-		if ( IsValid( shieldOwner ) && shieldOwner.IsPlayer() )
+
+		if ( IsAmpedWallEnt( victim ) )
 		{
-			if ( Bleedout_IsBleedingOut( shieldOwner ) )
-			{
-				LootData shieldData = EquipmentSlot_GetEquippedLootDataForSlot( shieldOwner, "incapshield" )
-				shieldIcon = shieldData.hudIcon
-				shieldLevel = shieldData.tier
-			}
-			else
-			{
-				shieldIcon = GIBRALTAR_PASSIVE_ICON
-				shieldLevel = 1
-			}
+			shieldIcon = $""
+			shieldLevel = 1
+			shieldFrac = isKillShot ? 0.0 : max( 0, ( victim.GetHealth() - damageAmount ) / victim.GetMaxHealth() )
 		}
+                 
+		else if ( IsMobileShieldEnt( victim ) )
+		{
+			shieldIcon = $""
+			shieldLevel = 1
+			shieldFrac = isKillShot ? 0.0 : max( 0, ( victim.GetHealth() - damageAmount ) / victim.GetMaxHealth() )
+		}
+		else if ( IsCastleWallEnt( victim ) )
+		{
+			shieldIcon = $""
+			shieldLevel = 1
+			shieldFrac = isKillShot ? 0.0 : max( 0, ( victim.GetHealth() - damageAmount ) / victim.GetMaxHealth() )
+		}
+      
+                
+                                    
+   
+                   
+                  
+                                                                                                          
+   
+      
+                        
+                                            
+   
+                   
+                  
+                                                                                                         
+   
+      
+		else
+		{
+			if ( IsValid( shieldOwner ) && shieldOwner.IsPlayer() )
+			{
+				if ( Bleedout_IsBleedingOut( shieldOwner ) )
+				{
+					LootData shieldData = EquipmentSlot_GetEquippedLootDataForSlot( shieldOwner, "incapshield" )
+					shieldIcon = shieldData.hudIcon
+					shieldLevel = shieldData.tier
+				}
+				else
+				{
+					shieldIcon = GIBRALTAR_PASSIVE_ICON
+					shieldLevel = 1
+				}
+			}
+                           
+                                                           
+    
+                    
+                   
+                                                                                                           
+    
+      
+		}
+	}
+
+	if ( victim.IsPlayer() && isOvershieldShot )
+	{
+		shieldIcon = GIBRALTAR_PASSIVE_ICON
+		shieldLevel = 1
+		overshield = true
+	}
+
+	if ( victim.IsPlayer() && isStunned )
+	{
+		shieldIcon = STUN_GRENADE_ICON
+		shieldLevel = 1
+		timeScale = STUN_GRENADE_ICON_TIMESCALE
 	}
 
 	if ( showHitIndicator )
@@ -286,12 +413,16 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 		{
 			RuiSetImage( rui, "shieldIcon", shieldIcon )
 			RuiSetInt( rui, "shieldTier", shieldLevel )
+			RuiSetFloat( rui, "shieldFrac", shieldFrac )
 		}
 		else
 		{
 			RuiSetImage( rui, "shieldIcon", $"" )
 			RuiSetInt( rui, "shieldTier", 0 )
 		}
+
+		RuiSetFloat( rui, "timeScale", timeScale )
+
 	}
 
 	if ( ShouldShowProjectileHitDot( damageType, weapon ) )
@@ -302,6 +433,25 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 		RuiSetFloat3( hitDotRui, "pos", damagePosition )
 		RuiSetBool( hitDotRui, "isCrit", isHeadShot || isCritShot )
 	}
+
+	                  
+                          
+                                                                                                                    
+
+  
+                                                                                                           
+                                           
+                                                  
+                                                  
+                                                    
+                                                             
+
+                   
+                       
+                                                            
+                                                      
+  
+       
 
 	const float FDT_DURATION = 1.0
 	const float FDT_STACK_THRESHOLD = 0.25
@@ -320,8 +470,14 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 		flyoutData.lastDamageFlyoutDamage = 0
 	}
 
-	float distance      = Distance( victim.GetOrigin(), GetLocalViewPlayer().EyePosition() )
-	damagePosition = GraphCappedVector( distance, 0, 256, victim.GetWorldSpaceCenter(), victim.GetOrigin() + <0, 0, victim.GetBoundingMaxs().z> )//
+	float distance = Distance( victim.GetOrigin(), GetLocalViewPlayer().EyePosition() )
+	vector damageFlyoutDisplayPosition = GraphCappedVector( distance, 0, 256, victim.GetWorldSpaceCenter(), victim.GetOrigin() + <0, 0, victim.GetBoundingMaxs().z> )
+
+	if ( victim.GetScriptName() in file.modifyDamageFlyoutForScriptNameCallbacks )
+	{
+		vector functionref( entity, vector ) func = file.modifyDamageFlyoutForScriptNameCallbacks[ victim.GetScriptName() ]
+		damageFlyoutDisplayPosition = func( victim, damageFlyoutDisplayPosition )
+	}
 
 	vector damageTextOffset = <0, -0.015, 0>
 
@@ -343,7 +499,7 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 			stackingRui = flyoutData.stackingDamageRui
 		}
 
-		RuiSetFloat3( stackingRui, "pos", damagePosition )
+		RuiSetFloat3( stackingRui, "pos", damageFlyoutDisplayPosition )
 		RuiSetGameTime( stackingRui, "startTime", Time() )
 		RuiSetFloat( stackingRui, "duration", FDT_DURATION )
 		RuiSetFloat( stackingRui, "damageAmount", flyoutData.lastDamageFlyoutDamage + damageAmount )
@@ -351,15 +507,20 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 		RuiSetInt( stackingRui, "hitType", hitType )
 		RuiSetAsset( stackingRui, "shieldIcon", shieldIcon )
 		RuiSetInt( stackingRui, "shieldTier", shieldLevel )
+		RuiSetFloat( stackingRui, "shieldFrac", shieldFrac )
 		RuiSetBool( stackingRui, "isCrit", isHeadShot || isCritShot )
-		//
-		//
+		RuiSetBool( stackingRui, "isSour", isSourShot )
+		                                                                                                                                                         
+		                                                                                                
 		if ( isShieldBreak )
 		{
-			printt( "wasShieldBreak" )
 			RuiSetGameTime( stackingRui, "shieldBreakTime", Time() )
 			RuiSetInt( stackingRui, "shieldBreakTier", shieldLevel )
 		}
+
+                                  
+                                                      
+        
 
 		flyoutData.stackingDamageRui = stackingRui
 
@@ -385,12 +546,17 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 			RuiSetGameTime( floatingRui, "startTime", Time() )
 			RuiSetFloat( floatingRui, "duration", FDT_DURATION )
 			RuiSetFloat( floatingRui, "damageAmount", damageAmount )
-			RuiSetFloat3( floatingRui, "pos", damagePosition )
+			RuiSetFloat3( floatingRui, "pos", damageFlyoutDisplayPosition )
 			RuiSetFloat2( floatingRui, "offset", damageTextOffset )
 			RuiSetImage( floatingRui, "shieldIcon", shieldIcon )
 			RuiSetInt( floatingRui, "shieldTier", shieldLevel )
 			RuiSetBool( floatingRui, "isCrit", isHeadShot || isCritShot )
+			RuiSetBool( floatingRui, "isSour", isSourShot )
 			RuiSetBool( floatingRui, "showStacking", showStackingDamageText )
+
+                                   
+                                                       
+         
 
 			DamageData newDamageData
 			newDamageData.rui = floatingRui
@@ -405,8 +571,8 @@ void function DamageFlyout( float damageAmount, vector damagePosition, entity vi
 
 				if ( timeDelta < 0.33 )
 				{
-					//
-					//
+					                                                                        
+					                                                   
 					RuiSetInt( damageData.rui, "index", index )
 				}
 				lastValidIndex = index
@@ -427,8 +593,13 @@ bool function ShouldShowProjectileHitDot( int damageType, entity weapon )
 	if ( !IsValid( weapon ) )
 		return false
 
-	#if(DEV)
-		//
+                          
+                                         
+              
+       
+
+	#if DEV
+		                                      
 		if ( GetCurrentPlaylistVarBool( "hud_projectile_hit_dots_disabled", false ) )
 			return false
 	#endif
@@ -436,6 +607,21 @@ bool function ShouldShowProjectileHitDot( int damageType, entity weapon )
 	return (weapon.GetProjectilesPerShot() > 1)
 }
 
+                         
+                                                
+ 
+                              
+              
+
+                                
+              
+
+                                     
+              
+
+            
+ 
+      
 
 int function GetArmorLevelFromDamageFlags( int damageFlags )
 {
@@ -511,13 +697,13 @@ string function GetFormattedEventText( ScoreEvent scoreEvent, int pointValue, EH
 	{
 		entity bossPlayer = targetEntity.GetBossPlayer()
 		if ( IsValid( bossPlayer ) )
-			targetEntityText = GetPlayerName( ToEHI( bossPlayer ) )
+			targetEntityText = GetPlayerNameFromEHI( ToEHI( bossPlayer ) )
 		else
 			targetEntityText = targetEntity.GetBossPlayerName()
 	}
 	else if ( EHIHasValidScriptStruct( associatedEHI ) )
 	{
-		targetEntityText = GetPlayerName( associatedEHI )
+		targetEntityText = GetPlayerNameFromEHI( associatedEHI )
 	}
 
 	return Localize( eventText, targetEntityText, valueA, valueB )
@@ -529,3 +715,95 @@ void function ScoreEvents_SetEnabled( bool state )
 	file.scoreEventsEnabled = state
 }
 
+                        
+                                                
+void function ServerCallback_ControlScoreEvent( int scoreEventId, bool isExpEvent, int pointsValue, int associatedEntityHandle )
+{
+	if ( !file.scoreEventsEnabled )
+		return
+
+	entity player = GetLocalClientPlayer()
+
+	if ( !IsValid( player ) )
+		return
+
+	ScoreEvent scoreEvent = ScoreEvent_FromId( scoreEventId )
+	if ( pointsValue <= 0 || ScoreEvent_GetEventName( scoreEvent ) == CONTROL_EXPEVENT_EXPRESET )
+		return
+
+	                                                                                             
+	string splashText = ScoreEvent_GetSplashText( scoreEvent )
+	string messageText = ""
+
+	                                                                                                                   
+	if ( associatedEntityHandle != 0 )
+	{
+		EHI associatedEHI = EncodedEHandleToEHI( associatedEntityHandle )
+		string targetEntityText = Localize( "#DISCONNECTED" )
+		entity targetEntity = FromEHI( associatedEHI )
+		if ( IsValid( targetEntity ) && !targetEntity.IsPlayer() )
+		{
+			entity bossPlayer = targetEntity.GetBossPlayer()
+			if ( IsValid( bossPlayer ) )
+				targetEntityText = GetPlayerNameFromEHI( ToEHI( bossPlayer ) )
+			else
+				targetEntityText = targetEntity.GetBossPlayerName()
+		}
+		else if ( EHIHasValidScriptStruct( associatedEHI ) )
+		{
+			targetEntityText = GetPlayerNameFromEHI( associatedEHI )
+		}
+
+		messageText = Localize( splashText, targetEntityText, pointsValue )
+	}
+	else
+	{
+		messageText = Localize( splashText, pointsValue )
+	}
+
+	MessageData messageData
+	messageData.scoreEventId = scoreEventId
+	messageData.scoreEventValue = pointsValue
+	messageData.messageText = messageText
+	messageData.duration = CONTROL_MESSAGE_DURATION
+	messageData.messageScale = isExpEvent ? 1.0 : 1.01
+
+	messageData.icon = ScoreEvent_GetMedalIcon( scoreEvent )
+	                                                                                                                                 
+	if ( isExpEvent )
+	{
+		Control_PlayEXPGainSFX()
+		file.pendingEventQueue.append( messageData )
+		if ( !file.eventQueueActive )
+			thread QueueMessageThink()
+	}
+	else
+	{
+		Obituary_Print_Localized( messageText,CONTROL_OBJECTIVE_GREEN, CONTROL_OBJECTIVE_GREEN )
+	}
+}
+                              
+
+                       
+                                                
+                                                                 
+ 
+                                
+        
+
+                                       
+
+                          
+        
+
+                                                        
+                                                                
+ 
+      
+
+                         
+                                                       
+ 
+                                                       
+ 
+      

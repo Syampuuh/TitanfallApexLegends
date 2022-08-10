@@ -24,7 +24,6 @@ struct
 	float matchmakingStartTime = 0.0
 	string lastMixtapeMatchmakingStatus
 
-	bool putPlayerInMatchmakingAfterDelay = false
 	float matchmakingDelayOverride = -1
 } file
 
@@ -38,7 +37,6 @@ void function InitMatchmakingOverlay()
 
 	RegisterSignal( "UpdateMatchmakingStatus" )
 	RegisterSignal( "BypassWaitBeforeRestartingMatchmaking" )
-	RegisterSignal( "PutPlayerInMatchmakingAfterDelay" )
 	RegisterSignal( "CancelRestartingMatchmaking" )
 	RegisterSignal( "LeaveParty" )
 }
@@ -50,11 +48,11 @@ function GameStartTime_Changed()
 
 void function UpdateGameStartTimeCounter()
 {
-	if ( level.ui.gameStartTime == null )
+	if ( level.ui.uiGameStartTime == -1.0 )
 		return
 
 	MatchmakingSetSearchText( "#STARTING_IN_LOBBY" )
-	MatchmakingSetCountdownTimer( expect float( level.ui.gameStartTime + 0.0 ), true )
+	MatchmakingSetCountdownTimer( expect float( level.ui.uiGameStartTime ), true )
 
 	HideMatchmakingStatusIcons()
 }
@@ -88,11 +86,11 @@ string function GetActiveSearchingPlaylist()
 
 float function CalcMatchmakingWaitTime()
 {
-	float result = ((file.matchmakingStartTime > 0.01) ? (Time() - file.matchmakingStartTime) : 0.0)
+	float result = ((file.matchmakingStartTime > 0.01) ? (UITime() - file.matchmakingStartTime) : 0.0)
 	return result
 }
 
-void function UpdateTimeToRestartMatchmaking( float time )//
+void function UpdateTimeToRestartMatchmaking( float time )                                                                                                                                  
 {
 	file.timeToRestartMatchMaking  = time
 
@@ -176,7 +174,7 @@ void function UpdateMatchmakingStatus()
 			if ( activeSearchingPlaylist.len() > 0 )
 			{
 				lastActiveSearchingPlaylist = activeSearchingPlaylist
-				file.matchmakingStartTime = Time()
+				file.matchmakingStartTime = UITime()
 			}
 			else
 			{
@@ -258,7 +256,7 @@ void function ShowMatchmakingStatusIcons()
 {
 	if (GetActiveMenu() == GetMenu( "LobbyMenu" ) )
 	{
-		Hud_SetVisible( Hud_GetChild( GetMenu( "LobbyMenu" ), "MatchmakingStatus" ),  GetMenuActiveTabIndex( GetMenu( "LobbyMenu" ) ) != 0 )
+		Hud_SetVisible( Hud_GetChild( GetMenu( "LobbyMenu" ), "MatchmakingStatus" ),  GetMenuActiveTabIndex( GetMenu( "LobbyMenu" ) ) != 1 )
 	}
 
 	foreach ( element in file.matchStatusRuis )
@@ -287,14 +285,10 @@ void function MatchmakingSetCountdownVisible( bool state )
 {
 	foreach ( element in file.matchStatusRuis )
 		MMStatusRui_SetCountdownVisible( Hud_GetRui( element ), state )
-
-	MMStatusOnHUD_SetCountdownVisible( state )
 }
 
-void function MatchmakingSetCountdownTimer( float time, bool useServerTime = true ) //
+void function MatchmakingSetCountdownTimer( float time, bool useServerTime = true )                                                                                                                                             
 {
 	foreach ( element in file.matchStatusRuis )
 		MMStatusRui_SetCountdownTimer( Hud_GetRui( element ), time, useServerTime )
-
-	MMStatusOnHUD_SetCountdownTimer( time, useServerTime )
 }

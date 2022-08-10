@@ -1,36 +1,16 @@
-untyped
-
 global function CLEventNotification_Init
 global function ServerCallback_EventNotification
-global function EventNotification
-global function SetEventNotificationHATT
-global function SetTimedEventNotificationHATT
-global function SetEventNotification
-global function SetTimedEventNotification
 global function HideEventNotification
 global function AddEventNotificationCallback
-global function AddPermanentEventNotification
-global function RestorePermanentEventNotification
-global function EmitCountdownSound
-
-global function SetEventNotificationEndingOnSignals //
-
-const EN_SHOW_OVER_SCREENFADE = 0x00000001
 
 void function CLEventNotification_Init()
 {
 	RegisterSignal( "SetEventNotification" )
-	RegisterEntityVarChangeCallback( "player", "permanentEventNotification", PermanentEventNotificationChanged )
-	AddCreatePilotCockpitCallback( CockpitCreate_RestorePermanentEventNotification )
-	AddCreateTitanCockpitCallback( CockpitCreate_RestorePermanentEventNotification )
 }
 
 void function ServerCallback_EventNotification( int eventID, int eHandle, var eventVal )
 {
-	entity ent
-	if ( eHandle )
-		ent = GetEntityFromEncodedEHandle( eHandle )
-
+	entity ent = (eHandle ? GetEntityFromEncodedEHandle( eHandle ) : null)
 	EventNotification( eventID, ent, eventVal )
 }
 
@@ -41,28 +21,16 @@ void function EventNotification( int eventID, entity ent, var eventVal )
 	switch ( eventID )
 	{
 		case  eEventNotifications.RoundWinningKillReplayCancelled:
-			SetTimedEventNotification( 5.0, "#ROUND_WINNING_KILL_REPLAY_CANCELLED", null, null, EN_SHOW_OVER_SCREENFADE )
+			SetTimedEventNotification( 5.0, "#ROUND_WINNING_KILL_REPLAY_CANCELLED" )
 			break
 
 		case eEventNotifications.Grapple_WasGrappled_ByPilot:
 		case eEventNotifications.Grapple_WasGrappled_ByTitan:
 			SmartAmmo_SetStatusWarning( "#GRAPPLED_WARNING", 3.0 )
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
 			break
 
 		case eEventNotifications.BLEEDOUT_SelfHealPrompt:
-			//
+			                                                                                                       
 			if ( player.p.lastEventNotificationText == "#BLEEDOUT_USE_SELF_RES_DYNAMIC" )
 				player.p.lastEventNotificationText = ""
 			SetTimedEventNotification( 1.0, "#BLEEDOUT_USE_SELF_RES_DYNAMIC" )
@@ -78,96 +46,26 @@ void function EventNotification( int eventID, entity ent, var eventVal )
 	}
 }
 
-void function SetEventNotificationHATT( string eventText, eventHATT = null, eventVal = 0, int flags = 0 )
-{
-	SetTimedEventNotification( 0, eventText, eventHATT, eventVal )
-}
-
-void function SetTimedEventNotificationHATT( float duration, string eventText, eventHATT, eventVal = 0, int flags = 0 )
+void function SetTimedEventNotification( float duration, string eventText )
 {
 	entity player = GetLocalClientPlayer()
-
-	if ( eventText != player.p.lastEventNotificationText )
-	{
-		Hud_SetAlpha( player.cv.hud.s.eventNotification, 0 )
-		Hud_FadeOverTime( player.cv.hud.s.eventNotification, 255, 1.0 )
-	}
-	else
-	{
-		Hud_SetAlpha( player.cv.hud.s.eventNotification, 255 )
-	}
-	Hud_Show( player.cv.hud.s.eventNotification )
-
-	Hud_SetAutoText( player.cv.hud.s.eventNotification, eventText, eventHATT, eventVal )
-	player.p.lastEventNotificationText = eventText
-
-	if ( !Hud_IsAutoText( player.cv.hud.s.eventNotification ) )
-		Hud_EnableAutoText( player.cv.hud.s.eventNotification )
-
-	player.Signal( "SetEventNotification" )
-
-	int zPos = 1000 //
-	if ( flags & EN_SHOW_OVER_SCREENFADE )
-		zPos = 3501
-
-	Hud_SetZ( player.cv.hud.s.eventNotification, zPos )
-
-	if ( duration )
-		thread HideEventNotificationWithDelay( duration )
-}
-
-void function SetEventNotification( string eventText, eventArg1 = null, eventArg2 = null, int flags = 0 )
-{
-	SetTimedEventNotification( 9999.0, eventText, eventArg1, eventArg2, flags )
-}
-
-void function SetTimedEventNotification( float duration, string eventText, eventArg1 = null, eventArg2 = null, int flags = 0 )
-{
-	entity player = GetLocalClientPlayer()
-
 	printt( "SetTimedEventNotification", duration, eventText, player.p.lastEventNotificationText )
 
 	if ( eventText == player.p.lastEventNotificationText )
-	{
-		//
-		//
 		HidePlayerHint( eventText )
-	}
 	else
-	{
-		//
-		AddPlayerHint( duration, 0.25, $"", eventText, eventArg1, eventArg2 )
-	}
-	//
-
-	//
-	//
-
-	//
+		AddPlayerHint( duration, 0.25, $"", eventText )
 	player.p.lastEventNotificationText = eventText
 
 	player.Signal( "SetEventNotification" )
-
-	//
-	//
-	//
-
-	//
 
 	if ( duration && duration < 9999 )
 		thread HideEventNotificationWithDelay( duration )
 }
 
-void function SetEventNotificationEndingOnSignals( string eventText, signalArray, eventArg1 = null, eventArg2 = null, int flags = 0 )
-{
-	SetEventNotification( eventText, eventArg1, eventArg2, flags )
-	thread HideEventNotificationOnSignals( signalArray )
-}
-
 void function HideEventNotification()
 {
 	ClearEventNotification()
-	RestorePermanentEventNotification()
 }
 
 void function HideEventNotificationWithDelay( float delay )
@@ -183,43 +81,6 @@ void function HideEventNotificationWithDelay( float delay )
 	HideEventNotification()
 }
 
-void function HideEventNotificationOnSignals( signalArray )
-{
-	entity player = GetLocalClientPlayer()
-	foreach ( signal in signalArray )
-		player.EndSignal( signal )
-
-	OnThreadEnd(
-		function() : ()
-		{
-			HideEventNotification()
-		}
-	)
-
-	WaitForever()
-}
-
-void function RestorePermanentEventNotification()
-{
-	if ( IsWatchingReplay() )
-		return
-
-	entity player = GetLocalClientPlayer()
-	int permanentEventNotificationID = expect int( player.nv.permanentEventNotification )
-	//
-	if ( permanentEventNotificationID != ePermanentEventNotifications.Empty )
-	{
-		Assert( permanentEventNotificationID in clGlobal.permanentEventNotifications )
-		SetEventNotification( clGlobal.permanentEventNotifications[ permanentEventNotificationID ] )
-	}
-}
-
-void function CockpitCreate_RestorePermanentEventNotification( entity cockpit, entity player )
-{
-	RestorePermanentEventNotification()
-}
-
-//
 void function ClearEventNotification()
 {
 	entity player = GetLocalClientPlayer()
@@ -227,64 +88,10 @@ void function ClearEventNotification()
 		return
 
 	HidePlayerHint( player.p.lastEventNotificationText )
-	//
-}
-
-void function EmitCountdownSound( float endCountdownTime, string soundAlias = "UI_InGame_MarkedForDeath_CountdownToMarked" )
-{
-	//
-
-	float remainingTime = endCountdownTime - Time()
-	while ( remainingTime > 0 )
-	{
-		entity player = GetLocalClientPlayer() //
-		EmitSoundOnEntity( player, soundAlias )
-		wait 1.0
-		remainingTime -= 1.0
-	}
 }
 
 void function AddEventNotificationCallback( int eventNotificationID, void functionref( entity, var ) callbackFunc )
 {
 	Assert( !(eventNotificationID in clGlobal.eventNotificationCallbacks), "Already have callbackFunc : " + string( clGlobal.eventNotificationCallbacks[ eventNotificationID ] ) + " associated with eEventNotificationID: " + eventNotificationID )
 	clGlobal.eventNotificationCallbacks[ eventNotificationID ] <- callbackFunc
-}
-
-void function AddPermanentEventNotification( int enumValue, string displayString )
-{
-	clGlobal.permanentEventNotifications[ enumValue ] <- displayString
-}
-
-//
-function PermanentEventNotificationChanged( player, newValue, oldValue )
-{
-	Assert( player == GetLocalClientPlayer() )
-	expect int( newValue )
-	expect int( oldValue )
-
-	if ( newValue == ePermanentEventNotifications.Empty )
-	{
-		if ( !IsValid( player ) || !player.cv )
-			return
-
-		if ( newValue == oldValue )
-			//
-			return
-
-		Assert( oldValue in clGlobal.permanentEventNotifications )
-
-		string eventNotificationText = clGlobal.permanentEventNotifications[ oldValue ]
-
-		if ( player.p.lastEventNotificationText != eventNotificationText )
-			return
-
-		ClearEventNotification()
-	}
-	else
-	{
-		Assert( newValue in clGlobal.permanentEventNotifications )
-		string eventNotificationText = clGlobal.permanentEventNotifications[ newValue ]
-
-		SetEventNotification( eventNotificationText )
-	}
 }

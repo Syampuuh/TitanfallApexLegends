@@ -1,0 +1,867 @@
+global function AutoPlayer_DropRandomLoot
+global function AutoPlayer_DropUselessItems
+global function AutoPlayer_DropInventory
+global function AutoPlayer_Init
+global function AutoPlayer_GetSeekAndDestroyPosition
+global function AutoPlayer_HasHealingConsumable
+global function AutoPlayer_GetHealingConsumableType
+global function AutoPlayer_GetHealingConsumableModName
+global function AutoPlayer_HasMobileRespawnBeacon
+global function AutoPlayer_EquipMobileRespawnBeacon
+global function AutoPlayer_GetCarePackagePlacementPosition
+global function AutoPlayer_GetWinterExpressRoundState
+global function AutoPlayer_GetWinterExpressNextStationPosition
+global function AutoPlayer_GetWinterExpressRandomTrainPosition
+global function AutoPlayer_CloseCraftingMenu
+global function AutoPlayer_LootItemFromDeathbox
+global function AutoPlayer_TranslateItemType
+global function AutoPlayer_GetAmmoPoolTypeByLootTableIndex
+global function AutoPlayer_GetLootTier
+global function AutoPlayer_ForceLegend
+global function AutoPlayer_SetLegend
+global function AutoPlayer_InteractWithNearestDoor
+global function AutoPlayer_MovePastNearestDoor
+global function AutoPlayer_AttackNearestDoor
+global function AutoPlayer_ScriptedPrimaryObjectiveCallback
+global function AutoPlayer_GetPlayerNetInt
+global function AutoPlayer_RespawnIfChoosing
+global function AutoPlayer_GetPlayerInventory
+global function AutoPlayer_GetLootRef
+global function AutoPlayer_HasVaultKey
+global function AutoPlayer_PINPlayerStuck
+
+struct
+{
+	table< int, string >         typeToHealModName
+	table< entity, KitHealData > playerBestHealingConsumableCache
+	array< int >                 healthKitUseOrder = []
+} file
+
+void function AutoPlayer_Init()
+{
+	#if SERVER
+		                                                  
+	#endif
+
+	AddCallback_GameStateEnter( eGameState.Playing, AutoPlayer_GameStatePlaying )
+
+	#if SERVER
+		                                                                                 
+		                                                                          
+		                                                                                        
+	#endif
+
+                        
+		if ( IsArenaMode() )
+		{
+			AddCallback_GameStateEnter( eGameState.Prematch, AutoPlayer_BuyArenasUpgrades )
+		}
+       
+
+	file.typeToHealModName[ eConsumableType.COMBO_FULL ] <- "phoenix_kit"
+	file.typeToHealModName[ eConsumableType.SHIELD_LARGE ] <- "shield_large"
+                         
+                                                                                             
+                                                                                               
+                                                                                             
+       
+	file.typeToHealModName[ eConsumableType.SHIELD_SMALL ] <- "shield_small"
+	file.typeToHealModName[ eConsumableType.HEALTH_LARGE ] <- "health_large"
+	file.typeToHealModName[ eConsumableType.HEALTH_SMALL ] <- "health_small"
+	file.typeToHealModName[ eConsumableType.ULTIMATE ] <- "ultimate_battery"
+
+	file.healthKitUseOrder.append( eHealthPickupType.SHIELD_LARGE )
+                         
+                                                                          
+                                                                           
+                                                                          
+       
+	file.healthKitUseOrder.append( eHealthPickupType.SHIELD_SMALL )
+	file.healthKitUseOrder.append( eHealthPickupType.COMBO_FULL )
+	file.healthKitUseOrder.append( eHealthPickupType.HEALTH_LARGE )
+	file.healthKitUseOrder.append( eHealthPickupType.HEALTH_SMALL )
+}
+
+vector function AutoPlayer_GetSeekAndDestroyPosition()
+{
+	return canyonlandsPositions.getrandom()
+}
+
+void function AutoPlayer_DropBackpackItem( entity player, string item, int dropCount )
+{
+	#if SERVER
+		                                                    
+	#else
+		Remote_ServerCallFunction( "ClientCallback_Sur_DropBackpackItem", item, dropCount, null )                          
+	#endif
+}
+
+void function AutoPlayer_DropInventory( entity player, string item, int dropCount )
+{
+	string eqSlot = ""
+	foreach ( equipSlot, es in EquipmentSlot_GetAllEquipmentSlots() )
+	{
+		LootData lootData = EquipmentSlot_GetEquippedLootDataForSlot( player, equipSlot )
+		if ( lootData.ref == item )
+		{
+			eqSlot = equipSlot.tostring()
+		}
+	}
+
+	#if SERVER
+		                                                    
+		
+		                  
+			                                              
+
+		                                
+		 
+			                                                                                          
+			                                                                                          
+		 
+	#else
+		Remote_ServerCallFunction( "ClientCallback_Sur_DropBackpackItem", item, dropCount, null )
+
+		if ( eqSlot != "")
+			Remote_ServerCallFunction( "ClientCallback_Sur_DropEquipment", eqSlot )
+
+		if ( IsValidAttachment( item ) )
+		{	
+			Remote_ServerCallFunction( "ClientCallback_Sur_UnequipAttachment", item, WEAPON_INVENTORY_SLOT_PRIMARY_0, true )
+			Remote_ServerCallFunction( "ClientCallback_Sur_UnequipAttachment", item, WEAPON_INVENTORY_SLOT_PRIMARY_1, true )
+		}
+	#endif
+}
+
+void function AutoPlayer_DropRandomLoot( entity player )
+{
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
+	if ( playerInventory.len() )
+	{
+		ConsumableInventoryItem item = playerInventory.getrandom()
+		LootData lootData = SURVIVAL_Loot_GetLootDataByIndex( item.type )
+		AutoPlayer_DropBackpackItem( player, lootData.ref, item.count )
+	}
+}
+
+array<string> function AutoPlayer_GetNeededAmmoTypes( entity player )
+{
+	array< entity > playerWeapons = player.GetMainWeapons()
+
+	array< string > neededAmmoTypes
+	foreach( entity weapon in playerWeapons )
+	{
+		string weaponRef = GetWeaponClassName( weapon )
+		string ammoType = GetWeaponAmmoType( weaponRef )
+
+		if ( weapon.GetWeaponSettingBool( eWeaponVar.uses_ammo_pool ) )
+		{
+			neededAmmoTypes.append( ammoType )
+		}
+	}
+	return neededAmmoTypes
+}
+
+int function AutoPlayer_GetWeaponCount( entity player )
+{
+	int count = 0
+	entity weaponInSlot0 = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_0 )
+	if ( IsValid( weaponInSlot0 ) )
+		++count
+
+	entity weaponInSlot1 = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_1 )
+	if ( IsValid( weaponInSlot1 ) )
+		++count
+
+	return count
+}
+
+                                                                 
+bool function AutoPlayer_HasVaultKey( entity player )
+{
+	if ( player.GetPlayerNetBool( "hasDataKnife" ) )
+		return true
+                   
+	else if ( GetCurrentPlaylistVarBool( "loot_vaults_enabled", true ) && player.GetPlayerNetBool( "hasShipKeycard" ) )
+		return true
+                         
+
+	return false
+}
+
+bool function AutoPlayer_IsLootUseful( entity player, LootData lootData, array<string> neededAmmoTypes )
+{
+	if ( lootData.lootType == eLootType.AMMO )
+	{
+		if ( neededAmmoTypes.len() == 0 )                                                           
+			return true
+
+		return neededAmmoTypes.contains( lootData.ref )
+	}
+	else if ( lootData.lootType == eLootType.MAINWEAPON )
+	{
+		int weaponCount = AutoPlayer_GetWeaponCount( player )
+		if ( weaponCount==0 )
+		{
+			return true
+		}
+		if ( weaponCount >= 2 )
+		{
+			return false
+		}
+
+		if ( neededAmmoTypes.contains( lootData.ammoType ) )
+		{
+			return false
+		}
+
+		return true                                           
+	}
+	else if ( lootData.lootType == eLootType.ATTACHMENT )
+	{
+		return false
+	}
+
+	return true
+}
+
+bool function AutoPlayer_DropUselessItems( entity player )
+{
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
+	int inventoryLimit = SURVIVAL_GetInventoryLimit( player )
+	if ( (inventoryLimit - playerInventory.len()) > 1 )                                                  
+	{
+		return false
+	}
+
+	array<string> neededAmmoTypes = AutoPlayer_GetNeededAmmoTypes( player )
+
+	bool itemsDropped = false
+	foreach ( index, item in playerInventory )
+	{
+		LootData lootData = SURVIVAL_Loot_GetLootDataByIndex( item.type )
+
+		if ( !AutoPlayer_IsLootUseful( player, lootData, neededAmmoTypes ) )
+		{
+			AutoPlayer_DropBackpackItem( player, lootData.ref, item.count )
+			itemsDropped = true
+		}
+	}
+
+	return itemsDropped
+}
+
+int function AutoPlayer_CompareHealData( KitHealData a, KitHealData b )
+{
+	if ( a.totalAppliedHeal < 75 && a.totalOverheal > 75 && a.totalOverheal > b.totalOverheal )
+		return 1
+	else if ( b.totalAppliedHeal < 75 && b.totalOverheal > 75 && b.totalOverheal > a.totalOverheal )
+		return -1
+
+	if ( a.totalAppliedHeal > 0 && b.totalAppliedHeal == 0 )
+		return -1
+	else if ( b.totalAppliedHeal > 0 && a.totalAppliedHeal == 0 )
+		return 1
+
+	if ( !a.possibleShieldAdd && !b.possibleShieldAdd )
+	{
+		if ( a.possibleHealthAdd > b.possibleHealthAdd )
+			return -1
+		else if ( b.possibleHealthAdd > a.possibleHealthAdd )
+			return 1
+	}
+
+	if ( a.healthKit.interactionTime < b.healthKit.interactionTime )
+		return -1
+	else if ( a.healthKit.interactionTime > b.healthKit.interactionTime )
+		return 1
+
+	return 0
+}
+
+KitHealData function AutoPlayer_GetBestHealingPickup( entity player )
+{
+	array<KitHealData> healthDataArray
+	foreach ( int kitType in file.healthKitUseOrder )
+	{
+		KitHealData healData = SURVIVAL_CreateKitHealData( player, kitType )
+		healthDataArray.append( healData )
+	}
+
+	healthDataArray.sort( AutoPlayer_CompareHealData )
+
+	foreach ( KitHealData healData in healthDataArray )
+	{
+		if ( healData.count > 0 )
+			return healData
+	}
+
+	return healthDataArray[0]
+}
+
+void function AutoPlayer_RefreshPlayerBestHealingConsumableCache( entity player )
+{
+	KitHealData healingPickup = AutoPlayer_GetBestHealingPickup( player )
+
+	file.playerBestHealingConsumableCache[ player ] <- healingPickup
+}
+
+bool function AutoPlayer_HasHealingConsumable( entity player )
+{
+	AutoPlayer_RefreshPlayerBestHealingConsumableCache( player )
+
+	KitHealData healData = file.playerBestHealingConsumableCache[ player ]
+
+	return healData.count > 0 && healData.totalAppliedHeal > 0
+}
+
+int function AutoPlayer_GetHealingConsumableType( entity player )
+{
+	                                                                       
+	if ( !(player in file.playerBestHealingConsumableCache) )
+		AutoPlayer_RefreshPlayerBestHealingConsumableCache( player )
+
+	KitHealData	healingPickup = file.playerBestHealingConsumableCache[ player ]
+
+	if ( healingPickup.count <= 0 )
+		return -1
+
+	return healingPickup.kitType
+}
+
+string function AutoPlayer_GetHealingConsumableModName( entity player )
+{
+	int bestHealingConsumableType = AutoPlayer_GetHealingConsumableType( player )
+
+	if ( bestHealingConsumableType < 0 )
+		return ""
+
+	return file.typeToHealModName[ bestHealingConsumableType ]
+}
+
+void function AutoPlayer_EquipMobileRespawnBeacon( entity player )
+{
+	entity gadget = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+                                
+                                                                                                                                                                   
+      
+	if( IsValid( gadget ) && gadget.GetWeaponClassName() == "mp_ability_mobile_respawn_beacon" )
+       
+	{
+		entity activeWeapon = player.GetActiveWeapon( eActiveInventorySlot.mainHand )
+
+		if ( activeWeapon != gadget )
+		#if SERVER
+			                                                                                          
+		#else
+			Remote_ServerCallFunction( "ClientCallback_Sur_EquipGadget", gadget.GetWeaponClassName() )
+		#endif
+	}
+}
+
+bool function AutoPlayer_HasMobileRespawnBeacon( entity player )
+{
+	entity gadget = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_GADGET )
+
+
+                                
+                                                                                                                                                                   
+      
+	if( IsValid( gadget ) && gadget.GetWeaponClassName() == "mp_ability_mobile_respawn_beacon" )
+       
+		return true
+
+	return false
+}
+
+int function AutoPlayer_GetWinterExpressRoundState()
+{
+	#if SERVER
+                        
+                                                                
+                                                                                                                  
+   
+                                                                       
+   
+                   
+        
+	#endif         
+
+	return -1
+}
+
+vector function AutoPlayer_GetWinterExpressNextStationPosition()
+{
+	#if SERVER && DEV
+                        
+                                                                  
+                            
+   
+                                                             
+                                                      
+   
+        
+	#endif         
+
+	return <0,0,0>
+}
+
+vector function AutoPlayer_GetWinterExpressRandomTrainPosition()
+{
+	vector position = <0,0,0>
+
+	#if SERVER
+                        
+                                                                                 
+
+                                                                          
+                 
+                                                                                               
+                               
+   
+                                                                                                                               
+                                           
+    
+                                            
+     
+                    
+     
+    
+   
+        
+	#endif         
+
+	return position
+}
+
+vector function AutoPlayer_GetCarePackagePlacementPosition( entity player )
+{
+	CarePackagePlacementInfo placementInfo = GetCarePackagePlacementInfo( player )
+
+	return placementInfo.origin
+}
+
+void function AutoPlayer_CloseCraftingMenu( entity player )
+{
+	#if SERVER
+		                                             
+			                                           
+	#endif
+}
+
+void function AutoPlayer_LootItemFromDeathbox( entity player, entity item, entity deathBox )
+{
+	#if SERVER
+		                                                              
+	#endif
+
+	#if CLIENT
+		Remote_ServerCallFunction( "ClientCallback_PickupSurvivalItem", item, 0, deathBox )
+	#endif
+}
+
+int function AutoPlayer_TranslateItemType( int lootTableIndex )
+{
+	switch ( SURVIVAL_Loot_GetLootDataByIndex( lootTableIndex ).lootType )
+	{
+		case eLootType.MAINWEAPON:
+			return AUTO_PLAYER_LOOT_TYPE_WEAPON
+
+		case eLootType.AMMO:
+			return AUTO_PLAYER_LOOT_TYPE_AMMO
+
+		case eLootType.ARMOR:
+			return AUTO_PLAYER_LOOT_TYPE_ARMOR
+
+		case eLootType.HELMET:
+			return AUTO_PLAYER_LOOT_TYPE_HELMET
+                      
+		case eLootType.DATAKNIFE:
+			return AUTO_PLAYER_LOOT_TYPE_VAULTKEYCARD
+      
+                  
+		case eLootType.SHIPKEYCARD:
+			return AUTO_PLAYER_LOOT_TYPE_VAULTKEYCARD
+      
+	}
+
+	return AUTO_PLAYER_LOOT_TYPE_OTHER
+}
+
+int function AutoPlayer_GetAmmoPoolTypeByLootTableIndex( int ammoLootTableIndex )
+{
+	return eAmmoPoolType[ SURVIVAL_Loot_GetLootDataByIndex( ammoLootTableIndex ).ref ]
+}
+
+int function AutoPlayer_GetLootTier( int lootTableIndex )
+{
+	return SURVIVAL_Loot_GetLootDataByIndex( lootTableIndex ).tier
+}
+
+string function AutoPlayer_GetLootRef( int lootTableIndex )
+{
+	return SURVIVAL_Loot_GetLootDataByIndex( lootTableIndex ).ref
+}
+
+string function AutoPlayer_GetPlayerInventory( entity player )
+{
+	string items = ""
+
+	foreach ( equipSlot, es in EquipmentSlot_GetAllEquipmentSlots() )
+	{
+		LootData lootData = EquipmentSlot_GetEquippedLootDataForSlot( player, equipSlot )
+	
+		items += equipSlot.tostring() + "," +
+				lootData.lootType.tostring() + "," +
+				( SURVIVAL_Loot_IsRefValid( lootData.ref ) ? "1," : "0," ) +
+				lootData.ref + "," +
+				lootData.tier.tostring()
+
+		items += "|||"
+	}
+
+	array<ConsumableInventoryItem> playerInventory = SURVIVAL_GetPlayerInventory( player )
+
+	foreach ( index, item in playerInventory )
+	{
+		LootData lootData = SURVIVAL_Loot_GetLootDataByIndex( item.type )
+
+		items += item.slot.tostring() + "," +
+				item.type.tostring() + "," +
+				item.count.tostring() + "," +
+				lootData.ref + "," +
+				lootData.tier.tostring()
+
+		items += "|||"
+	}
+
+	return items
+}
+
+void function AutoPlayer_ForceRandomLegend( entity player, array<ItemFlavor> charactersThatCannotBeSelected = [] )
+{
+	#if SERVER
+		                                                           
+		                                                                          
+		                                                                                                                                           
+		                                                                           
+	#endif
+}
+
+                                          
+void function AutoPlayer_PickLoadouts( )
+{
+	#if SERVER
+		                                                     
+		                                                                                         
+
+		           
+
+		                                               
+			           
+
+		                                          
+
+		                                                            
+
+		                 
+		                                                                  
+		 
+			                                                                                              
+			                                                                                      
+
+			                                               
+			                     
+
+			                                                 
+
+			                                                      
+
+			                                             
+			 
+				                                                   
+				 
+					                                               
+
+					                                                          
+						                                                                                                                    
+				 
+
+				                                                                                           
+				 
+					                                                                                        
+
+					                                                             
+				 
+			 
+
+			                                                                                                                        
+			                                
+
+			                             
+			 
+				                                                        
+
+				                                              
+				 
+					                                                       
+					 
+						                                                                              
+					 
+				 
+			 
+
+			                                             
+			 
+				                                                                                            
+					        
+
+				                                         
+					        
+
+				                                                                                            
+
+				                                                          
+					                                   
+
+				                                                       
+
+				                                                                      
+				                                                      
+			 
+
+			                                                                            
+		 
+	#endif
+}
+
+void function AutoPlayer_PickLoadoutCallback()
+{
+	#if SERVER
+		                                        
+		 
+			                                
+		 
+	#endif
+}
+
+void function AutoPlayer_ForceLegend( entity player, string legendReadableRef )
+{
+	#if SERVER
+		                                                                           
+		                                                                           
+	#endif
+}
+
+void function AutoPlayer_SetLegend( entity player, string legendReadableRef )
+{
+	ItemFlavor character = GetItemFlavorByHumanReadableRef( legendReadableRef )
+
+	#if SERVER
+		                                                                           
+	#elseif CLIENT
+		#if DEV
+			DEV_RequestSetItemFlavorLoadoutSlot( LocalClientEHI(), Loadout_Character(), character )
+		#else
+			                                                                                       
+			RequestSetItemFlavorLoadoutSlot( LocalClientEHI(), Loadout_Character(), character ) 
+		#endif
+	#endif
+}
+
+void function AutoPlayer_InteractWithNearestDoor( entity player )
+{
+	array<entity> allDoors = GetAllPropDoors()
+	entity closestDoor = GetClosest( allDoors, player.GetOrigin() )
+	vector targetPosition = closestDoor.GetOrigin() + ( closestDoor.GetForwardVector() * (2.0 * 39.97) )                         
+	AutoPlayer_GivePrimaryObjective( player, 16, targetPosition )                        
+}
+
+void function AutoPlayer_MovePastNearestDoor( entity player )
+{
+	array<entity> allDoors = GetAllPropDoors()
+	entity closestDoor = GetClosest( allDoors, player.GetOrigin() )
+	vector targetPosition = closestDoor.GetOrigin() + ( closestDoor.GetForwardVector() * (2.0 * 39.97) )                         
+	AutoPlayer_GivePrimaryObjective( player, 0, targetPosition )                        
+}
+
+void function AutoPlayer_AttackNearestDoor( entity player )
+{
+	array<entity> allDoors = GetAllPropDoors()
+	entity closestDoor = GetClosest( allDoors, player.GetOrigin() )
+	vector targetPosition = closestDoor.GetOrigin() + ( closestDoor.GetForwardVector() * (2.0 * 39.97) )                         
+	AutoPlayer_GivePrimaryObjective( player, 1, targetPosition )                        
+}
+
+void function AutoPlayer_ScriptedPrimaryObjectiveCallback( bool success )
+{
+	printl( "AUTOPLAYER OBJECTIVE WAS " + string( success ) )
+}
+
+int function AutoPlayer_GetPlayerNetInt( entity player, string name )
+{
+	return player.GetPlayerNetInt( name )
+}
+
+                                                                                    
+void function AutoPlayer_PINPlayerStuck( entity player, string spawnType )
+{
+#if SERVER
+	                                             
+#endif
+}
+
+void function AutoPlayer_RespawnIfChoosing( entity player )
+{
+	#if CLIENT
+                         
+		if ( player.GetPlayerNetBool( "Control_IsPlayerOnSpawnSelectScreen" ) )
+		{
+			Control_SendRespawnChoiceToServer( eControlPlayerRespawnChoice.SPAWN_AT_BASE, null )
+		}
+       
+	#endif
+}
+
+                       
+void function AutoPlayer_BuyArenasUpgrades()
+{
+	thread AutoPlayer_ActuallyBuyArenasUpgrades()
+}
+
+void function AutoPlayer_ActuallyBuyArenasUpgrades()
+{
+	                                                                                                        
+	wait 20
+
+	foreach ( entity player in GetPlayerArray() )
+	{
+		if ( AutoPlayer_IsAutoPlayer( player ) )
+		{
+			#if SERVER
+				                                
+			#endif
+
+			EHI playerEHI = ToEHI( player )
+			LoadoutEntry characterSlot = Loadout_Character()
+
+			if ( LoadoutSlot_IsReady( playerEHI, characterSlot ) )
+			{
+				ItemFlavor characterClass = LoadoutSlot_GetItemFlavor( playerEHI, characterSlot )
+				array<ItemFlavor> emotesList = RegisterReferencedItemFlavorsFromArray( characterClass, "emotes", "flavor" )
+
+				if ( emotesList.len() > 0 )
+				{
+					#if SERVER
+						                                                           
+					#elseif CLIENT
+						RequestCharacterEmote( player, ItemFlavor_GetNetworkIndex( emotesList.getrandom() ) )
+					#endif
+				}
+			}
+
+			for ( int i = 0; i < 20; ++i )                                                                              
+			{
+				int index = RandomIntRange( 0, 40 )
+
+				#if SERVER
+					                                             
+				#elseif CLIENT
+					Remote_ServerCallFunction( "ClientCallback_Arenas_Select", index )
+				#endif
+			}
+		}
+	}
+}
+      
+
+array<vector> canyonlandsPositions = [
+                            
+<-4952, 4278, 2137>,
+        
+<26495, 19955, 3619>,
+                    
+<27728, 23951, 4047>,
+          
+<24769, 16174, 3766>,
+          
+<35653, 1553, 3080>,
+            
+<35653, 1553, 3080>,
+          
+<23376, 5924, 4023>,
+                  
+<23376, 5924, 4023>,
+          
+<23971, -12173, 4664>,
+           
+<25228, -6030, 4690>,
+               
+<20171, -5959, 4352>,
+                  
+<24721, -15191, 4776>,
+             
+<23701, -21659, 4479>,
+          
+<13308, 16605, 4711>,
+            
+<13977, 13587, 4764>,
+          
+<10954, 9447, 5060>,
+          
+<12519, -2183, 3340>,
+               
+<10342, -2700, 2588>,
+       
+<3190, -6764, 3022>,
+          
+<13692, -20535, 1739>,
+             
+<11296, -21723, 1846>,
+                  
+<14422, -17861, 4266>,
+          
+<6663, 29473, 4896>,
+                   
+<6663, 29473, 4896>,
+                  
+<-1685, 29399, 4775>,
+                     
+<3501, 25020, 4128>,
+          
+<-1388, 14948, 2382>,
+              
+<682, 14756, 2349>,
+                  
+<-286, 20976, 4570>,
+           
+<-992, -536, 2030>,
+              
+<-2927, 719, 2056>,
+       
+<-1363, -4926, 2808>,
+             
+<-7378, 5375, 2401>,
+           
+<7931, -27703, 3441>,
+                 
+<8044, -29286, 3008>,
+           
+<-19200, 23094, 2592>,
+            
+<-22371, 23431, 2497>,
+           
+<-16764, 6234, 3092>,
+             
+<-16367, 5191, 2981>,
+         
+<-16331, 15208, 3704>,
+       
+<-19655, 9581, 2969>,
+             
+<-10441, 5368, 2847>,
+            
+<-17605, -7482, 2759>,
+              
+<-8525, -2059, 2953>
+]

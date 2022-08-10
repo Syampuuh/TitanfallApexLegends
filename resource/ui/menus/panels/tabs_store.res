@@ -30,15 +30,82 @@ resource/ui/menus/panels/tabs_store.res
 	{
 		ControlName				RuiPanel
 		xpos                    -40
+		xpos_nx_handheld        -50   	[$NX || $NX_UI_PC]
 		wide                    76
+		wide_nx_handheld        116   	[$NX || $NX_UI_PC]
 		tall					28
+		tall_nx_handheld		38    	[$NX || $NX_UI_PC]
 		visible					1
 		rui                     "ui/shoulder_navigation_shortcut_angle.rpak"
 		activeInputExclusivePaint	gamepad
 
-		pin_to_sibling			Tab0
+		pin_to_sibling			Anchor
 		pin_corner_to_sibling	BOTTOM_RIGHT
 		pin_to_sibling_corner	BOTTOM_LEFT
+	}
+
+	TabDivider0
+	{
+		ControlName             RuiPanel
+		classname				TabDividerClass
+
+		pin_to_sibling			Tab0
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+		xpos                    -40
+		ypos                    0
+		wide					88
+		tall					44
+
+		rui                     "ui/tab_divider_store.rpak"
+	}
+
+	TabDivider1
+	{
+		ControlName             RuiPanel
+		classname				TabDividerClass
+
+		pin_to_sibling			Tab0
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+		xpos                    -40
+		ypos                    0
+		wide					88
+		tall					44
+
+		rui                     "ui/tab_divider_store.rpak"
+	}
+
+	TabDivider2
+	{
+		ControlName             RuiPanel
+		classname				TabDividerClass
+
+		pin_to_sibling			Tab0
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+		xpos                    -40
+		ypos                    0
+		wide					88
+		tall					44
+
+		rui                     "ui/tab_divider_store.rpak"
+	}
+
+	TabDivider3
+	{
+		ControlName             RuiPanel
+		classname				TabDividerClass
+
+		pin_to_sibling			Tab0
+		pin_corner_to_sibling	TOP_LEFT
+		pin_to_sibling_corner	TOP_RIGHT
+		xpos                    -40
+		ypos                    0
+		wide					88
+		tall					44
+
+		rui                     "ui/tab_divider_store.rpak"
 	}
 
 	Tab0
@@ -146,14 +213,17 @@ resource/ui/menus/panels/tabs_store.res
 	RightNavButton
 	{
 		ControlName				RuiPanel
-		xpos                    16
+		xpos                    -24
+		xpos_nx_handheld        -24   [$NX || $NX_UI_PC]
 		wide                    76
+		wide_nx_handheld        116   [$NX || $NX_UI_PC]
 		tall					28
+		tall_nx_handheld		38    [$NX || $NX_UI_PC]
 		visible					1
 		rui                     "ui/shoulder_navigation_shortcut_angle.rpak"
 		activeInputExclusivePaint	gamepad
 
-		pin_to_sibling			Tab7
+		pin_to_sibling			Anchor
 		pin_corner_to_sibling	BOTTOM_LEFT
 		pin_to_sibling_corner	BOTTOM_RIGHT
 	}

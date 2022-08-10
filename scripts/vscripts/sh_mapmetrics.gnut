@@ -1,0 +1,667 @@
+global function MapMetrics_Init
+global function MapMetrics_RegisterNetworking
+
+#if SERVER
+                                     
+                             
+                                             
+
+                                                    
+                                                 
+                                                         
+#endif
+
+#if CLIENT
+global function MapMetrics_ClientTakeScreenshot
+global function MapMetrics_ClientInit
+global function MapMetrics_ClientEndMapMetrics
+global function MapMetrics_ClientRecordDataPoint
+#endif
+
+#if SERVER
+                                                                                                 
+                                                                                                 
+                                                                                         
+                                                                                               
+                                                                                                   
+
+                                                                                                                     
+                                                                                                                                                                                         
+
+                                             
+                                          
+                                                      
+                                                        
+                                    
+
+                                                             
+
+                      
+ 
+	           
+	               
+ 
+#endif
+
+#if CLIENT
+const int FRAME_TIME_BUFFER_SIZE = 20
+const float FRAME_TIME_VARIANCE_MAX_WAIT = 1.0       
+const float FRAME_TIME_VARIANCE_TOLERANCE = 1.0       
+#endif
+
+struct
+{
+	#if SERVER
+		                   
+	#endif
+
+	#if CLIENT
+		array<int> bandwidthInArray
+		array<int> bandwidthOutArray
+		string metricsFileName
+		string metricsDataBuffer
+		bool outputFormattedData
+		bool adaptiveScalingOn
+	#endif
+} file
+
+
+void function MapMetrics_Init()
+{
+	#if SERVER
+		                                                          
+			                                                                     
+
+		                                           
+	#endif
+}
+
+void function MapMetrics_RegisterNetworking()
+{
+	if( GetCurrentPlaylistName() != "map_metrics" )
+		return
+
+	Remote_RegisterClientFunction( "MapMetrics_ClientTakeScreenshot", "entity", "string" )
+	Remote_RegisterClientFunction( "MapMetrics_ClientInit", "string", "string", "int", 0, 500, "int", 0, INT_MAX )
+	Remote_RegisterClientFunction( "MapMetrics_ClientEndMapMetrics" )
+	Remote_RegisterClientFunction( "MapMetrics_ClientRecordDataPoint", "entity", "vector", -32000.0, 32000.0, 32, "vector", -200.0, 200.0, 32, "int", 0, 500, "int", -100, 100 )
+	Remote_RegisterServerFunction( "MapMetrics_OnClientRecordMetricsData", "int", 0, 500 )
+	Remote_RegisterServerFunction( "MapMetrics_OnClientTakeScreenshot" )
+}
+
+#if SERVER
+                                                                          
+ 
+	                                          
+		      
+
+	                   
+	                               
+	                                  
+	                        
+	                             
+	                                 
+
+	                                       
+ 
+
+                                     
+ 
+	                          
+ 
+
+                                                     
+ 
+	                        
+
+	                     
+		                                                           
+	      
+
+	                                                                                                                                         
+
+	                           
+
+	                        
+	                                                                           
+	                                         
+		                 
+
+	                      
+	                                                                                   
+	                                        
+		                 
+
+	                                                                                                       
+	                                                                                                                                   
+
+	                                                                              
+	                                                  
+	                                   
+	                                                                           
+
+	                                            
+
+	                                                                                              
+	                                    
+	                                 
+
+	                                                                                                                                       
+
+	                                                                                                     
+
+		                                                                         
+
+		                                                                                                                     
+		                                                              
+
+		                    
+		                                 
+		                                    
+
+		               
+
+		                                         
+			                
+
+		                                        
+			                
+
+		                                    
+
+		                     
+			                                                                                                                              
+		      
+	   
+
+	                                                                   
+	                                          
+
+	                         
+		      
+
+	                                                                     
+	                                                  
+	 
+		                         
+			      
+
+		                                                                                                                
+	 
+
+	                                                                              
+		      
+
+	                                                  
+	 
+		                                                        
+		                                                  
+		 
+			                         
+				      
+
+			                                                                    
+			                                          
+			                                        
+
+			                                                                                                                  
+			                                                                
+				        
+
+			                                                                                                     
+			                     
+				        
+
+			                       
+			                                                                       
+				        
+
+			                            
+			                            
+			                                         
+			 
+				                                            
+				 
+					                      
+					     
+				 
+			 
+			                      
+			 
+				                                        
+				 
+					                                            
+					 
+						                     
+						     
+					 
+				 
+			 
+
+			                                        
+			 
+				        
+			 
+
+			                                                                                                               
+		 
+	 
+ 
+
+                                                    
+ 
+	                                    
+	      
+
+	                                    
+	                           
+	                                                    
+	 
+		                                              
+		                                                  
+		 
+			                                                    
+			                     
+			     
+		 
+	 
+
+	                     
+		                              
+
+	                                         
+	                                                          
+	                                                       
+
+	                                    
+	 
+		                                                   
+		                                                   
+
+		              
+		                     
+		                     
+
+		                                          
+	 
+
+	                              
+ 
+
+                                                                                                                                                              
+ 
+	                           
+
+	           
+	                
+	 
+		                         
+			      
+
+		                            
+		                                        
+
+		                                                                                                                                                            
+
+		     
+	 
+ 
+
+                                                                                                                                                                  
+ 
+	                               
+	                            
+	                                    
+
+	                                                                                                                  
+ 
+
+                                                                                                                                                           
+ 
+	                                                  
+	                                                                                                                           
+	                                                                           
+
+	                        
+	 
+		                                  
+		                                          
+		                                        
+		                                                                                                                                                  
+		                                                
+		                                             
+	 
+ 
+
+                                                                                                         
+ 
+	                     
+		                                                                             
+	      
+
+	                        
+
+	                                                              
+	 
+		                                               
+		                            
+		                                                    
+
+		        
+
+		                                                                                                            
+		                                               
+	 
+
+	                    
+	                                 
+	                                    
+
+	                     
+		                                                    
+
+		                                    
+		                                                                        
+
+		                                          
+		                                          
+		                                          
+	      
+ 
+
+                                                                            
+ 
+	                                                         
+ 
+
+                                                                
+ 
+	                                          
+ 
+
+                                                                        
+ 
+	                                          
+ 
+
+#endif         
+
+#if CLIENT
+void function MapMetrics_ClientTakeScreenshot( entity player, string screenshotFileName )
+{
+	player.ClientCommand( "jpeg " + screenshotFileName )
+	Remote_ServerCallFunction( "MapMetrics_OnClientTakeScreenshot" )
+}
+
+void function MapMetrics_ClientInit( string buildVersion, string launchArgs, int fpsThreshold, int gridSize )
+{
+	file.outputFormattedData = GetCurrentPlaylistVarBool( "map_metrics_output_formatted_data", false )
+	file.adaptiveScalingOn = GetCurrentPlaylistVarBool( "map_metrics_adaptive_scaling", false )
+
+	string buildNum = buildVersion.slice( buildVersion.find( "#" ) )
+	file.metricsFileName = "metrics_" + GetMapName() + "_" + GetConsoleName() + "_CL" + buildNum
+	if( file.outputFormattedData )
+	{
+		file.metricsFileName += ".csv"
+		file.metricsDataBuffer = "Zone ID,Zone Name,setpos,FPS\n"
+	}
+	else
+	{
+		file.metricsFileName += ".txt"
+		file.metricsDataBuffer = "HARDWARE: " + GetConsoleName() + "\n" + buildVersion + "\nLAUNCH ARGS: " + launchArgs + "\nMAP: " + GetMapName() +
+		"\nFPS THRESHOLD: " + fpsThreshold + "\nGRID SIZE: " + gridSize + "\n\n"
+	}
+
+	                                                         
+	SetConVarBool( "dvs_enable", file.adaptiveScalingOn )
+	SetConVarBool( "perf_metrics_drawing_enabled", false )
+	SetConVarInt( "perf_metrics", 3 )
+	SetConVarInt( "fps_max", 0 )
+	SetConVarInt( "not_focus_sleep", 0 )
+}
+
+void function MapMetrics_ClientEndMapMetrics()
+{
+	if( !file.outputFormattedData )
+		RecordNetworkBandwidth()
+
+	WriteMetricsDataToFile( file.metricsFileName, file.metricsDataBuffer, true )
+
+	file.metricsDataBuffer = ""
+	file.metricsFileName = ""
+	file.outputFormattedData = false
+	file.adaptiveScalingOn = false
+
+	                       
+	SetConVarBool( "dvs_enable", true )
+	SetConVarBool( "perf_metrics_drawing_enabled", true )
+	SetConVarInt( "perf_metrics", 0 )
+	SetConVarInt( "fps_max", -1 )
+	SetConVarInt( "not_focus_sleep", 50 )
+}
+
+void function MapMetrics_ClientRecordDataPoint( entity player, vector position, vector angles, int fpsThreshold, int zoneId )
+{
+	thread MapMetrics_ClientRecordDataPoint_Thread( player, position, angles, fpsThreshold, zoneId )
+}
+
+void function MapMetrics_ClientRecordDataPoint_Thread( entity player, vector position, vector angles, int fpsThreshold, int zoneId )
+{
+	                              
+	                                                 
+	 
+		                                     
+		           
+	 
+
+	                        
+	                      
+	                     
+
+	                                                          
+	 
+		                                                                                       
+		                                                             
+
+		                            
+			                      
+
+		                                              
+		 
+			                
+			     
+		 
+
+		                               
+		                                     
+
+		           
+	   
+
+	                                                                                                                                          
+	wait 3.0
+
+	string zoneName = "Not in named Zone"
+	if( zoneId != -1 )
+		zoneName = GetZoneNameForZoneId( zoneId )
+
+	int fps = int( 1.0 / FrameTime() )
+
+	if( file.outputFormattedData )
+	{
+		file.metricsDataBuffer += zoneId + ","
+		file.metricsDataBuffer += zoneName + ","
+		file.metricsDataBuffer += "setpos " + position.x + " " + position.y + " " + position.z + "; setang " + angles.x + " " + angles.y + " " + angles.z + ","
+		file.metricsDataBuffer += fps + "\n"
+
+		Remote_ServerCallFunction( "MapMetrics_OnClientRecordMetricsData", fps )
+		return
+	}
+
+	file.metricsDataBuffer += "Zone: " + zoneId + "\n"
+	file.metricsDataBuffer += "Zone name: " +  zoneName + "\n"
+	file.metricsDataBuffer += "setpos " + position.x + " " + position.y + " " + position.z + "; "
+	file.metricsDataBuffer += "setang " + angles.x + " " + angles.y + " " + angles.z + "\n"
+	file.metricsDataBuffer += "FPS: " + fps  + "\n"
+	if( file.adaptiveScalingOn )
+		file.metricsDataBuffer += "Viewport scale: " + GetClientViewportScaling() + "\n"
+	                  
+		                                                                                                                        
+
+	if( fps < fpsThreshold )
+	{
+		file.metricsDataBuffer += "FPS BELOW GIVEN THRESHOLD!! DUMPING DATA...\n"
+
+		                                                   
+		                                                                                                                                                    
+		                                                                          
+
+		file.metricsDataBuffer +=  GetCurrentPerfData()
+	}
+
+	file.metricsDataBuffer += "\n"
+
+	file.bandwidthInArray.append( GetNetworkBandwithIn() )
+	file.bandwidthOutArray.append( GetNetworkBandwithOut() )
+
+	Remote_ServerCallFunction( "MapMetrics_OnClientRecordMetricsData", fps )
+}
+
+void function RecordNetworkBandwidth()
+{
+	if( file.bandwidthInArray.len() < 2 )
+		return
+
+	file.bandwidthInArray.sort()
+	file.bandwidthOutArray.sort()
+
+	int maxIndex = int( 0.9 * file.bandwidthInArray.len() )                                                         
+	int maxBandwidthIn = file.bandwidthInArray[maxIndex - 1] / 1024
+	int maxBandwidthOut = file.bandwidthOutArray[maxIndex - 1] / 1024
+
+	float varianceIn =  CalculateIntArrayVarianceWithGivenPercentile( file.bandwidthInArray, 0.9 ) / ( 1024 * 1024 )
+	float varianceOut = CalculateIntArrayVarianceWithGivenPercentile( file.bandwidthOutArray, 0.9 ) / ( 1024 * 1024 )
+
+	string networkBandwidthInLine =  "\nMax network bandwidth in (ignoring outliers): " + maxBandwidthIn + " KiB/s\nVariance (ignoring outliers): " + varianceIn + " (KiB/s)^2\n"
+	string networkBandwidthOutLine = "\nMax network bandwidth out (ignoring outliers): " + maxBandwidthOut + " KiB/s\nVariance (ignoring outliers): " + varianceOut + " (KiB/s)^2\n"
+
+	file.metricsDataBuffer += networkBandwidthInLine
+	file.metricsDataBuffer += networkBandwidthOutLine
+
+	file.bandwidthInArray.clear()
+	file.bandwidthOutArray.clear()
+}
+
+#endif         
+
+#if SERVER
+                                                                                                                                                
+ 
+	                                                                              
+	                                                  
+	                                        
+	                                   
+	                                                                           
+
+	                                                  
+	 
+		                                                        
+		            
+
+		                                                  
+		 
+			                                                                  
+			                                          
+			                                        
+
+			              
+			 
+				                                                                
+				                                                                                              
+			 
+			              
+			 
+				                                                                      
+				                                                                                              
+			 
+		 
+	 
+ 
+
+                                                                                                                                         
+ 
+	                                                                           
+	                                                                                   
+
+	                                   
+
+	                                                                              
+	                                                  
+	                                   
+	                                                                           
+
+	                                                  
+	 
+		                                                        
+
+		                                                  
+		 
+			                                                                    
+			                                          
+			                                        
+
+			                                                                                                                  
+			                                                                
+			 
+				                                                                        
+				        
+			 
+
+			                                                                            
+			                     
+			 
+				                                                                        
+				        
+			 
+
+			                       
+			                                                                       
+			 
+				                                                                        
+				        
+			 
+
+			                            
+			                            
+			                                         
+			 
+				                                            
+				 
+					                      
+					     
+				 
+			 
+			                      
+			 
+				                                        
+				 
+					                                            
+					 
+						                     
+						     
+					 
+				 
+			 
+
+			                                        
+			 
+				                                                                        
+				        
+			 
+
+			                                                                          
+			                                                                           
+		 
+	 
+ 
+#endif         

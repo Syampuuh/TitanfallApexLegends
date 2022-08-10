@@ -1,0 +1,594 @@
+  
+	                                                    
+  
+                      
+
+#if SERVER || CLIENT
+global function SpectreShacks_MapInit
+global function SpectreShacks_Bootstrap
+global const int CONTROLSCREEN_TEAM_INDEX= 2
+global const int CONTROLSCREEN_WAVES_CLEARED = 3
+global const int CONTROLSCREEN_MASTER_STATE_INDEX = 4
+global const int CONTROLSCREEN_SIDESCREEN_INDEX = 5
+global const int CONTROLSCREEN_COMBATSTATE_INDEX = 6
+
+global const int ARMORY_SCREEN_MAIN_ENT = 0
+global const int ARMORY_SCREEN_SIDE1_ENT = 1
+global const int ARMORY_SCREEN_SIDE2_ENT = 2
+
+global const asset ARMORY_TOP_PRIZE_VFX = $"P_Loot_ball_TP"
+#endif                    
+
+#if CLIENT
+global function Cl_SpectreShack_OnProximityTriggerEnter
+global function Cl_SpectreShack_OnProximityTriggerLeave
+global function ServerCallback_SpectreShacksUpdateLootBinRarity
+#endif          
+
+#if SERVER
+                                                                    
+
+                                                   
+                                              
+                                           
+                                     
+                     
+                                                                           
+       
+                                                 
+                                      
+             
+#endif          
+
+global const asset HANGING_SPECTRE_STATIC = $"mdl/Humans/class/medium/spectre/v20_orange_staticSpectre_idle_bay.rmdl"
+const asset STANDING_SPECTRE_STATIC = $"mdl/Humans/class/medium/spectre/v20_orange_staticSpectre_boxidle_bay.rmdl"
+
+const asset SPECTRE_SHACK_ICON = $"rui/hud/minimap/icon_minimap_imc_armory_small"
+const asset SPECTRE_SHACK_SMALL_ICON = $"rui/hud/minimap/icon_minimap_imc_armory"
+const asset SPECTRE_SHACK_LEGEND_ICON = $"rui/hud/minimap/icon_minimap_imc_armory"
+
+global const asset SPECTRE_SHACK_TELEPORTER_FX = $"P_ss_teleport_beam"
+global const asset HATCH_OPEN_DUST_FX = $"P_ss_door_steam"
+global const asset ARMORY_DOOR_DESTRUCTION_FX = $"P_ss_door_blast"
+global const asset ARMORY_SMART_SCAN_FX = $"P_ss_smrt_scan"
+global const asset ARMORY_TELEPORTER_3P_FX = $"P_ability_warp_ss"
+global const asset ARMORY_ELECTRIC_ROOF_FX = $"P_ss_defense_elec"
+global const asset ARMORY_ELECTRIC_ROOF_CENTER_FX = $"P_ss_defense_elec_middle"
+
+#if CLIENT
+table<entity, array< var > > ruiLookupTable
+const MIN_SHACK_RUI_DISTANCE = 2000
+bool inShackProximity = false
+#endif
+
+void function SpectreShacks_MapInit()
+{
+                      
+	if( !SpectreShacksAreEnabled() )
+		return
+
+	if( !IsSurvivalMode() )
+		return
+
+	if( !MapContainsArmories() )
+		return
+
+	#if SERVER || CLIENT
+		Remote_RegisterClientFunction( "Cl_SpectreShack_OnProximityTriggerEnter", "entity" )
+		Remote_RegisterClientFunction( "Cl_SpectreShack_OnProximityTriggerLeave", "entity" )
+	#endif
+	#if SERVER
+		      
+	#endif
+	#if CLIENT
+		SpectreShack_Init_Client()
+	#endif
+      
+}
+
+void function SpectreShacks_Bootstrap()
+{
+                      
+	if( !SpectreShacksAreEnabled() )
+		return
+
+	if( !IsSurvivalMode() )
+		return
+
+	if( !MapContainsArmories() )
+		return
+
+	#if SERVER || CLIENT
+		#if DEV
+			printf( "spectre shacks bootstrap()" )
+		#endif
+		SpectreShacks_InitGlobalDependencies()
+	#endif
+
+	#if SERVER
+		                                                                                    
+		                   
+	#endif
+	#if CLIENT
+		AddCreateCallback( "prop_dynamic", OnSpectreShackControlCreated )
+	#endif          
+
+                            
+}
+
+bool function MapContainsArmories()
+{
+                      
+	string mapName = GetMapName()
+
+	if( mapName.find( "mp_rr_tropic_island" ) > -1 )
+		return true
+	#if DEV
+	else if( mapName.find( "mp_rr_spectreshack_actionblock_02" ) > -1 )
+		return true
+	printt( "ARMORIES | map does not contain armories" )
+	#endif
+      
+	return false
+}
+
+#if CLIENT
+void function OnSpectreShackControlCreated ( entity cp )
+{
+	if( cp.GetScriptName() != IMC_ARMORY_PANEL_SCRIPTNAME )
+		return
+
+	AddCallback_OnUseEntity_ClientServer( cp, OnControlPanelUse_Skit4 )
+	SetCallback_CanUseEntityCallback( cp, Armory_ControlPanel_IsNotBusy )
+}
+#endif          
+
+bool function Armory_ControlPanel_IsNotBusy( entity player, entity ent, int useFlags )
+{
+	if ( !SURVIVAL_PlayerCanUse_AnimatedInteraction( player, ent ) )
+		return false
+
+	return true
+}
+
+void function SpectreShacks_InitGlobalDependencies()
+{
+                      
+	#if SERVER || CLIENT
+		FreelanceNPCs_Init()
+		SkitSystem_Init()
+	#if SERVER
+		                                      
+	#endif
+		PrecacheParticleSystem( SPECTRE_SHACK_TELEPORTER_FX )
+		PrecacheParticleSystem( HATCH_OPEN_DUST_FX )
+		PrecacheParticleSystem( ARMORY_DOOR_DESTRUCTION_FX )
+		PrecacheParticleSystem( ARMORY_SMART_SCAN_FX )
+		PrecacheParticleSystem( ARMORY_TELEPORTER_3P_FX )
+		PrecacheParticleSystem( ARMORY_ELECTRIC_ROOF_FX )
+		PrecacheParticleSystem( ARMORY_ELECTRIC_ROOF_CENTER_FX )
+		PrecacheParticleSystem( ARMORY_TOP_PRIZE_VFX )
+		PrecacheModel( STANDING_SPECTRE_STATIC )
+		PrecacheModel( HANGING_SPECTRE_STATIC )
+	#endif                    
+                            
+}
+
+#if SERVER
+
+                                          
+ 
+	                                                                                     
+	                               
+	                                           
+	                                        
+ 
+#endif          
+
+void function OnControlPanelUse_Skit4( entity cp, entity player, int useInputFlags )
+{
+	#if CLIENT
+		CustomUsePrompt_SetLastUsedTime( Time() )
+	#endif
+	thread ArmoryControlPanel_LongPress_Thread( cp, player )
+}
+
+void function ArmoryControlPanel_LongPress_Thread( entity cp, entity player )
+{
+	ExtendedUseSettings settings
+	settings.duration = 0.5
+	#if CLIENT
+		settings.loopSound = "survival_titan_linking_loop"
+		settings.displayRui = $"ui/extended_use_hint.rpak"
+		settings.displayRuiFunc = ArmoryActivation_DisplayRui
+		settings.icon = $""
+		settings.hint = Localize( "#PROMPT_CONFIRM" )
+		settings.successSound = "ui_menu_store_purchase_success"
+	#elseif SERVER              
+		                            
+		                                   
+		                                                
+		                                                
+	#endif          
+
+	waitthread ExtendedUse( cp, player, settings )
+}
+
+void function ArmoryActivation_DisplayRui( entity ent, entity player, var rui, ExtendedUseSettings settings )
+{
+	#if CLIENT || UI
+		RuiSetString( rui, "holdButtonHint", settings.holdHint )
+		RuiSetString( rui, "hintText", settings.hint )
+		RuiSetGameTime( rui, "startTime", Time() )
+		RuiSetGameTime( rui, "endTime", Time() + settings.duration )
+	#endif               
+}
+
+#if SERVER
+                                                                                                 
+ 
+	              
+ 
+
+                                                                                                 
+ 
+	                        
+	 
+		      
+	 
+
+	                               
+	                    
+	 
+		                                                    
+	 
+ 
+#endif          
+
+void function SpectreShackSpawnPoint_Init( entity spawnPoint, bool isStanding = false )
+{
+#if SERVER
+	                             
+	 
+		      
+	 
+
+	                                
+	                  
+	                
+		                                                                                                                                  
+	    
+		                                                                                                                                 
+
+	                                                       
+	                                                               
+	                                          
+	                                  
+	 
+		                                                                      
+		                            
+		                                  
+		                               
+	 
+
+	                                                       
+	                                  
+	 
+		                            
+	 
+
+	                          
+	                    
+#endif          
+}
+
+void function SpectreShackControl_Init( entity cp )
+{
+                      
+#if SERVER
+	                       
+	                                
+	                                                                     
+	               
+
+#endif          
+
+	AddCallback_OnUseEntity_ClientServer( cp, OnControlPanelUse_Skit4 )
+
+#if SERVER
+
+	       
+		                                                                        
+	             
+
+	                                                                               
+#endif          
+                            
+}
+
+#if SERVER
+                                                                                               
+ 
+	                                                            
+	                                                   
+	                                        
+	                                        
+
+	                                                    
+	                                                              
+	                                                             
+	                                                
+	                                                     
+	                                                
+	                                                                  
+	                                                    
+
+	                                     
+	                                       
+	                           
+	                                              
+
+	                           
+ 
+#endif          
+
+#if CLIENT
+void function MinimapPackage_SpectreShack( entity ent, var rui )
+{
+	RuiSetImage( rui, "defaultIcon", SPECTRE_SHACK_ICON )
+	RuiSetImage( rui, "clampedDefaultIcon", $"" )
+
+	RuiSetBool( rui, "useTeamColor", false )
+
+	RuiSetImage( rui, "smallIcon", SPECTRE_SHACK_SMALL_ICON )
+	RuiSetBool( rui, "hasSmallIcon", false )
+
+	RuiSetFloat2( rui, "iconScale", <0.95, 0.95, 0> )           
+}
+
+void function SpectreShack_Init_Client()
+{
+	#if DEV
+		printf( "ARMORY: SpectreShack_Init_Client()" )
+	#endif
+	                                    
+	RegisterMinimapPackage( "prop_script", eMinimapObject_prop_script.SPECTRE_SHACK, MINIMAP_OBJECT_RUI, MinimapPackage_SpectreShack, FULLMAP_OBJECT_RUI, MinimapPackage_SpectreShack )
+	SetMapFeatureItem( 1010, Localize( "#PROMPT_PING_IMC_ARMORY_EXT" ), Localize( "#IMC_ARMORY_DESC" ), SPECTRE_SHACK_LEGEND_ICON )
+}
+
+void function Cl_SpectreShack_OnProximityTriggerEnter( entity wp )
+{
+#if DEV
+	printf( "CLIENT: Cl_SpectreShack_OnProximityTriggerEnter() was called" )
+#endif
+	int wpType = wp.GetWaypointType()
+	if ( wpType == eWaypoint.SPECTRE_SHACK_TIMER )
+	{
+		inShackProximity = true
+		thread SpectreShackTimerWaypointThink_Thread( wp )
+	}
+}
+
+void function Cl_SpectreShack_OnProximityTriggerLeave( entity wp )
+{
+#if DEV
+	printf( "CLIENT: Cl_SpectreShack_OnProximityTriggerLeave() was called" )
+#endif
+	int wpType = wp.GetWaypointType()
+	if ( wpType == eWaypoint.SPECTRE_SHACK_TIMER )
+	{
+		inShackProximity = false
+	}
+}
+#endif          
+
+#if SERVER
+                                                                              
+ 
+	                                       
+
+	                                                                               
+	                                                                 
+	                      
+	                      
+
+	                  
+	                                   
+	                                           
+	                                  
+
+	         
+ 
+
+                                                              
+   
+  	                                                                                   
+  
+  	            
+  		                   
+  		 
+  			            
+  		 
+  	 
+  
+  	             
+   
+#endif          
+
+#if CLIENT
+void function SpectreShackTimerWaypointThink_Thread( entity wp )
+{
+                      
+	wp.SetDoDestroyCallback( true )
+	wp.EndSignal( "OnDestroy" )
+
+	const float width  = 167
+	const float height = 77
+
+	entity mainScreen = wp.GetWaypointEntity( ARMORY_SCREEN_MAIN_ENT )
+	entity sideScreenOne = wp.GetWaypointEntity( ARMORY_SCREEN_SIDE1_ENT )
+	entity sideScreenTwo = wp.GetWaypointEntity( ARMORY_SCREEN_SIDE2_ENT )
+
+	array< var > topos
+
+	for( int i = 0; i < 3; i++ )
+	{
+		var topo = RuiTopology_CreatePlane( <0, -(width * 0.5), (height * 0.5)> , <0, width, 0>, <0, 0, -height>, true )
+		if( IsValid( topo ) )
+		{
+			topos.append( topo )
+		}
+	}
+
+	RuiTopology_SetParent( topos[0], mainScreen )
+	RuiTopology_SetParent( topos[1], sideScreenOne )
+	RuiTopology_SetParent( topos[2], sideScreenTwo )
+
+	array< var > ruis
+	for( int i = 0; i < 3; i++ )
+	{
+		var r = RuiCreate( $"ui/spectreshack_main_screen.rpak", topos[ i ], RUI_DRAW_WORLD, 1 )
+		if( IsValid( r ) )
+		{
+			ruis.append( r )
+		}
+	}
+
+	ruiLookupTable[wp] <- ruis
+
+	float startTime = wp.GetWaypointGametime( 0 )
+	float endTime   = wp.GetWaypointGametime( 1 )
+
+	foreach( r in ruis )
+	{
+		RuiSetGameTime( r, "startTime", startTime )
+		RuiSetGameTime( r, "endTime", endTime )
+	}
+
+	RuiSetBool( ruis[1], "isSideScreen", true )
+	RuiSetBool( ruis[2], "isSideScreen", true )
+
+	bool isOwned = wp.GetOwner() == GetLocalViewPlayer()
+
+	OnThreadEnd(
+		function() : ( topos, ruis )
+		{
+			foreach( r in ruis )
+			{
+				RuiDestroyIfAlive( r )
+			}
+			foreach( t in topos )
+			{
+				RuiTopology_Destroy( t )
+			}
+		}
+	)
+
+	while( IsValid( wp ) && inShackProximity )
+	{
+		foreach( rui in ruis)
+		{
+			if( IsValid( rui ) )
+			{
+				startTime = wp.GetWaypointGametime( 0 )
+				RuiSetGameTime( rui, "startTime", startTime )
+				endTime   = wp.GetWaypointGametime( 1 )
+				RuiSetGameTime( rui, "endTime", endTime )
+
+				bool inCombat = ( wp.GetWaypointInt( CONTROLSCREEN_COMBATSTATE_INDEX ) == 1 )
+				RuiSetBool( rui, "inCombat", inCombat )
+
+				RuiSetInt( rui, "wavesCleared",  wp.GetWaypointInt( CONTROLSCREEN_WAVES_CLEARED ))
+
+				                              
+				RuiSetImage( rui, "player1Portrait", $"" )
+				RuiSetString( rui, "player1Name", "" )
+				RuiSetImage( rui, "player2Portrait", $"" )
+				RuiSetString( rui, "player2Name", "" )
+				RuiSetImage( rui, "player3Portrait", $"" )
+				RuiSetString( rui, "player3Name", "" )
+
+				entity localPlayer = GetLocalClientPlayer()
+
+				if( !IsValid( localPlayer ) )
+				{
+					break
+				}
+
+				array<entity> team = GetPlayerArrayOfTeam( wp.GetWaypointInt( CONTROLSCREEN_TEAM_INDEX ) )
+				if( team.len() <=0 )
+				{
+					                                                                                         
+					team = GetPlayerArrayOfTeam( localPlayer.GetTeam() )
+				}
+
+				foreach( int index, entity player in team )
+				{
+					if( index > 2 )
+					{
+						                                             
+						break
+					}
+
+					ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( player ), Loadout_Character() )
+					RuiSetImage( rui, "player" + (index + 1) + "Portrait", CharacterClass_GetCharacterLockedPortrait( character ) )
+					RuiSetString( rui, "player" + (index + 1) + "Name", player.GetPlayerName() )
+				}
+
+				RuiSetInt( rui, "state", wp.GetWaypointInt( CONTROLSCREEN_MASTER_STATE_INDEX )  )
+			}
+		}
+
+		WaitFrame()
+	}
+                            
+}
+
+void function ServerCallback_SpectreShacksUpdateLootBinRarity( entity waypoint, int bin1, int bin2, int bin3, int bin4, int bin5, int bin6, int bin7, int bin8 )
+{
+	if ( waypoint in ruiLookupTable )
+	{
+		foreach( rui in ruiLookupTable[waypoint] )
+		{
+			if( rui != null )
+			{
+				RuiSetInt( rui, "lootbin1Rarity", bin1 )
+				RuiSetInt( rui, "lootbin2Rarity", bin2 )
+				RuiSetInt( rui, "lootbin3Rarity", bin3 )
+				RuiSetInt( rui, "lootbin4Rarity", bin4 )
+				RuiSetInt( rui, "lootbin5Rarity", bin5 )
+				RuiSetInt( rui, "lootbin6Rarity", bin6 )
+				RuiSetInt( rui, "lootbin7Rarity", bin7 )
+				RuiSetInt( rui, "lootbin8Rarity", bin8 )
+			}
+		}
+	}
+}
+#endif          
+
+#if DEV && SERVER
+                                                                               
+ 
+	                                      
+	                                      
+	 
+		                                                                   
+		 
+			         
+		 
+	 
+	           
+ 
+
+                                                       
+ 
+	                         
+	                                
+	 
+		                 
+	 
+	          
+ 
+#endif                 
+
+                            

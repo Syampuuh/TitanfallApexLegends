@@ -26,9 +26,9 @@ void function InitEstablishUserPanel( var panel )
 	file.signInStatus = Hud_GetChild( file.panel, "SignInStatus" )
 	Hud_EnableKeyBindingIcons( file.signInStatus )
 
-	//
-	//
-	//
+	                                                                               
+	                                                                                        
+	                                                                                         
 }
 
 void function OnShowEstablishUserPanel( var panel )
@@ -42,15 +42,15 @@ void function EstablishUserPanelThink( var panel )
 	Signal( uiGlobal.signalDummy, "EndShowEstablishUserPanel" )
 	EndSignal( uiGlobal.signalDummy, "EndShowEstablishUserPanel" )
 
-	string sig = string( Time() )
+	string sig = string( UITime() )
 	printt( sig + "Hud_IsVisible for register panel:", Hud_IsVisible( file.panel ) )
 
 	int state
 	int lastState = -1
 
-	//
-	//
-	//
+	                                      
+	                                       
+	        
 
 	while ( Hud_IsVisible( file.panel ) )
 	{
@@ -63,8 +63,8 @@ void function EstablishUserPanelThink( var panel )
 			else
 				printt( sig + "userSignInState changed from:", GetEnumString( "userSignInState", lastState ), "to:", GetEnumString( "userSignInState", state ) )
 
-			//
-			//
+			                                                              
+			  	                                                                                                                       
 
 			if ( state == userSignInState.ERROR )
 			{
@@ -72,8 +72,8 @@ void function EstablishUserPanelThink( var panel )
 			}
 			else if ( state == userSignInState.SIGNED_OUT )
 			{
-				if ( IsDialog( GetActiveMenu() ) ) //
-					CloseActiveMenu( true )
+				if ( IsDialog( GetActiveMenu() ) )                                         
+					CloseActiveMenu()
 
 				ShowSignInStatus( "#A_BUTTON_START" )
 			}

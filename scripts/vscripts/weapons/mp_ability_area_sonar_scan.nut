@@ -3,9 +3,12 @@ global function MpAbilityAreaSonarScan_Init
 global function OnWeaponActivate_ability_area_sonar_scan
 global function OnWeaponPrimaryAttackAnimEvent_ability_area_sonar_scan
 
-#if(CLIENT)
-global function ServerCallback_SonarAreaScanTarget
-#endif //
+#if SERVER
+                                                               
+                                                 
+                                                 
+                                              
+#endif
 
 const asset FLASHEFFECT    = $"P_sonar_bloodhound"
 const asset EYEEFFECT    = $"P_sonar_bloodhound_eyes"
@@ -14,45 +17,31 @@ const asset FX_SONAR_TARGET = $"P_ar_target_sonar"
 
 const int AREA_SCAN_SKIN_INDEX = 9
 
+const float AREA_SONAR_SCAN_RADIUS = 3000.0
 const float AREA_SONAR_SCAN_HUD_FEEDBACK_DURATION = 3.0
-const float AREA_SONAR_SCAN_DURATION = 2.0
-const float AREA_SONAR_SCAN_CONE_FOV = 90.0
+const float AREA_SONAR_SCAN_CONE_FOV = 125.0
+
+const bool AREA_SONAR_PERF_TESTING = false
+
 
 struct
 {
 	int colorCorrection
 	int screeFxHandle
+	float areaSonarScanDuration
+	float areaSonarScanRadius
+	float areaSonarScanRadiusSqr
+	float areaSonarScanFOV
 
-#if(false)
 
+#if SERVER
+	                                   
+	                                                            
+
+
+	                                         
 #endif
 } file
-
-void function OnWeaponActivate_ability_area_sonar_scan( entity weapon )
-{
-}
-
-var function OnWeaponPrimaryAttackAnimEvent_ability_area_sonar_scan( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	//
-	entity weaponOwner = weapon.GetWeaponOwner()
-	Assert ( weaponOwner.IsPlayer() )
-
-	#if(false)
-//
-
-
-#endif //
-
-	#if(CLIENT)
-//
-//
-	#endif //
-
-	PlayerUsedOffhand( weaponOwner, weapon )
-
-	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
-}
 
 void function MpAbilityAreaSonarScan_Init()
 {
@@ -60,265 +49,539 @@ void function MpAbilityAreaSonarScan_Init()
 	PrecacheParticleSystem( EYEEFFECT )
 	PrecacheParticleSystem( FX_SONAR_TARGET )
 
-	#if(CLIENT)
+	file.areaSonarScanDuration = GetCurrentPlaylistVarFloat( "bloodhound_scan_duration", 3.0 )
+	file.areaSonarScanRadius = GetCurrentPlaylistVarFloat( "area_sonar_scan_radius_override", AREA_SONAR_SCAN_RADIUS )
+	file.areaSonarScanRadiusSqr = file.areaSonarScanRadius * file.areaSonarScanRadius
+	file.areaSonarScanFOV = GetCurrentPlaylistVarFloat( "bloodhound_scan_cone_fov", AREA_SONAR_SCAN_CONE_FOV )
+
+	#if CLIENT
 		PrecacheParticleSystem( AREA_SCAN_ACTIVATION_SCREEN_FX )
 		file.colorCorrection = ColorCorrection_Register( "materials/correction/area_sonar_scan.raw_hdr" )
 
 		StatusEffect_RegisterEnabledCallback( eStatusEffect.sonar_pulse_visuals, AreaSonarScan_StartScreenEffect )
 		StatusEffect_RegisterDisabledCallback( eStatusEffect.sonar_pulse_visuals, AreaSonarScan_StopScreenEffect )
-	#endif //
+	#endif         
 
 	RegisterSignal( "AreaSonarScan_Activated" )
 
 }
 
-#if(false)
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-#endif
-
-#if(CLIENT)
-
-void function ServerCallback_SonarAreaScanTarget( entity sonarTarget, entity owner )
+void function OnWeaponActivate_ability_area_sonar_scan( entity weapon )
 {
-	if ( !IsValid( sonarTarget ) )
-		return
-
-	entity viewPlayer = GetLocalViewPlayer()
-	int viewPlayerTeam = viewPlayer.GetTeam()
-	int ownerTeam = owner.GetTeam()
-
-	if ( sonarTarget == GetLocalViewPlayer() )
-		thread CreateViemodelSonarFlash( sonarTarget )
-	else if ( viewPlayerTeam == ownerTeam )
-		thread CreateSonarCloneForEnt( sonarTarget, owner )
 }
 
+var function OnWeaponPrimaryAttackAnimEvent_ability_area_sonar_scan( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	                                              
+	entity weaponOwner = weapon.GetWeaponOwner()
+	Assert ( weaponOwner.IsPlayer() )
+	
+#if CLIENT
+	EmitSoundOnPS5Controller( "/host/SonarScan_ButtonPress_1p_2ch_v1_01.wav", "/host/wpn_light_vib_single.wav" )
+#endif
+
+	#if SERVER
+		                                                                                  
+		                                                                                                 
+		                                                                                                                      
+		                                                                                      
+	#endif         
+
+	#if CLIENT
+  		                             
+  			                                                          
+	#endif         
+
+	PlayerUsedOffhand( weaponOwner, weapon )
+
+	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+}
+
+
+
+float function AreaSonarScan_GetConeFOV()
+{
+	return file.areaSonarScanFOV
+}
+
+#if SERVER
+                                           
+ 
+	                                 
+ 
+
+                                             
+ 
+	                               
+ 
+                                                
+ 
+	                                  
+ 
+
+                                                             
+ 
+	                          
+
+	                                       
+	                                                                        
+	                                                                      
+ 
+
+                                                                                                                 
+ 
+	       
+	                              
+		                                           
+	      
+
+	                            
+	                              
+
+	                                                                                                      
+	                                                                                                       
+
+	                                    
+	                               
+	                       
+
+	                                              
+
+	                                                                                                   
+	                           	               
+	                     			                            
+	                           	   
+
+	              
+	                          
+	                            
+	 
+       
+		                              
+			                                                
+		      
+
+		                                       
+			                              
+		    
+			                           
+
+		                                       
+		 
+			                                               
+			                                                  
+		 
+
+		                                             
+		 
+			                             
+		 
+
+		                                             
+
+
+		                                                    
+
+		                                                            
+		                                 
+		 
+			                                                     
+		 
+
+		                                      
+		                           
+		 
+			                                                   
+		 
+
+
+       
+		                              
+			                                              
+      
+	 
+
+	    
+	 
+		       
+		                              
+			                                                  
+		      
+
+		                                                                                                                                      
+		                        
+		                         
+		                             
+		                                        
+		                             	               
+		                       			                            
+		                             	   
+
+
+		                                
+			                                                                                                     
+		    
+			                                                                                       
+
+		                                                                                       
+
+		                                                   
+
+		       
+			                              
+				                                                
+		      
+
+	 
+
+	                            
+	 
+		       
+		                              
+			                                                   
+		      
+
+		                                                                                                  
+		                                       
+		 
+			                                              
+			 
+				                                                                            
+				                                       
+					                            
+
+				                                                    
+			 
+		 
+
+		       
+		                              
+			                                                 
+		      
+	 
+	    
+	 
+		       
+		                              
+			                                                      
+		      
+
+		                                                                                                                                         
+		                                                                                                  
+		                                       
+		 
+			                                              
+			  		                                          
+		 
+
+		       
+		                              
+			                                                    
+		      
+	 
+
+	                                                                      
+	                                                        
+	   
+	  	                               
+	  	 
+	  		                                                            
+	  	 
+	   
+
+
+
+	            
+		                                                       
+		 
+			                        
+			 
+				                                      
+				 
+					                                             
+					                                                                          
+				 
+			 
+			                                    
+			 
+				                                                                    
+				                                                        
+				   
+				  	                               
+				  	 
+				  		                                                            
+				  	 
+				   
+
+				                                                                   
+				 
+					                               
+					                                  
+					                                                                                                                         
+				 
+				                                                     
+			 
+
+			                          
+				                 
+
+		 
+	 
+
+
+
+	                                        
+
+	                                           
+		                                          
+
+	                                                            
+	                                        
+	                                                                                                                                           
+
+	                                         
+		                                     
+
+	                                                                                                                       
+	                                                                                                                                                                  
+
+	                                               
+	                                                                                                                           
+	                                                               
+
+	                                                                                                 
+
+	                                                                                                                   
+	                                         
+	                                                                                                                         
+
+
+	       
+	                              
+	 
+		                                        
+		          
+	 
+	      
+
+	                                 
+ 
+
+                                                            
+ 
+	                                                
+	                            
+	                              
+
+	                          
+	                                                         
+	                                                              
+	                                                
+
+	                                                                                                   
+	                                                                                                                                                                                                                                                                                                   
+	                                       	                        
+	                                 		                            
+	                                  
+	                                   
+	                                       
+	                                                  
+
+	                                          
+
+	            
+		                                  
+		 
+			                                   
+				                           
+		 
+	 
+
+	                                
+		                                                                                                               
+	    
+		                                                                                                 
+
+	                                                                                                 
+
+	                                                             
+
+	                                 
+ 
+
+                                                                                                                                                                                                     
+ 
+	                             
+	 
+		                                    
+		                                      
+			                                                                                                                                                                          
+	 
+ 
+
+                                                                                                                                                                                                                                                          
+ 
+	                                                      
+		                                                  
+ 
+
+                                                                                                                                                                                                                                                                  
+ 
+	                                                                                                                              
+	                                            
+		      
+
+	                                                  
+		      
+
+	                                                                            
+	                                      
+		                           
+
+	                                                  
+ 
+
+                                                                               
+ 
+	                                                     
+		      
+
+	                                    
+		      
+
+	                       
+		      
+
+	                                                   
+	                                                                     
+	                                                                 
+	                 
+		      
+	                               
+
+
+	                                                                                                
+	                                                                   
+	                                                   
+	                           
+		      
+
+	                                                                                                         
+	                         
+		      
+
+	                                       
+	 
+		                                             
+		                                                                           
+	 
+
+	                                                                                                                                                                          
+		                             
+
+	                                       
+	                                               
+	                                                                
+
+	                                                   
+
+	                                                                  
+
+	                                 
+	                                                                                         
+	                                                                                                                   
+ 
+
+                                                                             
+ 
+	                                                       
+		      
+
+	                                      
+		      
+
+	                                              
+		      
+
+	                                                   
+	                                                                       
+	                                                                   
+	                               
+	                                 
+
+	                                                                                                
+	                                                                     
+	                                                                                                             
+	                         
+		      
+
+	                                         
+	 
+		                                             
+		                                                                           
+	 
+
+	                                                                                                                                                                          
+		                               
+
+	                                     
+
+	                                                            
+
+	                                                                
+ 
+
+                                                                             
+ 
+	                                   
+	                                                 
+		      
+
+	                                              
+	 
+		                                                
+		                                                
+	 
+ 
+
+                                                              
+ 
+	                           
+	                                               
+		            
+
+	                   
+		            
+
+	                       
+		            
+
+	                                                                                                                                                                                                                                                                                                                              
+		            
+
+	                           
+	                                                     
+	                        
+	 
+		                          
+		                                                           
+			            
+	 
+
+	                                                                                                                                                                                                                                                     
+		            
+
+	                                                      
+		            
+
+	                         
+		            
+
+	           
+ 
+#endif
+
+#if CLIENT
 void function CreateViemodelSonarFlash( entity ent )
 {
 	EndSignal( ent, "OnDestroy" )
@@ -328,7 +591,7 @@ void function CreateViemodelSonarFlash( entity ent )
 	entity firstPersonProxy = ent.GetFirstPersonProxy()
 	entity predictedFirstPersonProxy = ent.GetPredictedFirstPersonProxy()
 
-	//
+	                                                                                                        
 	vector highlightColor = <1,0,0>
 	if ( StatusEffect_GetSeverity( ent, eStatusEffect.damage_received_multiplier ) > 0.0 )
 		highlightColor = <1,0,0>
@@ -347,7 +610,7 @@ void function CreateViemodelSonarFlash( entity ent )
 
 	EmitSoundOnEntity( ent, "HUD_MP_EnemySonarTag_Activated_1P" )
 
-	wait 0.5 //
+	wait 0.5                                                                    
 
 	viewModelArm = ent.GetViewModelArmsAttachment()
 	viewModelEntity = ent.GetViewModelEntity()
@@ -367,35 +630,6 @@ void function CreateViemodelSonarFlash( entity ent )
 		SonarViewModelClearHighlight( predictedFirstPersonProxy )
 }
 
-void function CreateSonarCloneForEnt( entity sonarTarget, entity owner )
-{
-	entity entClone = CreateClientSidePropDynamicClone( sonarTarget, sonarTarget.GetModelName() )
-	if ( !IsValid( entClone ) ) //
-		return
-
-	EndSignal( entClone, "OnDestroy" )
-	SonarPlayerCloneHighlight( entClone )
-
-	int fxid = GetParticleSystemIndex( FX_SONAR_TARGET )
-	int fxHandle = -1
-
-	if ( owner == GetLocalViewPlayer() )
-	{
-		fxHandle = StartParticleEffectOnEntity( entClone, fxid, FX_PATTACH_POINT_FOLLOW_NOROTATE, entClone.LookupAttachment( "CHESTFOCUS" ) )
-	}
-
-	OnThreadEnd(
-		function() : ( fxHandle )
-		{
-			if ( EffectDoesExist( fxHandle ) )
-				EffectStop( fxHandle, true, true )
-		}
-	)
-
-	wait AREA_SONAR_SCAN_DURATION
-	entClone.Destroy()
-}
-
 void function AreaSonarScan_StartScreenEffect( entity player, int statusEffect, bool actuallyChanged )
 {
 	entity localViewPlayer = GetLocalViewPlayer()
@@ -407,7 +641,7 @@ void function AreaSonarScan_StartScreenEffect( entity player, int statusEffect, 
 		return
 
 	int indexD        = GetParticleSystemIndex( AREA_SCAN_ACTIVATION_SCREEN_FX )
-	file.screeFxHandle = StartParticleEffectOnEntity( cockpit,indexD, FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+	file.screeFxHandle = StartParticleEffectOnEntity( cockpit,indexD, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
 	EffectSetIsWithCockpit( file.screeFxHandle, true )
 
 	thread ColorCorrection_LerpWeight( file.colorCorrection, 0, 1, 0.5 )
@@ -445,4 +679,5 @@ void function ColorCorrection_LerpWeight( int colorCorrection, float startWeight
 	ColorCorrection_SetWeight( colorCorrection, endWeight )
 }
 
-#endif //
+#endif         
+

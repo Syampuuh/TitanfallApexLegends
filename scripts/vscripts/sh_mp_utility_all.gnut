@@ -7,13 +7,14 @@ bool function MapIsValidForPersistence( string mapName )
 	return PersistenceEnumValueIsValid( "maps", mapName )
 }
 
+
 float function _GetDaysSinceVar( entity player, string variable )
 {
-	//
+	                       
 	Assert( IsValid( player ) )
 	Assert( player.IsPlayer() )
 
-	int storedTime = player.GetPersistentVarAsInt( variable )
+	int storedTime  = player.GetPersistentVarAsInt( variable )
 	int currentTime = Daily_GetCurrentTime()
 
 	if ( storedTime <= 0 || currentTime <= storedTime )
@@ -21,38 +22,51 @@ float function _GetDaysSinceVar( entity player, string variable )
 
 	int secondsElapsed = currentTime - storedTime
 
-	return ( secondsElapsed / float( SECONDS_PER_DAY ) )
+	return (secondsElapsed / float( SECONDS_PER_DAY ))
 }
+
 
 int function Daily_GetCurrentTime()
 {
-	//
+	                                                                  
 	return GetUnixTimestamp() + DAILY_RESET_TIME_ZONE_OFFSET * SECONDS_PER_HOUR
 }
 
+
 int function Daily_GetDayForCurrentTime()
 {
-	//
+	                                                                          
 	return Daily_GetDayForTimestamp( Daily_GetCurrentTime() )
 }
+
 
 int function Daily_GetDayForTimestamp( int timeStamp )
 {
 	return timeStamp / SECONDS_PER_DAY
 }
 
+
 int function Daily_SecondsTillDayEnd()
 {
-	//
+	                                                                                                                                              
 	int currentDayStart = Daily_GetDayForCurrentTime() * SECONDS_PER_DAY
 	return currentDayStart + SECONDS_PER_DAY - Daily_GetCurrentTime()
 }
 
+
 int function Daily_GetEndOfDayForCurrentTime()
 {
-	//
+	                                                       
 	return Daily_GetCurrentTime() + Daily_SecondsTillDayEnd()
 }
+
+
+int function ClampChallengeExpireTime( int time )
+{
+	ItemFlavor latestSeason = GetLatestSeason( GetUnixTimestamp() )
+	return ClampInt( time, CalEvent_GetStartUnixTime( latestSeason ), CalEvent_GetFinishUnixTime( latestSeason ) )
+}
+
 
 array<string> function GetPersistenceEnumAsArray( string persistenceEnumName )
 {
@@ -66,120 +80,18 @@ array<string> function GetPersistenceEnumAsArray( string persistenceEnumName )
 	return returnArray
 }
 
+
 string function SkillToString( val )
 {
-	//
+	                         
 	if ( val % 1 == 0 )
 		return format( "%i", val )
 
 	return format( "%.1f", val )
 }
 
+
 int function SkillToPerformance( float val )
 {
 	return int( val * 100 )
 }
-
-int function GetAvailableCredits( entity player )
-{
-	return player.GetPersistentVarAsInt( "credits" )
-}
-
-int function GetAvailableFDUnlockPoints( entity player, string titanClass )
-{
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-
-	unreachable
-}
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-#endif //

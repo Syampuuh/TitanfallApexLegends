@@ -16,54 +16,54 @@ global function CodeCallback_OnVortexHitProjectile
 global function IsIgnoredByVortex
 global function SetCallback_VortexSphereTriggerOnBulletHit
 global function SetCallback_VortexSphereTriggerOnProjectileHit
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+                                  
+                                    
+                               
+                                             
+                                                 
+                           
+                                           
+                                                
+                                            
+                                            
+                                                 
+                                
+#endif          
 
 const AMPED_WALL_IMPACT_FX = $"P_impact_xo_shield_cp"
 
 global const PROTO_AMPED_WALL = "proto_amped_wall"
 global const GUN_SHIELD_WALL = "gun_shield_wall"
 
-//
-//
-//
+                                                                                             
+                                                                                                                                                                            
+                                                                                     
 global const VORTEX_TRIGGER_AREA = "vortex_trigger_area"
 const PROX_MINE_MODEL = $"mdl/weapons/caber_shot/caber_shot_thrown.rmdl"
 
-const VORTEX_SPHERE_COLOR_CHARGE_FULL		= <115,247,255>	//
-const VORTEX_SPHERE_COLOR_CHARGE_MED		= <200,128,80>	//
-const VORTEX_SPHERE_COLOR_CHARGE_EMPTY		= <200,80,80>	//
-const VORTEX_SPHERE_COLOR_PAS_ION_VORTEX	= <115,174,255>	//
+const VORTEX_SPHERE_COLOR_CHARGE_FULL		= <115,247,255>	       
+const VORTEX_SPHERE_COLOR_CHARGE_MED		= <200,128,80>	         
+const VORTEX_SPHERE_COLOR_CHARGE_EMPTY		= <200,80,80>	      
+const VORTEX_SPHERE_COLOR_PAS_ION_VORTEX	= <115,174,255>	       
 const AMPED_DAMAGE_SCALAR = 1.5
 
-const VORTEX_SPHERE_COLOR_CROSSOVERFRAC_FULL2MED	= 0.75  //
-const VORTEX_SPHERE_COLOR_CROSSOVERFRAC_MED2EMPTY	= 0.95  //
+const VORTEX_SPHERE_COLOR_CROSSOVERFRAC_FULL2MED	= 0.75                                                                           
+const VORTEX_SPHERE_COLOR_CROSSOVERFRAC_MED2EMPTY	= 0.95                                                                                  
 
 const VORTEX_BULLET_ABSORB_COUNT_MAX = 32
 const VORTEX_PROJECTILE_ABSORB_COUNT_MAX = 32
 
-const VORTEX_TIMED_EXPLOSIVE_FUSETIME				= 2.75	//
-const VORTEX_TIMED_EXPLOSIVE_FUSETIME_WARNINGFRAC	= 0.75	//
+const VORTEX_TIMED_EXPLOSIVE_FUSETIME				= 2.75	                                     
+const VORTEX_TIMED_EXPLOSIVE_FUSETIME_WARNINGFRAC	= 0.75	                                                                                      
 
 const VORTEX_EXP_ROUNDS_RETURN_SPREAD_XY = 0.15
 const VORTEX_EXP_ROUNDS_RETURN_SPREAD_Z = 0.075
 
-const VORTEX_ELECTRIC_DAMAGE_CHARGE_DRAIN_MIN = 0.1  //
+const VORTEX_ELECTRIC_DAMAGE_CHARGE_DRAIN_MIN = 0.1                            
 const VORTEX_ELECTRIC_DAMAGE_CHARGE_DRAIN_MAX = 0.3
 
-//
+                                                                                          
 const VORTEX_SHOTGUN_DAMAGE_RATIO = 0.25
 
 
@@ -76,7 +76,7 @@ const VORTEX_EXPLOSIVE_WARNING_SFX_LOOP = "Weapon_Vortex_Gun.ExplosiveWarningBee
 
 const VORTEX_PILOT_WEAPON_WEAKNESS_DAMAGESCALE = 6.0
 
-//
+                                                                                  
 global const VORTEX_REFIRE_NONE					= ""
 global const VORTEX_REFIRE_ABSORB				= "absorb"
 global const VORTEX_REFIRE_BULLET				= "bullet"
@@ -130,34 +130,34 @@ void function Vortex_Init()
 	RegisterSignal( "Script_OnDamaged" )
 }
 
-#if(false)
+#if SERVER
+                                                                                 
+ 
 
+ 
 
+                                                                                                                 
+ 
+	                           
+ 
 
+                                                                                                               
+ 
+	                                           
+ 
 
+                                                                                                                            
+ 
+	                                               
+ 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-#endif //
+                                                                      
+ 
+	                                                                                                                                                  
+	                                                                            
+	                                                  
+ 
+#endif          
 
 void function SetCallback_VortexSphereTriggerOnBulletHit( entity vortexSphere, void functionref( entity, entity, var ) callback )
 {
@@ -174,58 +174,58 @@ void function CreateVortexSphere( entity vortexWeapon, bool useCylinderCheck, bo
 	entity owner = vortexWeapon.GetWeaponOwner()
 	Assert( owner )
 
-	#if(false)
-//
+	#if SERVER
+		                                                              
+		                                                                                                                   
 
+		                                                     
+		                      
 
+		                                                            
 
+		                       
+		 
+			                                            
+			                                         
+		 
 
+		                       
+			                                               
 
+		                                       
 
+		                           
+		                                     
+		                                      
+		                                          
+		                                          
+		                                 
+		                                    
+		                                    
+		                                                                                                            
 
+		                                                                           
+		                                                                                   
 
+		                             
 
+		                              
 
+		                    
+		 
+			                                          
+			                                       
+		 
+		    
+		 
+			                               
+			                                         
+		 
+		                                                                                                 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-#endif
+		                                           
+		                                                   
+	#endif
 
 	SetVortexAmmo( vortexWeapon, 0 )
 }
@@ -236,45 +236,45 @@ void function EnableVortexSphere( entity vortexWeapon )
 	entity weaponOwner = vortexWeapon.GetWeaponOwner()
 	bool hasBurnMod = vortexWeapon.GetWeaponSettingBool( eWeaponVar.is_burn_mod )
 
-	#if(false)
+	#if SERVER
+		                                                           
+		                      
+		                                
 
+		                                                        
 
+		                                                   
 
+		                                             
+		                                                                
 
+		                             
+		 
+			                                                      
+				                                                                                                             
+		 
+		                      
+		 
+			                                                     
+				                                                                                                            
+		 
+		    
+		 
+			                                                 
+				                                                                                                        
+		 
 
+		                                          
+		                                              
+		                                                         
+		                                                                                                                    
+		                                                                                      
+		                                                          
 
+		                                       
+	#endif
 
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-#endif
-
-	//
+	                                                            
 
 	SetVortexAmmo( vortexWeapon, 0 )
 }
@@ -283,10 +283,10 @@ void function DestroyVortexSphereFromVortexWeapon( entity vortexWeapon )
 {
 	DisableVortexSphereFromVortexWeapon( vortexWeapon )
 
-	#if(false)
-
-
-#endif
+	#if SERVER
+		                                                            
+		                                           
+	#endif
 }
 
 void function DestroyVortexSphere( entity vortexSphere )
@@ -302,12 +302,12 @@ void function DisableVortexSphereFromVortexWeapon( entity vortexWeapon )
 {
 	vortexWeapon.Signal( "VortexStopping" )
 
-	//
-	#if(false)
-
-
-
-#endif
+	                 
+	#if SERVER
+		                                                            
+		                                        
+		                                           
+	#endif
 }
 
 void function DisableVortexSphere( entity vortexSphere )
@@ -320,51 +320,51 @@ void function DisableVortexSphere( entity vortexSphere )
 }
 
 
-#if(false)
+#if SERVER
+                                                                        
+ 
+	                                             
+	                
+
+	                                                            
+	                                                    
+		                                           
+	                                                                             
+	                                                                                                             
+	                                                       
+
+	                                                    
+
+	                                                         
+	                                                                             
+
+	                                                       
+	                                                       
+
+	                                    
+	                                                   
+		                                          
+	                                                                            
+	                                                                                                           
+	                                                      
+
+	                                                   
+ 
 
 
+                                                             
+ 
+	                    
 
+	                                            
 
+	                                                                                                                                
+		                                             
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+	                                                                                                                              
+		                                            
+ 
+#endif          
 
 
 void function SetPlayerUsingVortex( entity weaponOwner, entity vortexWeapon )
@@ -389,215 +389,215 @@ void function SetPlayerUsingVortex( entity weaponOwner, entity vortexWeapon )
 	)
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-//
-
-
-//
-//
-
-
-
-//
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+                                       
+ 
+	                             
+		           
+
+	            
+ 
+
+                                                                                                      
+ 
+	                      
+		             
+
+	                     
+		             
+
+	                                      
+		             
+
+	                          
+		             
+
+	                                                         
+	                               
+		             
+
+	                                                           
+	                               
+		             
+
+	                                                           
+		             
+
+	                   
+	                                                     
+	                                                 
+	                                                         
+	                                                        
+	                                                     
+	                                  
+	                                                              
+
+	                                              
+
+	                         
+	                       
+		                          
+
+	                         
+	                   
+		             
+
+	                                                
+	 
+		                                                     
+		                                                                                      
+		                         
+		                                         
+		                                                                                                                                                 
+		                     
+		                                           
+		                      
+
+		                      
+		                                              
+	 
+
+	        
+ 
+
+                                                          
+                                                                                                                                                                                                                           
+ 
+	                                                   
+	                                            
+
+	                                              
+	               
+	 
+		                              
+			                                               
+		    
+			                                                   
+	 
+
+	                                                                                                                           
+	                 
+	 
+		                                                                                                                      
+		                             
+			            
+
+		                                        
+		                                                                                     
+			            
+
+		                                          
+			            
+
+		                                                                                                     
+		 
+			                                          
+			                                       
+			                                                                                              
+			                                  
+			                                          
+			            
+		 
+
+		                                         
+		   	            
+
+		                                             
+		 
+			                                                                
+
+			                            
+			                                           
+			 
+				                                          
+				  	                                                 
+			 
+		 
+
+		                               
+		                           
+		                                                            
+
+		                                           
+		 
+		 	                                          
+		 	   
+				                                                                                
+				                                     
+				  	                                                                                 
+		 	   
+
+			                                                                                                
+			                              
+				                                                                     
+		 
+
+		                                                                                                
+		                              
+			                                                               
+	 
+	    
+	 
+		                                           
+		 
+			                                                                                              
+			                              
+				                                                                     
+		 
+
+		                                                                                              
+		                              
+			                                                               
+	 
+
+	                                                                                                                            
+
+	                                                         
+	                                                                       
+
+	                                                    
+		           
+
+	                                                                        
+		           
+
+	                                                   
+		            
+
+	                                               
+
+	                                                   
+
+	                              
+		                                
+	    
+		                                    
+
+	                                                                                                           
+	                                                                                                                      
+		                                                                            
+
+	              
+	 
+		                  
+		                                       
+		                                                    
+
+		                                                                                   
+
+		                                            
+		                                           
+
+		                                                   
+			                                     
+
+		                                                       
+			                                         
+	 
+
+	           
+ 
+#endif          
 
 void function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity projectile )
 {
@@ -655,318 +655,318 @@ void function VortexSlowOwnerFromAttacker( entity player, entity attacker, vecto
 }
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+                                                                    
+ 
+	                                                                                        
+		                                                 
+ 
+
+                                                                        
+ 
+	                                                                                                
+		                                                     
+ 
+
+                                                                      
+ 
+	                                                           
+
+	                                                                                  
+	                                                                                                                   
+
+	                                     
+ 
+
+                                                                          
+ 
+	                                                           
+
+	                                                                             
+	                                                                                                                 
+
+	                                         
+ 
+
+                                                                                                                                                                   
+ 
+	                   
+	                          
+	                      
+	                                      
+	                              
+	                              
+	                                          
+	                                                      
+
+	                                                
+	                                    
+	 
+		                                
+	 
+	    
+	 
+		                                             
+
+		                           
+		                                   
+			                          
+		    
+			                      
+	 
+
+	                                                                              
+	                                                                 
+	 
+		                                                                                                                                                                             
+		                                       
+		                          						                                                                                    
+		                            	 				                                                                                                 
+		                                				                                                                                           
+		                                             
+			                                                 
+		                             					                                                                                        
+		                                             
+			                                 
+		                                     			                                                                                                 
+		                                                      
+			                                          
+		                                 				                                                                                          
+		                                             	                                                                                                     
+		                                   				                                                                                         
+		                                     			                                                                                        
+		                                                     
+			                                         
+		                                       			                                                                                                
+		                                   				                                                                                            
+
+		                                                                         
+	 
+
+	               				                                                                
+	                  			                                                                   
+	                     		                                                                      
+	                   			                                                                   
+	                                                                                                        
+
+	                                                    
+	                      		                                                                       
+	                       		                                                                                    
+	                       		                                                                        
+	                          	                                                                           
+
+	                                                                                                              
+
+	             
+ 
+
+                                                                      
+ 
+	                                                  
+		            
+
+	                             
+		            
+
+	                                                                            
+		            
+
+	           
+ 
+
+                                                                                 
+ 
+	                                                
+ 
+
+                                                
+                                                                                  
+ 
+	                                        
+
+	                                                           
+ 
+
+                                                                             
+ 
+	                                      
+ 
+
+                                                                
+ 
+	                                    
+ 
+
+                                                                                     
+ 
+	                         
+	                                                
+
+	                     
+	                                                                        
+ 
+
+                                                          
+                                                                                  
+ 
+	                                             
+	                
+
+	                                                                  
+	 
+		                                                                
+	 
+	    
+	 
+		                               
+			                                                     
+
+		                                        
+		 
+			                                                               
+			 
+				                                                                                           
+			 
+		 
+	 
+
+	                                                      
+	                        
+	 
+		                                           
+			                                                                                  
+	 
+	                                                                       
+	 
+		                                          
+			                                                                                 
+	 
+	    
+	 
+		                                      
+			                                                                             
+	 
+
+	                          
+
+	                       
+
+	                                 
+	                          
+	                                                
+ 
+
+                                                                                                               
+ 
+	                                             
+	                
+
+	                         
+		                                                            
+	    
+		                                                                
+
+	                                                      
+
+	                                      
+		                                                                             
+
+	                          
+
+	                       
+
+	                                 
+	                          
+	                                                
+ 
+
+                                                                                             
+ 
+	                    
+
+	                                                        
+	                                                      
+		             
+
+	                                            
+	               
+
+	        
+	 
+		                                                     
+
+		                                                 
+		                         
+		                                         
+		                                                  
+		                                                                      
+
+		                      
+
+		                       
+		                                
+		                        
+
+		                      
+	 
+
+	                
+	 
+		                                                     
+
+		                                                    
+		                         
+		                                         
+		                                                                                                           
+		                                                                      
+
+		                      
+
+		                       
+		                                
+		                        
+
+		                      
+	 
+
+	             
+ 
+
+                                                                 
+ 
+	                                                                   
+	 
+		                                            
+	 
+ 
+
+                                                                   
+ 
+	                                        
+	 
+		                        
+			        
+
+		                                  
+		                                         
+	 
+ 
+
+                                                       
+ 
+	                         
+		           
+
+	                         
+		           
+
+	                               
+		           
+
+	            
+ 
+
+#endif          
 
 int function VortexPrimaryAttack( entity vortexWeapon, WeaponPrimaryAttackParams attackParams )
 {
@@ -974,45 +974,45 @@ int function VortexPrimaryAttack( entity vortexWeapon, WeaponPrimaryAttackParams
 	if ( !vortexSphere )
 		return 0
 
-	#if(false)
-
-#endif
+	#if SERVER
+		                      
+	#endif
 
 	int totalfired = 0
 	int totalAttempts = 0
 
 	bool forceReleased = false
-	//
+	                                                                                  
 	if ( vortexWeapon.IsForceRelease() || vortexWeapon.GetWeaponChargeFraction() == 1 )
 		forceReleased = true
 
-	//
-	//
+	                    
+	                                                                                                               
 	int bulletsFired = Vortex_FireBackBullets( vortexWeapon, attackParams )
 	totalfired += bulletsFired
 
-	//
-	#if(false)
-//
+	                      
+	#if SERVER
+		                                                    
 
+		                                                                                    
 
+		                                                               
+		                                                                               
+		                                                
+			                                       
+		                                   
 
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-#else
+		                                            
+		 
+			                                                                                                                                                                       
+			                                                                                                       
+			              
+				            
+			               
+		 
+		                                    
+	#else
 		totalfired += GetProjectilesAbsorbedCount( vortexWeapon )
 	#endif
 
@@ -1028,10 +1028,11 @@ int function VortexPrimaryAttack( entity vortexWeapon, WeaponPrimaryAttackParams
 	return totalfired
 }
 
+const int MAX_BULLET_PER_SHOT = 35
 int function Vortex_FireBackBullets( entity vortexWeapon, WeaponPrimaryAttackParams attackParams )
 {
 	int bulletCount = GetBulletsAbsorbedCount( vortexWeapon )
-	//
+	                                         
 	if ( "shotgunPelletsToIgnore" in vortexWeapon.s )
 		bulletCount = int( ceil( bulletCount - vortexWeapon.s.shotgunPelletsToIgnore ) )
 
@@ -1039,8 +1040,8 @@ int function Vortex_FireBackBullets( entity vortexWeapon, WeaponPrimaryAttackPar
 	{
 		bulletCount = minint( bulletCount, MAX_BULLET_PER_SHOT )
 
-		//
-		//
+		                                                                            
+		  	                                                 
 
 		float radius = LOUD_WEAPON_AI_SOUND_RADIUS_MP
 		vortexWeapon.EmitWeaponNpcSound( radius, 0.2 )
@@ -1054,232 +1055,232 @@ int function Vortex_FireBackBullets( entity vortexWeapon, WeaponPrimaryAttackPar
 	return bulletCount
 }
 
-#if(false)
-
-
-//
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-//
-
-//
-
-//
-
-
-//
-
-
-//
-
-//
-//
-//
-
-
-
-
-
-
-#endif //
-
-//
+#if SERVER
+                                                                                                                           
+ 
+	                         
+	               		        
+	              		                                          
+
+	                                                      
+
+	                
+	                                                                       
+	                                                                    
+	  	                             
+	      
+		                                                             
+
+	                                                                                                                                         
+
+	                    
+	                                   
+	                              
+	                            
+	                                
+	                                                 
+	                                                     
+	                                      
+	                                                
+	                                                                          
+	           
+	 
+		                     
+
+		                                            
+	 
+
+	           
+ 
+
+                                                                                                                             
+ 
+	                         
+	               		         
+	              		                                       
+
+	                                                      
+
+	                
+	                                                                       
+	                                                                    
+	  	                             
+	      
+		                                                             
+
+	                                                                             
+	                                                        
+
+	                    
+	                                   
+	                              
+	                            
+	                                
+	                                                 
+	                                                     
+	                                      
+	                                                
+	                                                                          
+	           
+	 
+		                     
+
+		                                            
+	 
+
+	           
+ 
+
+                                                                                                    
+ 
+	                                              
+
+	                                                                                   
+
+	                                                                
+	                                                                
+	                                                                
+
+	                               
+
+	                
+ 
+
+                                                                                                           
+ 
+	                                                       
+	                                                       
+	                                                         
+
+	                                                                                   
+	              
+ 
+
+                                                                                                                   
+ 
+	                              
+	                    
+
+	                                         
+	                                                         
+	                                                         
+	                                
+	                                                                                        
+	                                                                                            
+	                                                   
+	                                         
+	                                                                   
+
+	             
+	 
+		                                                 
+
+		                                                                                                                     
+
+		                                              
+	 
+
+	           
+ 
+
+                                                                                                                                             
+ 
+	                                       
+	                                       
+	                                       
+
+	                                                                        
+	                                                                  
+
+	                                                                                                      
+	                                                     
+	                                                                            
+
+	                                         
+	                                                         
+	                                
+	                                          
+	                                     
+	                                                               
+	                                                                   
+	                                         
+	                                       
+	                                          
+	                                                                    
+	              
+	 
+		                                     
+		                                               
+		                      
+			                                                                                                                 
+	 
+
+	                               
+ 
+
+                                                                                                                              
+ 
+	                    
+	                                
+	 
+		                                   
+			                                                                                              
+			     
+
+		                          
+			                                                                                      
+			     
+
+		                           
+			                                                                                             
+			     
+
+		                                     
+			                                                                                             
+			     
+
+		                          
+			                                                                                                
+			     
+
+		                        
+			     
+	 
+
+	              
+ 
+
+                                                                                    
+ 
+	                                                                          
+	                                                          
+
+	                                                                                                      
+
+	                                                                                                                                             
+	                                                                                                    
+	                                                                                                       
+
+	                                                                                                  
+ 
+
+                                                             
+                                                                                                
+ 
+	                                                             
+	       
+	                                                                             
+	                                             
+	  	                        
+	      
+
+	                                                                      
+
+	                                                
+ 
+#endif          
+
+                                                                                                                                                                                              
 int function GetBulletsAbsorbedCount( entity vortexWeapon )
 {
 	if ( !vortexWeapon )
@@ -1304,45 +1305,45 @@ int function GetProjectilesAbsorbedCount( entity vortexWeapon )
 	return vortexSphere.GetProjectileAbsorbedCount()
 }
 
-#if(false)
+#if SERVER
+                                                                               
+ 
+	                           
+	                                                                   
+	 
+		                                            
+			                            
+	 
 
+	              
+ 
 
+                                                                                  
+ 
+	                           
+	                                                                   
+	 
+		                                         
+			                            
+	 
 
+	              
+ 
 
+                                                               
+ 
+	             
+	                                                                   
+	 
+		                                         
+			       
+	 
 
+	            
+ 
+#endif          
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-//
+                                                                                      
 void function Vortex_NotifyAttackerDidDamage( entity attacker, entity vortexOwner, vector hitPos )
 {
 	if ( !IsValid( attacker ) || !attacker.IsPlayer() )
@@ -1359,7 +1360,7 @@ void function SetVortexAmmo( entity vortexWeapon, int count )
 	entity owner = vortexWeapon.GetWeaponOwner()
 	if ( !IsValid_ThisFrame( owner ) )
 		return
-	#if(CLIENT)
+	#if CLIENT
 		if ( !IsLocalViewPlayer( owner ) )
 		return
 	#endif
@@ -1381,7 +1382,7 @@ vector function GetTriLerpColor( float fraction, vector color1, vector color2, v
 {
 	float r, g, b
 
-	//
+	                                           
 	if ( fraction < crossover1 )
 	{
 		r = Graph( fraction, 0, crossover1, color1.x, color2.x )
@@ -1398,7 +1399,7 @@ vector function GetTriLerpColor( float fraction, vector color1, vector color2, v
 	}
 	else
 	{
-		//
+		                                                               
 		r = color3.x
 		g = color3.y
 		b = color3.z
@@ -1408,45 +1409,45 @@ vector function GetTriLerpColor( float fraction, vector color1, vector color2, v
 	unreachable
 }
 
-//
-#if(false)
+                            
+#if SERVER
+                                                                                   
+ 
+	                    
 
+	                               
+		            
 
+	                                     
+		            
 
+	                                                   
+	                               
+		            
 
+	                 
+	 
+		                                       
+			            
 
+		                                                                                         
+			            
 
+		                                                      
+			            
 
+		            
+		                                                                      
+			            
+	 
 
+	           
+ 
+#endif          
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-#endif //
-
-/**/
-/**/
-/**/
+                                  
+  	                          	  
+                                  
 
 void function Vortex_SetTagName( entity weapon, string tagName )
 {
@@ -1487,90 +1488,94 @@ vector function GetBulletCollectionOffset( entity weapon )
 	unreachable
 }
 
-#if(false)
+#if SERVER
+                                                                             
+ 
+	                                                                                                                   
+	                                    
+		      
 
+	            
+	                       
+	                                                 
 
-//
+	                                            
+	                     
+	                                                                      
+	                         
+	                                                          
 
+	                                                   
+	                                                                                 
+	 
+		                                            
+		                                          
+		 
+			                                  
+			                      
+			 
+				                                                           
+				                                                                                                      
+			 
+		 
+	 
 
+	                                                                 
+ 
 
+                                                                   
+ 
+	                                               
+		                                                                                 
 
+	                                             
+		                                                                 
+ 
 
+                                                                                  
+ 
+	                                                     
 
+	                              
+		                                                
+ 
 
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+                                                                                            
+ 
+	                         
+	 
+		                                                
+	 
+ 
+#endif          
 
 bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere, var damageInfo )
 {
-	//
-	//
-	//
+	                                                              
+	                                                                                                                   
+	                                                                                      
 	if ( vortexSphere.GetTargetName() == VORTEX_TRIGGER_AREA )
 	{
 		if ( vortexSphere.e.Callback_VortexTriggerBulletHit != null )
 			vortexSphere.e.Callback_VortexTriggerBulletHit( weapon, vortexSphere, damageInfo )
+		#if SERVER
+		                                                 
+		#else
 		return false
+		#endif
 	}
 
 	bool isAmpedWall = vortexSphere.GetTargetName() == PROTO_AMPED_WALL
 	bool takesDamage = !isAmpedWall
 	bool adjustImpactAngles = !(vortexSphere.GetTargetName() == GUN_SHIELD_WALL)
 
-	#if(false)
-
-
-
-
-
-#endif
+	#if SERVER
+		                                            
+		 
+			                                                         
+			                                                                     
+		 
+	#endif
 
 	vector damageAngles = vortexSphere.GetAngles()
 
@@ -1581,29 +1586,29 @@ bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere
 
 	vector damageOrigin = DamageInfo_GetDamagePosition( damageInfo )
 
-	#if(CLIENT)
+	#if CLIENT
 		if ( !isAmpedWall )
 		{
-			//
+			                                                                           
 			int effectHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( SHIELD_WALL_BULLET_FX ), damageOrigin, damageAngles )
-			//
+			                                                                          
 			vector color = GetShieldTriLerpColor( 0.0 )
 			EffectSetControlPointVector( effectHandle, 1, color )
 		}
 
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
+		                                                                                   
+		                    
+		   
+		  	                                                           
+		  	                                                             
+		  	                                                                  
+		  
+		  	                             
+		  	                   
+		  		                         
+		  
+		  	                                                                                       
+		   
 
 		if ( DamageInfo_GetAttacker( damageInfo ) && DamageInfo_GetAttacker( damageInfo ).IsTitan() )
 			EmitSoundAtPosition( teamNum, DamageInfo_GetDamagePosition( damageInfo ), "TitanShieldWall.Heavy.BulletImpact_1P_vs_3P" )
@@ -1624,7 +1629,7 @@ bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere
 
 		if ( takesDamage )
 		{
-			//
+			                                                                                                                                                                                              
 			ShieldDamageModifier damageModifier = GetShieldDamageModifier( damageInfo )
 			damage *= damageModifier.damageScale
 			VortexSphereDrainHealthForDamage( vortexSphere, damage )
@@ -1639,9 +1644,9 @@ bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere
 
 	if ( isAmpedWall )
 	{
-		#if(false)
-
-#endif
+		#if SERVER
+		                                                         
+		#endif
 		return false
 	}
 
@@ -1655,7 +1660,7 @@ bool function OnVortexHitBullet_BubbleShieldNPC( entity vortexSphere, var damage
 
 	float distSq = DistanceSqr( vortexOrigin, damageOrigin )
 	if ( distSq < MINION_BUBBLE_SHIELD_RADIUS_SQR )
-		return false//
+		return false                                             
 
 	vector damageVec 	= damageOrigin - vortexOrigin
 	vector damageAngles = VectorToAngles( damageVec )
@@ -1663,7 +1668,7 @@ bool function OnVortexHitBullet_BubbleShieldNPC( entity vortexSphere, var damage
 
 	int teamNum = vortexSphere.GetTeam()
 
-	#if(CLIENT)
+	#if CLIENT
 		int effectHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( SHIELD_WALL_BULLET_FX ), damageOrigin, damageAngles )
 
 		vector color = GetShieldTriLerpColor( 0.9 )
@@ -1676,7 +1681,7 @@ bool function OnVortexHitBullet_BubbleShieldNPC( entity vortexSphere, var damage
 	#else
 		int fxId = GetParticleSystemIndex( SHIELD_WALL_BULLET_FX )
 		PlayEffectOnVortexSphere( fxId, DamageInfo_GetDamagePosition( damageInfo ), damageAngles, vortexSphere )
-		//
+		                                                                                            
 
 		if ( DamageInfo_GetAttacker( damageInfo ) && DamageInfo_GetAttacker( damageInfo ).IsTitan() )
 			EmitSoundAtPosition( teamNum, DamageInfo_GetDamagePosition( damageInfo ), "TitanShieldWall.Heavy.BulletImpact_3P_vs_3P" )
@@ -1688,55 +1693,59 @@ bool function OnVortexHitBullet_BubbleShieldNPC( entity vortexSphere, var damage
 
 bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSphere, entity attacker, entity projectile, vector contactPos )
 {
-	//
+	                                                       
 	if ( !IsValid( vortexSphere ) )
 		return false
 
-	//
-	//
-	//
+	                                                              
+	                                                                                                                   
+	                                                                                      
 	if ( vortexSphere.GetTargetName() == VORTEX_TRIGGER_AREA )
 	{
 		if ( vortexSphere.e.Callback_VortexTriggerProjectileHit != null )
 			vortexSphere.e.Callback_VortexTriggerProjectileHit( weapon, vortexSphere, attacker, projectile, contactPos )
+		#if SERVER
+		                                                 
+		#else
 		return false
+		#endif
 	}
 
 	var ignoreVortex = projectile.ProjectileGetWeaponInfoFileKeyField( "projectile_ignores_vortex" )
 	if ( ignoreVortex != null )
 	{
-		#if(false)
+		#if SERVER
+		                                          
+			            
 
+		                                          
+		                 
 
+		                       
+		 
+			            
+				                              
+				     
 
+			                   
+			            
+				                                
+				     
 
+			              
+				                                    
+				                            
+				     
 
+			        
+				                                                              
+				     
+		 
 
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-#endif
+		                                                                                              
+		                                          
+		                                  
+		#endif
 		return false
 	}
 
@@ -1753,21 +1762,21 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 	bool isAmpedWall = vortexSphere.GetTargetName() == PROTO_AMPED_WALL
 	bool takesDamage = !isAmpedWall
 
-	#if(false)
-
-
-#endif
-	//
+	#if SERVER
+		                                                
+			                                                                                      
+	#endif
+	                                                                
 	if ( isAmpedWall )
 		impactFX = AMPED_WALL_IMPACT_FX
 
 	int teamNum = vortexSphere.GetTeam()
 
-	#if(CLIENT)
+	#if CLIENT
 		if ( !isAmpedWall )
 		{
 			int effectHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( impactFX ), contactPos, damageAngles )
-			//
+			                                                                          
 			vector color = GetShieldTriLerpColor( 0.0 )
 			EffectSetControlPointVector( effectHandle, 1, color )
 		}
@@ -1785,10 +1794,10 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 		}
 
 		float damage = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
-		//
-		//
+		  	                                                                                                              
+		  	                                                         
 
-		if ( takesDamage )
+		if ( takesDamage && damage >= 0 )
 		{
 			VortexSphereDrainHealthForDamage( vortexSphere, damage )
 			if ( IsValid( attacker ) && attacker.IsPlayer() )
@@ -1812,12 +1821,12 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 		}
 	#endif
 
-	//
+	                                                                
 	if ( isAmpedWall )
 	{
-		#if(false)
-
-#endif
+		#if SERVER
+		                                                 
+		#endif
 
 		return false
 	}
@@ -1831,7 +1840,7 @@ bool function OnVortexHitProjectile_BubbleShieldNPC( entity vortexSphere, entity
 
 	float dist = DistanceSqr( vortexOrigin, contactPos )
 	if ( dist < MINION_BUBBLE_SHIELD_RADIUS_SQR )
-		return false //
+		return false                                               
 
 	vector damageVec 	= Normalize( contactPos - vortexOrigin )
 	vector damageAngles 	= VectorToAngles( damageVec )
@@ -1842,7 +1851,7 @@ bool function OnVortexHitProjectile_BubbleShieldNPC( entity vortexSphere, entity
 
 	int teamNum = vortexSphere.GetTeam()
 
-	#if(CLIENT)
+	#if CLIENT
 		int effectHandle = StartParticleEffectInWorldWithHandle( GetParticleSystemIndex( impactFX ), contactPos, damageAngles )
 
 		vector color = GetShieldTriLerpColor( 0.9 )
@@ -1852,7 +1861,7 @@ bool function OnVortexHitProjectile_BubbleShieldNPC( entity vortexSphere, entity
 	#else
 		int fxId = GetParticleSystemIndex( impactFX )
 		PlayEffectOnVortexSphere( fxId, contactPos, damageAngles, vortexSphere )
-//
+  		                                                                  
 
 		EmitSoundAtPosition( teamNum, contactPos, "TitanShieldWall.Explosive.BulletImpact_3P_vs_3P" )
 	#endif
@@ -1865,28 +1874,28 @@ int function VortexReflectAttack( entity vortexWeapon, table attackParams, vecto
 	if ( !vortexSphere )
 		return 0
 
-	#if(false)
-
-#endif
+	#if SERVER
+		                      
+	#endif
 
 	int totalfired = 0
 	int totalAttempts = 0
 
 	bool forceReleased = false
-	//
+	                                                                                  
 	if ( vortexWeapon.IsForceRelease() || vortexWeapon.GetWeaponChargeFraction() == 1 )
 		forceReleased = true
 
-	//
-	//
-	//
+	                                                                       
+	                                                                    
+	  	                                
 
-	//
-	//
+	                    
+	                                                                                                               
 
-	//
-	//
-	//
+	                                                         
+	                                                                           
+	                            
 	int bulletCount = GetBulletsAbsorbedCount( vortexWeapon )
 	if ( bulletCount > 0 )
 	{
@@ -1898,39 +1907,39 @@ int function VortexReflectAttack( entity vortexWeapon, table attackParams, vecto
 		totalfired += 1
 	}
 
-	//
-	#if(false)
-//
+	                      
+	#if SERVER
+		                                                    
 
+		                                                                                    
 
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-#endif
+		                                                               
+		                                                                               
+		                                                
+			                                       
+		                                   
+		                                            
+		 
+			                                                                                                   
+			              
+				            
+			               
+		 
+	#endif
 
 	SetVortexAmmo( vortexWeapon, 0 )
 	vortexWeapon.Signal( "VortexFired" )
 
-#if(false)
-
+#if SERVER
+	                                        
 #endif
 
-	/*
-
-
-
-
-*/
+	  
+	                    
+		                                                   
+	    
+		                                                   
+	  
 
 	return totalfired
 }
@@ -1943,9 +1952,9 @@ bool function IsIgnoredByVortex( string weaponName )
 	return false
 }
 
-#if(false)
-
-
-//
-
+#if SERVER
+                                                     
+ 
+	                                                                                    
+ 
 #endif

@@ -9,7 +9,7 @@ global function InitGamepadLayoutMenu
 global function GetGamepadButtonLayoutName
 global function RefreshButtonBinds
 
-//
+                                                         
 
 
 struct ButtonVars
@@ -49,6 +49,7 @@ struct
 
 void function MenuGamepadLayout_Init()
 {
+	AddUICallback_InputModeChanged( OnInputModeChanged )
 }
 
 
@@ -137,7 +138,7 @@ int function GetButtonIndexForPreset( int buttonIndex, int presetIndex )
 }
 
 
-void function InitGamepadLayoutMenu()
+void function InitGamepadLayoutMenu( var newMenuArg )                                               
 {
 	var menu = GetMenu( "GamepadLayoutMenu" )
 	file.menu = menu
@@ -149,7 +150,7 @@ void function InitGamepadLayoutMenu()
 	InitButtonRCP( Hud_GetChild( file.menu, "DialogFrame" ) )
 
 
-	//
+	                
 	for ( int idx = 0; idx < PRESETS_COUNT; ++idx )
 	{
 		string btnName = "BtnPreset" + format( "%d", idx )
@@ -161,15 +162,18 @@ void function InitGamepadLayoutMenu()
 		AddButtonEventHandler( button, UIE_GET_FOCUS, OnPresetButton_FocusedOn )
 		AddButtonEventHandler( button, UIE_LOSE_FOCUS, OnPresetButton_FocusedOff )
 
+		HudElem_SetRuiArg( button, "hideBlur", true )
 		SetButtonRuiText( button, PRESET_NAMES[idx] )
 	}
 
-	//
+	    
 	file.description = Hud_GetChild( menu, "lblControllerDescription" )
 
-	//
+	                
 	var customBtn = Hud_GetChild( menu, "BtnCustomizeLayout" )
 	SetButtonRuiText( customBtn, "#GAMEPAD_CUSTOM" )
+	HudElem_SetRuiArg( customBtn, "hideBlur", true )
+	
 	AddButtonEventHandler( customBtn, UIE_CLICK, OnCustomButton_Clicked )
 	AddButtonEventHandler( customBtn, UIE_GET_FOCUS, OnPresetButton_FocusedOn )
 	AddButtonEventHandler( customBtn, UIE_LOSE_FOCUS, OnPresetButton_FocusedOff )
@@ -275,6 +279,21 @@ void function SetInfoText( string headerText, string descText )
 	RuiSetString( Hud_GetRui( file.description ), "description", descText )
 }
 
+void function OnInputModeChanged( bool controllerModeActive )
+{
+	if( controllerModeActive )
+		return
+
+	if( file.listeningForButtonBind && file.pilotBindFocusIndex >= 0 )
+	{
+		file.listeningForButtonBind = false
+		SetMenuNavigationDisabled( false )
+
+		var buttonRui = Hud_GetRui( file.customBindButtonsPilot[file.pilotBindFocusIndex] )
+		RuiSetBool( buttonRui, "isListeningForBind", false )
+		RefreshButtonBinds()
+	}
+}
 
 void function OnPresetButton_Clicked( var button )
 {
@@ -297,11 +316,11 @@ void function UpdatePresetButtons()
 		string btnName = "BtnPreset" + format( "%d", idx )
 		var button     = Hud_GetChild( file.menu, btnName )
 		int buttonID   = int( Hud_GetScriptID( button ) )
-		Hud_SetSelected( button, layoutIdx == buttonID )
+		HudElem_SetRuiArg( button, "isEquipped", layoutIdx == buttonID )
 	}
 
 	var btnCustom = Hud_GetChild( file.menu, "BtnCustomizeLayout" )
-	Hud_SetSelected( btnCustom, layoutIdx == GAMEPAD_CUSTOM_LAYOUT_INDEX )
+	HudElem_SetRuiArg( btnCustom, "isEquipped", layoutIdx == GAMEPAD_CUSTOM_LAYOUT_INDEX )
 }
 
 
@@ -352,21 +371,21 @@ void function UpdateInfoText( int layoutIdx )
 	}
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
+                                                    
+   
+  	                  
+   
+                                                        
+   
+  	                  
+   
 
 bool function AnyBindButtonHasFocus()
 {
 	if ( file.pilotBindFocusIndex >= 0 )
 		return true
-	//
-	//
+	                                      
+	  	           
 
 	return false
 }
@@ -394,10 +413,10 @@ void function OnOpenGamepadLayoutMenu()
 {
 	file.listeningForButtonBind = false
 	file.pilotBindFocusIndex = -1
-	//
+	                               
 	RegisterBindCallbacks()
 
-	//
+	                                                                       
 	foreach ( idx, button in file.customBindButtonsPilot )
 	{
 		var buttonRui = Hud_GetRui( button )
@@ -419,7 +438,7 @@ void function OnCloseGamepadLayoutMenu()
 
 	RefreshCustomGamepadBinds_UI()
 
-	//
+	                                                                                                               
 	SetMenuNavigationDisabled( false )
 }
 
@@ -464,7 +483,7 @@ void function SetBindPromptForPilot( var button )
 	int buttonID       = int( Hud_GetScriptID( button ) )
 	ButtonVars bv      = GetBindDisplayName( CUSTOM_BIND_ALIASES_PILOT[buttonID] )
 	string displayName = (bv.pilot == "") ? bv.common : bv.pilot
-	//
+	                                                                                            
 }
 
 
@@ -473,7 +492,7 @@ void function SetUnbindablePromptForPilot( var button )
 	int buttonID       = int( Hud_GetScriptID( button ) )
 	ButtonVars bv      = GetBindDisplayName( CUSTOM_BIND_ALIASES_PILOT[buttonID] )
 	string displayName = (bv.pilot == "") ? bv.common : bv.pilot
-	//
+	                                                                                             
 }
 
 void function BindButtonPilot_Clicked( var button )
@@ -548,7 +567,14 @@ ButtonVars function GetBindDisplayName( string bind )
 			displayName.titan = "#PING_AND_WHEEL"
 			break
 
+		case "chat_wheel":
+			displayName.common = ""
+			displayName.pilot = "#CHAT_WHEEL"
+			displayName.titan = ""
+			break
+
 		case "scriptcommand5":
+		case "scriptcommand5; chat_wheel":
 			displayName.common = ""
 			displayName.pilot = "#EXTRA_CHARACTER_ACTION"
 			displayName.titan = ""
@@ -556,7 +582,7 @@ ButtonVars function GetBindDisplayName( string bind )
 
 		case "scriptcommand4":
 			displayName.common = ""
-			displayName.pilot = "#USE_HEALTH_KIT"        //
+			displayName.pilot = "#USE_HEALTH_KIT"                           
 			displayName.titan = ""
 			break
 
@@ -577,7 +603,6 @@ ButtonVars function GetBindDisplayName( string bind )
 			displayName.pilot = "#QUICK_CHAT"
 			displayName.titan = ""
 			break
-
 		case "scoreboard_focus":
 			displayName.common = ""
 			displayName.pilot = ""
@@ -657,8 +682,8 @@ ButtonVars function GetBindDisplayName( string bind )
 
 		case "offhand3":
 			displayName.common = ""
-			displayName.pilot = "Team Comms"        //
-			displayName.titan = "Team Comms"        //
+			displayName.pilot = "Team Comms"                                     
+			displayName.titan = "Team Comms"                                 
 			break
 
 		case "offhand4":
@@ -777,6 +802,12 @@ ButtonVars function GetBindDisplayName( string bind )
 		}
 			break
 
+		case "scriptcommand6":
+			displayName.common = "#EQUIP_GADGET"
+			displayName.pilot = "#EQUIP_GADGET"
+			displayName.titan = ""
+			break
+
 		default:
 			displayName.common = bind
 			displayName.pilot = ""
@@ -893,8 +924,18 @@ void function RefreshButtonBinds( int presetIndex = -1 )
 		RuiSetArg( file.gamepadLayoutRui, GetButtonDataForIndex( idx ).ruiArg, bindString )
 	}
 
-	if ( IsGamepadPS4() )
+	if ( IsGamepadPS4() ) 
 		RuiSetImage( file.gamepadLayoutRui, "gamepadImage", $"rui/menu/controls_menu/ps4_gamepad_button_layout" )
+	else if( IsGamepadPS5() )
+	{
+		RuiSetImage( file.gamepadLayoutRui, "gamepadImage", $"rui/menu/controls_menu/ps5_gamepad_button_layout" )
+	}
+	else if ( IsGamepadXB5() )
+	{
+		RuiSetImage( file.gamepadLayoutRui, "gamepadImage", $"rui/menu/controls_menu/xbx_gamepad_button_layout" )
+	}
+	else if ( IsGamepadNX() )
+		RuiSetImage( file.gamepadLayoutRui, "gamepadImage", $"rui/menu/controls_menu/nx_gamepad_button_layout" )
 	else
 		RuiSetImage( file.gamepadLayoutRui, "gamepadImage", $"rui/menu/controls_menu/xboxone_gamepad_button_layout" )
 
@@ -904,6 +945,20 @@ void function RefreshButtonBinds( int presetIndex = -1 )
 	RuiSetBool( file.gamepadLayoutRui, "isPreview", isPreview )
 
 	RuiSetString( Hud_GetRui( file.ultimateBindButtonPilot ), "iconText", tacticalBind + "+" + pingBind )
+	
+	                                
+	#if NX_PROG
+	float nxYOffset =  0.35
+	float nxBOffset =  0.43
+	float nxAOffset =  0.51
+	float nxXOffset =  0.59
+		
+	RuiSetFloat( file.gamepadLayoutRui, "nxXOffset", nxYOffset)
+	RuiSetFloat( file.gamepadLayoutRui, "nxAOffset", nxBOffset)
+	RuiSetFloat( file.gamepadLayoutRui, "nxBOffset", nxAOffset)
+	RuiSetFloat( file.gamepadLayoutRui, "nxYOffset", nxXOffset)
+	#endif
+	
 }
 
 
@@ -914,7 +969,7 @@ void function RestoreDefaultsButton( var button )
 
 	SetConVarToDefault( "gamepad_custom_pilot" )
 	SetConVarToDefault( "gamepad_button_layout" )
-	//
+	                                              
 
 	Hud_SetFocused( Hud_GetChild( file.menu, "BtnPreset0" ) )
 	SetCustomGamepadLayoutVisible( false )
@@ -995,28 +1050,28 @@ void function BindCatchCommon( int buttonEnum )
 		return
 	}
 
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+	                                      
+	   
+	  	                                                           
+	  	                                                                                                              
+	  	                  
+	  	 
+	  		                    
+	  		                             
+	  			                            
+	  	 
+	  
+	  	      
+	   
 }
 
-//
+                                                                                              
 const table<string, string> GAMEPAD_BIND_CONFLICTS =
 {
-	//
+	                                                                         
 	["offhand1"] 	= "ping",
 	["ping"]		= "offhand1",
-	//
+	                                                                                                                     
 	["zoom"] 		= "attack,speed",
 	["attack"] 		= "zoom",
 	["speed"] 		= "zoom",

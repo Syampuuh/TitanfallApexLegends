@@ -1,0 +1,680 @@
+resource/ui/menus/dialog_gamemode_select.menu
+{
+	// Z ordering
+	// Z 10: button legend, Title block, decsription and training
+	// Z 9: Fade
+	// Z 1-7: leaderboard, other game modes, etc
+	menu
+	{
+		ControlName				Frame
+		xpos					0
+		ypos					0
+		zpos					3
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		tabPosition				1
+		PaintBackgroundType		0
+		infocus_bgcolor_override	"0 0 0 0"
+		outoffocus_bgcolor_override	"0 0 0 0"
+		modal					1
+
+		ScreenBlur
+		{
+			ControlName				Label
+            labelText               ""
+		}
+
+		ToolTip
+        {
+            ControlName				RuiPanel
+            InheritProperties       ToolTip
+        }
+
+        ScreenFrame
+        {
+            ControlName				RuiPanel
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            visible					1
+            enabled 				1
+            scaleImage				1
+            rui                     "ui/screen_blur.rpak"
+            drawColor				"255 255 255 255"
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+		PanelFrame
+        {
+            ControlName				Label
+            xpos					0
+            ypos					0
+            wide					1920
+            tall					%100
+            labelText				""
+            visible				    1
+
+            pin_to_sibling          ScreenFrame
+            pin_corner_to_sibling   CENTER
+            pin_to_sibling_corner   CENTER
+        }
+
+        Cover
+        {
+            ControlName				ImagePanel
+            xpos					0
+            ypos					0
+            wide                    %200
+            tall					%200
+            visible					1
+            enabled 				1
+            scaleImage				1
+            image					"vgui/HUD/white"
+            drawColor				"0 0 0 230"
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	CENTER
+            pin_to_sibling_corner	CENTER
+        }
+
+
+        DisabledCover
+        {
+            ControlName				RuiPanel
+            xpos					0
+            ypos					0
+            zpos					9
+            wide					%100
+            tall					%100
+            visible					1
+            enabled 				1
+            scaleImage				1
+            rui                     "ui/modal_background.rpak"
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	CENTER
+            pin_to_sibling_corner	CENTER
+
+            ruiArgs
+            {
+                useAnimation    1
+                alpha           0.8
+
+            }
+        }
+
+        CloseButton
+        {
+            ControlName             BaseModHybridButton
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            labelText               ""
+            visible                 1
+            sound_accept            "UI_Menu_SelectMode_Close"
+        }
+
+        Header
+        {
+            ControlName				RuiPanel
+            wide					1920
+            tall					145
+            xpos                    0
+            ypos                    0
+            zpos                    1
+            rui                     "ui/gamemode_header.rpak"
+            visible					1
+
+            pin_to_sibling			PanelFrame
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+         HeaderWelcome
+        {
+            ControlName				RuiPanel
+            wide					1920
+            tall					145
+            xpos                    0
+            ypos                    0
+            zpos                    10
+            rui                     "ui/gamemode_header.rpak"
+            visible					1
+
+            pin_to_sibling			PanelFrame
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+		//
+		//Training
+        //
+        GameModeButton0
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					247
+            wide_nx_handheld		309		[$NX || $NX_UI_PC]
+            tall					108
+            tall_nx_handheld		135		[$NX || $NX_UI_PC]
+            xpos                    -48
+            xpos_nx_handheld        -18		[$NX || $NX_UI_PC]
+            ypos                    -83
+            zpos                    10
+            rui                     "ui/gamemode_select_button.rpak"
+            labelText               ""
+            visible					1
+            tabPosition             1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            ruiArgs
+            {
+                lockIconEnabled 0
+                useAnimation    1
+            }
+
+
+            navRight                GameModeButton1
+            navDown                 GameModeButton2
+            navLeft                 TournamentConnectButton
+
+            pin_to_sibling			PanelFrame
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+        }
+        //
+		//Firing Range
+		//
+        GameModeButton1
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					247
+            wide_nx_handheld		309		[$NX || $NX_UI_PC]
+            tall					108
+            tall_nx_handheld		135		[$NX || $NX_UI_PC]
+            xpos                    12
+            ypos                    0
+            zpos                    5
+            rui                     "ui/gamemode_select_button.rpak"
+            labelText               ""
+            visible					1
+            tabPosition             1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            ruiArgs
+            {
+                lockIconEnabled 0
+                useAnimation    1
+            }
+
+
+            navRight                TournamentConnectButton
+            navDown                 GameModeButton2
+            navLeft                 GameModeButton0
+
+            pin_to_sibling			GameModeButton0
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_RIGHT
+        }
+		//
+		// Survival
+		//
+		SurvivalCategory
+        {
+            ControlName				RuiPanel
+            wide					799
+            tall					37
+            xpos                    0
+            ypos                    0
+            zpos                    5
+            rui                     "ui/gamemode_category.rpak"
+            visible					1
+
+            pin_to_sibling			GameModeButtonBg
+            pin_corner_to_sibling	BOTTOM_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+            ruiArgs
+	        {
+	            useAnimation    1
+	        }
+        }
+        GameModeButtonBg
+        {
+            ControlName				RuiPanel
+            wide					457
+            tall					572
+            xpos                    0
+
+            ypos                    90
+            ypos_nx_handheld        70		[$NX || $NX_UI_PC]
+            zpos                    6
+            visible					1
+            rui					    "ui/gamemode_select_button.rpak"
+
+			ruiArgs
+			{
+				isLarge         1
+				isSurvival      1
+				useAnimation    1
+
+			}
+
+            pin_to_sibling			GameModeButton0
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	BOTTOM_LEFT
+        }
+		//Trios
+        GameModeButton2
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					361
+            tall					124
+            xpos                    0
+            ypos                    -142
+            zpos                    7
+            rui                     "ui/gamemode_select_flat_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navUp                   GameModeButton0
+            navRight                GameModeButton5
+            navDown                 GameModeButton3
+            navLeft                 GameModeButton8
+
+            pin_to_sibling			GameModeButtonBg
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+		//Duos
+        GameModeButton3
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					361
+            tall					124
+            xpos                    0
+            ypos                    12
+            zpos                    7
+            rui                     "ui/gamemode_select_flat_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navUp                   GameModeButton2
+            navRight                GameModeButton5
+            navDown                 GameModeButton4
+            navLeft                 GameModeButton8
+
+            pin_to_sibling			GameModeButton2
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	BOTTOM
+
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+		//solos
+        GameModeButton4
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					361
+            tall					124
+            xpos                    0
+            ypos                    -36
+            zpos                    7
+            rui                     "ui/gamemode_select_flat_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navUp                   GameModeButton3
+            navRight                GameModeButton5
+            navLeft                 GameModeButton8
+
+            pin_to_sibling			GameModeButtonBg
+            pin_corner_to_sibling	BOTTOM
+            pin_to_sibling_corner	BOTTOM
+
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+		//
+		// Ranked Survival
+		//
+        GameModeButton5
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					330
+            tall					572     // 340 + 24 + 340
+            xpos                    12
+            zpos                    5
+            rui                     "ui/gamemode_select_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navLeft                 GameModeButton2
+            navUp                   GameModeButton0
+            navRight                GameModeButton6
+
+            pin_to_sibling			GameModeButtonBg
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_RIGHT
+
+            ruiArgs
+            {
+                isLarge         1
+                isSurvival      1
+                useAnimation    1
+
+            }
+        }
+
+		//
+        // Arenas
+        //
+        ArenasCategory
+        {
+            ControlName				RuiPanel
+            wide					672
+            tall					37
+            xpos                    0
+            ypos                    0
+            zpos                    4
+            rui                     "ui/gamemode_category.rpak"
+            visible					1
+
+            pin_to_sibling			GameModeButton6
+            pin_corner_to_sibling	BOTTOM_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+
+        GameModeButton6
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					330
+            tall					572
+            xpos                    12
+            ypos                    0
+            zpos                    3
+            rui                     "ui/gamemode_select_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navLeft                 GameModeButton5
+            navUp                   GameModeButton0
+            navRight                GameModeButton7
+
+            pin_to_sibling			GameModeButton5
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner   TOP_RIGHT
+
+            ruiArgs
+            {
+                isLarge         1
+                isArena         1
+                useAnimation    1
+            }
+        }
+
+        GameModeButton7
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					330
+            tall					572
+            xpos                    12
+            ypos                    0
+            zpos                    2
+            rui                     "ui/gamemode_select_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navLeft                 GameModeButton6
+            navUp                   GameModeButton0
+            navRight                GameModeButton8
+
+            pin_to_sibling			GameModeButton6
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner   TOP_RIGHT
+
+            ruiArgs
+            {
+                isLarge         1
+                isArena         1
+                useAnimation    1
+            }
+        }
+
+        GameModeButton8
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            wide					330
+            tall					572
+            xpos                    12
+            ypos                    0
+            zpos                    2
+            rui                     "ui/gamemode_select_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+            cursorPriority          1
+            sound_accept            "UI_Menu_GameMode_Select"
+
+            navLeft                 GameModeButton7
+            navUp                   GameModeButton0
+
+            pin_to_sibling			GameModeButton7
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner   TOP_RIGHT
+
+            ruiArgs
+            {
+                isLarge         1
+                isArena         1
+                useAnimation    1
+            }
+        }
+
+		//
+        // LTM
+        //
+        LTMCategory
+        {
+            ControlName				RuiPanel
+            wide					330
+            tall					37
+            xpos                    0
+            ypos                    0
+            zpos                    5
+            rui                     "ui/gamemode_category.rpak"
+            visible					1
+            pin_to_sibling			GameModeButton8
+            pin_corner_to_sibling	BOTTOM_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+            ruiArgs
+            {
+                useAnimation    1
+            }
+        }
+
+                         
+        ArenasExplaination
+        {
+            ControlName				RuiPanel
+            wide					330
+            tall					572
+            xpos                    12
+            ypos                    0
+            zpos                    1
+            rui                     "ui/gamemode_arenas_explaination.rpak"
+            labelText               ""
+            visible					1
+
+            pin_to_sibling			GameModeButton7
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner   TOP_RIGHT
+            ruiArgs
+            {
+                useAnimation        1
+            }
+        }
+        
+
+                            
+				TournamentConnectButton
+				{
+		            ControlName				RuiButton
+					classname               MenuButton
+					xpos                    -50
+					ypos                    -85
+		            wide					110
+		            tall					110
+		            zpos                    10
+		            rui                     "ui/generic_icon_button.rpak"
+		            labelText               ""
+		            visible					0
+		            cursorVelocityModifier  0.7
+		            cursorPriority          1
+
+					sound_focus             "UI_Menu_Focus_Small"
+
+		            pin_to_sibling			PanelFrame
+		            pin_corner_to_sibling	TOP_RIGHT
+		            pin_to_sibling_corner	TOP_RIGHT
+
+		            ruiArgs
+                    {
+                        useAnimation    1
+                    }
+				}
+        
+                  
+		        CraftingPreview
+                {
+                    ControlName				RuiButton
+                    wide					520 // 48 + 340 + 48 + 48
+                    wide_nx_handheld		600		[$NX || $NX_UI_PC]
+                    tall					175 // 80 + 340 + 24 + 340 + 48
+                    tall_nx_handheld		201		[$NX || $NX_UI_PC]
+                    xpos                    -47
+                    xpos_nx_handheld        -12		[$NX || $NX_UI_PC]
+                    ypos                    18
+                    ypos_nx_handheld        35		[$NX || $NX_UI_PC]
+                    zpos                    5
+                    rui                     "ui/crafting_game_mode_preview.rpak"
+                    labelText               ""
+                    visible					1
+
+                    pin_to_sibling			PanelFrame
+                    pin_corner_to_sibling	BOTTOM_RIGHT
+                    pin_to_sibling_corner	BOTTOM_RIGHT
+
+                    ruiArgs
+                    {
+                        useAnimation    1
+                    }
+                }
+        
+                         
+			ArenasPreview
+            {
+                ControlName				RuiPanel
+                wide					625 // 48 + 340 + 48 + 48
+                tall					175 // 80 + 340 + 24 + 340 + 48
+                xpos                    -47
+                ypos                    10
+                zpos                    5
+                rui                     "ui/gamemode_arenas_rotation.rpak"
+                labelText               ""
+                visible					0
+
+                pin_to_sibling			PanelFrame
+                pin_corner_to_sibling	BOTTOM_RIGHT
+                pin_to_sibling_corner	BOTTOM_RIGHT
+                ruiArgs
+                {
+                    useAnimation    1
+                }
+            }
+        
+		PlaylistWarning
+        {
+            ControlName            Label
+            auto_wide_tocontents   1
+            tall                   27
+            visible                1
+            labelText              ""
+            font                   DefaultBold_27_DropShadow
+            allcaps                0
+            fgcolor_override       "222 222 222 255"
+            ypos                   10
+            xpos                   0
+            zpos                   5
+            pin_to_sibling         GameModeButtonBg
+            pin_corner_to_sibling  TOP_LEFT
+            pin_to_sibling_corner  BOTTOM_LEFT
+        }
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			InheritProperties       FooterButtons
+			zpos                    10
+		}
+	}
+}

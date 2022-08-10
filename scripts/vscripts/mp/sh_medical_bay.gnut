@@ -1,0 +1,1575 @@
+                   
+
+global function MedBay_MapInit
+global function MedBay_PreMapInit
+
+#if CLIENT
+global function ServerToClient_MedBayHealVisualsEnabled
+global function ServerToClient_MedBayHealVisualsDisabled
+global function ServerToClient_MedBayEyeTriggerEnter
+global function ServerToClient_MedBayEyeTriggerLeave
+#endif
+
+#if SERVER
+                                               
+       
+                                  
+      
+#endif
+
+#if SERVER || CLIENT
+global function MedBay_IsOnCooldown
+global function MedBay_IsDisabled
+#endif
+
+               
+const string MEDBAY_PLAYLIST_ENABLED = "medbay_enabled"
+const string MEDBAY_DISABLE_OUTSIDE_RING = "medbay_disable_outside_ring"
+const string MEDBAY_PLAYLIST_COOLDOWN_TIME = "medbay_cooldown_time_sec"
+const string MEDBAY_PLAYLIST_HEAL_POOL = "medbay_heal_pool"
+const string MEDBAY_PLAYLIST_IDLE_TIME = "medbay_idle_time_sec"
+const string MEDBAY_PLAYLIST_HEAL_PER_SEC = "medbay_heal_per_sec"
+const string MEDBAY_PLAYLIST_EYE_ENABLED = "medbay_eye_enabled"
+
+              
+const string MEDBAY_TRIGGER_SCRIPT_NAME = "medical_bay_trigger"
+const string MEDBAY_DOC_SCRIPT_NAME = "medical_bay_doc"
+const string MEDBAY_INDICATOR_EXT_SCRIPT_NAME = "medical_bay_indicator"
+const string MEDBAY_INDICATOR_INT_SCRIPT_NAME = "medical_bay_indicator_interior"
+const string MEDBAY_INDICATOR_PROP_SCRIPT_NAME = "medical_bay_indicator_prop"
+const string MEDBAY_INDICATOR_PROP_SCRIPT_NAME_INTERIOR = "medical_bay_indicator_prop_int"
+const string MEDBAY_FLOOR_SCRIPT_NAME = "medical_bay_floor"
+const string MEDBAY_CENTER_TARGET_NAME = "medical_bay_center"
+global const string MEDBAY_PING_SCRIPT_NAME = "medical_bay_ping"
+const string MEDBAY_EYE_JOINT_SCRIPT_NAME = "medical_bay_eye_joint"
+const string MEDBAY_EYE_STALK_SCRIPT_NAME = "medical_bay_eye_stalk"
+const string MEDBAY_EYE_TRIGGER_SCRIPT_NAME = "medical_bay_eye_trigger"
+const string MEDBAY_DOC_SOUND_SPAWN_SCRIPT_NAME = "medical_bay_sound_point"
+
+         
+const string SIG_LEFT_MEDBAY_TRIGGER = "MedBay_LeftHealing"
+const string SIG_OUT_OF_HEALING = "MedBay_OutOfHealing"
+const string SIG_PLAYER_ENTER_MEDBAY = "MedBay_PlayerEnterMedBay"
+const string SIG_NO_ONE_IN_MEDBAY = "MedBay_NoOneInMedBay"
+const string SIG_PLAYER_FULL_HEALTH = "MedBay_PlayerFullHealth"
+const string SIG_OUT_OF_RING = "MedBay_OutsideRing"
+const string SIG_OUT_OF_EYE_RANGE = "MedBay_OutsideEyeRange"
+
+      
+const int MEDBAY_CENTER_RADIUS = 256
+const int MEDBAY_CENTER_HALF_HEIGHT = 125
+
+const int MEDBAY_EYE_TRIGGER_RADIUS = 2200
+const int MEDBAY_EYE_TRIGGER_HALF_HEIGHT = 400
+
+             
+const float MEDBAY_COOLDOWN_TICK_SEC = 0.1
+
+       
+const float MEDBAY_REGEN_COOLDOWN_TIME_SEC = 7
+const int MEDBAY_REGEN_HEAL_POOL = 300
+const float MEDBAY_HEAL_PER_SEC = 20
+const float MEDBAY_REGEN_IDLE_RECHARGE_DELAY_SEC = 3
+const float MEDBAY_OUT_OF_RING_TEST_SEC = 1
+const float MEDBAY_OUT_OF_RING_EMPTY_DOC_TIME_SEC = 5
+
+      
+const MEDBAY_MIN_ROPE_DIST = 240
+const MEDBAY_MAX_ROPE_DIST = 340
+const MEDBAY_MIN_ROPE_LENGTH = 340     
+const MEDBAY_MAX_ROPE_LENGTH = 500     
+const MEDBAY_ROPE_NODE_COUNT = 10
+const MEDBAY_ROPE_SHOOT_OUT_TIME = 0.25
+const MEDBAY_ROPE_REEL_IN_TIME = 0.25
+const MEDBAY_ROPE_FADE_DISTANCE = 2200
+
+     
+const float MEDBAY_DOC_SCALE = 7.0
+
+            
+const float MEDBAY_INDICATOR_ORIGIN_OFFSET_INTERIOR = -10
+const vector MEDBAY_INDICATOR_ANGLE_OFFSET = < 0, 90, 0>
+const float MEDBAY_INDICATOR_SCALE = 2
+const float MEDBAY_INDICATOR_SCALE_INTERIOR = 1.7
+const int MEDBAY_INDICATOR_FADE_DISTANCE = 3000
+const float MEDBAY_INDICATOR_RUI_RADIUS = 200
+const float MEDBAY_INDICATOR_RUI_RADIUS_INTERIOR = 170
+const vector MEDBAY_INDICATOR_RUI_OFFSET = <0, 1, 0>
+const vector MEDBAY_INDICATOR_RUI_OFFSET_INTERIOR = <0, 1, 0>
+
+            
+const vector MEDBAY_RING_POS_OFFSET = <0, 0, 0>
+const float MEDBAY_RING_SCALE = 2.75
+
+        
+const vector MEDBAY_IDLE_COLOR = <142, 246, 255>                                                                                              
+const vector MEDBAY_CHARGING_COLOR = <255, 224, 102>             
+const vector MEDBAY_HEALING_COLOR = <36, 189, 107>                                                         
+const vector MEDBAY_COOLDOWN_COLOR = <245, 74, 80>                          
+
+const float RUI_LUMINOSITY = 0.4
+const float RUI_COLOR_DIVISOR = 255.0 * RUI_LUMINOSITY
+const vector RUI_IDLE_COLOR = MEDBAY_IDLE_COLOR / RUI_COLOR_DIVISOR
+const vector RUI_HEALING_COLOR = MEDBAY_HEALING_COLOR / RUI_COLOR_DIVISOR
+const vector RUI_COOLDOWN_COLOR = MEDBAY_COOLDOWN_COLOR / RUI_COLOR_DIVISOR
+
+     
+const asset RUI_MEDBAY_INDICATOR_RING = $"ui/medbay_cooldown.rpak"
+
+       
+const asset MDL_MEDBAY_RING = $"mdl/fx/LifelineTT_medbay_ring.rmdl"
+const asset MDL_MEDBAY_EYE_JOINT = $"mdl/olympus/olympus_ll_tt_building_interior_medbay_eye_01.rmdl"
+const asset MDL_MEDBAY_EYE_STALK = $"mdl/olympus/olympus_ll_tt_building_interior_medbay_eye_02.rmdl"
+
+     
+const VFX_MEDBAY_HEAL_COCKPIT_1P = $"P_heal_loop_screen"
+const VFX_MEDBAY_SPARKS = $"P_lifelineTT_medbay_sparks"
+const VFX_MEDBAY_PLATFORM = $"P_LifelineTT_medbay_platform"
+const VFX_MEDBAY_CROSS = $"P_LifelineTT_medbay_cross"
+const VFX_MEDBAY_CROSS_PULSE = $"P_LifelineTT_medbay_cross_pulse"
+
+                
+const string SFX_MEDBAY_REGEN_POWER_DOWN = "Olympus_LifelineTT_MedBay_PowerDown"
+const string SFX_MEDBAY_REGEN_ENTER_POINT = "Olympus_LifelineTT_MedBay_Enter"
+const string SFX_MEDBAY_REGEN_LEAVE_POINT = "Olympus_LifelineTT_MedBay_Leave"
+const string SFX_MEDBAY_REGEN_CHARGE_START = "Olympus_LifelineTT_MedBay_Charge_Start"
+const string SFX_MEDBAY_REGEN_CHARGE_LOOP = "Olympus_LifelineTT_MedBay_Charge_Loop"
+const string SFX_MEDBAY_REGEN_CHARGE_END = "Olympus_LifelineTT_MedBay_Charge_End"
+const string SFX_MEDBAY_SPARKS = "Olympus_LifelineTT_MedBay_Sparks"
+
+               
+const string SFX_MEDBAY_DEPLOY_ROPE_SOUND = "Olympus_LifelineTT_MedBay_Cable_Deploy"
+const string SFX_MEDBAY_ATTACH_SOUND_1P = "Olympus_LifelineTT_MedBay_Cable_Attach_1P"
+const string SFX_MEDBAY_ATTACH_SOUND_3P = "Olympus_LifelineTT_MedBay_Cable_Attach_3P"
+const string SFX_MEDBAY_DETACH_SOUND_1P = "Olympus_LifelineTT_MedBay_Cable_Detach_1P"
+const string SFX_MEDBAY_DETACH_SOUND_3P = "Olympus_LifelineTT_MedBay_Cable_Detach_3P"
+const string SFX_MEDBAY_MEDIC_HEAL_LOOP_SOUND_1P = "Olympus_LifelineTT_MedBay_Healing_1P"                                         
+const string SFX_MEDBAY_MEDIC_HEAL_LOOP_SOUND_3P = "Olympus_LifelineTT_MedBay_Healing_3P"                                           
+
+
+enum eMedBayState
+{
+	IDLE = 0,
+	CHARGING = 1,
+	HEALING = 2,
+	COOLDOWN = 3,
+	OFF = 4
+}
+
+enum eMedBayTrigger
+{
+	TRIGGER,
+	BUTTON,
+}
+
+global struct MedBayData
+{
+	#if SERVER
+		                                    
+		                                     
+		                                            
+		                                            
+		                                     
+		                                          
+		                                        
+		                                                          
+		                                                          
+		                                                                
+		                                                                   
+		                                             
+		                                          
+		                                                
+	#endif
+}
+
+struct SignalStruct
+{
+	entity droneMedic
+	entity player
+}
+
+struct
+{
+	#if SERVER
+		                                              
+		                                                         
+		                                                     
+		
+		                                      
+		                                                      
+		                                                        
+	#endif
+
+	#if CLIENT
+		int        healFxHandle
+		array<var> ruisToTrack
+		entity     eyeRotatorJoint
+		entity     eyeRotatorStalk
+		bool       inEyeRange = false
+	#endif
+
+	                                              
+	#if CLIENT || SERVER
+		entity waypointTracker
+	#endif
+} file
+
+            
+void function MedBay_PreMapInit()
+{
+	AddCallback_OnNetworkRegistration( MedBay_NetworkRegistration )
+}
+
+
+void function MedBay_NetworkRegistration()
+{
+	Remote_RegisterClientFunction( "ServerToClient_MedBayHealVisualsEnabled", "entity" )
+	Remote_RegisterClientFunction( "ServerToClient_MedBayHealVisualsDisabled", "entity" )
+	Remote_RegisterClientFunction( "ServerToClient_MedBayEyeTriggerEnter", "entity" )
+	Remote_RegisterClientFunction( "ServerToClient_MedBayEyeTriggerLeave", "entity" )
+}
+
+
+void function MedBay_MapInit()
+{
+	if ( GetCurrentPlaylistVarBool( MEDBAY_PLAYLIST_ENABLED, true ) )
+	{
+		RegisterSignal( SIG_LEFT_MEDBAY_TRIGGER )
+		RegisterSignal( SIG_PLAYER_ENTER_MEDBAY )
+		RegisterSignal( SIG_PLAYER_FULL_HEALTH )
+		RegisterSignal( SIG_OUT_OF_HEALING )
+		RegisterSignal( SIG_NO_ONE_IN_MEDBAY )
+		RegisterSignal( SIG_OUT_OF_RING )
+		RegisterSignal( SIG_OUT_OF_EYE_RANGE )
+
+		PrecacheModel( MDL_MEDBAY_RING )
+		PrecacheModel( MDL_MEDBAY_EYE_JOINT )
+		PrecacheModel( MDL_MEDBAY_EYE_STALK )
+
+		PrecacheParticleSystem( VFX_MEDBAY_HEAL_COCKPIT_1P )
+		PrecacheParticleSystem( VFX_MEDBAY_PLATFORM )
+		PrecacheParticleSystem( VFX_MEDBAY_SPARKS )
+		PrecacheParticleSystem( VFX_MEDBAY_CROSS )
+		PrecacheParticleSystem( VFX_MEDBAY_CROSS_PULSE )
+
+		#if SERVER
+			                       
+			                                  
+			                              
+
+			                                                                                                                  
+			                                                                                                                
+			                                                                                                 
+		#endif
+
+		#if SERVER || CLIENT
+			AddCallback_EntitiesDidLoad( EntitiesDidLoad )
+		#endif
+
+		#if SERVER
+			                                                                    
+		#endif
+
+		#if CLIENT
+			AddCreateCallback( "prop_dynamic", OnPropDynamicCreated )
+			AddCreateCallback( PLAYER_WAYPOINT_CLASSNAME, OnWaypointCreated )
+		#endif
+	}
+}
+
+#if SERVER || CLIENT
+void function EntitiesDidLoad()
+{
+	#if SERVER
+		                                                                                  
+		 
+			                                  
+		 
+	#endif
+
+	#if CLIENT
+		MedBay_InitEye()
+	#endif
+}
+#endif
+
+#if SERVER
+                                  
+ 
+	                                              
+	 
+		                            
+	 
+ 
+#endif
+
+#if CLIENT
+void function OnPropDynamicCreated( entity ent )
+{
+	if ( ent.GetScriptName() == MEDBAY_INDICATOR_PROP_SCRIPT_NAME || ent.GetScriptName() == MEDBAY_INDICATOR_PROP_SCRIPT_NAME_INTERIOR )
+		thread MedBay_RUIThink( ent )
+}
+
+void function OnWaypointCreated( entity ent )
+{
+	int wpType = ent.GetWaypointType()
+
+	if ( wpType == eWaypoint.MEDBAY_STATE )
+		Medbay_LinkRuis( ent )
+}
+#endif
+
+void function InitMedBay_Thread( entity instance )
+{
+	#if SERVER
+		                 
+
+		                                                                                                 
+
+		                                        
+
+		                                                           
+
+		                            
+		                            
+
+		                                       
+		 
+			                                                            
+			 
+				                                                            
+				 
+					                                                                              
+				 
+
+				                   
+			 
+			                                                                                                                                          
+			 
+				                                                                                                                                                  
+				                   
+			 
+			                                                               
+			 
+				                                 
+				                                 
+
+				                   
+			 
+			                                                                           
+			 
+				                                                                                  
+				                   
+			 
+		 
+
+		                
+		                                                            
+		 
+			                                                   
+			                                                 
+			                                                   
+			                                                   
+			                                         
+			                              
+			                                      
+			                                      
+			                        
+
+			                                                         
+
+			                        
+
+			                  
+		 
+		    
+		 
+			                         
+		 
+
+		                                  
+		                                                
+		                                                                            
+
+		                                        
+		                                                   
+
+		                                                     
+		                                                     
+
+		                                
+	#endif
+}
+
+#if SERVER      
+                                                                               
+ 
+	                                                                                 
+
+	               
+	                                          
+	                           
+	                                                 
+	                                        
+	                                     
+	                                          
+
+	                                                                                                                                 
+	                                     
+	                                 
+
+	                        
+ 
+#endif      
+
+#if SERVER        
+                                                                                         
+ 
+	                                                                                     
+
+	                                      
+ 
+
+                                                             
+ 
+	                                                                
+	                     
+	                                                       
+ 
+#endif
+
+            
+#if SERVER
+                                                    
+ 
+	                                                                      
+		      
+
+	                        
+	                                                      
+	                                                         
+	                                                           
+	                                                           
+	                              
+	                                 
+	                                         
+	                                                          
+	                           
+
+	                                                
+	                                                
+ 
+
+                                                             
+ 
+	                                         
+		      
+	                                                                                 
+ 
+
+                                                             
+ 
+	                                         
+		      
+	                                                                                 
+ 
+#endif
+
+#if CLIENT
+void function MedBay_InitEye()
+{
+	if ( !GetCurrentPlaylistVarBool( MEDBAY_PLAYLIST_EYE_ENABLED, true ) )
+		return
+
+	entity eyeJoint
+	entity eyeStalk
+	array<entity> eyes = GetEntArrayByScriptName( MEDBAY_EYE_JOINT_SCRIPT_NAME )
+	if ( eyes.len() == 1 )
+	{
+		entity target = eyes[0]
+		eyeJoint = CreateClientSidePropDynamic( target.GetOrigin(), target.GetAngles(), MDL_MEDBAY_EYE_JOINT )
+		eyeJoint.SetFadeDistance( MEDBAY_EYE_TRIGGER_RADIUS )
+		target.Destroy()
+	}
+
+	eyes = GetEntArrayByScriptName( MEDBAY_EYE_STALK_SCRIPT_NAME )
+	if ( eyes.len() == 1 )
+	{
+		entity target = eyes[0]
+		eyeStalk = CreateClientSidePropDynamic( target.GetOrigin(), target.GetAngles(), MDL_MEDBAY_EYE_STALK )
+		eyeStalk.SetFadeDistance( MEDBAY_EYE_TRIGGER_RADIUS )
+		target.Destroy()
+	}
+
+	if ( !IsValid( eyeJoint ) || !IsValid( eyeStalk ) )
+		return
+
+	entity eyeRotatorJoint = CreateClientsideScriptMover( EMPTY_MODEL, eyeJoint.GetOrigin() + <0, 0, 0>, <0, 0, 0> )
+	eyeRotatorJoint.NonPhysicsSetRotateModeLocal( true )
+	eyeJoint.SetParent( eyeRotatorJoint )
+
+	entity eyeRotatorStalk = CreateClientsideScriptMover( EMPTY_MODEL, eyeStalk.GetOrigin(), <0, 0, 0> )
+	eyeRotatorStalk.NonPhysicsSetRotateModeLocal( true )
+	eyeStalk.SetParent( eyeRotatorStalk )
+
+	eyeRotatorStalk.SetParent( eyeRotatorJoint )
+
+	file.eyeRotatorJoint = eyeRotatorJoint
+	file.eyeRotatorStalk = eyeRotatorStalk
+}
+
+void function ServerToClient_MedBayEyeTriggerEnter( entity player )
+{
+	entity localViewPlayer = GetLocalViewPlayer()
+	if ( player != localViewPlayer )
+		return
+
+	if ( !IsPilot( player ) )
+		return
+
+	if ( !file.inEyeRange )
+	{
+		file.inEyeRange = true
+		thread MedBay_Eye_Thread( player )
+	}
+}
+
+void function ServerToClient_MedBayEyeTriggerLeave( entity player )
+{
+	entity localViewPlayer = GetLocalViewPlayer()
+	if ( player != localViewPlayer )
+		return
+
+	if ( !IsPilot( player ) )
+		return
+
+	file.inEyeRange = false
+	player.Signal( SIG_OUT_OF_EYE_RANGE )
+}
+
+void function MedBay_Eye_Thread( entity player )
+{
+	if ( !IsValid( file.eyeRotatorStalk ) || !IsValid( file.eyeRotatorJoint ) || !IsValid( player ) )
+		return
+
+	file.eyeRotatorStalk.EndSignal( "OnDeath" )
+	file.eyeRotatorStalk.EndSignal( "OnDestroy" )
+	file.eyeRotatorJoint.EndSignal( "OnDeath" )
+	file.eyeRotatorJoint.EndSignal( "OnDestroy" )
+	file.waypointTracker.EndSignal( "OnDeath" )
+	file.waypointTracker.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( SIG_OUT_OF_EYE_RANGE )
+
+	vector previousJointAngles = <0, 0, 0>
+	vector previousStalkAngles = <0, 0, 0>
+
+	bool extended = true
+	while( true )
+	{
+		                                       
+		 
+			               
+			 
+				                 
+				      
+				                
+			 
+		 
+		                    
+		 
+			                
+			 
+				                 
+				      
+				               
+			   
+		vector jointAngles = VectorToAngles( Normalize( player.EyePosition() - file.eyeRotatorJoint.GetOrigin() ) )
+		if ( jointAngles != previousJointAngles )
+		{
+			file.eyeRotatorJoint.NonPhysicsRotateTo( <0, jointAngles.y, jointAngles.z>, 0.75, 0, 0.35 )
+		}
+
+		vector stalkAngles = VectorToAngles( Normalize( player.EyePosition() - file.eyeRotatorStalk.GetOrigin() ) )
+		if ( stalkAngles != previousStalkAngles )
+		{
+			file.eyeRotatorStalk.NonPhysicsRotateTo( <stalkAngles.x, 0, 0>, 0.75, 0, 0.35 )
+		}
+		   
+		wait 0.75
+	}
+}
+#endif             
+
+             
+#if SERVER
+                                                                                     
+ 
+	                                                                                                                           
+ 
+
+                                                                                                          
+ 
+	                                                                                                       
+ 
+
+                                                                                                                                   
+ 
+	                                    
+	                                       
+	                
+	 
+		                                       
+		               
+		                                                           
+	 
+
+	                             
+	            
+		                             
+
+	                                                                                                      
+
+	                                                        
+	                                                            
+
+	            
+	 
+		                                
+	 
+	    
+	 
+		                           
+	 
+
+	          
+ 
+
+                                                                        
+ 
+	                                
+	 
+		            
+			                  
+		    
+			                 
+	 
+	                                     
+	 
+		            
+			                 
+		    
+			                  
+	 
+ 
+
+                                                                                                         
+ 
+	                                                                               
+
+	               
+		                                                            
+	    
+		                                                                     
+
+	                                                                                                                         
+	                                                                                                                        
+
+	                                                                            
+
+	                                          
+ 
+
+                                                                              
+ 
+	                                                                                                                                       
+
+	                                       
+	                                   
+ 
+
+                                                   
+ 
+	                                
+	                        
+	 
+		                       
+			                         
+			      
+
+		                           
+			                             
+			      
+
+		                          
+			                            
+			      
+
+		                      
+		                           
+			                             
+			      
+	 
+	                                                            
+	                                         
+	 
+		                       
+		 
+			                                  
+		 
+	 
+	                                  
+	 
+		                       
+		 
+			                                              
+		 
+	 
+	                                       
+	 
+		                       
+		 
+			                                              
+		 
+	 
+	                                  
+	 
+		                                                         
+	 
+ 
+#endif              
+
+              
+#if SERVER
+                                                                                             
+ 
+	                                    
+	                                      
+		      
+
+	                                                          
+	                      
+	                      
+	                                    
+	                                    
+	                                         
+	                                   
+	                                  
+	                              
+ 
+
+                                                             
+ 
+	                                      
+	 
+		                                                        
+	 
+ 
+
+                                                                 
+ 
+	                                                                  
+	                                                                    
+		      
+
+	                                             
+
+	                               
+
+	                                      
+	                                                                 
+
+	                            
+	 
+		                
+		                                
+		                          
+		 
+			                   
+		 
+
+		                                    
+		                                                         
+	 
+ 
+
+                                                      
+ 
+	                                                                    
+		      
+
+	                                           
+	                                    
+	                                      
+	                                             
+
+	                                                                  
+	                                                               
+
+	                                             
+	 
+		                             
+		                              
+		                                           
+		 
+			                                    
+		 
+
+		                                    
+		                                                         
+	 
+ 
+#endif               
+
+     
+#if CLIENT
+void function Medbay_LinkRuis( entity ent )
+{
+	file.waypointTracker = ent
+	foreach ( rui in file.ruisToTrack )
+	{
+		MedBay_RuiTrack( rui, file.waypointTracker )
+	}
+	file.ruisToTrack.clear()
+}
+
+void function MedBay_RUIThink( entity ent )
+{
+	bool exterior = ent.GetScriptName() == MEDBAY_INDICATOR_PROP_SCRIPT_NAME
+	float radius  = exterior ? MEDBAY_INDICATOR_RUI_RADIUS : MEDBAY_INDICATOR_RUI_RADIUS_INTERIOR
+
+	float width  = radius
+	float height = radius
+	vector right = <0, 0, 1> * height * 0.5
+	vector down  = <1, 0, 0> * width * 0.5
+	vector org   = exterior ? MEDBAY_INDICATOR_RUI_OFFSET : MEDBAY_INDICATOR_RUI_OFFSET_INTERIOR
+
+	var topo = RuiTopology_CreatePlane( org - right * 0.5 - down * 0.5, right, down, true )
+
+	RuiTopology_SetParent( topo, ent )
+
+	var rui = RuiCreate( RUI_MEDBAY_INDICATOR_RING, topo, RUI_DRAW_WORLD, 1 )
+
+	if ( IsValid( file.waypointTracker ) )
+	{
+		MedBay_RuiTrack( rui, file.waypointTracker )
+	}
+	else
+	{
+		file.ruisToTrack.append( rui )
+	}
+	WaitForever()
+}
+
+void function MedBay_RuiTrack( var rui, entity ent )
+{
+	RuiSetFloat3( rui, "colorIdle", RUI_IDLE_COLOR )
+	RuiSetFloat3( rui, "colorHealing", RUI_HEALING_COLOR )
+	RuiSetFloat3( rui, "colorCooldown", RUI_COOLDOWN_COLOR )
+
+	RuiTrackInt( rui, "currentHeals", ent, RUI_TRACK_WAYPOINT_INT, 0 )
+	RuiTrackInt( rui, "totalHeals", ent, RUI_TRACK_WAYPOINT_INT, 1 )
+	RuiTrackInt( rui, "currentState", ent, RUI_TRACK_WAYPOINT_INT, 2 )
+}
+#endif      
+
+               
+#if SERVER
+                                                                     
+ 
+	                               
+	                         
+	                                    
+	                          
+ 
+
+                                                              
+ 
+	                                         
+		      
+
+	                                        
+	 
+		                                   
+	 
+	    
+	 
+		                                      
+	 
+
+	                                             
+	 
+		                                                     
+
+		                                               
+		                                   
+
+		                                                    
+	 
+ 
+
+
+                                                              
+ 
+	                                         
+		      
+
+	                                           
+	 
+		                                                                                                  
+	 
+
+	                                   
+
+	                                                     
+	                                            
+	 
+		                                              
+		                                                                 
+
+		                                          
+	 
+	    
+		                                                                                        
+ 
+
+                                                                       
+ 
+	                                             
+	 
+		                                                                                          
+	 
+ 
+
+                                                                          
+ 
+	                                             
+	 
+		                                                                                           
+	 
+ 
+#endif                
+
+              
+#if SERVER
+                                                                
+ 
+	                     
+
+	                                  
+
+	               
+ 
+
+                                                                                                             
+ 
+	                                          
+
+	                              
+	                                
+	                                                  
+
+	                                                                       
+
+	                                                              
+	                                      
+		                              
+	                                   
+		                               
+
+	              
+	                                                                                           
+	                                                      
+	                                                            
+	                                                           
+
+	                               
+	                               
+
+	                                                                                                                                                                                                                  
+	                                          
+	                                        
+	                                                                                                                                              
+
+	             
+	                                                                                          
+	                                                           
+	                                                                     
+
+	                                                                                                                                                                                                           
+	                              
+	                                  
+	                                                                                                                                                                       
+	                                                 
+
+	                                                        
+
+	                                                                                                                                         
+	                                                                                                                                       
+
+	                                               
+	                                        
+
+	                               
+
+	                                                                           
+	                                                                             
+ 
+
+                                                                                      
+ 
+	                                                                                                                   
+	                                                                                          
+	                                                                               
+	                                                                                                                                    
+	                                                
+	                                               
+ 
+
+                                                                            
+ 
+	                         
+	                                
+	                                    
+	                                             
+	                   
+ 
+
+                                                              
+ 
+	                                                        
+ 
+
+                                                                                   
+ 
+	                                                  
+	 
+		                                                                                 
+			                              
+	 
+ 
+
+                                                                                               
+ 
+	                                                        
+	                                                  
+	                                           
+	                              
+	                                
+	                             
+	                               
+
+	                                                          
+	                                                                     
+
+	                                                    
+	 
+		                                                
+		                                   
+	   
+
+	              
+	 
+		                                          
+		           
+	 
+ 
+
+                                                                    
+ 
+	                                                                                                          
+	 
+		                                                     
+		                                             
+		 
+			                                                                           
+			                                                                             
+		 
+
+		                                              
+		                                             
+
+		                                                                                                                                                                                       
+		                                       
+		                                                                                                                                          
+		                                                   
+		                                       
+
+		                                                                                                                                                                                      
+		                                      
+		                                                                                                                                         
+		                                                  
+		                                      
+
+		                             
+	 
+
+	                                     
+		                             
+	                                           
+		                                   
+
+	                                    
+		                            
+	                                          
+		                                  
+ 
+#endif               
+
+           
+#if CLIENT
+void function ServerToClient_MedBayHealVisualsEnabled( entity player )
+{
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	entity cockpit = player.GetCockpit()
+	if ( !IsValid( cockpit ) )
+		return
+
+	Assert( !EffectDoesExist( file.healFxHandle ), "tried to start a second screen fx" )
+
+	int fxID = GetParticleSystemIndex( VFX_MEDBAY_HEAL_COCKPIT_1P )
+	file.healFxHandle = StartParticleEffectOnEntity( cockpit, fxID, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
+	EffectSetIsWithCockpit( file.healFxHandle, true )
+
+	Chroma_StartHealingDroneEffect()
+}
+
+
+void function ServerToClient_MedBayHealVisualsDisabled( entity player )
+{
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	if ( !EffectDoesExist( file.healFxHandle ) )
+		return
+
+	EffectStop( file.healFxHandle, false, true )
+
+	Chroma_EndHealingDroneEffect()
+}
+#endif            
+
+         
+#if SERVER
+                                                              
+ 
+	                                              
+	 
+		                              
+			           
+	 
+
+	                                                                                
+	           
+ 
+
+
+                                                            
+ 
+	                                              
+	 
+		                                               
+			           
+	 
+
+	                                                                                 
+	           
+ 
+
+                                                                
+ 
+	                                              
+	 
+		                           
+			           
+	 
+	           
+ 
+
+                                                          
+ 
+	                                                       
+
+	                   
+		        
+
+	                         
+
+	                                                                          
+ 
+
+                                                  
+ 
+	                                                  
+ 
+
+                                                
+ 
+	                                                                    
+	                       
+		            
+
+	                              
+		            
+
+	                                   
+		            
+
+	                                                                           
+		            
+
+	                                                                                                                      
+		            
+
+	                                     
+		            
+
+	                            
+		            
+
+	                                    
+ 
+#endif          
+
+                
+#if SERVER
+                                                                                                    
+ 
+	                        
+	 
+		                       
+			                                                
+			                                  
+			      
+	 
+ 
+
+
+                                                                             
+ 
+	                                          
+	                        
+	 
+		                          
+			                                       
+			 
+				                                             
+				                                             
+			 
+			      
+	 
+ 
+
+                                                          
+ 
+	                                         
+ 
+
+                                                           
+ 
+	                                                                      
+		      
+
+	                                           
+	                                             
+	                                           
+	                                             
+	                                    
+	                                      
+	                                           
+	                                                
+
+	            
+		                   
+		 
+			                                                 
+			                                                                                        
+			                       
+			 
+				                 
+					                                                                              
+			 
+			                                            
+			 
+				                                                                              
+				                                  
+			 
+			    
+			 
+				                 
+					                                                                              
+				                                              
+				 
+					                 
+						                                                                       
+				 
+				                                                 
+			 
+		 
+	 
+
+	                                                                       
+
+	         
+	                                                    
+	                                             
+
+	          
+	                                                     
+	                                           
+	 
+		                                                                    
+	 
+
+	                                                                              
+	                                                            
+
+	                                        
+
+	      
+	                                                                        
+	                                                                       
+	                                                                      
+ 
+
+                                                           
+ 
+	                                    
+	                                      
+	                                           
+	                                                
+	                                              
+
+	                            
+	             
+	 
+		                                           
+		 
+			                                                    
+			                                                                                          
+			 
+				                                               
+			 
+		 
+
+		                                                       
+		 
+			                                                                              
+			                      
+		 
+		                                                            
+		 
+			                                                                              
+			                       
+		 
+		           
+	 
+ 
+
+                                                                              
+                                                                 
+ 
+	                                                                 
+	                                              
+	                                                                   
+	                                                                  
+ 
+
+                                                               
+ 
+	                                                                      
+		      
+	                                           
+	                                                   
+
+	                                  
+	 
+		                                                                          
+		                                          
+	   
+
+	                                         
+
+	                     
+
+	                                          
+
+	                                                                                           
+	                                        
+	                                                                                          
+ 
+
+                                                                        
+ 
+	                                                                       
+
+	                                                  
+	                                           
+	                                           
+
+	                                    
+	                                      
+	                             
+	                               
+	                                             
+
+	                                       
+
+	                                                                                    
+
+	                                                                             
+	                                                                                             
+	                                                                                                                   
+
+	                                                                                                 
+	                                      
+
+	                                          
+	 
+		                                          
+		                                                                
+		                                                               
+		                                 
+	   
+
+	                                                                   
+
+	                
+	              
+	 
+		                                                 
+		           
+		                                  
+		                                                                                             
+		                                                   
+
+		                                
+		 
+			                             
+
+			                                                         
+			                                    
+
+			                           
+			 
+				                   
+				                                           
+			 
+		 
+
+		                                     
+		 
+			                                        
+		 
+	 
+ 
+#endif        
+
+#if SERVER             
+                                                     
+ 
+	                                                                     
+	 
+		                                    
+	 
+ 
+
+                                                      
+ 
+	                                
+		      
+
+	                                    
+	                                      
+
+	                                  
+	 
+		                        
+	   
+
+	                                         
+
+	                                                                                
+	 
+		                                
+	 
+ 
+
+                                                 
+ 
+	                                                                                                
+		      
+
+	                       
+	                                        
+
+	                                                
+	                      
+
+	                                           
+	                                                                        
+	                                                                       
+
+	                                                                          
+	                                                                           
+ 
+
+                                                                                 
+ 
+	                          
+	                            
+
+	                               
+
+	                                                                 
+
+	                                           
+	                     
+	      
+	                     
+	      
+	                     
+	      
+	                     
+	        
+	                     
+	        
+	                     
+ 
+
+                                         
+ 
+	                                                                                            
+	                                                                 
+ 
+
+       
+                                  
+ 
+	                                    
+	                        
+ 
+      
+#endif             
+
+       
+#if SERVER || CLIENT
+bool function MedBay_IsOnCooldown()
+{
+	if ( !IsValid( file.waypointTracker ) )
+		return false
+	return file.waypointTracker.GetWaypointInt( 2 ) == eMedBayState.COOLDOWN
+}
+
+bool function MedBay_IsDisabled()
+{
+	if ( !IsValid( file.waypointTracker ) )
+		return false
+	return file.waypointTracker.GetWaypointInt( 2 ) == eMedBayState.OFF
+}
+#endif
+
+                        

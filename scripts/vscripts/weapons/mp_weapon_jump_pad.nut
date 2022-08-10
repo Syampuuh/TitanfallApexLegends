@@ -1,49 +1,36 @@
 global function OnWeaponTossReleaseAnimEvent_weapon_jump_pad
-global function OnWeaponAttemptOffhandSwitch_weapon_jump_pad
 global function OnWeaponTossPrep_weapon_jump_pad
 
 const float JUMP_PAD_ANGLE_LIMIT = 0.70
 
-bool function OnWeaponAttemptOffhandSwitch_weapon_jump_pad( entity weapon )
-{
-	int ammoReq = weapon.GetAmmoPerShot()
-	int currAmmo = weapon.GetWeaponPrimaryClipCount()
-	if ( currAmmo < ammoReq )
-		return false
+const bool JUMP_PAD_NEW_DEPLOY_FUNC = true
 
-	entity player = weapon.GetWeaponOwner()
-	if ( player.IsPhaseShifted() )
-		return false
-
-	return true
-}
 
 var function OnWeaponTossReleaseAnimEvent_weapon_jump_pad( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
 	int ammoReq = weapon.GetAmmoPerShot()
 	weapon.EmitWeaponSound_1p3p( GetGrenadeThrowSound_1p( weapon ), GetGrenadeThrowSound_3p( weapon ) )
 
-	entity deployable = ThrowDeployable( weapon, attackParams, 1.0, OnJumpPadPlanted )
+	entity deployable = ThrowDeployable( weapon, attackParams, 1.0, OnJumpPadPlanted, null, null )
 	if ( deployable )
 	{
 		entity player = weapon.GetWeaponOwner()
 		PlayerUsedOffhand( player, weapon, true, deployable )
 
-		#if(false)
+		#if SERVER
+		                                      
+		                                                                   
 
+		                                                            
+		                            
+			                                                
 
+		                                         
+		#endif
 
-
-
-
-
-
-#endif
-
-		#if(false)
-
-#endif
-
+		#if SERVER
+			                                                           
+		#endif
 	}
 
 	return ammoReq
@@ -54,44 +41,71 @@ void function OnWeaponTossPrep_weapon_jump_pad( entity weapon, WeaponTossPrepPar
 	weapon.EmitWeaponSound_1p3p( GetGrenadeDeploySound_1p( weapon ), GetGrenadeDeploySound_3p( weapon ) )
 }
 
-void function OnJumpPadPlanted( entity projectile )
+void function OnJumpPadPlanted( entity projectile, DeployableCollisionParams collisionParams )
 {
-	#if(false)
+#if SERVER
+                            
 
+	                                                                                                                                            
+	                 	     
+	                 	                                                              
+	               		                                                              
+	                                                                                                                             
+	                                    
+	 
+		                                                             
+		                                                                                  
+		                                        
+	 
 
+	                                                          
 
+                                     
 
+	                               
+	                                      
 
+	                                    
+	                                                
+	                                               
+	                                                  
+	                                             
 
+	                                                                                                                      
+	                                 
+	 
+		                                                               
+		                                                                     
 
+		                                             
+		                                                              
+			                                           
+	 
 
+	                                         
+	                        
+	                                                                    
 
+	                            
+	                              
+                      
+		                                                       
+                            
+	                                                                                                              
+	 
+		                                     
+		                                          
+	 
+	                                
+	 
+		                                 
+	 
 
+	                                                    
+	                                                                                 
 
+	                                                          
 
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-#endif
+                                               
+#endif              
 }

@@ -1,0 +1,838 @@
+global function ShAmbientDialogue_Init
+global function GetAllAmbientDialogue
+
+#if SERVER
+                                                    
+                                          
+                                                           
+                                                                
+                 
+                                                   
+      
+#endif
+
+#if SERVER && DEV
+	                                               
+#endif
+#if CLIENT
+	global function DEV_SetCharacterForAmbientDialogue
+                 
+                                                          
+      
+#endif
+
+                                                                     
+const int AMBIENT_DIALOGUE_FAIL_RANDOM_RETRY_ATTEMPTS = 3
+                 
+                                                
+      
+const bool VERBOSE_PRINT_DEBUG = false
+
+global struct AmbientDialogueData
+{
+	string eventName
+	ItemFlavor& speakingLegendFlav
+}
+
+global struct AmbientConversationData
+{
+	string							convoName
+	string							triggerScriptName
+	array<AmbientDialogueData> 		convoSequence
+	array<int> 						spokenBySquads			                                         
+	table<int, int>					numDiceRollAttemptsMadeByTeam	                                                                                                        
+	array<ItemFlavor> 				requiredLegendFlavs
+	array<ItemFlavor> 				forbiddenLegendFlavs		                                                                                      
+	int 							repeatType
+	float 							rarity
+	bool 							allLegendsRequired
+	array<string>					exclusiveConversations		                                                                                                                                 
+                  
+                       
+       
+}
+
+struct
+{
+	table < string, AmbientConversationData > ambDialogMap
+	table < entity, array<void functionref( entity, entity )> > triggerCallbackMap
+	table < entity, array<int> > triggerUsedBySquadMap
+	table < int, array<string> > excludedConversationsForSquad		                                                     
+	table < string, array<entity> > convoTriggerMap                                     
+} file
+
+void function ShAmbientDialogue_Init()
+{
+	if ( !GetCurrentPlaylistVarBool( "ambient_dialogue_enabled", true ) )
+	{
+		Warning( "WARNING! Ambient dialogue disabled!" )
+		return
+	}
+
+	#if SERVER || CLIENT
+		                                      
+		RegisterCSVDialogue( $"datatable/ambient_dialogue.rpak" )
+	#endif
+
+	                                                         
+	RegisterAmbientDialogueConversations( $"datatable/ambient_dialogue.rpak" )
+
+	#if SERVER
+		                                              
+	#endif
+}
+
+void function RegisterAmbientDialogueConversations( asset dt )
+{
+	var dataTable = GetDataTable( dt )
+
+	int columnName              = GetDataTableColumnByName( dataTable, "name" )
+	int columnMapName           = GetDataTableColumnByName( dataTable, "map" )
+	int columnTriggerScriptName = GetDataTableColumnByName( dataTable, "trigger" )
+	int columnConversationName  = GetDataTableColumnByName( dataTable, "conversation" )
+	int columnSpeakingLegend    = GetDataTableColumnByName( dataTable, "speakLegend" )
+	int columnRequiredLegend    = GetDataTableColumnByName( dataTable, "reqLegends" )
+	int columnForbiddenLegend   = GetDataTableColumnByName( dataTable, "forbidLegends" )
+	int columnRarityOverride    = GetDataTableColumnByName( dataTable, "rarityOverride" )
+	int columnOrder             = GetDataTableColumnByName( dataTable, "order" )
+	int columnRepeatType        = GetDataTableColumnByName( dataTable, "repeatType" )
+	int columnAllLegendsReqd    = GetDataTableColumnByName( dataTable, "allSpeakersRequired" )
+	int columnMutuallyExclusive = GetDataTableColumnByName( dataTable, "mutualExclusiveConvos" )
+                  
+                                                                           
+       
+
+	int numRows = GetDataTableRowCount( dataTable )
+	string currentConversation = ""
+	for ( int idx_row = 0; idx_row < numRows; idx_row++ )
+	{
+		string conversationName = GetDataTableString( dataTable, idx_row, columnConversationName )
+		if ( conversationName != "" && currentConversation != conversationName )
+		{
+			AmbientConversationData newConversation
+
+			newConversation.convoName = GetDataTableString( dataTable, idx_row, columnConversationName )
+			string mapName =   GetDataTableString( dataTable, idx_row, columnMapName )
+			if ( mapName == "" )
+			{
+				#if SERVER && DEV
+					                                                                                     
+				#endif
+				continue
+			}
+
+			#if UI
+			if ( GetActiveLevel() != mapName )
+			#else
+			if ( GetMapName() != mapName )
+			#endif
+			{
+				#if DEV
+					if ( VERBOSE_PRINT_DEBUG )
+					#if UI
+						printt( "Skipping register ambient dialogue conversation " + GetDataTableString( dataTable, idx_row, columnName ) + " required map( " + mapName + ") != current map(" +  GetActiveLevel() + ")")
+					#else
+						printt( "Skipping register ambient dialogue conversation " + GetDataTableString( dataTable, idx_row, columnName ) + " required map( " + mapName + ") != current map(" +  GetMapName() + ")")
+					#endif
+				#endif
+				continue
+			}
+
+			newConversation.triggerScriptName =   GetDataTableString( dataTable, idx_row, columnTriggerScriptName )
+			                                                
+			   
+			  	                 
+			  		                                                                                                
+			  	      
+			  	        
+			   
+
+			array<string> requiredLegendRefs = split( GetDataTableString( dataTable, idx_row, columnRequiredLegend ), ";" )
+			array<string> forbiddenLegendRefs = split( GetDataTableString( dataTable, idx_row, columnForbiddenLegend ), ";" )
+			string speakingLegendRef = GetDataTableString( dataTable, idx_row, columnSpeakingLegend )
+			if ( !requiredLegendRefs.contains( speakingLegendRef ) )
+			{
+				#if SERVER && DEV
+					                                                                                                                                                                                                                                                  
+				#endif
+				continue
+			}
+
+			if ( requiredLegendRefs.len() == 0 )
+			{
+				#if SERVER && DEV
+					                                                                                                                                                                                                            
+				#endif
+				continue
+			}
+
+			array<ItemFlavor> requiredLegendFlavs
+			array<ItemFlavor> forbiddenLegendFlavs
+			bool didErrorOccur
+
+			                                                                
+			didErrorOccur = AmbientDialogue_ProcessRefArray( requiredLegendFlavs, requiredLegendRefs, forbiddenLegendRefs, GetDataTableString( dataTable, idx_row, columnName ) )
+			didErrorOccur = AmbientDialogue_ProcessRefArray( forbiddenLegendFlavs, forbiddenLegendRefs, requiredLegendRefs, GetDataTableString( dataTable, idx_row, columnName ) ) ? true : didErrorOccur
+
+			                                                                             
+			if ( didErrorOccur )
+				continue
+
+			newConversation.requiredLegendFlavs = requiredLegendFlavs
+			newConversation.forbiddenLegendFlavs = forbiddenLegendFlavs
+
+			newConversation.repeatType 			= GetDataTableInt( dataTable, idx_row, columnRepeatType )
+
+			                                                                                                                         
+			newConversation.rarity  = GetDataTableFloat( dataTable, idx_row, columnRarityOverride )
+			string rarityOverridePlaylistVar = format( "amb_diag_rarity_override_%s", conversationName )
+			float rarityPlaylistOverride = GetCurrentPlaylistVarFloat( rarityOverridePlaylistVar, -1.0 )
+			if ( rarityPlaylistOverride >= 0 )
+				newConversation.rarity = rarityPlaylistOverride
+
+			newConversation.allLegendsRequired = GetDataTableBool( dataTable, idx_row, columnAllLegendsReqd )
+
+			newConversation.exclusiveConversations = split( GetDataTableString( dataTable, idx_row, columnMutuallyExclusive ), ";" )
+
+                    
+                                                                                        
+         
+
+			int curOrder = -1
+			                                                                                                   
+			for( int idx_rowsWithinConvo = idx_row; idx_rowsWithinConvo < numRows; idx_rowsWithinConvo++ )
+			{
+				string newConvoName = GetDataTableString( dataTable, idx_rowsWithinConvo, columnConversationName )
+				if ( newConvoName != "" && conversationName != newConvoName )
+				{
+					                                        
+					idx_row = idx_rowsWithinConvo - 1
+					break
+				}
+
+				                                                                                      
+				int order               = GetDataTableInt( dataTable, idx_rowsWithinConvo, columnOrder )
+				if ( order > curOrder )
+				{
+					AmbientDialogueData newDialogue
+					newDialogue.eventName 			= GetDataTableString( dataTable, idx_rowsWithinConvo, columnName )
+					newDialogue.speakingLegendFlav 	= GetCharacterFlavorFromTableName( GetDataTableString( dataTable, idx_rowsWithinConvo, columnSpeakingLegend ) )
+					newConversation.convoSequence.append( newDialogue )
+					curOrder = order
+				}
+				else if ( order <= curOrder )
+				{
+					Warning( "Warning! Incorrect order while parsing a conversation. Order should always go up. Event name: %s, Current order: %i, Attempted new order: %i", GetDataTableString( dataTable, idx_row, columnName ), curOrder, order )
+				}
+			}
+
+
+			file.ambDialogMap[ conversationName ] <- newConversation
+		}
+	}
+}
+
+#if SERVER
+                               
+ 
+	                                                              
+	 
+		                                           
+			                                                                                                                   
+	 
+ 
+#endif
+
+bool function AmbientDialogue_ProcessRefArray( array<ItemFlavor> arrayToPopulate, array<string> refArray, array<string> mutuallyExclusiveRefArray, string convoNameForDebug )
+{
+	bool didErrorOccur = false
+	foreach( string ref in refArray )
+	{
+		if( mutuallyExclusiveRefArray.contains( ref ) )
+		{
+			#if SERVER && DEV
+				                                                                                                                                                
+			#endif
+			didErrorOccur = true
+			continue
+		}
+
+		#if CLIENT || SERVER
+		if ( !GetValidVoices().contains( ref ) )
+		{
+			#if SERVER && DEV
+				                                                                                                                                                   
+				                                                              
+			#endif
+			didErrorOccur = true
+			continue
+		}
+		#endif
+		arrayToPopulate.append( GetCharacterFlavorFromTableName( ref ) )
+	}
+
+	return didErrorOccur
+}
+
+#if SERVER
+                                                                                                                                
+                                                                          
+                                                                                                              
+ 
+	                                                 
+	 
+		                                                                                    
+		      
+	 
+
+	                                                                 
+	                                                                         
+
+	                                                                                     
+		      
+
+	                          
+	                                                   
+	                                      
+	 
+		                                                               
+		                                                                                         
+		                                                                                                             
+
+		             
+			                                    
+	 
+
+	                                                 
+		                                                                                     
+	    
+		                                                                              
+
+	                                       
+	                                         
+		                                                 
+	    
+		                                              
+
+	                             
+	                                                             
+	 
+		                                                                  
+	 
+
+	                                                                                                                                                   
+ 
+
+                                                         
+                                                                                                            
+ 
+	                                                 
+	 
+		                                                                                    
+		            
+	 
+
+	                                                                         
+	                                                                            
+		            
+
+	                          
+	                                                   
+	                                      
+	 
+		                                                               
+		                                                                                         
+		                                                                                                             
+
+		             
+			                                    
+	 
+
+	                                                 
+		                                                                                     
+	    
+		                                                                              
+
+	                                       
+
+	                             
+	                                                             
+	 
+		                                                                  
+	 
+
+	                                                                                                                                                   
+	           
+ 
+
+
+                                                                                                                                     
+ 
+	                                                                                                         
+ 
+
+                                                                                                                                                  
+ 
+	                                                                                                        
+ 
+
+                                                                                                                                                
+ 
+	                                                              
+	                            
+	 
+		                                                                                            
+		      
+	 
+
+	                                    
+	 
+		                                                                                                        
+			                                                                                                                                                                                                                 
+
+		                                           
+		 
+			                                     
+			                      
+				                                             
+				 
+					                                                                                            
+					                                       
+
+					                                   
+					 
+						                                                                                                                           
+						                                
+					 
+				 
+			 
+		 
+
+		                                       
+			                                                                
+			 
+				                                                                                                
+				                                          
+					      
+
+				                                                           
+					      
+
+				                                                
+                     
+                                                                  
+                                                                           
+        
+          
+					                                                                 
+			 
+		 
+
+		                             
+		                                               
+		 
+			                                         
+			 
+				                                            
+			 
+			    
+			 
+				                                               
+			 
+		 
+
+
+		                                                                                                                          
+		                       
+			                                           
+	 
+ 
+#endif
+
+ItemFlavor function GetCharacterFlavorFromTableName( string dtName )
+{
+	return GetItemFlavorByHumanReadableRef( "character_" + dtName )
+}
+
+entity function GetSpeakingPlayerInSquadForAmbientDialogue( AmbientDialogueData data, array<entity> squad )
+{
+	foreach( entity player in squad )
+	{
+		ItemFlavor playerLegendFlav = LoadoutSlot_GetItemFlavor( ToEHI( player ), Loadout_Character() )
+		if ( playerLegendFlav == data.speakingLegendFlav )
+			return player
+	}
+
+	unreachable
+}
+
+#if CLIENT || SERVER
+bool function AmbientConversation_CanSquadPlay( AmbientConversationData convoData, array<entity> squad, int team, entity touchingEnt, entity trig )
+{
+	                                                     
+	if ( convoData.repeatType == 0 && convoData.spokenBySquads.contains( team ) && ( GetBugReproNum() != 16661 ) )
+		return false
+
+	if ( ( trig in file.triggerUsedBySquadMap ) && file.triggerUsedBySquadMap[ trig ].contains( team ) && ( GetBugReproNum() != 16661 ) )
+		return false
+
+	if ( ( team in file.excludedConversationsForSquad ) && ( file.excludedConversationsForSquad[ team ].contains( convoData.convoName ) ) )
+		return false
+
+	bool squadOutOfRetries = team in convoData.numDiceRollAttemptsMadeByTeam && convoData.numDiceRollAttemptsMadeByTeam[ team ] >= AMBIENT_DIALOGUE_FAIL_RANDOM_RETRY_ATTEMPTS
+	if ( convoData.repeatType == 0 && squadOutOfRetries )
+		return false
+
+	int numLegendReqs                 = convoData.requiredLegendFlavs.len()
+	int numAliveConnectedSquadMembers = squad.len()
+	if ( numLegendReqs > numAliveConnectedSquadMembers )
+		return false
+
+	array<entity> squadMembersWithRequiredLegendFlav
+	array<ItemFlavor> requiredFlavsRemaining = clone convoData.requiredLegendFlavs
+	for( int i; i < numAliveConnectedSquadMembers; i++ )
+	{
+		ItemFlavor squadMemberFlav = LoadoutSlot_GetItemFlavor( ToEHI( squad[ i ] ), Loadout_Character() )
+
+		if ( requiredFlavsRemaining.contains( squadMemberFlav ) )
+		{
+			squadMembersWithRequiredLegendFlav.append( squad[ i ] )
+			requiredFlavsRemaining.fastremovebyvalue( squadMemberFlav )
+		}
+
+		if ( convoData.forbiddenLegendFlavs.contains( squadMemberFlav ) )
+			return false
+	}
+
+	                                       
+	if ( requiredFlavsRemaining.len() > 0 )
+	{
+		return false
+	}
+
+	ItemFlavor firstSpeakerFlav = convoData.convoSequence[ 0 ].speakingLegendFlav
+
+	bool requiredLegendsTouching = true
+	bool firstSpeakerTouching = true
+	foreach( entity player in squadMembersWithRequiredLegendFlav )
+	{
+		if ( !trig.IsTouching( player ) )
+		{
+			requiredLegendsTouching = false
+
+			if ( LoadoutSlot_GetItemFlavor( ToEHI( touchingEnt ), Loadout_Character() ) == firstSpeakerFlav )
+			{
+				firstSpeakerTouching = false
+			}
+		}
+	}
+
+	if ( convoData.allLegendsRequired && !requiredLegendsTouching )
+		return false
+
+	                                                                                                                                                                                
+	                                                            
+	if ( !firstSpeakerTouching )
+		return false
+
+	if ( GetBugReproNum() == 16661 )
+		return true
+
+	                   
+	if ( GetBugReproNum() == 16662 )
+		return true
+
+	                                                                                                                                                  
+                 
+                                                                                                                     
+     
+	if ( RandomFloat( 1.0 ) > convoData.rarity )
+      
+	{
+
+		if ( team in convoData.numDiceRollAttemptsMadeByTeam )
+			convoData.numDiceRollAttemptsMadeByTeam[ team ]++
+		else
+			convoData.numDiceRollAttemptsMadeByTeam[ team ] <- 1
+
+		return false
+	}
+
+	return true
+}
+
+                                                                                                
+bool function NonTriggerAmbientConversation_CanSquadPlay( AmbientConversationData convoData, array<entity> squad, int team )
+{
+	                                                     
+	if ( convoData.repeatType == 0 && convoData.spokenBySquads.contains( team ) && ( GetBugReproNum() != 16661 ) )
+		return false
+
+	if ( ( team in file.excludedConversationsForSquad ) && ( file.excludedConversationsForSquad[ team ].contains( convoData.convoName ) ) )
+		return false
+
+	bool squadOutOfRetries = team in convoData.numDiceRollAttemptsMadeByTeam && convoData.numDiceRollAttemptsMadeByTeam[ team ] >= AMBIENT_DIALOGUE_FAIL_RANDOM_RETRY_ATTEMPTS
+	if ( convoData.repeatType == 0 && squadOutOfRetries )
+		return false
+
+	int numLegendReqs                 = convoData.requiredLegendFlavs.len()
+	int numAliveConnectedSquadMembers = squad.len()
+	if ( numLegendReqs > numAliveConnectedSquadMembers )
+		return false
+
+	array<entity> squadMembersWithRequiredLegendFlav
+	array<ItemFlavor> requiredFlavsRemaining = clone convoData.requiredLegendFlavs
+	for( int i; i < numAliveConnectedSquadMembers; i++ )
+	{
+		ItemFlavor squadMemberFlav = LoadoutSlot_GetItemFlavor( ToEHI( squad[ i ] ), Loadout_Character() )
+
+		if ( requiredFlavsRemaining.contains( squadMemberFlav ) )
+		{
+			squadMembersWithRequiredLegendFlav.append( squad[ i ] )
+			requiredFlavsRemaining.fastremovebyvalue( squadMemberFlav )
+		}
+
+		if ( convoData.forbiddenLegendFlavs.contains( squadMemberFlav ) )
+			return false
+	}
+
+	                                       
+	if ( requiredFlavsRemaining.len() > 0 )
+	{
+		return false
+	}
+
+	ItemFlavor firstSpeakerFlav = convoData.convoSequence[ 0 ].speakingLegendFlav
+
+	if ( GetBugReproNum() == 16661 )
+		return true
+
+	                   
+	if ( GetBugReproNum() == 16662 )
+		return true
+
+	                                                                                                                                                  
+                  
+                                                                                                                     
+      
+	if ( RandomFloat( 1.0 ) > convoData.rarity )
+       
+	{
+
+	if ( team in convoData.numDiceRollAttemptsMadeByTeam )
+		convoData.numDiceRollAttemptsMadeByTeam[ team ]++
+	else
+		convoData.numDiceRollAttemptsMadeByTeam[ team ] <- 1
+
+	return false
+	}
+
+	return true
+}
+
+#endif
+
+array<AmbientConversationData> function GetAllAmbientDialogue()
+{
+	#if UI
+		if (file.ambDialogMap.len() < 1)
+			ShAmbientDialogue_Init()
+	#endif
+
+	array<AmbientConversationData> result = []
+	foreach ( key, val in file.ambDialogMap)
+	{
+		result.append(val)
+	}
+	return result
+}
+
+#if SERVER && DEV
+                                                                                        
+ 
+	                                          
+	 
+		                                             
+		                   
+		 
+			                                                                                                     
+			                              
+
+			                                                       
+			                                                                         
+
+			                                                                             
+			                                            
+			 
+				                                                              
+				 
+					                         
+					 
+						                                                                                           
+						                                                    
+						 
+							                                                                                                                                                     
+						 
+					 
+					    
+						                                                                                                                                                  
+				 
+
+				                                                                
+				                                                               
+
+				                                
+				                                                        
+				                                                    
+
+				                                      
+				 
+					                                                            
+					                                                      
+				 
+			 
+		 
+	 
+	    
+	 
+		                                                                                                                                                                    
+	 
+ 
+#endif
+
+#if CLIENT
+void function DEV_SetCharacterForAmbientDialogue (string characterName, bool spawnBot)
+{
+	#if DEV
+	entity player = GetLocalClientPlayer()
+	if (!spawnBot)
+	{
+		string command ="loadouts_devset "+ Loadout_Character().id + " " + characterName
+		player.ClientCommand( command )
+	}
+	else
+	{
+		string command = "dev_sur_force_spawn_character " + characterName
+		player.ClientCommand( command )
+		player.ClientCommand( "bot -myteam" )
+		player.ClientCommand( "bot_follow 1" )
+	}
+	#endif
+}
+#endif
+
+                 
+                                      
+ 
+                                                                           
+ 
+
+                                                       
+ 
+                                                                          
+                                 
+             
+
+             
+ 
+
+          
+                                                                                                                   
+ 
+                                                  
+  
+                                                                                      
+        
+  
+
+                                                                  
+                                                                          
+
+                                                                                      
+        
+
+                           
+                                                    
+                           
+  
+                                                                 
+                                                                                           
+                                                                                                               
+                                      
+  
+     
+        
+
+                                                                                                                          
+                                                  
+                                                                                       
+     
+                                                                                
+
+                                        
+                                          
+                                                   
+     
+                                                
+
+                              
+                                                              
+  
+                                                                    
+  
+
+                                              
+
+                           
+  
+                                                                 
+                                                                                           
+                                                                                                                
+  
+ 
+
+                                                                                          
+ 
+                                                                                    
+
+                                                                              
+                                                                          
+                                                    
+
+                                           
+  
+                                                                 
+                                                                                           
+                                                                                                               
+  
+
+                                              
+ 
+
+      
+
+          
+                                                                                  
+ 
+                                                 
+                                                                           
+                                                                 
+                                                                     
+
+               
+
+                                                                 
+                                                                                                                                                  
+     
+ 
+
+                                                                                               
+ 
+                                                             
+  
+                                                                                       
+  
+ 
+      
+
+      

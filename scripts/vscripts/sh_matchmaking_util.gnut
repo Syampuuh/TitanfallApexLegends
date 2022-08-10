@@ -1,23 +1,47 @@
 global function DoesPlaylistSupportNoFillTeams
+global function DoesPlaylistSupportNoFill
 
-
-#if CLIENT || UI 
+#if (CLIENT || UI)
 global function StartMatchmakingStandard
 global function StartMatchmakingWithNoFillTeams
-#endif //
+#endif                      
 
 
 bool function DoesPlaylistSupportNoFillTeams( string playlist )
 {
-	int allowNoFillTeams = int( GetPlaylistVarOrUseValue( playlist, "allow_no_fill_teams", "0" ) )
-	return (allowNoFillTeams != 0)
+	return GetPlaylistVarBool( playlist, "allow_no_fill_teams", false )
 }
 
-#if CLIENT || UI 
+bool function DoesPlaylistSupportNoFill( string playlist )
+{
+	return GetPlaylistVarInt( playlist, "max_nofill_players", 0 ) > 0
+}
+
+#if (CLIENT || UI)
 void function StartMatchmaking_( string playlist, bool requestNoFillTeam )
 {
 	SetConVarInt( "match_teamNoFill", (requestNoFillTeam ? 1 : 0) )
 	StartMatchmaking( playlist )
+
+	#if UI
+	if ( Dev_CommandLineHasParm( "-auto_ezlaunch" ) )
+	{
+		thread function()
+		{
+			RegisterSignal( "StartMatchmaking_" )
+			Signal( uiGlobal.signalDummy, "StartMatchmaking_" )
+			EndSignal( uiGlobal.signalDummy, "StartMatchmaking_" )
+
+			wait( 1.0 )
+			if ( !IsConnected() )
+				return
+			if ( !AreWeMatchmaking() )
+				return
+
+			ClientCommand( "ezLaunch" )
+		}()
+	}
+	#endif      
 
 	Chroma_StartMatchmaking()
 }
@@ -32,6 +56,6 @@ void function StartMatchmakingWithNoFillTeams( string playlist )
 	Assert( DoesPlaylistSupportNoFillTeams( playlist ) )
 	StartMatchmaking_( playlist, true )
 }
-#endif //
+#endif                      
 
 

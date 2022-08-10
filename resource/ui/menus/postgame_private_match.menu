@@ -1,0 +1,145 @@
+resource/ui/menus/postgame_private_match.menu
+{
+	menu
+	{
+		ControlName				Frame
+		xpos					0
+		ypos					0
+		zpos					3
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		PaintBackgroundType		1
+		infocus_bgcolor_override	"32 32 32 64"
+		outoffocus_bgcolor_override	"64 64 64 64"
+
+        ScreenFrame
+        {
+            ControlName				Label
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            labelText				""
+            visible				    1
+            bgcolor_override        "0 0 0 160"
+            paintbackground         1
+        }
+
+        ScreenBlur
+        {
+            ControlName				Label
+            labelText               ""
+        }
+
+        Vignette
+        {
+            ControlName             ImagePanel
+            InheritProperties       MenuVignette
+        }
+
+		Decoration
+		{
+			ControlName             RuiPanel
+   			wide					f0
+   			tall                    f0
+	        rui                     "ui/customize_character_menu_decoration.rpak"
+	        visible 0
+		}
+
+        Logo
+        {
+            ControlName				RuiPanel
+			InheritProperties       Logo
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+        }
+
+        MenuHeader
+        {
+            ControlName				RuiPanel
+			ypos					-48
+            wide					1800
+            tall					208
+            visible				    1
+            rui                     "ui/generic_menu_header.rpak"
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        PrivateMatchRosterPanel
+        {
+           ControlName             CNestedPanel
+           controlSettingsFile     "resource/ui/menus/panels/private_match_postgame_teams.res"
+
+           wide                    1800
+           tall                    823
+           zpos                    2
+
+           pin_to_sibling          ScreenFrame
+           pin_corner_to_sibling   CENTER
+           pin_to_sibling_corner   CENTER
+
+           visible                 1
+        }
+
+        MatchmakingStatus
+        {
+            ControlName		        RuiPanel
+            InheritProperties		MatchmakingStatus
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	BOTTOM
+            pin_to_sibling_corner	BOTTOM
+        }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        PostGameSortingButton
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+            ypos                    64
+            wide					288
+            tall					60
+            rui                     "ui/generic_button.rpak"
+            labelText               ""
+            visible					1
+            cursorVelocityModifier  0.7
+
+
+            proportionalToParent    1
+
+            pin_to_sibling          PrivateMatchRosterPanel
+            pin_corner_to_sibling   BOTTOM_RIGHT
+            pin_to_sibling_corner   BOTTOM_RIGHT
+
+            sound_focus             "UI_Menu_Focus_Large"
+        }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			wide					f0
+			tall					36
+			visible					1
+			ypos                    -24
+			zpos                    1
+			controlSettingsFile		"resource/ui/menus/panels/footer_buttons.res"
+
+			pin_to_sibling			ScreenFrame
+			pin_corner_to_sibling	BOTTOM
+			pin_to_sibling_corner	BOTTOM
+		}
+	}
+}

@@ -6,48 +6,117 @@ void function GameModes_Init_SV_CL()
 	string gameMode
 
 	gameMode = TEAM_DEATHMATCH
-	#if(false)
-
-
-
+#if SERVER
+	                                                    
+	                                                                               
+	                                                                               
+#elseif CLIENT
+	GameMode_AddClientInit( gameMode, ClGamemodeTdm_Init )
+	GameMode_SetScoreboardSetupFunc( gameMode, ClScoreboardMp_Init )
 #endif
-	#if(!UI)
-		GameMode_SetScoreCompareFunc( gameMode, CompareKills )
-		GameMode_AddSharedInit( gameMode, GamemodeTdmShared_Init )
+#if !UI
+	GameMode_AddSharedInit( gameMode, GamemodeTdmShared_Init )
+
+	#if R2_SCOREBOARD
+	GameMode_SetScoreCompareFunc( gameMode, CompareKills )
 	#endif
+#endif
 
 	gameMode = SURVIVAL
-#if(false)
-
-
-
-
-#elseif(CLIENT)
+#if SERVER
+	                                                         
+	                                                                           
+	                                                                           
+	                                          
+#elseif CLIENT
 	GameMode_AddClientInit( gameMode, ClGamemodeSurvival_Init )
+	GameMode_SetScoreboardSetupFunc( gameMode, Fullmap_SetupScoreboard )
 #endif
-#if(!UI)
-	GameMode_SetScoreCompareFunc( gameMode, CompareAssaultScore )
+#if !UI
 	GameMode_AddSharedInit( gameMode, GamemodeSurvivalShared_Init )
+
+	#if R2_SCOREBOARD
+	GameMode_SetScoreCompareFunc( gameMode, CompareAssaultScore )
+	#endif
 #endif
 
-#if(false)
+                       
+	gameMode = GAMEMODE_ARENAS
+	#if SERVER
+		                                                         
+		                                                                           
+		                                                                           
+		                                          
+	#elseif CLIENT
+		GameMode_AddClientInit( gameMode, ClGamemodeSurvival_Init )
+		GameMode_SetScoreboardSetupFunc( gameMode, Arenas_ScoreboardSetup )
+	#endif
+	#if !UI
+		GameMode_AddSharedInit( gameMode, GamemodeSurvivalShared_Init )
 
+		#if R2_SCOREBOARD
+			GameMode_SetScoreCompareFunc( gameMode, CompareAssaultScore )
+		#endif
+	#endif
+      
 
+                        
+	gameMode = GAMEMODE_CONTROL
+	#if SERVER
+		                                                         
+		                                                                               
+		                                                                               
+		                                          
+	#elseif CLIENT
+		GameMode_AddClientInit( gameMode, ClGamemodeSurvival_Init )
+		GameMode_SetScoreboardSetupFunc( gameMode, Control_ScoreboardSetup )
+	#endif
+	#if !UI
+		GameMode_AddSharedInit( gameMode, GamemodeSurvivalShared_Init )
 
+		#if R2_SCOREBOARD
+			GameMode_SetScoreCompareFunc( gameMode, CompareAssaultScore )
+		#endif
+	#endif
+      
 
-
-
-
-
-
-
-
-
-
-#endif //
-
-	#if(false)
-
+	gameMode = GAMEMODE_FREELANCE
+#if SERVER
+	                                                        
+	                                                                             
+	                                                                             
 #endif
+#if CLIENT
+	GameMode_AddClientInit( gameMode, ClientInit_Freelance )
+	GameMode_SetScoreboardSetupFunc( gameMode, Fullmap_SetupScoreboard )
+#endif
+#if !UI
+	GameMode_AddSharedInit( gameMode, SharedInit_Freelance )
+
+	#if R2_SCOREBOARD
+	GameMode_SetScoreCompareFunc( gameMode, ScoreCompare_Freelance )
+	#endif
+#endif
+
+                       
+                           
+           
+                                                               
+               
+                                                               
+                                                                     
+       
+        
+                                                               
+
+                   
+                                                         
+        
+       
+      
+
+                   
+                            
+       
 
 }

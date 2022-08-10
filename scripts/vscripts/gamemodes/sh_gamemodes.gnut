@@ -12,15 +12,17 @@ global function GameMode_SetDefaultScoreLimits
 global function GameMode_AddScoreboardColumnData
 global function GameMode_SetGameModeAnnouncement
 global function GameMode_SetDefaultTimeLimits
+global function GameMode_SetWinBy2Rules
 global function GameMode_SetDesc
 global function GameMode_SetColor
 global function GameMode_SetSuddenDeath
-#if(false)
-
-#endif
+global function GameMode_SetPVEMode
 
 global function GameMode_GetScoreLimit
 global function GameMode_GetRoundScoreLimit
+global function GameMode_Rounds_IsWinBy2
+global function GameMode_GetWinBy2MaxTies
+global function GameMode_GetWinBy2MinScore
 global function GameMode_GetTimeLimit
 global function GameMode_GetRoundTimeLimit
 global function GameMode_GetGameModeAnnouncement
@@ -37,9 +39,8 @@ global function GameMode_GetTitanSpawnpointsRatingFunc
 global function GameMode_GetScoreCompareFunc
 global function GameMode_GetSuddenDeathEnabled
 global function GameMode_GetEvacEnabled
-#if(false)
-
-#endif
+global function GameMode_GetTimedEventsEnabled
+global function GameMode_GetPVEMode
 global function GameMode_GetGameEndingWarning
 global function GameMode_GetGameEndingConversation
 global function GameMode_GetScoreboardColumnTitles
@@ -50,6 +51,12 @@ global function GameMode_RunServerInits
 global function GameMode_RunClientInits
 global function GameMode_RunSharedInits
 global function GameMode_IsDefined
+
+#if CLIENT
+global function GameMode_RunScoreboardInit
+global function GameMode_SetScoreboardSetupFunc
+global function GameMode_GetScoreboardSetupFunc
+#endif
 
 global function GameMode_AddServerInit
 global function GameMode_AddClientInit
@@ -62,8 +69,14 @@ global function GameMode_SetCustomIntroAnnouncement
 global function GameMode_GetGameModeId
 
 global function GameMode_SetEvacEnabled
+global function GameMode_SetTimedEventsEnabled
 
 global function GameMode_GetLoadoutSelectTime
+
+#if CLIENT
+global function GameMode_DoesModeDisplayIconsForAllFriendlyTeams
+global function GameMode_DoesModeDisplayIconsForAllTeams
+#endif
 
 global struct GamemodeSettings
 {
@@ -84,13 +97,15 @@ global struct GamemodeSettings
 	void functionref( int, array<entity>, int, entity ) titanSpawnpointRatingFunc
 	IntFromEntityCompare scoreCompareFunc
 	int defaultScoreLimit = 100
-	int defaultTimeLimit = 10
+	int defaultTimeLimit = 30
 	int defaultRoundScoreLimit = 5
 	float defaultRoundTimeLimit = 5.0
+	bool isWinBy2 = false
+	int winBy2MaxTies = 3
+	int winBy2MinScore = 3
 	bool evacEnabled = true
-	#if(false)
-
-#endif
+	bool timedEventsEnabled = false
+	bool isPVEMode = false
 	string gameModeEndingWarning = "#GAMEMODE_END_IN_N_SECONDS"
 	string gameModeEndingConversation = ""
 	bool suddenDeathEnabled = false
@@ -98,32 +113,50 @@ global struct GamemodeSettings
 	array<int> scoreboardColumnScoreTypes
 	array<int> scoreboardColumnNumDigits
 	void functionref(entity) customIntroAnnouncementFunc
+
+	#if CLIENT
+		void functionref() scoreboardInitFunc
+	#endif
 }
 
 
 
-//
-//
-//
+                                                                   
+                                                                            
+                                                       
 global enum eGameModes
 {
 	invalid =							-1,
 
 	SURVIVAL_ID =						0,
 	TEAM_DEATHMATCH_ID =				1,
-	//
-	#if(false)
-
-#endif
+	                  					  
+	GAMEMODE_FREELANCE_ID = 3,
+                       
+	ARENAS_ID				= 4,
+      
+                        
+	CONTROL_ID				= 5,
+      
+                       
+                   
+      
 	_count,
 }
 
 const table<string, int> gameModesStringToIdMap = {
 	[ TEAM_DEATHMATCH ] 					= eGameModes.TEAM_DEATHMATCH_ID,
-	[ SURVIVAL ]							= eGameModes.SURVIVAL_ID
-#if(false)
-
-#endif
+	[ SURVIVAL ]							= eGameModes.SURVIVAL_ID,
+                       
+	[ GAMEMODE_ARENAS ]						= eGameModes.ARENAS_ID,
+      
+                        
+	[ GAMEMODE_CONTROL ]					= eGameModes.CONTROL_ID,
+      
+	[ GAMEMODE_FREELANCE ]					= eGameModes.GAMEMODE_FREELANCE_ID,
+                       
+                                                 
+      
 }
 
 struct
@@ -155,42 +188,87 @@ void function GameModes_Init()
 	GameMode_SetDesc( gameMode, "#PL_survival_hint" )
 	GameMode_SetIcon( gameMode, $"vgui/burncards/burncard_group_icon_weapons" )
 	GameMode_SetDefaultScoreLimits( gameMode, 50, 0 )
-	GameMode_SetDefaultTimeLimits( gameMode, 10, 0.0 )
+	GameMode_SetDefaultTimeLimits( gameMode, 30, 0.0 )
 	GameMode_AddScoreboardColumnData( gameMode, "#SCOREBOARD_PILOT_KILLS", PGS_PILOT_KILLS, 2 )
 	GameMode_SetColor( gameMode, [147, 204, 57, 255] )
 
-	#if(false)
+                       
+	gameMode = GAMEMODE_ARENAS
+	GamemodeSettings arenas = GameMode_Create( gameMode )
+	GameMode_SetName( gameMode, "#GAMEMODE_ARENAS" )
+	GameMode_SetGameModeAnnouncement( gameMode, "ffa_modeDesc" )
+	GameMode_SetDesc( gameMode, "#GAMEMODE_ARENAS_DESC" )
+	GameMode_SetIcon( gameMode, $"vgui/burncards/burncard_group_icon_weapons" )
+	GameMode_SetDefaultScoreLimits( gameMode, 50, 10 )
+	GameMode_SetDefaultTimeLimits( gameMode, 30, 0.0 )
+	GameMode_AddScoreboardColumnData( gameMode, "#SCOREBOARD_PILOT_KILLS", PGS_PILOT_KILLS, 2 )
+	GameMode_SetColor( gameMode, [147, 204, 57, 255] )
+	GameMode_SetWinBy2Rules( gameMode, 3, 3 )
+      
 
+                        
+	gameMode = GAMEMODE_CONTROL
+	GameMode_Create( gameMode )
+	GameMode_SetName( gameMode, "#CONTROL_NAME" )
+	GameMode_SetGameModeAnnouncement( gameMode, "ffa_modeDesc" )
+	GameMode_SetDesc( gameMode, "#GAMEMODE_CONTROL_DESC" )
+	GameMode_SetIcon( gameMode, $"vgui/burncards/burncard_group_icon_weapons" )
+	GameMode_SetDefaultScoreLimits( gameMode, 50, 0 )
+	GameMode_SetDefaultTimeLimits( gameMode, 30, 0.0 )
+	GameMode_AddScoreboardColumnData( gameMode, "#SCOREBOARD_PILOT_KILLS", PGS_PILOT_KILLS, 2 )
+	GameMode_SetColor( gameMode, [147, 204, 57, 255] )
+	GameMode_SetTimedEventsEnabled( gameMode, true )
+	#if UI
+		AddCallback_UI_GameModeRulesDialog_PopulateTabsForMode( Control_PopulateAboutText, GAMEMODE_CONTROL )
+	#endif      
+      
 
+	gameMode = GAMEMODE_FREELANCE
+	GameMode_Create( gameMode )
+	GameMode_SetGameModeAnnouncement( gameMode, "" )
+	GameMode_SetName( gameMode, "#PL_freelance" )
+	GameMode_SetDesc( gameMode, "#PL_freelance_hint" )
+	GameMode_SetIcon( gameMode, $"ui/menu/playlist/at" )
+	GameMode_SetDefaultScoreLimits( gameMode, 50000, 5 )
+	GameMode_SetDefaultTimeLimits( gameMode, 0, 120.0 )
+	GameMode_AddScoreboardColumnData( gameMode, "%$rui/candy/candy_credit_1%", PGS_SCORE, 5 )
+	GameMode_AddScoreboardColumnData( gameMode, "#SCOREBOARD_DEATHS", PGS_DEATHS, 2 )
+	GameMode_SetColor( gameMode, [127, 127, 127, 255] )
+	GameMode_SetPVEMode( gameMode, true )
 
+                       
+                           
+                            
+                                                 
+                                                               
+                                                      
+                                                      
+                                                  
+                                                   
+                                                                                      
+                                                                                  
+                                                                                    
+                                                   
+                                                 
+      
 
+                   
+                    
+       
 
-
-
-
-
-
-
-
-#endif
-
-	#if(false)
-
-#endif
-
-	#if(CLIENT)
+	#if SERVER || CLIENT
 	GameModes_Init_SV_CL()
 	#endif
 
-	//
+	    
 	GameMode_VerifyModes()
 }
 
-//
+                    
 
-/*
-
-*/
+                                                              
+	       
+                                                              
 
 GamemodeSettings function GameMode_Create( string gameModeName )
 {
@@ -208,13 +286,13 @@ void function GameMode_SetName( string gameModeName, string nameText )
 	file.gameModeDefs[gameModeName].name_localized = nameText
 }
 
-void function GameMode_SetGameModeAnnouncement( string gameModeName, string gameModeAnnoucement ) //
+void function GameMode_SetGameModeAnnouncement( string gameModeName, string gameModeAnnoucement )                                                
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	file.gameModeDefs[gameModeName].gameModeAnnoucement = gameModeAnnoucement
 }
 
-void function GameMode_SetGameModeAttackAnnouncement( string gameModeName, string gameModeAttackAnnoucement ) //
+void function GameMode_SetGameModeAttackAnnouncement( string gameModeName, string gameModeAttackAnnoucement )                                                
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	file.gameModeDefs[gameModeName].gameModeAttackAnnoucement = gameModeAttackAnnoucement
@@ -222,7 +300,7 @@ void function GameMode_SetGameModeAttackAnnouncement( string gameModeName, strin
 
 void function GameMode_SetGameModeDefendAnnouncement( string gameModeName, string gameModeDefendAnnoucement )
 {
-	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" ) //
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )                                                
 	file.gameModeDefs[gameModeName].gameModeDefendAnnoucement = gameModeDefendAnnoucement
 }
 
@@ -312,6 +390,15 @@ void function GameMode_SetDefaultTimeLimits( string gameModeName, int timeLimit,
 	file.gameModeDefs[gameModeName].defaultRoundTimeLimit = roundTimeLimit
 }
 
+void function GameMode_SetWinBy2Rules( string gameModeName, int minScore, int maxTies )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	file.gameModeDefs[gameModeName].isWinBy2 = true
+	file.gameModeDefs[gameModeName].winBy2MaxTies = maxTies
+	file.gameModeDefs[gameModeName].winBy2MinScore = minScore
+	file.gameModeDefs[gameModeName].defaultRoundScoreLimit = minScore + maxTies - 1
+}
+
 void function GameMode_AddScoreboardColumnData( string gameModeName, string title, int scoreType, int numDigits )
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
@@ -326,13 +413,17 @@ void function GameMode_SetEvacEnabled( string gameModeName, bool value )
 	file.gameModeDefs[gameModeName].evacEnabled = value
 }
 
-#if(false)
+void function GameMode_SetTimedEventsEnabled( string gameModeName, bool value )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	file.gameModeDefs[gameModeName].timedEventsEnabled = value
+}
 
-
-
-
-
-#endif
+void function GameMode_SetPVEMode( string gameModeName, bool value )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	file.gameModeDefs[gameModeName].isPVEMode = value
+}
 
 void function GameMode_SetGameEndingWarning( string gameModeName, string warning )
 {
@@ -352,9 +443,9 @@ void function GameMode_SetCustomIntroAnnouncement( string gameModeName, void fun
 	file.gameModeDefs[gameModeName].customIntroAnnouncementFunc = func
 }
 
-/*
-
-*/
+                                                              
+	       
+                                                              
 
 int function GameMode_GetScoreLimit( string gameModeName )
 {
@@ -366,6 +457,24 @@ int function GameMode_GetRoundScoreLimit( string gameModeName )
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	return GetCurrentPlaylistVarInt( "roundscorelimit", file.gameModeDefs[gameModeName].defaultRoundScoreLimit )
+}
+
+bool function GameMode_Rounds_IsWinBy2( string gameModeName )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	return GetCurrentPlaylistVarBool( "rounds_win_by_2_enabled", file.gameModeDefs[gameModeName].isWinBy2 )
+}
+
+int function GameMode_GetWinBy2MinScore( string gameModeName )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	return GetCurrentPlaylistVarInt( "rounds_win_by_2_enabled", file.gameModeDefs[gameModeName].winBy2MinScore )
+}
+
+int function GameMode_GetWinBy2MaxTies( string gameModeName )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	return GetCurrentPlaylistVarInt( "rounds_win_by_2_enabled", file.gameModeDefs[gameModeName].winBy2MaxTies )
 }
 
 int function GameMode_GetTimeLimit( string gameModeName )
@@ -460,19 +569,23 @@ bool function GameMode_GetSuddenDeathEnabled( string gameModeName )
 	return file.gameModeDefs[gameModeName].suddenDeathEnabled
 }
 
-bool function GameMode_GetEvacEnabled( string gameModeName ) //
+bool function GameMode_GetEvacEnabled( string gameModeName )                                                            
 {
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	return file.gameModeDefs[gameModeName].evacEnabled
 }
 
-#if(false)
+bool function GameMode_GetTimedEventsEnabled( string gameModeName )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	return file.gameModeDefs[gameModeName].timedEventsEnabled
+}
 
-
-
-
-
-#endif
+bool function GameMode_GetPVEMode( string gameModeName )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	return file.gameModeDefs[gameModeName].isPVEMode
+}
 
 string function GameMode_GetGameEndingWarning( string gameModeName )
 {
@@ -485,6 +598,20 @@ string function GameMode_GetGameEndingConversation( string gameModeName )
 	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
 	return file.gameModeDefs[gameModeName].gameModeEndingConversation
 }
+
+#if CLIENT
+void function GameMode_SetScoreboardSetupFunc( string gameModeName, void functionref() func )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	file.gameModeDefs[gameModeName].scoreboardInitFunc = func
+}
+
+void functionref() function GameMode_GetScoreboardSetupFunc( string gameModeName )
+{
+	Assert( gameModeName in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	return file.gameModeDefs[gameModeName].scoreboardInitFunc
+}
+#endif
 
 array<string> function GameMode_GetScoreboardColumnTitles( string gameModeName )
 {
@@ -510,9 +637,9 @@ void functionref(entity) function GameMode_GetCustomIntroAnnouncement( string ga
 	return file.gameModeDefs[gameModeName].customIntroAnnouncementFunc
 }
 
-/*
+                                                              
 
-*/
+                                                              
 void function GameMode_RunServerInits()
 {
 	Assert( GAMETYPE in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
@@ -522,6 +649,14 @@ void function GameMode_RunServerInits()
 		initFunc()
 	}
 }
+
+#if CLIENT
+void function GameMode_RunScoreboardInit()
+{
+	Assert( GAMETYPE in file.gameModeDefs, "No MP Gametype specified in _settings.nut" )
+	file.gameModeDefs[GAMETYPE].scoreboardInitFunc()
+}
+#endif
 
 void function GameMode_RunClientInits()
 {
@@ -561,11 +696,11 @@ void function GameMode_VerifyModes()
 
 		GAMETYPE_TEXT[gameModeName] <- gameModeData.name_localized
 		GAMETYPE_DESC[gameModeName] <- gameModeData.desc_localized
-		//
+		                                                  
 		GAMETYPE_COLOR[gameModeName] <- gameModeData.color
-		//
-		//
-		//
+		            
+		  	                                                  
+		        
 	}
 }
 
@@ -588,3 +723,19 @@ float function GameMode_GetLoadoutSelectTime()
 {
 	return GetCurrentPlaylistVarFloat( "pick_loadout_time", 5.0 )
 }
+
+#if CLIENT
+bool function GameMode_DoesModeDisplayIconsForAllFriendlyTeams( string mode )
+{
+                         
+		if ( mode == GAMEMODE_CONTROL )
+			return true
+       
+	return false
+}
+
+bool function GameMode_DoesModeDisplayIconsForAllTeams( string mode )
+{
+	return false
+}
+#endif

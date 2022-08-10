@@ -1,0 +1,52 @@
+global function CLPassiveCoverFire_Init
+
+void function CLPassiveCoverFire_Init()
+{
+	RegisterSignal( "passive_cover_fire_stop_ability" )
+	StatusEffect_RegisterEnabledCallback( eStatusEffect.passive_cover_fire_meter, PassiveCoverFireMeter_Start )
+	StatusEffect_RegisterDisabledCallback( eStatusEffect.passive_cover_fire_meter, PassiveCoverFireMeter_Stop )
+}
+
+void function PassiveCoverFireMeter_Start( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	thread PassiveCoverFireMeter_Update( ent )
+}
+
+void function PassiveCoverFireMeter_Stop( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	Signal( ent, "passive_cover_fire_stop_ability" )
+}
+
+void function PassiveCoverFireMeter_Update( entity player )
+{
+	EndSignal( player, "OnDeath" )
+	EndSignal( player, "OnDestroy" )
+	EndSignal( player, "passive_cover_fire_stop_ability" )
+
+	var rui = CreateFullscreenRui( $"ui/passive_cover_fire_meter.rpak" )
+
+	OnThreadEnd(
+		function() : ( rui )
+		{
+ 			RuiDestroy( rui )
+		}
+	)
+
+	RuiTrackFloat( rui, "coverFireMeter", null, RUI_TRACK_SCRIPT_NETWORK_VAR_LOCAL_VIEW_PLAYER, GetNetworkedVariableIndex( "coverFireMeter" ) )
+	RuiTrackBool( rui, "coverFireLocked", player, RUI_TRACK_SCRIPT_NETWORK_VAR_BOOL, GetNetworkedVariableIndex( "coverFireLocked" ) )
+
+	WaitForever()
+}
+

@@ -5,23 +5,29 @@ global function OnWeaponReadyToFire_ability_grapple
 global function CodeCallback_OnGrappleActivate
 global function CodeCallback_OnGrappleAttach
 global function CodeCallback_OnGrappleDetach
+global function CodeCallback_GrappleDetachFromNPC
 global function GrappleWeaponInit
 
-#if(false)
+#if SERVER
+                                                        
+                                            
+                                               
+                                      
+                                             
+                                         
 
-
-
-
-
-
-
-#endif //
+#endif          
 
 struct
 {
 	int grappleExplodeImpactTable
 	array<void functionref( entity player, entity hitent, vector hitpos, vector hitNormal )> onGrappledCallbacks
 	array<void functionref( entity player )> onGrappleDetachCallbacks
+
+	int grappleDrainBaseCost = 100
+	float grappleDrainMinDist = 300
+	float grappleDrainMaxDist = 2800
+	float grappleDrainMaxDist_Zscalar = 0.5
 } file
 
 const int GRAPPLEFLAG_CHARGED	= (1<<0)
@@ -31,14 +37,23 @@ void function GrappleWeaponInit()
 {
 	file.grappleExplodeImpactTable = PrecacheImpactEffectTable( "exp_rocket_archer" )
 
-#if(false)
+	RegisterSignal( "Grapple_OnTouchGround" )
 
-#endif //
+	file.grappleDrainBaseCost = GetCurrentPlaylistVarInt( "pathfinder_grapple_drain_base_cost", 100 )
+	file.grappleDrainMinDist = GetCurrentPlaylistVarFloat( "pathfinder_grapple_drain_min_dist", 300 )
+	file.grappleDrainMaxDist = GetCurrentPlaylistVarFloat( "pathfinder_grapple_drain_max_dist", 4500 )
+	file.grappleDrainMaxDist_Zscalar = GetCurrentPlaylistVarFloat( "pathfinder_grapple_drain_z_scalar", 0.5 )
 
-#if(false)
+#if SERVER
+	                                                                           
+#endif   
 
-
-//
+#if SERVER
+	                                              
+	                                
+	                                     
+	                                                   
+  	                                                                                                                                                                                     
 #endif
 }
 
@@ -46,34 +61,17 @@ void function OnWeaponActivate_ability_grapple( entity weapon )
 {
 	entity weaponOwner = weapon.GetWeaponOwner()
 	int pmLevel = -1
-	#if(false)
-
-#endif
 	if ( (pmLevel >= 2) && IsValid( weaponOwner ) )
 		weapon.SetScriptTime0( Time() )
 	else
 		weapon.SetScriptTime0( 0.0 )
 
-	//
+	                           
 	{
 		int oldFlags = weapon.GetScriptFlags0()
 		weapon.SetScriptFlags0( oldFlags & ~GRAPPLEFLAG_CHARGED )
 	}
 }
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-#endif
 
 var function OnWeaponPrimaryAttack_ability_grapple( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
@@ -82,9 +80,6 @@ var function OnWeaponPrimaryAttack_ability_grapple( entity weapon, WeaponPrimary
 	if ( owner.IsPlayer() )
 	{
 		int pmLevel = -1
-		#if(false)
-
-#endif
 		float scriptTime = weapon.GetScriptTime0()
 		if ( (pmLevel >= 2) && (scriptTime != 0.0) )
 		{
@@ -127,15 +122,15 @@ var function OnWeaponPrimaryAttack_ability_grapple( entity weapon, WeaponPrimary
 		return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
 }
 
-#if(false)
+#if SERVER
+                                                                                                              
+ 
+	                                      
 
+	                                    
 
-
-
-
-
-
-
+	        
+ 
 #endif
 
 bool function OnWeaponAttemptOffhandSwitch_ability_grapple( entity weapon )
@@ -154,17 +149,17 @@ bool function OnWeaponAttemptOffhandSwitch_ability_grapple( entity weapon )
 
 void function OnWeaponReadyToFire_ability_grapple( entity weapon )
 {
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                                        
+	#endif
 }
 
 void function DoGrappleImpactExplosion( entity player, entity grappleWeapon, entity hitent, vector hitpos, vector hitNormal )
 {
-#if(CLIENT)
+#if CLIENT
 	if ( !grappleWeapon.ShouldPredictProjectiles() )
 		return
-#endif //
+#endif   
 
 	vector origin = hitpos + hitNormal * 16.0
 	int damageType = (DF_RAGDOLL | DF_EXPLOSION | DF_ELECTRICAL)
@@ -192,32 +187,32 @@ void function CodeCallback_OnGrappleActivate( entity player )
 
 void function CodeCallback_OnGrappleAttach( entity player, entity hitent, vector hitpos, vector hitNormal )
 {
-#if(false)
+#if SERVER
+	                                                                                                               
 
+	                        
+	 
+		                                         
+		                                                        
+		 
+			                                                        
+		 
+	 
 
+	                                   
+	                                                    
+	 
+		                                                        
+	 
 
+	                                                            
+		                                                              
 
-//
+	                                    
 
+#endif          
 
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-	//
+	                  
 	{
 		if ( !IsValid( player ) )
 			return
@@ -230,8 +225,15 @@ void function CodeCallback_OnGrappleAttach( entity player, entity hitent, vector
 
 		if ( grappleWeapon.HasMod( "survival_finite_ordnance" ) )
 		{
-			int newAmmo = maxint( 0, grappleWeapon.GetWeaponPrimaryClipCount() - grappleWeapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire ) )
-			grappleWeapon.SetWeaponPrimaryClipCount( newAmmo )
+			if ( GetCurrentPlaylistVarBool( "pathfinder_grapple_scaled_ammo_drain", true ) )
+			{
+				thread GrappleDecreaseAmmo( player, grappleWeapon )
+			}
+			else
+			{
+				int newAmmo = maxint( 0, grappleWeapon.GetWeaponPrimaryClipCount() - grappleWeapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire ) )
+				grappleWeapon.SetWeaponPrimaryClipCount( newAmmo )
+			}
 		}
 
 		int flags = grappleWeapon.GetScriptFlags0()
@@ -246,120 +248,252 @@ void function CodeCallback_OnGrappleAttach( entity player, entity hitent, vector
 	}
 }
 
-void function CodeCallback_OnGrappleDetach( entity player )
+void function GrappleDecreaseAmmo( entity player, entity grappleWeapon )
 {
-	#if(false)
-//
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+	player.EndSignal( "OnDeath" )
+	grappleWeapon.EndSignal( "OnDestroy" )
 
+	vector startPos = player.GetOrigin()
 
+	table<string , float> d
+	table<string , vector> e
+	e[ "startPos" ] <- startPos
+	e[ "lastPos" ] <- startPos
+	d[ "distanceTraveled" ] <- 0.0
+	d[ "distanceTraveled_z" ] <- 0.0
 
+	float startTime = Time()
+	float fireDuration = grappleWeapon.GetWeaponSettingFloat( eWeaponVar.fire_duration )
 
+	int maxAmmo = grappleWeapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+	int startAmmo = grappleWeapon.GetWeaponPrimaryClipCount()
 
-//
-#endif
+	{
+		int amountToReduce = file.grappleDrainBaseCost
+
+		int newAmmo = maxint( 0, grappleWeapon.GetWeaponPrimaryClipCount() - amountToReduce )
+		grappleWeapon.SetWeaponPrimaryClipCount( 0 )
+		grappleWeapon.AddMod( "grapple_regen_stop" )
+		grappleWeapon.RegenerateAmmoReset()
+	}
+
+	OnThreadEnd(
+		function() : ( player, e, d, startAmmo, maxAmmo, grappleWeapon )
+		{
+			if ( IsValid( player ) )
+			{
+				if ( IsValid( grappleWeapon ) )
+				{
+					d[ "distanceTraveled" ] += Distance2D( e[ "lastPos" ], player.GetOrigin() )
+					d[ "distanceTraveled_z" ] = max( d[ "distanceTraveled_z" ], fabs( player.GetOrigin().z - e[ "startPos" ].z ) )
+					float distanceTraveled = max( max( d[ "distanceTraveled" ], Distance( e[ "startPos" ], player.GetOrigin() ) ), d[ "distanceTraveled_z" ] * file.grappleDrainMaxDist_Zscalar )
+					ReduceAmmoBasedOnDistance( grappleWeapon, d[ "distanceTraveled" ], startAmmo, maxAmmo )
+				}
+			}
+		}
+	)
+
+	bool playerWasOnZipline = player.IsZiplining()
+	while ( player.IsGrappleActive() || Length( player.GetVelocity() ) > 500.0 )
+	{
+		grappleWeapon.SetWeaponPrimaryClipCount( 0 )
+
+		d[ "distanceTraveled" ] += Distance2D( e[ "lastPos" ], player.GetOrigin() )
+		d[ "distanceTraveled_z" ] = max( d[ "distanceTraveled_z" ], fabs( player.GetOrigin().z - e[ "startPos" ].z ) )
+		float distanceTraveled = max( max( d[ "distanceTraveled" ], Distance( e[ "startPos" ], player.GetOrigin() ) ), d[ "distanceTraveled_z" ] * file.grappleDrainMaxDist_Zscalar )
+		e[ "lastPos" ] <- player.GetOrigin()
+
+		if ( player.IsZiplining() && !playerWasOnZipline )
+			break
+
+		if ( !player.IsZiplining() )
+			playerWasOnZipline =  false
+
+		if ((Time() - startTime) > 5)
+			break
+		
+		wait 0.1
+	}
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+void function ReduceAmmoBasedOnDistance( entity grappleWeapon, float distanceTraveled, int startAmmo, int maxAmmo )
+{
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+
+	if ( !IsValid( grappleWeapon.GetWeaponOwner() ) )
+		return
+
+	                                                            
+	                                                    
+
+	float XYScalar = GraphCapped( distanceTraveled, file.grappleDrainMinDist, file.grappleDrainMaxDist, 0, 1.0 )
+	                      
+
+	                                                                                    
+	                    
+
+	int amountToReduce = int( GraphCapped( XYScalar, 0, 1.0, 0, maxAmmo ) )                                                                                                          
+	amountToReduce += file.grappleDrainBaseCost
+
+	int newAmmo = minint( maxAmmo, maxint( 0, startAmmo - amountToReduce ) )
+
+	if ( grappleWeapon.HasMod( "arenas_tac_max_cooldown" ) )
+	{
+		if( grappleWeapon.GetWeaponPrimaryAmmoCount( AMMOSOURCE_STOCKPILE ) < grappleWeapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire ) )
+			newAmmo = 0
+	}
+
+	                                                          
+	                                         
+	                                                                               
+	grappleWeapon.SetWeaponPrimaryClipCount( newAmmo )
+	if ( grappleWeapon.HasMod( "grapple_regen_stop" ) )
+		grappleWeapon.RemoveMod( "grapple_regen_stop" )
+
+	grappleWeapon.RegenerateAmmoReset()
+}
+
+#if SERVER
+                                                  
+ 
+	                                        
+ 
+#endif
+
+void function CodeCallback_OnGrappleDetach( entity player )
+{
+	#if SERVER
+		                                          
+		                                                         
+		 
+			                             
+		 
+
+		                                     
+	#endif
+}
+
+bool function CodeCallback_GrappleDetachFromNPC( entity player, entity npc )
+{
+	if( IsValid( player ) && IsValid( npc ) )
+	{
+		if( npc.GetAIClassName() == "prowler" && Length( player.GetVelocity() ) > 400 )
+		{
+			return true
+		}
+	}
+
+	return false
+}
+
+#if SERVER
+                                                                                                                                                        
+ 
+	                                                                                                                       
+	                                                
+ 
+
+                                                                                                                                                           
+ 
+	                                                                                                                               
+	                                                           
+ 
+
+                                                                                                                                      
+ 
+	                                                                                                       
+	                                               
+ 
+
+                                                                                                                                         
+ 
+	                                                                                                                    
+	                                                          
+ 
+
+                                                                                             
+ 
+	                                                                                                            
+	                                                    
+ 
+
+                                                                                             
+ 
+	                                                      
+	 
+		                         
+	 
+ 
+
+                                                                                                 
+ 
+	                          
+	                           
+
+	                               
+
+	                                                         
+		      
+
+	                                                                    
+	 
+		                                               
+			                                                                              
+		                 
+		                                                      
+		 
+			                                 
+		 
+		    
+		 
+			                                
+			 
+				                   
+				                   
+					                          
+					     
+
+				                   
+					                          
+					     
+
+				                   
+					                               
+					     
+
+				        
+					     
+			 
+		 
+
+		                                                   
+		 
+			                                                                         
+			                  
+			                                                                           
+		 
+
+		                       
+			                             
+		                                                                                                                               
+		                                                
+		                                                                                               
+	 
+ 
+
+#endif          
+
+#if SERVER
+                                                                                                        
+ 
+	                                                                              
+		                                             
+ 
+#endif

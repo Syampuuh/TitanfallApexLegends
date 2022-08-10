@@ -1,71 +1,155 @@
-//
+                                                                                                                                             
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global function ShMusic_LevelInit
 #endif
 
-#if(false)
+#if (SERVER || CLIENT || UI)
+global function Loadout_MusicPack
+global function MusicPack_GetSortOrdinal
 
-
-
-
+global function MusicPack_GetPreviewMusic
 #endif
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 global function GetMusicPackForPlayer
+global function GetMusicPackDefaultIsSelectedLoadout
 global function WaitForMusicPackForPlayer
 
-//
+                                            
 global function MusicPack_GetMainMenuToLobbyMusic
 global function MusicPack_GetLobbyMusic
 global function MusicPack_GetLobbyIntoCharacterSelectMusic
-global function MusicPack_GetCharacterSelectMusic
+global function MusicPack_GetCharacterSelectMusic_Squad
+global function MusicPack_GetCharacterSelectMusic_Duo
+global function MusicPack_GetCharacterSelectMusic_Solo
 global function MusicPack_GetSkydiveMusic
 global function MusicPack_GetWinMusic
 global function MusicPack_GetLossMusic
+global function MusicPack_GetFiringRangeMusic
+
+global function MusicPack_IsCharacterBased
+global function MusicPack_GetCharacter
+global function MusicPack_GetPortraitImage
+global function MusicPack_GetPortraitBlend
 #endif
 
-#if(false)
-
-
-
-
-
-
-
+#if SERVER
+                                 
+                                 
+                                      
+                                    
 #endif
+
+#if CLIENT
+global function ServerCallback_PlayMatchEndMusic
+#endif
+
+#if UI
+global function SetActiveMusicPack
+global function GetActiveMusicPack
+global function SetActiveMusicContext
+global function GetActiveMusicContext
+global function SetActiveMusicTrack
+global function GetActiveMusicTrack
+global function SetDesiredCustomMusic
+global function GetDesiredCustomMusic
+global function UIMusicUpdate
+global function PlayCustomUIMusic
+global function CancelCustomUIMusic
+#endif
+
+#if SERVER && DEV
+                                         
+#endif
+
+#if UI
+global enum eMenuMusicContext
+{
+	NONE,
+	MAIN_MENU,
+	LOBBY,
+	CUSTOM,
+}
+#endif
+
+global const string LOOT_CEREMONY_MUSIC_P1 = "Music_LootCeremony_Pt1"
+global const string LOOT_CEREMONY_MUSIC_P2 = "Music_LootCeremony_Pt2"
+
+global array<string> WORKAROUND_UI_MUSIC_SOUND_LIST = [
+	"Music_FrontEnd",
+	"mainmenu_music_Event1", "Music_Lobby_Event1",                                                                                                     
+	              
+	"SQ_Music_Lobby_Silence", "SQ_S11_LoreText_Ch01_Music_01", "SQ_S11_LoreText_Ch01_Music_02",
+	"SQ_S11_LoreText_Ch01_Music_03", "SQ_S11_LoreText_Ch01_Music_04", "SQ_S11_LoreText_Ch02_Music_01", "SQ_S11_LoreText_Ch02_Music_02", "SQ_S11_LoreText_Ch02_Music_03", "SQ_S11_LoreText_Ch03_Music_01",
+	"SQ_S11_LoreText_Ch03_Music_02", "SQ_S11_LoreText_Ch03_Music_03", "SQ_S11_LoreText_Ch03_Music_04", "SQ_S11_LoreText_Ch03_Music_05", "SQ_S11_LoreText_Ch04_Music_01", "SQ_S11_LoreText_Ch04_Music_02",
+	"SQ_S11_LoreText_Ch04_Music_03", "SQ_S11_LoreText_Ch04_Music_04", "SQ_S11_LoreText_Ch04_Music_05", "SQ_S11_LoreText_Ch04_Music_06", "SQ_S11_LoreText_Ch05_Music_01", "SQ_S11_LoreText_Ch05_Music_02",
+	"SQ_S11_LoreText_Ch05_Music_03", "SQ_S11_LoreText_Ch05_Music_04", "SQ_S11_LoreText_Ch05_Music_05", "SQ_S11_LoreText_Ch05_Music_06", "SQ_S11_LoreText_Ch05_Music_07", "SQ_S11_LoreText_Ch05_Music_08",
+	"SQ_S11_LoreText_Ch06_Music_01", "SQ_S11_LoreText_Ch06_Music_02", "SQ_S11_LoreText_Ch06_Music_03", "SQ_S11_LoreText_Ch06_Music_04", "SQ_S11_LoreText_Ch06_Music_05", "SQ_S11_LoreText_Ch06_Music_06",
+	"SQ_S11_LoreText_Ch06_Music_07", "SQ_S11_LoreText_Ch06_Music_08", "SQ_S11_LoreText_Ch07_Music_01", "SQ_S11_LoreText_Ch07_Music_02", "SQ_S11_LoreText_Ch07_Music_03", "SQ_S12_LoreText_Ch01_Music_01",
+	"SQ_S12_LoreText_Ch01_Music_02", "SQ_S12_LoreText_Ch01_Music_03", "SQ_S12_LoreText_Ch01_Music_04", "SQ_S12_LoreText_Ch01_Music_05", "SQ_S12_LoreText_Ch02_Music_01", "SQ_S12_LoreText_Ch02_Music_02",
+	"SQ_S12_LoreText_Ch02_Music_03", "SQ_S12_LoreText_Ch02_Music_04", "SQ_S12_LoreText_Ch03_Music_01", "SQ_S12_LoreText_Ch03_Music_02", "SQ_S12_LoreText_Ch03_Music_03", "SQ_S12_LoreText_Ch03_Music_04",
+	"SQ_S12_LoreText_Ch03_Music_05", "SQ_S12_LoreText_Ch03_Music_06", "SQ_S12_LoreText_Ch04_Music_01", "SQ_S12_LoreText_Ch04_Music_02", "SQ_S12_LoreText_Ch04_Music_03", "SQ_S12_LoreText_Ch04_Music_04",
+	"SQ_S12_LoreText_Ch05_Music_01", "SQ_S12_LoreText_Ch05_Music_02", "SQ_S12_LoreText_Ch05_Music_03", "SQ_S12_LoreText_Ch05_Music_04", "SQ_S12_LoreText_Ch05_Music_05", "SQ_S12_LoreText_Ch05_Music_06",
+	"SQ_S12_LoreText_Ch05_Music_07", "SQ_S12_LoreText_Ch06_Music_01", "SQ_S12_LoreText_Ch06_Music_02", "SQ_S12_LoreText_Ch06_Music_03", "SQ_S12_LoreText_Ch06_Music_04", "SQ_S12_LoreText_Ch06_Music_05",
+	"SQ_S12_LoreText_Ch07_Music_01", "SQ_S12_LoreText_Ch07_Music_02", "SQ_S12_LoreText_Ch07_Music_03", "SQ_S12_LoreText_Ch07_Music_04", "SQ_S12_LoreText_Ch07_Music_05", "SQ_S12_LoreText_Ch07_Music_06",
+	"SQ_S12_LoreText_Ch07_Music_07", "SQ_S13_LoreText_Ch01_Music_01", "SQ_S13_LoreText_Ch01_Music_02", "SQ_S13_LoreText_Ch01_Music_03", "SQ_S13_LoreText_Ch01_Music_04", "SQ_S13_LoreText_Ch02_Music_01",
+	"SQ_S13_LoreText_Ch02_Music_02", "SQ_S13_LoreText_Ch02_Music_03", "SQ_S13_LoreText_Ch03_Music_01", "SQ_S13_LoreText_Ch03_Music_02", "SQ_S13_LoreText_Ch03_Music_03", "SQ_S13_LoreText_Ch03_Music_04",
+	"SQ_S13_LoreText_Ch03_Music_05", "SQ_S13_LoreText_Ch04_Music_01", "SQ_S13_LoreText_Ch04_Music_02", "SQ_S13_LoreText_Ch04_Music_03", "SQ_S13_LoreText_Ch04_Music_04", "SQ_S13_LoreText_Ch04_Music_05",
+	"SQ_S13_LoreText_Ch04_Music_06", "SQ_S13_LoreText_Ch04_Music_07", "SQ_S13_LoreText_Ch04_Music_08", "SQ_S13_LoreText_Ch05_Music_01", "SQ_S13_LoreText_Ch05_Music_02", "SQ_S13_LoreText_Ch05_Music_03",
+	"SQ_S13_LoreText_Ch05_Music_04", "SQ_S13_LoreText_Ch05_Music_05", "SQ_S13_LoreText_Ch05_Music_06", "SQ_S13_LoreText_Ch05_Music_07", "SQ_S13_LoreText_Ch06_Music_01", "SQ_S13_LoreText_Ch06_Music_02",
+	"SQ_S13_LoreText_Ch06_Music_03", "SQ_S13_LoreText_Ch06_Music_04", "SQ_S13_LoreText_Ch06_Music_05", "SQ_S13_LoreText_Ch06_Music_06", "SQ_S13_LoreText_Ch06_Music_07", "SQ_S13_LoreText_Ch07_Music_01",
+	"SQ_S13_LoreText_Ch07_Music_02", "SQ_S13_LoreText_Ch07_Music_03", "SQ_S13_LoreText_Ch08_Music_01", "SQ_S13_LoreText_Ch08_Music_02", "SQ_S14_LoreText_Ch01_Music_01", "SQ_S14_LoreText_Ch02_Music_01",
+	"SQ_S14_LoreText_Ch02_Music_02", "SQ_S14_LoreText_Ch02_Music_03", "SQ_S14_LoreText_Ch02_Music_04", "SQ_S14_LoreText_Ch03_Music_01", "SQ_S14_LoreText_Ch03_Music_02", "SQ_S14_LoreText_Ch03_Music_03",
+	"SQ_S14_LoreText_Ch04_Music_01", "SQ_S14_LoreText_Ch04_Music_02", "SQ_S14_LoreText_Ch04_Music_03", "SQ_S14_LoreText_Ch01_Music_02", "SQ_S14_LoreText_Ch01_Music_03"
+	LOOT_CEREMONY_MUSIC_P1,
+	LOOT_CEREMONY_MUSIC_P2
+]
 
 struct FileStruct_LifetimeLevel
 {
-	#if(false)
+	LoadoutEntry&          musicPackSelectionSlot
+	table<ItemFlavor, int> musicPackFlavorSortOrdinalMap
 
-
-#endif
-
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                          
+	#endif
 }
 FileStruct_LifetimeLevel& fileLevel
 
-#if CLIENT || UI 
+#if UI
+struct
+{
+	ItemFlavor ornull activeMusicPack = null
+	int               activeMusicContext = eMenuMusicContext.NONE
+	string            activeMusicTrack = ""
+	string ornull     desiredCustomMusic = null
+} file
+#endif
+
+#if SERVER || CLIENT || UI
 void function ShMusic_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileGame
 	fileLevel = newFileGame
 
 	AddCallback_RegisterRootItemFlavors( OnRegisterRootItemFlavors )
+
+	#if SERVER
+		                                                            
+	#endif
 }
 #endif
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 void function OnRegisterRootItemFlavors()
 {
 	array<ItemFlavor> musicPackList = []
-	foreach( asset musicPackAsset in WORKAROUND_GetAllMusicPackAssets() )
+	foreach ( asset musicPackAsset in GetBaseItemFlavorsFromArray( "musicPacks" ) )
 	{
 		if ( musicPackAsset == $"" )
 			continue
+
 		ItemFlavor ornull musicPack = RegisterItemFlavorFromSettingsAsset( musicPackAsset )
 		if ( musicPack == null )
 			continue
@@ -73,13 +157,13 @@ void function OnRegisterRootItemFlavors()
 		expect ItemFlavor( musicPack )
 		musicPackList.append( musicPack )
 
-		#if(CLIENT)
+		#if SERVER || CLIENT
 			array<string> verificationFields = [
-				//
-				//
-				//
+				                 
+				                  
+				                         
 				"musicLobby",
-				//
+				                                
 				"musicCharacterSelect",
 				"musicSkydive",
 				"musicWin",
@@ -89,98 +173,140 @@ void function OnRegisterRootItemFlavors()
 			foreach( string field in verificationFields )
 			{
 				string alias = GetGlobalSettingsString( musicPackAsset, field )
-				Assert( DoesAliasExist( alias ), format( "Music Pack Asset '%s' has invalid '%s' miles event '%s'", ItemFlavor_GetHumanReadableRef( musicPack ), field, alias ) )
+				if ( !DoesAliasExist( alias ) )
+					Warning( "Music Pack Asset '%s' has invalid '%s' miles event '%s'", ItemFlavor_GetHumanReadableRef( musicPack ), field, alias )
 			}
 		#endif
 	}
 
+	foreach ( musicPack in musicPackList )
+	{
+		string alias1 = MusicPack_GetMainMenuToLobbyMusic( musicPack )
+		if ( !WORKAROUND_UI_MUSIC_SOUND_LIST.contains( alias1 ) )
+			WORKAROUND_UI_MUSIC_SOUND_LIST.append( alias1 )
 
-	#if(false)
+		string alias2 = MusicPack_GetLobbyMusic( musicPack )
+		if ( !WORKAROUND_UI_MUSIC_SOUND_LIST.contains( alias2 ) )
+			WORKAROUND_UI_MUSIC_SOUND_LIST.append( alias2 )
+	}
 
+	MakeItemFlavorSet( musicPackList, fileLevel.musicPackFlavorSortOrdinalMap )
 
+	LoadoutEntry entry = RegisterLoadoutSlot( eLoadoutEntryType.ITEM_FLAVOR, "music_pack_selection" )
+	entry.networkTo = eLoadoutNetworking.PLAYER_EXCLUSIVE
+	                                             
+	entry.DEV_name = "Music Pack"
+	fileLevel.musicPackSelectionSlot = entry
+	entry.validItemFlavorList = musicPackList
+	entry.defaultItemFlavor = musicPackList[1]
+	entry.favoriteItemFlavor = musicPackList[0]
+	entry.maxFavoriteCount = 8
 
+	#if UI
+		AddCallback_ItemFlavorLoadoutSlotDidChange_AnyPlayer( entry, void function( EHI playerEHI, ItemFlavor flavor ) {
+			if ( playerEHI != LocalClientEHI() )
+				return
 
-//
-
-
-
-
-#endif
+			if ( GetActiveMusicPack() != flavor )
+				UIMusicUpdate( true )
+		} )
+	#endif
 }
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 ItemFlavor function GetMusicPackForPlayer( entity player )
 {
-	#if(false)
+	LoadoutEntry entry = Loadout_MusicPack()
+	if ( !LoadoutSlot_IsReady( ToEHI( player ), entry ) )
+		return GetDefaultItemFlavorForLoadoutSlot( EHI_null, entry )
 
+	ItemFlavor flav = LoadoutSlot_GetItemFlavor( ToEHI( player ), entry )
 
+	#if CLIENT || SERVER
+		if ( !IsLobby() && ItemFlavor_IsTheRandom( flav ) )
+		{
+			int guid = player.GetNonRewindMusicPack()
+			if ( guid != 0 )
+			{
+				flav = GetItemFlavorByGUID( guid )
+				                                                              
+			}
+		}
 
+		asset customPack = GetCurrentPlaylistVarAsset( "force_custom_musicpack" )
+		if ( customPack != $"" )
+		{
+			printf( "%s() - Playlist forcing music pack to: '%s'", FUNC_NAME(), string( customPack ) )
+			flav = GetItemFlavorByAsset( customPack )
+		}
+	#else
+		flav = __GetMusicPackForPlayer_RollTheRandom( player )
+	#endif                   
 
+	return flav
+}
 
-#else
-		if ( IsSeason01EventActive() )
-			return GetItemFlavorByAsset( $"settings/itemflav/music_pack/season01_event.rpak" )
+bool function GetMusicPackDefaultIsSelectedLoadout( entity player )
+{
+	LoadoutEntry entry = Loadout_MusicPack()
+	if ( !LoadoutSlot_IsReady( ToEHI( player ), entry ) )
+		return true
 
-		return GetItemFlavorByAsset( $"settings/itemflav/music_pack/default.rpak" )
-	#endif
+	ItemFlavor flav = LoadoutSlot_GetItemFlavor( ToEHI( player ), entry )
+	if ( ItemFlavor_IsTheDefault( flav ) )
+		return true
+
+	return false
 }
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 ItemFlavor function WaitForMusicPackForPlayer( entity player )
 {
-	#if(false)
-
-#else
-		if ( IsSeason01EventActive() )
-			return GetItemFlavorByAsset( $"settings/itemflav/music_pack/season01_event.rpak" )
-
-		return GetItemFlavorByAsset( $"settings/itemflav/music_pack/default.rpak" )
-	#endif
+	return LoadoutSlot_WaitForItemFlavor( ToEHI( player ), Loadout_MusicPack() )
 }
 #endif
 
 
-#if(false)
-
-
-
-
+#if (SERVER || CLIENT || UI)
+LoadoutEntry function Loadout_MusicPack()
+{
+	return fileLevel.musicPackSelectionSlot
+}
 #endif
 
 
-#if(false)
+#if (SERVER || CLIENT || UI)
+int function MusicPack_GetSortOrdinal( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
 
-
-
-
-
-
+	return fileLevel.musicPackFlavorSortOrdinalMap[flavor]
+}
 #endif
 
 
-#if(false)
-
-
-
-
-
+#if (SERVER || CLIENT || UI)
+string function MusicPack_GetPreviewMusic( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "musicPreview" )
+}
 #endif
 
 
-//
-//
-//
-//
-//
-//
-//
+                              
+                                                                 
+   
+  	                                                              
+  	                                                                                
+   
+        
 
-
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 string function MusicPack_GetMainMenuToLobbyMusic( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
@@ -189,16 +315,22 @@ string function MusicPack_GetMainMenuToLobbyMusic( ItemFlavor flavor )
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 string function MusicPack_GetLobbyMusic( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
 	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "musicLobby" )
 }
+
+string function MusicPack_GetFiringRangeMusic( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "musicFiringRange" )
+}
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 string function MusicPack_GetLobbyIntoCharacterSelectMusic( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
@@ -207,16 +339,37 @@ string function MusicPack_GetLobbyIntoCharacterSelectMusic( ItemFlavor flavor )
 #endif
 
 
-#if CLIENT || UI 
-string function MusicPack_GetCharacterSelectMusic( ItemFlavor flavor )
+#if (SERVER || CLIENT || UI)
+string function MusicPack_GetCharacterSelectMusic_Squad( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+
 	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "musicCharacterSelect" )
 }
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
+string function MusicPack_GetCharacterSelectMusic_Duo( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "musicCharacterSelectDuo" )
+}
+#endif
+
+
+#if (SERVER || CLIENT || UI)
+string function MusicPack_GetCharacterSelectMusic_Solo( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+
+	return GetGlobalSettingsString( ItemFlavor_GetAsset( flavor ), "musicCharacterSelectSolo" )
+}
+#endif
+
+
+#if (SERVER || CLIENT || UI)
 string function MusicPack_GetSkydiveMusic( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
@@ -225,7 +378,7 @@ string function MusicPack_GetSkydiveMusic( ItemFlavor flavor )
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 string function MusicPack_GetWinMusic( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
@@ -234,7 +387,7 @@ string function MusicPack_GetWinMusic( ItemFlavor flavor )
 #endif
 
 
-#if CLIENT || UI 
+#if (SERVER || CLIENT || UI)
 string function MusicPack_GetLossMusic( ItemFlavor flavor )
 {
 	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
@@ -243,104 +396,366 @@ string function MusicPack_GetLossMusic( ItemFlavor flavor )
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER || CLIENT || UI
+bool function MusicPack_IsCharacterBased( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( flavor ), "isCharacterBased" )
+}
 #endif
 
 
-#if(false)
+#if SERVER || CLIENT || UI
+ItemFlavor function MusicPack_GetCharacter( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+	Assert( MusicPack_IsCharacterBased( flavor ) )
 
+	asset characterAsset = GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "character" )
+	Assert( characterAsset != $"" && IsValidItemFlavorSettingsAsset( characterAsset ) )
 
-
-
-
-
-
-
-
-
+	return GetItemFlavorByAsset( characterAsset )
+}
 #endif
 
 
-#if(false)
+#if SERVER || CLIENT || UI
+asset function MusicPack_GetPortraitImage( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
 
+	if ( MusicPack_IsCharacterBased( flavor ) )
+		return CharacterClass_GetGalleryPortrait( MusicPack_GetCharacter( flavor ) )
 
-
-
-
-
+	return GetGlobalSettingsAsset( ItemFlavor_GetAsset( flavor ), "portraitImage" )
+}
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-//
-
+#if SERVER || CLIENT || UI
+float function MusicPack_GetPortraitBlend( ItemFlavor flavor )
+{
+	Assert( ItemFlavor_GetType( flavor ) == eItemType.music_pack )
+	return GetGlobalSettingsFloat( ItemFlavor_GetAsset( flavor ), "portraitBlend" )
+}
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                         
+ 
+	                                                                  
+		      
 
+	                  
+		      
 
+	                                                   
+	 
+		                                                                                             
+		      
+	 
 
+	                                                         
+		                                                     
+	                                                                    
 
+	                                                     
 
-
-
+	                      
+		                                                           
+	    
+		                                                                             
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                   
+ 
+	                                                      
+		                                                                               
 
-
-
-
-
-
-
-
-
-
-
-
+	                                                     
+	                                       
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
+#if SERVER
+                                                                        
+ 
+	                                                         
+		            
+	                                                                             
+ 
 #endif
 
 
+#if SERVER
+                                                   
+ 
+	                                                         
+		      
+
+	                                                                                             
+
+	                                                       
+	 
+		                                       
+	 
+ 
+#endif
+
+
+#if CLIENT
+void function ServerCallback_PlayMatchEndMusic()
+{
+	                                                                                                                              
+	                                                                                  
+
+	entity clientPlayer = GetLocalClientPlayer()
+	if ( clientPlayer.GetTeam() == GetWinningTeam() )
+	{
+		EmitSoundOnEntity( clientPlayer, MusicPack_GetWinMusic( GetMusicPackForPlayer( clientPlayer ) ) )
+	}
+	else
+	{
+		StopSoundOnEntity( clientPlayer, MusicPack_GetLossMusic( GetMusicPackForPlayer( clientPlayer ) ) )
+		EmitSoundOnEntity( clientPlayer, MusicPack_GetLossMusic( GetMusicPackForPlayer( clientPlayer ) ) )
+	}
+}
+#endif
+
+
+#if SERVER
+                                                          
+ 
+	                                   
+ 
+
+                                                 
+ 
+	                               
+
+	                                         
+		           
+
+	                                                                  
+
+	                                                               
+	                                                           
+ 
+#endif
+
+
+#if SERVER || CLIENT || UI
+ItemFlavor function __GetMusicPackForPlayer_RollTheRandom( entity player )
+{
+	ItemFlavor music = WaitForMusicPackForPlayer( player )
+
+	if ( GRX_IsInventoryReady( player ) && ItemFlavor_IsTheRandom( music ) )
+	{
+		LoadoutEntry musicSlot  = Loadout_MusicPack()
+		array<ItemFlavor> items = clone GetValidItemFlavorsForLoadoutSlot( ToEHI( player ), musicSlot )
+
+		foreach ( item in clone items )
+		{
+			if (
+				( ItemFlavor_GetGRXMode( item ) != GRX_ITEMFLAVORMODE_NONE && !GRX_IsItemOwnedByPlayer( item, player ) )
+				|| ItemFlavor_IsTheRandom( item )
+				)
+				items.fastremovebyvalue( item )
+		}
+
+		if ( items.len() > 0 )
+		{
+			music = items.getrandom()
+		}
+	}
+
+	return music
+}
+#endif
+
+
+#if UI
+void function SetActiveMusicPack( ItemFlavor ornull musicPack )
+{
+	file.activeMusicPack = musicPack
+}
+
+ItemFlavor ornull function GetActiveMusicPack()
+{
+	return file.activeMusicPack
+}
+
+void function SetActiveMusicContext( int musicContext )
+{
+	file.activeMusicContext = musicContext
+}
+
+int function GetActiveMusicContext()
+{
+	return file.activeMusicContext
+}
+
+void function SetActiveMusicTrack( string musicTrack )
+{
+	file.activeMusicTrack = musicTrack
+}
+
+string function GetActiveMusicTrack()
+{
+	return file.activeMusicTrack
+}
+
+void function SetDesiredCustomMusic( string ornull music )
+{
+	file.desiredCustomMusic = music
+}
+
+string ornull function GetDesiredCustomMusic()
+{
+	return file.desiredCustomMusic
+}
+
+void function UIMusicUpdate( bool wasManualMusicPackChange = false )
+{
+	int currentMusicContext  = GetActiveMusicContext()
+	string currentMusicTrack = GetActiveMusicTrack()
+	int desiredMusicContext  = eMenuMusicContext.NONE
+	string desiredMusicTrack = ""                 
+
+	if ( IsPlayVideoMenuPlayingVideo() )
+	{
+		desiredMusicContext = eMenuMusicContext.NONE
+		desiredMusicTrack = ""
+	}
+	else if ( !IsConnected() )
+	{
+		            
+		desiredMusicContext = eMenuMusicContext.MAIN_MENU
+		desiredMusicTrack = "Music_FrontEnd"
+	}
+	else if ( IsLobby() )
+	{
+		string ornull desiredCustomMusic = GetDesiredCustomMusic()
+
+		if ( desiredCustomMusic != null )
+		{
+			desiredMusicContext = eMenuMusicContext.CUSTOM
+			desiredMusicTrack = expect string( desiredCustomMusic )
+		}
+		else
+		{
+			if ( IsLocalClientEHIValid() && LoadoutSlot_IsReady( LocalClientEHI(), Loadout_MusicPack() ) && GRX_IsInventoryReady( GetLocalClientPlayer() ) )
+			{
+				ItemFlavor musicPack = GetMusicPackForPlayer( GetLocalClientPlayer() )
+				SetActiveMusicPack( musicPack )
+
+				desiredMusicContext = eMenuMusicContext.LOBBY
+				if ( currentMusicContext == eMenuMusicContext.MAIN_MENU || wasManualMusicPackChange )
+					desiredMusicTrack = MusicPack_GetMainMenuToLobbyMusic( musicPack )
+				else
+					desiredMusicTrack = MusicPack_GetLobbyMusic( musicPack )
+			}
+			else
+			{
+				                                                                     
+				desiredMusicContext = currentMusicContext
+				desiredMusicTrack = currentMusicTrack
+
+				thread UpdateUIMusicOnMusicPackLoadoutSlotReadyThread()
+			}
+		}
+	}
+	else
+	{
+		desiredMusicContext = eMenuMusicContext.NONE
+		desiredMusicTrack = ""
+	}
+
+	bool changeIfDesiredMusicTrackIsDifferentEvenIfContextIsUnchanged = false
+	if ( wasManualMusicPackChange )
+		changeIfDesiredMusicTrackIsDifferentEvenIfContextIsUnchanged = true
+	if ( desiredMusicContext == eMenuMusicContext.CUSTOM )                                                                                       
+		changeIfDesiredMusicTrackIsDifferentEvenIfContextIsUnchanged = true
+
+	bool shouldChangeMusic = false                                                                                                            
+	if ( desiredMusicContext != currentMusicContext )                          
+		shouldChangeMusic = true
+	else if ( currentMusicTrack == "" && desiredMusicTrack != "" )                                                                                            
+		shouldChangeMusic = true
+	else if ( currentMusicTrack != "" && desiredMusicTrack == "" )                                                                                            
+		shouldChangeMusic = true
+	else if ( desiredMusicTrack != currentMusicTrack && changeIfDesiredMusicTrackIsDifferentEvenIfContextIsUnchanged )                                                               
+		shouldChangeMusic = true
+
+	if ( shouldChangeMusic )
+	{
+		if ( desiredMusicContext != eMenuMusicContext.LOBBY )
+			SetActiveMusicPack( null )
+
+		SetActiveMusicContext( desiredMusicContext )
+
+		printf( "Menu music update: %s (%s) -> %s (%s) (%s)", currentMusicTrack, DEV_GetEnumStringSafe( "eMenuMusicContext", currentMusicContext ), desiredMusicTrack, DEV_GetEnumStringSafe( "eMenuMusicContext", desiredMusicContext ), changeIfDesiredMusicTrackIsDifferentEvenIfContextIsUnchanged ? "T" : "F" )
+
+		if ( desiredMusicTrack != currentMusicTrack )
+		{
+			foreach ( string soundName in WORKAROUND_UI_MUSIC_SOUND_LIST )
+				StopUISoundByName( soundName )
+
+			if ( desiredMusicTrack != "" )
+			{
+				Assert( WORKAROUND_UI_MUSIC_SOUND_LIST.contains( desiredMusicTrack ), format( "Tried to play '%s' for UI music but its not in WORKAROUND_UI_MUSIC_SOUND_LIST", desiredMusicTrack ) )
+				EmitUISound( desiredMusicTrack )
+			}
+
+			SetActiveMusicTrack( desiredMusicTrack )
+		}
+	}
+}
+
+void function UpdateUIMusicOnMusicPackLoadoutSlotReadyThread()
+{
+	Signal( uiGlobal.signalDummy, "UpdateUIMusicOnMusicPackLoadoutSlotReadyThread" )
+	EndSignal( uiGlobal.signalDummy, "UpdateUIMusicOnMusicPackLoadoutSlotReadyThread" )
+
+	WaitForLocalClientEHI()
+	LoadoutSlot_WaitForItemFlavor( LocalClientEHI(), Loadout_MusicPack() )
+	while ( !GRX_IsInventoryReady( GetLocalClientPlayer() ) )
+		WaitFrame()
+	UIMusicUpdate()
+}
+
+void function PlayCustomUIMusic( string music )
+{
+	Assert( IsConnected() && IsLobby() )
+
+	SetDesiredCustomMusic( music )
+	UIMusicUpdate()
+}
+
+
+void function CancelCustomUIMusic()
+{
+	SetDesiredCustomMusic( null )
+	UIMusicUpdate()
+}
+#endif      
+
+
+#if SERVER && DEV
+                                                        
+ 
+	                                                         
+	 
+		                                   
+		      
+	 
+
+	                                                                                
+		                    
+ 
+#endif

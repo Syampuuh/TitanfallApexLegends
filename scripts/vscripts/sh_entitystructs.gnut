@@ -1,22 +1,22 @@
-//
+  
 
 
-//
-//
-//
-//
-//
-//
+             
+             
+             
+             
+             
+                  
 
 global typedef EncodedEHandle int
 global const EncodedEHandle EncodedEHandle_null = 0
 
-#if(false)
+#if SERVER
 
+                         
+                                
 
-
-
-#elseif CLIENT || UI 
+#elseif CLIENT || UI
 
 global typedef EHI EncodedEHandle
 global const EHI EHI_null = EncodedEHandle_null
@@ -24,55 +24,76 @@ global const EHI EHI_null = EncodedEHandle_null
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global struct EHIScriptStruct
 {
 	EHI ehi
 
-	//
+	                      
 	bool isPlayer = false
 	bool isConnected = false
+	string name = ""
 	int  team = TEAM_INVALID
 	int  teamMemberIndex
-	#if CLIENT || UI 
+	int platformID = -1
+	#if CLIENT || UI
 		bool   isLocalClientPlayer = false
-		string name = ""
 	#endif
 
-	//
-	#if(false)
-
-
-
-#endif
-	#if CLIENT || UI 
+	           
+	#if SERVER
+		                        
+		                                  
+		                                      
+	#endif
+	#if SERVER || CLIENT || UI
 		table<int, array<void functionref( EHI, ItemFlavor )> > itemFlavorLoadoutSlotChangedCallbacksMap
 	#endif
-	#if(CLIENT)
+	#if CLIENT
 		array<int> netVarsLastSeenValuesMap
+		string obfuscatedID = ""
 	#endif
-	#if(UI)
+	#if UI
 		array<int> loadoutSlotsLastSeenContentsMap
 	#endif
 
-	//
-	#if(false)
+	             
+	#if SERVER
+		             
+	#endif
 
-#endif
+	        
+	#if SERVER
+		                          
+		                                                                       
+		                       
+	#endif
 
-	//
-	#if(false)
+	                                                                                  
+	int rankScore = -1                                   
+	int rankedLadderPosition = -1                                         
 
-//
+	int rankScorePrevSeason = -1                                   
+	int rankedLadderPositionPrevSeason = -1                                         
 
-#endif
+                        
+		int arenasRankScore = 0                                
+		int arenasRankedLadderPosition = -1                                         
+       
+
+	       
+	string clubName = ""
+	string clubTag = ""
+	string clubLogo = ""
+
+	array< ItemFlavor > legendaryItemsOwnedByPlayer = []
 }
 #endif
 
 
-#if(false)
-
-#elseif CLIENT || UI 
+#if SERVER
+                                    
+#elseif CLIENT || UI
 global typedef EHISignalDummy EHIScriptStruct
 #endif
 

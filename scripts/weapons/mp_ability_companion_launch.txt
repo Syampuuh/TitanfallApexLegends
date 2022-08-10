@@ -1,0 +1,194 @@
+#base "_base_ability_tactical.txt"
+
+WeaponData
+{
+    // General
+    "printname"   									"#ABL_TAC_VANTAGE"
+    "shortprintname"   								"#ABL_TAC_VANTAGE"
+    "description" 									"#ABL_TAC_VANTAGE_DESC"
+    "longdesc"										"#ABL_TAC_VANTAGE_LONGDESC"
+
+    "hud_icon"										"rui/hud/tactical_icons/tactical_vantage"
+
+    "fire_mode"   									"offhand"
+    "offhand_cancelled_by_melee"					"1"
+    "offhand_active_slot"                           "altHand"
+    "is_semi_auto"                                  "1"
+    "offhand_default_inventory_slot"				"1"
+    "offhand_keep_primary_in_hand"					"0"
+    "offhand_holster_primary"						"1"
+    "hide_holstered_sidearm_when_active"			"1"
+    "offhand_hold_enabled"							"0"
+    "play_one_handed_alt_hand_anim_on_mainhand"     "1"
+
+    "OnWeaponActivate"                              "OnWeaponActivate_companion_launch"
+    "OnWeaponDeactivate"                            "OnWeaponDeactivate_companion_launch"
+    "OnWeaponPrimaryAttack"							"OnWeaponPrimaryAttack_companion_launch"
+    "OnWeaponPrimaryAttackAnimEvent"				"OnWeaponPrimaryAttackAnimEvent_companion_launch"
+    "OnWeaponRegenEnd"                              "OnWeaponRegenEndGeneric"
+    "OnWeaponAttemptOffhandSwitch"					"OnWeaponAttemptOffhandSwitch_companion_launch"
+    "zoom_effects"                                  "0"
+
+    "play_offhand_charging_anim"  					"0"
+    "play_offhand_start_end_anim"					"0"
+
+    // Models
+    "viewmodel"   									"mdl/weapons/vantage_tactical_whistle/ptpov_vantage_tactical_whistle.rmdl"
+    "playermodel" 									"mdl/weapons/empty_handed/w_empty_handed_mirage.rmdl"  //spawning whistle mdl from animSeq because of offHand/althand
+    //"projectilemodel" 							//"mdl/dev/empty_model.rmdl"
+    "leveled_pickup"								"1"
+
+    "bone_merge_world_model"						"1"
+
+
+    "ammo_suck_behavior"							"offhand_weapons"
+
+    "ammo_display"									"count"
+
+    "ammo_clip_size"   								"200"
+    "ammo_default_total"							"200"
+    "ammo_min_to_fire"								"200"
+    "ammo_per_shot"									"200"
+    "ammo_stockpile_max"							"200"
+
+    "regen_ammo_refill_rate"						"10"
+
+    // Regen Ammo
+    "regen_ammo_refill_start_delay"					"0.0"
+
+    // Damage
+    "damage_type" 									"none"
+    "explosion_damage_heavy_armor"					"0"
+    "damage_near_distance"							"0"
+    "damage_far_distance" 							"0"
+    "damage_near_value"   							"0"
+    "damage_far_value"								"0"
+
+    // Sounds
+    //"fire_sound_1_player_1p"						"Mirage_PsycheOut_Activate_1P"
+    //"fire_sound_1_player_3p"						"Mirage_PsycheOut_Activate_3P"
+
+    // Rumble
+    "rumble"  										"-1"
+
+    // Behavior
+    //"fire_rate"   									"2.0"  //falsed out for whistle exploration
+    //"fire_duration"                                 "1.5"
+    "cooldown_type"									"ammo_instant"
+    "holster_time"									"0.7"
+    //"deploy_time" 								"0.15"
+    "lower_time"  									"1"
+    //"raise_time"  								"0.15"
+    "allow_empty_fire"								"1"
+    "reload_enabled"								"0"
+    "empty_reload_only"   							"0"
+    "allow_empty_click"   							"0"
+    "trigger_snipercam"   							"0"
+    "allow_headshots" 								"0"
+    "breaks_cloak"									"0"
+    "primary_fire_does_not_block_sprint"			"1"
+    "aimassist_disable_hipfire"						"1"
+    "aimassist_disable_ads"							"1"
+
+
+    Mods
+    {
+        survival_armor_cooldown_mod
+        {
+            "regen_ammo_refill_rate"    "*1.25"
+        }
+
+                               
+
+        arenas_tac_max_cooldown
+        {
+            "ammo_regen_takes_from_stockpile"               "1"
+            "ammo_default_total"							"200" // 150 * 2 charges
+            "ammo_stockpile_max"							"800" // 150 * 7 charges
+        }
+              
+
+        survival_finite_ordnance
+        {
+
+        }
+
+        vantage_is_launching_mod
+        {
+            "activitymodifier1p"    "is_launching"
+            "activitymodifier3p"    "is_launching"
+            "fire_rate"   			"0.5" //This allows the whole attack animation to play, otherwise it gets cut off.
+        }
+        vantage_failed_los_mod
+        {
+            "activitymodifier1p"    "failed_los"
+        }
+        vantage_from_perched_mod
+        {
+            "activitymodifier1p"    "from_perched"
+        }
+
+        vantage_whistle_fwd
+        {
+           "activitymodifier1p"    "whistle_fwd"
+        }
+        vantage_whistle_back
+        {
+           "activitymodifier1p"    "whistle_back"
+        }
+        vantage_whistle_left
+        {
+           "activitymodifier1p"    "whistle_left"
+        }
+        vantage_whistle_right
+        {
+          "activitymodifier1p"    "whistle_right"
+
+        }
+        vantage_can_interrupt
+        {
+          "offhand_instant_swap_to_offhand"               "1"
+        }
+
+
+
+    }
+    active_crosshair_count				"2"
+    rui_crosshair_index					"0"
+
+    "ordnance_crosshair_always_on_start_index"	"1"
+
+    RUI_CrosshairData
+    {
+        DefaultArgs
+        {
+            adsFrac 					player_zoomFrac
+            crosshairMovementX          crosshair_movement_x
+            crosshairMovementY          crosshair_movement_y
+        }
+
+        Crosshair_1
+        {
+            "ui"						"ui/crosshair_tactical"
+            Args
+            {
+                regenRate               "eWeaponVar.regen_ammo_refill_rate"
+                ammoFrac                "progress_weapon_clip_ammo_frac"
+                dryfireTime             "weapon_latest_dryfire_time"
+            }
+        }
+
+        Crosshair_2
+        {
+            "ui"						"ui/crosshair_tac_range"
+            Args
+            {
+                ammoFrac                "progress_weapon_clip_ammo_frac"
+                isTacInRangeInt		    "weapon_script_int_0"
+                grappleInRangeTime		"grapple_in_range_time"
+                grappleOutOfRangeTime	"grapple_out_of_range_time"
+                weaponIsDisabled		"weapon_is_disabled"
+            }
+        }
+    }
+}

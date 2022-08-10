@@ -6,7 +6,7 @@
         ControlName             SliderControl
         InheritProperties       SliderControl
         tabPosition             1
-        navDown                 SwchPushToTalk
+        navDown                 SwchAudioLanguage
         conCommand              "sound_volume"
         minValue                0.0
         maxValue                1.0
@@ -16,13 +16,38 @@
         ypos                    0
     }
 
+    SwchAudioLanguage
+    {
+        ControlName             RuiButton
+        InheritProperties       SwitchButton
+        style                   DialogListButton
+        navUp                   SldMasterVolume
+        navDown                 SwchInputDevice
+        ConVar                  "miles_language"
+        list
+        {
+            "#SETTING_DEFAULT"          ""
+            "#GAMEUI_LANGUAGE_ENGLISH"  "english"
+        }
+
+        pin_to_sibling          SldMasterVolume
+        pin_corner_to_sibling   TOP_LEFT
+        pin_to_sibling_corner   BOTTOM_LEFT
+
+        visible                 0 //[$ENGLISH || $PORTUGUESE || $TCHINESE]
+        //visible                 1 [!$ENGLISH && !$PORTUGUESE && !$TCHINESE]
+
+        childGroupAlways        ChoiceButtonAlways
+    }
+
     VoiceChatHeader
     {
         ControlName				ImagePanel
         InheritProperties		SubheaderBackgroundWide
         xpos					0
         ypos					6
-        pin_to_sibling			SldMasterVolume
+        pin_to_sibling			SldMasterVolume //[$ENGLISH || $PORTUGUESE || $TCHINESE]
+        //pin_to_sibling			SwchAudioLanguage [!$ENGLISH && !$PORTUGUESE && !$TCHINESE]
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
     }
@@ -35,13 +60,28 @@
         pin_to_sibling_corner	LEFT
         labelText				"#MENU_VOICE_CHAT"
     }
+    SwchInputDevice
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchAudioLanguage
+        navDown					SwchPushToTalk
+        ConVar                  "voice_input_device"
+        // list is populated by code
+        
+        pin_to_sibling			VoiceChatHeader
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
 
+        childGroupAlways        MultiChoiceButtonAlways
+    }
     SwchPushToTalk
     {
         ControlName             RuiButton
         InheritProperties       SwitchButton
         style                   DialogListButton
-        navUp                   SldMasterVolume
+        navUp                   SwchInputDevice
         navDown                 SldOpenMicSensitivity
         ConVar                  "TalkIsStream"
         list
@@ -50,7 +90,7 @@
             "#SETTING_OPENMIC"  1
         }
 
-        pin_to_sibling          VoiceChatHeader
+        pin_to_sibling          SwchInputDevice
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
 
@@ -68,7 +108,8 @@
         stepSize                50
         inverseFill             0
         showLabel               1
-
+		tall_nx_handheld		80 [$NX]
+		
         pin_to_sibling          SwchPushToTalk
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
@@ -80,6 +121,7 @@
             zpos					5
             wide					280
             tall					60
+            tall_nx_handheld		80 [$NX]
             visible					1
             enabled					1
             tabPosition				0
@@ -193,13 +235,14 @@
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
     }
+
     SwchSoundWithoutFocus
     {
         ControlName             RuiButton
         InheritProperties       SwitchButton
         style                   DialogListButton
         navUp                   SldLobbyMusicVolume
-        navDown                 SwchChatTextToSpeech
+        navDown                 SwchSpeakerConfig
         ConVar                  "sound_without_focus"
         list
         {
@@ -213,72 +256,12 @@
         childGroupAlways        ChoiceButtonAlways
     }
 
-    SwchChatTextToSpeech
-    {
-        ControlName             RuiButton
-        InheritProperties       SwitchButton
-        style                   DialogListButton
-        navUp                   SwchSoundWithoutFocus
-        navDown                 SwchChatSpeechToText
-
-        pin_to_sibling          SwchSoundWithoutFocus
-        pin_corner_to_sibling   TOP_LEFT
-        pin_to_sibling_corner   BOTTOM_LEFT
-
-        ConVar                  "hudchat_play_text_to_speech"
-        list
-        {
-            "#SETTING_OFF"  0
-            "#SETTING_ON"   1
-        }
-
-        visible                 1 [$ENGLISH]
-        visible                 0 [!$ENGLISH]
-
-        ruiArgs
-        {
-            buttonText      "#MENU_CHAT_TEXT_TO_SPEECH"
-        }
-        clipRui                 1
-        childGroupAlways        ChoiceButtonAlways
-    }
-
-    SwchChatSpeechToText
-    {
-        ControlName             RuiButton
-        InheritProperties       SwitchButton
-        style                   DialogListButton
-        navUp                   SwchChatTextToSpeech
-        navDown                 SwchSpeakerConfig
-
-        pin_to_sibling          SwchChatTextToSpeech
-        pin_corner_to_sibling   TOP_LEFT
-        pin_to_sibling_corner   BOTTOM_LEFT
-
-        visible                 1 [$ENGLISH]
-        visible                 0 [!$ENGLISH]
-
-        ConVar                  "speechtotext_enabled"
-        list
-        {
-            "#SETTING_OFF"  0
-            "#SETTING_ON"   1
-        }
-
-        ruiArgs
-        {
-            buttonText      "#MENU_CHAT_SPEECH_TO_TEXT"
-        }
-        clipRui                 1
-        childGroupAlways        ChoiceButtonAlways
-    }
-
     SwchSpeakerConfig
     {
         ControlName             RuiButton
         InheritProperties       SwitchButton
         style                   DialogListButton
-        navUp                   SwchChatSpeechToText
+        navUp                   SwchSoundWithoutFocus
         ypos                    40
         ConVar                  "miles_channels"
         visible                 1
@@ -294,11 +277,11 @@
             "#SETTING_NINE_CHANNEL"     9
         }
 
-        pin_to_sibling          SwchChatSpeechToText [$ENGLISH]
-        pin_to_sibling			SwchSoundWithoutFocus [!$ENGLISH]
+        pin_to_sibling		SwchSoundWithoutFocus
         pin_corner_to_sibling   TOP_LEFT
         pin_to_sibling_corner   BOTTOM_LEFT
     }
+
     InputBlocker
     {
         ControlName             Label

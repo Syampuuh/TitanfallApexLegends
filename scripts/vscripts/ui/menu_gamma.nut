@@ -11,7 +11,7 @@ struct {
 	bool registeredAcceptButtonPress = false
 } file
 
-void function InitGammaMenu()
+void function InitGammaMenu( var newMenuArg )                                               
 {
 	var menu = GetMenu( "GammaMenu" )
 	file.menu = menu
@@ -40,11 +40,11 @@ void function SetGammaFromNormalizedValue( float normalizedGamma )
 
 void function OnGammaMenu_Open()
 {
+#if !NX_PROG
 	var gammaLeftRui   = Hud_GetRui( Hud_GetChild( file.menu, "GammaElementLeft" ) )
 	var gammaCenterRui = Hud_GetRui( Hud_GetChild( file.menu, "GammaElementCenter" ) )
 	var gammaRightRui  = Hud_GetRui( Hud_GetChild( file.menu, "GammaElementRight" ) )
-	var sliderHintRui  = Hud_GetRui( Hud_GetChild( file.menu, "SliderHint" ) )
-
+	
 	RuiSetImage( gammaLeftRui, "basicImage", $"rui/menu/common/gamma_image" )
 	RuiSetFloat3( gammaLeftRui, "basicImageColor", <0.0075, 0.0075, 0.0075> )
 
@@ -54,6 +54,9 @@ void function OnGammaMenu_Open()
 	RuiSetImage( gammaRightRui, "basicImage", $"rui/menu/common/gamma_image" )
 	RuiSetFloat3( gammaRightRui, "basicImageColor", <0.995, 0.995, 0.995> )
 
+#endif
+
+	var sliderHintRui  = Hud_GetRui( Hud_GetChild( file.menu, "SliderHint" ) )
 	RuiSetString( sliderHintRui, "labelText", "#GAMMA_ADJUST_CONTROLS" )
 
 	thread RegisterAcceptButtonPressAfterRelease()
@@ -77,15 +80,15 @@ void function GammaMenuThink( var gammaSliderRui )
 {
 	while ( GetTopNonDialogMenu() == file.menu )
 	{
-		if ( file.stickDeflection > 0.25 && Time() - file.lastStickMoveUpdateTime > 0.15 )
+		if ( file.stickDeflection > 0.25 && UITime() - file.lastStickMoveUpdateTime > 0.15 )
 		{
 			file.sliderFrac = min( 1.0, file.sliderFrac + (1 / NUM_GAMMA_STEPS) )
-			file.lastStickMoveUpdateTime = Time()
+			file.lastStickMoveUpdateTime = UITime()
 		}
-		else if ( file.stickDeflection < -0.25 && Time() - file.lastStickMoveUpdateTime > 0.15 )
+		else if ( file.stickDeflection < -0.25 && UITime() - file.lastStickMoveUpdateTime > 0.15 )
 		{
 			file.sliderFrac = max( 0.0, file.sliderFrac - (1 / NUM_GAMMA_STEPS) )
-			file.lastStickMoveUpdateTime = Time()
+			file.lastStickMoveUpdateTime = UITime()
 		}
 
 		RuiSetFloat( gammaSliderRui, "sliderFrac", file.sliderFrac )

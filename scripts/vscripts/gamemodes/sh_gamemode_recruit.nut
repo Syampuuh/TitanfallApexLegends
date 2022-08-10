@@ -1,12 +1,12 @@
 global function IsRecruitMode
 global function CanRecruitOrRevivePlayer
 
-#if(false)
-
-
+#if SERVER
+                                       
+                                
 #endif
 
-#if(CLIENT)
+#if CLIENT
 global function CL_RecruitModeUnitFrames_Init
 global function Recruit_OnPlayerTeamChanged
 
@@ -33,14 +33,14 @@ bool function CanRecruitOrRevivePlayer( entity reviver, entity target )
 	return false
 }
 
-#if(false)
-
-
-
-
+#if SERVER
+                                
+ 
+	                                                        
+ 
 #endif
 
-#if(CLIENT)
+#if CLIENT
 void function CL_RecruitModeUnitFrames_Init()
 {
 	AddCreateCallback( "player", OnPlayerCreated )
@@ -49,11 +49,11 @@ void function CL_RecruitModeUnitFrames_Init()
 
 void function OnPlayerCreated( entity player )
 {
-	//
-	//
-	//
-	//
-	Recruit_OnPlayerTeamChanged( player, TEAM_UNASSIGNED, player.GetTeam() ) //
+	                                                                                                             
+	                                                                                                                                  
+	                                                   
+	                                        
+	Recruit_OnPlayerTeamChanged( player, TEAM_UNASSIGNED, player.GetTeam() )                                                                                                                                                                                             
 
 	if ( IsRecruitMode() && GetLocalClientPlayer() == player )
 		CreateRecruitModeRuis()
@@ -84,10 +84,10 @@ void function Recruit_OnPlayerTeamChanged( entity player, int oldTeam, int newTe
 
 void function CreateRecruitModeRuis()
 {
-	if ( file.recruitModeRuis.len() > 0 ) //
+	if ( file.recruitModeRuis.len() > 0 )                                             
 		return
 
-	int maxTeamSize = GetCurrentPlaylistVarInt( "recruit_max_team_size", 3 ) - 1 //
+	int maxTeamSize = GetCurrentPlaylistVarInt( "recruit_max_team_size", 3 ) - 1                                                           
 	for ( int i = 0; i < maxTeamSize; i++ )
 	{
 		var rui = CreatePermanentCockpitPostFXRui( $"ui/unitframe_recruit_mode.rpak", HUD_Z_BASE )
@@ -114,65 +114,57 @@ void function UpdateUnitframePlaceholderVisibility()
 }
 #endif
 
-#if(false)
+#if SERVER
+                                                                      
+ 
+	                                            
+		      
 
+	                                              
+	 
+		                               
+		                                
+		                                          
+		                          
+		                                                           
+		                                     
+		                                                                            
+		                                                       
+			                                 
+	 
+	                    
+ 
 
+                                                   
+ 
+	                                                                                                                                              
+ 
 
+                                            
+ 
+	                               
 
+	                     
+	                                                              
+	                                            
+	 
+		                                                           
+		                             
+		 
+			           
+			     
+		 
+	 
+	                    
+		      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                               
+	                                          
+	                          
+	                                                           
+	                                     
+	                                                                            
+	                    
+	                                 
+ 
 #endif

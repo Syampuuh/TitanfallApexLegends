@@ -1,818 +1,1249 @@
+  
+
+#if SERVER || CLIENT
 global function ShLootBin_Init
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                 
+                                 
+global function LootBin_IsOpenAtAll
+global function LootBin_IsFullyOpenedForPlayer
+global function LootBin_IsBusy
+global function LootBin_HasSecretCompartment
+global function LootBin_HasUnopenedSecretCompartment
+global function LootBin_GetSpawnedLoot
+global function GetLootBinForHitEnt
+global function GetAllLootBins
+global function AddCallback_OnLootBinOpening
 #endif
 
-global function LootBin_IsBusy
-global function GetLootBinForHitEnt
+#if SERVER
+                                  
+                                  
 
-global function LootBin_IsOpen
+                             
+                                   
+                           
+                               
+                                   
+                                         
+                                                  
+                                                                     
+                                                   
 
+                             
+                                        
+                                         
+#endif
+
+#if SERVER && DEV
+                                             
+                                                    
+                                        
+                                           
+#endif
+
+#if CLIENT
+global function ServerToClient_LootBinOpening
+#endif
+
+
+#if SERVER
+                                        
+#endif
+
+
+
+#if SERVER || CLIENT
 global const string LOOT_BIN_MARKER_SCRIPTNAME = "survival_lootbin"
 global const string LOOT_BIN_SCRIPTNAME = "survival_lootbin_spawned"
 
-global const asset LOOT_BIN_MODEL = $"mdl/props/loot_bin/loot_bin_01_animated.rmdl"
-#if(false)
+global const asset LOOT_BIN_MODEL = $"mdl/props/loot_bin/loot_bin_01_loba.rmdl"
 
-#endif
-
-global const bool LOOT_BIN_CLOSABLE = false //
-
-global const string SOUND_LOOT_BIN_OPEN = "Door_Lootbin_Open"
-global const string SOUND_LOOT_BIN_IDLE = "Door_Lootbin_Presence_Loop"
-const float NUM_LOOT_BIN_SOUND_INITS_PER_SEC = 50.0        //
-const float LOOT_BIN_SOUND_INIT_MIN_WAIT = 5.0
+global const asset LOOT_BIN_OPEN_REGULAR_FX = $"P_LootBin_open"
+global const asset LOOT_BIN_OPEN_SECRET_FX = $"P_LootBin_open_lower"
+                                                                        
 
 const bool SURVIVAL_DEBUG_LOOT_BINS = false
+#endif
 
+
+#if SERVER || CLIENT
+global enum eLootBinCompartment
+{
+	REGULAR,
+	SECRET,
+	_COUNT
+}
+#endif
+
+
+#if SERVER
+                                                                                                                                            
+#elseif CLIENT
+global typedef OnLootBinOpeningCallbackType void functionref( entity )
+#endif
+
+
+#if SERVER
+                        
+ 
+	                    
+
+	                                 
+	                                
+ 
+#endif
+
+#if SERVER
+                                                                                                                                                                                            
+ 
+	                              
+	 
+		                              
+		       
+			                                                                   
+			                                                                               
+		      
+	 
+ 
+#endif
+
+#if SERVER || CLIENT
 struct
 {
-	bool                          lootBinsInfinite = false
-	table<entity, array<entity> > lootBinsSpawnedLootMap
-	table<entity, array<string> > lootBinsLootInside
-	#if(false)
+	#if SERVER || CLIENT
+		array<OnLootBinOpeningCallbackType> onLootBinOpeningCallbacks
+	#endif
 
-#endif
-	array<entity>                 lootBinList
-	int                           numLootBins
+	#if SERVER
+		                                                   
+
+		                                                     
+	#endif
 } file
+#endif
 
+
+#if SERVER || CLIENT
 void function ShLootBin_Init()
 {
 	PrecacheModel( LOOT_BIN_MODEL )
+	PrecacheParticleSystem( LOOT_BIN_OPEN_REGULAR_FX )
+	PrecacheParticleSystem( LOOT_BIN_OPEN_SECRET_FX )
 
-	#if(false)
+	#if SERVER || CLIENT
+		Remote_RegisterClientFunction( "ServerToClient_LootBinOpening", "entity" )
+	#endif
 
+	#if SERVER
+		                                                                             
+		                                              
+		                                                          
+		                                                
 
+		       
+			                                                                                       
+		      
+	#endif
 
-
-
-
-
-#endif
-	#if(CLIENT)
+	#if CLIENT
 		AddCreateCallback( "prop_dynamic", OnPropDynamicCreated )
+		AddDestroyCallback( "prop_dynamic", OnPropDynamicDestroyed )
 	#endif
 }
-
-
-#if(false)
-
-
-//
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-//
-//
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-//
-
-
-
-
-
-//
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-//
-//
-//
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(CLIENT)
-bool function LootBin_IsOpen( entity lootbin )
+#if SERVER || CLIENT
+array<entity> function GetAllLootBins()
 {
-	if ( GradeFlagsHas( lootbin, eGradeFlags.IS_OPEN ) )
+	#if SERVER
+		                                                   
+	#elseif CLIENT
+		return GetEntArrayByScriptName( LOOT_BIN_SCRIPTNAME )
+	#endif
+}
+#endif
+
+
+#if SERVER
+                                 
+ 
+	                       
+ 
+#endif
+
+
+#if SERVER || CLIENT
+void function AddCallback_OnLootBinOpening( OnLootBinOpeningCallbackType callbackFunc )
+{
+	Assert( !file.onLootBinOpeningCallbacks.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with Survival_AddCallback_OnLootbinOpened" )
+	file.onLootBinOpeningCallbacks.append( callbackFunc )
+}
+#endif
+
+
+#if SERVER
+                               
+ 
+	                                                                                                  
+	                                                                            
+		                      
+
+	                                                    
+	                                                               
+
+                        
+		                           
+       
+ 
+#endif
+
+
+#if SERVER
+                                                        
+ 
+	                                                                        
+
+	                                         
+
+	                               
+	 
+		                                                  
+		                            
+	 
+ 
+#endif
+
+
+#if SERVER && DEV
+                                                                                  
+ 
+	                            
+		                     
+		                                                      
+		                                                               
+	                                                                                                     
+ 
+#endif
+
+
+#if SERVER
+                                                                                                                                         
+ 
+	                                               
+	                                            
+	                                             
+	                                 
+
+	                    
+	  	                                                                                                                                
+	  	 
+	  		                                  
+	  		                                              
+	  	 
+	        
+
+	                           
+	                           
+	                        
+	                           
+	                           
+
+	                                                                                                                                       
+	                                              
+	                                   
+	 
+		                           
+		                                                 
+		                                                                 
+	 
+
+
+	                                                                       
+
+	                                           
+
+	              
+ 
+
+                                                                  
+ 
+	                        
+		       
+	                                        
+	                                                                   
+ 
+#endif
+
+
+#if SERVER
+                                                                                                                                   
+ 
+	                                                                            
+
+	                                                                                    
+
+	              
+ 
+#endif
+
+
+#if SERVER
+                                                                             
+ 
+	                                 
+
+	                                                                                                                   
+
+	                                               
+	                      
+	 
+		                             
+		                                                                                          
+		           
+	 
+
+	                                                  
+	                                                                                            
+	                                                                        
+	 
+		                                                                                                
+
+		                                                  
+		 
+			                                
+				        
+
+			                                                                                                                   
+			 
+				                                  
+				                                  
+				      
+			 
+		 
+	 
+	              
+	 
+		                                         
+			                                   
+			                                 
+			                                                    
+
+		                                                                  
+		 
+			                                 
+			      
+		 
+
+		                                                                                  
+		                                                                
+	 
+ 
+#endif
+
+#if SERVER
+                                
+                                           
+ 
+	                                        
+		      
+	                                         
+	                                                                      
+		                                      
+	   
+
+	                                  
+	                        
+	                        
+	                               
+	                     
+	                                           
+	                                
+	                                                                                       
+
+	                                
+
+	                          
+	                                             
+	                                                       
+
+	                            
+		                                                                                                  
+	      
+
+	                      
+	                                          
+ 
+
+                                              
+ 
+	       
+		                                
+		                                  
+	      
+
+	                   
+	                                                                                                      
+	                                                
+	                                                          
+	                                                                                                                
+		                                               
+	   
+ 
+#endif
+
+                              
+                                                                                                       
+   
+  	                                   
+  		                          
+  
+  	                                                                
+  	 
+  		                                                 
+  		         
+  	 
+  
+  	                                                                                                    
+  	                                                                                                                   
+  	                     
+   
+        
+
+
+#if SERVER
+                                  
+ 
+	                                              
+		                 
+ 
+#endif
+
+
+#if SERVER
+                                                                                                       
+ 
+	                              
+		                                                            
+ 
+#endif
+
+
+#if SERVER
+                                                                                                        
+ 
+	                                                                                                                                                                     
+	                                                                                                 
+
+	                                                         
+
+	               
+	                           
+	                                                                                   
+
+	                                                           
+	                                                 
+		                                         
+	                                                     
+		                                        
+
+	                                      
+	                           
+
+                         
+		                                                                                             
+		 
+			                       
+		 
+                               
+
+	                                                                   
+	 
+		                                  
+		                                          
+		 
+			                                                             
+                         
+                                                                                                        
+        
+				                                                                                     
+         
+		 
+	 
+ 
+#endif
+
+
+#if SERVER
+                 
+                                                                                                                                                             
+     
+                                                                                                                              
+      
+ 
+	                                                           
+
+	                                                                                                                            
+
+	                                              
+	 
+		                                          
+			        
+
+		                                                                                                                                    
+		                                                                                                 
+		                                    
+		                            
+		                                    
+
+		                                                            
+		                                                                    
+	 
+
+	                                      
+	                                 
+	                                
+	                   
+
+	                                                                                                                                                     
+	                                                   
+	 
+		                                                                                  
+
+		                                                                 
+
+		                                                        
+                       
+                                                                        
+       
+
+		                           
+		                           
+		                        
+		 
+			                                                                   
+
+			                     
+			                   
+			                                   
+                        
+                                                    
+        
+				                                                                                                                                                         
+                        
+       
+                                                                                                                                  
+        
+
+			                         
+			                                                
+				                        
+
+			                     
+		 
+		    
+		 
+			                         
+			                              
+
+			                                                 
+				                        
+			                                                     
+				                         
+
+			                                                  
+				                
+
+			                         
+				                                        
+				 
+					                                                                 
+					                     
+					                   
+					                                   
+					                                                                                                                                                         
+				 
+				    
+				 
+					                       
+					                     
+				 
+			     
+				                                                                 
+				                   
+				                                   
+				                                                                                                                                                         
+                     
+                                      
+         
+				                                        
+          
+					                     
+				    
+					                       
+			      
+		 
+
+		                
+			                                                  
+
+		                                                                                                                                                                                                                         
+		                                                                                    
+		 
+			                                                                    
+			                                                 
+		 
+
+
+		                                  
+		                                  
+	 
+
+	                                     
+ 
+#endif
+
+
+#if SERVER
+                 
+                                                                                           
+     
+                                                                             
+      
+ 
+	                                                                                                             
+	 
+		                                                                                                             
+			        
+
+		                                                     
+                    
+                                                                                                                 
+        
+			                                                                                                    
+         
+		                                                              
+		  	                                                                                                   
+	 
+ 
+#endif
+
+
+#if SERVER || CLIENT
+bool function LootBin_HasSecretCompartment( entity lootBin )
+{
+	Assert( lootBin.GetScriptName() == LOOT_BIN_SCRIPTNAME || lootBin.GetScriptName() == LOOT_BIN_MARKER_SCRIPTNAME )
+
+                       
+             
+       
+
+	if ( lootBin.GetNetworkedClassName() != "prop_dynamic" )
+		return false
+
+	return lootBin.GetSkin() == lootBin.GetSkinIndexByName( "SecretLoot" )
+}
+#endif
+
+#if SERVER || CLIENT
+bool function LootBin_HasUnopenedSecretCompartment( entity lootBin )
+{
+	Assert( lootBin.GetScriptName() == LOOT_BIN_SCRIPTNAME || lootBin.GetScriptName() == LOOT_BIN_MARKER_SCRIPTNAME )
+
+	if ( lootBin.GetNetworkedClassName() != "prop_dynamic" )
+		return false
+
+	if (LootBin_HasSecretCompartment( lootBin ) == false)
+		return false
+
+	if (GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN_SECRET ) == true)
+		return false
+
+	return true
+}
+#endif
+
+#if SERVER || CLIENT
+array<entity> function LootBin_GetSpawnedLoot( entity lootBin, bool includeRegular, bool includeSecret )
+{
+	#if CLIENT
+		Assert( includeRegular && includeSecret, "Cannot distinguish between regular and secret compartments on CLIENT -- must include both" )
+	#endif
+
+	array<entity> out = []
+	foreach ( entity child in lootBin.GetChildren() )
+	{
+		if ( child.GetNetworkedClassName() != "prop_survival" )
+			continue
+
+		#if SERVER
+			                                                  
+				        
+
+			                                                                                             
+				        
+		#endif
+
+		out.append( child )
+	}
+	return out
+}
+#endif
+
+
+#if SERVER
+                                               
+ 
+	                                                           
+
+	                                        
+		            
+
+	                                       
+		            
+
+	                                                                  
+	                     
+		            
+
+	           
+ 
+#endif
+
+
+#if SERVER
+                                                                                                      
+ 
+	                        
+
+	                                                                                                  
+		                                                               
+
+	                                                           
+	                     
+		                                      
+	                    
+		                                     
+
+	           
+ 
+#endif
+
+
+#if SERVER
+                         
+ 
+	             
+	            
+	          
+	              
+	               
+	           
+ 
+#endif
+
+
+#if SERVER
+                                                                               
+ 
+	                                               
+		            
+
+	                              
+		            
+
+	                                                    
+		            
+
+                 
+                                                                               
+              
+        
+
+	                                                                           
+	                                                                         
+	                                                                                
+	                                             
+	                                                          
+
+	                     
+
+	                                                                                   
+	                                                                                                                   
+		                                                
+
+                      
+                          
+  
+                                                                       
+                                                
+      
+                                                   
+  
+     
+	                                                                                             
+	               
+	 
+		                                 
+		                                                                                        
+		 
+			                
+			                                                 
+		 
+	 
+
+	              
+	 
+		            
+	 
+	                                                                             
+	 
+		                                                                        
+			                                             
+		                              
+			                                                
+		                                                     
+			                                               
+	 
+	                       
+	 
+		                                            
+			                                              
+		                             
+			                                                 
+		                            
+			               
+	 
+      
+
+	                         
+		            
+
+	                                                               
+
+	                        
+		                                                                                                                                                  
+
+	           
+ 
+#endif
+
+
+#if SERVER
+                                                                                       
+ 
+	                                                                                                       
+
+	                                                       
+		           
+
+	                                                                      
+	                                                                             
+
+	                     
+
+                      
+                          
+  
+                                                                       
+                                                
+      
+                                                   
+  
+     
+	                                                                           
+		                                             
+	                                           
+		                                                
+	                                         
+		                                               
+      
+
+	                         
+		      
+
+	                                                                 
+ 
+#endif
+
+
+#if SERVER
+                                                                                                         
+ 
+	                                                                                                        
+
+	                                                       
+		           
+
+	                                                                      
+	                                                                             
+
+	                     
+	                                                                         
+		                                              
+	                                          
+		                                                 
+
+	                         
+	 
+		                                                                 
+	 
+	
+	                 
+	 
+		                                                                           
+			                 
+
+		                                                           
+		                               
+		                              
+	 
+ 
+#endif
+
+
+#if SERVER
+                                                                                            
+ 
+	                                 
+
+	                                                        
+
+	                                            
+		                         
+		 
+			                                               
+			                                     
+		 
+	   
+
+	                                             
+
+	                                                
+
+	                                                           
+
+	                                                                   
+	                                                                          
+
+	  
+	                     
+	  
+
+	                                       
+	                                      
+
+	              
+	                                                        
+	 
+		                         
+		                                     
+		                        
+	 
+	                                                            
+	 
+		                        
+		                                        
+		                       
+	 
+	                                                          
+	 
+		                                           
+		                                     
+		                        
+		                       
+	 
+	                                                              
+	 
+		                        
+		                                      
+		                         
+	 
+	                                                           
+	 
+		                                         
+		                                      
+		                         
+		                        
+	 
+
+	                                     
+
+	                    
+	                    
+	 
+		                                                 
+		                                       
+	 
+
+	                                           
+	 
+		                                                                                                                                                                                             
+	 
+	                                         
+	 
+		                                                                                                                                                                                             
+		                                                                  
+                         
+		                                                     
+		 
+			                                                                   
+		 
+        
+		                                                                                                                                                          
+	 
+
+	                                                                        
+	                                                                                                                                                      
+	                                                                                                 
+	                                       
+		                                 
+
+		        
+		                                    
+	    
+
+	  
+	                                             
+	  
+
+	                                                                                                          
+		                                             
+
+	                                                                                                         
+		                                                    
+
+	                                                                                                            
+		                                               
+
+	                                                      
+		                                                      
+
+	                                                                  
+	                                                                         
+
+	                                       
+		                                                                                                    
+	                                     
+		                                                                                                   
+
+	                                                                          
+	                                                                          
+
+	                          
+	                          
+
+	          
+	                                                                             
+	 
+		                                                          
+		                                                          
+		                                                                                                                                                     
+			                                                               
+			                                                            
+		 
+
+		                                                                             
+			                                                                     
+
+		                                                                   
+		 
+			                               
+			 
+				                              
+				                                                     
+					                                                      
+			 
+			                    
+		 
+
+		                                                                
+		 
+			                   
+		 
+
+		                                          
+			                                                                           
+	 
+
+	          
+	                                                                             
+	 
+		                                                                          
+		 
+			                            
+			                         
+		 
+
+		                                                                         
+		   
+		  	                           
+		  	                        
+		   
+
+		                                               
+
+		                                       
+		 
+			                   
+				                              
+			    
+				                                                                                                                                 
+		 
+
+		                                     
+		 
+			                   
+				                             
+			    
+				                                                                                                                                
+		 
+	 
+
+	                                                                                           
+		                          
+			      
+
+		                                                                                   
+	 
+
+	                    
+		                                                                   
+	                   
+		                                                                  
+
+	  
+	                         
+	  
+	                             
+	                 
+
+	                                     
+ 
+#endif
+
+#if CLIENT
+void function ServerToClient_LootBinOpening( entity lootBin )
+{
+	foreach ( OnLootBinOpeningCallbackType cb in file.onLootBinOpeningCallbacks )
+		cb( lootBin )
+}
+#endif
+
+
+#if SERVER || CLIENT
+bool function CanAccessSecretCompartments( entity lootBin, entity player )
+{
+	                                                             
+	if ( !LootBin_HasSecretCompartment( lootBin ) )
+		return false
+
+	if ( !IsValid( player ) )
+		return false
+
+                     
+		bool canOpenCompartment = PlayerHasPassive( player, ePassives.PAS_MEDIC )
+      
+                                                                                         
+       
+
+	return canOpenCompartment
+}
+#endif
+
+
+#if SERVER || CLIENT
+bool function LootBin_IsOpenAtAll( entity lootBin )
+{
+	return GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN ) || GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN_SECRET )
+}
+#endif
+
+
+#if SERVER || CLIENT
+bool function LootBin_IsFullyOpenedForPlayer( entity lootBin, entity player )
+{
+	if ( !GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN ) )
+		return false
+
+	if ( CanAccessSecretCompartments( lootBin, player ) && !GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN_SECRET ) )
+		return false
+
+	return true
+}
+#endif
+
+
+#if SERVER || CLIENT
+bool function LootBin_CanBeClosed( entity lootBin )
+{
+	if ( IsInfiniteLootBinsEnabled() )
 		return true
+
 	return false
 }
 #endif
 
-#if(false)
 
-
-
-
-
-
-#endif
-
-#if(CLIENT)
-bool function LootBin_IsBusy( entity lootbin )
+#if SERVER || CLIENT
+bool function IsInfiniteLootBinsEnabled()
 {
-	if ( GradeFlagsHas( lootbin, eGradeFlags.IS_BUSY ) )
-		return true
-	return false
+	#if DEV
+		if ( GetBugReproNum() == 50 )
+			return true
+	#endif
+
+	return GetCurrentPlaylistVarBool( "lootbins_infinite", false )
 }
 #endif
 
-#if(CLIENT)
-void function OnPropDynamicCreated( entity lootbin )
+
+#if SERVER || CLIENT
+bool function LootBin_IsBusy( entity lootBin )
 {
-	if ( lootbin.GetScriptName() != LOOT_BIN_SCRIPTNAME )
+	return GradeFlagsHas( lootBin, eGradeFlags.IS_BUSY )
+}
+#endif
+
+
+#if CLIENT
+void function OnPropDynamicCreated( entity lootBin )
+{
+	if ( lootBin.GetScriptName() != LOOT_BIN_SCRIPTNAME )
 		return
 
-	AddEntityCallback_GetUseEntOverrideText( lootbin, GetLootBinUseTextOverride )
-
-	SetCallback_CanUseEntityCallback( lootbin, LootBin_CanUse )
+	AddEntityCallback_GetUseEntOverrideText( lootBin, GetLootBinUseTextOverride )
+	SetCallback_CanUseEntityCallback( lootBin, CanUseLootBin )
 }
 #endif
 
-#if(CLIENT)
+
+#if CLIENT
+void function OnPropDynamicDestroyed( entity lootBin )
+{
+	  
+}
+#endif
+
+
+#if SERVER || CLIENT
 entity function GetLootBinForHitEnt( entity hitEnt )
 {
 	if ( hitEnt.GetScriptName() == LOOT_BIN_SCRIPTNAME )
 		return hitEnt
 
 	entity parentEnt = hitEnt.GetParent()
-	if ( IsValid( parentEnt ) && (parentEnt.GetScriptName() == LOOT_BIN_SCRIPTNAME) )
+	if ( IsValid( parentEnt ) && parentEnt.GetScriptName() == LOOT_BIN_SCRIPTNAME )
 		return parentEnt
 
 	return null
 }
 #endif
 
-#if(CLIENT)
-bool function LootBin_CanUse( entity player, entity lootbin )
+
+#if SERVER || CLIENT
+bool function CanUseLootBin( entity player, entity lootBin, int useFlags )
 {
 	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
 		return false
@@ -820,40 +1251,243 @@ bool function LootBin_CanUse( entity player, entity lootbin )
 	if ( Bleedout_IsBleedingOut( player ) )
 		return false
 
-	if ( LootBin_IsBusy( lootbin ) )
+	if ( LootBin_IsBusy( lootBin ) )
 		return false
 
-	bool anythingToOpen = false
-	if ( !LootBin_IsOpen( lootbin ) )
-		anythingToOpen = true
-	#if(false)
+                       
+	if ( LootBin_IsFullyOpenedForPlayer( lootBin, player ) )
+		return false
+      
 
-
-#endif
-
-	return anythingToOpen
+	return true
 }
 #endif
 
-#if(CLIENT)
-string function GetLootBinUseTextOverride( entity lootbin )
+
+#if CLIENT
+string function GetLootBinUseTextOverride( entity lootBin )
 {
-	if ( !LootBin_IsOpen( lootbin ) )
+	entity player = GetLocalViewPlayer()
+
+                 
+                                                                               
+  
+                                
+  
+     
+       
+	if ( !LootBin_IsFullyOpenedForPlayer( lootBin, player ) )
 	{
-		if ( GradeFlagsHas( lootbin, eGradeFlags.IS_LOCKED ) )
+		if ( GradeFlagsHas( lootBin, eGradeFlags.IS_LOCKED ) )
+		{
+			if ( IsValid( lootBin.GetOwner() ) )
+			{
+				entity lootBinOwner = lootBin.GetOwner()
+
+				EHI ornull ehi = ToEHI( lootBinOwner )
+				if ( ehi == null )
+					return ""
+				expect EHI( ehi )
+				if ( !EHIHasValidScriptStruct( ehi ) )
+					return ""
+
+				int team          = EHI_GetTeam( ehi )
+				string playerName = GetPlayerNameFromEHI( ehi )
+
+				string hint = "#SURVIVAL_LOOTBIN_LOCKED_FRIENDLY"
+
+				if ( lootBinOwner == player || GetCurrentPlaylistVarBool( "lootbin_locking_disabled", false ) )
+					hint = "#SURVIVAL_LOOTBIN_LOCKED_SELF"
+				else if ( IsEnemyTeam( team, player.GetTeam() ) )
+					hint = "#SURVIVAL_LOOTBIN_LOCKED_ENEMY"
+
+				return Localize( hint, playerName )
+			}
 			return "#SURVIVAL_LOOTBIN_LOCKED"
-		return "#SURVIVAL_LOOTBIN_OPEN"
+		}
+		else if ( !GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN ) )
+			return "#SURVIVAL_LOOTBIN_OPEN"
+                        
+		else if ( !GradeFlagsHas( lootBin, eGradeFlags.IS_OPEN_SECRET ) )
+			return "#SURVIVAL_LOOTBIN_OPEN_SECRET"
+       
 	}
-
-#if(false)
-
-
-#endif //
-
-	if ( LOOT_BIN_CLOSABLE )
+	else if ( LootBin_CanBeClosed( lootBin ) )
+	{
 		return "#SURVIVAL_LOOTBIN_CLOSE"
-
+	}
 	return ""
 }
 #endif
+
+#if SERVER
+                                         
+ 
+	                                                                  
+	                        
+		      
+	                                                                        
+	                       
+	                             
+	                                
+
+	                                                                                     
+	                                                                 
+	 
+		                             
+	 
+	                                
+	 
+		                                        
+		                                    
+		 
+			                                             
+			 
+				             
+				                                             
+				 
+					                                                                                          
+					 
+						       
+					 
+				 
+				                                     
+				 
+					                                        
+					                       
+					   
+					     
+				 
+				    
+				 
+					                                           
+					                       
+					   
+				 
+			 
+		 
+
+		                                           
+		                             
+		 
+			                                                  
+			 
+				                                               
+			 
+		 
+	 
+
+	                                                
+	 
+		                                                                   
+	 
+ 
+#endif
+
+
+#if SERVER && DEV
+                                                                                               
+ 
+	                                              
+	 
+		                                                    
+			        
+
+		                                                                                                                                       
+			        
+
+		                     
+		 
+			                                                           
+			                       
+			                                          
+			                                         
+			                                                                           
+				                                                                                                                  
+
+			                  
+			                                   
+			 
+				                                              
+				 
+					            
+					     
+				 
+			 
+			             
+				        
+		 
+
+		                                                                                                                                       
+		                                                                                      
+		                                             
+		     
+	 
+ 
+
+                                                                                
+ 
+	                                              
+	 
+		                                                    
+			        
+
+		                                                                                                                                       
+			        
+
+		                                                        
+			        
+
+		                                                                                                                                       
+		                                                                                      
+		                                             
+		     
+	 
+ 
+                                        
+ 
+	                
+	                                              
+	 
+		          
+		                                                            
+		                                                      
+	 
+ 
+
+                                                                                                       
+ 
+	                                                           
+	                       
+	                                 
+	                                          
+	                   
+		                                         
+
+	                            
+	 
+		                               
+			                                 
+	 
+
+	                                                 
+		                                             
+
+	                   
+	 
+		                            
+			                           
+	 
+
+	                     
+ 
+
+       
+                                                          
+ 
+	                                                                                   
+ 
+      
+#endif
+
 

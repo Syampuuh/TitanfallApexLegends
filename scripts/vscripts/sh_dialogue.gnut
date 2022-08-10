@@ -34,7 +34,7 @@ global struct ConversationStruct
 	float lastPlayedTime
 	int range
 	array<string> inheritedDebounceConversations
-	table<int, array> conversationTable //
+	table<int, array> conversationTable                                             
 }
 
 struct
@@ -49,7 +49,7 @@ void function DialogueShared_Init()
 {
 	DialogueScheduleShared_Init()
 
-	#if(CLIENT)
+	#if CLIENT
 		DialogueScheduleClient_Init()
 	#else
 		DialogueScheduleServer_Init()
@@ -63,9 +63,9 @@ void function DialogueShared_Init()
 void function RegisterConversation( string conversation, int priority, float debounceTime = DEFAULT_CONVERSATION_DEBOUNCE_TIME, int range = 0, array<string> inheritedDebounceConversations = [] )
 {
 	convIndex++
-	#if(false)
-
-#else
+	#if SERVER
+		                                             
+	#else
 		file.indexToConv[ convIndex ] <- conversation
 	#endif
 
@@ -73,7 +73,7 @@ void function RegisterConversation( string conversation, int priority, float deb
 
 	dataStruct.conversationTable[ TEAM_MILITIA ] <- []
 	dataStruct.conversationTable[ TEAM_IMC ] <- []
-	dataStruct.conversationTable[ TEAM_BOTH ] <- []
+	dataStruct.conversationTable[ TEAM_NPC_FRIENDLY_TO_PLAYERS ] <- []
 	dataStruct.priority = priority
 	dataStruct.debounceTime = debounceTime
 	dataStruct.range = range
@@ -148,7 +148,7 @@ string function Dispatch( int team, string alias )
 	switch ( team )
 	{
 		case TEAM_IMC:
-		case TEAM_BOTH:
+		case TEAM_NPC_FRIENDLY_TO_PLAYERS:
 			return "diag_imc_dispatch_" + alias
 
 		case TEAM_MILITIA:
@@ -164,7 +164,7 @@ array<string> function Voices( int team, string baseAlias, array<int> voiceAvail
 	switch ( team )
 	{
 		case TEAM_IMC:
-		case TEAM_BOTH:
+		case TEAM_NPC_FRIENDLY_TO_PLAYERS:
 			return AI_Dialogue_AliasAllVoices( "diag_imc_grunt", "_" + baseAlias, voiceAvailability, true )
 
 		case TEAM_MILITIA:
@@ -177,10 +177,10 @@ array<string> function Voices( int team, string baseAlias, array<int> voiceAvail
 
 array<string> function AI_Dialogue_AliasAllVoices( string aliasPreVoice, string aliasPostVoice, array<int> voiceAvailability, bool hasDry = true )
 {
-	Assert( !Flag( "EntitiesDidLoad" ) ) //
+	Assert( !Flag( "EntitiesDidLoad" ) )                                                                     
 
-	//
-	//
+	                                                                                                               
+	                                                                  
 
 	Assert( voiceAvailability.len() == VOICE_COUNT )
 
@@ -212,7 +212,7 @@ array<string> function AI_Dialogue_AliasAllVoices( string aliasPreVoice, string 
 
 bool function IsForcedDialogueOnly( entity player )
 {
-	if ( level.nv.forcedDialogueOnly )
+	if ( GetForcedDialogueOnly() )
 		return true
 
 	return player.GetForcedDialogueOnly()
@@ -225,13 +225,13 @@ bool function ShouldPlaySquadConversation( entity player, string conversationTyp
 
 	if ( IsForcedDialogueOnly( player ) )
 	{
-		//
+		                                                                                  
 		return false
 	}
 
 	if ( !GetGlobalNetBool( "squadConversationEnabled" ) )
 	{
-		//
+		                                                                                                 
 		return false
 	}
 

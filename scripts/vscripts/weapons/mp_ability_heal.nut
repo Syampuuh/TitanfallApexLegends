@@ -1,32 +1,45 @@
 global function OnWeaponChargeBegin_ability_heal
-global function OnWeaponPrimaryAttack_ability_heal
 global function OnWeaponChargeEnd_ability_heal
+global function OnWeaponAttemptOffhandSwitch_ability_heal
 
 bool function OnWeaponChargeBegin_ability_heal( entity weapon )
 {
 	entity ownerPlayer = weapon.GetWeaponOwner()
 	float duration     = weapon.GetWeaponSettingFloat( eWeaponVar.charge_time )
 	StimPlayerWithOffhandWeapon( ownerPlayer, duration, weapon )
-	#if(false)
+	#if SERVER
+		                                                                   
+		 
+			                                               
+			 
+				                                                                  
+				                                                                  
+			 
+		 
 
+		                                              
+		                                                                           
+		                                                                 
+		                                                
 
+		                                  
+		                                     
 
+		                                                                               
+		                                                                                        
+		                                                                                                                                                                                                                                     
 
-
-
-
-#endif
+		                                                 
+	#endif
 	PlayerUsedOffhand( ownerPlayer, weapon )
 
-	#if(false)
-
-
-
-
-
-
-
-#else
+	#if SERVER
+		                                       
+		 
+			                                                                   
+			                                                                 
+		 
+	#else
 		Rumble_Play( "rumble_stim_activate", {} )
 	#endif
 	return true
@@ -35,19 +48,22 @@ bool function OnWeaponChargeBegin_ability_heal( entity weapon )
 
 void function OnWeaponChargeEnd_ability_heal( entity weapon )
 {
-	entity player = weapon.GetWeaponOwner()
-	#if(false)
-//
-//
-
-#endif
+	#if SERVER
+		                                                                                  
+		                                                                
+	#endif
 }
 
 
-var function OnWeaponPrimaryAttack_ability_heal( entity weapon, WeaponPrimaryAttackParams attackParams )
+bool function OnWeaponAttemptOffhandSwitch_ability_heal( entity weapon )
 {
 	entity player = weapon.GetWeaponOwner()
-	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
+
+	if ( !IsValid( player ) )
+		return false
+
+	if ( !player.IsPlayer() )
+		return false
+
+	return true
 }
-
-

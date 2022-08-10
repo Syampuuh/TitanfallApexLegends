@@ -63,8 +63,11 @@ struct
 	table< string, ScrollPanelData > scrollPanels
 } file
 
-
+#if NX_PROG || PC_PROG_NX_UI
+const float SCROLL_SPEED = 15.0
+#else
 const float SCROLL_SPEED = 10.0
+#endif
 
 void function ScrollPanelInit()
 {
@@ -206,8 +209,12 @@ void function UpdateScrollBar( ScrollPanelData data )
 {
 	var scrollBarRui = Hud_GetRui( data.scrollBarElement )
 	Hud_Show( data.scrollBarElement )
-	RuiSetFloat( scrollBarRui, "handleOffset", data.listOffset / float( data.contentHeight ) )
-	RuiSetFloat( scrollBarRui, "handleFrac", data.panelHeight / float( data.contentHeight ) )
+
+	if ( data.contentHeight > 0 )
+	{
+		RuiSetFloat( scrollBarRui, "handleOffset", data.listOffset / float( data.contentHeight ) )
+		RuiSetFloat( scrollBarRui, "handleFrac", data.panelHeight / float( data.contentHeight ) )
+	}
 
 	if ( data.panelHeight >= data.contentHeight )
 		Hud_Hide( data.scrollBarElement )
@@ -284,7 +291,7 @@ void function OnScrollBarClick( var button )
 	ScrollPanelData data = GetDataForPanel( Hud_GetValueForKey( button, "parentPanel" ) )
 
 	printt( "OnScrollBarClick" )
-	//
+	                            
 }
 
 
@@ -364,9 +371,23 @@ ScrollPanelData function GetDataForPanel( var panel )
 
 void function ScrollPanel_Refresh( var panel )
 {
+#if NX_PROG
+                                                                                                  
+	ScrollPanelData data = GetDataForPanel( panel )
+	
+	data.paddingVert = ContentScaledYAsInt( 8 )
+	data.contentPanel = Hud_GetChild( panel, "ContentPanel" )
+	data.contentHeight = Hud_GetHeight( data.contentPanel )
+	data.panelHeight = Hud_GetHeight( panel )
+	data.panelSize = REPLACEHud_GetSize( panel )
+	data.panelAbsPos = REPLACEHud_GetAbsPos( panel )
+	
+	UpdatePanelElements( data, true )
+#else
 	ScrollPanelData data = GetDataForPanel( panel )
 
 	UpdatePanelElements( data, true )
+#endif
 }
 
 

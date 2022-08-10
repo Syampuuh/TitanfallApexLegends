@@ -1,0 +1,74 @@
+global function PassiveGunner_Init
+
+global const string GUNNER_MOD_NAME = "rampart_gunner"
+global const string RAMPART_VOICE = "rampart"
+asset icon = $"rui/hud/passive_icons/passive_rampart"
+
+void function PassiveGunner_Init()
+{
+	#if SERVER
+		                                                                                    
+		                                                               
+	#endif
+
+	#if CLIENT
+		AddCallback_PlayerClassChanged( OnPlayerClassChanged )
+		AddCallback_OnPrimaryWeaponStatusUpdate( OnPrimaryWeaponStatusUpdate )
+		AddModToTableOfPassiveWeaponBonuses( GUNNER_MOD_NAME, "#GEAR_GUNNER", "#GEAR_GUNNER_DESC_GUN", icon, "#GEAR_GUNNER_DESC_LSTAR", IsWeaponLstar )
+	#endif
+}
+
+#if SERVER
+                                                                                                     
+ 
+	              
+	 
+		                                             
+		                                                           
+		                                                                                               
+			                                            
+	 
+
+	             
+	 
+		                                             
+		                                                                       
+	 
+ 
+#endif
+
+#if CLIENT
+void function OnPlayerClassChanged( entity player )
+{
+	                                 
+	OnPrimaryWeaponStatusUpdate( player.GetActiveWeapon( eActiveInventorySlot.mainHand ), ClWeaponStatus_GetWeaponHudRui( player ) )
+}
+
+void function OnPrimaryWeaponStatusUpdate( entity selectedWeapon, var weaponRui )
+{
+	if ( !IsValid( selectedWeapon ) )
+		return
+
+	entity lastSelectedWeapon = GetLastSelectedPrimaryWeapon()
+
+	entity weaponInSlot0 = GetLocalViewPlayer().GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_0 )
+	entity weaponInSlot1 = GetLocalViewPlayer().GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_1 )
+	bool noWeapon        = !IsValid( weaponInSlot0 ) && !IsValid( weaponInSlot1 )
+
+	if ( selectedWeapon.HasMod( GUNNER_MOD_NAME ) )
+	{
+		RuiSetBool( weaponRui, "showPassiveBonusIconAmmo", true )
+		RuiSetImage( weaponRui, "passiveBonusIconAmmo", $"rui/hud/character_abilities/rampart_passive_weapon_hud_dongle" )
+	}
+	else if ( ( IsValid( lastSelectedWeapon ) && ! lastSelectedWeapon.HasMod( GUNNER_MOD_NAME ) && !lastSelectedWeapon.HasMod( "auto_loader" ) ) || noWeapon )
+	{
+		RuiSetBool( weaponRui, "showPassiveBonusIconAmmo", false )
+		RuiSetImage( weaponRui, "passiveBonusIconAmmo", $"" )
+	}
+}
+
+bool function IsWeaponLstar( entity weapon )
+{
+	return weapon.GetWeaponClassName() == "mp_weapon_lstar"
+}
+#endif

@@ -1,18 +1,19 @@
-//
+  
 
-#if(false)
-
+#if SERVER
+       
 #endif
 
 globalize_all_functions
 
 global const ANALYSIS_PREVIEW_TIME = 5.0
+const float DEFAULT_MIN_AIRDROP_DISTANCE = 3000.0
 
-#if(false)
-
-
-
-#endif //
+                       
+                                               
+                                                  
+                                                    
+                                
 
 struct AirdropBadPlace
 {
@@ -26,6 +27,9 @@ struct
 {
 	array<AirdropBadPlace> airdropBadPlaceArray
 	int                    airdropBadPlaceCount
+
+	array<entity> airdropTraceIgnoreEntArray
+	array<entity> airdropAllowedDynamicEnts
 } file
 
 vector function GetOriginFromAttachPoint( AttachPoint point, vector origin, vector forward, vector right )
@@ -72,24 +76,24 @@ array<vector> function GetFlightPathPoints( FlightPath flightPath, vector origin
 	return orgs
 }
 
-#if(false)
+#if SERVER
+                                               
+ 
+	                                                                                                                 
+ 
 
+                                                                     
+ 
+	                                              
 
+	                                                  
+	 
+		                                                                       
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+	             
+ 
+#endif          
 
 bool function IsLegalFlightPath( FlightPath flightPath, vector origin, vector forward, vector right, bool draw = false )
 {
@@ -106,25 +110,25 @@ bool function IsLegalFlightPath( FlightPath flightPath, vector origin, vector fo
 		{
 			if ( result.hitSky )
 			{
-				//
+				                                                                               
 				continue
 			}
 
 			if ( Distance( result.endPos, endPos ) > 16 )
 			{
-				//
-				//
+				             
+				  	                                                                           
 
 				DoTraceCoordCheck( true )
 				return false
 			}
 		}
 
-		//
-		//
+		             
+		  	                                                                             
 	}
 
-	//
+	                                                                                            
 	DoTraceCoordCheck( true )
 	return true
 }
@@ -146,14 +150,14 @@ bool function IsLegalFlightPath_OverTime( FlightPath flightPath, vector origin, 
 			if ( result.hitSky )
 			{
 				if ( draw )
-					DebugDrawLine( orgs[i - 1], orgs[i], 0, 255, 0, true, ANALYSIS_PREVIEW_TIME )
+					DebugDrawLine( orgs[i - 1], orgs[i], COLOR_GREEN, true, ANALYSIS_PREVIEW_TIME )
 				continue
 			}
 
 			if ( Distance( result.endPos, endPos ) > 16 )
 			{
 				if ( draw )
-					DebugDrawLine( orgs[i - 1], orgs[i], 255, 0, 0, true, ANALYSIS_PREVIEW_TIME )
+					DebugDrawLine( orgs[i - 1], orgs[i], COLOR_RED, true, ANALYSIS_PREVIEW_TIME )
 
 				DoTraceCoordCheck( true )
 				return false
@@ -161,155 +165,155 @@ bool function IsLegalFlightPath_OverTime( FlightPath flightPath, vector origin, 
 		}
 
 		if ( draw )
-			DebugDrawLine( orgs[i - 1], orgs[i], 0, 255, 0, true, ANALYSIS_PREVIEW_TIME )
+			DebugDrawLine( orgs[i - 1], orgs[i], COLOR_GREEN, true, ANALYSIS_PREVIEW_TIME )
 
 		WaitFrame()
 	}
 
-	//
+	                                                                                            
 	DoTraceCoordCheck( true )
 	return true
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+                                                                            
+ 
+	                      
+	                              
+
+	                                               
+	                        
+
+	                                                
+
+	                                                  
+	                 
+
+	                                       
+	 
+		                  
+		 
+			                           
+			        
+		 
+
+		                                                        
+		       
+		                                  
+	 
+
+	            
+ 
+
+                                                                                   
+ 
+	                      
+	                              
+
+	                                               
+	                        
+
+	                                                       
+	                                                  
+	                 
+
+	                                       
+	 
+		                  
+		 
+			                                     
+			        
+		 
+
+		                                    
+		                                      
+		                            
+		                                          
+		                                                                          
+		       
+	 
+
+	            
+ 
+
+                                                                                                   
+ 
+	                        
+		                       
+	                                                
+ 
+
+                                                                                                                                                                        
+ 
+	                                                                       
+	                                                    
+	                 
+	 
+		                                                                   
+		                                 
+		                                                
+
+		                 
+		 
+			                                                                   
+			                          
+		 
+	 
+
+	                                                                                                  
+
+	                                                  
+
+	                            
+	 
+		                                                                           
+		                            
+		 
+			                             
+			                                                          
+		 
+	 
+
+	  
+	                                                        
+	                                                                      
+
+	                                               
+	 
+		                                                 
+		                                     
+			        
+		                                                                                                      
+
+		                                                                   
+		                            
+		 
+			                             
+			                                                                  
+		 
+	 
+	  
+
+	                          
+ 
+
+                                                                                                                           
+ 
+	                                                             
+
+	                   
+
+	                                                                                                      
+ 
+
+                                                                                                 
+ 
+	                                       
+		                          
+
+	                                                                                         
+ 
+#endif          
 
 float function FixYaw( float yaw )
 {
@@ -319,599 +323,599 @@ float function FixYaw( float yaw )
 	return yaw
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-//
-
-//
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-//
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+                                         
+ 
+	                       
+	                 
+ 
+
+                                                                                         
+ 
+	                       
+	                                              
+	                                    
+	                      
+	                       
+
+	                                                  
+	 
+		                                                                       
+	 
+
+	                          
+	                 
+ 
+
+                                                                                      
+ 
+	                       
+	                          
+	                          
+	                      
+	                       
+	                 
+ 
+
+                                                                                                                  
+ 
+	         
+	              
+	         
+
+	                                          
+	 
+		                                                     
+		                                                              
+		 
+			                                                                 
+			        
+		 
+
+		                           
+		                                      
+		                                
+		 
+			                                                                 
+			        
+		 
+
+
+		                                                               
+		                         
+
+		                
+	 
+
+	                         
+	 
+		                                              
+	 
+
+	                 
+ 
+
+                                                                                     
+ 
+	         
+	                           
+
+	                                          
+	 
+		                                                              
+			        
+
+		                           
+		                       
+	 
+
+	                       
+		           
+
+	                            
+ 
+
+                                                                                                    
+ 
+	                     
+	                                                                           
+ 
+
+                                                                                              
+ 
+	                                 
+	                                          
+
+	                     
+	                                                                           
+ 
+
+                                                                                       
+ 
+	                                
+	                                            
+
+	                     
+	                                                             
+ 
+
+  
+                                                                
+ 
+	                        
+	                              
+	                
+
+	               
+	 
+		                                                  
+		                                 
+		               
+	 
+
+	                 
+	                        
+
+	                                                
+
+	                                     
+	 
+		                  
+			        
+
+		                                                        
+		                                     
+
+		                     
+		 
+			              
+		 
+
+		                        
+		 
+			                                                           
+			                                          
+			                     
+		 
+	 
+
+
+	                   
+	 
+		              
+		                                     
+		 
+			                  
+				        
+
+			                                                        
+			                                     
+
+			                     
+			 
+				                                                           
+				                                          
+				                     
+			 
+		 
+
+		                   
+			      
+	 
+
+	                           
+	                       
+
+	                                       
+	                                     
+
+	                
+	                             
+	                     
+
+	                                                                        
+
+	                   
+	 
+		                   
+	 
+
+	             
+ 
+  
+
+                              
+ 
+	                      
+		         
+	                      
+		        
+	        
+ 
+
+                                                                                                                           
+ 
+	                                                   
+		            
+
+	                                                                
+
+	                
+	                                   
+
+	                                                   
+	                 
+	                                                    
+
+	                           
+	   
+	  	                                             
+	  	                                                                       
+	  	                                                                            
+	   
+	                               
+	                         
+ 
+
+                                                          
+ 
+	                               
+	              
+	            
+	             
+	                                          
+	 
+		                           
+		                                      
+		                                
+			        
+
+		                         
+		            
+		               
+	 
+
+	                  
+
+	               
+ 
+
+                                                                                         
+ 
+	                                                  
+	                                                       
+	                                                                                                
+
+	                                   
+	                                                  
+
+	                                          
+	                                                                              
+
+	             
+	                                       
+
+	                                     
+	 
+		                                                                    
+		                          
+		                      
+		                                                   
+
+		                                                                     
+			        
+
+		                                  
+			        
+
+		                                                           
+	 
+
+	                          
+ 
+
+                                            
+ 
+	                                             
+		           
+
+	                                                   
+ 
+
+                                                                                               
+ 
+	                       
+	               
+	                        
+	                           
+
+	                   
+
+	                
+	                                                                                
+	                   
+		             
+
+	                            
+	                                          
+	                                        
+
+	                   
+	                                                                                   
+	                   
+		             
+
+	       
+	                                                                                    
+	                   
+		             
+
+	              
+	                                                                                      
+	                   
+		             
+
+	               
+	                                                                                     
+	                   
+		             
+
+	                                                        
+ 
+
+                                                          
+ 
+	                  
+	                    
+ 
+
+                                                        
+ 
+	              
+	                  
+ 
+
+                                                                         
+ 
+	                              
+	                          
+ 
+
+                                                                                     
+ 
+	                                       
+		                          
+
+	                                                  
+
+	                      
+	                     
+	 
+		                   
+		 
+			                          
+		 
+		    
+		 
+			                              
+		 
+	 
+
+	                       
+
+	                
+	 
+		                            
+			                                                               
+			     
+
+		                        
+			                                                        
+			     
+
+		                             
+		                            
+			                                                                
+			     
+
+		                                
+			                                                                           
+			     
+
+		                       
+			                                                                                                                    
+			     
+
+		                                     
+			                                                                     
+			     
+
+			                                    
+			  	                                                                    
+			  
+			  	     
+
+		        
+			                                     
+			     
+	 
+
+	                                                
+
+	                        
+		                          
+
+	                                                                            
+	                                         
+	                          
+
+	                                            
+	                                                                         
+
+	                                                  
+	 
+		                                                                                      
+		                     
+			                                           
+		                         
+		                                                                                                     
+		                                                        
+	 
+
+	                 
+ 
+
+                                                                                                            
+                                                                                                                                                                     
+                                         
+                                                                              
+ 
+	                                                                                                                                        
+
+	                                       
+		            
+
+	                                                  
+
+	                      
+	                     
+	 
+		                   
+		 
+			                          
+		 
+		    
+		 
+			                              
+		 
+	 
+
+	                       
+
+	                
+	 
+		                            
+			                                                               
+			     
+
+		                        
+			                                                        
+			     
+
+		                             
+		                            
+			                                                                
+			     
+
+		                                
+			                                                                           
+			     
+
+		                       
+			                                                                                                                    
+			     
+
+		                                     
+			                                                                     
+			     
+
+			  		                                  
+			  			                                                                    
+			  
+			  			     
+
+		        
+			                                     
+			     
+	 
+
+	                                                
+
+	                        
+		            
+
+	           
+ 
+
+                                                                                               
+ 
+	           
+
+	                                              
+	 
+		                                                               
+
+		                                                            
+		                                        
+		                                             
+		                                           
+
+		                                                                        
+		                                                        
+		            
+	 
+
+	                                                                 
+	                    
+	                                 
+	                                 
+	                                                                                          
+	                                    
+	                                 
+	                       
+
+	            
+ 
+
+                                                               
+ 
+	                                          
+	 
+		                                                             
+			           
+	 
+
+	            
+ 
+
+                                                               
+ 
+	             
+	                                          
+	 
+		                                                             
+			       
+	 
+
+	            
+ 
+
+                                                                         
+ 
+	                                                  
+	                                               
+
+	            
+	              
+	                                                      
+	 
+		                                          
+		 
+			                                                      
+				        
+
+			                                 
+			                                                                                           
+			                                                                                   
+				            
+
+			                
+		 
+	 
+
+	                
+ 
+#endif          
 
 const bool DEBUG_DROP_POINTS = false
 const bool DEBUG_DROP_POINTS_LINES = false
@@ -925,7 +929,6 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 	const DOOR_UP_OFFSET = 64
 	const LEDGE_DOWN_OFFSET = 96
 	const EDGE_TRACE_HEIGHT = 48
-	const vector UP_VECTOR = <0, 0, 1>
 
 	int door_space_distance = isCarePackage ? 64 : 128
 	int edge_trace_dist     = isCarePackage ? 64 : 96
@@ -941,43 +944,43 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 	vector forward     = AnglesToForward( < 0, yaw, 0 > )
 	vector up          = <0, 0, 1>
 
-	//
+	                                                                                                         
 	vector maxs = !isCarePackage ? AIRDROP_MAXS : AIRDROP_MAXS * 0.65
 	vector mins = !isCarePackage ? AIRDROP_MINS : AIRDROP_MINS * 0.65
 
 	if ( IsNearAirdropBadPlace( baseOrigin, realmEnt ) )
 		failCode = failCode | 0x0040
 
-	TraceResults trace = TraceHull( startOrigin, endOrigin, mins, maxs, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, UP_VECTOR, realmEnt )
+	TraceResults trace = TraceHull( startOrigin, endOrigin, mins, maxs, file.airdropTraceIgnoreEntArray, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, UP_VECTOR, realmEnt )
 	float dot          = DotProduct( up, trace.surfaceNormal )
-	//
+	                            
 	if ( dot != 0 && DotToAngle( dot ) > maxSurfaceAngle )
 	{
 		failCode = failCode | 0x0001
-		#if(false)
-
-
-
-
-#endif
+		#if DEBUG_DROP_POINTS_LINES
+			                                                                                  
+			                                                                                            
+			                                                                                                         
+			                                                                                 
+		#endif
 	}
 
-	//
+	                                                                  
 	entity groundEnt = trace.hitEnt
-	if ( IsValid( groundEnt ) && !groundEnt.IsWorld() )
+	if ( IsValid( groundEnt ) && !groundEnt.IsWorld() && !file.airdropAllowedDynamicEnts.contains( groundEnt ) )
 		failCode = failCode | 0x0002
 
 	if ( trace.startSolid )
 		failCode = failCode | 0x0200
 
-	//
+	                                        
 	float distToNodeSqr = DistanceSqr( trace.endPos, baseOrigin )
 	float distToNode    = Distance( trace.endPos, baseOrigin )
 	if ( distToNodeSqr > MAX_DIST_TO_GROUND_SQR )
 		failCode = failCode | 0x0004
 
 
-	//
+	                                                                                                                 
 	vector traceOrigin                  = trace.endPos
 	array<vector> ridgeTraceVectorArray = [ <1, 0, 0>, <-0.5, 0.86, 0>, <-0.5, -0.86, 0> ]
 	foreach ( traceVector in ridgeTraceVectorArray )
@@ -985,51 +988,51 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 		vector ridgeOrigin      = traceOrigin + <0, 0, 16> + traceVector * 18
 		vector ridgeTraceOrigin = baseOrigin + <0, 0, -12> + traceVector * 18
 
-		TraceResults ridgeTrace = TraceLine( ridgeOrigin, ridgeTraceOrigin, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
+		TraceResults ridgeTrace = TraceLine( ridgeOrigin, ridgeTraceOrigin, file.airdropTraceIgnoreEntArray, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
 		float fraction          = ridgeTrace.fraction
 		if ( fraction == 1 )
 		{
 			failCode = failCode | 0x0080
-			#if(false)
-
-#endif
+			#if DEBUG_DROP_POINTS_LINES
+				                                                                                         
+			#endif
 			break
 		}
 	}
 
 
-	//
+	                                 
 	array<vector> edgeTraceVectorArray = [ <1, 0, 0>, <0.5, 0.86, 0>, <-0.5, 0.86, 0>, <-1, 0, 0>, <-0.5, -0.86, 0>, <0.5, -0.86, 0> ]
 	foreach ( traceVector in edgeTraceVectorArray )
 	{
 		vector edgeOrigin      = baseOrigin + <0, 0, EDGE_TRACE_HEIGHT> + traceVector * edge_trace_dist
 		vector edgeTraceOrigin = baseOrigin + <0, 0, -EDGE_TRACE_HEIGHT> + traceVector * edge_trace_dist
 
-		TraceResults sightTrace = TraceLine( baseOrigin + <0, 0, EDGE_TRACE_HEIGHT>, edgeOrigin, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
+		TraceResults sightTrace = TraceLine( baseOrigin + <0, 0, EDGE_TRACE_HEIGHT>, edgeOrigin, file.airdropTraceIgnoreEntArray, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
 		if ( sightTrace.fraction < 1 )
 		{
-			#if(false)
-
-#endif
-			continue    //
+			#if DEBUG_DROP_POINTS_LINES
+				                                                                                                                   
+			#endif
+			continue                                                                                                              
 		}
 
-		TraceResults edgeTrace = TraceLine( edgeOrigin, edgeTraceOrigin, null, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
+		TraceResults edgeTrace = TraceLine( edgeOrigin, edgeTraceOrigin, file.airdropTraceIgnoreEntArray, (TRACE_MASK_PLAYERSOLID | TRACE_MASK_TITANSOLID | CONTENTS_NOAIRDROP), TRACE_COLLISION_GROUP_NONE, realmEnt )
 		float fraction         = edgeTrace.fraction
 		if ( fraction == 1 )
 		{
 			failCode = failCode | 0x0020
-			#if(false)
-
-#endif
+			#if DEBUG_DROP_POINTS_LINES
+				                                                                                  
+			#endif
 			break
 		}
 	}
 
 
-	//
-	vector playerMins = <-16, -16, 0>//
-	vector playerMaxs = <16, 16, 72>//
+	                                       
+	vector playerMins = <-16, -16, 0>                            
+	vector playerMaxs = <16, 16, 72>                            
 	vector doorOrigin = baseOrigin + <0, 0, DOOR_UP_OFFSET>
 
 	vector base     = <0, yaw, 0>
@@ -1049,30 +1052,45 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 			vector doorEndOrigin = doorOrigin + traceVector * door_space_distance
 			vector ledgeOrigin   = doorEndOrigin + <0, 0, -LEDGE_DOWN_OFFSET>
 
-			//
+			                                                   
 			float fraction = TraceHullSimple( doorOrigin, doorEndOrigin, playerMins, playerMaxs, null )
 			if ( fraction != 1 )
 			{
 				failCode = failCode | 0x0008
 				failed = true
 
-				#if(false)
-
-#endif
+				#if DEBUG_DROP_POINTS_LINES
+					                                                                                
+				#endif
 				break
 			}
 
-			//
+			                                                                       
 			fraction = TraceHullSimple( doorEndOrigin, ledgeOrigin, playerMins, playerMaxs, null )
 			if ( fraction == 1 )
 			{
 				failCode = failCode | 0x0010
 				failed = true
 
-				#if(false)
+				#if DEBUG_DROP_POINTS_LINES
+					                                                                                
+					                                                                                     
+				#endif
+				break
+			}
+		}
 
-
-#endif
+		                                                                    
+		array<int> realmsToTest = IsValid( realmEnt ) ? realmEnt.GetRealms() : [ eRealms.DEFAULT ]
+		foreach ( entity trigger in GetTriggersByClassesInRealms(
+			["trigger_hurt"],
+			baseOrigin + < 0, 0, 512>, baseOrigin, realmsToTest                      
+			, TRACE_MASK_PLAYERSOLID ) )
+		{
+			if ( trigger.HasKey( "damageSourceId" ) && trigger.GetValueForKey( "damageSourceId" ) != "" )
+			{
+				failCode = failCode | 0x0400
+				failed = true
 				break
 			}
 		}
@@ -1082,470 +1100,595 @@ bool function VerifyAirdropPoint( vector baseOrigin, float yaw, bool isCarePacka
 	}
 
 
-	#if(false)
 
 
+	#if DEBUG_DROP_POINTS
+		if ( DEBUG_DROP_POINTS_LINES && failCode & 0x0005 )
+		{
+			DebugDrawCylinder( trace.endPos, < -90, 0, 0 >, maxs.x, maxs.z, <250, 50, 0>, false, DEBUG_DRAW_TIME )
+			DebugDrawCylinder( baseOrigin, < -90, 0, 0 >, maxs.x, maxs.z, <70, 70, 70>, false, DEBUG_DRAW_TIME )
+		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+		if ( failCode )
+			printt( "dropPoint check faild at origin:", baseOrigin, "yaw:", yaw )
+		if ( failCode & 0x0001 )
+			printt( "\t- Surface angle to steep. Slope angle:", DotToAngle( dot ) )
+		if ( failCode & 0x0002 )
+			printt( "\t- Didn't land on the worldspawn entity. Ground Ent:", groundEnt )
+		if ( failCode & 0x0004 )
+			printt( "\t- Didn't reach the ground. Dist from ground:", sqrt( distToNodeSqr ), distToNode )
+		if ( failCode & 0x0008 )
+			printt( "\t- Door area was not clear." )
+		if ( failCode & 0x0010 )
+			printt( "\t- Door opened towards a ledge." )
+		if ( failCode & 0x0020 )
+			printt( "\t- Part of the Pod was sticking out over an ledge." )
+		if ( failCode & 0x0040 )
+			printt( "\t- To close to an Airdrop Bad Place." )
+		if ( failCode & 0x0080 )
+			printt( "\t- Part might have been on a narrow ridge or low wall etc." )
+		if ( failCode & 0x0100 )
+			printt( "\t- Point was touching out of bound trigger." )
+		if ( failCode & 0x0200 )
+			printt( "\t- Trace started in solid." )
+		if ( failCode & 0x0400 )
+			printt( "\t- Trace passes through a hurt trigger." )
+	#endif                        
 
 	if ( failCode )
 		return false
 
-	//
+	                                                         
 	return true
 }
 
 
-#if(false)
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-#endif //
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-#endif //
-
-#if(false)
-
-
-
-
-
-
-
-
-#endif //
-
-#if(false)
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
+void function AddAirdropTraceIgnoreEnt( entity ent )
+{
+	file.airdropTraceIgnoreEntArray.append( ent )
+	AddEntityDestroyedCallback( ent, RemoveAirdropTraceIgnoreEntOnDestroy )
+}
+
+
+void function RemoveAirdropTraceIgnoreEntOnDestroy( entity ent )
+{
+	file.airdropTraceIgnoreEntArray.fastremovebyvalue( ent )
+}
+
+array<entity> function GetAirDropTraceIgnoreEntArray()
+{
+	return file.airdropTraceIgnoreEntArray
+}
+
+                       
+                                                                                             
+ 
+                                                                    
+                                                                                
+
+                                                  
+
+                                                                                                                 
+
+                                
+                                       
+                                                       
+                                                       
+
+                                 
+                 
+
+                                            
+  
+                                                                                                                                                                                                                                          
+
+                                                                           
+
+                                        
+                                  
+  
+
+                    
+ 
+                                
+
+                       
+                                              
+                                            
+                                                                                                     
+ 
+                                      
+                        
+                 
+
+                     
+                   
+
+                                                
+                                             
+                                                  
+
+                                                     
+                              
+
+                                                                                                                                                      
+                 
+
+                                                                                                                 
+
+                           
+                                
+                                       
+                                                       
+                                                       
+
+                                            
+  
+                                 
+                                                                                                                                                                                                                 
+                                                                                                            
+
+                       
+   
+                               
+                                
+                                                                                             
+                                      
+                                   
+                
+                                        
+   
+
+                                                          
+                                           
+   
+                               
+                                   
+                
+                                        
+   
+
+                                                                    
+                                                               
+   
+                               
+                             
+                                   
+                
+                                        
+   
+
+                           
+   
+                               
+                                   
+                
+                                        
+   
+
+                                       
+  
+
+                                
+                                              
+   
+                                                            
+                                    
+    
+             
+                                                                                    
+    
+   
+                                       
+   
+                                      
+                                                                     
+                                                
+    
+              
+                                                                                                  
+    
+   
+
+                 
+                                                                              
+                          
+                                          
+                          
+                                                                               
+                          
+                                          
+                          
+                                      
+                                     
+
+                
+              
+
+                                                          
+            
+ 
+
+          
+                                                                 
+ 
+                                                                             
+
+                                                   
+
+                                                        
+ 
+                   
+
+                 
+                                                         
+ 
+                                                    
+
+                              
+  
+                                                           
+  
+ 
+                          
+
+                                
+
+#if SERVER
+                                                          
+ 
+	                                                                                            
+
+	                                                  
+
+	                                                       
+ 
+
+                                                          
+ 
+	                                                                               
+
+	                                                  
+
+	                                                       
+ 
+
+                                                                          
+ 
+	                      
+	                                                                                 
+	               
+	 
+		                   
+			                                                                                            
+		                                    
+		                       
+	 
+
+	                                                                                        
+	                                                                                                                        
+
+	                                                                    
+
+	                                                        
+	                                       
+
+	                                                
+		                                              
+		                                                                 
+		                                          
+		                                                 
+		                                                  
+
+		                                               
+		                                                                                          
+		                                                                                
+		                                                                                     
+	      
+
+	                       
+ 
+
+                                                                                                                                                                                                                                                                                           
+ 
+	                                       
+	                            
+	                                
+	                                
+	                                                                                                   
+	                                     
+	                                                     
+	                                           
+	                                        
+	                          
+	                                     
+	                                   
+	                                   
+	                        
+	                  	        
+	                   	    
+	                  
+                               
+                                  
+                                     
+
+                         
+		                              
+			                                        
+                               
+
+	                                         
+		                    
+
+	              
+	 
+		                                                         
+		 
+			                                                                                                                   
+			                             
+			                             
+			                   
+		 
+
+		                                                               
+		 
+			                  
+                           
+				                                                                                                                                             
+				                                                                                                                
+				                                                                                                     
+				                              
+					                                                  
+                                 
+
+			                            
+				                      
+			                     
+				               
+			                         
+			                
+		 
+
+		                       
+		                     
+		                    
+		 
+			                                                                               
+			                 
+		 
+
+		                                                                                                                                          
+
+		                                                                                                                                                                        
+		                          
+			                                        
+
+		            
+		 
+			                               
+
+			                                                  
+
+			                                     
+			 
+				                                                             
+				 
+					           
+					     
+				 
+			 
+		 
+
+                                
+                                                                                                        
+                                                                                      
+                                                                                                               
+    
+                                                                                      
+                
+
+                                    
+     
+                              
+                                                 
+                                          
+                                   
+                              
+                               
+     
+    
+                                      
+
+		                               
+		 
+			                                                                                                                                                                                                           
+			                      
+			 
+				           
+			 
+		 
+
+                          
+			                                                                                                                                 
+			                                       
+			 
+				                                                                              
+			 
+                                
+
+		                                                                              
+		                                                                                          
+		                                 
+		 
+			                                  
+			                     
+				                                
+			                          
+
+			                              
+			                                        
+			                                                 
+			                                              
+
+			                                                                                                                                        
+			                       
+			 
+				                     
+					                                                                                                                                              
+				                          
+				           
+			 
+			                     
+			    
+			 
+				                                                                                             
+			 
+			                          
+		 
+
+		           
+		 
+			          
+			           
+			        
+		 
+
+		                                                              
+		                                            
+		 
+			                        
+				                                                                                     
+
+			          
+			           
+			        
+		 
+
+		                   
+	 
+
+	           
+ 
+
+                                                               
+ 
+	                                                       
+	 
+		                                                                              
+		                                                                                                 
+			                                                                                                                                                                             
+	 
+ 
+
+                                                                                                   
+ 
+	                               
+	                                                
+	                               
+	                               
+	                                   
+
+	                                                   
+
+	                                        
+	                             
+	 
+		                                                                              
+		                                                                 
+			                                                                                                                             
+	 
+ 
+
+                                                                                                      
+ 
+	                               
+	                                                
+	                               
+	                               
+	                                   
+
+	                                                   
+
+	                                        
+	                             
+	 
+		                                                                              
+		                                                                 
+			                                                                                                                             
+	 
+
+	                                                                                           
+ 
+
+                                                                                                   
+ 
+	            
+		                   
+		 
+			                            
+			                                        
+			                             
+			 
+				                                                                                    
+			 
+		 
+	 
+
+	                          
+		                                  
+
+	                    
+	 
+		                                                                                                  
+		             
+	 
+
+	             
+ 
+
+                                                            
+ 
+	                                                
+	                                                   
+	                                                                   
+	                      
+
+	                                                  
+
+	                                                                                 
+
+	               
+	 
+		                   
+			                                                                                                    
+		                                    
+		                       
+	 
+
+	                                                                                        
+	                                                                                                                        
+
+	                                                                    
+
+	                                               
+	                                                                 
+	                                       
+
+	                                                                  
+	                                                                               
+	 
+		                                       
+	 
+
+	                       
+ 
+#endif         
+
+#if SERVER || CLIENT
 bool function IsNearAirdropBadPlace( vector origin, entity realmEnt = null )
 {
-	//
-	//
+	                                                                                                                                         
+	                                                                      
 	foreach( airdropBadPlace in file.airdropBadPlaceArray  )
 	{
 		if ( IsValid( airdropBadPlace.ownerEnt ) && IsValid( realmEnt ) )
@@ -1559,6 +1702,10 @@ bool function IsNearAirdropBadPlace( vector origin, entity realmEnt = null )
 		if ( distSrq < radiusSqr )
 			return true
 	}
+
+	if ( IsOriginInvalidForPlacingPermanentOnto( origin ) )
+		return true
+
 	return false
 }
 
@@ -1573,15 +1720,15 @@ void function DestroyAirdropBadPlace( int id )
 		}
 	}
 }
-#endif //
+#endif                   
 
-#if(CLIENT)
+#if CLIENT
 void function ServerCallback_CreateAirdropBadPlace( int id, vector origin, int radius, entity ownerEnt )
 {
 	foreach( badPlace in file.airdropBadPlaceArray )
 	{
 		if ( badPlace.id == id )
-			return //
+			return                 
 	}
 
 	printt( "Adding airdrop badplace this client", GetLocalClientPlayer() )
@@ -1599,18 +1746,45 @@ void function ServerCallback_DestroyAirdropBadPlace( int id )
 {
 	DestroyAirdropBadPlace( id )
 }
-#endif //
+#endif         
 
-#if(false)
+#if SERVER && DEV
+                                               
+ 
+	                                                       
+	                                                                    
+	                                                                                                                                                                           
+	                                                                      
+	                          
+	 
+		                                                                  
+	 
+ 
+#endif
 
 
+#if SERVER || CLIENT
+void function AddToAllowedAirdropDynamicEntities( entity ent )
+{
+	Assert( !file.airdropAllowedDynamicEnts.contains( ent ), "Entity already added to allowed airdrop dynamic ents!" )
+
+	file.airdropAllowedDynamicEnts.append( ent )
+}
+#endif
 
 
+#if SERVER && CLIENT
+void function RemoveFromAllowedAirdropDynamicEntities( entity ent )
+{
+	Assert( file.airdropAllowedDynamicEnts.contains( ent ), "Entity not contained in allowed dynamic airdrop entities! Cannot remove from array." )
 
+	file.airdropAllowedDynamicEnts.fastremovebyvalue( ent )
+}
+#endif
 
-
-
-
-
-
+#if SERVER || CLIENT
+array< entity > function GetAllowedAirdropDynamicEntitiesArray()
+{
+	return file.airdropAllowedDynamicEnts
+}
 #endif

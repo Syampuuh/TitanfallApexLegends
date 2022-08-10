@@ -1,19 +1,20 @@
 untyped
 
-//
-//
-//
-//
+                                                                                              
+  	                
+                                                                                       
+                                                                                              
 
 global function ClientCodeCallback_MapSpawn
 global function ClientCodeCallback_RunClientConnectScripts
 global function ClientCodeCallback_FullUpdate
 global function Init_PlayerScripts
-global function CodeCallback_EntityVarChanged
 global function ServerCallback_ClientInitComplete
+global function ClientCodeCallback_ClientInit
+global function ClientCodeCallback_ClientShutdown
 global function ClientCodeCallback_OnDropShipCinematicEventStateChanged
 global function ClientCodeCallback_OnDetenteEnded
-global function ClientCodeCallback_OnResolutionChanged
+global function ClientCodeCallback_ResolutionChanged
 global function PerfInitLabels
 global function GetCockpitRuiHeight
 
@@ -21,6 +22,9 @@ global function GetVirtualScreenSize
 global function GetCurrentVirtualScreenSize
 global function GetScaledVirtualScreenSize
 global function UpdateFullscreenTopology
+global function GetNearestAspectRatio
+
+global function CreateFullscreenTopology
 
 global var Hud = null
 
@@ -46,7 +50,7 @@ float function GetNearestAspectRatio( int width, int height )
 	else if ( fabs( ASPECT_RATIO_16_BY_9 - aspectRatio ) < 0.1 )
 		return aspectRatio
 	else if ( fabs( ASPECT_RATIO_21_BY_9 - aspectRatio ) < 0.1 )
-		return aspectRatio //
+		return aspectRatio                                                                                                                                
 	else if ( fabs( (16.0 * 3 / 9.0) - aspectRatio ) < 0.1 )
 		return ASPECT_RATIO_16_BY_9
 	else if ( fabs( (16.0 * 3 / 10.0) - aspectRatio ) < 0.1 )
@@ -60,10 +64,10 @@ UISize function GetCurrentVirtualScreenSize( bool isHud )
 {
 	UISize screenSize = GetScreenSize()
 
-	//
+	                                                                     
 	if ( isHud )
 	{
-		float clampedAspectRatio = GetNearestAspectRatio( screenSize.width, screenSize.height )//
+		float clampedAspectRatio = GetNearestAspectRatio( screenSize.width, screenSize.height )                                                                          
 		float aspectRatio        = screenSize.width / float( screenSize.height )
 		if ( aspectRatio != clampedAspectRatio )
 			screenSize.width = int( screenSize.height * clampedAspectRatio )
@@ -106,10 +110,12 @@ void function ClientCodeCallback_MapSpawn()
 
 	FlagInit( "ClientInitComplete" )
 	FlagInit( "EntitiesDidLoad" )
+	FlagInit( "ClientNetGlobalEntity" )
+	FlagInit( "ClientNetGlobalNonRewindEntity" )
 
 	PrecacheResFiles()
 
-	#if(DEV)
+	#if DEV
 		ClModelViewInit()
 	#endif
 
@@ -119,12 +125,18 @@ void function ClientCodeCallback_MapSpawn()
 
 	if ( IsLobby() )
 	{
-		//
-		//
-		//
+		                                                                                                      
+		                                                                                                            
+		                             
 	}
+
+	AddCallback_UIScriptReset( ResetUIDisableDev )
 }
 
+void function ResetUIDisableDev()
+{
+	RunUIScript( "UICallback_SetUIVar", "uiDisableDev", GetGlobalNonRewindNetBool( "uiDisableDev" ) )
+}
 
 float function GetCockpitRuiHeight()
 {
@@ -142,14 +154,9 @@ void function PrecacheResFiles()
 	PrecacheRes( "vgui_icon" )
 	PrecacheRes( "vgui_binding" )
 	PrecacheRes( "vgui_jump_quest" )
-	PrecacheRes( "vgui_titan_ammo" )
 	PrecacheRes( "vgui_xpbar" )
-	PrecacheRes( "vgui_titan_threat" )
-	PrecacheRes( "vgui_titan_vdu" )
 	PrecacheRes( "vgui_fullscreen_titan" )
 	PrecacheRes( "vgui_fullscreen_pilot" )
-	PrecacheRes( "vgui_pilot_launcher_screen" )
-	PrecacheRes( "vgui_titan_emp" )
 	PrecacheRes( "vgui_enemy_announce" )
 	PrecacheRes( "Coop_TeamScoreEventNotification" )
 	PrecacheRes( "control_panel_generic_screen" )
@@ -207,10 +214,11 @@ void function CreateHUDRuiTopologies()
 	clGlobal.topoFullscreenHud = CreateFullscreenTopology( true )
 	clGlobal.topoFullscreenHudPermanent = CreateFullscreenTopology( true )
 	clGlobal.topoFullscreenFullMap = CreateFullscreenTopology( true )
+	clGlobal.topFullscreenTargetInfo = CreateFullscreenTopology( true )
 
-	RuiTopology_ShareWithCode( clGlobal.topoFullscreenHudPermanent, RUI_CODE_TOPO_PERMANENT_HUD )
+	RuiTopology_ShareWithCode( clGlobal.topFullscreenTargetInfo, RUI_CODE_TOPO_TARGET_INFO_HUD )
 
-	//
+	          
 	{
 		clGlobal.topoTitanCockpitHud = RuiTopology_CreateSphere( <-120, 0, -TITAN_COCKPIT_TOPO_RADIUS * deg_sin( TITAN_COCKPIT_ROTATION_ANGLE )>, <0, -1, 0>, <deg_sin( TITAN_COCKPIT_ROTATION_ANGLE ), 0, -deg_cos( TITAN_COCKPIT_ROTATION_ANGLE )>, TITAN_COCKPIT_TOPO_RADIUS, TITAN_COCKPIT_RUI_SCREEN_WIDTH, TITAN_COCKPIT_RUI_SCREEN_WIDTH / 1.7665, TITAN_COCKPIT_RUI_SUBDIV )
 		clGlobal.topoTitanCockpitLowerHud = RuiTopology_CreatePlane( <0, 0, 0>, <0, -TITAN_COCKPIT_LOWER_RUI_SCREEN_SQUARE_SIZE, 0>, <0, 0, -TITAN_COCKPIT_LOWER_RUI_SCREEN_SQUARE_SIZE * TITAN_COCKPIT_LOWER_RUI_SCREEN_HEIGHT_SCALE>, true )
@@ -221,15 +229,16 @@ void function CreateHUDRuiTopologies()
 	UpdateFullscreenTopology( clGlobal.topoFullscreenHud, true )
 	UpdateFullscreenTopology( clGlobal.topoFullscreenHudPermanent, true )
 	UpdateFullscreenTopology( clGlobal.topoFullscreenFullMap, true )
+	UpdateFullscreenTopology( clGlobal.topFullscreenTargetInfo, true )
 }
 
 
-void function ClientCodeCallback_OnResolutionChanged()
+void function ClientCodeCallback_ResolutionChanged( bool askForConfirmation )
 {
 	UpdateMainHudVisibility( GetLocalViewPlayer() )
 	UpdateFullscreenTopology( clGlobal.topoFullScreen, false )
 	UpdateFullscreenTopology( clGlobal.topoFullscreenFullMap, true )
-	InitChatHUD()    //
+	InitChatHUD()                                                                                                                                
 
 	if ( !IsLobby() )
 		FullMap_UpdateTopologies()
@@ -271,6 +280,7 @@ void function RunClientConnectScriptsThreaded( entity player )
 		return
 
 	player.cv = level.clientVars
+	Assert( IsValid(player.cv) )
 
 	clGlobal.levelEnt = CreateClientSidePointCamera( <0, 0, 0>, <0, 0, 0>, 50 )
 	clGlobal.levelEnt.Hide()
@@ -279,6 +289,8 @@ void function RunClientConnectScriptsThreaded( entity player )
 	Init_ClientScripts( player )
 
 	FlagWait( "ClientInitComplete" )
+	FlagWait( "ClientNetGlobalEntity" )
+	FlagWait( "ClientNetGlobalNonRewindEntity" )
 
 	player = GetLocalClientPlayer()
 
@@ -286,6 +298,10 @@ void function RunClientConnectScriptsThreaded( entity player )
 	Assert( player == GetLocalClientPlayer() )
 
 	level.clientScriptInitialized = true
+
+	ExecuteNetBufferedCallbacks()
+
+	TriggerGlobalChangeCallbacks()
 
 	RunCallbacks_EntitiesDidLoad()
 
@@ -303,13 +319,15 @@ void function Init_ClientScripts( entity player )
 
 		KillReplayHud_AddClient()
 
-		clGlobal.initScoreboardFunc()
+		if ( clGlobal.initScoreboardFunc != null )
+			clGlobal.initScoreboardFunc()
+
 		MainHud_AddClient( player )
 		InitCrosshair()
-		player.ClientCommand( "ClientStatus " + (IsPartyMember( player ) ? "1" : "0") )
+		Remote_ServerCallFunction( "ClientCallback_ClientStatus", IsPartyMember( player ))
 	}
 
-	//
+	                                           
 	foreach ( callbackFunc in clGlobal.onClientScriptInitCallback )
 	{
 		callbackFunc( player )
@@ -345,55 +363,44 @@ void function Init_PlayerScripts( entity player )
 	player.p.playerScriptsInitialized = true
 }
 
-
-void function CodeCallback_EntityVarChanged( entity ent, varName, newValue, oldValue )
-{
-	string className = expect string( ent.GetNetworkedClassName() )
-
-	if ( !(className in _entityClassVarChangeCallbacks) )
-		return
-
-	if ( !(varName in _entityClassVarChangeCallbacks[className]) )
-		return
-
-	foreach ( callbackFunc in _entityClassVarChangeCallbacks[className][varName] )
-	{
-		table infos = expect table( callbackFunc.getinfos() )
-		if ( infos.parameters.len() == 2 )
-			callbackFunc( ent )
-		else
-			callbackFunc( ent, newValue, oldValue )
-	}
-}
-
-//
+                                                                      
 void function ServerCallback_ClientInitComplete()
 {
 	FlagSet( "ClientInitComplete" )
 }
 
-/*
+void function ClientCodeCallback_ClientInit()
+{
+	                                                                     
+}
 
+void function ClientCodeCallback_ClientShutdown()
+{
+	                                                                         
+}
 
+                                                                 
+ 
+	                                     
 
+	                 
+		                 
 
+	                                                         
+ 
 
+                                               
+ 
+	                         
+	 
+		              
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+		                          
+		 
+			                                  
+		 
+	 
+   
 
 void function PerfInitLabels()
 {

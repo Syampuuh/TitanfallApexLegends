@@ -1,0 +1,210 @@
+resource/ui/menus/dialogs/launch_mission_dialog.menu
+{
+	menu
+	{
+		ControlName				Frame
+		zpos					3
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		tabPosition				0
+		PaintBackgroundType		0
+		infocus_bgcolor_override	"0 0 0 0"
+		outoffocus_bgcolor_override	"0 0 0 0"
+		modal					1
+		disableDpad             1
+
+		ScreenBlur
+		{
+			ControlName				Label
+			labelText               ""
+		}
+
+        ScreenFrame
+        {
+            ControlName				RuiPanel
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            visible					1
+            enabled 				1
+            scaleImage				1
+            rui                     "ui/screen_blur.rpak"
+            drawColor				"255 255 255 255"
+        }
+
+		DarkenBackground
+		{
+			ControlName				Label
+			wide					%100
+			tall					%100
+			labelText				""
+			bgcolor_override		"0 0 0 150"
+			visible					1
+			paintbackground			1
+		}
+
+        Background
+        {
+            ControlName				RuiPanel
+            rui                     "ui/dialog_background.rpak"
+            wide			        %100
+            tall			        430
+            visible				    1
+
+            pin_to_sibling			DarkenBackground
+            pin_corner_to_sibling	CENTER
+            pin_to_sibling_corner	CENTER
+        }
+
+        CloseButton
+        {
+            ControlName             BaseModHybridButton
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            labelText               ""
+            visible                 1
+            sound_accept            "UI_Menu_SelectMode_Close"
+        }
+
+        InfoRui
+        {
+            ControlName				RuiPanel
+            rui                     "ui/launch_mission_dialog.rpak"
+            zpos                    5
+            wide			        1920
+            tall			        430
+            visible				    1
+
+            pin_to_sibling			DarkenBackground
+            pin_corner_to_sibling	CENTER
+            pin_to_sibling_corner	CENTER
+        }
+
+        MissionRewardButton1
+        {
+            ControlName				RuiButton
+            classname				MissionRewardNoClick
+            pin_to_sibling			InfoRui
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP
+            xpos					-300
+            ypos					-216
+            wide					75
+            tall					75
+            visible					1
+            enabled					1
+            navRight                MissionRewardButton2
+            navDown                 LaunchMissionButton
+            rui                     "ui/quest_reward_button.rpak"
+            sound_focus             "UI_Menu_Focus_Small"
+            sound_accept            ""
+            cursorPriority 10
+        }
+
+        MissionRewardButton2
+        {
+            ControlName				RuiButton
+            classname				MissionRewardNoClick
+            pin_to_sibling			MissionRewardButton1
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_RIGHT
+            xpos					8
+            ypos					0
+            wide					75
+            tall					75
+            visible					1
+            enabled					1
+            navLeft                 MissionRewardButton1
+            navRight                MissionRewardButton2
+            navDown                 LaunchMissionButton
+            rui                     "ui/quest_reward_button.rpak"
+            sound_focus             "UI_Menu_Focus_Small"
+            sound_accept            ""
+            cursorPriority 10
+        }
+
+        MissionRewardButton3
+        {
+            ControlName				RuiButton
+            classname				MissionRewardNoClick
+            pin_to_sibling			MissionRewardButton2
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_RIGHT
+            xpos					8
+            ypos					0
+            wide					75
+            tall					75
+            visible					1
+            enabled					1
+            navLeft                 MissionRewardButton2
+            navDown                 LaunchMissionButton
+            rui                     "ui/quest_reward_button.rpak"
+            sound_focus             "UI_Menu_Focus_Small"
+            sound_accept            ""
+            cursorPriority 10
+        }
+
+        LaunchMissionButton
+        {
+            ControlName			    RuiButton
+            pin_to_sibling			MissionRewardButton1
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	BOTTOM_LEFT
+            xpos				    0
+            ypos				    10
+            wide				    290
+            tall				    64
+            visible                 1
+            labelText               ""
+            rui                     "ui/quest_dialog_button.rpak"
+            sound_focus             "UI_Menu_Focus_Large"
+            cursorVelocityModifier  0.7
+            proportionalToParent	1
+
+            navRight                LoreButton
+            navUp                   MissionRewardButton1
+            cursorPriority 10
+        }
+
+        LoreButton
+        {
+            ControlName			    RuiButton
+            pin_to_sibling			LaunchMissionButton
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_RIGHT
+            xpos				    8
+            ypos				    0
+            wide				    290
+            tall				    64
+            visible                 1
+            labelText               ""
+            rui					    "ui/quest_dialog_button.rpak"
+            sound_focus             "UI_Menu_Focus_Large"
+            cursorVelocityModifier  0.7
+            proportionalToParent	1
+
+            navLeft                 LaunchMissionButton
+            navUp                   MissionRewardButton2
+            cursorPriority 10
+        }
+
+        ToolTip
+        {
+            ControlName				RuiPanel
+            InheritProperties       ToolTip
+        }
+
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			InheritProperties       FooterButtons
+		}
+	}
+}

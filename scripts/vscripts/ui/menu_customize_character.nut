@@ -21,7 +21,7 @@ struct
 const bool NEXT = true
 const bool PREV = false
 
-void function InitCustomizeCharacterMenu()
+void function InitCustomizeCharacterMenu( var newMenuArg )                                               
 {
 	var menu = GetMenu( "CustomizeCharacterMenu" )
 	file.menu = menu
@@ -53,6 +53,8 @@ void function CustomizeCharacterMenu_SetCharacter( ItemFlavor character )
 
 void function CustomizeCharacterMenu_OnOpen()
 {
+	SetCurrentHubForPIN( "menu_CustomizeCharacterMenu" )                                     
+
 	if ( !file.tabsInitialized )
 	{
 		array<var> panels = GetMenuTabBodyPanels( file.menu )
@@ -66,16 +68,16 @@ void function CustomizeCharacterMenu_OnOpen()
 	ItemFlavor character = expect ItemFlavor( file.characterOrNull )
 	SetTopLevelCustomizeContext( character )
 
-	if ( uiGlobal.lastMenuNavDirection == MENU_NAV_FORWARD )
+	if ( GetLastMenuNavDirection() == MENU_NAV_FORWARD )
 	{
 		TabData tabData = GetTabDataForPanel( file.menu )
 		ActivateTab( tabData, 0 )
 	}
-	//
-	//
+	      
+	  	                                                            
 
 	RuiSetString( file.titleRui, "title", Localize( ItemFlavor_GetLongName( character ) ).toupper() )
-	RuiSetGameTime( file.decorationRui, "initTime", Time() )
+	RuiSetGameTime( file.decorationRui, "initTime", ClientTime() )
 
 	RegisterNewnessCallbacks( character )
 
@@ -97,8 +99,8 @@ void function CustomizeCharacterMenu_OnClose()
 void function RegisterNewnessCallbacks( ItemFlavor character )
 {
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterSkinsTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterSkinsPanel" ) )
-	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterCardTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterCardsPanel" ) )
-	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterQuipsTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterQuipsPanel" ) )
+	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterCardTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterCardsPanelV2" ) )
+	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterQuipsTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterEmotesPanel" ) )
 	Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterFinishersTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterExecutionsPanel" ) )
 }
 
@@ -106,8 +108,8 @@ void function RegisterNewnessCallbacks( ItemFlavor character )
 void function DeregisterNewnessCallbacks( ItemFlavor character )
 {
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterSkinsTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterSkinsPanel" ) )
-	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterCardTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterCardsPanel" ) )
-	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterQuipsTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterQuipsPanel" ) )
+	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterCardTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterCardsPanelV2" ) )
+	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterQuipsTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterEmotesPanel" ) )
 	Newness_RemoveCallback_OnRerverseQueryUpdated( NEWNESS_QUERIES.CharacterFinishersTab[character], OnNewnessQueryChangedUpdatePanelTab, GetPanel( "CharacterExecutionsPanel" ) )
 }
 

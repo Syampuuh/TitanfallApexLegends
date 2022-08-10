@@ -1,6 +1,6 @@
 untyped
 
-//
+                                                                                                     
 global function WeaponUtility_Init
 
 global function ApplyVectorSpread
@@ -8,22 +8,16 @@ global function DebugDrawMissilePath
 global function DegreesToTarget
 global function EntityCanHaveStickyEnts
 global function EntityShouldStick
-global function FireExpandContractMissiles
-global function FireExpandContractMissiles_S2S
+global function EntityShouldStickEx
 global function GetVectorFromPositionToCrosshair
 global function GetVelocityForDestOverTime
 global function GetPlayerVelocityForDestOverTime
-global function GetWeaponBurnMods
 global function InitMissileForRandomDriftForVortexLow
 global function IsPilotShotgunWeapon
 global function PlantStickyEntity
+global function PlantStickyEntityOnConsistentSurface
 global function PlantStickyEntityThatBouncesOffWalls
 global function PlantStickyEntityOnWorldThatBouncesOffWalls
-global function PlantStickyGrenade
-global function PlantSuperStickyGrenade
-global function Player_DetonateSatchels
-global function PROTO_CanPlayerDeployWeapon
-global function ProximityCharge_PostFired_Init
 global function EnergyChargeWeapon_OnWeaponChargeLevelIncreased
 global function EnergyChargeWeapon_OnWeaponChargeBegin
 global function EnergyChargeWeapon_OnWeaponChargeEnd
@@ -35,15 +29,9 @@ global function ProjectileShotgun_GetInnerSpread
 global function FireProjectileBlastPattern
 global function FireGenericBoltWithDrop
 global function OnWeaponPrimaryAttack_GenericBoltWithDrop_Player
-global function OnWeaponPrimaryAttack_GenericMissile_Player
 global function OnWeaponActivate_updateViewmodelAmmo
-global function TEMP_GetDamageFlagsFromProjectile
 global function WeaponCanCrit
 global function GiveEMPStunStatusEffects
-global function GetPrimaryWeapons
-global function GetSidearmWeapons
-global function GetATWeapons
-global function GetPlayerFromTitanWeapon
 global function GetMaxTrackerCountForTitan
 global function FireBallisticRoundWithDrop
 global function DoesModExist
@@ -60,94 +48,261 @@ global function GetMeleeWeapon
 global function OnWeaponRegenEndGeneric
 global function Ultimate_OnWeaponRegenBegin
 global function OnWeaponActivate_RUIColorSchemeOverrides
+global function PlayDelayedShellEject
+global function IsABaseGrenade
+global function HandleDisappearingParent
+global function SolveBallisticArc
+global function AreAbilitiesSilenced
+global function GetNeededEnergizeConsumableCount
+global function HasEnoughEnergizeConsumable
+global function OnWeaponEnergizedStart
 
-#if(false)
-
-
-
-
-
-
-
-
-
+#if SERVER
+                             
+                                           
+                                                   
+                                
+                                                      
+                                  
+                                                          
+                                            
+                                                         
+                                                    
+                                                             
+                                                             
+                                                               
+                                                         
+                                    
+                                       
+                                       
+                                      
+                                                       
+                                              
 #endif
 
-#if(CLIENT)
+                         
+#if SERVER
+                                                            
+                                                    
+#endif              
+#if CLIENT
+global function UICallback_UpdateLaserSightColor
+#endif              
+                                   
+
+global function Weapon_AddSingleCharge
+
+#if CLIENT
 global function ServerCallback_SetWeaponPreviewState
+global function ServerCallback_KineticLoaderReloadedThroughSlide
+global function ServerCallback_KineticLoaderReloadedThroughSlideEnd
 #endif
 
-global function GetRadiusDamageDataFromProjectile
+global function OnWeaponTryEnergize
+
 global function OnWeaponAttemptOffhandSwitch_Never
+global function OnWeaponAttemptOffhandSwitch_NoZip
 
-#if(DEV)
+#if DEV
 global function DevPrintAllStatusEffectsOnEnt
-#endif //
+#endif           
 
-#if(false)
+#if SERVER
+                                               
+                                           
+                                            
+                                     
+                                   
+                                    
+                                 
+                                           
+                                             
+                                                       
+                                                      
+                                   
+                                      
+                      
+                                                
+                                               
+                                                  
+                                       
+                                        
+                                        
+                                           
+                                       
+                                     
+                                                 
+                                        
+                                                 
+                                   
+                                  
 
+                         
+                                                      
+      
 
+       
+                                 
+      
 
+                                                                     
 
+#endif         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
+#if CLIENT
 global function GlobalClientEventHandler
 global function UpdateViewmodelAmmo
 global function IsOwnerViewPlayerFullyADSed
-global function ServerCallback_SatchelPlanted
-#endif //
+global function GetAmmoColorByType
+global function TryCharacterButtonCommonReadyChecks
+#endif         
+
+global function ShouldShowADSScopeView
+global function HasFullscreenScope
 
 global function AddCallback_OnPlayerAddWeaponMod
 global function AddCallback_OnPlayerRemoveWeaponMod
 
 global function CodeCallback_OnPlayerAddedWeaponMod
 global function CodeCallback_OnPlayerRemovedWeaponMod
+
+global function EnergyChoke_OnWeaponModCommandCheckMods
+
+#if CLIENT
+global function DisplayCenterDotRui
+#endif
+
+global function IsTurretWeapon
+global function IsHMGWeapon
+
+#if SERVER || CLIENT
+global function GetInfiniteAmmo
+#if SERVER
+                                        
+                                        
+                                          
+       
+                                       
+      
+#endif
+global const string MOD_INFINITE_AMMO_CLIPS = "infinite_ammo_clips"
+#endif
+
+                                                                                                                                                      
+global struct MarksmansTempoSettings
+{
+	int   requiredShots
+	float graceTimeBuildup
+	float graceTimeInTempo
+	int  fadeoffMatchGraceTime
+	float fadeoffOnPerfectMomentHit
+	float fadeoffOnFire
+
+	string weaponDeactivateSignal
+}
+global const string MOD_MARKSMANS_TEMPO = "hopup_marksmans_tempo"
+global const string MOD_MARKSMANS_TEMPO_ACTIVE = "marksmans_tempo_active"
+global const string MOD_MARKSMANS_TEMPO_BUILDUP = "marksmans_tempo_buildup"
+global const string MARKSMANS_TEMPO_REQUIRED_SHOTS_SETTING = "marksmans_tempo_required_shots"
+global const string MARKSMANS_TEMPO_GRACE_TIME_SETTING = "marksmans_tempo_grace_time"
+global const string MARKSMANS_TEMPO_GRACE_TIME_IN_TEMPO_SETTING = "marksmans_tempo_grace_time_in_tempo"
+global const string MARKSMANS_TEMPO_FADEOFF_MATCH_GRACE_TIME = "marksmans_tempo_fadeoff_match_grace_time"
+global const string MARKSMANS_TEMPO_FADEOFF_ON_PERFECT_MOMENT_SETTING = "marksmans_tempo_fadeoff_on_perfect_moment"	                                                                                                                                      
+global const string MARKSMANS_TEMPO_FADEOFF_ON_FIRE_SETTING = "marksmans_tempo_fadeoff_on_fire"
+global const string MARKSMANS_TEMPO_FADEOFF_THREAD_ABORT = "marksmans_tempo_fadeoff_abort"
+global const string ENERGIZE_STATUS_RUI_ABORT_SIGNAL = "EnergizRuiThinkAbortSignal"
+global function MarksmansTempo_Validate
+global function MarksmansTempo_OnActivate
+global function MarksmansTempo_OnDeactivate
+global function MarksmansTempo_AbortFadeoff
+global function MarksmansTempo_SetPerfectTempoMoment
+global function MarksmansTempo_OnFire
+global function MarksmansTempo_RemoveTempo
+global function MarksmansTempo_ClearTempo
+
+
+
+global enum eShatterRoundsTypes
+{
+	STANDARD,
+	SHATTER_TRI,
+
+	_count
+}
+global const string SHATTER_ROUNDS_HOPUP_MOD = "hopup_shatter_rounds"
+global const string SHATTER_ROUNDS_MOD = "altfire_shatter_rounds"
+global const string SHATTER_ROUNDS_HIPFIRE_MOD = "shatter_rounds_hipfire"
+global const string SHATTER_ROUNDS_THINK_END_SIGNAL = "shatter_rounds_think_end"
+global const string SHATTER_ROUNDS_ADS_THINK_THREAD_ABORT_SIGNAL = "shatter_rounds_ads_think_end"
+global function ShatterRounds_UpdateShatterRoundsThink
+#if SERVER
+                                      
+#endif
+
+
+
+
+global const string SMART_RELOAD_HOPUP = "hopup_smart_reload"
+global const string LMG_FAST_RELOAD_MOD = "fast_reload_mod"
+global const string LMG_OVERLOADED_AMMO_MOD = "overloaded_ammo"
+global const string END_SMART_RELOAD = "end_smart_reload_functionality"
+global const string ULTIMATE_ACTIVE_MOD_STRING = "ultimate_active"
+
+const vector LOWAMMO_UI_COLOR = <0, 255, 0> / 255.0
+const vector OVERLOADAMMO_UI_COLOR = <0, 200, 200> / 255.0
+const vector OUTOFAMMO_UI_COLOR = <255, 65, 65> / 255.0
+const vector NORMALAMMO_UI_COLOR = <0, 0, 0>
+
+global const string OVERLOAD_AMMO_SETTING = "smart_reload_overload_ammo_required"
+global const string LOW_AMMO_FAC_SETTING = "low_ammo_fraction"
+
+global struct SmartReloadSettings
+{
+	int OverloadedAmmo
+	float LowAmmoFrac
+}
+
+const int MIN_AMMO_REQUIRED = 0
+const int MAX_AMMO_REQUIRED = 11
+
+global function OnWeaponActivate_Smart_Reload
+global function OnWeaponDeactivate_Smart_Reload
+global function OnWeaponReload_Smart_Reload
+
+
+global struct KineticLoaderSettings
+{
+	float  loadDelay
+	float  additiveDelay
+	float  maxDelay
+	int    ammoToLoad
+	string kineticLoaderSFX
+}
+
+global function OnWeaponActivate_Kinetic_Loader
+global function OnWeaponDeactivate_Kinetic_Loader
+
+global const string END_KINETIC_LOADER = "end_kinetic_loader_functionality"
+global const string KINETIC_LOADER_HOPUP = "hopup_kinetic_loader"
+global const string END_KINETIC_LOADER_CHOKE = "end_kinetic_loader_choke_functionality"
+
+global const string KINETIC_LOAD_DELAY_SETTING = "kinetic_load_delay"
+global const string KINETIC_LOAD_ADDITIVE_DELAY_SETTING = "kinetic_load_additive_delay"
+global const string KINETIC_LOAD_MAX_DELAY_SETTING = "kinetic_load_max_delay"
+global const string KINETIC_AMMO_TO_LOAD_SETTING = "kinetic_ammo_to_load"
+global const string KINETIC_LOAD_SFX_SETTING = "kinetic_load_sfx"
+#if CLIENT
+global const string END_KINETIC_LOADER_RUI = "end_kinetic_loader_functionality"
+#endif
+
+
+                          
+                                 
+                                           
+          
+                                            
+      
+      
 
 global const bool PROJECTILE_PREDICTED = true
 global const bool PROJECTILE_NOT_PREDICTED = false
@@ -158,16 +313,26 @@ global const bool PROJECTILE_NOT_LAG_COMPENSATED = false
 global const PRO_SCREEN_IDX_MATCH_KILLS = 1
 global const PRO_SCREEN_IDX_AMMO_COUNTER_OVERRIDE_HACK = 2
 
+global const int DAMAGEARROW_WP_INT_INDEX_ID = 0
+global const int DAMAGEARROW_WP_INT_INDEX_TEAM = 1
+global const int DAMAGEARROW_WP_INT_INDEX_VISIBILITY_TYPE = 2
+
+global const int DAMAGEARROW_WP_ENT_OWNER = 0
+
+#if SERVER
+                                                               
+#endif
+
 const float DEFAULT_SHOTGUN_SPREAD_INNEREXCLUDE_FRAC = 0.4
 const bool DEBUG_PROJECTILE_BLAST = false
 
-const float EMP_SEVERITY_SLOWTURN = 0.35
+const float EMP_SEVERITY_SLOWTURN = 0.7
 const float EMP_SEVERITY_SLOWMOVE = 0.50
-const float LASER_STUN_SEVERITY_SLOWTURN = 0.20
+const float LASER_STUN_SEVERITY_SLOWTURN = 0.4
 const float LASER_STUN_SEVERITY_SLOWMOVE = 0.30
 
-const asset FX_EMP_BODY_HUMAN = $"P_emp_body_human"
-const asset FX_EMP_BODY_TITAN = $"P_emp_body_titan"
+global const asset FX_EMP_BODY_HUMAN = $"P_emp_body_human"
+global const asset FX_EMP_BODY_TITAN = $"P_emp_body_titan"
 const asset FX_VANGUARD_ENERGY_BODY_HUMAN = $"P_monarchBeam_body_human"
 const asset FX_VANGUARD_ENERGY_BODY_TITAN = $"P_monarchBeam_body_titan"
 const SOUND_EMP_REBOOT_SPARKS = "marvin_weld"
@@ -180,6 +345,10 @@ const bool DEBUG_BURN_DAMAGE = false
 
 const float BOUNCE_STUCK_DISTANCE = 5.0
 
+const float GOLD_MAG_TIME_BEFORE_STOWED_RELOAD = 5.0
+
+global const string ARROWS_UNSTICK_SIGNAL = "arrows_unstick"
+
 global struct RadiusDamageData
 {
 	int   explosionDamage
@@ -190,106 +359,157 @@ global struct RadiusDamageData
 
 global struct EnergyChargeWeaponData
 {
-	array<vector> blastPattern
-	string        fx_barrel_glow_attach
-	asset         fx_barrel_glow_final_1p
-	asset         fx_barrel_glow_final_3p
+	string fx_barrel_glow_attach
+	asset  fx_barrel_glow_final_1p
+	asset  fx_barrel_glow_final_3p
 }
 
-#if(false)
+#if SERVER
+                         
+ 
+	                 
+	                                           
+	                     
+	            
+	                  
+	            
+	             
+	            
+	                      
+	             
+	               
+	                
+	              
+	                   
+	                
+	                                                   
+ 
 
+                      
+ 
+	                     
+	                  
+ 
 
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                         
+ 
+	                 
+	                 
+	               
+	               
+	                 
+	                 
+	                 
+	                 
+ 
 #endif
+
+global struct ArcSolution
+{
+	bool valid
+	vector fire_velocity
+	float duration
+}
 
 struct
 {
-	#if(false)
+	#if SERVER
 
+		                                                                                                                                                               
+		                                                        
+		                                                           
 
+		                                          
+		                                          
 
+		                                             
 
+		                             
 
+		       
+			                          
+		      
 
+		              						                     
 
-
-
-
-
-
-#else //
+	#else          
 		var satchelHintRUI = null
 	#endif
 
 	array<void functionref( entity, entity, string )> playerAddWeaponModCallbacks
 	array<void functionref( entity, entity, string )> playerRemoveWeaponModCallbacks
+	table<string, array<void functionref( entity, string, bool )> > weaponModChangedCallbacks
+
+	#if CLIENT
+	bool reloadedThroughSlide = false
+	int ammoToLoadTotal = 0
+	#endif
 } file
 
 global int HOLO_PILOT_TRAIL_FX
 
 
+                                                    
+StringSet STICKY_CLASSES = {
+	worldspawn = IN_SET,
+	player = IN_SET,
+	prop_dynamic = IN_SET,
+	prop_script = IN_SET,
+	prop_death_box = IN_SET,
+	func_brush = IN_SET,
+	func_brush_lightweight = IN_SET,
+	phys_bone_follower = IN_SET,
+	door_mover = IN_SET,
+	prop_door = IN_SET,
+	script_mover = IN_SET,
+	player_vehicle = IN_SET,
+	turret = IN_SET,
+	prop_loot_grabber = IN_SET,
+	prop_lootroller = IN_SET,
+}
+
 void function WeaponUtility_Init()
 {
-	level.weaponsPrecached <- {}
-
-	//
-	level.stickyClasses <- {}
-	level.stickyClasses[ "worldspawn" ]                <- true
-	level.stickyClasses[ "player" ]                    <- true
-	level.stickyClasses[ "prop_dynamic" ]            <- true
-	level.stickyClasses[ "prop_script" ]            <- true
-	level.stickyClasses[ "func_brush" ]                <- true
-	level.stickyClasses[ "func_brush_lightweight" ]    <- true
-	level.stickyClasses[ "phys_bone_follower" ]        <- true
-	level.stickyClasses[ "door_mover" ]                <- true
-	level.stickyClasses[ "prop_door" ]                <- true
-	level.stickyClasses[ "script_mover" ]                <- true
-
 	level.trapChainReactClasses <- {}
 	level.trapChainReactClasses[ "mp_weapon_frag_grenade" ]            <- true
 	level.trapChainReactClasses[ "mp_weapon_satchel" ]                <- true
 	level.trapChainReactClasses[ "mp_weapon_proximity_mine" ]        <- true
 	level.trapChainReactClasses[ "mp_weapon_laser_mine" ]            <- true
 
-	RegisterSignal( "Planted" )
+	                             
 	RegisterSignal( "OnKnifeStick" )
 	RegisterSignal( "EMP_FX" )
 	RegisterSignal( "ArcStunned" )
 	RegisterSignal( "CleanupPlayerPermanents" )
+	RegisterSignal( "PlayerChangedClass" )
 	RegisterSignal( "OnSustainedDischargeEnd" )
 	RegisterSignal( "EnergyWeapon_ChargeStart" )
 	RegisterSignal( "EnergyWeapon_ChargeReleased" )
 	RegisterSignal( "WeaponSignal_EnemyKilled" )
+
+	RegisterSignal( "GoldMagPerkEnd" )
+
+	RegisterSignal( MARKSMANS_TEMPO_FADEOFF_THREAD_ABORT )
+
+	RegisterSignal ( END_SMART_RELOAD )
+
+	RegisterSignal ( END_KINETIC_LOADER )
+	RegisterSignal ( END_KINETIC_LOADER_CHOKE )
+	Remote_RegisterClientFunction( "ServerCallback_KineticLoaderReloadedThroughSlide", "int", 0, 32 )
+	Remote_RegisterClientFunction( "ServerCallback_KineticLoaderReloadedThroughSlideEnd" )
+                           
+                                                                 
+                                    
+                          
+	Remote_RegisterServerFunction( "ClientCallback_UpdateLaserSightColor" )
+                                    
+	#if CLIENT
+	RegisterSignal ( END_KINETIC_LOADER_RUI )
+	#endif
+
+	#if SERVER
+	                                       
+	#endif
 
 	PrecacheParticleSystem( EMP_GRENADE_BEAM_EFFECT )
 	PrecacheParticleSystem( FX_EMP_BODY_TITAN )
@@ -300,41 +520,55 @@ void function WeaponUtility_Init()
 
 	PrecacheImpactEffectTable( CLUSTER_ROCKET_FX_TABLE )
 
-	#if(false)
+	#if SERVER
+		                                                                                          
+		                                                                                              
+		                                                  
+		                                                            
+		                                                                  
+		                                                             
+		                                                                                 
+		                                                                                        
+		                                                                                       
+		                                                                                           
+		                                                                                           
+                           
+		                                                                                          
+        
+		                                                                                             
+		                                              
+		                                            
+		                                                 
+		                                                   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+		                                                                                      
+	#endif
 
 	HOLO_PILOT_TRAIL_FX = PrecacheParticleSystem( $"P_ar_holopilot_trail" )
+
+		RegisterSignal( SHATTER_ROUNDS_THINK_END_SIGNAL )
+		#if SERVER
+		                                                              
+		#endif
+
+		AddCallback_OnPlayerAddWeaponMod( ShatterRounds_OnPlayerAddedWeaponMod )
+		AddCallback_OnPlayerRemoveWeaponMod( ShatterRounds_OnPlayerRemovedWeaponMod )
 }
 
-#if(false)
-
-
-//
-//
-//
-//
-//
-
+#if SERVER
+                               
+ 
+	                                                                           
+	                                                                                                                                                              
+	                                                                                                                                                       
+	                                                                                                                                                            
+	                                                                                                                                                            
+ 
 #endif
 
-//
+                                                                    
 
-#if(CLIENT)
+#if CLIENT
 void function GlobalClientEventHandler( entity weapon, string name )
 {
 	if ( name == "ammo_update" )
@@ -346,7 +580,7 @@ void function GlobalClientEventHandler( entity weapon, string name )
 
 void function UpdateViewmodelAmmo( bool forceFull, entity weapon )
 {
-	Assert( weapon != null ) //
+	Assert( weapon != null )                                                        
 
 	if ( !IsValid( weapon ) )
 		return
@@ -365,100 +599,87 @@ void function UpdateViewmodelAmmo( bool forceFull, entity weapon )
 	if ( forceFull || (rounds > maxRounds) )
 		rounds = maxRounds
 
-	//
+	                                             
 	weapon.SetViewmodelAmmoModelIndex( rounds )
 }
-#endif //
+#endif              
 
 void function OnWeaponActivate_updateViewmodelAmmo( entity weapon )
 {
-	#if(CLIENT)
+	#if CLIENT
 		UpdateViewmodelAmmo( false, weapon )
-	#endif //
+	#endif              
 }
 
-//
+                                    
 
 void function OnWeaponActivate_RUIColorSchemeOverrides( entity weapon )
 {
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                   
+	#endif
 }
 
-#if(false)
+#if SERVER
+                                                                                                                             
+ 
+	                                                   
+ 
 
+                                                                                                               
+                                                                                                               
+                                                                        
+ 
+	                         
+		      
 
+	           
+	                                                                                  
+	 
+		                                                                        
+		                                                          
+	 
 
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
+	                                                              
+	                                                                                   
+ 
 #endif
 
 int function Fire_EnergyChargeWeapon( entity weapon, WeaponPrimaryAttackParams attackParams, EnergyChargeWeaponData chargeWeaponData, bool playerFired = true, float patternScale = 1.0, bool ignoreSpread = true )
 {
-	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
-
-	bool shouldCreateProjectile = false
-	if ( IsServer() || weapon.ShouldPredictProjectiles() )
-		shouldCreateProjectile = true
-
-	#if(CLIENT)
-		if ( !playerFired )
-			shouldCreateProjectile = false
-	#endif
-
 	int chargeLevel = EnergyChargeWeapon_GetChargeLevel( weapon )
-	//
+	                              
 	if ( chargeLevel == 0 )
 		return 0
 
-	if ( shouldCreateProjectile )
+	                                               
+	float spreadChokeFrac = 1.0
+	                                                                                                                         
+	switch( chargeLevel )
 	{
-		//
-		float spreadChokeFrac = 1.0
-		//
-		switch( chargeLevel )
-		{
-			case 1:
-				spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_1" ) )
-				break
+		case 1:
+			spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_1" ) )
+			break
 
-			case 2:
-				spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_2" ) )
-				break
+		case 2:
+			spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_2" ) )
+			break
 
-			case 3:
-				spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_3" ) )
-				break
+		case 3:
+			spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_3" ) )
+			break
 
-			case 4:
-				spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_4" ) )
-				break
+		case 4:
+			spreadChokeFrac = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_spread_choke_frac_4" ) )
+			break
 
-			default:
-				Assert( false, "chargeLevel " + chargeLevel + " doesn't have matching weaponsetting for projectile_spread_choke_frac_" + chargeLevel )
-		}
-		patternScale *= spreadChokeFrac
-
-		FireProjectileBlastPattern( weapon, attackParams, playerFired, chargeWeaponData.blastPattern, patternScale, ignoreSpread )
+		default:
+			Assert( false, "chargeLevel " + chargeLevel + " doesn't have matching weaponsetting for projectile_spread_choke_frac_" + chargeLevel )
 	}
+	patternScale *= spreadChokeFrac
+
+	float speedScale = 1.0
+	weapon.FireWeapon_Default( attackParams.pos, attackParams.dir, speedScale, patternScale, ignoreSpread )
 
 	if ( weapon.IsChargeWeapon() )
 		EnergyChargeWeapon_StopCharge( weapon, chargeWeaponData )
@@ -492,14 +713,14 @@ int function EnergyChargeWeapon_GetChargeLevel( entity weapon )
 
 bool function EnergyChargeWeapon_OnWeaponChargeLevelIncreased( entity weapon, EnergyChargeWeaponData chargeWeaponData )
 {
-	#if(CLIENT)
+	#if CLIENT
 		if ( InPrediction() && !IsFirstTimePredicted() )
 			return true
 #endif
 
-#if(false)
-//
-#endif
+#if SERVER
+		                                                         
+	#endif
 
 	int level    = weapon.GetWeaponChargeLevel()
 	int maxLevel = weapon.GetWeaponChargeLevelMax()
@@ -553,24 +774,30 @@ void function EnergyChargeWeapon_StopCharge( entity weapon, EnergyChargeWeaponDa
 	weapon.StopWeaponSound( expect string( weapon.GetWeaponInfoFileKeyField( "sound_energy_charge_loop" ) ) )
 	weapon.StopWeaponSound( expect string( weapon.GetWeaponInfoFileKeyField( "sound_energy_charge_loop_3p" ) ) )
 
-	#if(CLIENT)
-		//
+	#if CLIENT
+		                                                                                                                               
 		float chargeTime          = weapon.GetWeaponSettingFloat( eWeaponVar.charge_time )
 		int chargeLevels          = weapon.GetWeaponSettingInt( eWeaponVar.charge_levels )
 		int chargeLevelBase       = weapon.GetWeaponSettingInt( eWeaponVar.charge_level_base )
-		float weaponMinChargeTime = chargeTime / (chargeLevels - chargeLevelBase).tofloat()
+		float chargeLevelsReduced   = (chargeLevels - chargeLevelBase).tofloat()
+		float weaponMinChargeTime = 0.0
+
+		if ( chargeLevelsReduced > 0.0 )
+		{
+			weaponMinChargeTime = chargeTime / chargeLevelsReduced
+		}
 
 		if ( Time() - weapon.w.startChargeTime >= weaponMinChargeTime )
 		{
 			weapon.EmitWeaponSound( expect string( weapon.GetWeaponInfoFileKeyField( "sound_energy_charge_end" ) ) )
 		}
-	#elseif(false)
-
-
-
-
-
-#endif
+	#elseif SERVER
+		                                      
+		                       
+		 
+			                                                                                                                                   
+		 
+	#endif
 }
 
 
@@ -597,7 +824,7 @@ bool function EnergyChargeWeapon_OnWeaponChargeBegin( entity weapon )
 
 void function EnergyChargeWeapon_OnWeaponChargeEnd( entity weapon, EnergyChargeWeaponData chargeWeaponData )
 {
-	//
+	                       
 	weapon.Signal( "EnergyWeapon_ChargeReleased" )
 
 	thread EnergyChargeWeapon_StopCharge_Think( weapon, chargeWeaponData )
@@ -627,12 +854,12 @@ void function FireHitscanShotgunBlast( entity weapon, vector pos, vector dir, in
 	Assert( numBlasts > 0 )
 	int numBlastsOriginal = numBlasts
 
-	/*
-
-
-
-
-*/
+	  
+	              
+		                                                                            
+		                                                                            
+		                                                                      
+	  
 
 	if ( maxDistance == null )
 		maxDistance = weapon.GetMaxDamageFarDist()
@@ -656,7 +883,7 @@ void function FireHitscanShotgunBlast( entity weapon, vector pos, vector dir, in
 		antilagPlayer = owner
 	}
 
-	//
+	                  
 	Assert( maxAngle > 0.0, "JFS returning out at this instance. We need to investigate when a valid mp_titanweapon_laser_lite weapon returns 0 spread" )
 	if ( maxAngle == 0.0 )
 		return
@@ -673,12 +900,12 @@ void function FireHitscanShotgunBlast( entity weapon, vector pos, vector dir, in
 			break
 	}
 
-	//
+	                                                                                     
 	owner = weapon.GetWeaponOwner()
 	if ( !IsValid( owner ) )
 		return
 
-	//
+	                                                           
 	const int MAX_TRACERS = 16
 	bool didHitAnything   = ((numBlastsOriginal - numBlasts) != 0)
 	bool doTraceBrushOnly = (!didHitAnything)
@@ -709,7 +936,7 @@ vector function ApplyVectorSpread( vector vecShotDirection, float spreadDegrees,
 
 	float sinDeg = deg_sin( spreadDegrees / 2.0 )
 
-	//
+	                               
 	float x
 	float y
 	float z
@@ -719,11 +946,11 @@ vector function ApplyVectorSpread( vector vecShotDirection, float spreadDegrees,
 	else if ( bias < 0.0 )
 		bias = 0.0
 
-	//
+	                                                                        
 	float shotBiasMin = -1.0
 	float shotBiasMax = 1.0
 
-	//
+	                                                      
 	float shotBias = ((shotBiasMax - shotBiasMin) * bias) + shotBiasMin
 	float flatness = (fabs( shotBias ) * 0.5)
 
@@ -770,23 +997,23 @@ int function HitscanShotgunBlastDamageEntity( entity weapon, vector barrelPos, v
 {
 	entity target = result.ent
 
-	//
+	                                                                         
 	if ( !target.IsTitan() && damageScaler > 1 )
 		damageScaler = max( damageScaler * 0.4, 1.5 )
 
 	entity owner = weapon.GetWeaponOwner()
-	//
+	                        
 	if ( !IsValid( target ) || !IsValid( owner ) )
 		return 0
 
-	//
+	                                                           
 	vector hitLocation = result.visiblePosition
 	vector vecToEnt    = (hitLocation - barrelPos)
 	vecToEnt.Norm()
 	if ( Length( vecToEnt ) == 0 )
 		vecToEnt = barrelVec
 
-	//
+	                                                                                                                            
 	WeaponFireBulletSpecialParams fireBulletParams
 	fireBulletParams.pos = barrelPos
 	fireBulletParams.dir = vecToEnt
@@ -799,57 +1026,57 @@ int function HitscanShotgunBlastDamageEntity( entity weapon, vector barrelPos, v
 	fireBulletParams.noTracer = false
 	fireBulletParams.activeShot = false
 	fireBulletParams.doTraceBrushOnly = false
-	weapon.FireWeaponBullet_Special( fireBulletParams ) //
+	weapon.FireWeaponBullet_Special( fireBulletParams )                                                      
 
-	#if(false)
-//
+	#if SERVER
+		                                                    
+		                                                           
 
+		                                                               
+			                       
 
-//
+		                                
+		                                                                                           
 
+		                                                                  
+		                                              
+		                                                                                                                                                        
+		 
+			                          
+			                                                                                                                           
+		 
 
+		                      
+		                  
+		  	                                                                                                                                                                                         
 
+		                                                                                                                                                                                                       
+		                                                                  
+		                                                                                                                                                                       
 
+		                                                   
+		                                                                                
+		                                                                   
+		                                                
 
-//
+		                                               
 
+		  
+		                                                                                        
+		                                                                                  
+		                                                                                                                                                                                                                                                                            
+		                               
+			                                                             
 
-
-
-//
-
-
-
-//
-//
-
-//
-
-//
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-#endif //
+		                         
+		                                                     
+		                                             
+		                                         
+		                                             
+		                                                                                       
+		                                                           
+		                      
+	#endif              
 
 	return 1
 }
@@ -867,7 +1094,7 @@ void function FireProjectileShotgunBlast( entity weapon, WeaponPrimaryAttackPara
 		vector spreadVec = spreadVecs[i]
 		attackParams.dir = spreadVec
 
-		bool ignoreSpread = true  //
+		bool ignoreSpread = true                                                                                                                      
 		bool deferred     = i > (spreadVecs.len() / 2)
 		entity bolt       = FireBallisticRoundWithDrop( weapon, attackParams.pos, attackParams.dir, playerFired, ignoreSpread, i, deferred )
 	}
@@ -876,18 +1103,18 @@ void function FireProjectileShotgunBlast( entity weapon, WeaponPrimaryAttackPara
 
 array<vector> function GetProjectileShotgunBlastVectors( vector pos, vector forward, vector right, float outerSpread, float innerSpead, int numSegments )
 {
-	#if(false)
-
-
-
-#endif
+	#if DEBUG_PROJECTILE_BLAST
+		                                                               
+		                       
+		                       
+	#endif
 
 	int numRadialSegments = numSegments - 1
 
 	float degPerSegment = 360.0 / numRadialSegments
 	array<vector> randVecs
 
-	//
+	                                               
 	for ( int i = 0 ; i < numRadialSegments ; i++ )
 	{
 		vector randVec = VectorRotateAxis( forward, right, RandomFloatRange( innerSpead, outerSpread ) )
@@ -895,46 +1122,46 @@ array<vector> function GetProjectileShotgunBlastVectors( vector pos, vector forw
 		randVec.Norm()
 		randVecs.append( randVec )
 
-		#if(false)
+		#if DEBUG_PROJECTILE_BLAST
+			                                                                
+			                                                                   
+			               
+			                            
 
-
-
-
-
-
-
-
-
-#endif
+			                                                                 
+			                                                                   
+			               
+			                            
+		#endif
 	}
 
-	//
-	//
-	//
-	//
-	//
+	                    
+	                                  
+	                                                                                
+	                                                                      
+	                
 
-	//
+	                                                               
 	randVecs.append( forward )
 
-	#if(false)
+	#if DEBUG_PROJECTILE_BLAST
+		                                               
+		 
+			                                    
+			                                                                                                  
+			                                    
+			                                                                                                  
 
+			                                                
+			                                                
+			                                                
+		 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+		                                  
+		 
+			                                                                
+		 
+	#endif
 
 	return randVecs
 }
@@ -971,9 +1198,9 @@ void function FireProjectileBlastPattern( entity weapon, WeaponPrimaryAttackPara
 
 	float defaultPatternScale = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_blast_pattern_default_scale" ) )
 	patternScale *= defaultPatternScale
-	#if(false)
-
-#endif
+	#if DEBUG_PROJECTILE_BLAST
+		                                                     
+	#endif
 
 	array<vector> scaledBlastPattern = clone blastPattern
 
@@ -1018,9 +1245,9 @@ array<vector> function GetProjectileBlastPatternVectors( WeaponPrimaryAttackPara
 		vector vecToTarget = Normalize( offsetPos - startPos )
 		patternVecs.append( vecToTarget )
 
-		#if(false)
-
-#endif
+		#if DEBUG_PROJECTILE_BLAST
+			                                                          
+		#endif
 	}
 
 	return patternVecs
@@ -1061,21 +1288,10 @@ entity function FireBallisticRoundWithDrop( entity weapon, vector pos, vector di
 	fireBoltParams.dontApplySpread = ignoreSpread
 	fireBoltParams.projectileIndex = projectileIndex
 	fireBoltParams.deferred = deferred
-	entity bolt = weapon.FireWeaponBolt( fireBoltParams )
+	entity bolt = weapon.FireWeaponBoltAndReturnEntity( fireBoltParams )
 
-	if ( bolt != null )
-	{
-		bolt.proj.savedDir = originalDir
-		bolt.proj.savedShotTime = Time()
-
-		#if(false)
-
-
-#endif
-	}
-
-	#if(CLIENT)
-	Chroma_FiredWeapon( weapon )
+	#if CLIENT
+		Chroma_FiredWeapon( weapon )
 	#endif
 
 	return bolt
@@ -1101,19 +1317,19 @@ vector function GetZVelocityForDistOverTime( float distance, float duration, flo
 	float voz = 0.5 * gravity * duration * duration / duration
 	return <0, 0, voz>
 
-	//
-	//
-	//
-	//
+	                                                    
+	                                                    
+	                                                                                          
+	                        
 }
 
 
 int function FireGenericBoltWithDrop( entity weapon, WeaponPrimaryAttackParams attackParams, bool isPlayerFired )
 {
-	#if(CLIENT)
+	#if CLIENT
 		if ( !weapon.ShouldPredictProjectiles() )
 			return 1
-	#endif //
+	#endif              
 
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
 
@@ -1128,7 +1344,7 @@ int function FireGenericBoltWithDrop( entity weapon, WeaponPrimaryAttackParams a
 	fireBoltParams.scriptExplosionDamageType = damageFlags
 	fireBoltParams.clientPredicted = isPlayerFired
 	fireBoltParams.additionalRandomSeed = 0
-	entity bolt = weapon.FireWeaponBolt( fireBoltParams )
+	entity bolt = weapon.FireWeaponBoltAndReturnEntity( fireBoltParams )
 	if ( bolt != null )
 	{
 		bolt.kv.gravity = PROJ_GRAVITY
@@ -1136,8 +1352,8 @@ int function FireGenericBoltWithDrop( entity weapon, WeaponPrimaryAttackParams a
 		bolt.kv.renderamt = 0
 		bolt.kv.fadedist = 1
 	}
-	#if(CLIENT)
-	Chroma_FiredWeapon( weapon )
+	#if CLIENT
+		Chroma_FiredWeapon( weapon )
 	#endif
 
 
@@ -1171,489 +1387,526 @@ var function OnWeaponPrimaryAttack_EPG( entity weapon, WeaponPrimaryAttackParams
 	return missile
 }
 
-#if(false)
 
-
-
-
-#endif //
-
-
-var function OnWeaponPrimaryAttack_GenericMissile_Player( entity weapon, WeaponPrimaryAttackParams attackParams )
+bool function PlantStickyEntityOnWorldThatBouncesOffWalls( entity ent, DeployableCollisionParams collisionParams, float bounceDot, vector angleOffset = <0, 0, 0>, bool ignoreHullTrace = false )
 {
-	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
-
-	vector bulletVec = ApplyVectorSpread( attackParams.dir, weapon.GetAttackSpreadAngle() - 1.0 )
-	attackParams.dir = bulletVec
-
-	if ( IsServer() || weapon.ShouldPredictProjectiles() )
+	entity hitEnt = collisionParams.hitEnt
+	if ( HitEntIsValidToStick( hitEnt ) )
 	{
-		WeaponFireMissileParams fireMissileParams
-		fireMissileParams.pos = attackParams.pos
-		fireMissileParams.dir = attackParams.dir
-		fireMissileParams.speed = 1.0
-		fireMissileParams.scriptTouchDamageType = weapon.GetWeaponDamageFlags()
-		fireMissileParams.scriptExplosionDamageType = weapon.GetWeaponDamageFlags()
-		fireMissileParams.doRandomVelocAndThinkVars = false
-		fireMissileParams.clientPredicted = true
-		entity missile = weapon.FireWeaponMissile( fireMissileParams )
-		if ( missile )
-		{
-			missile.InitMissileForRandomDriftFromWeaponSettings( attackParams.pos, attackParams.dir )
-		}
-	}
-}
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-bool function PlantStickyEntityOnWorldThatBouncesOffWalls( entity ent, table collisionParams, float bounceDot, vector angleOffset = <0, 0, 0> )
-{
-	entity hitEnt = expect entity( collisionParams.hitEnt )
-	if ( hitEnt && (hitEnt.IsWorld() || hitEnt.HasPusherAncestor()) )
-	{
-		float dot = expect vector( collisionParams.normal ).Dot( <0, 0, 1> )
+		float dot = collisionParams.normal.Dot( <0, 0, 1> )
 
 		if ( dot < bounceDot )
 		{
-			#if(false)
+			#if SERVER
+				                                            
+				 
+					                                          
+					            
+				 
 
+				                                                                  
+				                                          
 
-
-
-
-
-
-
-
-
-
-#else
+				                                   
+					            
+			#else
 				return false
 			#endif
 		}
 
-		return PlantStickyEntity( ent, collisionParams, angleOffset )
+		return PlantStickyEntity( ent, collisionParams, angleOffset, ignoreHullTrace )
 	}
 
 	return false
 }
 
-
-bool function PlantStickyEntityThatBouncesOffWalls( entity ent, table collisionParams, float bounceDot, vector angleOffset = <0, 0, 0> )
+bool function HitEntIsValidToStick( hitEnt )
 {
-	//
-	float dot = expect vector( collisionParams.normal ).Dot( <0, 0, 1> )
-
-	if ( dot < bounceDot )
+	if ( !hitEnt || !IsValid( hitEnt ) )
 		return false
+	
+	if ( hitEnt.IsWorld() )
+		return true
+	if ( hitEnt.HasPusherAncestor() )
+		return true
+	if ( hitEnt.IsFuncBrush() )
+		return true
 
-	return PlantStickyEntity( ent, collisionParams, angleOffset )
+	return false
 }
 
-
-bool function PlantStickyEntity( entity ent, table collisionParams, vector angleOffset = <0, 0, 0> )
-{
-	if ( !EntityShouldStick( ent, expect entity( collisionParams.hitEnt ) ) )
-		return false
-
-	//
-	if ( collisionParams.hitEnt.IsProjectile() )
-		return false
-
-	//
-	vector plantAngles   = AnglesCompose( VectorToAngles( collisionParams.normal ), angleOffset )
-	vector plantPosition = expect vector( collisionParams.pos )
-
-	vector up = AnglesToUp( ent.GetAngles() )
-	vector normal = expect vector( collisionParams.normal )
-	float dot = DotProduct( up, normal )
-
-	vector fwd = AnglesToForward( ent.GetAngles() )
-
-	if ( !LegalOrigin( plantPosition ) )
-		return false
-
-	#if(false)
-
-
-
-#else
-		ent.SetOrigin( plantPosition )
-		ent.SetAngles( plantAngles )
-	#endif
-	ent.SetVelocity( <0, 0, 0> )
-
-	//
-	if ( !collisionParams.hitEnt.IsWorld() )
-	{
-		if ( !ent.IsMarkedForDeletion() && !collisionParams.hitEnt.IsMarkedForDeletion() )
-		{
-			if ( collisionParams.hitbox > 0 )
-				ent.SetParentWithHitbox( collisionParams.hitEnt, collisionParams.hitbox, true )
-
-			//
-			else
-				ent.SetParent( collisionParams.hitEnt )
-
-			if ( collisionParams.hitEnt.IsPlayer() )
-			{
-				thread HandleDisappearingParent( ent, expect entity( collisionParams.hitEnt ) )
-			}
-		}
-	}
-	else
-	{
-		ent.SetVelocity( <0, 0, 0> )
-		ent.StopPhysics()
-	}
-#if(CLIENT)
-	if ( ent instanceof C_BaseGrenade )
-#else
-	if ( ent instanceof CBaseGrenade )
+#if DEV
+const bool DEBUG_SURFACE_TEST = false
+const float DEBUG_SURFACE_TEST_TIME = 20
 #endif
-	ent.MarkAsAttached()
+const float SURFACE_TEST_TRACE_LENGTH = 66
 
-	ent.Signal( "Planted" )
-
-	return true
-}
-
-
-bool function PlantStickyGrenade( entity ent, vector pos, vector normal, entity hitEnt, int hitbox, float depth = 0.0, bool allowBounce = true, bool allowEntityStick = true, bool onlyTitansAllowed = true )
+bool function PlantStickyEntityOnConsistentSurface( entity projectile, DeployableCollisionParams collisionParams, float consistentDotThreshold, float size, vector angleOffset = <0, 0, 0> )
 {
-	if ( IsFriendlyTeam( ent.GetTeam(), hitEnt.GetTeam() ) )
-		return false
+	bool surfaceIsConsistent = true
 
-	if ( ent.IsMarkedForDeletion() || hitEnt.IsMarkedForDeletion() )
-		return false
-
-	vector plantAngles   = VectorToAngles( normal )
-	vector plantPosition = pos + normal * -depth
-
-	if ( !allowBounce )
-		ent.SetVelocity( <0, 0, 0> )
-
-	if ( !LegalOrigin( plantPosition ) )
-		return false
-
-	#if(false)
-
-
-
-#else
-		ent.SetOrigin( plantPosition )
-		ent.SetAngles( plantAngles )
-	#endif
-
-	if ( !hitEnt.IsWorld() && !hitEnt.IsFuncBrush() && ((onlyTitansAllowed && !hitEnt.IsTitan()) || !allowEntityStick) )
-		return false
-
-	//
-	if ( ent.IsMarkedForDeletion() )
-		return false
-
-	ent.SetVelocity( <0, 0, 0> )
-
-	if ( hitEnt.IsWorld() )
+	                                                                                                      
+	vector forward = CrossProduct( collisionParams.normal, <1, 0, 0> )                                                                         
+	if ( Length( forward ) == 0.0 )
 	{
-		ent.SetParent( hitEnt, "", true )
-		ent.StopPhysics()
+		forward = CrossProduct( collisionParams.normal, <0, 0, 1> )
 	}
-	else
-	{
-		if ( hitbox > 0 )
-			ent.SetParentWithHitbox( hitEnt, hitbox, true )
-		else //
-			ent.SetParent( hitEnt )
+	vector surfaceAngles = AnglesOnSurface( collisionParams.normal, forward )
+	vector right         = AnglesToRight( surfaceAngles )
 
-		if ( hitEnt.IsPlayer() )
+	#if DEV
+		if ( DEBUG_SURFACE_TEST )
 		{
-			thread HandleDisappearingParent( ent, hitEnt )
+			                                                                                                   
+			                                                                                                
+			 DebugDrawArrow( collisionParams.pos, collisionParams.pos + collisionParams.normal * SURFACE_TEST_TRACE_LENGTH / 2, 10, COLOR_GREEN, true, DEBUG_SURFACE_TEST_TIME )
 		}
-	}
-
-	#if(CLIENT)
-		if ( ent instanceof C_BaseGrenade )
-			ent.MarkAsAttached()
-	#else
-		if ( ent instanceof CBaseGrenade )
-			ent.MarkAsAttached()
 	#endif
 
-	return true
-}
-
-
-bool function PlantSuperStickyGrenade( entity ent, vector pos, vector normal, entity hitEnt, int hitbox )
-{
-	if ( IsFriendlyTeam( ent.GetTeam(), hitEnt.GetTeam() ) )
-		return false
-
-	vector plantAngles   = VectorToAngles( normal )
-	vector plantPosition = pos
-
-	if ( !LegalOrigin( plantPosition ) )
-		return false
-
-	#if(false)
-
-
-//
-
-#else
-		ent.SetOrigin( plantPosition )
-		ent.SetAngles( plantAngles )
-	#endif
-
-	if ( !hitEnt.IsWorld() && !hitEnt.IsPlayer() && !hitEnt.IsNPC() )
-		return false
-
-	ent.SetVelocity( <0, 0, 0> )
-
-	if ( hitEnt.IsWorld() )
+	int goodHitCount            = 0
+	array<vector> testPositions = [ <-1, -1, 0>, <-1, 1, 0>, <1, 1, 0>, <1, -1, 0> ]
+	for ( int i = 0; i < testPositions.len(); ++i )
 	{
-		ent.StopPhysics()
-	}
-	else
-	{
-		if ( !ent.IsMarkedForDeletion() && !hitEnt.IsMarkedForDeletion() )
-		{
-			if ( hitbox > 0 )
-				ent.SetParentWithHitbox( hitEnt, hitbox, true )
-			else //
-				ent.SetParent( hitEnt )
+		vector testPos = testPositions[i]
 
-			if ( hitEnt.IsPlayer() )
+		vector origin    = collisionParams.pos + collisionParams.normal * size
+		vector endOrigin = origin + forward * testPos.x * size + right * testPos.y * size - collisionParams.normal * SURFACE_TEST_TRACE_LENGTH
+
+		#if DEV
+			if ( DEBUG_SURFACE_TEST )
 			{
-				thread HandleDisappearingParent( ent, hitEnt )
+				DebugDrawArrow( origin, endOrigin, 5, COLOR_CYAN, true, DEBUG_SURFACE_TEST_TIME )
+			}
+		#endif
+		TraceResults traceResult = TraceLine( origin, endOrigin, [ projectile ], TRACE_MASK_NPCWORLDSTATIC, TRACE_COLLISION_GROUP_NONE )
+
+		if ( traceResult.fraction < 1.0 )                      
+		{
+			float dot = traceResult.surfaceNormal.Dot( collisionParams.normal )
+			if ( dot < consistentDotThreshold )
+			{
+				surfaceIsConsistent = false
+				#if DEV
+					if ( DEBUG_SURFACE_TEST )
+					{
+						DebugDrawArrow( traceResult.endPos, traceResult.endPos + traceResult.surfaceNormal * 20, 5, <255, 100, 0>, true, DEBUG_SURFACE_TEST_TIME )
+					}
+				#endif
+			}
+			else
+			{
+				goodHitCount++
+				#if DEV
+					if ( DEBUG_SURFACE_TEST )
+					{
+						DebugDrawArrow( traceResult.endPos, traceResult.endPos + traceResult.surfaceNormal * 20, 5, <100, 255, 0>, true, DEBUG_SURFACE_TEST_TIME )
+					}
+				#endif
 			}
 		}
+		else
+		{
+			surfaceIsConsistent = false
+			break
+		}
 	}
 
-	#if(CLIENT)
-		if ( ent instanceof C_BaseGrenade )
-			ent.MarkAsAttached()
-	#else
-		if ( ent instanceof CBaseGrenade )
-			ent.MarkAsAttached()
+
+	if ( !surfaceIsConsistent )
+	{
+		#if SERVER
+			                                
+			 
+				                                         
+					                                                         
+
+				                                                                                                                      
+					                                                                    
+			 
+		#endif
+
+		return false
+	}
+
+	return PlantStickyEntity( projectile, collisionParams, angleOffset )
+}
+
+bool function PlantStickyEntityThatBouncesOffWalls( entity projectile, DeployableCollisionParams cp, float bounceDot, vector angleOffset = <0, 0, 0> )
+{
+                     
+	if ( (cp.deployableFlags & eDeployableFlags.VEHICLES_LARGE_DEPLOYABLE) && EntIsHoverVehicle( cp.hitEnt ) )
+		return PlantStickyEntity_LargeDeployableOnVehicle( projectile, cp, angleOffset )
+                           
+
+	float dot = cp.normal.Dot( <0, 0, 1> )
+	if ( dot < bounceDot )
+	{
+		#if SERVER
+			                                
+			 
+				                                         
+					                                            
+				                                                                                                                      
+					                                                       
+			 
+		#endif
+		return false
+	}
+
+	#if SERVER
+		                              
+		                                                          
+		                                                           
+		                                                                                                                                                          
+		                                              
+		                                               
+		 
+			            
+		 
 	#endif
 
+	return PlantStickyEntity( projectile, cp, angleOffset )
+}
+
+
+#if DEV
+const bool DEBUG_DRAW_PLANT_STICKY = false
+#endif
+
+bool function PlantStickyEntity( entity ent, DeployableCollisionParams cp, vector angleOffset = <0, 0, 0>, bool ignoreHullTrace = false, bool moveOnNoHitTrace = true )
+{
+	if ( !EntityShouldStickEx( ent, cp ) )
+		return false
+	Assert( !ent.IsMarkedForDeletion(), "" )
+	Assert( !cp.hitEnt.IsMarkedForDeletion(), "" )
+
+	                                                                                       
+	Assert( LengthSqr( cp.normal ) > FLT_EPSILON , "PlantStickyEntity: normal vector " + cp.normal + " is a zero vector. Entity: '" + ent + "' is sticking to HitEnt: '" + cp.hitEnt + "' at position: " + cp.pos )
+	vector plantAngles = AnglesCompose( VectorToAngles( cp.normal ), angleOffset )
+	vector plantPosition
+	if ( ignoreHullTrace )
+	{
+		plantPosition = cp.pos
+	}
+	else
+	{
+		#if DEV
+		if ( DEBUG_DRAW_PLANT_STICKY )
+		{
+			DebugDrawSphere( cp.pos, 5, COLOR_YELLOW, false, 60 )
+			DebugDrawArrow( cp.pos, cp.pos + cp.normal*20, 10, COLOR_YELLOW, false, 60 )
+		}
+		#endif
+		vector traceDir    = cp.normal * -1
+		vector mins        = cp.ignoreHullSize ? ZERO_VECTOR: ent.GetBoundingMins()
+		vector maxs        = cp.ignoreHullSize ? ZERO_VECTOR: ent.GetBoundingMaxs()
+		vector entPos 	   = cp.pos
+		int traceMask 	   = (ent.IsProjectile() && ent.GetProjectileWeaponSettingBool( eWeaponVar.grenade_use_mask_ability )) ? TRACE_MASK_ABILITY : TRACE_MASK_SHOT
+		array<entity> ignoreEnts = [ent]
+		if ( ent.IsProjectile() && ent.proj.ignoreOwnerForPlaceStickyEnt && IsValid( ent.GetOwner() ) )
+			ignoreEnts.append( ent.GetOwner() )
+
+		TraceResults trace
+		if( ( cp.hitEnt.IsPlayer() || cp.hitEnt.IsNPC() ) && ent.IsProjectile() && ent.ProjectileGetWeaponClassName() == "mp_weapon_cluster_bomb_launcher" )
+		{
+			vector center = cp.hitEnt.GetWorldSpaceCenter()
+			center.z = entPos.z
+			trace = TraceLineHighDetail( entPos, center, ignoreEnts, traceMask, TRACE_COLLISION_GROUP_NONE )
+		}
+		else if( cp.highDetailTrace || ( ent.IsProjectile() && ent.proj.useHighDetailCollisionTraceForPlaceStickyEnt ) )
+		{
+			trace = TraceHullHighDetail( entPos, ( entPos + ( traceDir * cp.traceLength ) ), mins, maxs, ignoreEnts, ( traceMask & ~CONTENTS_HITBOX ), TRACE_COLLISION_GROUP_NONE, cp.normal )
+		}
+		else
+		{
+			trace = TraceHull( entPos, ( entPos + ( traceDir * cp.traceLength ) ), mins, maxs, ignoreEnts, ( traceMask & ~CONTENTS_HITBOX ), TRACE_COLLISION_GROUP_NONE, cp.normal )
+		}
+
+		if( moveOnNoHitTrace || trace.fraction < 1.0 )
+		{
+			plantPosition = trace.endPos
+		
+			#if DEV
+			if ( DEBUG_DRAW_PLANT_STICKY )
+			{
+				DebugDrawSphere( plantPosition, 3, COLOR_RED, false, 60 )
+			}
+			#endif
+		}
+		else
+		{
+			plantPosition = cp.pos
+			
+			#if DEV
+			if ( DEBUG_DRAW_PLANT_STICKY )
+			{
+				DebugDrawSphere( plantPosition, 3, COLOR_BLUE, false, 60 )
+			}
+			#endif
+		}
+
+		if ( !LegalOrigin( plantPosition ) )
+			return false
+
+		if ( trace.startSolid && IsValid( trace.hitEnt ) && !trace.hitEnt.IsWorld() && ent.IsProjectile() && ent.GetProjectileWeaponSettingBool( eWeaponVar.grenade_mover_destroy_when_planted ) )
+		{
+			#if SERVER
+				             
+			#endif
+			return false
+		}
+	}
+
+	if ( IsOriginInvalidForPlacingPermanentOnto( plantPosition ) )
+		return false
+
+	#if SERVER
+		                                 
+		                               
+		                         
+			                         
+	#else
+		ent.SetOrigin( plantPosition )
+		ent.SetAngles( plantAngles )
+	#endif
+	ent.SetVelocity( <0, 0, 0> )
+
+	                                                                                                  
+	if ( !EntityShouldStickEx( ent, cp ) )
+		return false
+	Assert( !ent.IsMarkedForDeletion(), "" )
+	Assert( !cp.hitEnt.IsMarkedForDeletion(), "" )
+
+	                                                              
+	if ( cp.hitEnt.IsWorld() )
+	{
+		ent.SetVelocity( <0, 0, 0> )
+		ent.StopPhysics()
+	}
+	else
+	{
+		if ( cp.hitBox > 0 )
+			ent.SetParentWithHitbox( cp.hitEnt, cp.hitBox, true )
+		else
+			ent.SetParent( cp.hitEnt )	                                                                 
+
+		if ( cp.hitEnt.IsPlayer() )
+			thread HandleDisappearingParent( ent, cp.hitEnt )
+	}
+
+	CommonOnSuccessfulStickyPlant( ent, cp )
 	return true
 }
 
-#if(false)
+void function CommonOnSuccessfulStickyPlant( entity ent, DeployableCollisionParams cp )
+{
+	if ( IsABaseGrenade( ent ) )
+	{
+		ent.MarkAsAttached()
+		ent.AddGrenadeStatusFlag( GSF_PLANTED )
+	}
+	if ( ent.IsProjectile() )
+	{
+		ent.proj.isPlanted = true
+		if ( ent.proj.deployFunc != null )
+			ent.proj.deployFunc( ent, cp )
+	}
+}
 
+                     
+bool function PlantStickyEntity_LargeDeployableOnVehicle( entity ent, DeployableCollisionParams cp, vector angleOffset = <0, 0, 0> )
+{
+	if ( !HoverVehicle_AttachEntToNearestAbilityAttachment( ent, cp.hitEnt, false, false, <0,0,0> ) )
+		return false
+	CommonOnSuccessfulStickyPlant( ent, cp )
+	return true
+}
+                           
 
+#if SERVER
+                                         
+ 
+	                                   
+ 
+#endif
 
+bool function IsABaseGrenade( entity ent )
+{
+	#if CLIENT
+		return (ent instanceof C_BaseGrenade)
+	#else
+		return (ent instanceof CBaseGrenade)
+	#endif
+}
 
+#if SERVER
+                                                                      
+ 
+	                                
+	                            
 
+	            
+		                    
+		 
+			                     
+				                 
+		 
+	 
 
-
-
-
-
-
-
-
-
+	                                                                       
+ 
 #else
 void function HandleDisappearingParent( entity ent, entity parentEnt )
 {
 	parentEnt.EndSignal( "OnDeath" )
 	ent.EndSignal( "OnDestroy" )
 
-	parentEnt.WaitSignal( "StartPhaseShift" )
+	parentEnt.WaitSignal( "StartPhaseShift", "DeathTotem_PreRecallPlayer" )
 
 	ent.ClearParent()
 }
 #endif
 
-bool function EntityShouldStick( entity stickyEnt, entity hitent )
+string function GetClassnamefromStickyHitEnt( entity hitEnt )
 {
-	if ( !EntityCanHaveStickyEnts( stickyEnt, hitent ) )
+	string ornull classNameRaw = hitEnt.GetNetworkedClassName()
+	return ((classNameRaw == null) ? "" : expect string( classNameRaw ))
+}
+
+bool function EntityShouldStickEx( entity stickyEnt, DeployableCollisionParams params )
+{
+	entity hitEnt = params.hitEnt
+	if ( !EntityCanHaveStickyEnts( stickyEnt, hitEnt ) )
 		return false
 
-	if ( hitent == stickyEnt )
+	string className = GetClassnamefromStickyHitEnt( hitEnt )
+	if ( className == "prop_door" )
+	{
+		float normal = ((params.normal == <0,0,0>) ? 0.0 : params.normal.Dot( UP_VECTOR ))
+		if ( normal > DOT_60DEGREE )
+			return false
+	}
+
+	if ( stickyEnt.IsMarkedForDeletion() )
+		return false
+	if ( hitEnt.IsMarkedForDeletion() )
+		return false
+	if ( hitEnt == stickyEnt )
+		return false
+	if ( hitEnt == stickyEnt.GetParent() )
 		return false
 
-	if ( hitent == stickyEnt.GetParent() )
+                     
+	if ( (params.deployableFlags & eDeployableFlags.VEHICLES_NO_STICK) && (className == "player_vehicle") )
+		return false
+                           
+
+	if ( hitEnt.GetScriptName() == DIRTY_BOMB_TARGETNAME && params.hitBox == 0 )
 		return false
 
 	return true
 }
-
+bool function EntityShouldStick( entity stickyEnt, entity hitEnt )
+{
+	DeployableCollisionParams params
+	params.hitEnt = hitEnt
+	return EntityShouldStickEx( stickyEnt, params )
+}
 
 bool function EntityCanHaveStickyEnts( entity stickyEnt, entity ent )
 {
 	if ( !IsValid( ent ) )
 		return false
 
-	if ( ent.GetModelName() == $"" ) //
+	if ( ent.GetModelName() == $"" )                                                                        
 		return false
 
-	var entClassname = ent.GetNetworkedClassName()
-	if ( entClassname == null || !(string( entClassname ) in level.stickyClasses) && !ent.IsNPC() )
+	                                                                                             
+	if ( ent.IsProjectile() )
 		return false
 
-	#if(false)
+	string stickyEntWeaponClassName = ""
 
-
-
-
-
-#endif
-
-
-#if(CLIENT)
-	if ( stickyEnt instanceof C_Projectile )
+#if SERVER
+	                                       
 #else
-	if ( stickyEnt instanceof CProjectile )
+	if ( stickyEnt instanceof C_Projectile )
 #endif
 	{
-		string weaponClassName = stickyEnt.ProjectileGetWeaponClassName()
-		local stickPlayer      = GetWeaponInfoFileKeyField_Global( weaponClassName, "stick_pilot" )
-		local stickTitan       = GetWeaponInfoFileKeyField_Global( weaponClassName, "stick_titan" )
-		local stickNPC         = GetWeaponInfoFileKeyField_Global( weaponClassName, "stick_npc" )
+		stickyEntWeaponClassName = stickyEnt.ProjectileGetWeaponClassName()
+	}
 
-		if ( ent.IsTitan() && stickTitan == 0 )
+	var entClassname = ent.GetNetworkedClassName()
+	if ( entClassname == null )
+		return false
+
+	if ( entClassname == "prop_lootroller" && stickyEntWeaponClassName != "" )
+		return true
+
+	                                               
+	if ( ent.GetScriptName() == WRECKING_BALL_BALL_SCRIPT_NAME )
+		return true
+	                                                                                                    
+	if ( stickyEnt.GetScriptName() == RIOT_DRILL_SCRIPT_NAME )
+		return true
+
+	                                                           
+	if ( ent.GetScriptName() == MOBILE_SHIELD_SCRIPTNAME )
+		return MobileShield_IsAllowedStickyEnt( ent, stickyEnt, stickyEntWeaponClassName )
+
+                       
+		                                                                                                                       
+		if ( entClassname == "phys_bone_follower" && IsValid( ent.GetOwner() ) )
+		{
+			entity cannonEnt = ent.GetOwner()
+
+			if ( cannonEnt.GetScriptName() == GetEnumString( "eSkydiveLauncherType", eSkydiveLauncherType.GRAVITY_CANNON ) )
+			{
+				                                                                                                                                                                                                                                                                        
+				                                                                                                                                                                      
+				if ( INVALID_GRAVITY_CANNON_PLACEABLES.contains( stickyEntWeaponClassName ) )
+				{
+					return false
+				}
+			}
+		}
+       
+
+	if ( !(string( entClassname ) in STICKY_CLASSES) && !ent.IsNPC() )
+		return false
+
+	#if SERVER
+		                                     
+		 
+			                                                                                        
+				            
+		 
+	#endif
+
+	if ( stickyEntWeaponClassName != "" )
+	{
+		                     
+		                                                                                                            
+		  	            
+
+		if ( ent.IsPlayer() && (GetWeaponInfoFileKeyField_Global( stickyEntWeaponClassName, "stick_pilot" ) == 0) )
 			return false
-		else if ( ent.IsPlayer() && stickPlayer == 0 )
+		if ( ent.IsNPC() && (GetWeaponInfoFileKeyField_Global( stickyEntWeaponClassName, "stick_npc" ) == 0) )
 			return false
-		else if ( ent.IsNPC() && stickNPC == 0 )
+		if ( (ent.GetScriptName() == CRYPTO_DRONE_SCRIPTNAME ) && (GetWeaponInfoFileKeyField_Global( stickyEntWeaponClassName, "stick_drone" ) == 0) )
 			return false
 	}
+
+	#if SERVER
+		                              
+			            
+	#endif          
 
 	return true
 }
 
-#if(false)
-//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-void function ProximityCharge_PostFired_Init( entity proximityMine, entity player )
-{
-	#if(false)
-
-#endif
-}
-
-
-void function ExplodePlantedGrenadeAfterDelay( entity grenade, float delay )
-{
-	grenade.EndSignal( "OnDeath" )
-	grenade.EndSignal( "OnDestroy" )
-
-	float endTime = Time() + delay
-
-	while ( Time() < endTime )
-	{
-		EmitSoundOnEntity( grenade, DEFAULT_WARNING_SFX )
-		wait 0.1
-	}
-
-	grenade.GrenadeExplode( grenade.GetForwardVector() )
-}
-
-
-void function Player_DetonateSatchels( entity player )
-{
-	player.Signal( "DetonateSatchels" )
-
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-#endif
-}
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(DEV)
+#if DEV
 void function ShowExplosionRadiusOnExplode( entity ent )
 {
 	ent.WaitSignal( "OnDestroy" )
@@ -1663,222 +1916,200 @@ void function ShowExplosionRadiusOnExplode( entity ent )
 
 	vector org    = ent.GetOrigin()
 	vector angles = <0, 0, 0>
-	thread DebugDrawCircle( org, angles, innerRadius, 255, 255, 51, true, 3.0 )
-	thread DebugDrawCircle( org, angles, outerRadius, 255, 255, 255, true, 3.0 )
+	thread DebugDrawCircle( org, angles, innerRadius, <255, 255, 51>, true, 3.0 )
+	thread DebugDrawCircle( org, angles, outerRadius, COLOR_WHITE, true, 3.0 )
 }
-#endif //
-
-#if(false)
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#endif       
+
+
+#if SERVER
+                                                 
+                                                                                                                                                                                                 
+ 
+	                                                                                                                        
+	                                 
+
+	                                      
+	                                       
+	               
+	                
+
+	              
+	 
+		                          
+			      
+
+		                                            
+		                                             
+		                                              
+
+		                                                   
+			        
+
+		                             
+		                          
+		 
+			                                              
+			 
+				                                              
+				 
+					                                                    
+					 
+						                                           
+						 
+							                       
+							     
+						 
+					 
+				 
+			 
+			    
+			 
+				                                                              
+				 
+					                                     
+						                        
+					    
+						                                                           
+				 
+				    
+				 
+					                       
+				 
+			 
+		 
+
+		                       
+			                                                                                                               
+
+		                         
+			     
+	 
+
+	                          
+		      
+
+	                                                                                                                               
+
+	                                  
+	 
+		                                                     
+
+		                   
+			             
+	 
+	                                                                                                 
+	 
+		               
+		                               
+			                                                     
+		    
+			                                           
+
+		                                                                
+
+		                                                    
+		 
+			                       
+			                                      
+		 
+	 
+
+	                          
+		      
+	
+               
+                                                                                           
+  
+                           
+                     
+                              
+                                     
+                                                   
+                                   
+
+                                      
+  
+     
+       
+	                           
+	 
+		                                                                                                           
+		                 
+	 
+	    
+	 
+		                                                    
+	 
+ 
+
+                                                               
+ 
+	                                                                                                          
+
+	                                
+		            
+
+	                             
+ 
+
+                                                         
+ 
+	                                                                
+
+	                
+
+	                   
+		            
+
+	                  
+ 
+
+                                  
+                                                                    
+ 
+	                                
+	                                                        
+	                         
+		                 
+ 
+
+                                                                         
+ 
+	                        
+		                                             
+
+	                                                                                                                   
+
+	                                                
+ 
+
+                                                                               
+ 
+	                                            
+	                                                                        
+		      
+
+	                                                         
+	                      
+		      
+
+	                 
+	                                       
+		                                
+	                                                   
+		                                      
+
+	                       
+		      
+
+	                                             
+ 
+#endif          
 
 bool function WeaponCanCrit( entity weapon )
 {
-	//
+	                                                                   
 	if ( !weapon )
 		return false
 
@@ -1886,68 +2117,30 @@ bool function WeaponCanCrit( entity weapon )
 }
 
 
-#if(false)
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
 vector function GetVectorFromPositionToCrosshair( entity player, vector startPos )
 {
 	Assert( IsValid( player ) )
 
-	//
+	                          
 	vector traceStart        = player.EyePosition()
 	vector traceEnd          = traceStart + (player.GetViewVector() * 20000)
 	array<entity> ignoreEnts = [ player ]
 	TraceResults traceResult = TraceLine( traceStart, traceEnd, ignoreEnts, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
 
-	//
+	                                                   
 	vector vec = traceResult.endPos - startPos
 	vec = Normalize( vec )
 	return vec
 }
 
-/*
-
-
-
-
-
-
-*/
+  
+                                                                      
+ 
+	                                                
+	                              
+	                              
+ 
+  
 
 void function InitMissileForRandomDriftForVortexHigh( entity missile, vector startPos, vector startDir )
 {
@@ -1960,353 +2153,363 @@ void function InitMissileForRandomDriftForVortexLow( entity missile, vector star
 	missile.InitMissileForRandomDrift( startPos, startDir, 0.3, 0.085, 0, 0, 0.5, 0.5, 0 )
 }
 
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+  
+                                                                 
+ 
+	                                                             
+
+	                                                                                                        
+	                                                                                                        
+
+	                                                                                                            
+	                                                                                                            
+
+	                                                                                                                
+	                                        
+		                                 
+	                                                                                                                
+	                                        
+		                                 
+ 
+
+                          
+ 
+	                                                                         
+ 
+
+                                                                          
+ 
+	                                                            
+	                                                             
+	                                                                               
+
+	                                               
+
+	                     
+
+	                                             
+
+	                                                                                     
+	                                                                                     
+
+	                                   
+	                             
+
+	                                                                                         
+	                                                                                        
+
+	                              
+	                           
+	                      
+	                      
+	                   
+	                      
+	            
+
+	          
+ 
+
+                                                                                                                    
+                                                                      
+ 
+	                                                                                     
+	                                 
+		                            
+
+	                   
+	                                                                                                                                                                                    
+ 
+
+                                                                                                                                      
+ 
+	                           
+	                                                                             
+
+	                                                                                   
+	                                                             
+	                                                            
+	                                
+	 
+		                            
+		                                                                 
+		                                                                     
+		                                        
+		                                        
+
+		                           
+
+		              
+		                                
+			                                                                      
+
+		                                                                         
+
+		                                                                
+		                   
+		  	                                                                                                                                      
+
+		                                        
+		                             
+		                            
+			                                 
+		    
+			                                   
+
+		                            
+		 
+			                                                                          
+		 
+
+		                                                             
+		                                                                                            
+
+		                                             
+		                      
+		            
+	 
+
+	          
+ 
+  
+
+#if SERVER
+                                                                                                                             
+ 
+	                        
+		      
+
+	                              
+
+	                                          
+	                 
+	                 
+	                   
+	                             
+
+	                                                                                           
+	                                                                                    
+	                       
+	 
+		                                                                                       
+		                                                                                                             
+	 
+	    
+	 
+		                                                                                           
+		                                                                                                                 
+	 
+
+	                                              
+
+	                                   
+	                                                                                                                    
+	                                     
+	                                                
+	                                   
+	                                                                 
+	                                           
+
+	                                        
+	                             
+	 
+		                                                
+			                                                                                                                                                                         
+	 
+
+	                                                                   
+	                                                                   
+	         
+
+	                          
+	 
+		                                                                                                                        
+		                                                                                                     
+	 
+
+	            
+		                                    
+		 
+			                    
+				                
+			                         
+		 
+	 
+
+	                           
+		                   
+
+	                                                                                                                                                 
+ 
+
+                                                              
+                                                                                                                                         
+                                                     
+                                                              
+                                                                                                                                                                                            
+ 
+	                              
+
+	                                     
+	                                                          
+	                                    
+
+	                                       
+		                                                          
+
+	                       
+	 
+		                                         
+		                                                    
+	 
+
+	                                     
+	                                       
+
+	                                                                                                         
+
+	            
+		                                    
+		 
+			                             
+		 
+	 
+
+	                         
+	               
+	                          
+	              
+	                                                   
+	                                                                         
+
+	                                 
+	                                             
+	 
+		                                                                                                                                               
+		           
+	 
+
+	                            
+ 
+
+                                                                                                                                                                                                   
+ 
+	                                            
+	                                                                  
+
+	                                                 
+	                                                
+	                                           
+	                                           
+	                                               
+	                                           
+	                                            
+	                                              
+	                                               
+
+	                 
+	              
+	                  
+	              
+	             
+	                      
+	              
+	              
+
+	                                                     
+
+	                                                               
+	                                                                    
+	                                     
+	                                                              
+	                                                                                             
+
+	            
+		                                
+		 
+			                                 
+			 
+				                                           
+				 
+					                    
+						            
+				 
+				                         
+			 
+		 
+	 
+
+	                                                                                    
+	 
+		                                               
+		                                 
+		                                                                      
+		                           
+		                        
+		                                                                                   
+
+		                                                  
+		                   
+		 
+			                          
+			                        
+		 
+
+		                                               
+
+		                                                                                                          
+		                                       
+
+		                           
+
+		         
+
+		                          
+
+		          
+			                   
+			      
+			          
+			       
+			                 
+			            
+			            
+			                                   
+			                   
+			       
+			                      
+			                           
+			                          
+
+		                                           
+			                                                   
+	 
+ 
+
+
+                                                   
+ 
+	                                                    
+	                                                                                 
+	                                                        
+	                               
+	                               
+	                                           
+	                                                             
+
+	                                   
+	                                  
+	                                  
+
+	                                
+	                             
+	                                                                   
+
+	                                                                         
+	                                   
+
+	                   
+ 
+#endif          
 
 vector function GetVelocityForDestOverTime( vector startPoint, vector endPoint, float duration )
 {
@@ -2322,10 +2525,10 @@ vector function GetVelocityForDestOverTime( vector startPoint, vector endPoint, 
 
 vector function GetPlayerVelocityForDestOverTime( vector startPoint, vector endPoint, float duration )
 {
-	//
+	                                                                      
 
 	float gravityScale = GetGlobalSettingsFloat( DEFAULT_PILOT_SETTINGS, "gravityScale" )
-	float GRAVITY      = 750 * gravityScale //
+	float GRAVITY      = 750 * gravityScale                                  
 
 	float vox = (endPoint.x - startPoint.x) / duration
 	float voy = (endPoint.y - startPoint.y) / duration
@@ -2334,41 +2537,7 @@ vector function GetPlayerVelocityForDestOverTime( vector startPoint, vector endP
 	return <vox, voy, voz>
 }
 
-
-bool function HasLockedTarget( entity weapon )
-{
-	if ( weapon.SmartAmmo_IsEnabled() )
-	{
-		array< SmartAmmoTarget > targets = weapon.SmartAmmo_GetTargets()
-		if ( targets.len() > 0 )
-		{
-			foreach ( target in targets )
-			{
-				if ( target.fraction == 1 )
-					return true
-			}
-		}
-	}
-	return false
-}
-
-
-bool function CanWeaponShootWhileRunning( entity weapon )
-{
-	if ( "primary_fire_does_not_block_sprint" in weapon.s )
-		return expect bool( weapon.s.primary_fire_does_not_block_sprint )
-
-	if ( weapon.GetWeaponSettingBool( eWeaponVar.primary_fire_does_not_block_sprint ) )
-	{
-		weapon.s.primary_fire_does_not_block_sprint <- true
-		return true
-	}
-
-	weapon.s.primary_fire_does_not_block_sprint <- false
-	return false
-}
-
-#if(CLIENT)
+#if CLIENT
 
 bool function IsOwnerViewPlayerFullyADSed( entity weapon )
 {
@@ -2388,179 +2557,7 @@ bool function IsOwnerViewPlayerFullyADSed( entity weapon )
 
 	return true
 }
-#endif //
-
-array<entity> function FireExpandContractMissiles( entity weapon, WeaponPrimaryAttackParams attackParams, vector attackPos, vector attackDir, int damageType, int explosionDamageType, bool shouldPredict, int rocketsPerShot, missileSpeed, launchOutAng, launchOutTime, launchInAng, launchInTime, launchInLerpTime, launchStraightLerpTime, applyRandSpread, int burstFireCountOverride = -1, debugDrawPath = false )
-{
-	array<table> missileVecs = GetExpandContractRocketTrajectories( weapon, attackParams.burstIndex, attackPos, attackDir, rocketsPerShot, launchOutAng, launchInAng, burstFireCountOverride )
-	entity owner             = weapon.GetWeaponOwner()
-	array<entity> firedMissiles
-
-	vector missileEndPos = owner.EyePosition() + (attackDir * 5000)
-
-	for ( int i = 0; i < rocketsPerShot; i++ )
-	{
-		WeaponFireMissileParams fireMissileParams
-		fireMissileParams.pos = attackPos
-		fireMissileParams.dir = attackDir
-		fireMissileParams.speed = expect float( missileSpeed )
-		fireMissileParams.scriptTouchDamageType = damageType
-		fireMissileParams.scriptExplosionDamageType = explosionDamageType
-		fireMissileParams.doRandomVelocAndThinkVars = false
-		fireMissileParams.clientPredicted = shouldPredict
-		entity missile = weapon.FireWeaponMissile( fireMissileParams )
-
-		if ( missile )
-		{
-			/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-			missile.InitMissileExpandContract( missileVecs[i].outward, missileVecs[i].inward, launchOutTime, launchInLerpTime, launchInTime, launchStraightLerpTime, missileEndPos, applyRandSpread )
-
-			if ( IsServer() && debugDrawPath )
-				thread DebugDrawMissilePath( missile )
-
-			//
-			missile.InitMissileForRandomDriftFromWeaponSettings( attackPos, attackDir )
-
-			firedMissiles.append( missile )
-		}
-	}
-
-	return firedMissiles
-}
-
-
-array<entity> function FireExpandContractMissiles_S2S( entity weapon, WeaponPrimaryAttackParams attackParams, vector attackPos, vector attackDir, bool shouldPredict, int rocketsPerShot, missileSpeed, launchOutAng, launchOutTime, launchInAng, launchInTime, launchInLerpTime, launchStraightLerpTime, applyRandSpread, int burstFireCountOverride = -1, debugDrawPath = false )
-{
-	array<table> missileVecs = GetExpandContractRocketTrajectories( weapon, attackParams.burstIndex, attackPos, attackDir, rocketsPerShot, launchOutAng, launchInAng, burstFireCountOverride )
-	entity owner             = weapon.GetWeaponOwner()
-	array<entity> firedMissiles
-
-	vector missileEndPos = attackPos + (attackDir * 5000)
-
-	for ( int i = 0; i < rocketsPerShot; i++ )
-	{
-		WeaponFireMissileParams fireMissileParams
-		fireMissileParams.pos = attackPos
-		fireMissileParams.dir = attackDir
-		fireMissileParams.speed = expect float( missileSpeed )
-		fireMissileParams.scriptTouchDamageType = DF_GIB | DF_IMPACT
-		fireMissileParams.scriptExplosionDamageType = damageTypes.explosive
-		fireMissileParams.doRandomVelocAndThinkVars = false
-		fireMissileParams.clientPredicted = shouldPredict
-		entity missile = weapon.FireWeaponMissile( fireMissileParams )
-		missile.SetOrigin( attackPos )//
-		if ( missile )
-		{
-			/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-			missile.InitMissileExpandContract( missileVecs[i].outward, missileVecs[i].inward, launchOutTime, launchInLerpTime, launchInTime, launchStraightLerpTime, missileEndPos, applyRandSpread )
-
-			if ( IsServer() && debugDrawPath )
-				thread DebugDrawMissilePath( missile )
-
-			//
-			missile.InitMissileForRandomDriftFromWeaponSettings( attackPos, attackDir )
-
-			firedMissiles.append( missile )
-		}
-	}
-
-	return firedMissiles
-}
-
-
-array<table> function GetExpandContractRocketTrajectories( entity weapon, int burstIndex, vector attackPos, vector attackDir, int rocketsPerShot, launchOutAng, launchInAng, int burstFireCount = -1 )
-{
-	bool DEBUG_DRAW_MATH = false
-
-	if ( burstFireCount == -1 )
-		burstFireCount = weapon.GetWeaponBurstFireCount()
-
-	float additionalRotation = ((360.0 / rocketsPerShot) / burstFireCount) * burstIndex
-	//
-	//
-	//
-
-	vector ang     = VectorToAngles( attackDir )
-	vector forward = AnglesToForward( ang )
-	vector right   = AnglesToRight( ang )
-	vector up      = AnglesToUp( ang )
-
-	if ( DEBUG_DRAW_MATH )
-		DebugDrawLine( attackPos, attackPos + (forward * 1000), 255, 0, 0, true, 30.0 )
-
-	//
-	float offsetAng = 360.0 / rocketsPerShot
-	for ( int i = 0; i < rocketsPerShot; i++ )
-	{
-		float a    = offsetAng * i + additionalRotation
-		vector vec = <0, 0, 0>
-		vec += up * deg_sin( a )
-		vec += right * deg_cos( a )
-
-		if ( DEBUG_DRAW_MATH )
-			DebugDrawLine( attackPos, attackPos + (vec * 50), 10, 10, 10, true, 30.0 )
-	}
-
-	//
-	vector x  = right * deg_sin( launchOutAng )
-	vector y  = up * deg_sin( launchOutAng )
-	vector z  = forward * deg_cos( launchOutAng )
-	vector rx = right * deg_sin( launchInAng )
-	vector ry = up * deg_sin( launchInAng )
-	vector rz = forward * deg_cos( launchInAng )
-	array<table> missilePoints
-	for ( int i = 0; i < rocketsPerShot; i++ )
-	{
-		table points
-
-		//
-		float a       = offsetAng * i + additionalRotation
-		float s       = deg_sin( a )
-		float c       = deg_cos( a )
-		vector vecOut = z + x * c + y * s
-		vecOut = Normalize( vecOut )
-		points.outward <- vecOut
-
-		//
-		vector vecIn = rz + rx * c + ry * s
-		points.inward <- vecIn
-
-		//
-		missilePoints.append( points )
-
-		if ( DEBUG_DRAW_MATH )
-		{
-			DebugDrawLine( attackPos, attackPos + (vecOut * 50), 255, 255, 0, true, 30.0 )
-			DebugDrawLine( attackPos + vecOut * 50, attackPos + vecOut * 50 + (vecIn * 50), 255, 0, 255, true, 30.0 )
-		}
-	}
-
-	return missilePoints
-}
+#endif          
 
 
 void function DebugDrawMissilePath( entity missile )
@@ -2572,7 +2569,7 @@ void function DebugDrawMissilePath( entity missile )
 		WaitFrame()
 		if ( !IsValid( missile ) )
 			return
-		DebugDrawLine( lastPos, missile.GetOrigin(), 0, 255, 0, true, 20.0 )
+		DebugDrawLine( lastPos, missile.GetOrigin(), COLOR_GREEN, true, 20.0 )
 		lastPos = missile.GetOrigin()
 	}
 }
@@ -2587,294 +2584,108 @@ bool function IsPilotShotgunWeapon( string weaponName )
 }
 
 
-array<string> function GetWeaponBurnMods( string weaponClassName )
-{
-	array<string> burnMods = []
-	array<string> mods     = GetWeaponMods_Global( weaponClassName )
-	string prefix          = "burn_mod"
-	foreach ( mod in mods )
-	{
-		if ( mod.find( prefix ) == 0 )
-			burnMods.append( mod )
-	}
 
-	return burnMods
+
+#if SERVER
+                                                              
+ 
+	                                                                                                                                         
+	                                   
+	           
+
+	                                    
+
+	                                             
+		      
+
+	                                                                                                
+	                       
+	 
+		                                     
+
+		                                                                           
+		                              
+		                        
+		 
+			                                                                                      
+				        
+
+			                              
+		 
+
+		                                                       
+		                       
+		 
+			                                        
+			                                   
+			 
+				             
+				              
+
+				                    
+					     
+			 
+		 
+	 
+ 
+
+                                                           
+ 
+	                                                             
+ 
+
+                                                              
+ 
+	                                                                            
+	                        
+	 
+		             
+	 
+ 
+
+                                                  
+ 
+	                                                                    
+		        
+
+	         
+ 
+
+                                                         
+ 
+	                                                                    
+		        
+
+	         
+ 
+#endif         
+
+
+void function GiveEMPStunStatusEffects( entity target, float duration, float fadeoutDuration = 0.5, float slowTurn = EMP_SEVERITY_SLOWTURN, float slowMove = EMP_SEVERITY_SLOWMOVE )
+{
+	#if SERVER
+		                        
+		 
+			                                                                           
+			 
+				                                           
+			 
+
+			                                                     
+		 
+
+		                                                                                                              
+		                                                                                                              
+
+		                        
+		 
+			                                                                  
+			                                                                  
+		 
+	#endif
 }
 
-
-int function TEMP_GetDamageFlagsFromProjectile( entity projectile )
-{
-	var damageFlagsString = projectile.ProjectileGetWeaponInfoFileKeyField( "damage_flags" )
-	if ( damageFlagsString == null )
-		return 0
-	expect string( damageFlagsString )
-
-	return TEMP_GetDamageFlagsFromString( damageFlagsString )
-}
-
-
-int function TEMP_GetDamageFlagsFromString( string damageFlagsString )
-{
-	int damageFlags = 0
-
-	array<string> damageFlagTokens = split( damageFlagsString, "|" )
-	foreach ( token in damageFlagTokens )
-	{
-		damageFlags = damageFlags | getconsttable()[strip( token )]
-	}
-
-	return damageFlags
-}
-
-#if(false)
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-bool function PROTO_CanPlayerDeployWeapon( entity player )
-{
-	if ( player.IsPhaseShifted() )
-		return false
-
-	if ( player.ContextAction_IsActive() == true )
-	{
-		if ( player.IsZiplining() )
-			return true
-		else
-			return false
-	}
-
-	return true
-}
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-void function GiveEMPStunStatusEffects( entity ent, float duration, float fadeoutDuration = 0.5, float slowTurn = EMP_SEVERITY_SLOWTURN, float slowMove = EMP_SEVERITY_SLOWMOVE )
-{
-	entity target = ent
-	int slowEffect = StatusEffect_AddTimed( target, eStatusEffect.turn_slow, slowTurn, duration, fadeoutDuration )
-	int turnEffect = StatusEffect_AddTimed( target, eStatusEffect.move_slow, slowMove, duration, fadeoutDuration )
-
-	#if(false)
-
-
-
-
-
-#endif
-}
-
-#if(DEV)
+#if DEV
 string ornull function FindEnumNameForValue( table searchTable, int searchVal )
 {
 	foreach ( string keyname, int value in searchTable )
@@ -2904,7 +2715,7 @@ void function DevPrintAllStatusEffectsOnEnt( entity ent )
 	}
 	printt( found + " effects active.\n" )
 }
-#endif //
+#endif           
 
 entity function GetMeleeWeapon( entity player )
 {
@@ -2919,1364 +2730,853 @@ entity function GetMeleeWeapon( entity player )
 }
 
 
-array<entity> function GetPrimaryWeapons( entity player )
-{
-	array<entity> primaryWeapons
-	array<entity> weapons = player.GetMainWeapons()
-	foreach ( weaponEnt in weapons )
-	{
-		int weaponType = weaponEnt.GetWeaponType()
-		if ( weaponType == WT_SIDEARM || weaponType == WT_ANTITITAN )
-			continue
-
-		primaryWeapons.append( weaponEnt )
-	}
-	return primaryWeapons
-}
-
-
-array<entity> function GetSidearmWeapons( entity player )
-{
-	array<entity> sidearmWeapons
-	array<entity> weapons = player.GetMainWeapons()
-	foreach ( weaponEnt in weapons )
-	{
-		if ( weaponEnt.GetWeaponType() != WT_SIDEARM )
-			continue
-
-		sidearmWeapons.append( weaponEnt )
-	}
-	return sidearmWeapons
-}
-
-
-array<entity> function GetATWeapons( entity player )
-{
-	array<entity> atWeapons
-	array<entity> weapons = player.GetMainWeapons()
-	foreach ( weaponEnt in weapons )
-	{
-		if ( weaponEnt.GetWeaponType() != WT_ANTITITAN )
-			continue
-
-		atWeapons.append( weaponEnt )
-	}
-	return atWeapons
-}
-
-
-entity function GetPlayerFromTitanWeapon( entity weapon )
-{
-	entity titan = weapon.GetWeaponOwner()
-	entity player
-
-	if ( titan == null )
-		return null
-
-	if ( !titan.IsPlayer() )
-		player = titan.GetBossPlayer()
-	else
-		player = titan
-
-	return player
-}
-
-#if(false)
-
-
-
-
-
-
-
-//
-//
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-//
-/*
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-
-#if(CLIENT)
-void function ServerCallback_SatchelPlanted()
-{
-	entity player = GetLocalViewPlayer()
-	thread SatchelDetonationHint( player )
-}
-
-void function SatchelDetonationHint( entity player )
-{
-	player.EndSignal( "OnDeath" )
-	player.EndSignal( "DetonateSatchels" )
-
-	OnThreadEnd(
-		function() : ( player )
-		{
-			if ( IsValid( player ) )
-				SatchelDetonationHint_Destroy( player )
-		}
-	)
-
-	string satchelClassName = "mp_weapon_satchel"
-
-	if ( SHOW_SATCHEL_DETONATION_HINT_WITH_CLACKER )
-		SatchelDetonationHint_Show( player )
-
-	while ( PlayerHasWeapon( player, satchelClassName ) )
-	{
-		wait 0.1
-
-		if ( !SHOW_SATCHEL_DETONATION_HINT_WITH_CLACKER )
-		{
-			//
-			if ( player.GetActiveWeapon( OFFHAND_ORDNANCE ).GetWeaponClassName() != satchelClassName )
-			{
-				SatchelDetonationHint_Show( player )
-			}
-			else
-			{
-				SatchelDetonationHint_Destroy( player )
-			}
-		}
-	}
-}
-
-void function SatchelDetonationHint_Show( entity player )
-{
-	if ( file.satchelHintRUI != null )
-		return
-
-	SatchelDetonationHint_Destroy( player )
-
-	int sorting = 0
-	file.satchelHintRUI = RuiCreate( $"ui/satchel_detonation_hint.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, sorting )
-}
-
-void function SatchelDetonationHint_Destroy( entity player )
-{
-	if ( file.satchelHintRUI != null )
-		RuiDestroyIfAlive( file.satchelHintRUI )
-
-	file.satchelHintRUI = null
-}
-#endif //
+#if SERVER
+                                                  
+ 
+	                                      
+	                                                                                                                    
+	 
+		                                                                      
+			                        
+	 
+	    
+	 
+		                       
+	 
+ 
+
+                                                                
+ 
+	                                                 
+	                                                   
+ 
+
+                                                                
+ 
+	                                             
+	                                              
+	 
+		                                      
+		                                     
+		           
+	 
+	            
+ 
+
+                                                                        
+ 
+	                                                   
+	 
+		                                                  
+			                             
+	 
+
+	                                                                 
+	                                                                                  
+ 
+
+                                                   
+ 
+	                                           
+	                                   
+	                                                                                                                                               
+	                                             
+		                             
+ 
+
+                                                
+ 
+	                                           
+	                                   
+	                                                                                                                                        
+	                                             
+		                             
+ 
+
+                                                          
+ 
+	                                             
+	                                                                                                                                                                            
+	                                                       
+	 
+		                                                   
+			                             
+	 
+ 
+
+                                                            
+ 
+	                                             
+	                                                                                                                                                                
+	                                                       
+	 
+		                                                   
+			                             
+	 
+ 
+
+                                                                      
+ 
+	                                           
+	                                      
+	                                                                                                                      
+	                                                                                                                             
+	                                         
+
+	                             
+ 
+
+                                                                     
+ 
+	                                           
+	                                      
+	                                                                                                                     
+	                                                                                                                                                                         
+	                                                                                                                                                                     
+	                                       
+
+	                             
+ 
+
+                                                           
+ 
+	                                               
+	                                            
+
+	              
+ 
+
+                                                                  
+ 
+	                                                 
+ 
+
+
+                                                                           
+ 
+	                                                                       
+		            
+
+	                      
+		            
+
+	                                   
+		            
+
+	                             
+		            
+
+	                              
+		            
+
+	                                               
+	                                       
+		            
+
+	           
+ 
+
+                                                                   
+ 
+	                     
+	 
+		                                               
+		 
+			           
+		 
+		    
+		 
+			                                               
+		 
+	 
+
+	            
+ 
+
+                                                             
+ 
+	                                     
+
+	                          
+
+	                                        
+		                                                  
+	   
+
+	                                           
+ 
+
+                                                                                                                                                                                                                                                                  
+ 
+	                      
+		      
+
+	                                                                           
+		      
+
+	                                                        
+	                            
+		      
+
+	                                                                             
+	               
+	            
+
+	                    
+	 
+		                       
+		                
+	 
+	                                                                                                                
+	 
+		                  
+		                
+		                                                         
+		 
+			                                                               
+		 
+	 
+                                
+                            
+  
+                    
+                  
+                                                           
+   
+                                                                  
+   
+  
+      
+	                          
+	 
+		                  
+		                
+		                                                         
+		 
+			                                                               
+			                                              
+		 
+	 
+	                          
+	 
+		                  
+		                
+	 
+	                             
+	 
+		              
+		                
+	 
+	                             
+	 
+		                                                 
+			      
+
+		                                                
+			      
+
+		                
+		                
+		                                                                 
+	 
+	                            
+	 
+		              
+		                
+		                                                                 
+	 
+                     
+	                                    
+	 
+		              
+		                
+	 
+      
+
+	                          
+
+	                
+	 
+		                                                            
+		                                               
+		                           
+		 
+			                                                              
+			                                        
+			 
+				                                              
+				                                                                                      
+				                                                
+				                                                                                                                                                              
+			 
+			                                           
+		 
+	 
+
+	                                                                      
+		                                                   
+
+	                                                                                                                                                      
+	                                                      
+	                                                                                                                                                  
+		      
+
+	                     
+	 
+		                                                                      
+	 
+	                         
+	 
+		                                           
+		                                                             
+		                                        
+	 
+	                             
+	 
+		                                       
+	 
+	                              
+	 
+		                                                             
+		                                                                      
+		                        
+		                                                                  
+		 
+			                                                                                             
+			                                          
+		 
+		    
+			                                                 
+	 
+	                         
+	 
+		                                          
+	 
+
+	                                        
+	 
+		                                                                                                                           
+			                                                                     
+	 
+ 
+
+                                                                                                              
+                                              
+                                                                                               
+ 
+	                      
+		      
+
+	                          
+	                            
+
+	                              
+		                       
+
+	                                                                           
+		      
+
+	                
+	                
+	                                  
+	                                     
+	                     
+	                   
+
+	                                                        
+	                                    
+	                                                        
+	                    
+	 
+		                 
+			                                   
+			                               
+			                              
+			     
+
+		                   
+			                                     
+			                                 
+			                                
+			     
+
+		        
+			                                               
+	 
+
+	                                                        
+	                               
+	                                                        
+	                         
+	                      
+
+
+	                                                                     
+	  
+	                                    
+	                     
+
+
+	                                                        
+
+	                                              
+	                                  
+	  
+
+
+	                                                    
+	                                   
+	                       
+	                                                                                             
+
+	                           
+		                          
+
+	                                        
+
+	               
+
+	                                      
+	                                    
+	                        
+	                                                                                              
+
+	                           
+		                         
+
+	                       
+ 
+
+                                                                                                              
+                                              
+                                                                              
+ 
+	                      
+		      
+
+	                          
+	                            
+
+	                                     
+	             
+	                   
+	               
+	                 
+	            
+	                
+	                     
+
+	                                                        
+	                                    
+	                                                        
+	                    
+	 
+		                 
+			                                                 
+				      
+			                                                
+				      
+			                     
+			                  
+			                              
+			                                               
+			     
+
+		                   
+			                     
+			                
+			                                
+			                                               
+			     
+
+		        
+			                                               
+	 
+
+	                                                        
+	                                     
+	                                                        
+	                                                                           
+	                                        
+
+	                                 
+	 
+		                                            
+		                        
+
+
+		                                                                     
+		                                      
+		                                      
+
+		            
+			                                              
+			 
+				                          
+					                                 
+				                     
+					                                        
+			 
+		 
+
+		                    
+	 
+ 
+
+                                                                                                      
+ 
+	                      
+		      
+
+	                      
+	                            
+	                          
+	                                  
+	                         
+
+	                              
+
+	                                               
+	                                          
+
+	               
+	                    
+	 
+		                                                                                                   
+		                                                                                                                            
+		                        
+	 
+
+	            
+		                              
+		 
+			                          
+			 
+				                      
+			 
+
+			                     
+				                                                        
+		 
+	 
+
+	                
+	 
+		                                                        
+
+                     
+		                               
+			                            
+      
+
+		             
+	 
+	    
+	 
+		                                                                           
+
+		                                      
+		                         
+		                          
+		 
+			                           
+			 
+				                    
+				 
+					                     
+					                          
+						                       
+
+					                     
+						                                                        
+				 
+			 
+			                                  
+			 
+				                      
+				                                                                           
+				                    
+			 
+
+			           
+		 
+	 
+ 
+
+                                                                      
+ 
+ 
+
+                                                           
+ 
+	                                 
+
+	                                    
+	                                                  
+	                                    
+ 
+
+                                                           
+ 
+	                                                                 
+	                                                                  
+		           
+
+	                            
+		            
+
+	           
+ 
+
+                                                                                                     
+ 
+	                                
+	                                   
+
+	                              
+		      
+
+	                                                        
+	              
+	              
+	                     
+
+	                              
+	 
+		         		                                      
+		         		                  
+		                                                
+	 
+	    
+	 
+		                                                                                                         
+		                        
+		                                        
+			                                          
+		               	                                                                 
+		         		                                                                                                                               
+		                                                              
+		                                                                                                                                                                                            
+	 
+
+	                          
+		                                       
+
+	                                                                       
+	                                                           
+
+	                                                                                         
+	 
+		                                          
+		                                                                                    
+	 
+	    
+	 
+		                                                                                 
+	 
+
+	                                                                                       
+	                                                                       
+ 
+
+                                                                 
+ 
+	                                      
+		      
+
+	                        
+	                        
+
+	                                                    
+	                                                      
+	                                                                
+	                             
+	                      
+
+	                                                       
+	                                          
+	                                                           
+	                           
+	                                              
+	                                                                                                                   
+	 
+		                                       
+	 
+
+	                        
+
+	                       
+	                                                  
+	                                                         
+	                                                       
+ 
+
+
+                                                                    
+ 
+	                     
+	                                                   
+	 
+		                                                                             
+		 
+			                                             
+			                                                
+			                                    
+				                          
+		 
+	 
+
+	              
+ 
+
+                                                
+ 
+                         
+	                              
+                                   
+ 
+
+                                                                                              
+ 
+	                          
+
+	                                                                                     
+	                                    
+		      
+
+	                              
+ 
+
+                                                                                                                                      
+ 
+	                                                                     
+ 
+
+                                                                                                   
+ 
+	                         
+		      
+
+	                               
+
+	                   
+		                                                                                                      
+
+	                                     
+	                            
+
+	                                   
+	 
+		                                                  
+		                                         
+
+		                                         
+	 
+
+	                       
+		      
+
+	                                   
+	 
+		                                                
+		                         
+			        
+
+		                                                    
+
+		                                                                                       
+		 
+			                                 
+				                                                     
+				     
+
+			                              
+			                                      
+			                                       
+			                                    
+
+				                       
+				 
+					                                                                                   
+						                                                                                                                         
+					    
+						                                         
+				 
+				    
+				 
+					                                                                                   
+						                                                                                                                         
+					    
+						                                         
+				 
+				     
+
+			                                    
+				                       
+					                                                                               
+				    
+					                                                                               
+				     
+
+			        
+				                                                                                   
+				     
+		 
+	 
+ 
+#endif         
 
 
 void function PlayerUsedOffhand( entity player, entity offhandWeapon, bool sendPINEvent = true, entity trackedProjectile = null, table pinAdditionalData = {} )
 {
-	#if(false)
+	#if SERVER
+		                                                                                                                                                        
 
+		                                                         
+		 
+			                             
+		 
 
+		                                   
+		 
+			                                                
+			                         
+				        
 
+			                              
+				        
 
+			                       
+				                                                  
+			    
+				                                                  
+			                                         
 
+			      
+			                   
+			 
+				                                                      
+				                                
+					                                                                                                    
+				                                     
+					                                                                                                    
+			 
 
+			      
+		 
 
+	#endif          
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-	#if(CLIENT)
+	#if CLIENT
 		if ( offhandWeapon == player.GetOffhandWeapon( OFFHAND_ULTIMATE ) )
-			UltimateWeaponStateSet( eUltimateState.ACTIVE )
+		{
+			if ( offhandWeapon.GetWeaponSettingFloat( eWeaponVar.regen_ammo_refill_rate ) == 0 )
+				UltimateWeaponStateSet( eUltimateState.CHARGING )
+			else
+				UltimateWeaponStateSet( eUltimateState.ACTIVE )
+		}
 		Chroma_PlayerUsedAbility( player, offhandWeapon )
-	#endif //
-}
-
-
-RadiusDamageData function GetRadiusDamageDataFromProjectile( entity projectile, entity owner )
-{
-	RadiusDamageData radiusDamageData
-
-	radiusDamageData.explosionDamage = -1
-	radiusDamageData.explosionDamageHeavyArmor = -1
-
-	if ( owner.IsNPC() )
-	{
-		radiusDamageData.explosionDamage = projectile.GetProjectileWeaponSettingInt( eWeaponVar.npc_explosion_damage )
-		radiusDamageData.explosionDamageHeavyArmor = projectile.GetProjectileWeaponSettingInt( eWeaponVar.npc_explosion_damage_heavy_armor )
-	}
-
-	if ( radiusDamageData.explosionDamage == -1 )
-		radiusDamageData.explosionDamage = projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage )
-
-	if ( radiusDamageData.explosionDamageHeavyArmor == -1 )
-		radiusDamageData.explosionDamageHeavyArmor = projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor )
-
-	radiusDamageData.explosionRadius = projectile.GetProjectileWeaponSettingFloat( eWeaponVar.explosionradius )
-	radiusDamageData.explosionInnerRadius = projectile.GetProjectileWeaponSettingFloat( eWeaponVar.explosion_inner_radius )
-
-	Assert( radiusDamageData.explosionRadius > 0, "Created RadiusDamageData with 0 radius" )
-	Assert( radiusDamageData.explosionDamage > 0 || radiusDamageData.explosionDamageHeavyArmor > 0, "Created RadiusDamageData with 0 damage" )
-	return radiusDamageData
+	#endif         
 }
 
 
@@ -4297,17 +3597,23 @@ void function CodeCallback_OnPlayerAddedWeaponMod( entity player, entity weapon,
 	if ( !IsValid( player ) )
 		return
 
+	if ( !IsValid( weapon ) )
+		return
+
 	foreach ( callback in file.playerAddWeaponModCallbacks )
 	{
 		callback( player, weapon, mod )
 	}
 
-	//
+	                                                                        
 
-	#if(false)
+	bool modAdded = true
+	RunWeaponModChangedCallbacks( weapon, mod, modAdded )
 
-
-#endif
+	#if SERVER
+		                                                                           
+		                                                                                  
+	#endif
 }
 
 
@@ -4316,461 +3622,612 @@ void function CodeCallback_OnPlayerRemovedWeaponMod( entity player, entity weapo
 	if ( !IsValid( player ) )
 		return
 
+	if ( !IsValid( weapon ) )
+		return
+
 	foreach ( callback in file.playerRemoveWeaponModCallbacks )
 	{
 		callback( player, weapon, mod )
 	}
 
-	//
+	                                                                            
 
-	#if(false)
+	bool modAdded = false
+	RunWeaponModChangedCallbacks( weapon, mod, modAdded )
 
-
-#endif
+	#if SERVER
+		                                                                           
+		                                                                                  
+	#endif
 }
 
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-#endif //
+                                                 
+void function RunWeaponModChangedCallbacks( entity weapon, string mod, bool modAdded )
+{
+	string className = weapon.GetWeaponClassName()
+	if ( !(className in file.weaponModChangedCallbacks) )
+		return
+
+	foreach ( callbackFunc in file.weaponModChangedCallbacks[className] )
+		callbackFunc( weapon, mod, modAdded )
+}
+
+#if SERVER
+                                                 
+ 
+	                            
+		           
+
+	                                                                                                                                       
+	                                                                                                            
+
+	                                        
+ 
+
+
+                                                            
+ 
+	                    
+	 
+		                     
+		 
+			                                                                        
+			                                                                          
+		 
+		    
+		 
+			                                                       
+		 
+	 
+	    
+	 
+		                     
+		 
+			                                                                        
+			                                                                          
+		 
+		    
+		 
+			                                                       
+		 
+	 
+ 
+
+                                                                 
+ 
+	                                                                  
+	 
+		                                                         
+		                        
+		 
+			                                       
+			        
+		 
+
+		                      
+		 
+			                                                                          
+			                                       
+		 
+	 
+ 
+
+                                                              
+ 
+	                    
+	                         
+	                                                                                                                  
+	                                          
+ 
+
+                                                                  
+ 
+	                                  
+	                                 
+		          
+
+	                              
+	                
+	                 
+	                 
+	          
+ 
+
+                                                             
+ 
+	                                                
+	                          
+	                                         
+	                     
+		                                                                 
+	                
+ 
+
+                                                                        
+ 
+	                                                
+	                          
+	                                                
+	                     
+		                                                                 
+	                
+ 
+
+                                                                                     
+ 
+	                                  
+	             
+	                   
+ 
+
+
+                                                                                                        
+ 
+	                     
+		               
+
+	                         
+		      
+
+	                                       
+	                         
+		      
+
+	                                                    
+
+	                                                   
+	                             
+	                            
+		                                                
+			              
+
+	                       
+		                                        
+
+	                                     
+	                                                     
+		                                                                                         
+
+	                                                    
+
+	                                                                        
+	                           
+	 
+		                  
+		                                     
+	 
+ 
+
+                                                       
+ 
+	                         
+		      
+
+	                                       
+	                         
+		      
+
+	                                     
+	                                                     
+		                                                                                  
+
+	                                                    
+
+	                                          
+ 
+
+                                                         
+ 
+	                                     
+
+	                                                  
+	                
+		                                              
+	                     
+		                                              
+
+	               
+ 
+
+                                                                                                                          
+ 
+	                                                           
+		                                                     
+
+	                                                                      
+ 
+
+                                                                                                                       
+ 
+	                          
+
+	                                                 
+	                     
+	                                                                                                                                                            
+	                         
+	 
+		                                    
+		                                              
+		                                              
+	 
+	                          
+	                                     
+	                                                
+
+	                               
+	                             
+	                                  
+
+	            
+		                             
+		 
+			                    
+
+			                      
+				              
+		 
+	 
+
+	           
+	 
+		                                                                       
+		                               
+
+		                               
+		 
+			                                                                                 
+			 
+				                                                            
+			 
+		 
+
+		           
+	 
+ 
+
+                         
+                                                                
+                                                                                        
+ 
+                                             
+                                                                                                                                              
+        
+
+                                
+                                                                      
+                                                                                                        
+                                                                                                      
+                                                                                                               
+                                                                                                                                     
+                                                                                                                         
+                                                                                                               
+
+                                         
+                                                                                       
+
+                                                                            
+ 
+                                   
+
+                                                       
+
+                                                                                      
+ 
+	                                            
+	                                                                                                                                            
+		      
+
+	                               
+	                                                                           
+	                                                                                                       
+	                                                                                                     
+	                                                                                                              
+	                                                                                                                                    
+	                                                                                                                        
+	                                                                                                              
+
+	                                        
+	                                                                                      
+
+	                                                                           
+ 
+
+                                                 
+ 
+	                      
+		            
+
+	                           
+		            
+
+	                    
+ 
+
+                                                                                                                  
+ 
+	                          
+	 
+		                                                                             
+		                                                               
+	 
+	                                                                  
+	 
+		                                                               
+	 
+ 
+
+                                                                    
+ 
+	                                                          
+	                           
+
+	                          
+	                                                
+
+	                                                                                                                                 
+
+	                                 
+	 
+		                             
+		                                                                                                                    
+		                                 
+		 
+			                               
+			                                                                                                                    
+		 
+	 
+
+	                                   
+		           
+
+	            
+ 
+
+                                                                                                                              
+ 
+	                          
+	 
+		                                                                             
+		                                                                        
+	 
+	                                                                           
+	 
+		                                                                        
+	 
+ 
+
+                                                                                              
+ 
+	                                                                                                                            
+ 
+
+                                                                                                       
+ 
+	                                    
+		            
+
+	                                           
+	                                                     
+		                                                                  
+			            
+
+	           
+ 
+
+                                                                                                                     
+ 
+	                     
+	                   
+	                           
+	                        
+	                                                       
+	                                                                      
+	                                                                    
+	                                                            
+	                                 
+
+	                                      
+
+	                            
+		                                             
+		                                       
+		                                               
+		                                                                          
+	      
+
+	                              
+		                                    
+ 
+
+                                                                                                                              
+ 
+	                                                         
+	 
+		                                                               
+		      
+	 
+
+	                                                          
+	                            
+		                                                
+	                                        
+	                                                         
+
+	                                                               
+ 
+
+                                                                          
+ 
+	                            
+		         
+
+	                            
+		        
+
+	        
+ 
+
+                                                                              
+ 
+	                                             
+
+	                            
+		                                                                                        
+	      
+ 
+
+                                                  
+ 
+	                          
+	                            
+
+	                               
+
+	            
+		                     
+		 
+			                            
+				                                        
+			      
+
+			                     
+				                                
+		 
+	 
+
+	                                                  
+	 
+		                                           
+
+		                                                                              
+		 
+			                   
+
+			                              
+			 
+				                     
+				                               
+
+				                               
+				                                                                    
+				                       
+				 
+					                           
+					                                 
+
+					                            
+						                                                                                                   
+					      
+				 
+			 
+			                                                                 
+			 
+				                                  
+				                                        
+				                             
+
+				                            
+					                                                                                                
+				      
+			 
+
+			                      
+			 
+				                     
+				 
+					                                                      
+						                                                                                    
+				 
+
+				                                                                                                        
+
+				                                                                       
+				                                
+					     
+			 
+		 
+
+		                      
+		                                                           
+			                                         
+
+		           
+	 
+ 
+
+                                                                                                               
+ 
+       
+	                                              
+	 
+		                                            
+	 
+      
+	                                                                                                      
+ 
+
+                                                                                         
+ 
+	                                                                         
+ 
+
+                                                                       
+ 
+	                             
+ 
+
+                                                        
+ 
+	                                   
+ 
+
+                                           
+ 
+	                      
+ 
+
+                                                              
+ 
+	                           
+
+	                 
+		                              
+ 
+
+
+       
+                                 
+ 
+	                              
+		      
+
+	                                   
+
+	                         
+	 
+		                                                   
+		                                                 
+		                                                      
+
+		                          
+
+		                             
+	 
+	    
+	 
+		                                                   
+		                                                 
+		                                                      
+
+		                         
+
+		                                
+	 
+ 
+            
+
+
+#endif          
 
 int function GetMaxTrackerCountForTitan( entity titan )
 {
@@ -4842,16 +4299,26 @@ bool function IsWeaponInAutomaticMode( entity weapon )
 	return !weapon.GetWeaponSettingBool( eWeaponVar.is_semi_auto )
 }
 
+
 bool function OnWeaponAttemptOffhandSwitch_Never( entity weapon )
 {
 	return false
 }
 
+bool function OnWeaponAttemptOffhandSwitch_NoZip( entity weapon )
+{
+	entity player = weapon.GetWeaponOwner()
+	if ( player.IsZiplining() )
+		return false
 
-#if(CLIENT)
+	return true
+}
+
+
+#if CLIENT
 void function ServerCallback_SetWeaponPreviewState( bool newState )
 {
-	#if(DEV)
+	#if DEV
 		entity player = GetLocalClientPlayer()
 
 		if ( newState )
@@ -4880,20 +4347,20 @@ void function ServerCallback_SetWeaponPreviewState( bool newState )
 
 void function OnWeaponReadyToFire_ability_tactical( entity weapon )
 {
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                                        
+	#endif
 }
 
 
 void function OnWeaponRegenEndGeneric( entity weapon )
 {
-	#if(false)
-
-
-
-#endif
-	#if(CLIENT)
+	#if SERVER
+		                         
+			      
+		                                       
+	#endif
+	#if CLIENT
 		entity owner = weapon.GetWeaponOwner()
 		if ( !IsValid( owner ) || !owner.IsPlayer() )
 			return
@@ -4905,24 +4372,1958 @@ void function OnWeaponRegenEndGeneric( entity weapon )
 
 void function Ultimate_OnWeaponRegenBegin( entity weapon )
 {
-	#if(CLIENT)
+	#if CLIENT
 		UltimateWeaponStateSet( eUltimateState.CHARGING )
 	#endif
 }
 
-#if(false)
+#if SERVER
+                                                            
+ 
+	                                      
+	                                             
+		      
+
+	                                
+		      
+
+	                              
+		      
+
+	                                                           
+		                                                      
+	                                                                
+		                                             
+ 
+#endif
+
+void function PlayDelayedShellEject( entity weapon, float time, int count = 1, bool persistent = false )
+{
+	AssertIsNewThread()
+
+	weapon.EndSignal( "OnDestroy" )
+
+	asset vmShell      = weapon.GetWeaponSettingAsset( eWeaponVar.fx_shell_eject_view )
+	asset worldShell   = weapon.GetWeaponSettingAsset( eWeaponVar.fx_shell_eject_world )
+	string shellAttach = weapon.GetWeaponSettingString( eWeaponVar.fx_shell_eject_attach )
+
+	if ( shellAttach == "" )
+		return
+
+	for ( int i = 0; i < count; i++ )
+	{
+		wait time
+
+		if ( !IsValid( weapon ) )
+			return
+		entity viewmodel = weapon.GetWeaponViewmodel()
+		if ( !IsValid( viewmodel ) )
+			return
+		weapon.PlayWeaponEffect( vmShell, worldShell, shellAttach, persistent )
+	}
+}
 
 
 
+#if SERVER
+                                                           
+ 
+	                                                                                     
+	                                    
+		      
+
+	                                 
+ 
+#endif         
+
+
+#if SERVER
+                                                   
+ 
+	                                 
+	                                                                   
+
+	                                                
+	 
+		                       
+		                                        
+
+		                             
+		                                                                                                  
+		                                                                
+		                                                               
+		                                                            
+		                                                                
+		                                                    
+
+		                                                             
+		 
+			                                                                
+			                             
+		 
+		    
+		 
+			                                                                
+			                                                                                          
+		 
+
+		                                  
+	 
+
+	                                         
+	 
+		                                                
+	 
+	    
+	 
+		                                                 
+	 
+
+	                                                                              
+	                                                                                   
+	                                                                                  
+	 
+		                                            
+			                                                                                                                  
+		    
+			                                                                                                                   
+	 
+ 
+#endif         
+
+
+#if SERVER
+                                                      
+ 
+	                                                              
+	 
+		                                                                    
+
+		                                               
+		 
+			                                          
+
+			                            
+				        
+
+			             
+			                              
+			 
+				                                                           
+			 
+			    
+			 
+				                                                                   
+			 
+			                                               
+
+			                                
+			 
+				                                                                                  
+				 
+					                                                                         
+				 
+				    
+				 
+					                                                                         
+					                                                                                  
+				 
+			 
+
+			                                   
+			                                                                                     
+				                                                                
+
+			                                    
+			                                                                                      
+				                                                                  
+
+			                                                
+				                                                        
+		 
+
+		                                       
+	 
+
+	                                                                                                             
+	                                                                 
+	 
+		                                                       
+		                                                                         
+		                                          
+	 
+	                                             
+	 
+		                                                                                              
+	 
+
+	                                                                          
+ 
+
+                                      
+                                                                                                                            
+ 
+	                                             
+	 
+		                                                              
+
+		                                                                                        
+
+		                                                             
+		                                                                   
+		 
+			                                                                        
+			                                                             
+			                                                  
+			 
+				                                   
+				                                 
+			 
+		 
+
+		                                                                              
+		                                                                                  
+		                                                                    
+		                                                                                       
+		                         
+		 
+			                                                                          
+			                                                   
+			 
+				                                 
+				                                                                                                      
+			 
+		 
+	 
+ 
+
+                                                                                 
+ 
+	                               
+	                               
+	                                    
+
+	                        
+	                         
+	             
+	 
+		                                                                                
+		                          
+			      
+		                                                                 
+		                                                  
+			      
+
+		                                                
+		                                                                                                                                
+		                                                                     
+		                       
+		                                                                           
+		                                          
+		 
+			                                                                                
+			                          
+				      
+			                                                                 
+			                                                  
+				      
+
+			                                                 
+			                                                  
+			                                                        
+			                                                                                                                                     
+			                                             
+
+			                                                                                              
+			                  
+				                            
+
+			                                       
+				                           
+				                   
+			 
+				                                     
+			 
+			                                                                                                                          
+			 
+				                                                   
+				 
+					                                                                         
+					                                                                           
+
+					                                                                                                                          
+					                                                                                              
+
+					                  
+					 
+						                   
+							                                                                     
+						    
+							                                                                         
+					 
+					                        
+					 
+						                                                         
+					 
+
+					                                                                           
+					                                                                                 
+					                                
+				 
+				                                   
+			 
+			           
+		 
+
+		                                                                                                                                                   
+		                                   
+		           
+	 
+ 
+
+                                                     
+ 
+	                    
+		      
+
+	                                                              
+
+	                                                                           
+		                                  
+ 
+
+
+                         
+                                                     
+                                                     
+                                                     
+
+                                                                                                                               
+ 
+	                        
+		      
+
+	                         
+		      
+
+	                         
+		      
+
+	                                                                                                                  
+	 
+		                                                                                               
+	 
+	                                                                                                                                
+	 
+		                                                                                                
+	 
+ 
+
+                                                                   
+ 
+	                              
+ 
+                                   
+#endif         
+
+#if CLIENT
+                         
+void function UICallback_UpdateLaserSightColor()
+{
+	Remote_ServerCallFunction( "ClientCallback_UpdateLaserSightColor" )
+}
+                                   
+
+bool function TryCharacterButtonCommonReadyChecks( entity player )
+{
+	if ( player != GetLocalViewPlayer() )
+		return false
+	if ( player != GetLocalClientPlayer() )
+		return false
+	if ( IsControllerModeActive() )
+	{
+		if ( TryOnscreenPromptFunction( player, "quickchat" ) )
+			return false
+	}
+                     
+	if ( HoverVehicle_PlayerIsDriving( player ) )
+		return false
+      
+
+	return true
+}
+#endif          
+
+                                                   
+bool function ShouldShowADSScopeView( entity weapon )
+{
+	if ( !IsValid( weapon ) )
+		return false
+
+	if ( !HasFullscreenScope( weapon ) )
+		return false
+
+	entity player = weapon.GetWeaponOwner()
+	if ( !IsValid( player ) )
+		return false
+
+	if ( player.GetZoomFrac() < weapon.GetWeaponSettingFloat( eWeaponVar.ads_fov_zoomfrac_end ) )
+		return false
+
+	return true
+}
+
+
+bool function HasFullscreenScope( entity weapon )
+{
+	if ( !IsValid( weapon ) )
+		return false
+
+	if ( weapon.GetWeaponSettingInt( eWeaponVar.bodygroup_ads_scope_set ) <= 0 )
+		return false
+
+	if ( weapon.GetWeaponInfoFileKeyField( "bodygroup_ads_scope_name" ) == null )
+		return false
+
+	return true
+}
+
+#if CLIENT
+vector function GetAmmoColorByType( string ammoType )
+{
+	int colorID  = ammoColors[ammoType]
+	vector color = GetKeyColor( colorID ) / 255.0
+	return color
+}
+#endif
+
+
+bool function EnergyChoke_OnWeaponModCommandCheckMods( entity player, entity weapon, string mod, bool isAdd )
+{
+	weapon.ForceChargeEndNoAttack()
+	weapon.Signal( END_KINETIC_LOADER_CHOKE )
+	weapon.RemoveMod( "kinetic_choke" )
+	if ( isAdd && weapon.HasMod( KINETIC_LOADER_HOPUP ) && mod == "choke")
+	{
+		if( !weapon.HasMod( "hopup_kinetic_choke" ) )
+		{
+			weapon.AddMod( "hopup_kinetic_choke" )
+			thread KineticLoaderChokeFunctionality_ServerThink( player, weapon )
+		}
+	}
+	else if ( !isAdd && weapon.HasMod( KINETIC_LOADER_HOPUP ) && mod == "choke")
+	{
+		weapon.RemoveMod( "hopup_kinetic_choke" )
+	}
+	return true
+}
+
+#if SERVER
+                                                      
+ 
+	                                                         
+	                          
+	 
+		                                
+		 
+			                                  
+			 
+				                                 
+				                                       
+			 
+			    
+			 
+				                                                           
+				                              
+				 
+					                                       
+					                                
+					 
+						                                                   
+					 
+				 
+			 
+		 
+	 
+ 
+#endif
+
+                                                                                                                                                                 
+ArcSolution function SolveBallisticArc( vector launchOrigin, float launchSpeed, vector targetOrigin, float gravity, bool lowAngle = true )
+{
+	ArcSolution as
+
+	             
+	                      
+	                                 
+	  
+	                                                                                  
+	                                                                                   
+	                                                                                       
+	                                                                                             
+	                                                                                       
+	                                               
+	  
+	                                 
+	                                                                                   
+	                                                                                                                           
+	                     
+
+	vector diff = targetOrigin - launchOrigin
+	vector diffXZ =FlattenVec( diff );
+	float groundDist = Length( diffXZ );
+
+	float speed2 = launchSpeed*launchSpeed;
+	float speed4 = launchSpeed*launchSpeed*launchSpeed*launchSpeed;
+	float y = diff.z;
+	float x = groundDist;
+	float gx = gravity*x;
+
+	float root = speed4 - gravity*(gravity*x*x + 2*y*speed2);
+
+	              
+	if (root < 0)
+		return as;
+
+	as.valid = true
+	root = sqrt( root );
+
+	float lowAng = atan2(speed2 - root, gx)
+	float highAng = atan2(speed2 + root, gx)
+
+	float goodAngle = ( lowAngle ) ? lowAng : highAng
+
+	vector groundDir = Normalize( diffXZ )
+	as.fire_velocity = ( groundDir * cos( goodAngle ) *launchSpeed ) + ( < 0, 0, 1 > * sin( goodAngle ) * launchSpeed )
+	float groundSpeed = Length( FlattenVec( as.fire_velocity ) )
+	groundSpeed = ( groundSpeed > 0 ) ? groundSpeed : 1.0
+	as.duration = groundDist / groundSpeed
+
+	return as;
+}
+
+void function Weapon_AddSingleCharge( entity weapon )
+{
+	int ammoReq = weapon.GetAmmoPerShot()
+	int maxClip = weapon.GetWeaponPrimaryClipCountMax()
+	int fullAdd = weapon.GetWeaponPrimaryClipCount() + ammoReq
+	int newClip = minint( maxClip, fullAdd )
+	weapon.SetWeaponPrimaryClipCount( newClip )
+
+	if ( fullAdd > maxClip )
+	{
+		int diff = fullAdd - maxClip
+		int maxAmmo = weapon.GetWeaponPrimaryAmmoCountMax( AMMOSOURCE_STOCKPILE )
+		int fullAmmoAdd = weapon.GetWeaponPrimaryAmmoCount( AMMOSOURCE_STOCKPILE ) + diff
+		int newAmmo = minint( maxAmmo, fullAmmoAdd )
+		weapon.SetWeaponPrimaryAmmoCount( AMMOSOURCE_STOCKPILE, newAmmo )
+	}
+}
+
+#if SERVER || CLIENT
+bool function AreAbilitiesSilenced( entity player )
+{
+	if ( !IsValid( player ) )
+		return true
+
+	if ( StatusEffect_GetSeverity( player, eStatusEffect.silenced ) )
+		return true
+	if ( StatusEffect_GetSeverity( player, eStatusEffect.is_boxing ) )
+		return true
+
+	return false
+}
+#endif
+
+int function GetNeededEnergizeConsumableCount( entity weapon, entity player )
+{
+	string weaponRef = weapon.GetWeaponClassName()
+	string consumableRef = GetWeaponInfoFileKeyField_GlobalString ( weaponRef, "energized_consumable" )
+	int consumableRequiredCount = GetWeaponInfoFileKeyField_GlobalInt ( weaponRef, "energized_consumable_needed_amount" )
+
+	int requiredCountWithPassive = consumableRequiredCount
+	                                                      
+	{
+		if ( consumableRef == "health_pickup_combo_small" )
+			requiredCountWithPassive = player.HasPassive( ePassives.PAS_BONUS_SMALL_HEAL ) ? maxint( 0, consumableRequiredCount - 1 ) : consumableRequiredCount
+	}
+
+	return requiredCountWithPassive
+}
+
+bool function HasEnoughEnergizeConsumable( entity weapon, entity player )
+{
+	string weaponRef = weapon.GetWeaponClassName()
+	string consumableRef = GetWeaponInfoFileKeyField_GlobalString ( weaponRef, "energized_consumable" )
+	int consumableRequiredCount = GetNeededEnergizeConsumableCount( weapon, player )
+	int consumableCurrentCount = SURVIVAL_CountItemsInInventory( player, consumableRef )
+	return consumableCurrentCount >= consumableRequiredCount
+}
+
+bool function OnWeaponTryEnergize( entity weapon, entity player )
+{
+	if ( !IsValid( player ) )
+		return false
+
+	if ( !IsValid( weapon ) )
+		return false
+
+	if( !HasEnoughEnergizeConsumable( weapon, player ) )
+	{
+		#if CLIENT
+		string weaponName = weapon.GetWeaponClassName()
+		int consumableRequiredCount = GetNeededEnergizeConsumableCount( weapon, player )
+		string consumableName = GetWeaponInfoFileKeyField_GlobalString( weaponName, consumableRequiredCount > 1 ? "energized_consumable_name_plural" : "energized_consumable_name_singular" )
+		string pingStringData = GetWeaponInfoFileKeyField_GlobalString ( weaponName, "energized_consumable_required_hint" )
+
+		                                                                                  
+		if( weaponName == "mp_weapon_dragon_lmg"  )
+			AnnouncementMessageRight( player, Localize( pingStringData, Localize( consumableName ) ) )
+		else
+			AnnouncementMessageRight( player, Localize( pingStringData, consumableRequiredCount, Localize( consumableName ) ) )
+
+		string commsData = GetWeaponInfoFileKeyField_GlobalString ( weaponName, "energized_comms" )
+		Quickchat( player, eCommsAction[commsData] )
+		#endif
+
+		return false
+	}
+
+	return true
+}
+
+void function OnWeaponEnergizedStart( entity weapon, entity player )
+{
+	if ( !IsValid( weapon ) )
+		return
+
+	string weaponRef = weapon.GetWeaponClassName()
+	string consumableRef = GetWeaponInfoFileKeyField_GlobalString ( weaponRef, "energized_consumable" )
+	int consumableRequiredCount = GetNeededEnergizeConsumableCount( weapon, player )
+	SURVIVAL_RemoveFromPlayerInventory( player, consumableRef, consumableRequiredCount )
+}
+
+#if CLIENT
+void function DisplayCenterDotRui( entity weapon, string abortSignal, float appearDelay, float duration, float dotAlpha, float fadeInDuration, float fadeOutDuration )
+{
+	AssertIsNewThread()
+	if ( !IsValid( weapon ) )
+		return
+	entity player = weapon.GetWeaponOwner()
+	if ( !IsValid( player ) )
+		return
+
+	player.EndSignal( "OnDeath" )
+	weapon.EndSignal( "OnDestroy" )
+	weapon.EndSignal( abortSignal )
+
+	var rui = CreateCockpitPostFXRui( $"ui/crosshair_single_dot_helper.rpak" )
+	RuiSetBool( rui, "isActive", false )
+
+	OnThreadEnd(
+		function() : ( rui, weapon, player )
+		{
+			RuiDestroy( rui )
+		}
+	)
+
+	wait appearDelay
+
+	if ( !IsValid( weapon ) )
+		return
+
+	float endTime = Time() + duration
+
+	RuiSetBool( rui, "isActive", true )
+	RuiSetFloat( rui, "birthTime", Time() )
+	RuiSetFloat( rui, "deathTime", endTime )
+	RuiSetFloat( rui, "dotAlpha", dotAlpha )
+	RuiSetFloat( rui, "fadeInDuration", fadeInDuration )
+	RuiSetFloat( rui, "fadeOutDuration", fadeOutDuration )
+
+	while ( Time() < endTime )
+	{
+		WaitFrame()
+	}
+
+	RuiSetBool( rui, "isActive", false )
+}
+#endif
+
+                                                                                         
+  
+  	               
+  
+                                                                                         
+          
+                                                                                                                                                      
+          
+
+bool function MarksmansTempo_Validate( entity weapon, MarksmansTempoSettings settings )
+{
+	#if CLIENT
+		if ( !InPrediction() )
+			return weapon.HasMod( MOD_MARKSMANS_TEMPO )
+	#endif
+
+	if ( !weapon.HasMod( MOD_MARKSMANS_TEMPO ) )
+	{
+		MarksmansTempo_RemoveTempo( weapon, settings )
+		return false
+	}
+
+	return true
+}
+
+void function MarksmansTempo_OnActivate( entity weapon, MarksmansTempoSettings settings )
+{
+	AssertIsNewThread()
+	weapon.EndSignal( "OnDestroy" )
+
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+
+	#if SERVER
+		                                                                          
+			                                                                
+		                                                                           
+			                                                                 
+	#endif
+
+	WaitFrame()	                                                                                                                                              
+
+	bool valid = MarksmansTempo_Validate( weapon, settings )
+	#if SERVER
+	            
+	 
+		                                                       
+		                         
+	 
+	#endif
+
+}
+
+void function MarksmansTempo_OnDeactivate( entity weapon, MarksmansTempoSettings settings )
+{
+	#if CLIENT
+	if ( !InPrediction() )
+		return
+	#endif
+
+	if ( MarksmansTempo_Validate( weapon, settings ) )
+		MarksmansTempo_ClearTempo( weapon, settings )
+}
+
+void function MarksmansTempo_AbortFadeoff( entity weapon, MarksmansTempoSettings settings )
+{
+	weapon.Signal( MARKSMANS_TEMPO_FADEOFF_THREAD_ABORT )
+}
+
+void function MarksmansTempo_SetPerfectTempoMoment( entity weapon, MarksmansTempoSettings settings, entity player, float time, bool useOnPerfectMomentFadeoff )
+{
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+
+	if ( weapon.HasMod( MOD_MARKSMANS_TEMPO ) && (!IsClient() || InPrediction()) )
+	{
+		weapon.SetScriptTime1( time )
+
+		if ( useOnPerfectMomentFadeoff )
+		{
+			weapon.Signal( MARKSMANS_TEMPO_FADEOFF_THREAD_ABORT )
+			float fadeoffDelay = time - Time()
+			float fadeoffTime
+			if ( settings.fadeoffMatchGraceTime > 0 )
+				fadeoffTime = weapon.HasMod( MOD_MARKSMANS_TEMPO_ACTIVE ) ? settings.graceTimeInTempo : settings.graceTimeBuildup
+			else
+				fadeoffTime = settings.fadeoffOnPerfectMomentHit
+			thread MarksmansTempo_Fadeoff( weapon, settings, fadeoffTime + fadeoffDelay )
+		}
+	}
+}
+
+void function MarksmansTempo_Fadeoff( entity weapon, MarksmansTempoSettings settings, float fadeTime )
+{
+	AssertIsNewThread()
+	weapon.EndSignal( "OnDestroy" )
+	weapon.EndSignal( settings.weaponDeactivateSignal )
+	weapon.EndSignal( MARKSMANS_TEMPO_FADEOFF_THREAD_ABORT )
+
+	wait fadeTime
+	MarksmansTempo_ClearTempo( weapon, settings )
+}
+
+void function MarksmansTempo_OnFire( entity weapon, MarksmansTempoSettings settings, bool useOnFireFadeoff )
+{
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+
+	weapon.RemoveMod( MOD_MARKSMANS_TEMPO_BUILDUP )
+	weapon.Signal( MARKSMANS_TEMPO_FADEOFF_THREAD_ABORT )
+	if ( MarksmansTempo_Validate( weapon, settings ) )
+	{
+		float graceTime = weapon.HasMod( MOD_MARKSMANS_TEMPO_ACTIVE ) ? settings.graceTimeInTempo : settings.graceTimeBuildup
+		if ( Time() <= weapon.GetScriptTime1() + graceTime  )
+		{
+			int newShotCount = minint( weapon.GetScriptInt1() + 1, settings.requiredShots )
+			weapon.SetScriptInt1( newShotCount )
+			if ( newShotCount >= settings.requiredShots )
+			{
+				weapon.AddMod( MOD_MARKSMANS_TEMPO_ACTIVE )
+			}
+
+			if ( !weapon.HasMod( MOD_MARKSMANS_TEMPO_ACTIVE ) )
+			{
+				weapon.AddMod( MOD_MARKSMANS_TEMPO_BUILDUP )
+			}
+
+			if ( useOnFireFadeoff )
+				thread MarksmansTempo_Fadeoff( weapon, settings, settings.fadeoffOnFire )
+		}
+		else
+		{
+			MarksmansTempo_ClearTempo( weapon, settings )
+		}
+	}
+}
+
+void function MarksmansTempo_ClearTempo( entity weapon, MarksmansTempoSettings settings )
+{
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+
+	weapon.SetScriptInt1( 0 )
+	MarksmansTempo_ClearMods( weapon )
+}
+
+void function MarksmansTempo_RemoveTempo( entity weapon, MarksmansTempoSettings settings )
+{
+	#if CLIENT
+		if ( !InPrediction() )
+			return
+	#endif
+
+	weapon.SetScriptInt1( -1 )                                                                                                               
+	MarksmansTempo_ClearMods( weapon )
+}
+
+void function MarksmansTempo_ClearMods( entity weapon )
+{
+	weapon.RemoveMod( MOD_MARKSMANS_TEMPO_ACTIVE )
+	weapon.RemoveMod( MOD_MARKSMANS_TEMPO_BUILDUP )
+}
 
 
 
+                                                                                         
+  
+  	              
+  
+                                                                                         
+          
+                                                                                                                                  
+          
+                                                                                
+void function ShatterRounds_OnPlayerAddedWeaponMod( entity player, entity weapon, string mod )
+{
+	if ( mod != SHATTER_ROUNDS_HIPFIRE_MOD )
+		return
+
+	if ( !IsValid( weapon ) )
+		return
+
+	ShatterRounds_AddShatterRounds( weapon )
+}
+
+                                                                                
+void function ShatterRounds_OnPlayerRemovedWeaponMod( entity player, entity weapon, string mod )
+{
+	if ( mod != SHATTER_ROUNDS_HIPFIRE_MOD )
+		return
+
+	if ( !IsValid( weapon ) )
+		return
+
+	ShatterRounds_RemoveShatterRounds( weapon )
+}
+
+                                                                                                                     
+void function ShatterRounds_UpdateShatterRoundsThink( entity weapon )
+{
+	AssertIsNewThread()
+	entity player = weapon.GetWeaponOwner()
+	if ( !IsValid( player ) )
+		return
+
+	player.EndSignal( "OnDeath" )
+	weapon.EndSignal( SHATTER_ROUNDS_THINK_END_SIGNAL )
+	weapon.EndSignal( "OnDestroy" )
+
+	Assert( eShatterRoundsTypes._count == 2 )
+
+	WaitFrame()		                                                                                                                                                             
+
+	int curState = -1
+	while ( true )
+	{
+		if ( !IsValid( player ) || !IsValid( weapon ) )
+			return
+
+		if ( weapon.HasMod( SHATTER_ROUNDS_HIPFIRE_MOD ) && curState != 0 )
+		{
+			ShatterRounds_AddShatterRounds( weapon )
+			curState = 0
+		}
+		else if ( !weapon.HasMod( SHATTER_ROUNDS_HIPFIRE_MOD ) && curState != 1 )
+		{
+			ShatterRounds_RemoveShatterRounds( weapon )
+			curState = 1
+		}
+
+		WaitFrame()
+	}
+}
+
+void function ShatterRounds_AddShatterRounds( entity weapon )
+{
+	#if SERVER
+		                                                                
+			                                                       
+	#endif
+	#if CLIENT
+		if ( weapon.GetWeaponClassName() == "mp_weapon_bow" )
+			WeaponBow_UpdateArrowColor( weapon, eShatterRoundsTypes.SHATTER_TRI )
+
+	#endif
+}
+
+void function ShatterRounds_RemoveShatterRounds( entity weapon )
+{
+	#if SERVER
+		                                                             
+			                                                    
+	#endif
+	#if CLIENT
+		if ( weapon.GetWeaponClassName() == "mp_weapon_bow" )
+			WeaponBow_UpdateArrowColor( weapon, eShatterRoundsTypes.STANDARD )
+	#endif
+}
+#if SERVER
+                                                                     
+ 
+	                   
+	                             
+	                               
+	                                                                
+
+	            
+		                               
+		 
+			                        
+				                                              
+		 
+	 
+
+	              
+	 
+		                                               
+			      
+
+			                                                                           
+		 
+			                                                  
+			 
+				                                              
+				                                           
+			 
+		 
+		                                                         
+		 
+			                                           
+			                                        
+		 
+
+		                                                 
+		 
+			      
+		 
+
+		           
+	 
+ 
+#endif
+
+#if SERVER
+                                                                                                                                
+ 
+	                        
+		      
+
+	                         
+		      
+
+	                         
+		      
+
+	                                             
+	 
+		                                             
+		 
+			                                                
+		 
+	 
+
+ 
+#endif
+
+                      
+void function OnWeaponActivate_Smart_Reload ( entity weapon, SmartReloadSettings settings )
+{
+	if ( !IsValid( weapon ) )
+		return
+
+	entity player = weapon.GetWeaponOwner()
+
+	if ( IsValid( player ) )
+	{
+		#if CLIENT
+		int slot = GetSlotForWeapon( player, weapon )
+		if ( slot >= 0 )
+			weapon.w.activeOptic = SURVIVAL_GetWeaponAttachmentForPoint( player, slot, "sight" )
+		else
+			weapon.w.activeOptic = ""
+		#endif
+		ApplySmartReloadFunctionality ( player, weapon, settings )
+	}
+}
+
+void function ApplySmartReloadFunctionality ( entity player, entity weapon, SmartReloadSettings settings )
+{
+#if SERVER
+	                                                                             
+#endif
+#if CLIENT
+	thread ApplySmartReloadFunctionality_ClientThink ( player, weapon, settings )
+#endif
+}
+
+void function OnWeaponReload_Smart_Reload ( entity weapon, int milestoneIndex )
+{
+	LootData weaponLootData = SURVIVAL_Loot_GetLootDataByRef( weapon.GetWeaponClassName() )
+
+	SmartReloadSettings settings
+	settings.OverloadedAmmo				 = GetWeaponInfoFileKeyField_GlobalInt( weaponLootData.baseWeapon, OVERLOAD_AMMO_SETTING )
+
+	entity player = weapon.GetWeaponOwner()
+	int clipCount = weapon.GetWeaponPrimaryClipCount()
+	int maxClipCount = weapon.GetWeaponPrimaryClipCountMax ()
+	int maxClipWithoutOverloadedAmmo = maxClipCount - settings.OverloadedAmmo
+	int overFlowAmmo = clipCount - maxClipWithoutOverloadedAmmo
+	string ammoType = AmmoType_GetRefFromIndex( weapon.GetWeaponAmmoPoolType() )
+	int ammoPoolType = eAmmoPoolType[ ammoType ]
 
 
+	if ( !weapon.HasMod( SMART_RELOAD_HOPUP ) )
+	{
+		weapon.RemoveMod( LMG_OVERLOADED_AMMO_MOD )
+		weapon.RemoveMod( LMG_FAST_RELOAD_MOD )
+	}
 
+	if ( weapon.HasMod( LMG_FAST_RELOAD_MOD ) )
+	{
+		#if CLIENT
+		if ( !IsValid( player ) || !IsLocalViewPlayer( player ) )
+			return
 
+		EmitSoundOnEntity( player, "UI_InGame_BoostedLoader_Reload" )
+		#endif
+	}
+	else
+	{
+		#if SERVER
+		                                                                                               
+		 
+			                                                                                        
 
+			                                                                  
+			                      
+			 
+				                                                                                                      
+				                                                                
 
+				                                                        
+				                                               
+			 
+			    
+			 
+				                                                            
+				                                                                      
+			 
+		 
+		#endif
 
+		weapon.RemoveMod( LMG_OVERLOADED_AMMO_MOD )
+	}
+}
+
+#if SERVER
+                                                                                                                                
+ 
+	                                             
+	 
+			                                     
+			 
+				                                                                                     
+				                            
+
+				                                                                                                                  
+				                                                                                                               
+
+				                                 
+
+				                                                 
+			 
+		 
+ 
 
 #endif
+void function OnWeaponDeactivate_Smart_Reload ( entity weapon )
+{
+	weapon.Signal ( END_SMART_RELOAD )
+	entity player = weapon.GetWeaponOwner()
+
+	if( !IsValid( weapon ) || !IsValid( player) )
+		return
+
+	#if SERVER
+	                                                                                                                               
+	 
+		                                           
+		                                                                                  
+	 
+	#endif
+}
+
+void function ApplySmartReloadFunctionality_ClientThink ( entity player, entity weapon, SmartReloadSettings settings )
+{
+	#if CLIENT
+		AssertIsNewThread()
+		weapon.EndSignal( "OnDestroy" )
+		weapon.EndSignal( END_SMART_RELOAD )
+
+		if ( !IsValid( player ) || !IsLocalViewPlayer( player ) )
+			return
+		player.EndSignal( "OnDeath" )
+
+		vector lowAmmoColor      = SrgbToLinear( LOWAMMO_UI_COLOR )
+		vector normalAmmoColor   = SrgbToLinear( NORMALAMMO_UI_COLOR )
+		vector overloadAmmoColor = SrgbToLinear( OVERLOADAMMO_UI_COLOR )
+		vector outofAmmoColor    = SrgbToLinear( OUTOFAMMO_UI_COLOR )
+
+		int clipCount
+		int maxClipCount
+		int overloadClipCount
+		int maxAmmoRequiredCount
+		float clipCountFrac = 1.0
+		float offset = 0.05
+		var rui = ClWeaponStatus_GetWeaponHudRui( player )
+		var reloadRui = GetAmmoStatusHintRui()
+		var crosshairRui = CreateCockpitPostFXRui( $"ui/ammo_status_hint.rpak", HUD_Z_BASE )
+		var chargeBarRui = CreateCockpitPostFXRui( $"ui/crosshair_reload_hopup_bar.rpak" )
+
+		OnThreadEnd(
+			function() : ( player, weapon, rui, reloadRui, crosshairRui, chargeBarRui )
+			{
+				RuiDestroy( crosshairRui )
+				RuiDestroy( chargeBarRui )
+				RuiSetBool( reloadRui, "showHopupReloadIcon", false )
+				RuiSetFloat3( rui, "ammoGlowColor", SrgbToLinear( NORMALAMMO_UI_COLOR ) )
+			}
+		)
+
+		while ( true )
+		{
+			clipCount = weapon.GetWeaponPrimaryClipCount()
+			maxClipCount = weapon.GetWeaponPrimaryClipCountMax()
+			overloadClipCount = maxClipCount - settings.OverloadedAmmo
+			maxAmmoRequiredCount = int( maxClipCount * settings.LowAmmoFrac)
+			clipCountFrac = float( clipCount) / float( maxClipCount )
+
+			if ( weapon.HasMod( LMG_FAST_RELOAD_MOD ) && weapon.IsReloading() )
+			{
+				RuiSetFloat3( chargeBarRui, "bracketColor", normalAmmoColor )
+				RuiSetBool( crosshairRui, "showFastReloadText", true )
+				RuiSetBool( crosshairRui, "showHopupReloadBG", true )
+				RuiSetBool( reloadRui, "showHopupReloadIcon", false )
+			}
+			else if ( weapon.HasMod( SMART_RELOAD_HOPUP ) && weapon.HasMod( LMG_OVERLOADED_AMMO_MOD ) && clipCount > overloadClipCount )
+			{
+				RuiSetFloat3( rui, "ammoGlowColor", overloadAmmoColor )
+				RuiSetFloat3( chargeBarRui, "bracketColor", overloadAmmoColor )
+				RuiSetBool( crosshairRui, "showFastReloadText", false )
+				RuiSetBool( crosshairRui, "showHopupReloadBG", false )
+				RuiSetBool( reloadRui, "showHopupReloadIcon", false )
+				RuiSetBool( chargeBarRui, "showExtraAmmo", true )
+			}
+			else if ( weapon.HasMod( SMART_RELOAD_HOPUP ) && clipCount > MIN_AMMO_REQUIRED && clipCount <= maxAmmoRequiredCount )
+			{
+				RuiSetFloat3( rui, "ammoGlowColor", lowAmmoColor )
+				RuiSetFloat3( chargeBarRui, "bracketColor", lowAmmoColor )
+				RuiSetBool( reloadRui, "showHopupReloadIcon", true )
+				RuiSetBool( crosshairRui, "showFastReloadText", false )
+				RuiSetBool( crosshairRui, "showHopupReloadBG", false )
+			}
+			else if ( weapon.HasMod( SMART_RELOAD_HOPUP ) && clipCount == 0 )
+			{
+				RuiSetFloat3( chargeBarRui, "bracketColor", outofAmmoColor )
+				RuiSetBool( crosshairRui, "showFastReloadText", false )
+				RuiSetBool( reloadRui, "showHopupReloadIcon", false )
+				RuiSetBool( crosshairRui, "showHopupReloadBG", false )
+				RuiSetBool( chargeBarRui, "showExtraAmmo", false )
+			}
+			else
+			{
+				RuiSetFloat3( chargeBarRui, "bracketColor", normalAmmoColor )
+				RuiSetFloat3( rui, "ammoGlowColor", normalAmmoColor )
+				RuiSetBool( crosshairRui, "showFastReloadText", false )
+				RuiSetBool( reloadRui, "showHopupReloadIcon", false )
+				RuiSetBool( crosshairRui, "showHopupReloadBG", false )
+				RuiSetBool( chargeBarRui, "showExtraAmmo", false )
+			}
+
+			if ( weapon.HasMod( SMART_RELOAD_HOPUP ) )
+			{
+				RuiSetBool( chargeBarRui, "isActive", true )
+				RuiSetFloat( chargeBarRui, "energizeFrac", clipCountFrac )
+				RuiSetFloat( chargeBarRui, "adsFrac", player.GetZoomFrac() )
+
+				switch ( weapon.w.activeOptic )
+				{
+					case "":	            
+					offset = 0.05
+					break
+					case "optic_cq_hcog_classic":
+						offset = 0.08
+						break
+					case "optic_cq_holosight":
+						offset = 0.11
+						break
+					case "optic_cq_hcog_bruiser":
+						offset = 0.09
+						break
+					case "optic_cq_holosight_variable":
+						offset = 0.09
+						break
+					case "optic_ranged_hcog":
+						offset = 0.11
+						break
+					case "optic_ranged_aog_variable":
+						offset = 0.14
+						break
+					case "optic_cq_threat":
+						offset = 0.07
+						break
+				}
+				RuiSetFloat( chargeBarRui, "offset", offset )
+			}
+			WaitFrame()
+		}
+	#endif
+}
+
+void function ApplySmartReloadFunctionality_ServerThink ( entity player, entity weapon, SmartReloadSettings settings )
+{
+	#if SERVER
+		                   
+		                               
+		                                    
+		                             
+
+		              
+		 
+			                                                  
+			                                                         
+			                                                                    
+			                                                              
+
+			                                                                                                                
+			 
+				                                    
+				                                        
+			 
+			                                                                                                                             
+				                                           
+			    
+				                                       
+
+			           
+		 
+	#endif
+}
+
+bool function IsTurretWeapon( entity weapon )
+{
+	if( !IsValid( weapon ) || !weapon.IsWeaponX() )
+		return false
+
+	return ( GetWeaponInfoFileKeyField_GlobalInt_WithDefault( weapon.GetWeaponClassName(), "is_turret_weapon" , 0 ) == 1 )
+}
+
+bool function IsHMGWeapon( entity weapon )
+{
+	if( !IsValid( weapon ) || !weapon.IsWeaponX() )
+		return false
+
+	return ( GetWeaponInfoFileKeyField_GlobalInt_WithDefault( weapon.GetWeaponClassName(), "is_hmg_weapon" , 0 ) == 1 )
+}
+
+
+void function OnWeaponActivate_Kinetic_Loader( entity weapon)
+{
+	if ( !IsValid( weapon ) )
+		return
+
+	if( !weapon.IsWeaponX() )
+		return
+
+	entity player = weapon.GetWeaponOwner()
+
+	if ( IsValid( player ) )
+	{
+		if ( weapon.HasMod ( KINETIC_LOADER_HOPUP ) )
+		{
+			#if CLIENT
+			if ( InPrediction() )
+			#endif
+			{
+				                                                            
+				if ( weapon.HasMod( "hopup_kinetic_choke" ) && weapon.HasMod( "kinetic_choke" ) )
+				{
+						weapon.RemoveMod( "kinetic_choke" )
+				}
+			}
+
+			ApplyKineticLoaderFunctionality( player, weapon )
+		}
+
+	}
+}
+
+void function OnWeaponDeactivate_Kinetic_Loader( entity weapon )
+{
+	weapon.Signal( END_KINETIC_LOADER )
+	weapon.Signal( END_KINETIC_LOADER_CHOKE )
+
+	#if CLIENT
+	weapon.Signal( END_KINETIC_LOADER_RUI )
+	#endif
+}
+
+void function ApplyKineticLoaderFunctionality( entity player, entity weapon )
+{
+	weapon.Signal( END_KINETIC_LOADER )
+	weapon.Signal( END_KINETIC_LOADER_CHOKE )
+
+	#if SERVER
+		                                                               
+		                                                                    
+	#endif
+
+	#if CLIENT
+		weapon.Signal( END_KINETIC_LOADER_RUI )
+		thread ApplyKineticLoader_ClientThink( player, weapon )
+	#endif
+}
+
+void function KineticLoaderChokeFunctionality_ServerThink( entity player, entity weapon )
+{
+	#if SERVER
+		                             
+		                               
+		                                            
+
+		           
+
+		                                               
+			      
+
+		                                                
+		 
+			                                             
+			 
+				                                   
+				     
+			 
+
+			                                                
+			 
+				                                             
+				 
+					                                                                         
+
+					                     
+					 
+						                                 
+						 
+							                               
+
+							                                        
+								                                
+						 
+					 
+					                           
+					 
+						                                   
+						     
+					 
+				 
+				           
+			 
+			                        
+			                                                                                                  
+			 
+				           
+			 
+			                               
+			    
+			 
+				                                  
+				 
+					                                                                  
+				 
+				           
+			 
+		 
+	#endif
+}
+void function KineticLoaderFunctionality_ServerThink( entity player, entity weapon )
+{
+	#if SERVER
+		                             
+		                               
+		                                      
+
+		                                              
+			      
+
+		                                                                            
+		                                            
+
+		                                                                                       
+
+		                              
+		                  				                                                                                                    
+		                      			                                                                                                             
+		                 				                                                                                                        
+		                   				                                                                                                     
+		                          		                                                                                                 
+
+		         
+		                                    
+		                       
+
+		                                               
+		 
+			                                                                                        
+			                         
+			 
+				                
+
+				                                              
+					      
+
+				                                             
+				                                                                                                                          
+				 
+
+					                                            
+					                                                                                                                                                                      
+
+					                                         
+					                                                            
+					                                                                                      
+
+					                                                                                 
+					 
+
+						                                                                          
+
+						                                                    
+						                    
+							                                                                    
+
+						                
+						                                                                                   
+
+						                                                                                                          
+						 
+							                                   
+						 
+
+						                                                                   
+						                                                                                                            
+
+						                
+						       
+						                                                                                                    
+					 
+				 
+			 
+			                        
+			                              
+			 
+				           
+			 
+			                               
+			    
+			 
+				         
+				                              
+				                   
+				                                                                                              
+				           
+			 
+		 
+	#endif
+}
+void function KineticLoaderChokeGraceWindow_ServerThink( entity player, entity weapon )
+{
+	#if SERVER
+		                             
+		                               
+		                                            
+		                                             
+		                        
+
+		                                             
+			      
+
+		                                                
+		 
+			                                                                                      
+			 
+				                                   
+				     
+			 
+
+			                                                                    
+			 
+				                                            
+				 
+					                                
+				 
+			 
+
+			                         
+				     
+
+			                                                       
+			 
+				                         
+				 
+					     
+				 
+				    
+				 
+					                                                                         
+
+					                     
+					 
+						                                 
+						 
+							                                       
+								                                   
+
+							     
+						 
+					 
+					                           
+					 
+						                                   
+						     
+					 
+
+					           
+				 
+			 
+			    
+			 
+				           
+			 
+		 
+	#endif
+}
+
+#if SERVER
+                                                                                                                                  
+ 
+	                        
+		      
+
+	                         
+		      
+
+	                         
+		      
+
+	                                                                                                                     
+	 
+		                                            
+
+		                                          
+	 
+
+	                                       
+	 
+		                                                                  
+		 
+			                                             
+				                                      
+		 
+
+
+	 
+	                                               
+	 
+		                                        
+		                                   
+
+		                                            
+	 
+
+ 
+
+#endif
+
+#if CLIENT
+void function ServerCallback_KineticLoaderReloadedThroughSlide( int ammoToLoadTotal )
+{
+	file.ammoToLoadTotal = ammoToLoadTotal
+	file.reloadedThroughSlide = true
+}
+void function ServerCallback_KineticLoaderReloadedThroughSlideEnd()
+{
+	file.ammoToLoadTotal = 0
+	file.reloadedThroughSlide = false
+}
+#endif
+
+void function ApplyKineticLoader_ClientThink( entity player, entity weapon )
+{
+	#if CLIENT
+		AssertIsNewThread()
+		weapon.EndSignal( "OnDestroy" )
+		weapon.EndSignal( END_KINETIC_LOADER_RUI )
+
+		if ( !IsValid( player ) || !IsLocalViewPlayer( player ) )
+			return
+
+		player.EndSignal( "OnDeath" )
+
+		vector lowAmmoColor      = SrgbToLinear( OVERLOADAMMO_UI_COLOR )
+		vector normalAmmoColor   = SrgbToLinear( NORMALAMMO_UI_COLOR )
+
+		var rui = ClWeaponStatus_GetWeaponHudRui( player )
+		var crosshairRui = CreateCockpitPostFXRui( $"ui/ammo_status_hint.rpak", HUD_Z_BASE )
+
+		OnThreadEnd(
+			function() : ( player, weapon, crosshairRui )
+			{
+				RuiDestroy( crosshairRui )
+				file.ammoToLoadTotal = 0
+				file.reloadedThroughSlide = false
+			}
+		)
+
+		if (!IsValid( weapon ) || !IsValid( player ) )
+			return
+
+		while ( IsValid( weapon ) && IsValid( player ))
+		{
+			if ( file.reloadedThroughSlide )
+			{
+				string ammoToLoadSting = Localize( "#WPN_HOPUP_KINETIC_LOADER_RELOAD_HINT", file.ammoToLoadTotal )
+				RuiSetString( crosshairRui, "ammoToLoadString", ammoToLoadSting )
+				RuiSetFloat3( rui, "ammoGlowColor", lowAmmoColor )
+				RuiSetBool( crosshairRui, "showKineticReloadText", true )
+				RuiSetBool( crosshairRui, "showHopupKineticReloadBG", true )
+			}
+			else
+			{
+				RuiSetFloat3( rui, "ammoGlowColor", normalAmmoColor )
+				RuiSetBool( crosshairRui, "showKineticReloadText", false )
+				RuiSetBool( crosshairRui, "showHopupKineticReloadBG", false )
+			}
+
+			WaitFrame()
+		}
+	#endif
+}
+
+                          
+                                                   
+ 
+                          
+        
+
+                                                                
+                                                             
+
+                        
+        
+
+                                            
+   
+                                             
+                                                                               
+                                               
+                                                
+
+                                              
+                                                                                                                                                     
+
+                                           
+                                                                
+                                                                                        
+
+                                                                                                      
+   
+                             
+                       
+                                                                          
+
+                        
+                                                                                      
+
+             
+                                                                                            
+                                                                          
+         
+   
+  
+
+ 
+
+
+                                              
+ 
+           
+                                           
+                                                                                  
+       
+ 
+      
+
+               
+#if SERVER || CLIENT
+bool function GetInfiniteAmmo( entity weapon )
+{
+	                         
+	return weapon.HasMod( MOD_INFINITE_AMMO_CLIPS )
+}
+
+#if SERVER
+                                                                                                                                                          
+ 
+	                                                                             
+		            
+
+	                                                                                                  
+ 
+
+                                                                                                                                                                                    
+ 
+	                               
+		            
+
+	                                         
+	                                                                              
+
+	                       
+		                                                                                                        
+
+	                            
+ 
+
+                                                                                                                                                                                      
+ 
+	                               
+		            
+
+	                                                 
+	                                                                                              
+	                                                                                                               
+
+	                       
+		                                                                                                                
+
+	                                    
+
+ 
+
+                                                                                                                            
+ 
+	                          
+	                                                                                                        
+	                                              
+	 
+		                                              
+		                                                 
+			        
+		                                                                                                              
+	 
+	                                                                                                                
+ 
+
+                                                                                                                                             
+ 
+	       
+		                                        
+	      
+
+	                                                
+
+	                                                                                            
+	                  
+	 
+		                                             
+
+		                                                                                                        
+		                                                                                                       
+		                                                                                                       
+
+		                         
+		                                    
+		 
+			                                                                                                           
+			                                                           
+				                    
+			    
+				                   
+		 
+
+		                                                                           
+		                            
+		 
+			                                                                           
+			                                                   
+				                    
+			    
+				                   
+		 
+
+		                         
+		 
+			                                                                                      
+			                                          
+				                    
+			                                                            
+				                   
+		 
+
+		                                                                       
+		                        
+			                    
+
+		                                       
+		                           
+		 
+			                                               
+			 
+				                                                                     
+				                    
+				                   
+			 
+			    
+				                    
+		 
+	 
+	    
+	 
+		                                                             
+		                           
+		 
+			                    
+		 
+	 
+
+	                                                                                                  
+	                                                 
+
+	                                   
+	                   
+	 
+		                       
+		 
+			                   
+				                                        
+			                                                     
+				                                                                                              
+		 
+
+		                                                
+			                                        
+
+		                       
+			                                                                                                                     
+
+		                                                                                       
+			                                                             
+
+		                                                                                  
+	 
+	    
+	 
+		                                               
+			                                           
+
+		                       
+		 
+			                   
+				                                                                                                        
+			                                                     
+			 
+				                                                                                             
+				                                        
+			 
+		 
+		                                                                      
+			                                                                        
+
+		                                                                                  
+	 
+
+	                                
+ 
+
+       
+                                                                                                             
+ 
+	                                                                                        
+ 
+
+                                                             
+ 
+	                                                
+	                                                      
+	                                                                                                        
+	                                                                                                       
+	                                                                                                       
+	                           			                        
+	                          			                       
+	                          			                       
+	                        			                                              
+ 
+      
+
+#endif
+
+#endif               

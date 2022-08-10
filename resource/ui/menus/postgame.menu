@@ -67,22 +67,22 @@ resource/ui/menus/postgame.menu
             wide					1800
             tall					208
             visible				    1
-            rui                     "ui/generic_menu_header.rpak"
+            rui                     "ui/menu_header_with_sub_string.rpak"
 
             pin_to_sibling			ScreenFrame
             pin_corner_to_sibling	TOP
             pin_to_sibling_corner	TOP
         }
 
-        MatchmakingStatus
-        {
-            ControlName		        RuiPanel
-            InheritProperties		MatchmakingStatus
-
-            pin_to_sibling			ScreenFrame
-            pin_corner_to_sibling	BOTTOM
-            pin_to_sibling_corner	BOTTOM
-        }
+//       MatchmakingStatus
+//       {
+//           ControlName		        RuiPanel
+//           InheritProperties		MatchmakingStatus
+//
+//           pin_to_sibling			ScreenFrame
+//           pin_corner_to_sibling	BOTTOM
+//           pin_to_sibling_corner	BOTTOM
+//       }
 
         MatchRank
         {
@@ -103,10 +103,14 @@ resource/ui/menus/postgame.menu
             ControlName				RuiPanel
 
             xpos                    48
+            xpos_nx_handheld        225			[$NX || $NX_UI_PC]
             ypos                    "%-12"
+            ypos_nx_handheld        "%-15"		[$NX || $NX_UI_PC]
 
             wide					850
+            wide_nx_handheld		870			[$NX || $NX_UI_PC]
             tall					850
+            tall_nx_handheld		870   		[$NX || $NX_UI_PC]
             rui                     "ui/combined_card.rpak"
             visible					1
 
@@ -119,6 +123,7 @@ resource/ui/menus/postgame.menu
 		{
 			ControlName				Label
 			xpos					0
+			xpos_nx_handheld		300			[$NX || $NX_UI_PC]
 			ypos					c-420
 			wide					%100
 			tall					906
@@ -143,14 +148,30 @@ resource/ui/menus/postgame.menu
 			pin_to_sibling_corner	TOP
         }
 
-        MatchmakingStatus
+//        MatchmakingStatus
+//        {
+//            ControlName		        RuiPanel
+//            InheritProperties		MatchmakingStatus
+//
+//            pin_to_sibling			ScreenFrame
+//            pin_corner_to_sibling	BOTTOM
+//            pin_to_sibling_corner	BOTTOM
+//        }
+
+        BadgeEarned
         {
             ControlName		        RuiPanel
-            InheritProperties		MatchmakingStatus
+
+            rui                     "ui/badge_earned_box.rpak"
+            xpos                    48
+            ypos                    "%-12"
+            wide                    850
+            tall                    850
+            visible                 1
 
             pin_to_sibling			ScreenFrame
-            pin_corner_to_sibling	BOTTOM
-            pin_to_sibling_corner	BOTTOM
+            pin_corner_to_sibling	TOP_RIGHT
+            pin_to_sibling_corner	TOP
         }
 
         XPEarned1
@@ -159,7 +180,9 @@ resource/ui/menus/postgame.menu
             rui                     "ui/xp_earned_box.rpak"
             xpos                    6
             wide                    380
+            wide_nx_handheld        625			[$NX || $NX_UI_PC]
             tall                    280
+            tall_nx_handheld        350			[$NX || $NX_UI_PC]
             visible					1
 
             zpos                    500
@@ -176,7 +199,9 @@ resource/ui/menus/postgame.menu
             xpos                    32
             ypos                    "%-10"
             wide                    380
+            wide_nx_handheld        625			[$NX || $NX_UI_PC]
             tall                    280
+            tall_nx_handheld        350			[$NX || $NX_UI_PC]
             visible                 1
 
             zpos                    500
@@ -193,7 +218,9 @@ resource/ui/menus/postgame.menu
             xpos                    172
             ypos                    0
             wide                    480
+			wide_nx_handheld        625			[$NX || $NX_UI_PC]
             tall                    280
+            tall_nx_handheld        350			[$NX || $NX_UI_PC]
             visible                 1
 
             zpos                    500
@@ -218,18 +245,18 @@ resource/ui/menus/postgame.menu
             pin_to_sibling_corner   CENTER
         }
 
-        SquadSummary
-        {
-            ControlName				RuiPanel
-            rui                     "ui/squad_summary.rpak"
-            xpos                    0
-            ypos                    0
-            wide					1920
-            tall					1080
-            visible					0
-
-            zpos                    500
-        }
+        // SquadSummary
+        // {
+        //    ControlName				RuiPanel
+        //    rui                     "ui/squad_summary.rpak"
+        //    xpos                    0
+        //    ypos                    0
+        //    wide					1920
+        //    tall					1080
+        //    visible					0
+		//
+        //    zpos                    500
+        // }
 
         XPProgressBarAccount
         {
@@ -237,6 +264,7 @@ resource/ui/menus/postgame.menu
             rui                     "ui/xp_progress_bars.rpak"
             xpos                    0
             ypos                    16
+            ypos_nx_handheld        -43			[$NX || $NX_UI_PC]
             wide                    512
             tall                    360
             visible					1
@@ -269,13 +297,14 @@ resource/ui/menus/postgame.menu
         {
             ControlName				RuiButton
             classname               "MenuButton"
+            xpos_nx_handheld		-140			[$NX || $NX_UI_PC]
             wide					384
             tall					66
             rui                     "ui/generic_button.rpak"
             labelText               ""
             visible					1
             cursorVelocityModifier  0.7
-            zpos                    3
+            zpos                    30
 
             proportionalToParent    1
 
@@ -294,15 +323,7 @@ resource/ui/menus/postgame.menu
 		FooterButtons
 		{
 			ControlName				CNestedPanel
-			wide					f0
-			tall					36
-			visible					1
-			zpos                    1
-			controlSettingsFile		"resource/ui/menus/panels/footer_buttons.res"
-
-			pin_to_sibling			MenuFrame
-			pin_corner_to_sibling	BOTTOM
-			pin_to_sibling_corner	BOTTOM
+			InheritProperties       FooterButtons
 		}
 	}
 }

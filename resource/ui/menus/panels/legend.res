@@ -19,7 +19,20 @@ resource/ui/menus/panels/legend.res
         image					"vgui/HUD/white"
         drawColor				"0 0 0 150"
     }
+	PanelFrame
+    {
+        ControlName				Label
+        xpos					0
+        ypos					0
+        wide					1920
+        tall					%100
+        labelText				""
+        visible				    1
 
+        pin_to_sibling          ScreenFrame
+        pin_corner_to_sibling   CENTER
+        pin_to_sibling_corner   CENTER
+    }
     CharacterSelectInfo
     {
         ControlName		        RuiPanel
@@ -30,7 +43,7 @@ resource/ui/menus/panels/legend.res
         visible			        1
         rui                     "ui/character_select_info.rpak"
 
-        pin_to_sibling			ScreenFrame
+        pin_to_sibling			PanelFrame
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
     }
@@ -41,12 +54,14 @@ resource/ui/menus/panels/legend.res
         xpos					50
         ypos					0
         wide 					502
+        wide_nx_handheld		0			[$NX || $NX_UI_PC]
         tall					866
+        tall_nx_handheld		0			[$NX || $NX_UI_PC]
         rui 					"ui/gladiator_card_squadscreen.rpak"
         visible					1
         zpos					5
 
-        pin_to_sibling			ScreenFrame
+        pin_to_sibling			PanelFrame
         pin_corner_to_sibling	RIGHT
         pin_to_sibling_corner	RIGHT
     }
@@ -55,6 +70,7 @@ resource/ui/menus/panels/legend.res
     {
         ControlName             RuiPanel
         xpos					0
+        xpos_nx_handheld		175			[$NX || $NX_UI_PC]
         ypos					60
         wide 					400
         tall					320
@@ -73,6 +89,7 @@ resource/ui/menus/panels/legend.res
     {
         ControlName             RuiPanel
         xpos					75
+        xpos_nx_handheld		235		[$NX || $NX_UI_PC]
         ypos					0
         wide 					400
         tall					320
@@ -91,6 +108,7 @@ resource/ui/menus/panels/legend.res
     {
         ControlName             RuiPanel
         xpos					75
+        xpos_nx_handheld		235		[$NX || $NX_UI_PC]
         ypos					0
         wide 					400
         tall					320
@@ -110,6 +128,7 @@ resource/ui/menus/panels/legend.res
         ControlName             RuiPanel
         xpos					0
         ypos					0
+        ypos_nx_handheld		50		[$NX || $NX_UI_PC]
         wide 					400
         tall					320
         rui 					"ui/character_special_perk.rpak"

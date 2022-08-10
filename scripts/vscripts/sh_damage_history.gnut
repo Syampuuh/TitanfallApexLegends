@@ -1,58 +1,75 @@
 global function DamageHistoryInit
-global function StoreDamageHistoryAndUpdate
-//
-//
-global function WasRecentlyHitByEntityWithDamagetype
-//
-global function GetLatestAssistingPlayerInfo
-global function GetLatestAssistingPlayerFromSameTeam
-global function GetTotalDamageTaken
-global function DamageHistory_GetDamageFromEntity
-//
-global function GetDamageEventsForTime
-global function WasRecentlyHitForDamageType
-//
-global function GetLastDamageSourceStringForAttacker
-//
 global function ClearRecentDamageHistory
-//
-global function PrintDamageEventsForTime
 
-const DEATH_RECAP_DAMAGE_HISTORY_TIME = 30    //
+#if SERVER                                                                                    
+                                           
+                                                    
+                                                        
+                                            
+                                                     
+                                                 
+                                                    
+                                                
+                                          
+                                               
+                                                        
+
+       
+                                     
+                                     
+                          
+            
+
+#endif         
+
+#if SERVER
+                                          
+#endif
+
+const DEATH_RECAP_DAMAGE_HISTORY_TIME = 30                                                          
+const DEATH_REACP_GROUP_MAX_TIME = 1.0                                                   
+const DEATH_REACP_GROUP_MAX_HITS = 9                                         
+const INVALID_EHANDLE = -1
 
 global enum eDamageHistorySet
 {
-	DEFAULT, //
+	DEFAULT,                      
 	HEALTH,
 	SHIELD,
-	BLEEDOUT, //
+	BLEEDOUT,                 
 	ALL,
 }
 
-global struct AttackerDamage
+global struct DeathRecapDamageData
 {
-	entity            attacker
-	string            attackerName
-	float             totalDamage
-	float             eventCount
-	table<int, float> damageBySource
+	                          
+	int   attackerEHandle     	                  
+	int   victimEHandle       	                  
+	int   damageSourceID      	                  
+	int   damageType          	                       
+	int   totalDamage         	                 
+	int   hitCount            	                 
+	int   headShotBits        	                 
+	float healthFrac          	                     
+	float shieldFrac          	                     
+	float blockTime           	                         
+
+	                      
+	int   gladCardSlotIndex                                                     
+	asset customImage                                                                                        
+	int   index                                                                                       
 }
 
 global struct DamageHistoryStruct
 {
-	string        attackerName
-	string        attackerPetName
-	vector        origin
-	float         damage
-	int           damageType
-	int           damageSourceId
-	entity        attacker
-	int           attackerEHandle
-	float         attackerHealthPercent
-	float         time
-	//
-	bool          victimIsTitan
-	bool          rodeoDamage
+	vector origin
+	float  damage
+	int    damageType
+	int    damageSourceId
+	entity attacker
+	int    attackerEHandle
+	int    victimEHandle
+	float  time
 
 	bool wasBleedingOut
 
@@ -69,366 +86,222 @@ global struct AssistingPlayerStruct
 
 void function DamageHistoryInit()
 {
-	#if(false)
-
-
-#endif //
+	#if SERVER
+		                                                                               
+		                                                       
+	#endif         
 }
 
 
 void function ClearRecentDamageHistory( entity player )
 {
+	                                                                                                                                         
 	player.e.recentDamageHistory.clear()
-	#if(false)
-//
+	#if SERVER
+		                                                                                  
+		                                         
 
-#endif //
+		                                                                                                                                       
+		                                          
+		                                                                               
+	#endif         
 }
 
+#if SERVER
+                                                                                                                                                                                         
+ 
+	                                 
 
-DamageHistoryStruct function StoreDamageHistoryAndUpdate( entity storeEnt, float maxTime, float damage, vector damageOrigin, int damageType, int damageSourceId, entity attacker = null )
-{
-	DamageHistoryStruct damageHistory
+	                   
 
-	float time = Time()
+	          
+		                           
+		 
+			                                                    
+			                                       
+				                      
+		 
+	      
 
-	#if(false)
+	                                    
+		                                                       
 
+	                                     
+	                          
+	 
+		                                              
+	 
 
+	                                                                                                                                                   
+	                                              
 
+	                                   
+	                             
+	                                     
+	                                             
+	                                 
+	                         
+	                                               
+	                                                          
 
+	                                                    
 
+	                                                                                                                                                            
+	                                    
+		                                                                                     
+	    
+		                                                          
 
-#endif
+	                          
+	 
+		                                                       
+		                                
+			                                                                                                      
+		                                            
+	 
+	    
+	 
+		                                       
+			           
+	 
 
-	if ( damageType & DF_VORTEX_REFIRE )
-		damageSourceId = eDamageSourceId.damagedef_unknownBugIt
+	                      
 
-	if ( IsValid( attacker ) )
-	{
-		#if(CLIENT)
-			AttackerDisplayNameStruct names = GetAttackerDisplayNamesFromClassname( attacker, true )
-			damageHistory.attackerName = names.attackerName
-			damageHistory.attackerPetName = names.attackerPetName
-			damageHistory.attackerHealthPercent = max( 0.0, float( attacker.GetHealth() ) / float( attacker.GetMaxHealth() ) * 100.0 )
-		#endif
-	}
+	                                                                                                   
+	                                                                 
+		                                             
+	                                                         
 
-	damage = min( damage, storeEnt.GetHealth() )
-	damageHistory.origin = damageOrigin
-	damageHistory.damage = damage
-	damageHistory.damageType = damageType
-	damageHistory.damageSourceId = damageSourceId
-	damageHistory.attacker = attacker
-	damageHistory.time = time
-	//
+	          
+		                                                 
+		 
+			                                                                                                   
+			                                                                 
+				                                                                                                                            
+			                                                              
+		 
+	      
 
-	damageHistory.healthFrac = GetHealthFrac( storeEnt )
-	damageHistory.shieldFrac = GetShieldHealthFrac( storeEnt )
-
-	if ( storeEnt.IsPlayer() )
-	{
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-	}
-	else
-	{
-		if ( GetHealthFrac( storeEnt ) == 1.0 )
-			maxTime = 0
-	}
-
-
-	Assert( maxTime >= 0 )
-	PurgeDamageHistory( storeEnt, maxTime, time )
-
-	storeEnt.e.recentDamageHistory.insert( 0, damageHistory )
-
-	return damageHistory
-}
-
-
-array<DamageHistoryStruct> function GetDamageEventsForTime( entity player, float hitTime )
-{
-	float time = Time() - hitTime
-
-	array<DamageHistoryStruct> events
-
-	foreach ( event in player.e.recentDamageHistory )
-	{
-		if ( event.time < time )
-			return events
-
-		events.insert( 0, event )
-	}
-
-	return events
-}
-
-
-void function PrintDamageEventsForTime( entity player, float time = 20.0 )
-{
-	array<DamageHistoryStruct> events = GetDamageEventsForTime( player, time )
-
-	float runningTotal
-	foreach ( event in events )
-	{
-		runningTotal += event.damage
-		printt( "event:", event.damage, runningTotal, event.damageType & DF_SHIELD_DAMAGE, event.wasBleedingOut, event.attacker )
-	}
-}
-
+	                    
+ 
+#endif            
 
 void function PurgeDamageHistory( entity player, float maxTime, float time )
 {
-	//
-	int i
+	                             
+	int timedOutIndex = GetTimedOutDamageHistoryIndex( player.e.recentDamageHistory, maxTime, time )
+	if ( timedOutIndex < player.e.recentDamageHistory.len() )
+		player.e.recentDamageHistory.resize( timedOutIndex + 1 )
+}
+
+
+#if SERVER
+                                                                                   
+ 
+	                             
+	                                                                                                       
+	                                                                
+		                                                               
+ 
+#endif
+
+
+int function GetTimedOutDamageHistoryIndex( array<DamageHistoryStruct> events, float maxTime, float time )
+{
 	float removeTime = time - maxTime
 
-	for ( i = player.e.recentDamageHistory.len() - 1 ; i >= 0; i-- )
+	for ( int index = events.len() - 1 ; index >= 0; index-- )
 	{
-		DamageHistoryStruct history = player.e.recentDamageHistory[ i ]
-
-		if ( history.time > removeTime )
-			return
-
-		player.e.recentDamageHistory.remove( i )
-	}
-}
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-bool function WasRecentlyHitByEntityWithDamagetype( entity player, entity ent, int damageType, float hitTime )
-{
-	float time = Time() - hitTime
-	foreach ( DamageHistoryStruct history in player.e.recentDamageHistory )
-	{
-		if ( history.attacker != ent )
-			continue
-		if ( !(history.damageType & damageType) )
-			continue
-		if ( history.time < time )
-			continue
-
-		return true
+		if ( events[index].time > removeTime )
+			return index
 	}
 
-	return false
-}
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-bool function WasRecentlyHitForDamageType( entity player, int damageType, float hitTime )
-{
-	float time = Time() - hitTime
-	//
-	int i
-
-	foreach ( history in player.e.recentDamageHistory )
-	{
-		if ( history.time < time )
-			continue
-		if ( history.damageType & damageType )
-			return true
-	}
-
-	return false
+	return -1
 }
 
-
-float function GetTotalDamageTaken( entity player )
-{
-	float total = 0
-	foreach ( history in player.e.recentDamageHistory )
-	{
-		total += history.damage
-	}
-
-	return total
-}
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-float function DamageHistory_GetDamageFromEntity( entity player, entity attacker, int damageHistorySet = eDamageHistorySet.HEALTH )
-{
-	Assert( IsValid( attacker ) )
-
-	float total = 0
-	foreach ( history in player.e.recentDamageHistory )
-	{
-		if ( history.attacker != attacker )
-			continue
-
-		bool useDamage = false
-		switch ( damageHistorySet )
-		{
-			case eDamageHistorySet.DEFAULT:
-				useDamage = !history.wasBleedingOut
-				break
-
-			case eDamageHistorySet.HEALTH:
-				useDamage = (history.damageType & DF_SHIELD_DAMAGE) == 0 && !history.wasBleedingOut
-				break
-
-			case eDamageHistorySet.SHIELD:
-				useDamage = (history.damageType & DF_SHIELD_DAMAGE) != 0
-				break
-
-			case eDamageHistorySet.BLEEDOUT:
-				useDamage = history.wasBleedingOut
-				break
-
-			case eDamageHistorySet.ALL:
-			default:
-				useDamage = true
-				break
-		}
-
-		if ( !useDamage )
-			continue
-
-		total += history.damage
-	}
-
-	return total
-}
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-/*
-
-
-
-
-
-
-
-
-
-*/
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-//
-//
+#if SERVER
+                                                                                                              
+ 
+	                             
+	                                                                       
+	 
+		                              
+			        
+		                                         
+			        
+		                          
+			        
+
+		           
+	 
+
+	            
+ 
+#endif            
+
+
+#if SERVER
+                                                                         
+ 
+	                                                                       
+	 
+		                                        
+			                       
+	 
+
+	                  
+	           
+ 
+#endif            
+
+#if SERVER
+                                                                                                                                   
+ 
+	                             
+
+	               
+	                                                   
+	 
+		                                   
+			        
+
+		                      
+		                           
+		 
+			                               
+				                                   
+				     
+
+			                              
+				                                                                                   
+				     
+
+			                              
+				                                                        
+				     
+
+			                                
+				                                  
+				     
+
+			                           
+			        
+				                
+				     
+		 
+
+		                 
+			        
+
+		                       
+	 
+
+	            
+ 
+#endif            
+
+                                                                                                                               
+                                                                                                                                               
 AssistingPlayerStruct function GetLatestAssistingPlayerInfo( entity ent )
 {
 	float lastTime    = 0.0
@@ -455,56 +328,155 @@ AssistingPlayerStruct function GetLatestAssistingPlayerInfo( entity ent )
 	return assistingPlayerInfo
 }
 
+#if SERVER
+                                                                                                     
+ 
+	                       
+	                          
+	                                                                                              
+
+	                                                                                                      
+	 
+		                                                                                                                                                        
+			                                          
+		                                                           
+			                                          
+		                                   
+			                                          
+		                                       
+			                                          
+	 
+
+	                                                                                               
+
+	                                                   
+	 
+		                                         
+		                                                                
+			        
+
+		                                  
+			        
+
+		                                                      
+			        
+
+		                                                  
+			        
+
+		                                          
+		 
+			                                                                       
+				                                                                
+		 
+		    
+		 
+			                                                                   
+		 
+	 
+
+	                       
+ 
+#endif            
+
+#if SERVER
+                                                                                      
+ 
+	                                                                          
+	                                                 
+		         
+
+	                                               
+ 
+#endif
+
+#if SERVER
+                                                                                
+ 
+	                         
+		                              
+
+	                                                                             
+	                                                
+	 
+		                                                                               
+			        
+
+		                                         
+			                                   
+	 
+
+	                              
+ 
+#endif            
 
-array<entity> function GetLatestAssistingPlayerFromSameTeam( entity victim, entity attacker )
-{
-	float lastTime    = 0.0
-	float currentTime = Time()
-	array<entity> assistingPlayerArray
+#if SERVER
+                                                                                                             
+ 
+	                                                                    
 
-	foreach ( history in victim.e.recentDamageHistory )
-	{
-		if ( !IsValid( history.attacker ) || !history.attacker.IsPlayer() )
-			continue
+	                                                                                                       
+		      
 
-		if ( history.attacker == attacker )
-			continue
+	                                                                                                     
+	                                                                     
+	                                                                         
+	 
+		                                                                                                                                                                                                                                                            
+			                                                                                         
+	 
+	    
+	 
+		                                                                                          
+	 
 
-		if ( history.attacker.GetTeam() != attacker.GetTeam() )
-			continue
 
-		if ( currentTime - history.time >= MAX_ASSIST_TIME_GAP )
-			continue
+ 
+#endif            
 
-		if ( assistingPlayerArray.contains( history.attacker ) )
-			continue
+#if SERVER
+                                                                                      
+ 
+	                                                       
+	                                                                         
+		                                                                         
 
-		assistingPlayerArray.append( history.attacker )
-	}
+ 
+#endif            
 
-	return assistingPlayerArray
-}
+#if SERVER
+                                                                                                                          
+ 
+	                                                       
+	                                                                         
+	 
+		                                                                                                     
+		                                                                     
+		                                                                                         
+	 
 
-string function GetLastDamageSourceStringForAttacker( entity victim, entity attacker )
-{
-	if ( !IsValid( victim ) )
-		return ""
+ 
+#endif            
 
-	array<DamageHistoryStruct> recentDamageHistory = victim.e.recentDamageHistory
-	foreach ( damageHistory in recentDamageHistory )
-	{
-		if ( !IsValid( damageHistory.attacker ) || !damageHistory.attacker.IsPlayer() )
-			continue
+#if SERVER
+                                                                                                                
+ 
+	                                           
 
-		if ( damageHistory.attacker == attacker )
-			return DamageSourceIDToString( damageHistory.damageSourceId )
-	}
+	                                  
 
-	return ""
-}
+	                                                
+	 
+		                             
+			        
+		                                 
+			        
 
-#if(false)
+		                                
+	 
 
+	                       
+ 
 
 
 
@@ -518,158 +490,708 @@ string function GetLastDamageSourceStringForAttacker( entity victim, entity atta
 
 
 
+                                                                                                        
+                                                                                                         
+                                                                                                         
+                                                                                                        
+                                                                                                  
+                                                                                                  
+                                                                                                  
 
 
+                                                                                                 
+ 
+	                                                           
 
+	                                           
+ 
 
 
+                                                                        
+ 
+	                                                                                                 
+	                                       
+		      
 
+	                                                                                                                           
+	                                                                       
+	                                                       
 
+	                                                                          
+	                  
+		             
 
+	                                                                   
+	                                                           
+	                                                                 
 
+	                            
 
+	                                         
+	 
+		                                                                                                      
+		                                                                   
+		                      
 
+		                                     
+			                       
+		                                   
+			                       
+		                                                     
+			                       
+		                                                   
+		 
+			                                            
+			 
+				                       
+			 
+			    
+			 
+				                                               
+				                                                                                                                            
+				                                                       
+				                                                   
+					                       
+			 
+		 
+		                                         
+			                       
+	 
+
+	                       
+		                                                                                                                                                                                         
+
+	                                                                    
+	                                           
+ 
+
+
+                                                         
+ 
+	                                
+
+	                                                    
+
+	                                                                             
+
+	                                              
+		      	                                                                       
+
+	                                                         
+
+	                                                                                                                        
+	                                                                                                                                     
+	                                        
+	                                    
+
+	       
+		                            
+		                             
+			                                                                                                             
+		                                                                                                            
+		                                                                                  
+	      
+
+	                                        
+
+	                                     
+	                                      
+	                       
+		                 
+
+	                                                                                         
+	                                       
+	 
+		                            
+			     
+
+		                              
+		                           
+			                      
+			                    
+			                     
+			                 
+			                  
+			               
+			                   
+			                 
+			                 
+			                
+			      
+			             
+
+		       
+			                                                                       
+			                                                                         
+			                                                                                                                                                                                                      
+		      
+	 
+
+	                                      
+
+	                                
+
+	                 
+	                                                                                                
+	                              
+		                                          
+	    
+		                                               
+	                                                        
+
+	                                                                                                                                                
+	                                                                                                                                                            
+	                                                                  
+	                                                      
+	  	                                                                 
+
+	                                             
+
+	                                                
+	       
+		                                               
+		                                                 
+		                                               
+		                                                      
+	      
+ 
 
+       
+                                                                           
+ 
+	                    
+	                              
+		                                                                                   
+	                                                                                             
+	                                                                            
+	                                 
+	 
+		                                                                         
+		                                                                           
 
+		                                                                                                                                                                          
+	 
+ 
+      
 
-
-
-
-//
-//
-//
-//
-//
-//
-//
-
-
-
-//
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+                                                             
+ 
+	                                            
+
+	                                                           
+	                                                             
+	 
+		                                                       
+			        
+		                                             
+	 
+
+	                                                                 
+	          
+ 
+
+
+                                
+                                                                              
+ 
+	                                                                                              
+
+	                                
+		                              
+
+	                                
+		                              
+
+	                        
+		                              
+
+	                        
+		                              
+
+	                                                                                                  
+ 
+
+
+                                                                                                                                                                              
+ 
+	                                         
+
+	                                          
+
+	                                
+
+	                                                                     
+	                                         
+	                                         
+	                                                 
+	                           
+	                                                                                                                           
+
+	                                            
+	                         
+	                        
+
+	                                               
+	 
+		                                              
+
+		                                           
+		                                         
+
+		                             
+		                             
+			                                 
+
+		                                                                                   
+			                                                                                                         
+
+		                           
+			        
+
+		                        
+			        
+
+		                                                                                                                                             
+		                                                
+			        
+
+		                                            
+
+		                     
+		 
+			                                                                                           
+				                 
+
+			                                         
+				                 
+
+			                                                 
+				                 
+
+			                                                                                                          
+				                 
+
+			                                            
+			 
+				                                                                                    
+				                                   
+					                 
+				                        
+					                 
+			 
+		 
+
+		                              
+		 
+			                                                                                                       
+			                                  
+			                                                                                 
+			                                      
+				                             
+		 
+
+		                 
+		 
+			                                
+			                                      
+			                                             
+
+			                              
+			                                                                      
+			                                                                  
+			                                                                          
+			                                                                  
+			                                                    
+			                                                 
+			                                                     
+			                                                   
+			                                                   
+			                                                                                                   
+			                                                                                                                                                             
+
+			                           
+			                    
+		 
+
+		                                                                                    
+
+		                                                                       
+		                                                                                                                                                                           
+		                                                                  
+
+		                                                                                          
+		                                                              
+						                                     
+						                              
+						                                           
+
+		                    
+		 
+			                                               
+
+			                                         
+				                                                                                                                                                                 
+			                                              
+			                                     
+				                                                                                                                               
+			                  
+		 
+
+		                                     
+		                                 
+		                                         
+		                          
+	 
+
+	                                        
+
+	                       
+ 
+
+
+       
+
+                                  
+                                  
+
+                                                                                       
+ 
+	               
+	               
+
+	  											    		  		    		      	      	      	      		        
+	                                                    
+	                                                   	   	         	     	     	   		          	          
+	                                                   	   	         	     	     	   		       		          
+	                                                   	   	         	     	     	   		          	          
+	                                                   	   	         	     	     	   		          	          
+	                                                   	   	         	     	     	   		          	          
+	                                                   	   	         	     	     	   		          	          
+	                                                   	   	         	     	     	   		          	          
+	  
+	                                                                                             
+
+	  
+	                                           
+	                                                                                                     
+	                                                                                                  
+	                                                                                                  
+	                                                                                                  
+	                                                                                                    
+	                                                                                                  
+	                                                                                                  
+	                                                                                                   
+	                                                                                                       
+	                                                                                                    
+	                                                                                                   
+	                                                                                                   
+	                                                                                                   
+
+	                                                                                                   
+	                                                                                                    
+	                                                                                                   
+	                                                                                                   
+
+  
+	  
+	                                                                           
+	                                        	       		    	         	     	     	  		          	      		    
+	                                        	       		    	         	     	     	   		          	      		    
+	                                        	       		    	         	     	     	  		          	      		    
+	                                        	       		    	         	     	     	   		          	      		    
+	                                        	       		    	         	     	     	   		          	      		    
+	                                        	       		    	         	     	     	   		          	      		    
+	                                        	       		    	         	     	     	   		          	      		    
+	                                        	       		    	         	     	     	   		          	      		    
+	                                        	       		   		      		     	     	   		          	       	        
+	                                        	       		   		      		     	     	   		          	       	        
+	                                        	       		   		      		     	     	   		          	       	        
+	                                        	       		   		      		     	     	   		          	       	        
+	                                        	       		   		      		     	     	   		          	       	        
+	                                        	       		   		      		     	     	  		          	       	        
+	                                        	       		   		       		     	     	   		          	       	        
+	                                        	       		   		       		     	     	   		          	       	        
+	                                        	       		   		       		     	     	   		          	       	        
+
+	                                         	       		   		        	     	     	   		       		         	    
+	                                         	       		   		      		     	     	   		       		         	    
+	                                         	       		   		      		     	     	   		       		         	    
+	                                         	       		   		        	     	     	   		       		         	    
+	                                         	       		   		      		     	     	   		       		         	    
+	                                         	       		   		      		     	     	   		       		         	    
+	                                         	       		   		      		     	     	   		       		         	    
+	                                         	       		   		      		     	     	   		       		         	    
+	                                         	       		   		       		     	     	   		       		         	    
+	                                        	       		   		       		     	     	   		       		         	    
+  
+
+	                                      
+	                                           
+ 
+
+                                                   
+ 
+	                                                         
+
+	                                                                                                                        
+	                                                                                                                                     
+	                                        
+	                                    
+
+	                            
+	                             
+		                                                                                                             
+	                                                                                                            
+	                                                                                  
+
+	                                       
+	 
+		                  
+			                                            
+
+		                                                                       
+		                                                                         
+
+		                                                                                                                                                                                                      
+	 
+
+	                                               
+	                            
+	                                               
+	                            
+ 
+
+
+                                                                                                                                                                                       
+ 
+	                                
+
+	                        
+	                                
+	                              
+	                                
+	                                
+	                                     
+	                                                       
+	                                                      
+	                                                           
+
+	                                      
+	                               
+	                                   
+
+	                   
+ 
+
+                                            
+ 
+	                         
+
+	                          
+	                         
+	                              
+	                             
+	                                 
+	                        
+	                                          
+	                                        
+	                                     
+	                            
+	                            
+	                   
+	                              
+	                         
+	                       
+	                               
+	                                
+	                              
+	                              
+	                        
+	                                 
+	                              
+	                                
+	                               
+	                        
+	                              
+	                                  
+	                              
+	                                          
+	                            
+	                                     
+	                                   
+
+	            
+	                                      
+	 
+		                   
+		 
+			                           
+			             
+			                         
+		 
+	 
+
+	                       
+		                   
+	    
+		                                    
+
+	                  
+ 
+
+                
+
+
+                                                                           
+ 
+	                                                              
+		      
+
+	                                  
+
+	                   
+	                      
+	                   
+
+	                                                                                                               
+	                                                                                                                   
+	                                                                                           
+	                                                                                       
+	                                                                                                      
+	                                                                                                    
+	                                                       
+
+	                                   
+
+	                                                                   
+	                            
+	                                                              
+	 
+		                                                             
+
+		                             
+			                                 
+
+		                           
+			        
+
+		                                           
+		                                                                       
+
+		                                                 
+			                    
+		                                                    
+			                                         
+
+		                                                                                                                         
+		                    
+		 
+			                                                
+			 
+				           
+				                          
+			 
+		 
+
+		                            
+			                                  
+
+		                       
+		                                         
+
+		                                     
+		 
+			                                                                               
+			                                                    
+				            
+
+			                                 
+		 
+	 
+
+	                 
+	                                            
+
+	                                                                   
+	                           
+	 
+		                                                                                                       
+
+		                                    
+		 
+			                                  
+
+			                                                                                             
+			                   
+				        
+
+			           
+			                          
+			                                         
+		 
+	 
+
+	       
+		                                                                     
+		                          
+		                                                                                                        
+		                                                                                                   
+	            
+
+	                  
+	                                                                                                                                                                            
+ 
+
+
+                                                                                             
+ 
+	                                                                        
+ 
+
+
+                                                                    
+ 
+	                                                              
+		      
+
+	                                                                                                 
+	                                       
+		      
+
+	                                                                                                                           
+	                                                                       
+	                        
+	 
+		                                    
+		                                     
+		                                 
+		                                
+		                          
+		                           
+		                                    
+		                           
+		                                     
+		                                       
+                              
+                                                            
+                                                     
+      
+
+			                                                 
+			                                                                
+			                                                                   
+			                                                       
+			                                                      
+
+			                                                                                                                                                                                          
+
+			     
+
+		        
+			     
+	 
+
+	                                                                        
+ 
+
+#endif         

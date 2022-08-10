@@ -1,0 +1,105 @@
+global function ClCustomUsePrompt_Init
+
+global function CustomUsePrompt_SetLastUsedTime
+global function CustomUsePrompt_Show
+global function CustomUsePrompt_Hide
+global function CustomUsePrompt_ClearForAny
+global function CustomUsePrompt_ClearForEntity
+global function CustomUsePrompt_SetText
+global function CustomUsePrompt_SetAdditionalText
+global function CustomUsePrompt_SetHintImage
+global function CustomUsePrompt_ShowSourcePos
+global function CustomUsePrompt_SetSourcePos
+global function CustomUsePrompt_SetLineColor
+global function CustomUsePrompt_SetShouldCenterImage
+
+struct
+{
+	var rui
+	entity focusedEnt
+} file
+
+
+void function ClCustomUsePrompt_Init()
+{
+	file.rui = CreateFullscreenRui( $"ui/custom_hint_display.rpak", 1 )
+	RuiSetVisible ( file.rui, false )
+
+	file.focusedEnt = null
+}
+
+void function CustomUsePrompt_Show( entity focusedEnt )
+{
+	RuiSetVisible( file.rui, true )
+	file.focusedEnt = focusedEnt
+}
+
+void function CustomUsePrompt_Hide()
+{
+	RuiSetVisible( file.rui, false )
+}
+
+void function CustomUsePrompt_ClearForAny()
+{
+	RuiSetVisible( file.rui, false )
+	RuiSetString( file.rui, "hintText", "" )
+	RuiSetString( file.rui, "additionalText", "" )
+	RuiSetImage( file.rui, "hintImage", $""  )
+	RuiSetBool( file.rui, "showSourcePos", false )
+	RuiSetFloat3( file.rui, "sourceWorldPos", <0, 0, 0> )
+	file.focusedEnt = null
+}
+
+void function CustomUsePrompt_ClearForEntity( entity ent )
+{
+	if ( IsValid( file.focusedEnt ) && IsValid( ent ) && ent == file.focusedEnt )
+	{
+		RuiSetVisible( file.rui, false )
+		RuiSetString( file.rui, "hintText", "" )
+		RuiSetString( file.rui, "additionalText", "" )
+		RuiSetImage( file.rui, "hintImage", $""  )
+		RuiSetBool( file.rui, "showSourcePos", false )
+		RuiSetFloat3( file.rui, "sourceWorldPos", <0, 0, 0> )
+		file.focusedEnt = null
+	}
+}
+
+void function CustomUsePrompt_SetText( string text )
+{
+	RuiSetString( file.rui, "hintText", text )
+}
+
+void function CustomUsePrompt_SetAdditionalText( string text )
+{
+	RuiSetString( file.rui, "additionalText", text )
+}
+
+void function CustomUsePrompt_SetLastUsedTime( float time )
+{
+	RuiSetGameTime( file.rui, "lastUsedTime", time )
+}
+
+void function CustomUsePrompt_SetHintImage( asset image )
+{
+	RuiSetImage( file.rui, "hintImage", image )
+}
+
+void function CustomUsePrompt_ShowSourcePos( bool shouldShow )
+{
+	RuiSetBool( file.rui, "showSourcePos", shouldShow )
+}
+
+void function CustomUsePrompt_SetSourcePos( vector pos )
+{
+	RuiSetFloat3( file.rui, "sourceWorldPos", pos )
+}
+
+void function CustomUsePrompt_SetLineColor( vector color )
+{
+	RuiSetFloat3( file.rui, "lineColor", color )
+}
+
+void function CustomUsePrompt_SetShouldCenterImage( bool val )
+{
+	RuiSetBool( file.rui, "shouldCenterImage", val )
+}

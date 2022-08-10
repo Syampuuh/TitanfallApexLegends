@@ -1,8 +1,8 @@
 untyped
 
-//
-//
-//
+                                                                                              
+               
+                                                                                              
 
 global table<string,var> level
 
@@ -29,9 +29,11 @@ global function LevelVarInit
 global bool reloadingScripts = false
 global bool reloadedScripts = false
 
-#if(DEV)
+#if DEV
 global function __serialize_state
 global function __evalBreakpoint
+
+global bool PREFIX_PRINTT = false
 #endif
 
 
@@ -65,8 +67,12 @@ void function printt( ... )
 		return
 
 	local msg = vargv[0]
+	#if DEV
+		if ( PREFIX_PRINTT )
+			msg = "<" + getstackinfos( 2 ).func + "> " + msg
+	#endif
 	for ( int i = 1; i < vargc; i++ )
-		msg = (msg + " " + vargv[i])
+		msg = (msg + " " + vargv[i] )
 
 	printl( msg )
 }
@@ -85,9 +91,9 @@ void function PrintFunc( var val = null )
 
 string function VM_NAME()
 {
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		           
+	#elseif CLIENT
 		return "CL"
 	#else
 		Assert( UI )
@@ -124,7 +130,11 @@ void function printt_spamLog( ... )
 	for ( int i = 1; i < vargc; i++ )
 		msg = (msg + " " + vargv[i])
 
+#if UI
+	SpamLog( format( "[%.3f] %s\n", UITime(), msg ) )
+#else
 	SpamLog( format( "[%.3f] %s\n", Time(), msg ) )
+#endif      
 }
 
 void function printl_spamLog( var msg )
@@ -146,12 +156,12 @@ void function LevelVarInit()
 }
 
 
-#if(DEV)
+#if DEV
 
-//
-//
-//
-//
+                                                                                              
+                    
+                                       
+                                                                                              
 
 var function __evalBreakpoint( string evalString )
 {
@@ -164,7 +174,7 @@ var function __evalBreakpoint( string evalString )
 	local first = 1
 	foreach ( i, v in stackInfos.locals )
 	{
-		if ( i != "this" && i[0] != '@' ) //
+		if ( i != "this" && i[0] != '@' )                                 
 		{
 			if ( !first )
 			{
@@ -195,14 +205,14 @@ var function __evalBreakpoint( string evalString )
 
 void function __serialize_state()
 {
-	/*
-
-*/
+	  
+		                                
+	  
 	try
 	{
 		function evaluate_watch( stackframe, stacklevel, expression )
 		{
-			//
+			                                                        
 			local res = compilewatch( expression, stacklevel + 1, stackframe.src )
 			if ( typeof( res ) == "int" )
 				return { status = "ok", val = res }
@@ -211,15 +221,15 @@ void function __serialize_state()
 		}
 		local evaluate_watch = this.evaluate_watch
 
-		//
-		//
+		                                                                             
+		                                                                             
 		{
 			local stack = []
 			int baseStackFrameIndex = 2
 			int level = baseStackFrameIndex
 			local si
 
-			//
+			                             
 			for ( ;; )
 			{
 				si = getstackinfos( level )
@@ -229,7 +239,7 @@ void function __serialize_state()
 				level++
 			}
 
-			//
+			                      
 			foreach ( stackFrameIndex, stackFrame in stack )
 			{
 				if ( stackFrame.src != "NATIVE" )
@@ -241,7 +251,7 @@ void function __serialize_state()
 						{
 							if ( stackFrame.src != "NATIVE" )
 							{
-								//
+								                                                                                
 								stackFrame.watches[i] <- evaluate_watch( stackFrame, stackFrameIndex + baseStackFrameIndex, watch )
 							}
 							else
@@ -340,4 +350,4 @@ void function __serialize_state()
 	}
 }
 
-#endif //
+#endif       

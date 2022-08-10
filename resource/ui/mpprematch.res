@@ -163,21 +163,21 @@ Resource/UI/MPPrematch.res
 		pin_to_sibling_corner		BOTTOM_LEFT
 	}
 
-	waitingForPlayersTimer
-	{
-		ControlName			ImagePanel
-		xpos				90
-		ypos				r175
-		wide				81
-		tall				81
-		visible				0
-		enabled				1
-		scaleImage			1
-		image				"ui/icon_loading"
-		frame				0
-
-		zpos			5001
-	}
+//	waitingForPlayersTimer
+//	{
+//		ControlName			ImagePanel
+//		xpos				90
+//		ypos				r175
+//		wide				81
+//		tall				81
+//		visible				0
+//		enabled				1
+//		scaleImage			1
+//		image				"ui/icon_loading"
+//		frame				0
+//
+//		zpos			5001
+//	}
 
 	LoadOutIcon
 	{

@@ -1,0 +1,1176 @@
+global function MpSpaceElevator_Init
+
+#if SERVER
+                                                  
+                                        
+#endif
+
+#if CLIENT
+global function ServerToClient_SpaceElevatorTacProgressRuiStart
+#endif
+
+global const string SPACE_ELEVATOR_SCRIPTNAME = "space_elevator"
+const string SPACE_ELEVATOR_MOVER_SCRIPTNAME = "space_elevator_mover"
+
+                  
+int SPACEELEVATOR_1P_SCREEN_FX_ID
+const asset SPACEELEVATOR_1P_SCREEN_FX = $"P_anti_grav_hud"
+const asset ELEVATOR_IGNITION_FX = $"P_wpn_grav_lift_ignition"
+const asset ELEVATOR_BASE_FX = $"P_wpn_grav_lift_base"
+const asset ELEVATOR_TOP_FX = $"P_wpn_grav_lift_top"
+                                                        
+const asset FX_PROJECTILE_DESTROYED = $"P_projectile_melted"
+
+                 
+const string SPACEELEVATOR_SOUND_NEWT_IDLE_LOOP = "Nova_Tac_Upper_Active"
+const float SPACEELEVATOR_SOUND_NEWT_IDLE_Z_OFFSET = 600
+const string SPACEELEVATOR_SOUND_NEWT_DESTROY = "Nova_Ultimate_Destroy"
+const string SPACEELEVATOR_SOUND_NEWT_DAMAGE = "Nova_Ultimate_NewT_Damage"
+
+const string SPACEELEVATOR_SOUND_NEWT_START_FRIENDLY = "Nova_tac_Bottom_Active"
+const string SPACEELEVATOR_SOUND_NEWT_START_ENEMY = "Nova_tac_Bottom_Active_Enemy"
+
+const string SPACEELEVATOR_SOUND_PLAYER_ENTER_3P = "Nova_tac_Enter_3p"
+const string SPACEELEVATOR_SOUND_PLAYER_ENTER_3P_ENEMY = "Nova_tac_Enter_3p_enemy"
+const string SPACEELEVATOR_SOUND_PLAYER_EXIT_3P = "Nova_tac_Exit_3p"
+const string SPACEELEVATOR_SOUND_PLAYER_EXIT_3P_ENEMY = "Nova_tac_Exit_3p_enemy"
+const string SPACEELEVATOR_SOUND_PLAYER_ENTER_1P = "Nova_tac_Enter_1p"
+const string SPACEELEVATOR_SOUND_PLAYER_EXIT_1P = "Nova_tac_Exit_1p"
+const string SPACEELEVATOR_SOUND_PLAYER_RIDE_1P = "Nova_tac_Ride_1p"
+
+        
+const bool SPACEELEVATOR_DEBUG = false
+const bool SPACEELEVATOR_DRONE_DEBUG = false
+const bool SPACEELEVATOR_VORTEX_DEBUG = false
+const bool SPACEELEVATOR_LIFETIME_DEBUG = false
+
+                        
+const float SPACEELEVATOR_TUNING_RADIUS = 70
+const int SPACEELEVATOR_TUNING_HEIGHT = 1200
+
+const float SPACEELEVATOR_TUNING_UP_SPEED = 340
+const float SPACEELEVATOR_TUNING_HORIZ_SPEED = 170
+const float SPACEELEVATOR_TUNING_HORIZ_ACCEL = 2000
+const float SPACEELEVATOR_TUNING_TO_CENTER_SPEED = 50
+const float SPACEELEVATOR_TUNING_TO_CENTER_ACCEL = 0
+const float SPACEELEVATOR_TUNING_INPUT_THRESHOLD = 0.2
+
+const float SPACEELEVATOR_TUNING_EJECT_UP_SPEED = 450
+const float SPACEELEVATOR_TUNING_EJECT_HORIZ_SPEED = 400
+const float SPACEELEVATOR_TUNING_MAX_EJECT_TIME = 0.5
+const float SPACEELEVATOR_TUNING_MAX_HOVER_TIME = 2.0
+
+const float SPACEELEVATOR_TUNING_PLAYER_VIEWPOINT_OFFSET = 33
+const float SPACEELEVATOR_TUNING_AWAY_FROM_CENTER_DIST = 40
+const float SPACEELEVATOR_TUNING_HOVER_HEIGHT_PCT = 0.9
+
+const float SPACEELEVATOR_TUNING_LIFETIME = 10
+const float SPACEELEVATOR_TUNING_KEEP_ALIVE_MAX_TIME = 5
+
+const asset SPACEELEVATOR_SHAFT_MDL_ASSET = $"mdl/fx/nova_elevator_shield.rmdl"
+const asset SPACEELEVATOR_SHAFT_FX = $"p_wpn_grav_lift_column"
+const float SPACEELEVATOR_SHAFT_SPACING = 160
+const float SPACEELEVATOR_SHAFT_BOTTOM_SPACING = 150
+
+const float SPACEELEVATOR_MAX_FRICTION_SCALE = 2500
+
+
+                            
+const asset HORIZON_FINISHER_REPULSOR_FLASH = $"P_repulsor_push_execution_flash_fwd"
+
+struct ElevatorEffectData
+{
+	int forceStandHandle = -1
+}
+
+struct
+{
+	#if SERVER
+		                                                
+		                                               
+		                                                      
+	#endif
+
+	var elevatorProgressRui
+} file
+
+
+void function MpSpaceElevator_Init()
+{
+	SPACEELEVATOR_1P_SCREEN_FX_ID = PrecacheParticleSystem( SPACEELEVATOR_1P_SCREEN_FX )
+
+	PrecacheParticleSystem( ELEVATOR_IGNITION_FX )
+	PrecacheParticleSystem( ELEVATOR_BASE_FX )
+	PrecacheParticleSystem( ELEVATOR_TOP_FX )
+	                                            
+	PrecacheParticleSystem( SPACEELEVATOR_SHAFT_FX )
+	PrecacheParticleSystem( FX_PROJECTILE_DESTROYED )
+
+	PrecacheParticleSystem( HORIZON_FINISHER_REPULSOR_FLASH )
+
+	PrecacheModel( SPACEELEVATOR_SHAFT_MDL_ASSET )
+
+	RegisterSignal( "SpaceElevator_StopVisualBlend" )
+
+	Remote_RegisterClientFunction( "ServerToClient_SpaceElevatorTacProgressRuiStart", "entity" )
+
+	#if SERVER
+		                                                                              
+		                                                                          
+	#endif
+
+	#if CLIENT
+		RegisterSignal( "SpaceElevator_StopSignal" )
+
+		StatusEffect_RegisterEnabledCallback( eStatusEffect.in_space_elevator, SpaceElevatorTac_1PFX_Start )
+		StatusEffect_RegisterDisabledCallback( eStatusEffect.in_space_elevator, SpaceElevatorTac_1PFX_Stop )
+	#endif         
+}
+
+
+#if SERVER
+                                                                                                        
+ 
+	                                                          
+ 
+#endif
+
+
+#if SERVER
+                                                                                                     
+ 
+	                                    
+
+	                                                                                
+	                                                           
+
+	                   
+	 
+		                                       
+		                              
+		                                   
+		                                              
+		                                        
+	 
+
+	                                 
+	                                           
+	                                            
+	                                           
+	                                                       
+	                                                        
+
+	                   
+	 
+		                                  
+		                                             
+		                                         
+	 
+
+	                                     
+
+	            
+	                       
+	 
+		                                                                                          
+		                           
+		                               
+	 
+	    
+	 
+		                    
+	 
+
+	                
+	                   
+	 
+		                                                                                                                                                   
+		                                                                                                                        
+		                                                          
+		                              
+	 
+
+	                                        
+	                                                                                                                             
+
+	                                                                                                                                                              
+	                                                                                   
+	                                                                                                              
+	                                    
+	                                                                              
+
+	                                                                                                            
+
+	                      
+	                   
+	 
+		                                                                                                 
+		                                                                                                 
+	 
+	    
+	 
+		                                                                          
+	 
+
+	                 
+	                                                 
+	                                         
+	                                                                                             
+	                            
+	                                              
+	                                
+	                                                         
+	                         
+
+
+
+	                                      
+	                                               
+
+	                                                                                                                                                                                                               
+	                                                                                                                                                                                                            
+	                                                                                                                                                                                                           
+
+	                                             
+	                                                 
+	                                             
+
+
+	                                                                                                                          
+	                                                               
+
+	                               
+	                     
+	                    
+	                                          
+	 
+		                                                                                                                                                                                                        
+		                                                
+		                                                         
+
+		                                                          
+
+		                                                                                                                                                 
+		                                            
+
+		                                       
+	 
+
+	                                                                                                                                                                                                                                             
+	                                                
+	                                                         
+
+
+
+	            
+		                                                                                                              
+		 
+			                                            
+			                                           
+			                                                  
+
+			                    
+				            
+
+			                        
+				                
+
+			                                          
+			 
+				                    
+				 
+					                
+					            
+				 
+			 
+			                                
+
+			                                        
+				                      
+
+			                       
+				               
+
+			                                
+				                        
+
+			                              
+				                      
+		 
+	 
+
+	               
+	                                          
+	                                          
+	                                                 
+	                                                  
+	                                                               
+
+
+	                                                                                                                
+
+	                        
+	                                                        
+ 
+                                                                               
+ 
+	                                 
+	                                                                                              
+	              
+	 
+		                               
+		        
+	 
+ 
+
+                                                              
+ 
+	                                 
+	                           
+	                     
+	                                          
+	 
+		                                               
+		 
+			              
+			                             
+			                                         
+			 
+				                                                      
+				 
+					                        
+					 
+						                                                         
+						                                                                             
+						                                                                                                                                                                                                                    
+						                                                                                                                                 
+						 
+							                       
+						 
+					 
+				 
+			 
+
+			                                                                                                                                       
+
+			                                                                               
+			 
+				     
+			 
+
+			                            
+			              
+		 
+	 
+ 
+
+
+                                                                                                     
+ 
+	                                                                                 
+	                                                                       
+	                                                                                           
+	                                                                                         
+	                                                              
+	                                                                                                
+	                                                                                                         
+	                                      
+	                                                     
+	                                                                                           
+	                           
+	                               
+	                                
+	                                          
+	                                          
+	                                 
+	                                    
+	                                    
+	                                   
+	                                                  
+	                                
+	                             
+	                                        
+	                              
+	                                                                           
+	                                       
+
+	                             
+
+
+	                                  
+	                                                    
+
+	                       
+		                                         
+	                                     
+	                                                     
+
+	                                                                                                                     
+	                                                                                                            
+	                                                 
+	                                                                                                  
+	                                                                                                          
+	                                
+
+
+	                   
+ 
+
+          
+                                                                                                          
+ 
+	                                                                                                                                                  
+	                                 
+	 
+		                                                  
+	 
+ 
+      
+
+                                                                                                                                                     
+ 
+	                                                                                                                                              
+	                                 
+	 
+		                                                      
+		                                                     
+	 
+	                                      
+	   
+	  	                     
+	  
+	  		     
+	  
+	  	        
+	  		                         
+	   
+
+	                      
+
+	                                
+	                                
+	                                                                                                       
+
+	                                   
+	 
+		                                  
+		                                
+			                 
+		    
+			                   
+	 
+
+	                                                                           
+	 
+		                                                      
+		                                                             
+		                                                                                                                     
+		                                                                      
+		                                             
+		                                                                               
+		                                     
+	 
+ 
+
+                                                              
+ 
+	                                        
+	                                                  
+	                                             
+	                   
+
+
+	                         				                                                       					                               
+	                                 		                                                               			                                  
+	                                 		                                                               			                                  
+	                               			                                                             				                                      
+	                               			                                                             				                                      
+
+	                              			                                                             			                                     
+	                                      	                                                                    	                                        
+	                             		 	                                                            			                                     
+	                             		 	                                                            			                                     
+
+
+	                                                         
+	                                         
+	                             	                   
+										                           
+										                           
+										                         
+										                         
+										                        
+										                                
+										                        
+										                         
+	                                   
+	                                     
+	                                     
+	                                   
+	                                      
+	                                        
+	                           
+	                        
+
+
+	                             
+	                                             
+
+	                               
+	                                              
+
+
+	                                                      
+	                                                                                              
+
+
+	                                 
+
+	                          
+	 
+		                                                  
+	 
+	            
+		                         
+		 
+			                          
+			 
+				                                                
+			 
+			                         
+				                 
+		 
+	 
+	                          
+	 
+		                                                                                                                                                                 
+		                                                                                                                                                                                  
+	 
+	             
+ 
+
+
+#endif         
+
+void function SPACEELEVATOR_TriggerEnter( entity trigger, entity ent )
+{
+	if ( !ent.DoesShareRealms( trigger ) )
+		return
+
+#if SERVER
+	                                                                                                             
+	 
+		                                                                            
+		 
+			                                
+			 
+				                                 
+			 
+			                                                         
+		 
+		      
+	 
+#endif         
+	if ( !ent.IsPlayer() )
+		return
+
+	thread SPACEELEVATOR_InTriggerThread( trigger, ent )
+}
+
+#if SERVER
+                                                                     
+ 
+	                               
+
+	                             
+	                  
+	                    
+
+	                               
+	 
+		                                                                                                                                                    
+		                                                                                                 
+		                                                             
+
+		           
+	 
+
+	                       
+	 
+		                          
+		                                       
+		                                    
+		 
+			                                     
+		 
+	 
+ 
+
+                                                                                
+ 
+	                                 
+	                               
+
+	                                         
+
+	            
+		                                    
+		 
+			                                
+			 
+				                             
+			 
+
+			                       
+			 
+				                                                                                                                                              
+
+				                                  
+
+				                                                                    
+				                                                                              
+				                                                            
+				 
+					                                                       
+				 
+			 
+		 
+	 
+
+	                                                                                       
+
+
+	                                                                      
+
+	                                                                     
+	 
+		                                
+		 
+			                                                                 
+		 
+
+		              
+		                                    
+		                                       
+		                                                   
+
+
+		                                               
+
+		                                                
+		                                                                        
+
+		                                                                                                                                  
+
+		                                                      
+
+
+		                                               
+		                                                                                                       
+		 
+			                                             
+			                                                                                               
+		 
+
+		                                                         
+		                                                                       
+
+		                                
+		 
+			                                                                                                        
+			                                                                                                                  
+			                                                                                                     
+		 
+		                                
+		                                   
+
+
+		           
+	 
+ 
+
+#endif         
+
+bool function ShouldSpaceElevatorAffectPlayer( entity player )
+{
+	if ( !IsAlive( player ) )
+	{
+		return false
+	}
+	if ( player.IsGrappleAttached() || player.IsZiplining() )
+	{
+		return false
+	}
+	if ( player.ContextAction_IsBusy() )
+	{
+		return false
+	}
+
+	if ( player.IsPhaseShiftedOrPending() )
+	{
+		return false
+	}
+
+	return true
+}
+
+
+void function ApplyElevatorEffects( entity player, entity trigger, array<entity> player3PEffectsArray, ElevatorEffectData data, bool shouldApply )
+{
+	if ( shouldApply )
+	{
+		StatusEffect_AddEndless( player, eStatusEffect.in_space_elevator, 1.0 )
+
+		#if SERVER
+			                                         
+			                                        
+			                                                
+			 
+				                                                          
+				         
+				                       
+				 
+					                              
+					   
+				 
+			 
+
+			                                                
+
+			                          
+			 
+				                                                
+			 
+
+			                                    
+			                                        
+			 
+				                   
+				                                                                     
+			 
+			                       
+
+			                            
+
+			                         
+			 
+				                                                                       
+				                                       
+				                            
+				 
+					                                            
+					 
+						                                        
+					 
+					                                           
+					 
+						                                                            
+						 
+							                                                                                 
+						 
+						    
+						 
+							                                                 
+						 
+					 
+					                                                  
+					 
+						                                                                    
+						 
+							             
+							                                                        
+
+							                                                
+							 
+								                                            
+								                                                          
+								 
+									                                                 
+								 
+							 
+						 
+					 
+
+
+					                                                                                                   
+				 
+			 
+		#endif
+	}
+	else
+	{
+		StatusEffect_StopAllOfType( player, eStatusEffect.in_space_elevator )
+
+		#if SERVER
+			                                                     
+			                                                
+
+			                          
+			 
+				                                               
+			 
+
+			                                  
+			                     
+			                                                  
+			                      
+
+			                         
+			 
+				                                       
+				                            
+				 
+					                                            
+					 
+						                                        
+					 
+
+					                                           
+					 
+						                                                            
+						 
+							                                                          
+						 
+					 
+				 
+			 
+		#endif
+
+	}
+}
+
+
+void function SPACEELEVATOR_InTriggerThread( entity trigger, entity player )
+{
+	EndSignal( trigger, "OnDestroy" )
+	EndSignal( player, "OnDestroy" )
+	EndSignal( player, "OnDeath" )
+
+
+	array<entity> player3PSpaceElevatorFXArray
+	ElevatorEffectData data
+
+
+	OnThreadEnd(
+		function() : (player, player3PSpaceElevatorFXArray, trigger, data )
+		{
+			if ( IsValid( player ) )
+			{
+				if ( StatusEffect_GetSeverity( player, eStatusEffect.in_space_elevator ) > 0 )
+				{
+					ApplyElevatorEffects( player, trigger, player3PSpaceElevatorFXArray, data, false )
+				}
+
+				if ( ShouldSpaceElevatorAffectPlayer( player ) )
+				{
+					SPACEELEVATOR_EjectPlayer( player, trigger )
+				}
+			}
+		}
+	)
+
+	if ( ShouldSpaceElevatorAffectPlayer( player ) )
+	{
+		#if SERVER
+			                                                                                                            
+			                                            
+			 
+				                                                                                                              
+			 
+			    
+			 
+				                                                                                                                    
+			 
+		#endif
+	}
+
+	const TICK_RATE = 0.1
+	int lastStatusEffectIdKR = -1
+	bool shouldKeepInside    = false
+	while( trigger.IsTouching( player ) || shouldKeepInside )
+	{
+		if ( SPACEELEVATOR_DEBUG && !trigger.IsTouching( player ) && shouldKeepInside )
+		{
+			printt( "Elevator outside volume but keeping me inside!" )
+		}
+		shouldKeepInside = false
+		if ( ShouldSpaceElevatorAffectPlayer( player ) )
+		{
+			if ( SPACEELEVATOR_DEBUG )
+			{
+				DebugDrawSphere( player.GetOrigin(), 11, <75, 0, 150>, true, TICK_RATE )
+			}
+
+			if ( StatusEffect_GetSeverity( player, eStatusEffect.in_space_elevator ) <= 0 )
+			{
+				ApplyElevatorEffects( player, trigger, player3PSpaceElevatorFXArray, data, true )
+				#if SERVER
+					                                                                                                                                                  
+				#endif
+			}
+
+
+			#if SERVER
+				                                        
+				                                         
+
+				                                               
+
+				                                                
+				                                                                           
+
+				                                                                                                                                      
+
+				                                                      
+
+
+				                                                 
+				                                               
+				                                                               
+
+				                        
+				                                                                    
+				 
+					                          
+					                  
+					                                                                                                                    
+
+					                                                                                                 
+					                             
+					 
+						                       
+					 
+					    
+					 
+						              
+						                        
+					 
+				 
+				                                                                                                            
+				 
+					                                                                                                                
+					 
+						                       
+					 
+				 
+
+				                          
+				 
+					                                                                                                                                                                             
+					                                                                                
+				 
+
+			#endif
+
+		}
+		wait TICK_RATE
+	}
+}
+
+
+float function GetPlayerElevatorProgress( entity elevator, entity player )
+{
+	float progress = 1.0
+	if ( IsValid( player ) )
+	{
+		vector playerPos = player.GetOrigin()
+
+		vector elevatorPos = elevator.GetOrigin()
+
+		vector triggerToPlayer = playerPos - elevatorPos
+
+		vector elevatorDirection = elevator.GetUpVector()
+		float distanceAlongLine  = DotProduct( triggerToPlayer, elevatorDirection )
+
+		progress = distanceAlongLine / SPACEELEVATOR_TUNING_HEIGHT
+	}
+	return progress
+}
+
+
+void function SPACEELEVATOR_EjectPlayer( entity player, entity trigger )
+{
+	#if SERVER
+		                                              
+			      
+
+		                          
+		 
+			                                                
+		 
+
+		                                                                                                                                                 
+
+		                                                                                                           
+		                                             
+		 
+			                                                                                                             
+		 
+		    
+		 
+			                                                                                                                   
+		 
+	#endif
+}
+
+#if SERVER
+                                                                                                                
+ 
+	                             
+ 
+
+                                                                                 
+ 
+	                          
+	 
+		                                        
+	 
+
+	             
+	                                      
+	 
+		                    
+			            
+	 
+	                            
+ 
+#endif         
+
+#if CLIENT
+                                    
+void function SpaceElevatorTac_1PFX_Start( entity ent, int statusEffect, bool actuallyChanged )
+{
+	ManageHighlightEntity( ent )
+
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	entity viewPlayer = GetLocalViewPlayer()
+	int fxHandle
+	fxHandle = StartParticleEffectOnEntityWithPos( viewPlayer, SPACEELEVATOR_1P_SCREEN_FX_ID, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID, viewPlayer.EyePosition(), <0, 0, 0> )
+	EffectSetIsWithCockpit( fxHandle, true )
+
+	thread SpaceElevator_1PFX_Thread( viewPlayer, fxHandle )
+}
+
+void function SpaceElevatorTac_1PFX_Stop( entity ent, int statusEffect, bool actuallyChanged )
+{
+	ManageHighlightEntity( ent )
+
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	foreach ( player in GetPlayerArray() )
+	{
+		ManageHighlightEntity( player )
+	}
+
+	ent.Signal( "SpaceElevator_StopSignal" )
+}
+void function  SpaceElevator_1PFX_Thread( entity player, int fxHandle )
+{
+	player.EndSignal( "SpaceElevator_StopSignal" )
+	player.EndSignal( "OnDeath" )
+
+	OnThreadEnd(
+		function() : ( fxHandle )
+		{
+			if ( !EffectDoesExist( fxHandle ) )
+				return
+
+			EffectStop( fxHandle, false, true )
+		}
+	)
+
+	bool wasOn = true;
+
+	for ( ; ; )
+	{
+		if ( !EffectDoesExist( fxHandle ) )
+			break
+
+		                                                                                       
+		bool shouldBeOn = StatusEffect_GetSeverity( player, eStatusEffect.in_black_hole_field ) == 0
+		if ( !wasOn && shouldBeOn )
+		{
+			EffectWake( fxHandle )
+			wasOn = true
+		}
+		else if ( wasOn && !shouldBeOn )
+		{
+			EffectSleep( fxHandle )
+			wasOn = false
+		}
+
+		WaitFrame()
+	}
+}
+#endif         
+
+
+#if CLIENT
+void function ServerToClient_SpaceElevatorTacProgressRuiStart( entity base )
+{
+	if ( !IsValid( base ) )
+		return
+
+	thread CL_SpaceElevatorProgressRUIThread( GetLocalViewPlayer(), base )
+}
+
+void function CL_SpaceElevatorProgressRUIThread( entity player, entity base )
+{
+	player.EndSignal( "SpaceElevator_StopSignal" )
+	player.EndSignal( "OnDeath" )
+	base.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function() : (player, base)
+		{
+			if ( file.elevatorProgressRui != null )
+			{
+				RuiDestroy( file.elevatorProgressRui )
+				file.elevatorProgressRui = null
+			}
+
+			StopSoundOnEntity( player, SPACEELEVATOR_SOUND_PLAYER_RIDE_1P )
+		}
+	)
+
+	EmitSoundOnEntity( player, SPACEELEVATOR_SOUND_PLAYER_RIDE_1P )
+
+	if ( file.elevatorProgressRui != null )
+	{
+		RuiDestroy( file.elevatorProgressRui )
+		file.elevatorProgressRui = null
+	}
+	                                                                                  
+	                                                          
+	                                                                             
+
+	float progress = 0.0
+	while ( IsValid( base ) && StatusEffect_GetSeverity( player, eStatusEffect.in_space_elevator ) > 0 )
+	{
+		                                
+		vector playerPos       = player.GetOrigin()
+		vector basePos         = base.GetOrigin()
+		vector triggerToPlayer = playerPos - basePos
+		float playerHeight     = triggerToPlayer.z
+
+		progress = Clamp( playerHeight / (SPACEELEVATOR_TUNING_HEIGHT * SPACEELEVATOR_TUNING_HOVER_HEIGHT_PCT), 0.0, 1.0 )
+
+		if ( file.elevatorProgressRui != null )
+		{
+			RuiSetFloat( file.elevatorProgressRui, "progress", progress )
+		}
+
+		WaitFrame()
+	}
+}
+#endif
+

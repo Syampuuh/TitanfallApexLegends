@@ -1,0 +1,341 @@
+resource/ui/menus/clubs_search.menu
+{
+	menu
+	{
+		ControlName				Frame
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		PaintBackgroundType		0
+		infocus_bgcolor_override	"0 0 0 0"
+		outoffocus_bgcolor_override	"0 0 0 0"
+
+        ScreenFrame
+        {
+            ControlName				Label
+            xpos					0
+            ypos					0
+            wide					%100
+            tall					%100
+            labelText				""
+            //visible				    1
+            //bgcolor_override        "255 255 0 100"
+            //paintbackground         1
+
+        }
+        PanelFrame
+        {
+            ControlName				Label
+            xpos					0
+            ypos					0
+            wide					1920
+            tall					%100
+            labelText				""
+            visible				    1
+
+            pin_to_sibling          ScreenFrame
+            pin_corner_to_sibling   CENTER
+            pin_to_sibling_corner   CENTER
+        }
+        ScreenBlur
+        {
+            ControlName				Label
+            labelText               ""
+        }
+
+        ToolTip
+        {
+            ControlName				RuiPanel
+            InheritProperties       ToolTip
+            zpos                    999
+        }
+
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			InheritProperties       FooterButtons
+		}
+
+        MatchmakingStatus
+        {
+            ControlName		        RuiPanel
+            InheritProperties		MatchmakingStatus
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	BOTTOM
+            pin_to_sibling_corner	BOTTOM
+        }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+// Club Search
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        SearchSettingsPanel
+        {
+            ControlName				CNestedPanel
+
+            xpos                    -48
+            ypos                    -84
+            ypos_nx_handheld        -34		[$NX || $NX_UI_PC]
+            zpos                    0
+
+            wide                    577
+            tall                    883
+            tall_nx_handheld        945		[$NX || $NX_UI_PC]
+
+            visible					1
+            controlSettingsFile		"resource/ui/menus/panels/panel_club_search_settings.res"
+
+            proportionalToParent    1
+
+            pin_to_sibling          PanelFrame
+            pin_corner_to_sibling   TOP_LEFT
+            pin_to_sibling_corner   TOP_LEFT
+        }
+
+        ResultsField
+        {
+            ControlName				Label
+            wide					1128
+            tall					883
+            xpos                    -48
+            ypos                    -84
+            ypos_nx_handheld        -24		[$NX || $NX_UI_PC]
+            zpos                    0
+            labelText               ""
+            textAlignment           "north"
+            wrap                    1
+            visible					1
+            bgcolor_override        "0 0 0 128"
+            paintbackground         0
+
+            pin_to_sibling          PanelFrame
+            pin_corner_to_sibling   TOP_RIGHT
+            pin_to_sibling_corner   TOP_RIGHT
+        }
+
+        MenuHeader
+        {
+            ControlName				RuiPanel
+        	ypos					0
+            wide					1800
+            tall					208
+            visible				    1
+            rui                     "ui/generic_menu_header.rpak"
+
+            pin_to_sibling			ResultsField
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        SearchResultsLabel
+        {
+            ControlName				Label
+            wide					768
+            wide_nx_handheld		1200	[$NX || $NX_UI_PC]
+            tall					20
+            tall_nx_handheld		90		[$NX || $NX_UI_PC]
+            xpos                    0
+            ypos                    -128
+            zpos                    0
+            labelText               ""
+            textAlignment           center
+            wrap                    0			[!$NX && !$NX_UI_PC]
+            wrap                    1			[$NX || $NX_UI_PC]
+            visible					1
+            bgcolor_override        "0 0 0 128"
+            paintbackground         0
+			fontHeight_nx_handheld	50		[$NX || $NX_UI_PC]
+
+            pin_to_sibling          MenuHeader
+            pin_corner_to_sibling   TOP
+            pin_to_sibling_corner   BOTTOM
+        }
+
+        SearchResultsGrid
+        {
+            ControlName             GridButtonListPanel
+
+            xpos                    0
+            ypos                    8
+            ypos_nx_handheld        15		[$NX || $NX_UI_PC]
+
+            pin_to_sibling          SearchResultsLabel
+            pin_corner_to_sibling   TOP
+            pin_to_sibling_corner   BOTTOM
+
+            columns                  2
+            rows                     5
+            rows_nx_handheld         4		[$NX || $NX_UI_PC]
+            buttonSpacing            12
+            scrollbarSpacing         2
+            scrollbarOnLeft          0
+            //tabPosition            1
+            selectOnDpadNav          0
+
+            ButtonSettings
+            {
+                rui                      "ui/club_search_result_button.rpak"
+                clipRui                  1
+                wide                     425 
+                wide_nx_handheld         574		[$NX || $NX_UI_PC]
+                tall                     139
+                tall_nx_handheld         188		[$NX || $NX_UI_PC]
+                cursorVelocityModifier   0.7
+                rightClickEvents         1
+                //doubleClickEvents      1
+                //middleClickEvents      1
+                sound_focus              "UI_Menu_Focus"
+                sound_accept             "UI_Menu_Accept"
+                sound_deny               "UI_Menu_Deny"
+            }
+        }
+
+        ResultsPageButton00
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+
+            xpos                    -144
+            xpos_nx_handheld        0		[$NX || $NX_UI_PC]
+            ypos                    0
+            ypos_nx_handheld        125		[$NX || $NX_UI_PC]
+
+            wide					32
+            wide_nx_handheld		55		[$NX || $NX_UI_PC]
+            tall					32
+            tall_nx_handheld		55		[$NX || $NX_UI_PC]
+            rui                     "ui/clubs_search_result_page_button.rpak"
+            visible					0
+            cursorVelocityModifier  0.7
+
+			navLeft                 ResultsPageButton01
+
+            proportionalToParent    1
+
+            pin_to_sibling          ResultsField
+            pin_corner_to_sibling   BOTTOM_RIGHT
+            pin_to_sibling_corner   BOTTOM_RIGHT
+
+            sound_focus             "UI_Menu_Focus_Small"
+        }
+
+		ResultsPageButton01
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+
+            xpos                    8
+            ypos                    0
+
+            wide					32
+            wide_nx_handheld		55		[$NX || $NX_UI_PC]
+            tall					32
+            tall_nx_handheld		55		[$NX || $NX_UI_PC]
+            rui                     "ui/clubs_search_result_page_button.rpak"
+            visible					0
+            cursorVelocityModifier  0.7
+
+            navRight                ResultsPageButton00
+            navLeft                 ResultsPageButton02
+
+            proportionalToParent    1
+
+            pin_to_sibling          ResultsPageButton00
+            pin_corner_to_sibling   RIGHT
+            pin_to_sibling_corner   LEFT
+
+            sound_focus             "UI_Menu_Focus_Small"
+        }
+
+        ResultsPageButton02
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+
+            xpos                    8
+            ypos                    0
+
+            wide					32
+            wide_nx_handheld		55		[$NX || $NX_UI_PC]
+            tall					32
+            tall_nx_handheld		55		[$NX || $NX_UI_PC]
+            rui                     "ui/clubs_search_result_page_button.rpak"
+            visible					0
+            cursorVelocityModifier  0.7
+
+            navRight                ResultsPageButton01
+            navLeft                 ResultsPageButton03
+
+            proportionalToParent    1
+
+            pin_to_sibling          ResultsPageButton01
+            pin_corner_to_sibling   RIGHT
+            pin_to_sibling_corner   LEFT
+
+            sound_focus             "UI_Menu_Focus_Small"
+        }
+
+        ResultsPageButton03
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+
+            xpos                    8
+            ypos                    0
+
+            wide					32
+            wide_nx_handheld		55		[$NX || $NX_UI_PC]
+            tall					32
+            tall_nx_handheld		55		[$NX || $NX_UI_PC]
+            rui                     "ui/clubs_search_result_page_button.rpak"
+            visible					0
+            cursorVelocityModifier  0.7
+
+            navRight                ResultsPageButton02
+            navLeft                 ResultsPageButton04
+
+            proportionalToParent    1
+
+            pin_to_sibling          ResultsPageButton02
+            pin_corner_to_sibling   RIGHT
+            pin_to_sibling_corner   LEFT
+
+            sound_focus             "UI_Menu_Focus_Small"
+        }
+
+        ResultsPageButton04
+        {
+            ControlName				RuiButton
+            classname               "MenuButton"
+
+            xpos                    8
+            ypos                    0
+
+            wide					32
+            wide_nx_handheld		55		[$NX || $NX_UI_PC]
+            tall					32
+            tall_nx_handheld		55		[$NX || $NX_UI_PC]
+            rui                     "ui/clubs_search_result_page_button.rpak"
+            visible					0
+            cursorVelocityModifier  0.7
+
+            navLeft                 ResultsPageButton03
+
+            proportionalToParent    1
+
+            pin_to_sibling          ResultsPageButton03
+            pin_corner_to_sibling   RIGHT
+            pin_to_sibling_corner   LEFT
+
+            sound_focus             "UI_Menu_Focus_Small"
+        }
+    }
+}

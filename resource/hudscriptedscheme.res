@@ -323,28 +323,6 @@ Scheme
 			}
 		}
 
-		GameUIButtons
-		{
-			1
-			{
-				bitmap			1
-				name			"ControllerButtons"
-				scalex			0.843
-				scaley			0.843
-			}
-		}
-
-		GameUIButtonsTiny
-		{
-			1
-			{
-				bitmap		1
-				name		ControllerButtons
-				scalex		0.562
-				scaley		0.562
-			}
-		}
-
 		KillShotGlow
 		{
 			1
@@ -383,17 +361,6 @@ Scheme
 				antialias		1
 			}
 		}
-		Default_9_DropShadow
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			9
-				antialias 		1
-				dropshadow		1
-			}
-		}
 		Default_9_Additive_Blur_Scanlines
 		{
 			isproportional		only
@@ -408,16 +375,6 @@ Scheme
 			}
 		}
 
-		Default_17
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			17
-				antialias 		1
-			}
-		}
 		Default_17_ShadowGlow
 		{
 			1
@@ -448,73 +405,6 @@ Scheme
 				shadowglow		7
 			}
 		}
-		Default_21_Outline
-		{
-			1
-			{
-				name			Default
-				tall			21
-				antialias		1
-				outline 		1
-			}
-		}
-		Default_21_Italic
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			21
-				antialias 		1
-				italic			1
-			}
-		}
-		Default_21_ShadowGlow_Outline
-		{
-			1
-			{
-				name			Default
-				tall			21
-				antialias		1
-				shadowglow 		7
-				outline 		1
-			}
-		}
-
-		Default_23_Additive
-		{
-			isproportional		only
-			1
-			{
-				name			Default
-				tall			23
-				antialias 		1
-				additive		1
-			}
-		}
-		Default_23_ShadowGlow
-		{
-			isproportional		only
-			1
-			{
-				name			Default
-				tall			23
-				antialias		1
-				shadowglow		7
-			}
-		}
-		Default_23_ShadowGlow_Outline
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			23
-				antialias		1
-				outline 		1
-				shadowglow 		7
-			}
-		}
 
 		Default_27
 		{
@@ -536,38 +426,6 @@ Scheme
 				shadowglow		7
 			}
 		}
-		Default_27_Outline
-		{
-			1
-			{
-				name			Default
-				tall			27
-				antialias		1
-				outline 		1
-			}
-		}
-		Default_27_ShadowGlow_Outline
-		{
-			1
-			{
-				name			Default
-				tall			27
-				antialias		1
-				shadowglow 		7
-				outline 		1
-			}
-		}
-		Default_27_Additive_Blur
-		{
-			1
-			{
-				name			Default
-				tall			27
-				antialias		1
-				blur			2
-				additive		1
-			}
-		}
 
 		Default_28_ShadowGlow
 		{
@@ -581,26 +439,6 @@ Scheme
 			}
 		}
 
-		Default_29
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			29
-				antialias 		1
-			}
-		}
-
-		Default_31
-		{
-			1
-			{
-				name			Default
-				tall			31
-				antialias		1
-			}
-		}
 		Default_31_ShadowGlow
 		{
 			1
@@ -609,17 +447,6 @@ Scheme
 				tall			31
 				antialias		1
 				shadowglow		7
-			}
-		}
-		Default_31_ShadowGlow_Outline
-		{
-			1
-			{
-				name			Default
-				tall			31
-				antialias		1
-				shadowglow		7
-				outline 		1
 			}
 		}
 
@@ -643,40 +470,6 @@ Scheme
 				shadowglow		7
 			}
 		}
-		Default_34_DropShadow
-		{
-			isproportional		only
-			1
-			{
-				name			Default
-				tall			34
-				antialias		1
-				dropshadow 		1
-			}
-		}
-		Default_34_Italic
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			34
-				antialias 		1
-				italic			1
-			}
-		}
-
-		Default_39_ShadowGlow_Outline
-		{
-			1
-			{
-				name			Default
-				tall			39
-				antialias		1
-				shadowglow		7
-				outline 		1
-			}
-		}
 
 		Default_41_DropShadow
 		{
@@ -687,17 +480,6 @@ Scheme
 				tall			41
 				antialias 		1
 				dropshadow 		1
-			}
-		}
-
-		Default_43
-		{
-			isproportional		only
-			1
-			{
-				name			Default
-				tall			43
-				antialias		1
 			}
 		}
 
@@ -714,16 +496,6 @@ Scheme
 			}
 		}
 
-		Default_55_ShadowGlow
-		{
-			1
-			{
-				name			Default
-				tall			55
-				antialias		1
-				shadowglow		7
-			}
-		}
 		Default_55_Responsive
 		{
 			1
@@ -736,27 +508,6 @@ Scheme
 			}
 		}
 
-		Default_69_ShadowGlow
-		{
-			1
-			{
-				name			Default
-				tall			69
-				antialias		1
-				shadowglow		11
-			}
-		}
-		Default_69_DropShadow
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			69
-				antialias 		1
-				dropshadow		1
-			}
-		}
 		Default_69_Outline_DropShadow
 		{
 			isproportional 	only
@@ -781,65 +532,7 @@ Scheme
 			}
 		}
 
-		Default_83_Additive
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			83
-				antialias 		1
-				additive		1
-			}
-		}
-
-		Default_92_DropShadow
-		{
-			isproportional	only
-			1
-			{
-				name			Default
-				tall			92
-				antialias 		1
-				dropshadow 		1
-			}
-		}
-
 		//////////////////////////////////// Default bold font variations ////////////////////////////////////
-
-		DefaultBold_11_DropShadow
-		{
-			isproportional	only
-			1
-			{
-				name			DefaultBold
-				tall			11
-				antialias 		1
-				dropshadow		1
-			}
-		}
-
-		DefaultBold_17
-		{
-			isproportional	only
-			1
-			{
-				name			DefaultBold
-				tall			17
-				antialias		1
-			}
-		}
-
-		DefaultBold_21
-		{
-			isproportional	only
-			1
-			{
-				name			DefaultBold
-				tall			21
-				antialias	    1
-			}
-		}
 
 		DefaultBold_34
 		{
@@ -852,40 +545,6 @@ Scheme
 			}
 		}
 
-		DefaultBold_43
-		{
-			isproportional		only
-			1
-			{
-				name			DefaultBold
-				tall			43
-				antialias		1
-			}
-		}
-
-		DefaultBold_44_DropShadow
-		{
-			isproportional	only
-			1
-			{
-				name			DefaultBold
-				tall			44
-				antialias 		1
-				dropshadow		1
-			}
-		}
-
-		DefaultBold_62_Outline
-		{
-			isproportional		only
-			1
-			{
-				name			DefaultBold
-				tall			62
-				antialias		1
-				outline 		1
-			}
-		}
 		DefaultBold_62_DropShadow
 		{
 			isproportional	only
@@ -895,95 +554,6 @@ Scheme
 				tall			62
 				antialias 		1
 				dropshadow 		1
-			}
-		}
-
-		//////////////////////////////////// Titanfall font variations ////////////////////////////////////
-
-		Titanfall_48_Additive_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			48
-				antialias 		1
-				additive		1
-				scanlines		2
-			}
-		}
-		Titanfall_48_ShadowGlow_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			48
-				antialias 		1
-				shadowglow		7
-				scanlines		2
-			}
-		}
-
-		Titanfall_54_Additive_ShadowGlow_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			54
-				antialias 		1
-				additive		1
-				shadowglow		7
-				scanlines		2
-			}
-		}
-		Titanfall_54_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			54
-				antialias 		1
-				scanlines		2
-			}
-		}
-		Titanfall_54_ShadowGlow_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			54
-				antialias 		1
-				shadowglow		7
-				scanlines		2
-			}
-		}
-
-		Titanfall_72_Additive_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			72
-				antialias 		1
-				additive		1
-				scanlines		2
-			}
-		}
-		Titanfall_72_ShadowGlow_Scanlines
-		{
-			isproportional		only
-			1
-			{
-				name			Titanfall
-				tall			72
-				antialias 		1
-				shadowglow		7
-				scanlines		2
 			}
 		}
 
@@ -1139,20 +709,6 @@ Scheme
 			visible				0
 			scaleImage			1
 			rui					"ui/scoreboard_row_mp.rpak"
-		}
-
-		ScoreboardGamepadFooterButton
-		{
-			classname				ScoreboardGamepadFooterButtonClass
-			zpos					3
-			auto_wide_tocontents 	1
-			tall 					36
-			labelText				"DEFAULT"
-			font					Default_28_ShadowGlow
-			allcaps					1
-			enabled					1
-			visible					1
-			activeInputExclusivePaint	gamepad
 		}
 
 		WorldHealthBar

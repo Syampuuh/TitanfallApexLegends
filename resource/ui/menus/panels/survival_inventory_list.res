@@ -3,288 +3,334 @@ Resource/UI/menus/panels/survival_inventory_list.res
     PanelFrame
     {
 		ControlName				ImagePanel
-		wide					f0
-		tall					f0
+        proportionalToParent    1
+        wide					f0
+        tall					f0
 		visible				    0
         scaleImage				1
         image					"vgui/HUD/white"
         drawColor				"255 255 255 15"
-
-        proportionalToParent    1
     }
 
-	NavUpHidden
+	CategoryHeader0
 	{
-		ControlName			BaseModHybridButton
-		visible			    1
-		enabled             1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader1
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader2
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader3
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader4
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader5
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader6
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	CategoryHeader7
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListCategoryHeader
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
 
-	NavDownHidden
+	ItemButton0
 	{
-		ControlName			BaseModHybridButton
-		visible			    0
-		enabled             1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton0
+	ItemButton1
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
-
-		navDown         ListButton1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton1
+	ItemButton2
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
-
-		navUp           ListButton1
-		navDown         ListButton2
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton2
+	ItemButton3
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
-
-		navUp           ListButton2
-		navDown         ListButton3
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton3
+	ItemButton4
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton4
+	ItemButton5
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton5
+	ItemButton6
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton6
+	ItemButton7
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton7
+	ItemButton8
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton8
+	ItemButton9
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton9
+	ItemButton10
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton10
+	ItemButton11
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton11
+	ItemButton12
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton12
+	ItemButton13
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton13
+	ItemButton14
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton14
+	ItemButton15
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton15
+	ItemButton16
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton16
+	ItemButton17
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton17
+	ItemButton18
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton18
+	ItemButton19
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton19
+	ItemButton20
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
-	ListButton20
+	ItemButton21
 	{
-		ControlName			RuiButton
-		Classname			"ListButtonClass"
-		InheritProperties	SurvivalInventoryListButton
-		wide			500
-		tall			88
-		visible			1
-
-		zpos			1
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
 	}
-
+	ItemButton22
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton23
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton24
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton25
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton26
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton27
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton28
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton29
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton30
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
+	ItemButton31
+	{
+		ControlName			        RuiButton
+		InheritProperties	        SurvivalGroundListItemButton
+		//pin_corner_to_sibling	    TOP_LEFT
+		//pin_to_sibling			    PanelFrame
+		//pin_to_sibling_corner	    TOP_LEFT
+	}
 }

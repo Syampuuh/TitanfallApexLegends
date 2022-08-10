@@ -1,0 +1,247 @@
+global function NET_TraceRoute_Init
+global function NET_TraceRoute_BeginToAddress
+#if SERVER
+                                                
+                                            
+#endif
+#if CLIENT
+global function NET_TraceRoute_BeginToServer
+#endif
+global function NET_TraceRoute_Print
+global function NET_TraceRoute_End
+global function NET_TraceRoute_ToJSON
+
+                                                                          
+                                                                                
+           
+const int TRACE_ROUTE_AUTO_RUN_TIME_SECONDS = 30
+
+                                                                              
+                                                   
+const int TRACE_ROUTE_AUTO_RUN_LATENCY_THRESHOLD_MS = 200
+
+                                                                                
+                                                                                               
+                                                     
+const int TRACE_ROUTE_AUTO_RUN_DEBOUNCE_TIME_SECONDS = 3
+
+const string SERVER_PERFORM_TRACE_ROUTE_RPC = "ClientCallback_PerformTraceRoute"
+
+struct
+{
+	int secondsOverThreshold = 0
+#if SERVER
+	                                                                                                               
+	                                  
+	                           
+#endif
+}file
+
+
+void function NET_TraceRoute_Init()
+{
+	if(GetConVarBool("net_traceroute"))
+	{
+		printt("TraceRoute Diagnostics are enabled")
+		Remote_RegisterServerFunction( SERVER_PERFORM_TRACE_ROUTE_RPC )
+		#if CLIENT
+			AddCallback_OnPlayerMatchStateChanged( OnPlayerMatchStateChanged )
+		#endif
+	}
+	else
+	{
+		printt("TraceRoute Diagnostics are disabled")
+	}
+}
+
+int function NET_TraceRoute_BeginToAddress(string address)
+{
+	return NetTraceRouteBegin(address)
+}
+#if SERVER
+                                                             
+ 
+	                                                                                   
+	                                                                                       
+	                                                                                     
+	                        
+	                                         
+	 
+		      
+	 
+
+	                                             
+	                                 
+	                                             
+ 
+
+                                                        
+ 
+	                                               
+ 
+#endif
+
+#if CLIENT
+int function NET_TraceRoute_BeginToServer()
+{
+	return NetTraceRouteBeginToServer()
+}
+#endif
+
+void function NET_TraceRoute_Print(int idx)
+{
+	printt( "Address				         Sent  Received  Loss%  Best  Worst  Last  Average" )
+	array<NetTraceRouteResults> results = NetTraceRouteGetResults(idx)
+	                                                 
+	foreach(NetTraceRouteResults result in results)
+	{
+		float loss = 100;
+		if( result.sent != 0 )
+		{
+			loss -= (float(result.received) / float(result.sent)) * 100;
+		}
+		printf( "%-30s%6d%10d%7d%6d%7d%6d%9d\n", result.address, result.sent, result.received, int(loss), result.bestRttMs, result.worstRttMs, result.lastRttMs, result.averageRttMs )
+	}
+}
+
+void function NET_TraceRoute_End(int idx)
+{
+	NetTraceRouteEnd(idx)
+}
+
+string function NET_TraceRoute_ToJSON(int idx, entity player)
+{
+	string jsonData = "{\r\n"
+	jsonData += "  \"pid\": \"" + player.GetPINNucleusPid() + "\",\r\n"
+#if SERVER
+	                                                                 
+	                                                                                                               
+#endif
+	jsonData += "  \"hops\": [\r\n"
+	array<NetTraceRouteResults> results = NetTraceRouteGetResults(idx)
+	bool firstIter = true
+	foreach(NetTraceRouteResults result in results)
+	{
+		if(firstIter == true)
+		{
+			firstIter = false;
+		}
+		else
+		{
+			jsonData += ",\r\n"
+		}
+
+		jsonData += "    {\r\n"
+		jsonData += "      \"ip\": \"" + result.address + "\",\r\n"
+		jsonData += "      \"sent\": " + result.sent + ",\r\n"
+		jsonData += "      \"received\": " + result.received + ",\r\n"
+		jsonData += "      \"best\": " + result.bestRttMs + ",\r\n"
+		jsonData += "      \"worst\": " + result.worstRttMs + ",\r\n"
+		jsonData += "      \"last\": " + result.lastRttMs + ",\r\n"
+		jsonData += "      \"average\": " + result.averageRttMs + "\r\n"
+		jsonData += "    }"
+	}
+	jsonData += "\r\n"
+	jsonData += "  ]\r\n"
+	jsonData += "}"
+	return jsonData
+}
+
+table function NET_TraceRoute_ToTable(int idx, entity player)
+{
+	array<table> hops
+
+	array<NetTraceRouteResults> results = NetTraceRouteGetResults(idx)
+	foreach(NetTraceRouteResults result in results)
+	{
+		table hop = {
+			ip = result.address
+			sent = result.sent
+			received = result.received
+			best = result.bestRttMs
+			worst = result.worstRttMs
+			last = result.lastRttMs
+			average = result.averageRttMs
+		}
+		hops.append(hop)
+	}
+
+	table traceRouteData = {
+		hops = hops
+	}
+	return traceRouteData
+}
+
+#if CLIENT
+void function OnPlayerMatchStateChanged( entity player, int newValue )
+{
+	if( player != GetLocalClientPlayer())
+	{
+		return
+	}
+
+	if( newValue == ePlayerMatchState.NORMAL )
+	{
+		thread NET_TraceRoute_Monitor(player)
+	}
+}
+
+void function NET_TraceRoute_Monitor(entity player)
+{
+
+	if( player != GetLocalClientPlayer() )
+	{
+		return
+	}
+
+	bool bShouldRun = true;
+	while(bShouldRun)
+	{
+		int ping = MyPing()
+		if( ping > TRACE_ROUTE_AUTO_RUN_LATENCY_THRESHOLD_MS )
+		{
+			if( file.secondsOverThreshold >= TRACE_ROUTE_AUTO_RUN_DEBOUNCE_TIME_SECONDS )
+			{
+				printt("High network latency has caused this client to automaticaly trigger a traceroute diagnostic")
+				NET_TraceRoute_AutoTraceRoute(player)
+				bShouldRun = false;
+			}
+			else
+			{
+				file.secondsOverThreshold++
+			}
+		}
+		else
+		{
+			file.secondsOverThreshold = 0
+		}
+		Wait(1)
+	}
+
+}
+#endif
+
+void function NET_TraceRoute_AutoTraceRoute(entity player)
+{
+	int traceRouteSessionId
+#if SERVER
+	                                                                                                
+#endif
+#if CLIENT
+	traceRouteSessionId = NET_TraceRoute_BeginToServer()
+#endif
+
+	if(  traceRouteSessionId < 0 )
+		return                            
+
+#if CLIENT
+	Remote_ServerCallFunction(SERVER_PERFORM_TRACE_ROUTE_RPC)
+#endif
+
+	Wait(TRACE_ROUTE_AUTO_RUN_TIME_SECONDS)
+	table results = NET_TraceRoute_ToTable(traceRouteSessionId, player)
+
+	PIN_NET_TraceRouteResult(player, results)
+
+	NET_TraceRoute_End(traceRouteSessionId)
+}

@@ -8,7 +8,8 @@ struct
 	ItemFlavor& character
 } file
 
-void function InitCharacterSkillsDialog()
+void function InitCharacterSkillsDialog( var newMenuArg )
+                                              
 {
 	var menu = GetMenu( "CharacterSkillsDialog" )
 	file.menu = menu
@@ -37,24 +38,50 @@ void function OpenCharacterSkillsDialog( ItemFlavor character )
 
 void function CharacterSkillsDialog_OnOpen()
 {
-	//
+	                    
 	EmitUISound( "UI_Menu_Legend_Details" )
 
-	if ( LoadoutSlot_IsReady( ToEHI( GetUIPlayer() ), Loadout_CharacterClass() ) )
+	if ( LoadoutSlot_IsReady( ToEHI( GetLocalClientPlayer() ), Loadout_Character() ) )
 	{
 		CharacterHudUltimateColorData colorData = CharacterClass_GetHudUltimateColorData( file.character )
 		RuiSetColorAlpha( file.contentRui, "ultimateColor", SrgbToLinear( colorData.ultimateColor ), 1 )
 		RuiSetColorAlpha( file.contentRui, "ultimateColorHighlight", SrgbToLinear( colorData.ultimateColorHighlight ), 1 )
+             
+                                                                              
+   
+                               
+                                                       
+                                                        
+                                                        
+                                                          
+                                                       
+                                                        
+
+                                          
+                         
+    
+                                                                                            
+    
+   
+      
 	}
 
-	string character = ItemFlavor_GetHumanReadableRef( file.character )
-	float damageScale = GetCurrentPlaylistVarFloat( "damage_scale_" + character, 1.0 )
+	string character  = ItemFlavor_GetHumanReadableRef( file.character )
+	float damageScale = CharacterClass_GetDamageScale( file.character )
 
 	if ( damageScale < 1.0 )
 	{
-		int percent = int((1.0 - damageScale)*100)
+		int percent        = int( ((1.0 - damageScale) * 100) + 0.5 )
+		string finalString = Localize( "#SPECIAL_PERK_N_N", Localize( "#PAS_FORTIFIED" ), Localize( "#PAS_FORTIFIED_DESC", percent ) )
 		RuiSetImage( file.contentRui, "specialPerkIcon", $"rui/hud/passive_icons/juggernaut" )
-		RuiSetString( file.contentRui, "specialPerkDesc", Localize( "#SPECIAL_PERK_JUGGERNAUT", percent ) )
+		RuiSetString( file.contentRui, "specialPerkDesc", finalString )
+	}
+	else if ( damageScale > 1.0 )
+	{
+		int percent        = int( (fabs( 1.0 - damageScale ) * 100) + 0.5 )
+		string finalString = Localize( "#SPECIAL_PERK_N_N", Localize( "#PAS_LOW_PROFILE" ), Localize( "#PAS_LOW_PROFILE_DESC", percent ) )
+		RuiSetImage( file.contentRui, "specialPerkIcon", $"rui/hud/passive_icons/low_profile" )
+		RuiSetString( file.contentRui, "specialPerkDesc", finalString )
 	}
 	else
 	{
@@ -62,9 +89,36 @@ void function CharacterSkillsDialog_OnOpen()
 		RuiSetString( file.contentRui, "specialPerkDesc", "" )
 	}
 
-	RuiSetImage( file.contentRui, "passiveIcon", ItemFlavor_GetIcon( CharacterClass_GetPassiveAbility( file.character ) ) )
-	RuiSetString( file.contentRui, "passiveName", Localize( ItemFlavor_GetLongName( CharacterClass_GetPassiveAbility( file.character ) ) ) )
-	RuiSetString( file.contentRui, "passiveDesc", Localize( ItemFlavor_GetLongDescription( CharacterClass_GetPassiveAbility( file.character ) ) ) )
+                    
+                                                                
+      
+		string roleDesc = CharacterClass_GetCharacterRolePerkDesc( file.character )
+       
+	if ( roleDesc == "" )
+	{
+		RuiSetImage( file.contentRui, "rolePerkIcon", $"" )
+	}
+	else
+	{
+		RuiSetImage( file.contentRui, "rolePerkIcon", CharacterClass_GetCharacterRoleImage( file.character )  )
+	}
+	RuiSetString( file.contentRui, "rolePerkDesc", roleDesc )
+
+	ItemFlavor ornull passiveAbility = null
+	foreach ( ItemFlavor ability in CharacterClass_GetPassiveAbilities( file.character ) )
+	{
+		if ( CharacterAbility_ShouldShowDetails( ability ) )
+		{
+			                                  
+			passiveAbility = ability
+			break
+		}
+	}
+	expect ItemFlavor( passiveAbility )
+
+	RuiSetImage( file.contentRui, "passiveIcon", ItemFlavor_GetIcon( passiveAbility ) )
+	RuiSetString( file.contentRui, "passiveName", Localize( ItemFlavor_GetLongName( passiveAbility ) ) )
+	RuiSetString( file.contentRui, "passiveDesc", Localize( ItemFlavor_GetLongDescription( passiveAbility ) ) )
 	RuiSetString( file.contentRui, "passiveType", Localize( "#PASSIVE" ) )
 
 	RuiSetImage( file.contentRui, "tacticalIcon", ItemFlavor_GetIcon( CharacterClass_GetTacticalAbility( file.character ) ) )
@@ -77,7 +131,7 @@ void function CharacterSkillsDialog_OnOpen()
 	RuiSetString( file.contentRui, "ultimateDesc", Localize( ItemFlavor_GetLongDescription( CharacterClass_GetUltimateAbility( file.character ) ) ) )
 	RuiSetString( file.contentRui, "ultimateType", Localize( "#ULTIMATE" ) )
 
-	RuiSetGameTime( file.contentRui, "initTime", Time() )
+	RuiSetGameTime( file.contentRui, "initTime", ClientTime() )
 }
 
 

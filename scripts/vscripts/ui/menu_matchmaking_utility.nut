@@ -1,7 +1,5 @@
 global function LeaveMatch
-#if(false)
-
-#endif
+global function LeaveMatch_Freelance
 global function LeaveParty
 global function LeaveMatchAndParty
 
@@ -15,35 +13,35 @@ struct
 
 void function LeaveMatch()
 {
-	//
-	//
-	//
-	#if(DURANGO_PROG)
+	ResetReconnectParameters()
+
+	                                                                                
+	                                                                                
+	                                 
+	#if DURANGO_PROG
 		Durango_LeaveParty()
-	#endif //
+	#endif                    
 
 	CancelMatchmaking()
-	ClientCommand( "LeaveMatch" )
+	Remote_ServerCallFunction( "ClientCallback_LeaveMatch" )
 }
 
-#if(false)
+void function LeaveMatch_Freelance()
+{
+	#if DURANGO_PROG
+		Durango_LeaveParty()
+	#endif                    
 
+	CancelMatchmaking()
 
-
-
-//
-
-
-
-
-
-
-
-#endif
+	string hubPlaylist = GetCurrentPlaylistVarString( "freelance_hub_playlist", "freelance_hub" )
+	Assert( (hubPlaylist.len() > 0), "Missing 'freelance_hub_playlist' entry." )
+	StartMatchmakingStandard( hubPlaylist )
+}
 
 void function LeaveParty()
 {
-	ClientCommand( "party_leave" )
+	Party_LeaveParty()
 	Signal( uiGlobal.signalDummy, "LeaveParty" )
 }
 

@@ -32,6 +32,7 @@
             rui                     "ui/generic_popup_button.rpak"
             clipRui                 1
             wide					680
+            wide_nx_handheld        800         [$NX || $NX_UI_PC]
             tall					60
             cursorVelocityModifier  0.7
 

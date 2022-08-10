@@ -11,6 +11,7 @@ global struct ClGlobals
 	array<void functionref( entity )> onLocalClientPlayerSpawnedCallbacks
 	array<void functionref( entity )> onMinimapEntSpawnedCallbacks
 	array<bool functionref( entity )> onMinimapEntShouldCreateCallbacks
+	table<string,bool functionref( entity )> onMinimapEntShouldCreateCallbacks_scriptname
 	array<void functionref( entity )> onUseEntGainFocusCallbacks
 	array<void functionref( entity )> onUseEntLoseFocusCallbacks
 	array<void functionref( entity )> addLocalPlayerFuncs
@@ -18,7 +19,7 @@ global struct ClGlobals
 	array<void functionref( StaticPropRui, var )> onStaticPropRUICreatedCallbacks
 	array<void functionref( float, vector, int, int, entity )> onLocalPlayerTookDamageCallback
 	table< int, array<void functionref( float, vector, int, int, entity )> > onLocalPlayerTookDamageTypeCallback
-	array<void functionref( entity, entity, vector, int ) > onLocalPlayerDidDamageCallback
+	array<void functionref( entity, entity, vector, int, float ) > onLocalPlayerDidDamageCallback
 	array<void functionref( entity, int, int ) > onPlayerLifeStateChangedCallbacks
 	table<string, array<void functionref( entity )> > onCreateCallbacks
 	table<string, array<void functionref( entity )> > onTargetNameCreateCallbacks
@@ -31,7 +32,12 @@ global struct ClGlobals
 	array<void functionref( entity clientPlayer, entity spectatorTarget )> firstPersonSpectateEndCallbacks
 	array<void functionref( entity clientPlayer, entity spectatorTarget )> thirdPersonSpectateStartCallbacks
 	array<void functionref( entity clientPlayer, entity spectatorTarget )> thirdPersonSpectateEndCallbacks
+	array<void functionref( entity clientPlayer )> freeCamSpectateStartCallbacks
+	array<void functionref( entity clientPlayer )> freeCamSpectateEndCallbacks
 	array<void functionref( entity localClientPlayer, entity prevSpectatorTarget, entity currentSpectatorTarget )> onSpectatorTargetChangedCallbacks
+	array<void functionref( entity localClientPlayer, int newMode )> onSpectatorPlayerTagModeChangedCallbacks
+	array<void functionref( bool enemiesVisible )> onSpectatorMinimapEnemiesVisibleChangedCallbacks
+	array<void functionref( int newState )> onSpectatorUiStateChangedCallbacks
 	table<string, array<void functionref( entity )> > onDestroyedCallbacks
 	table<string, array<void functionref( entity )> > onDeathOrDestroyCallbacks
 	table<int, array<void functionref( entity )> > onCinematicEventFlagChangedCallback
@@ -39,17 +45,16 @@ global struct ClGlobals
 	void functionref( entity ) onHardpointChangedCallback
 	void functionref( entity ) onHardpointIDChangedCallback
 	void functionref( entity ) onHardpointEntityChangedCallback
-	array<void functionref( entity )> onPetTitanModeChangedCallbacks
-	array<void functionref( entity )> onPetTitanChangedCallbacks
 	array<void functionref( entity )> onPlayerClassChangedCallbacks
+	array<void functionref( entity )> onPlayerClassActuallyChangedCallbacks
 	array<void functionref( entity )> consumableInventoryChangedCallbacks
 
 	array<bool functionref( entity player, entity zipline, vector ziplineClosestPoint )> canUseZiplineCallbacks
 
+	array<void functionref( entity )> givePlayerDoubleJumpCallbacks
+
 	array<void functionref()>[ eGameState._count_ ] gameStateEnterCallbacks
 	DamageHistoryStruct &lastDamageHistory
-
-	VisGroup menuVisGroup
 
 	float lastMenuToggleTime = 0
 	bool isMenuOpen = false
@@ -60,11 +65,9 @@ global struct ClGlobals
 	MenuCharacterDef currentMenuPilotModels
 	MenuCharacterDef previewMenuPilotModels
 
-	entity lastKiller //
+	entity lastKiller                                 
 	int lastKillerEntIndex
 	AttackerDisplayNameStruct nameOfLastKiller
-
-	table<int, string> permanentEventNotifications
 
 	entity levelEnt
 
@@ -85,6 +88,7 @@ global struct ClGlobals
 	var topoFullscreenHud
 	var topoFullscreenHudPermanent
 	var topoFullscreenFullMap
+	var topFullscreenTargetInfo
 	var topoMinimap
 	var topoTitanCockpitHud
 	var topoTitanCockpitLowerHud
@@ -123,9 +127,9 @@ global struct ClGlobals
 	entity clientCamera
 
 
-	#if(false)
-
-#endif
+                             
+                                         
+       
 }
 
 global ClGlobals clGlobal

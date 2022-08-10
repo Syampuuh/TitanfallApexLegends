@@ -1,5 +1,27 @@
 
 global function Lobby_AddLocalPlayer
+global function AddCallback_OnPlayerAddedToLobby
+global function Lobby_SetBannerSkin
+#if DEV
+global function DEV_SetLobbyBannerSkin
+#endif
+
+const int LOBBY_BANNER_DEFAULT_SKIN_INDEX = 0
+const int LOBBY_BANNER_ARENAS_SKIN_INDEX = 1
+const int LOBBY_BANNER_CONTROL_SKIN_INDEX = 2
+const int LOBBY_BANNER_LTM_SKIN_INDEX = 3
+const int LOBBY_BANNER_FREEDM_SKIN_INDEX = 4
+
+struct
+{
+	array<void functionref( entity )> onPlayerAddedToLobbyCallbacks
+
+	entity lobbyBanner = null
+	#if DEV
+		bool overrideLobbyBanner = false
+	#endif
+	bool animatedEntitiesCreated = false
+} file
 
 void function Lobby_AddLocalPlayer()
 {
@@ -11,4 +33,149 @@ void function Lobby_AddLocalPlayer()
 
 	SetStandardAbilityBindingsForPilot( player )
 	RefreshPresentationType()
+
+                 
+	                                                                                        
+	                                                                    
+	                                                      
+	RunUIScript( "Lobby_EnableMinimapCoordsOnConnect", player.GetPlayerName() )
+      
+
+	foreach ( func in file.onPlayerAddedToLobbyCallbacks )
+		func( player )
+
+	CacheLobbyBannerEnt()
+
+	thread ManageJitterVFX_Thread()
+
+	thread LobbyCreateAnimatedEntitiesThread()
+}
+
+void function AddCallback_OnPlayerAddedToLobby( void functionref( entity ) onPlayerAddedToLobbyCallback )
+{
+	Assert( ! ( file.onPlayerAddedToLobbyCallbacks.contains( onPlayerAddedToLobbyCallback ) ), "Attempted to add same callback to onPlayerAddedToLobbyCallbacks twice." )
+
+	file.onPlayerAddedToLobbyCallbacks.append( onPlayerAddedToLobbyCallback )
+}
+
+void function CacheLobbyBannerEnt()
+{
+	array<entity> ents = GetEntArrayByScriptName( "lobby_banner" )
+	if( ents.len() > 0 )
+		file.lobbyBanner = ents[0]
+}
+
+void function Lobby_SetBannerSkin( string playlist )
+{
+	if( file.lobbyBanner == null )
+	{
+		                                        
+		CacheLobbyBannerEnt()
+
+		if( file.lobbyBanner == null )
+		{
+			Warning( "Lobby_SetBannerSkin - No lobby_banner entity found!" )
+			return
+		}
+	}
+
+	string playlistName = GetParty().playlistName
+
+	int skinIndex = LOBBY_BANNER_DEFAULT_SKIN_INDEX
+	if( playlist != "" && GetPlaylistGamemodeByIndex( playlist, 0 ) == GAMEMODE_ARENAS )
+		skinIndex = LOBBY_BANNER_ARENAS_SKIN_INDEX
+	else if ( GetPlaylistVarBool( playlistName, "is_limited_mode", false ) )
+		skinIndex = LOBBY_BANNER_LTM_SKIN_INDEX
+                         
+	else if ( playlist != "" && GetPlaylistGamemodeByIndex( playlist, 0 ) == GAMEMODE_CONTROL )
+		skinIndex = LOBBY_BANNER_CONTROL_SKIN_INDEX
+       
+                        
+                                                                                           
+                                            
+       
+
+	#if DEV
+		if ( file.overrideLobbyBanner )
+			return
+	#endif
+
+	file.lobbyBanner.SetSkin( skinIndex )
+}
+
+#if DEV
+void function DEV_SetLobbyBannerSkin( int i )
+{
+	if ( i == -1 )
+	{
+		file.overrideLobbyBanner = false
+		return
+	}
+
+	file.lobbyBanner.SetSkin( i )
+	file.overrideLobbyBanner = true
+}
+#endif
+
+void function LobbyCreateAnimatedEntitiesThread()
+{
+	if ( file.animatedEntitiesCreated )
+		return
+
+	entity bat = CreateClientSidePropDynamic( <-145.5, 1163, 83>,   <0, 130, 0>, $"mdl/creatures/echo/echo_base_w.rmdl")
+	bat.SetScriptName( "bat" )
+	bat.SetSkin( 1 )
+	bat.SetModelScale( 1.5 )
+
+	thread BatAnimThread( bat )
+
+	entity prisoner = CreateClientSidePropDynamic(<-155, 1330, -15> , <0, -105, 0>, $"mdl/humans/civilian/civilian_sci_v1.rmdl")
+	prisoner.SetModelScale( 1.2 )
+	prisoner.SetScriptName( "prisoner1" )
+	thread PlayAnim( prisoner, "S14_lobby_inmate_left_v1" )
+
+	entity prisoner2 = CreateClientSidePropDynamic(<220, 1330, -15> , <0, -145, 0>, $"mdl/humans/civilian/civilian_sci_v1.rmdl")
+	prisoner2.SetScriptName( "prisoner2" )
+	prisoner2.SetModelScale( 1.2 )
+	thread PlayAnim( prisoner2, "S14_lobby_inmate_right" )
+
+	file.animatedEntitiesCreated = true
+}
+
+
+array< asset > anims = [
+	$"animseq/creatures/echo/echo_animrig/echo_lobby_hang_idle.rseq",
+	$"animseq/creatures/echo/echo_animrig/echo_lobby_hang_idle_yawn.rseq",
+	$"animseq/creatures/echo/echo_animrig/echo_lobby_hang_idle_clean.rseq",
+	$"animseq/creatures/echo/echo_animrig/echo_lobby_hang_idle_twitch.rseq",
+]
+
+void function BatAnimThread( entity bat )
+{
+	bat.EndSignal( "OnDestroy" )
+	while ( true )
+	{
+		float f = RandomFloat( 1.0 )
+		int animIndex = 0
+
+		if ( f <= 0.6 )
+		{
+			animIndex = 0
+		}	
+		else if ( f <= 0.8 )
+		{
+			animIndex = 3
+		}
+		else if ( f <= 0.9 )
+		{
+			animIndex = 1
+		}
+		else
+		{
+			animIndex = 2
+		}
+
+		waitthread PlayAnim( bat, anims[animIndex] )
+	}
+
 }

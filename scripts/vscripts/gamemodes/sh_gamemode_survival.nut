@@ -1,6 +1,26 @@
-//
+  
 
-#if(CLIENT)
+global function PreGame_GetWaitingForPlayersHasBlackScreen
+global function PreGame_GetWaitingForPlayersSpawningEnabled
+global function PreGame_GetWaitingForPlayersDelayMin
+global function PreGame_GetWaitingForPlayersDelayMax
+global function PreGame_GetWaitingForPlayersCountdown
+global function CharSelect_GetIntroMusicStartTime
+global function CharSelect_GetIntroTransitionDuration
+global function CharSelect_GetIntroCountdownDuration
+global function CharSelect_GetPickingDelayBeforeAll
+global function CharSelect_GetPickingDelayOnFirst
+global function CharSelect_GetPickingSingleDurationMax
+global function CharSelect_GetPickingSingleDurationMin
+global function CharSelect_GetPickingDelayAfterEachLock
+global function CharSelect_GetPickingDelayAfterAll
+global function CharSelect_GetOutroSceneChangeDuration
+global function CharSelect_GetOutroAllSquadsPresentDuration
+global function CharSelect_GetOutroSquadPresentDuration
+global function CharSelect_GetOutroChampionPresentDuration
+global function CharSelect_GetOutroTransitionDuration
+
+#if SERVER || CLIENT
 global function GamemodeSurvivalShared_Init
 
 global function Survival_CanUseHealthPack
@@ -19,13 +39,26 @@ global function PredictHealthPackUse
 
 global function GetMusicForJump
 
-global function Survival_GetCurrentRank
-global function CanWeaponInspect
 global function PositionIsInMapBounds
 global function Survival_IsPlayerHealing
+
+global function PlayerIsMarkedAsCanBeRespawned
+
+global function IsSurvivalMode
 #endif
 
-const float MAX_MAP_BOUNDS = 48000.0
+#if SERVER
+                                       
+                                     
+#endif
+
+#if UI
+global function GamemodeSurvivalShared_UI_Init
+#endif
+
+global function IsSquadDataPersistenceEmpty
+
+const float MAX_MAP_BOUNDS = 61000.0
 
 global const string SURVIVAL_DEFAULT_TITAN_DEFENSE = "mp_titanability_arm_block"
 
@@ -56,6 +89,11 @@ const int USEHEALTHPACK_DENY_NO_HEALTH_KITS = 4
 const int USEHEALTHPACK_DENY_NO_SHIELD_KITS = 5
 const int USEHEALTHPACK_DENY_NO_KITS = 6
 const int USEHEALTHPACK_DENY_FULL = 7
+
+                                                                                                                                                                          
+                                                                                    
+global const int NUMBER_OF_SUMMARY_DISPLAY_VALUES = 7                                      
+global const array< int > SUMMARY_DISPLAY_EMPTY_SET = [ 0, 0, 0, 0, 0, 0, 0 ]
 
 enum eUseHealthKitResult
 {
@@ -98,7 +136,18 @@ global struct TargetKitHealthAmounts
 global enum eSurvivalHints
 {
 	EQUIP,
-	ORDNANCE
+	ORDNANCE,
+                               
+	ORDNANCE_FUSE,
+	ORDNANCE_FUSE_MULTI,
+      
+                               
+	CRYPTO_DRONE_ACCESS,
+      
+              
+                       
+                        
+      
 }
 
 global struct VictoryPlatformModelData
@@ -116,17 +165,53 @@ struct
 	VictoryPlatformModelData & victorySequencePlatforData
 } file
 
-#if(CLIENT)
+
+bool function HasFastIntro()
+{
+	if ( GetCurrentPlaylistVarBool( "fast_intro", false ) )
+		return true
+
+	return GetConVarBool( "fast_intro" )
+}
+
+  
+bool function PreGame_GetWaitingForPlayersHasBlackScreen()		{ return GetCurrentPlaylistVarBool( "waiting_for_players_has_black_screen", false ) }
+bool function PreGame_GetWaitingForPlayersSpawningEnabled()		{ return GetCurrentPlaylistVarBool( "waiting_for_players_spawning_enabled", false ) }
+float function PreGame_GetWaitingForPlayersDelayMin()			{ return GetCurrentPlaylistVarFloat( "waiting_for_players_min_wait", 0.0 ) }
+float function PreGame_GetWaitingForPlayersDelayMax()			{ return GetCurrentPlaylistVarFloat( "waiting_for_players_timeout_seconds", 20.0 ) }
+float function PreGame_GetWaitingForPlayersCountdown()			{ return (HasFastIntro() ? 0.0 : GetCurrentPlaylistVarFloat( "waiting_for_players_countdown_seconds", 8.0 ) ) }
+  
+float function CharSelect_GetIntroMusicStartTime()		 		{ return GetCurrentPlaylistVarFloat( "charselect_intro_music_start_time", -0.8 ) }
+float function CharSelect_GetIntroTransitionDuration()			{ return GetCurrentPlaylistVarFloat( "charselect_intro_transition_duration", 3.0 ) }
+float function CharSelect_GetIntroCountdownDuration()			{ return GetCurrentPlaylistVarFloat( "charselect_intro_countdown_duration", 0.0 ) }
+  
+float function CharSelect_GetPickingDelayBeforeAll()			{ return GetCurrentPlaylistVarFloat( "charselect_picking_delay_before_all", 0.0 ) }
+float function CharSelect_GetPickingDelayOnFirst()				{ return GetCurrentPlaylistVarFloat( "charselect_picking_delay_on_first", 1.5 ) }
+float function CharSelect_GetPickingSingleDurationMax()			{ return (HasFastIntro() ? 0.0 : GetCurrentPlaylistVarFloat( "character_select_time_max", 8.0 ) ) }
+float function CharSelect_GetPickingSingleDurationMin()			{ return (HasFastIntro() ? 0.0 : GetCurrentPlaylistVarFloat( "character_select_time_min", 6.0 ) ) }
+float function CharSelect_GetPickingDelayAfterEachLock()		{ return GetCurrentPlaylistVarFloat( "charselect_picking_delay_after_each_lock", 0.5 ) }
+float function CharSelect_GetPickingDelayAfterAll()				{ return GetCurrentPlaylistVarFloat( "charselect_picking_delay_after_all", 1.5 ) }
+  
+float function CharSelect_GetOutroSceneChangeDuration()			{ return GetCurrentPlaylistVarFloat( "charselect_outro_scene_change_duration", 4.0 ) }
+float function CharSelect_GetOutroAllSquadsPresentDuration()	{ return GetCurrentPlaylistVarFloat( "charselect_outro_all_squads_present_duration", 0.0 ) }
+float function CharSelect_GetOutroSquadPresentDuration()		{ return GetCurrentPlaylistVarFloat( "charselect_outro_squad_present_duration", 6.0  ) }
+float function CharSelect_GetOutroChampionPresentDuration()		{ return GetCurrentPlaylistVarFloat( "charselect_outro_champion_present_duration", 8.0 ) }
+float function CharSelect_GetOutroTransitionDuration()			{ return GetCurrentPlaylistVarFloat( "charselect_outro_transition_duration", 3.0 ) }
+
+
+#if SERVER || CLIENT
 void function GamemodeSurvivalShared_Init()
 {
-	#if(CLIENT)
-		#if(true)
-			ShEliteStreak_Init()
-		#endif
+	#if SERVER || CLIENT
 		BleedoutShared_Init()
 		ShApexScreens_Init()
 		Sh_RespawnBeacon_Init()
+		MobileRespawnBeacon_Init()
 		Sh_Airdrops_Init()
+
+                        
+                          
+        
 
 		PrecacheImpactEffectTable( "dropship_dust" )
 		PrecacheModel( SURVIVAL_PLANE_MODEL )
@@ -137,26 +222,85 @@ void function GamemodeSurvivalShared_Init()
 		ClientMusic_SharedInit()
 
 		AddCallback_CanStartCustomWeaponActivity( ACT_VM_WEAPON_INSPECT, CanWeaponInspect )
+
+		Remote_RegisterServerFunction( "ClientCallback_Sur_RequestSquadDataPersistence" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_UpdateCharacterLock", "bool")
+
+		                        
+		Remote_RegisterServerFunction( "ClientCallback_Sur_UseHealthPack", "string" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_DropBackpackItem", "string", "int", 0, INT_MAX, "entity" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_DropBackpackItem_UI", "string", "int", 0, INT_MAX, "int",INT_MIN, INT_MAX )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_DropEquipment", "string" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_EquipOrdnance", "string" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_EquipGadget", "string" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_EquipAttachment", "string", "int", -1, INT_MAX )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_UnequipAttachment", "string", "int", -1, INT_MAX, "bool" )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_TransferAttachment", "string", "int", -1, INT_MAX )
+
+		Remote_RegisterServerFunction( "ClientCallback_Sur_CancelHeal" )
+
+		Remote_RegisterServerFunction( "ClientCallback_TPPromptGoToMapPoint", "float", -FLT_MAX, FLT_MAX, 32, "float", -FLT_MAX, FLT_MAX, 32 )
+		Remote_RegisterServerFunction( "ClientCallback_Sur_HoldForUltimate" )
+		Remote_RegisterServerFunction( "ClientCallback_ReportPlayer", "int", -1, INT_MAX, "string", "string", "string" )
 	#endif
 
-	#if(false)
+	#if SERVER
+		                                                                      
 
+                    
+			                                                                                       
+                          
 
+	#endif          
 
-#elseif(CLIENT)
-		AddCreateCallback( "prop_dynamic", OnPropDynamicCreated )
-	#endif
+	if ( FreelanceSystemsAreEnabled() )
+	{
+		FreelanceNPCs_Init()
+		SkitSystem_Init()
+		ObjectiveSystem_Init()
+		EncounterSystem_Init()
+
+#if SERVER
+		                                      
+		                         
+#endif          
+
+	}
+
+#if SERVER
+                       
+                                                                             
+      
+#endif         
+
 }
 #endif
 
-#if(CLIENT)
+#if UI
+void function GamemodeSurvivalShared_UI_Init()
+{
+	AddUICallback_InputModeChanged( UIInputChanged )
+}
+
+void function UIInputChanged( bool controllerModeActive )
+{
+
+}
+#endif
+
+#if SERVER || CLIENT
 bool function Survival_PlayerCanDrop( entity player )
 {
 	if ( !IsAlive( player ) )
 		return false
 
-	//
-	//
+	                       
+	  	            
+
+                       
+	if( IsArenaMode() && !GamePlaying() )
+		return false
+      
 
 	if ( player.ContextAction_IsActive() && !player.ContextAction_IsRodeo() )
 		return false
@@ -166,6 +310,23 @@ bool function Survival_PlayerCanDrop( entity player )
 
 	if ( player.IsPhaseShifted() )
 		return false
+
+	if ( player.IsGrappleActive() )
+		return false
+	
+	if ( player.IsTraversing() || player.IsWallHanging() || player.IsWallRunning() )
+		return false
+	
+	if ( player.p.isInExtendedUse )
+		return false
+	
+	if ( IsPlayerInCryptoDroneCameraView( player ) )
+		return false
+
+                            
+	if ( ExplosiveHold_IsPlayerPlantingGrenade( player ) )
+		return false
+      
 
 	return true
 }
@@ -199,21 +360,20 @@ bool function Survival_CanUseHealthPack( entity player, int itemType, bool check
 		}
 	}
 
-	#if(CLIENT)
+	#if CLIENT
 		if ( printReason )
 		{
 			switch( canUseResult )
 			{
 				case eUseHealthKitResult.DENY_NONE:
-					//
+					                  
 					break
 
 				case eUseHealthKitResult.DENY_NO_HEALTH_KIT:
 				case eUseHealthKitResult.DENY_NO_KITS:
 				case eUseHealthKitResult.DENY_NO_SHIELD_KIT:
-					player.ClientCommand( "ClientCommand_Quickchat " + eCommsAction.INVENTORY_NEED_HEALTH )
-					//
-
+					Remote_ServerCallFunction( "ClientCallback_Quickchat", eCommsAction.INVENTORY_NEED_HEALTH, eCommsFlags.NONE, null, "" )
+					                                
 				default:
 					AnnouncementMessageRight( player, healthKitResultStrings[canUseResult] )
 					break
@@ -223,104 +383,88 @@ bool function Survival_CanUseHealthPack( entity player, int itemType, bool check
 
 	return false
 
-	/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+	  
+	          
+		                                       
+			            
+
+		                                     
+			            
+
+		                         
+			            
+	              
+		                                                
+			            
+	      
+
+	                                                                         
+		            
+
+	                                       
+		            
+
+	                         
+		            
+
+	                              
+		            
+
+	                                                                             
+		            
+
+	                                                                 
+		            
+
+	                       
+		            
+
+	                                             
+	 
+		                                                                     
+		                                                      
+		                                                            
+
+		                     
+			            
+	 
+	    
+	 
+		                                      
+		                                             
+		                    
+		                      
+
+		                                                                          
+
+		                                                              
+			              
+
+		                                                   
+			              
+
+		                                                                              
+			                
+
+		                                                    
+		 
+			                                                           
+			                                                   
+			                                                               
+				                
+		 
+
+		                             
+			            
+	 
+
+	           
+	  
 }
 
 int function Survival_TryUseHealthPack( entity player, int itemType )
 {
-	#if(CLIENT)
+	#if CLIENT
 		if ( player != GetLocalClientPlayer() )
 			return eUseHealthKitResult.DENY_NONE
 
@@ -329,10 +473,10 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 
 		if ( IsWatchingReplay() )
 			return eUseHealthKitResult.DENY_NONE
-	#elseif(false)
-
-
-#endif
+	#elseif SERVER
+		                                                
+			                                    
+	#endif
 
 	if ( player.ContextAction_IsActive() && !player.ContextAction_IsRodeo() )
 		return eUseHealthKitResult.DENY_NONE
@@ -366,7 +510,7 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 		if ( !ultimateAbility.IsReadyToFire() )
 			return eUseHealthKitResult.DENY_ULT_NOTREADY
 	}
-	else if ( GetCurrentPlaylistVarInt( "survival_shields", 1 ) > 0 )
+	else
 	{
 		int currentHealth  = player.GetHealth()
 		int currentShields = player.GetShieldHealth()
@@ -415,22 +559,6 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 			}
 		}
 	}
-	else
-	{
-		HealthPickup pickup = SURVIVAL_Loot_GetHealthKitDataFromStruct( itemType )
-		if ( GetCurrentPlaylistVarInt( "survival_shields", 1 ) && pickup.shieldAmount > 0 )
-		{
-			if ( player.GetShieldHealthMax() > 0.0 && GetHealthFrac( player ) >= 1.0 && GetShieldHealthFrac( player ) >= 1.0 )
-				return eUseHealthKitResult.DENY_SHIELD_FULL
-			else if ( GetHealthFrac( player ) >= 1.0 )
-				return eUseHealthKitResult.DENY_HEALTH_FULL
-		}
-		else
-		{
-			if ( GetHealthFrac( player ) >= 1.0 )
-				return eUseHealthKitResult.DENY_HEALTH_FULL
-		}
-	}
 
 	if ( GetCurrentPlaylistVarBool( "survival_healthkits_limit_movement", true ) == false && player.IsSprinting() )
 	{
@@ -441,23 +569,23 @@ int function Survival_TryUseHealthPack( entity player, int itemType )
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 float function Survival_GetCharacterSelectDuration( int pickIndex )
 {
-	float min = GetCurrentPlaylistVarFloat( "character_select_time_min", 6.0 )
-	float max = GetCurrentPlaylistVarFloat( "character_select_time_max", 8.0 )
-	return GraphCapped( pickIndex, 0, MAX_TEAM_PLAYERS - 1, max, min )
+	float min = CharSelect_GetPickingSingleDurationMin()
+	float max = CharSelect_GetPickingSingleDurationMax()
+	return GraphCapped( pickIndex, 0, (MAX_TEAM_PLAYERS - 1), max, min )
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 bool function Survival_CharacterSelectEnabled()
 {
 	return Survival_GetCharacterSelectDuration( 0 ) > 0.0
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 bool function Sur_CanUseZipline( entity player, entity zipline, vector ziplineClosestPoint )
 {
 	if ( player.IsGrapplingZipline() )
@@ -466,8 +594,8 @@ bool function Sur_CanUseZipline( entity player, entity zipline, vector ziplineCl
 	if ( player.GetWeaponDisableFlags() == WEAPON_DISABLE_FLAGS_ALL )
 		return false
 
-	//
-	//
+	                                                                                                                                                        
+	  	            
 
 	if ( Bleedout_IsBleedingOut( player ) )
 		return false
@@ -476,90 +604,60 @@ bool function Sur_CanUseZipline( entity player, entity zipline, vector ziplineCl
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function Sur_SetPlaneCenterEnt( entity ent )
 {
 	file.planeCenterEnt = ent
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function Sur_SetPlaneEnt( entity ent )
 {
 	file.planeEnt = ent
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 entity function Sur_GetPlaneCenterEnt()
 {
 	return file.planeCenterEnt
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 entity function Sur_GetPlaneEnt()
 {
 	return file.planeEnt
 }
 #endif
 
-#if(!UI)
-void function OnPropDynamicCreated( entity prop )
-{
-	#if(false)
+#if !UI
 
+#if SERVER
+                                                             
+                                                 
+                                                        
+                                                                  
+ 
+	                         
+		      
 
+	                                                            
+	                                                              
+ 
+
+                  
+                                                                          
+ 
+	                         
+		      
+
+	                                                                             
+	                                                                               
+ 
+                        
 #endif
-}
-
-#if(false)
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
 
 TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPickup itemData )
 {
@@ -589,7 +687,7 @@ TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPicku
 
 		Assert( currentShields + shieldsToApply <= shieldHealthMax, "Bad math: " + currentShields + " + " + shieldsToApply + " > " + shieldHealthMax )
 
-		if ( healthToApply || itemData.healTime > 0 ) //
+		if ( healthToApply || itemData.healTime > 0 )                                     
 			targetValues.targetHealth = (currentHealth + healthToApply + resourceHealthRemaining) / 100.0
 
 		if ( shieldsToApply && shieldHealthMax > 0 )
@@ -604,7 +702,7 @@ TargetKitHealthAmounts function PredictHealthPackUse( entity player, HealthPicku
 
 
 #endif
-#if(CLIENT)
+#if SERVER || CLIENT
 bool function CanWeaponInspect( entity player, int activity )
 {
 	if ( Bleedout_IsBleedingOut( player ) )
@@ -612,26 +710,67 @@ bool function CanWeaponInspect( entity player, int activity )
 
 	return GetCurrentPlaylistVarBool( "enable_weapon_inspect", true )
 }
+#endif
 
 
-int function Survival_GetCurrentRank( entity player )
-{
-	int team                  = player.GetTeam()
-	int numLivingSquadMembers = GetPlayerArrayOfTeam_AliveConnected( team ).len()
-	if ( numLivingSquadMembers <= 0 )
-	{
-		#if(false)
+#if SERVER
+                                                     
+ 
+                  
+		                  
+			                                           
+       
+
+                       
+                                      
+                                                
+       
+
+                         
+		                              
+			                                       
+       
+
+                           
+                               
+                                            
+       
+
+	                                            
+	                                                                             
+	                                 
+	 
+		          
+			                                                     
+		     
+			                                                     
+		      
+	 
+	                             
+ 
 
 
-//
+                                                   
+ 
+	                                                          
 
-#else
-			return player.GetPersistentVarAsInt( "lastGameRank" )
-		#endif
-	}
-	return GetNumTeamsRemaining()
-}
+	                                                                                                   
+	                           
+		               
 
+	                                                       
+
+	                                                            
+	 
+		                                                                       
+	 
+
+	               
+ 
+#endif          
+
+
+#if SERVER || CLIENT
 void function SetVictorySequencePlatformModel( asset model, vector originOffset, vector modelAngles )
 {
 	VictoryPlatformModelData data
@@ -652,20 +791,63 @@ VictoryPlatformModelData function GetVictorySequencePlatformModel()
 
 string function GetMusicForJump( entity player )
 {
-	#if(false)
-
-#else
-		return MusicPack_GetSkydiveMusic( GetMusicPackForPlayer( player ) )
-	#endif //
+	string override = GetCurrentPlaylistVarString( "music_override_skydive", "" )
+	if ( override.len() > 0 )
+		return override
+	return MusicPack_GetSkydiveMusic( GetMusicPackForPlayer( player ) )
 }
 
 bool function PositionIsInMapBounds( vector pos )
 {
-	return (fabs( pos.x ) < MAX_MAP_BOUNDS && fabs( pos.y ) < MAX_MAP_BOUNDS && fabs( pos.z ) < MAX_MAP_BOUNDS)
+	return VectorWithinBounds( pos, MAX_MAP_BOUNDS )
 }
 
 bool function Survival_IsPlayerHealing( entity player )
 {
 	return player.GetPlayerNetBool( "isHealing" )
 }
-#endif
+
+bool function PlayerIsMarkedAsCanBeRespawned( entity player )
+{
+	int respawnStatus = player.GetPlayerNetInt( "respawnStatus" )
+	switch ( respawnStatus )
+	{
+		case eRespawnStatus.WAITING_FOR_DELIVERY:
+		case eRespawnStatus.WAITING_FOR_PICKUP:
+		case eRespawnStatus.WAITING_FOR_RESPAWN:
+			return true
+	}
+
+	return false
+}
+
+bool function IsSurvivalMode()
+{
+	return GameRules_GetGameMode() == SURVIVAL
+}
+
+#endif                    
+
+bool function IsSquadDataPersistenceEmpty( entity player )
+{
+	int maxTrackedSquadMembers = PersistenceGetArrayCount( "lastGameSquadStats" )
+	for ( int i = 0 ; i < maxTrackedSquadMembers ; i++ )
+	{
+		int eHandle = player.GetPersistentVarAsInt( "lastGameSquadStats[" + i + "].eHandle" )
+
+		                                            
+		if ( eHandle > 0 )
+			return false
+	}
+	return true
+}
+
+#if SERVER
+                                          
+ 
+                       
+                                                                    
+                                                            
+      
+ 
+#endif          

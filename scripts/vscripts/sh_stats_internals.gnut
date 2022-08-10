@@ -1,84 +1,91 @@
 global function ShStatsInternals_LevelInit
 
-#if CLIENT || UI 
+
+
+#if SERVER || CLIENT || UI
 global function ResolveStatEntry
-global function GetStat_Bool
 global function GetStat_Int
-global function GetStat_Float
+                                      
 global function GetStatEntryByIndex
 global function IsValidStatEntryRef
 global function GetStatEntryByRef
 global function StatEntry_GetIndex
 global function StatEntry_GetRef
 global function StatEntry_GetType
+global function StatEntry_GetBehavior
 global function StatEntry_GetFlags
 global function DoesStatSatisfyValue
 
-global function RegisterAccumulatedStat_Bool
 global function RegisterAccumulatedStat_Int
-global function RegisterAccumulatedStat_Float
 global function RegisterVariableStat_Int
-global function RegisterVariableStat_Bool
 global function RegisterExpensiveCalculatedStat_Int
 global function RegisterCachedCalculatedStat_Int
 global function RegisterStatEnumStruct
+global function HasStatCachingOptimizations
 #endif
 
-#if(false)
+#if SERVER
+                                               
 
+                                        
+                                  
 
+                                   
+                             
 
+                                           
+                                              
 
+                                       
+                                                            
 
-
-
-
-
-
-
-
-
-
-
-
+                                                  
 #endif
 
-#if(false)
-//
+#if SERVER && DEV
+                                                                                                                                                      
+                                                                                                                                                       
 #endif
 
 const bool STATS_DEBUG_PRINT_SPAM = false
+const int UNINITIALIZED = -2                                                                                  
 
+                      
+                      
+                      
+                      
+                      
 
-//
-//
-//
-//
-//
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global enum eStatType
 {
 	INVALID,
-	BOOL,
 	INT,
-	FLOAT,
 }
 global enum eStatBehavior
 {
-	CALCULATED, //
-	ACCUMULATED, //
-	VARIABLE, //
+	CALCULATED,                                                                 
+	ACCUMULATED,                                       
+	VARIABLE,                                          
 }
 global enum eStatFlags
 {
 	STORE_START_OF_PREVIOUS_MATCH = (1 << 0),
 	PERSISTENCE_WRITE_IMMEDIATELY = (1 << 1),
 }
+
+                                                      
+global struct CalcStatCache
+{
+	string statRef
+	int timeStamp
+	int value
+	int when
+}
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global enum eStatGetWhen
 {
 	CURRENT,
@@ -88,64 +95,59 @@ global enum eStatGetWhen
 #endif
 
 
-#if CLIENT || UI 
-global typedef StatChangedCallbackType_Bool void functionref( entity player, bool oldValue, bool newValue )
+#if SERVER || CLIENT || UI
 global typedef StatChangedCallbackType_Int void functionref( entity player, int oldValue, int newValue )
-global typedef StatChangedCallbackType_Float void functionref( entity player, float oldValue, float newValue )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global struct StatEntry
 {
 	int    index
 	int    indexWithinType
 	string persistenceFullKey_Current
+	var    persistenceFullKey_Current_Handle
 	string persistenceFullKey_StartOfPreviousMatch
+	var    persistenceFullKey_StartOfPreviousMatch_Handle
+
 	int    type = eStatType.INVALID
 	int    behavior
 	int    flags = 0
-	bool   shouldCache //
+	bool   shouldCache                             
 
 	array<string> enumKeys
 
-	//
-
-	bool functionref( entity player, array<StatEntry> sourceEntries, int when )      calcFunc_Bool
+	                                                           
 	int functionref( entity player, array<StatEntry> sourceEntries, int when )       calcFunc_Int
-	float functionref( entity player, array<StatEntry> sourceEntries, int when )     calcFunc_Float
-	array<StatEntry>                                                                 calcSourceEntries
-
-	array<StatEntry> dependents
+	array<StatEntry> ornull															calcSourceEntries = null
+	array<StatEntry> ornull															dependents = null
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global struct StatCalcFuncInfo
 {
-	bool functionref( entity player, array<StatEntry> sourceEntries, int when )  calcFunc_Bool
 	int functionref( entity player, array<StatEntry> sourceEntries, int when )   calcFunc_Int
-	float functionref( entity player, array<StatEntry> sourceEntries, int when ) calcFunc_Float
 
-	array<StatEntry> sourceEntries
+	array<StatEntry> ornull															sourceEntries
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global struct StatTemplateEnumKeyResolver
 {
 	bool isFinal
 
-	table<string, StatTemplateEnumKeyResolver> children //
+	table<string, StatTemplateEnumKeyResolver> children                        
 
-	table<string, StatEntry> entries //
+	table<string, StatEntry> entries                       
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global struct StatEnumStruct
 {
 	StatEnumStruct ornull parentEnumStruct
@@ -153,39 +155,41 @@ global struct StatEnumStruct
 	string fieldName
 	string enumName
 
-	array<string> choices //
+	array<string> choices                                                                                              
 
-	#if(DEV)
+	#if DEV
 		string structName
 	#endif
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global struct StatTemplate
 {
+	            
+
 	StatEnumStruct ornull parentEnumStruct
 
-	int  type = eStatType.INVALID //
-	int  behavior //
+	int  type = eStatType.INVALID       
+	int  behavior                                     
 	int  flags = 0
-	bool shouldCache = false //
+	bool shouldCache = false                             
 
 	string fieldName
 
 	int enumKeyCount
 
-	StatTemplateEnumKeyResolver& resolver //
+	StatTemplateEnumKeyResolver& resolver                        
 
-	StatEntry& rootEntry //
+	StatEntry& rootEntry                         
 
 	array<StatEntry> allEntries
 }
 #endif
 
 
-#if ( CLIENT || UI ) && DEV 
+#if (SERVER || CLIENT || UI) && DEV
 struct StatEnumStruct_Children
 {
 	array<StatEnumStruct> childEnumStructs
@@ -195,168 +199,211 @@ struct StatEnumStruct_Children
 
 
 
-//
-//
-//
-//
-//
-struct AdditionalStatsPlayerState
-{
-	#if CLIENT || UI 
-		table<int, bool>  cachedStats_Bool
-		table<int, int>   cachedStats_Int
-		table<int, float> cachedStats_Float
-
-		table<int, array<StatChangedCallbackType_Bool> >  watchCallbacks_Bool
-		table<int, array<StatChangedCallbackType_Int> >   watchCallbacks_Int
-		table<int, array<StatChangedCallbackType_Float> > watchCallbacks_Float
-	#endif
-}
-
+                       
+                       
+                       
+                       
+                       
 struct FileStruct_LifetimeLevel
 {
-	#if CLIENT || UI 
-		#if(DEV)
-			StatEnumStruct_Children                        rootFieldsList //
-			table<StatEnumStruct, StatEnumStruct_Children> sesChildrenMap //
+	#if SERVER || CLIENT || UI
+		#if DEV
+			StatEnumStruct_Children                        rootFieldsList                                 
+			table<StatEnumStruct, StatEnumStruct_Children> sesChildrenMap        
 		#endif
 
-		//
-		array<StatEntry> stats_Bool
 		array<StatEntry> stats_Int
-		array<StatEntry> stats_Float
 
 		array<StatEntry>         allStats
-		table<string, StatEntry> refStatMap
+		table<string, StatEntry> refStatEntryMap
 
-		table<EHI, AdditionalStatsPlayerState> playerStateMap = {}
+		table< entity, array<CalcStatCache> > calculatedStatsCache                          
 	#endif
 
+	#if SERVER && DEV
+		                               
+	#endif
+
+	int calculatedStatsCacheDurationSec = 30
+	bool doOnDemandStats = false
+
+	table< entity, array<StatEntry> > playerDirtyStats
 }
 FileStruct_LifetimeLevel& fileLevel
 
 const string STATS_PERSISTENCE_PREFIX_CURRENT = "stats"
 const string STATS_PERSISTENCE_PREFIX_START_OF_PREVIOUS_MATCH = "stats_sopm"
 
+                           
+                           
+                           
+#if DEV
+void function StatCallStackCheck( bool DEV_isManualDevSet, int up = 1 )
+{
+	                                                                                                 
+	string fileName =  FILE_NAME( up )
+	if ( fileName != "sh_stats_internals.gnut" && fileName != "sh_stats.gnut" && DEV_isManualDevSet == false )
+		Assert( false, "Tried to manipulate a stat from " + fileName + ". Do NOT call Stat manipulation functions directly EXCEPT in a DEV_ helper function." )
+}
+#endif
 
-//
-//
-//
-//
-//
 
-#if CLIENT || UI 
+
+                         
+                         
+                         
+                         
+                         
+
+#if SERVER || CLIENT || UI
 void function ShStatsInternals_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileLevel
 	fileLevel = newFileLevel
 
-	#if(false)
+	#if SERVER
+		       
+			                                                 
+			                                                                         
+			                                                                       
+		      
 
+		                                                          
+	#endif
 
+	#if SERVER || CLIENT
+		Remote_RegisterServerFunction( "ClientCallback_UpdateSOPMStatValue", "string" )
+	#endif
 
+	#if SERVER && DEV
+		                                                                                   
+	#endif
 
-
-
-
-#endif
+	int lobbyMultiplier = IsLobby() ? 10 : 1                                                     
+	fileLevel.calculatedStatsCacheDurationSec = lobbyMultiplier * GetCurrentPlaylistVarInt( "calc_stats_cache_duration_sec", 30 )
+	fileLevel.doOnDemandStats = GetCurrentPlaylistVarBool( "do_on_demand_stats", true )
 }
 #endif
 
 
 
-//
-//
-//
-//
-//
+                          
+                          
+                          
+                          
+                          
 
-#if CLIENT || UI 
-bool function GetStat_Bool( entity player, StatEntry entry, int when = eStatGetWhen.CURRENT )
+array<StatEntry> function GetCalcSourceEntriesFromEntry( StatEntry entry )
 {
-	Assert( entry.type == eStatType.BOOL )
-	#if CLIENT || UI 
-		if ( !(entry.flags & eStatFlags.PERSISTENCE_WRITE_IMMEDIATELY) )
-			Assert( when != eStatGetWhen.CURRENT || IsLobby(), "Cannot get current stats in client or UI VM during a match (they could be out of date)." )
-	#endif
+	array<StatEntry> calcSourceEntries
+	if ( entry.calcSourceEntries == null )
+		return []
+	return expect array<StatEntry>( entry.calcSourceEntries )
+}
 
-	if ( entry.behavior == eStatBehavior.CALCULATED && !entry.shouldCache )
-		return entry.calcFunc_Bool( player, entry.calcSourceEntries, when )
-
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#elseif CLIENT || UI 
-		#if(DEV)
-			//
-			if ( DEV_ShouldIgnorePersistence() )
-				return false
-		#endif
-
-		if ( when == eStatGetWhen.CURRENT || when == eStatGetWhen.START_OF_CURRENT_MATCH )
-		{
-			if ( !(entry.flags & eStatFlags.PERSISTENCE_WRITE_IMMEDIATELY) )
-				Assert( when != eStatGetWhen.CURRENT || IsLobby() )
-			return expect bool(player.GetPersistentVar( entry.persistenceFullKey_Current ))
-		}
-		else if ( when == eStatGetWhen.START_OF_PREVIOUS_MATCH )
-		{
-			Assert( entry.flags & eStatFlags.STORE_START_OF_PREVIOUS_MATCH, "Tried to get with eStatGetWhen.START_OF_PREVIOUS_MATCH on a stat that does not have eStatFlags.STORE_START_OF_PREVIOUS_MATCH set." )
-			return expect bool(player.GetPersistentVar( entry.persistenceFullKey_StartOfPreviousMatch ))
-		}
-		unreachable
-	#endif
+#if SERVER || CLIENT || UI
+bool function HasStatCachingOptimizations()
+{
+	return fileLevel.calculatedStatsCacheDurationSec > 0
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetStat_Int( entity player, StatEntry entry, int when = eStatGetWhen.CURRENT )
 {
 	Assert( entry.type == eStatType.INT )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		if ( !(entry.flags & eStatFlags.PERSISTENCE_WRITE_IMMEDIATELY) )
-			Assert( when != eStatGetWhen.CURRENT || IsLobby(), "Cannot get current stats in client or UI VM during a match (they could be out of date)." )
+			Assert( when != eStatGetWhen.CURRENT || IsLobby(), format( "Cannot get current stats in client or UI VM during a match (they could be out of date): %s", entry.persistenceFullKey_Current ) )
 	#endif
 
-	if ( (when == eStatGetWhen.CURRENT || when == eStatGetWhen.START_OF_CURRENT_MATCH)
-			&& entry.behavior == eStatBehavior.CALCULATED && !entry.shouldCache )
-		return entry.calcFunc_Int( player, entry.calcSourceEntries, when )
+	if ( HasStatCachingOptimizations() )
+	{
+		int unixTime = GetUnixTimestamp()
+		                                                                                                                                                                    
+		                                                                                                                                         
+		                                                                                                                                
 
-	#if(false)
+		                                               
+		                                                                      
+		                                                                                                           
+		                                                                                      
+		   
+		if ( ( when == eStatGetWhen.CURRENT || when == eStatGetWhen.START_OF_CURRENT_MATCH )
+				&& entry.behavior == eStatBehavior.CALCULATED && !entry.shouldCache )
+		{
+			if ( player in fileLevel.calculatedStatsCache )
+			{
+				foreach ( CalcStatCache calcStat in fileLevel.calculatedStatsCache[player] )
+				{
+					if ( calcStat.when == when && calcStat.statRef == entry.persistenceFullKey_Current && unixTime <= calcStat.timeStamp + fileLevel.calculatedStatsCacheDurationSec )
+						return calcStat.value
+					else if ( calcStat.when == when && calcStat.statRef == entry.persistenceFullKey_Current && unixTime > calcStat.timeStamp + fileLevel.calculatedStatsCacheDurationSec )         
+						fileLevel.calculatedStatsCache[player].fastremovebyvalue( calcStat )
+				}
 
+				                                                                                
+				CalcStatCache calcStat
+				calcStat.value = entry.calcFunc_Int( player, GetCalcSourceEntriesFromEntry( entry ), when )
+				calcStat.timeStamp = unixTime
+				calcStat.statRef = entry.persistenceFullKey_Current
+				calcStat.when = when
+				fileLevel.calculatedStatsCache[ player ].append( calcStat )
 
+				return calcStat.value
+			}
+			else
+			{
+				                                                             
+				CalcStatCache calcStat
+				calcStat.value = entry.calcFunc_Int( player, GetCalcSourceEntriesFromEntry( entry ), when )
+				calcStat.timeStamp = unixTime
+				calcStat.statRef = entry.persistenceFullKey_Current
+				calcStat.when = when
+				fileLevel.calculatedStatsCache[ player ] <- [ calcStat ]
 
+				return calcStat.value
+			}
+		}
+	}
+	else                                                  
+	{
+		if ( (when == eStatGetWhen.CURRENT || when == eStatGetWhen.START_OF_CURRENT_MATCH)
+				&& entry.behavior == eStatBehavior.CALCULATED && !entry.shouldCache )
+			return entry.calcFunc_Int( player, GetCalcSourceEntriesFromEntry( entry ), when )
+	}
 
+	#if DEV
+		                                                               
+		if ( DEV_ShouldIgnorePersistence() )
+			return 0
+	#endif
 
+	#if SERVER
 
+		                            
+		                                
+				                                                                     
 
-
-
-
-
-
-
-
-#elseif CLIENT || UI 
-		#if(DEV)
-			//
-			if ( DEV_ShouldIgnorePersistence() )
-				return 0
-		#endif
-
+		                                   
+		 
+			                                                                         
+			                                                     
+		 
+		                                                       
+		 
+			                                                                                
+			                                                            
+		 
+		                                                        
+		 
+			                                                                                                                                                                                                     
+			                                                                                                   
+			                                                                                           
+		 
+		           
+	#elseif CLIENT || UI
 		if ( when == eStatGetWhen.CURRENT || when == eStatGetWhen.START_OF_CURRENT_MATCH )
 		{
 			if ( !(entry.flags & eStatFlags.PERSISTENCE_WRITE_IMMEDIATELY) )
@@ -374,58 +421,7 @@ int function GetStat_Int( entity player, StatEntry entry, int when = eStatGetWhe
 #endif
 
 
-#if CLIENT || UI 
-float function GetStat_Float( entity player, StatEntry entry, int when = eStatGetWhen.CURRENT )
-{
-	Assert( entry.type == eStatType.FLOAT )
-	#if CLIENT || UI 
-		if ( !(entry.flags & eStatFlags.PERSISTENCE_WRITE_IMMEDIATELY) )
-			Assert( when != eStatGetWhen.CURRENT || IsLobby(), "Cannot get current stats in client or UI VM during a match (they could be out of date)." )
-	#endif
-
-	if ( entry.behavior == eStatBehavior.CALCULATED && !entry.shouldCache )
-		return entry.calcFunc_Float( player, entry.calcSourceEntries, when )
-
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#elseif CLIENT || UI 
-		#if(DEV)
-			//
-			if ( DEV_ShouldIgnorePersistence() )
-				return 0
-		#endif
-
-		if ( when == eStatGetWhen.CURRENT || when == eStatGetWhen.START_OF_CURRENT_MATCH )
-		{
-			if ( !(entry.flags & eStatFlags.PERSISTENCE_WRITE_IMMEDIATELY) )
-				Assert( when != eStatGetWhen.CURRENT || IsLobby() )
-			return expect float(player.GetPersistentVar( entry.persistenceFullKey_Current ))
-		}
-		else if ( when == eStatGetWhen.START_OF_PREVIOUS_MATCH )
-		{
-			Assert( entry.flags & eStatFlags.STORE_START_OF_PREVIOUS_MATCH, "Tried to get with eStatGetWhen.START_OF_PREVIOUS_MATCH on a stat that does not have eStatFlags.STORE_START_OF_PREVIOUS_MATCH set." )
-			return expect float(player.GetPersistentVar( entry.persistenceFullKey_StartOfPreviousMatch ))
-		}
-		unreachable
-	#endif
-}
-#endif
-
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatEntry function GetStatEntryByIndex( int index )
 {
 	return fileLevel.allStats[index]
@@ -433,23 +429,23 @@ StatEntry function GetStatEntryByIndex( int index )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function IsValidStatEntryRef( string ref )
 {
-	return (ref in fileLevel.refStatMap)
+	return (ref in fileLevel.refStatEntryMap)
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatEntry function GetStatEntryByRef( string ref )
 {
-	return fileLevel.refStatMap[ref]
+	return fileLevel.refStatEntryMap[ref]
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function StatEntry_GetIndex( StatEntry entry )
 {
 	return entry.index
@@ -457,7 +453,7 @@ int function StatEntry_GetIndex( StatEntry entry )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 string function StatEntry_GetRef( StatEntry entry )
 {
 	return entry.persistenceFullKey_Current
@@ -465,7 +461,7 @@ string function StatEntry_GetRef( StatEntry entry )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function StatEntry_GetType( StatEntry entry )
 {
 	return entry.type
@@ -473,7 +469,15 @@ int function StatEntry_GetType( StatEntry entry )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+int function StatEntry_GetBehavior( StatEntry entry )
+{
+	return entry.behavior
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 int function StatEntry_GetFlags( StatEntry entry )
 {
 	return entry.flags
@@ -481,504 +485,436 @@ int function StatEntry_GetFlags( StatEntry entry )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function DoesStatSatisfyValue( entity player, StatEntry entry, float checkValue, int when = eStatGetWhen.CURRENT )
 {
-	if ( entry.type == eStatType.BOOL )
-	{
-		Assert( checkValue == 0.0 || checkValue == 1.0 )
-		bool value    = GetStat_Bool( player, entry, when )
-		bool wantTrue = (checkValue == 1.0)
-		return (value == wantTrue)
-	}
-	else if ( entry.type == eStatType.INT )
-	{
-		Assert( float(int(checkValue)) == checkValue )
-		int value = GetStat_Int( player, entry, when )
-		return (value >= int(checkValue))
-	}
-	else if ( entry.type == eStatType.FLOAT )
-	{
-		float value = GetStat_Float( player, entry, when )
-		return value >= checkValue
-	}
-	unreachable
+	Assert( float(int(checkValue)) == checkValue )
+	int value = GetStat_Int( player, entry, when )
+	return (value >= int(checkValue))
 }
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                                           
+ 
+	                                                                                                                                                                         
+	                                                                              
+	                                                                     
+		                                                                        
+	    
+		                                                                         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                              
+	                      
+ 
+                                                                                                              
+ 
+	                                                                                                  
+	                                                                                                                                             
+	                                                            
+	                                 
+	                           
+		                                                                     
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                       
+ 
+	                                                  
+	                                                                                                               
+	                                      
+	 
+		                    
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                    
+ 
+	                                
+	 
+		                                                                          
+		                                                                                 
+	 
+	    
+	 
+		                                                              
+		                                                                     
+	 
 
+	       
+		                                                               
+		                                    
+			      
+	      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                         
+	 
+		                                                             
+		 
+			                                                                    
+		 
+	 
+	                                                             
+	 
+		                                              
+		                                          
+	 
+ 
 #endif
 
 
-#if(false)
-
-
-//
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
+#if SERVER
+                                                                           
+ 
+	                    
+	                
+	 
+		                                               
+			                                               
+
+		                                           
+			                                           
+	 
+ 
 #endif
 
 
 
-//
-//
-//
-//
-//
+                       
+                       
+                       
+                       
+                       
 
-#if ( CLIENT || UI ) && DEV 
-string function DEV_GetStatTemplateDebugName( StatTemplate template )
+#if SERVER || CLIENT || UI
+string function GetStatTemplateDebugName( StatTemplate template )
 {
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	return ""
+	string sesPart                 = ""
+	StatEnumStruct ornull ancestor = template.parentEnumStruct
+	while ( ancestor != null )
+	{
+		{
+			expect StatEnumStruct(ancestor)
+			sesPart = format( ".%s[%s]%s", ancestor.fieldName, ancestor.enumName, sesPart )
+		}
+		ancestor = expect StatEnumStruct(ancestor).parentEnumStruct
+	}
+
+	return format( "stats%s.%s", sesPart, template.fieldName )
 }
 #endif
 
 
-#if(false)
-
-
-
-
+#if SERVER && DEV
+                                                                                          
+ 
+	                         
+	                                                                    
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER && DEV
+                                                 
+ 
+	                                   
+	                                           
+	 
+		                                                                                          
+		          
+			                                                                                                                                   
+		      
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER && DEV
+                                                                           
+ 
+	                                        
+
+	                                                             
+		                                                                                    
+ 
+#endif
 
 
+#if SERVER && DEV
+                                                                          
+ 
+	                        
 
+	                                      
+	 
+		                            
+		      
+	 
 
+	                                              
+	                                                  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 #endif
 
 
 
-//
-//
-//
-//
-//
+                   
+                   
+                   
+                   
+                   
 
-#if(false)
+#if SERVER
+                                                                                      
+ 
+	                            
 
+	                      
+	 
+		       
+			                                   
+			     
+		       
+			                                              
+			     
+		       
+			                                                         
+			     
+		       
+			                                                                    
+			     
+	 
 
+	           
+ 
 
+                                                                                   
+ 
+	                                                                           
 
+	                                                                                             
 
+	                                                 
+	 
+		                                   
 
-//
+		                          
 
+		                                                            
 
+		                          
 
+		                                     
+		 
+			                         
+		 
 
+		                               
 
+		                                                             
 
+		                                                     
+	 
+ 
 
+                                                                             
+ 
+	                                                                           
 
+	                                                                                             
 
+	                                                 
+	 
+		                                   
 
+		                          
 
+		                                                            
 
+		                          
+		                                     
+		 
+			                         
+		 
 
+		                               
 
+		                                                             
+		                                               
+	 
+ 
 
+                                                                                                
+ 
+	                               
+	 
+		                                                                         
+		                                            
+			                                                     
+	 
+ 
 
+                                                                                                                         
+ 
+	                                     
+	                                                                                                 
+	                              
 
+	       
+		                                        
+	      
+
+	       
+		                                           
+			                                                                                 
+	      
+
+	                            
+	                                
+		                                                                     
+
+	                                                             
+	                                         
+	                                                         
+
+	                                   
+	                                
+		      
+
+	                             
+		                                                                                                                             
+
+	                                                                     
+		                                                                                                         
+			                                
+
+	                                                                 
+
+       
+	                                     
+      
+	 
+		                                                                                                           
+		 
+			                                                                     
+		 
+		                                     
+		 
+			                                         
+		 
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                                            
+ 
+	                                     
 
+	       
+		                                        
+	      
 
+	       
+		                                                                  
+			                                                                   
+	      
 
+	                                
+		                                                                     
 
+	                                                             
+	                                   
+	                                                        
+		      
 
+	                                                                                                                                                
+		                                                                                                            
+	                                                         
 
-//
+	                             
+		                                                                                                                       
 
+	                                                                     
+		                                                                                                         
+			                                
 
+	                                                                 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+       
+	                                     
+      
+	 
+		                                                                                                           
+		 
+			                                                                     
+		 
+		                                     
+		 
+			                                         
+		 
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                               
+ 
+	                                                                         
 
+	                                
+		                                                                     
 
+	                                                                                                      
+	                                
+	                                                                                        
+	 
+		                                                      
 
+		                
+			                                                                                                                        
+		                                     
+			                                         
 
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		                             
+			                                                                                                            
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                    
+ 
+	                                                                         
+	 
+		                
+		                                                                                        
+		                                                                                                             
+			                                
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                                     
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatEntry function ResolveStatEntry( StatTemplate template, ... )
 {
 	Assert( template.type != eStatType.INVALID, "StatTemplate was not initialized." )
 
 	int keyArgCount = expect int(vargc)
-	Assert( keyArgCount == template.enumKeyCount, "Stat '" + DEV_GetStatTemplateDebugName( template ) + "' requires " + template.enumKeyCount + " enum keys but ResolveStatEntry was called with " + keyArgCount + "." )
+	Assert( keyArgCount == template.enumKeyCount, "Stat '" + GetStatTemplateDebugName( template ) + "' requires " + template.enumKeyCount + " enum keys but ResolveStatEntry was called with " + keyArgCount + "." )
 
 	if ( vargc == 0 )
 		return template.rootEntry
@@ -988,16 +924,64 @@ StatEntry function ResolveStatEntry( StatTemplate template, ... )
 	{
 		Assert( !resolver.isFinal )
 		string key = expect string(vargv[resolveDepth])
+
+                                             
+                                               
+                                                                   
+        
+
 		resolver = resolver.children[key]
 	}
 	Assert( resolver.isFinal )
 	string key = expect string(vargv[keyArgCount - 1])
+
+                                            
+                                              
+                                                                  
+       
+
+	#if SERVER && DEV
+		                                                                     
+		                                 
+		 
+			                                                                                                             
+			                         
+		 
+	#endif
+
 	return resolver.entries[key]
 }
-#endif
+
+                                           
+                                                                                 
+ 
+                                                   
+                                                                        
+                                                                                      
+                                                                                
+                                                                               
+                                                                                   
+                                                                        
+                                                                                 
+                                                            
+    
+                                                                                      
+                                     
+  
+                                                    
+                                                               
+   
+                                                                   
+                                                                              
+   
+  
+           
+ 
+             
+#endif                          
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatEnumStruct function RegisterStatEnumStruct( StatEnumStruct ornull parentSESOrNull, string fieldName, string enumName, array<string> choices )
 {
 	StatEnumStruct ses
@@ -1006,7 +990,7 @@ StatEnumStruct function RegisterStatEnumStruct( StatEnumStruct ornull parentSESO
 	ses.enumName = enumName
 	ses.choices = choices
 
-	#if(DEV)
+	#if DEV
 		if ( parentSESOrNull == null )
 		{
 			fileLevel.rootFieldsList.childEnumStructs.append( ses )
@@ -1028,10 +1012,11 @@ StatEnumStruct function RegisterStatEnumStruct( StatEnumStruct ornull parentSESO
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplate function InternalRegisterStatCommon( StatEnumStruct ornull parentSESOrNull, string fieldName, int type, int behavior, int flags, bool shouldCache )
 {
 	StatTemplate template
+
 	template.fieldName = fieldName
 	template.type = type
 	template.behavior = behavior
@@ -1047,32 +1032,39 @@ StatTemplate function InternalRegisterStatCommon( StatEnumStruct ornull parentSE
 		template.rootEntry.shouldCache = template.shouldCache
 
 		template.rootEntry.persistenceFullKey_Current = STATS_PERSISTENCE_PREFIX_CURRENT + "." + fieldName
+		if ( template.rootEntry.behavior != eStatBehavior.CALCULATED || template.rootEntry.shouldCache )
+		{
+#if DEV
+			                                                               
+			if ( !DEV_ShouldIgnorePersistence() )
+#endif
+			{
+				template.rootEntry.persistenceFullKey_Current_Handle = PersistenceGetVarHandle( template.rootEntry.persistenceFullKey_Current )
+			}
+		}
+
 		if ( (template.flags & eStatFlags.STORE_START_OF_PREVIOUS_MATCH) > 0 )
+		{
 			template.rootEntry.persistenceFullKey_StartOfPreviousMatch = STATS_PERSISTENCE_PREFIX_START_OF_PREVIOUS_MATCH + "." + fieldName
+
+#if DEV
+			                                                               
+			if ( !DEV_ShouldIgnorePersistence() )
+#endif
+			{
+				template.rootEntry.persistenceFullKey_StartOfPreviousMatch_Handle = PersistenceGetVarHandle( template.rootEntry.persistenceFullKey_StartOfPreviousMatch )
+			}
+		}
 
 		template.rootEntry.index = fileLevel.allStats.len()
 		fileLevel.allStats.append( template.rootEntry )
 
-		fileLevel.refStatMap[template.rootEntry.persistenceFullKey_Current] <- template.rootEntry
+		fileLevel.refStatEntryMap[template.rootEntry.persistenceFullKey_Current] <- template.rootEntry
 
-		if ( template.type == eStatType.BOOL )
-		{
-			//
-			template.rootEntry.indexWithinType = fileLevel.stats_Bool.len()
-			fileLevel.stats_Bool.append( template.rootEntry )
-		}
-		else if ( template.type == eStatType.INT )
-		{
-			template.rootEntry.indexWithinType = fileLevel.stats_Int.len()
-			fileLevel.stats_Int.append( template.rootEntry )
-		}
-		else if ( template.type == eStatType.FLOAT )
-		{
-			template.rootEntry.indexWithinType = fileLevel.stats_Float.len()
-			fileLevel.stats_Float.append( template.rootEntry )
-		}
+		template.rootEntry.indexWithinType = fileLevel.stats_Int.len()
+		fileLevel.stats_Int.append( template.rootEntry )
 
-		#if(DEV)
+		#if DEV
 			fileLevel.rootFieldsList.childStatTemplates.append( template )
 		#endif
 
@@ -1082,7 +1074,7 @@ StatTemplate function InternalRegisterStatCommon( StatEnumStruct ornull parentSE
 	{
 		StatEnumStruct parentSES = expect StatEnumStruct(parentSESOrNull)
 
-		#if(DEV)
+		#if DEV
 			StatEnumStruct_Children sesChildren
 			if ( parentSES in fileLevel.sesChildrenMap )
 				sesChildren = fileLevel.sesChildrenMap[parentSES]
@@ -1109,7 +1101,7 @@ StatTemplate function InternalRegisterStatCommon( StatEnumStruct ornull parentSE
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplateEnumKeyResolver function BuildStatTemplateEnumKeyResolversRecursive( StatTemplate template, int depth, array<StatEnumStruct> sesAncestorsReversed, StatTemplate stat, string partialKey, array<string> enumKeys )
 {
 	StatTemplateEnumKeyResolver resolver
@@ -1133,30 +1125,40 @@ StatTemplateEnumKeyResolver function BuildStatTemplateEnumKeyResolversRecursive(
 
 			string entryPersistencePartialKey = partialKey + ancestor.fieldName + "[" + choice + "]" + "." + stat.fieldName
 			entry.persistenceFullKey_Current = STATS_PERSISTENCE_PREFIX_CURRENT + "." + entryPersistencePartialKey
+
+			if ( entry.behavior != eStatBehavior.CALCULATED || entry.shouldCache )
+			{
+#if DEV
+				                                                               
+				if ( !DEV_ShouldIgnorePersistence() )
+#endif
+				{
+					entry.persistenceFullKey_Current_Handle = PersistenceGetVarHandle( entry.persistenceFullKey_Current )
+				}
+			}
+
 			if ( (entry.flags & eStatFlags.STORE_START_OF_PREVIOUS_MATCH) > 0 )
+			{
 				entry.persistenceFullKey_StartOfPreviousMatch = STATS_PERSISTENCE_PREFIX_START_OF_PREVIOUS_MATCH + "." + entryPersistencePartialKey
+
+#if DEV
+				                                                               
+				if ( !DEV_ShouldIgnorePersistence() )
+#endif
+				{
+					entry.persistenceFullKey_StartOfPreviousMatch_Handle = PersistenceGetVarHandle( entry.persistenceFullKey_StartOfPreviousMatch )
+				}
+			}
 			entry.enumKeys = grownEnumKeys
 
 			entry.index = fileLevel.allStats.len()
 			fileLevel.allStats.append( entry )
 
-			fileLevel.refStatMap[entry.persistenceFullKey_Current] <- entry
+			fileLevel.refStatEntryMap[entry.persistenceFullKey_Current] <- entry
 
-			if ( template.type == eStatType.BOOL )
-			{
-				entry.indexWithinType = fileLevel.stats_Bool.len()
-				fileLevel.stats_Bool.append( entry )
-			}
-			else if ( template.type == eStatType.INT )
-			{
-				entry.indexWithinType = fileLevel.stats_Int.len()
-				fileLevel.stats_Int.append( entry )
-			}
-			else if ( template.type == eStatType.FLOAT )
-			{
-				entry.indexWithinType = fileLevel.stats_Float.len()
-				fileLevel.stats_Float.append( entry )
-			}
+			entry.indexWithinType = fileLevel.stats_Int.len()
+			fileLevel.stats_Int.append( entry )
+
 
 			resolver.entries[choice] <- entry
 
@@ -1182,15 +1184,7 @@ StatTemplateEnumKeyResolver function BuildStatTemplateEnumKeyResolversRecursive(
 #endif
 
 
-#if CLIENT || UI 
-StatTemplate function RegisterAccumulatedStat_Bool( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags = 0 )
-{
-	return InternalRegisterStatCommon( enumStructOrNull, fieldName, eStatType.BOOL, eStatBehavior.ACCUMULATED, flags, false )
-}
-#endif
-
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplate function RegisterAccumulatedStat_Int( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags = 0 )
 {
 	return InternalRegisterStatCommon( enumStructOrNull, fieldName, eStatType.INT, eStatBehavior.ACCUMULATED, flags, false )
@@ -1198,47 +1192,40 @@ StatTemplate function RegisterAccumulatedStat_Int( StatEnumStruct ornull enumStr
 #endif
 
 
-#if CLIENT || UI 
-StatTemplate function RegisterAccumulatedStat_Float( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags = 0 )
-{
-	return InternalRegisterStatCommon( enumStructOrNull, fieldName, eStatType.FLOAT, eStatBehavior.ACCUMULATED, flags, false )
-}
-#endif
-
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplate function RegisterVariableStat_Int( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags = 0 )
 {
 	return InternalRegisterStatCommon( enumStructOrNull, fieldName, eStatType.INT, eStatBehavior.VARIABLE, flags, false )
 }
 #endif
 
-#if CLIENT || UI 
-StatTemplate function RegisterVariableStat_Bool( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags = 0 )
-{
-	return InternalRegisterStatCommon( enumStructOrNull, fieldName, eStatType.BOOL, eStatBehavior.VARIABLE, flags, false )
-}
-#endif
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplate function InternalRegisterCalculatedStatCommon( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags, bool shouldCache,
 		StatCalcFuncInfo functionref( StatEntry, array<StatTemplate> ) setupFunc, array<StatTemplate> sourceTemplates )
 {
 	StatTemplate stat = InternalRegisterStatCommon( enumStructOrNull, fieldName, eStatType.INT, eStatBehavior.CALCULATED, flags, shouldCache )
 
-	//
-	//
+	                                                           
+	  	                                                                                                                                       
 
 	foreach( StatEntry entry in stat.allEntries )
 	{
 		StatCalcFuncInfo calcInfo = setupFunc( entry, sourceTemplates )
-		entry.calcFunc_Bool = calcInfo.calcFunc_Bool
 		entry.calcFunc_Int = calcInfo.calcFunc_Int
-		entry.calcFunc_Float = calcInfo.calcFunc_Float
 		entry.calcSourceEntries = calcInfo.sourceEntries
 
-		foreach( StatEntry sourceEntry in calcInfo.sourceEntries )
-			sourceEntry.dependents.append( entry )
+		if ( calcInfo.sourceEntries != null )
+		{
+			array<StatEntry> sourceEntries = expect array<StatEntry>( calcInfo.sourceEntries )
+			foreach( StatEntry sourceEntry in sourceEntries )
+			{
+				if ( sourceEntry.dependents == null )
+					sourceEntry.dependents = []
+				array<StatEntry> dependents = expect array<StatEntry>( sourceEntry.dependents )
+				dependents.append( entry )
+			}
+		}
 	}
 
 	return stat
@@ -1246,7 +1233,7 @@ StatTemplate function InternalRegisterCalculatedStatCommon( StatEnumStruct ornul
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplate function RegisterExpensiveCalculatedStat_Int( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags,
 		StatCalcFuncInfo functionref( StatEntry, array<StatTemplate> ) setupFunc, array<StatTemplate> sourceTemplates )
 {
@@ -1255,7 +1242,7 @@ StatTemplate function RegisterExpensiveCalculatedStat_Int( StatEnumStruct ornull
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 StatTemplate function RegisterCachedCalculatedStat_Int( StatEnumStruct ornull enumStructOrNull, string fieldName, int flags,
 		StatCalcFuncInfo functionref( StatEntry, array<StatTemplate> ) setupFunc, array<StatTemplate> sourceTemplates )
 {
@@ -1264,203 +1251,263 @@ StatTemplate function RegisterCachedCalculatedStat_Int( StatEnumStruct ornull en
 #endif
 
 
-#if(false)
+#if SERVER
 
+                                         
+ 
+	                           
 
+	       
+		                                                               
+		                                    
+			      
+	      
 
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
+	                                                                                                                                             
+	                                
+	 
+		                                           
+		 
+			                                                                   
+			 
+				                                 
+				                                                                                   
+			 
+		 
+	 
+	    
+	 
+		                                                             
+		 
+			                                                                                   
+		 
+	 
+ 
 
 #endif
 
+#if SERVER
+                                                                        
+ 
+	       
+		                                    
+			      
+	      
 
-#if(false)
+	                                                                                
+	                                                        
+	 
+		                                              
+		                                          
+	 
 
+	                                                                      
+	 
+		                                                    
+	 
+ 
+#endif
 
+#if SERVER
+                                                                                                                  
+ 
+	                                 
+	                                                                        
+	 
+		                                                                      
+		 
+			                                                                                                         
+			                                                                      
 
+			                                                                                                                                                           
+		 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		                                                                                                             
+		 
+			                                                                                          
+			                                                                                                                                                       
+		 
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                             
+ 
+	                                                                 
 
+	                                               
+		      
 
+	                                    
+	                                 
+	 
+		                                          
+		                                                                    
+			      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		                                                                   
+		                                                                                                                                      
+		                                  
+			                                                                                                   
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                                                           
+ 
+	                                                                      
+	 
+		                                                                                               
+		                                               
+		                                                                                                                         
+		                                  
+			                                                                                      
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                                                                                     
+	 
+		                                                                                                                   
+		                                                      
+		                                                                                                                                      
+		                                  
+			                                                                                                   
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER && DEV
+                                     
+ 
+	                                           
+
+	                                                         
+	 
+		                                                             
+		                                                     
+			                                           
+	 
+	                                                                                                          
+	                                                                                                                          
+
+	                
+	                                                                                                                 
+	                     
+	                                                                                                                                                                                      
+	                     
+
+	                                      
+	                                                                             
+	                                                                                                 
+	                           
+ 
+#endif
 
 
+#if SERVER && DEV
+                                                                                                                                       
+ 
+	                                       
+	                                                                                
+	 
+		                                                                                               
+			                               
+	 
+
+	                                      
+	                                                                            
+	 
+		                                                         
+			                            
+	 
+
+	                                                          
+		            
+
+	                                              
+	                                              
+	 
+		                                                                                       
+	 
+	                                              
+	 
+		                                                         
+			                                                       
+	 
+	                       
+
+	           
+ 
+#endif
 
 
+#if SERVER && DEV
+                                                                                                                                                               
+ 
+	                              
+	 
+		                                                       
+	 
+	    
+	 
+		                                                                 
+		                                                           
+	 
+
+	                                
+	                                      
+		                                        
+
+	                                       
+	                                                                
+	 
+		                                                                                                 
+			                               
+	 
+
+	                                      
+	                                                            
+	 
+		                                                         
+			                            
+	 
+
+	                                                          
+		            
+
+	                                         
+	                                                   
+	 
+		                                                                                                      
+	 
+	                                              
+	 
+		                                                       
+	 
+	                       
+
+	           
+ 
+#endif
 
 
+#if SERVER && DEV
+                                                                                      
+ 
+	                                                                     
+	 
+		                                          
+		                                                                    
+			      
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                                             
+	                                          
+ 
 #endif
 
 

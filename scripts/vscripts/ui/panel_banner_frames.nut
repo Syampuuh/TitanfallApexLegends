@@ -22,10 +22,10 @@ void function InitCardFramesPanel( var panel )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK_LEGEND", "#X_BUTTON_UNLOCK_LEGEND", null, CustomizeMenus_IsFocusedItemParentItemLocked )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_EQUIP", "#X_BUTTON_EQUIP", null, CustomizeMenus_IsFocusedItemEquippable )
 	AddPanelFooterOption( panel, LEFT, BUTTON_X, false, "#X_BUTTON_UNLOCK", "#X_BUTTON_UNLOCK", null, CustomizeMenus_IsFocusedItemLocked )
-	//
-	//
-	//
-	//
+	                                                                                                                                           
+	                                                                                                                     
+	                                                                                                                       
+	                                                                                                                        
 }
 
 
@@ -49,7 +49,7 @@ void function CardFramesPanel_Update( var panel )
 {
 	var scrollPanel = Hud_GetChild( file.listPanel, "ScrollPanel" )
 
-	//
+	          
 	foreach ( int flavIdx, ItemFlavor unused in file.cardFrameList )
 	{
 		var button = Hud_GetChild( scrollPanel, "GridButton" + flavIdx )
@@ -59,7 +59,7 @@ void function CardFramesPanel_Update( var panel )
 
 	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.FRAME, -1, null )
 
-	//
+	                                  
 	if ( IsPanelActive( file.panel ) )
 	{
 		LoadoutEntry entry = Loadout_GladiatorCardFrame( GetTopLevelCustomizeContext() )
@@ -70,7 +70,7 @@ void function CardFramesPanel_Update( var panel )
 		foreach ( int flavIdx, ItemFlavor flav in file.cardFrameList )
 		{
 			var button = Hud_GetChild( scrollPanel, "GridButton" + flavIdx )
-			CustomizeButton_UpdateAndMarkForUpdating( button, entry, flav, PreviewCardFrame, CanEquipCanBuyCharacterItemCheck )
+			CustomizeButton_UpdateAndMarkForUpdating( button, [entry], flav, PreviewCardFrame, CanEquipCanBuyCharacterItemCheck )
 		}
 	}
 }
@@ -78,7 +78,7 @@ void function CardFramesPanel_Update( var panel )
 
 void function CardFramesPanel_OnFocusChanged( var panel, var oldFocus, var newFocus )
 {
-	if ( !IsValid( panel ) ) //
+	if ( !IsValid( panel ) )                  
 		return
 	if ( GetParentMenu( panel ) != GetActiveMenu() )
 		return
@@ -105,7 +105,12 @@ bool function ShouldDisplayFrame( ItemFlavor frame )
 {
 	if ( GladiatorCardFrame_ShouldHideIfLocked( frame ) )
 	{
-		if ( !IsItemFlavorUnlockedForLoadoutSlot( LocalClientEHI(), Loadout_CharacterClass(), frame ) )
+		ItemFlavor ornull character = GladiatorCardFrame_GetCharacterFlavor( frame )
+		if ( character == null )
+			character = LoadoutSlot_GetItemFlavor( LocalClientEHI(), Loadout_Character() )
+		
+		LoadoutEntry entry = Loadout_GladiatorCardFrame( expect ItemFlavor( character ) )
+		if ( !IsItemFlavorUnlockedForLoadoutSlot( LocalClientEHI(), entry, frame ) )
 			return false
 	}
 

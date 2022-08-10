@@ -1,9 +1,15 @@
 
 global function MpWeaponSniper_Init
 
-#if(CLIENT)
+global const string KRABER_WEAPON_NAME = "mp_weapon_sniper"
+
+#if SERVER
+                                                
+#endif         
+
+#if CLIENT
 global function OnClientAnimEvent_weapon_sniper
-#endif //
+#endif              
 
 void function MpWeaponSniper_Init()
 {
@@ -16,7 +22,19 @@ void function SniperPrecache()
 	PrecacheParticleSystem( $"wpn_mflash_snp_hmn_smoke_side" )
 }
 
-#if(CLIENT)
+bool function MpWeaponSniper_IsValidModCommand( entity player, entity weapon, string mod, bool isAdd )
+{
+	if ( DoesModExist( weapon, "optic_toggle" ) )
+	{
+		string opticToggleMod = expect string( weapon.GetWeaponInfoFileKeyField( "script_optic_toggle_name" ) )
+		if ( mod == opticToggleMod )
+			return true
+	}
+
+	return false
+}
+
+#if CLIENT
 void function OnClientAnimEvent_weapon_sniper( entity weapon, string name )
 {
 	GlobalClientEventHandler( weapon, name )

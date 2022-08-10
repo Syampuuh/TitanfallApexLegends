@@ -18,52 +18,65 @@ string dev_infoPanelTitleString = ""
 string dev_infoPanelTextString = ""
 
 global const int RUMBLE_FLAGS_NONE 				= 0x0000
-global const int RUMBLE_FLAG_STOP				= 0x0001 //
-global const int RUMBLE_FLAG_LOOP				= 0x0002 //
-global const int RUMBLE_FLAG_RESTART			= 0x0004 //
-global const int RUMBLE_FLAG_UPDATE_SCALE		= 0x0008 //
-global const int RUMBLE_FLAG_ONLYONE			= 0x0010 //
-global const int RUMBLE_FLAG_RANDOM_AMPLITUDE	= 0x0020 //
-global const int RUMBLE_FLAG_INITIAL_SCALE		= 0x0040 //
+global const int RUMBLE_FLAG_STOP				= 0x0001                                                                    
+global const int RUMBLE_FLAG_LOOP				= 0x0002                          
+global const int RUMBLE_FLAG_RESTART			= 0x0004                                                  
+global const int RUMBLE_FLAG_UPDATE_SCALE		= 0x0008                                                                    
+global const int RUMBLE_FLAG_ONLYONE			= 0x0010                                                    
+global const int RUMBLE_FLAG_RANDOM_AMPLITUDE	= 0x0020                                                                 
+global const int RUMBLE_FLAG_INITIAL_SCALE		= 0x0040                                                            
 
-global struct RUIWorldCoordinates //
+global struct RUIWorldCoordinates                                                                                     
 {
 	vector org
 	vector right
 	vector down
 }
 
+global struct ScreenSpaceData
+{
+	int   deltaCenterX
+	int   deltaCenterY
+	float degsFromCenter
+}
+
 struct
 {
 	table<int,array<var> > textPanels
 	int showButtonHintsInt = 1
+
+	table< entity, int > playerHide3pWeaponCount
 } file
 
-/*
+#if DEV
+const bool SCREEN_SPACE_DATA_DEBUG = false
+#endif
 
+                                                    
+                                            
 
+                                
+ 
+	                  
+	               
+	                   
+	                    
+	                    
 
+	            
+	              
+ 
 
+                    
+ 
+	                            
+	                                   
+	                        
 
+	                     
+ 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+                                                    
 
 array function StringToColorArray( string colorString, string delimiter = " " )
 {
@@ -122,7 +135,7 @@ string function ReloadScripts()
 
 	ReloadingScriptsBegin()
 
-	//
+	                             
 
 	ReloadScriptCallbacks()
 
@@ -135,8 +148,17 @@ string function ReloadScripts()
 
 void function AddLocalPlayerTookDamageCallback( void functionref( float, vector, int, int, entity ) callbackFunc )
 {
-	Assert( !( clGlobal.onLocalPlayerTookDamageCallback.contains( callbackFunc ) ) )
+	int index = clGlobal.onLocalPlayerTookDamageCallback.find( callbackFunc )
+	Assert( index == -1, "Requested DamageCallback " + string( callbackFunc ) + " to be added already exists at index " + index + "!" )
 	clGlobal.onLocalPlayerTookDamageCallback.append( callbackFunc )
+}
+
+void function RemoveLocalPlayerTookDamageCallback( void functionref( float, vector, int, int, entity ) callbackFunc )
+{
+	int index = clGlobal.onLocalPlayerTookDamageCallback.find( callbackFunc )
+
+	Assert( index != -1, "Requested DamageCallback " + string( callbackFunc ) + " to be removed not found! " )
+	clGlobal.onLocalPlayerTookDamageCallback.fastremove( index )
 }
 
 void function AddLocalPlayerTookDamageTypeCallback( int damageSourceId, void functionref( float, vector, int, int, entity ) callbackFunc )
@@ -148,7 +170,7 @@ void function AddLocalPlayerTookDamageTypeCallback( int damageSourceId, void fun
 	clGlobal.onLocalPlayerTookDamageTypeCallback[ damageSourceId ].append( callbackFunc )
 }
 
-void function AddLocalPlayerDidDamageCallback( void functionref( entity, entity, vector, int ) callbackFunc )
+void function AddLocalPlayerDidDamageCallback( void functionref( entity, entity, vector, int, float ) callbackFunc )
 {
 	Assert( !( clGlobal.onLocalPlayerDidDamageCallback.contains( callbackFunc ) ) )
 	clGlobal.onLocalPlayerDidDamageCallback.append( callbackFunc )
@@ -159,7 +181,7 @@ void function AddCreateCallback( string className, void functionref( entity ) ca
 	if ( !( className in clGlobal.onCreateCallbacks ) )
 		clGlobal.onCreateCallbacks[ className ] <- []
 
-#if(DEV)
+#if DEV
 	foreach ( func in clGlobal.onCreateCallbacks[ className ] )
 	{
 		Assert( func != callbackFunc )
@@ -174,7 +196,7 @@ void function AddTargetNameCreateCallback( string targetName, void functionref( 
 	if ( !( targetName in clGlobal.onTargetNameCreateCallbacks ) )
 		clGlobal.onTargetNameCreateCallbacks[ targetName ] <- []
 
-#if(DEV)
+#if DEV
 	foreach ( func in clGlobal.onTargetNameCreateCallbacks[ targetName ] )
 	{
 		Assert( func != callbackFunc )
@@ -190,7 +212,13 @@ void function AddCallback_MinimapEntSpawned( void functionref( entity ) callback
 	clGlobal.onMinimapEntSpawnedCallbacks.append( callbackFunc )
 }
 
-void function AddCallback_MinimapEntShoudCreateCheck( bool functionref( entity ) callbackFunc )
+void function AddCallback_MinimapEntShouldCreateCheck_Scriptname( string scriptname, bool functionref( entity ) callbackFunc )
+{
+	Assert( !( scriptname in clGlobal.onMinimapEntShouldCreateCallbacks_scriptname ), "Already added " + string( callbackFunc ) + " with AddCallback_MinimapEntShouldCreateCheck_Scriptname" )
+	clGlobal.onMinimapEntShouldCreateCallbacks_scriptname[scriptname] <- callbackFunc
+}
+
+void function AddCallback_MinimapEntShouldCreateCheck( bool functionref( entity ) callbackFunc )
 {
 	Assert( !clGlobal.onMinimapEntShouldCreateCallbacks.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddCallback_MinimapEntShoudCreateCheck" )
 	clGlobal.onMinimapEntShouldCreateCallbacks.append( callbackFunc )
@@ -268,10 +296,40 @@ void function AddThirdPersonSpectateEndedCallback( void functionref( entity spec
 	clGlobal.thirdPersonSpectateEndCallbacks.append( callbackFunc )
 }
 
+void function AddFreeCamSpectateStartedCallback( void functionref( entity spectatingPlayer ) callbackFunc )
+{
+	Assert( !clGlobal.freeCamSpectateStartCallbacks.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddFreeCamSpectateStartedCallback" )
+	clGlobal.freeCamSpectateStartCallbacks.append( callbackFunc )
+}
+
+void function AddFreeCamSpectateEndedCallback( void functionref( entity spectatingPlayer ) callbackFunc )
+{
+	Assert( !clGlobal.freeCamSpectateEndCallbacks.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddFreeCamSpectateEndedCallback" )
+	clGlobal.freeCamSpectateEndCallbacks.append( callbackFunc )
+}
+
 void function AddOnSpectatorTargetChangedCallback( void functionref( entity spectatingPlayer, entity prevSpectatorTarget, entity newSpectatorTarget ) callbackFunc )
 {
 	Assert( !clGlobal.onSpectatorTargetChangedCallbacks.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddOnSpectatorTargetChangedCallback" )
 	clGlobal.onSpectatorTargetChangedCallbacks.append( callbackFunc )
+}
+
+void function AddOnSpectatorTagModeChangedCallback( void functionref( entity spectatingPlayer, int newMode ) callbackFunc )
+{
+	Assert( !clGlobal.onSpectatorPlayerTagModeChangedCallbacks.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddOnSpectatorTagModeChangedCallback" )
+	clGlobal.onSpectatorPlayerTagModeChangedCallbacks.append( callbackFunc )
+}
+
+void function AddOnSpectatorVisibleEnemiesChanged( void functionref( bool enemiesVisible ) callbackFunc )
+{
+	Assert( !clGlobal.onSpectatorMinimapEnemiesVisibleChangedCallbacks.contains(callbackFunc), "Already added " + string( callbackFunc ) + " with AddOnSpectatorVisibleEnemiesChanged" )
+	clGlobal.onSpectatorMinimapEnemiesVisibleChangedCallbacks.append( callbackFunc )
+}
+
+void function AddOnSpectatorUiStateChanged( void functionref( int newState ) callbackFunc )
+{
+	Assert( !clGlobal.onSpectatorUiStateChangedCallbacks.contains(callbackFunc), "Already added " + string( callbackFunc ) + " with AddOnSpectatorUiStateChanged" )
+	clGlobal.onSpectatorUiStateChangedCallbacks.append( callbackFunc )
 }
 
 void function AddCallback_OnSelectedWeaponChanged( void functionref( entity ) callbackFunc )
@@ -320,7 +378,7 @@ void function AddOnDeathCallback( string className, void functionref( entity ) c
 
 	clGlobal.onDeathCallbacks[ className ].append( callbackFunc )
 
-	//
+	                                                              
 	if ( className in clGlobal.onCreateCallbacks )
 	{
 		foreach ( func in clGlobal.onCreateCallbacks[ className ] )
@@ -339,7 +397,7 @@ void function AddOnDeathOrDestroyCallback( string className, void functionref( e
 
 	clGlobal.onDeathOrDestroyCallbacks[ className ].append( callbackFunc )
 
-	//
+	                                                              
 	if ( className in clGlobal.onCreateCallbacks )
 	{
 		foreach ( func in clGlobal.onCreateCallbacks[ className ] )
@@ -356,14 +414,14 @@ void function __OnDeathCallbackEnable( entity ent )
 	ent.DoDeathCallback( true )
 }
 
-void function AddCinematicEventFlagChangedCallback( int flag, void functionref( entity ) callbackFunc ) //
+void function AddCinematicEventFlagChangedCallback( int flag, void functionref( entity ) callbackFunc )                                                                                                     
 {
 	if ( !( flag in clGlobal.onCinematicEventFlagChangedCallback ) )
 		clGlobal.onCinematicEventFlagChangedCallback[ flag ] <- []
 
 	Assert( !clGlobal.onCinematicEventFlagChangedCallback[ flag ].contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddCinematicEventFlagChangedCallback" )
 
-	//
+	                                                                                   
 
 	clGlobal.onCinematicEventFlagChangedCallback[ flag ].append( callbackFunc )
 }
@@ -374,7 +432,7 @@ void function PrintAspectRatioInfo( float desiredWidth, float width, float heigh
 	printt( "Width/Height:", desiredWidth, int( ( desiredWidth * aspectRatio ) + 0.5 ) )
 }
 
-//
+                                                                    
 array<entity> function GetClientEntArray( string classname, string nameMask )
 {
 	array<entity> ents = GetClientEntArrayBySignifier( classname )
@@ -389,9 +447,9 @@ array<entity> function GetClientEntArray( string classname, string nameMask )
 	return returns
 }
 
-//
-//
-//
+                                                             
+                                                                                     
+                                                              
 entity function CreatePropDynamic( asset model, vector origin = <0,0,0>, vector angles = <0,0,0> )
 {
 	entity prop_dynamic = CreateClientSidePropDynamic( origin, angles, model )
@@ -399,9 +457,9 @@ entity function CreatePropDynamic( asset model, vector origin = <0,0,0>, vector 
 	return prop_dynamic
 }
 
-//
-//
-//
+                                                             
+                                          
+                                                              
 entity function CreateScriptRef( vector origin = <0,0,0>, vector angles = <0,0,0> )
 {
 	entity ent = CreatePropDynamic( $"mdl/dev/editor_ref.rmdl", origin, angles )
@@ -413,7 +471,7 @@ entity function CreateScriptRef( vector origin = <0,0,0>, vector angles = <0,0,0
 string function GetComputerName( entity player )
 {
 	string name = player.GetPlayerName()
-	array<string> msg = split( name, " " )
+	array<string> msg = split( name, WHITESPACE_CHARACTERS )
 	if ( msg.len() < 2 )
 		return ""
 
@@ -434,7 +492,7 @@ void function AddLocalPlayerFunc( void functionref(entity player) func )
 	clGlobal.addLocalPlayerFuncs.append( func )
 }
 
-//
+                                     
 void function CLWarpoutEffect( entity dropship )
 {
 	if ( !IsValid( dropship ) )
@@ -449,14 +507,14 @@ void function __DelayDropshipDelete( entity dropship )
 {
 	dropship.EndSignal( "OnDeath" )
 
-	wait 0.1 //
+	wait 0.1                                                    
 
 	dropship.Destroy()
 }
 
 void function CLWarpinEffect( asset model, string animation, vector origin, vector angles, string sfx = "" )
 {
-	//
+	                                                 
 	Point start = __GetWarpinPosition( model, animation, origin, angles )
 
 	__WarpInEffectShared( start.origin, start.angles, sfx )
@@ -487,7 +545,7 @@ void function CoreActivatedVO( entity player )
 		return
 
 	expect string( conversationName )
-	//
+	                                                     
 }
 
 void function MonitorFlickerAndChange( entity screen, asset modelname )
@@ -496,7 +554,7 @@ void function MonitorFlickerAndChange( entity screen, asset modelname )
 
 	screen.SetModel( modelname )
 	bool state = false
-	int flickers = RandomIntRange( 2, 6 ) * 2 + 1//
+	int flickers = RandomIntRange( 2, 6 ) * 2 + 1                       
 
 	for ( int i = 0; i < flickers; i++ )
 	{
@@ -564,49 +622,49 @@ int function PlayFXOnTag( entity ent, int playFxID, int tagID )
 	return fxID
 }
 
-/*
+                                                                   
+ 
+	                             
 
+	                                     
+		      
 
+	                                                 
+	                                                   
+	                                                   
+	                                                    
 
+	                                                                          
 
+	                                                                                                            
+	                                                                                             
 
+	                                                                       
+	 
+		                                     
+			           
+		    
+			           
+	 
 
+	                                                                                                       
+	 
+		                                                                           
+	 	                                                          
+ 		                                                           
+	 
+	    
+	 
+		                                                                
+	 	                                                               
+ 		                                                                
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+	                       
+		                                                   
+	    
+		                                                   
+   
 
 void function ReCalculatePetTurretNumbers()
 {
@@ -624,6 +682,33 @@ void function ReCalculatePetTurretNumbers()
 	}
 
 	level.petSentryTurrets = petTurrets
+}
+
+void function MMR_RemotePrintTeams()
+{
+	Remote_ServerCallFunction( "ClientCallback_Dev_PrintTeamsMMR" )
+}
+
+
+void function Dev_ClientTestToto(int toto,string tata)
+{
+	entity player = GetLocalClientPlayer()
+	Remote_ServerCallFunction("ClientCallback_DevToto", toto, tata)
+}
+
+void function ServerCallback_DevToto(int toto, string tata)
+{
+	Assert(tata.len() != 0)                                          
+	printt(" ServerCallback_DevToto ", toto, tata)
+}
+
+void function ServerCallback_DevEcho(int toto, string tata, bool bIsEcho, entity ent)
+{
+	Assert(tata.len() != 0)                                          
+	printt(" ServerCallback_DevEcho ", toto, tata, bIsEcho, ent)
+
+	if( bIsEcho )
+		Remote_ServerCallFunction( "ClientCallback_DevEcho", toto, tata, false, ent )
 }
 
 void function Dev_BuildClientMessage( Type, ... )
@@ -658,30 +743,27 @@ void function ClientCodeCallback_OnDevnetBugScreenshot()
 {
 	printt( "(devnet screenshot client script callback)" )
 	ShGladiatorCards_OnDevnetBugScreenshot()
-
-	entity player = GetLocalClientPlayer()
-	player.ClientCommand( "OnDevnetBugScreenshot" )
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+                                                          
+   
+  	                                   
+  	                                               
+  	                                                                                                       
+  
+  	                    
+  	                                                               
+  	                                                                
+  
+  	                  
+   
 
 float function GetNextRespawnTime( entity player )
 {
-	return expect float( player.nv.nextRespawnTime - 0.0 ) //
+	return player.GetNonRewindRespawnTime() 
 }
 
-#if(DEV)
+#if DEV
 void function TwoPinTest()
 {
 	entity player = gp()[0]
@@ -695,11 +777,18 @@ AttackerDisplayNameStruct function GetAttackerDisplayNamesFromClassname( entity 
 
 	if ( ent == GetLocalClientPlayer() )
 	{
-		names.attackerName = ent.GetPlayerName()
+		names.attackerName = ent.GetPlayerNameWithClanTag()
 	}
 	else if ( ent.IsPlayer() )
 	{
-		names.attackerName = isAttacker ? GetKillerName( ToEHI( ent ) ) : GetPlayerName( ToEHI( ent ) )
+		string clubTag = ""
+
+		                            
+		                      
+		  	                             
+
+		string attackerName = isAttacker ? GetKillerNameFromEHI( ToEHI( ent ) ) : GetPlayerNameFromEHI( ToEHI( ent ) )
+		names.attackerName = clubTag + attackerName
 	}
 	else if ( ent instanceof C_AI_BaseNPC )
 	{
@@ -708,12 +797,12 @@ AttackerDisplayNameStruct function GetAttackerDisplayNamesFromClassname( entity 
 		entity bossPlayer = ent.GetBossPlayer()
 		if ( IsValid( bossPlayer ) )
 		{
-			bossPlayerName = isAttacker ? GetKillerName( ToEHI( bossPlayer ) ) : GetPlayerName( ToEHI( bossPlayer ) )
+			bossPlayerName = isAttacker ? GetKillerNameFromEHI( ToEHI( bossPlayer ) ) : GetPlayerNameFromEHI( ToEHI( bossPlayer ) )
 		}
 
 		if ( bossPlayerName != "" )
 		{
-			//
+			                                                                                                        
 			if ( IsTurret( ent ) )
 			{
 				names.attackerName = bossPlayerName
@@ -772,7 +861,7 @@ AttackerDisplayNameStruct function GetAttackerDisplayNamesFromClassname( entity 
 				printt( "    ent title:", title )
 				printt( "    ent bossPlayerName:", bossPlayerName )
 				printt( "-----------------------------------------------" )
-				//
+				                                                       
 			}
 		}
 
@@ -789,12 +878,12 @@ AttackerDisplayNameStruct function GetAttackerDisplayNamesFromClassname( entity 
 
 string function GetAttackerDisplayNamesDamageSourceId( int damageSourceId )
 {
-	/*
-
-
-
-
-*/
+	  
+		                                                                 
+		                                                                                        
+		                                                                                        
+		                                                                                      
+	  
 
 	string killerName = ""
 	switch ( damageSourceId )
@@ -813,16 +902,38 @@ bool function IsSpectatingThirdPerson()
 	return IsSpectating() && clGlobal.observerMode == OBS_MODE_CHASE
 }
 
+bool function IsSpectatingInEyeSimple()
+{
+	return IsSpectating() && clGlobal.observerMode == OBS_MODE_IN_EYE_SIMPLE
+}
+
+bool function IsSpectatingStaticLocked()
+{
+	return IsSpectating() && clGlobal.observerMode == OBS_MODE_STATIC_LOCKED
+}
+
 bool function IsSpectating()
 {
 	return clGlobal.isSpectating
 }
 
-bool function IsDemoSpectator( entity player )
+bool function IsLocalPlayerOnTeamSpectator()
 {
+	return GetLocalClientPlayer().GetTeam() == TEAM_SPECTATOR
+}
+
+bool function IsSpectator( entity player )
+{
+	if ( !IsValid( player ) )
+		return false
+
 	return player.GetTeam() == TEAM_SPECTATOR
 }
 
+bool function IsSpectatorSpectatingPlayer( entity player )
+{
+	return IsSpectator( GetLocalClientPlayer() ) && GetLocalViewPlayer() == player
+}
 
 void function RuiSetResolutionToScreenSize( var rui )
 {
@@ -840,47 +951,47 @@ void function AddClientCallback_OnResolutionChanged( void functionref() callback
 
 void function ServerCallback_UpdateHeroStats()
 {
-	//
-	//
+	                                               
+	                                 
 
-	//
-	//
-	/*
+	                                                                               
+	                                                                             
+	  
+	                                                                  
+	                                           
+	                                               
+	                                 
+	                                                                     
+	                                                      
+	                                               
+	                                                                         
+	                                         
+	                                                                                             
+	                                                   
+	                                                                      
+	                                              
 
+	                
+		                                         
+	      
+	  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-	//
+	                                               
 }
 
 var function CreateRUITopology_Worldspace( vector org, vector ang, float width, float height )
 {
-	//
+	                                                              
 	org += ( (AnglesToRight( ang )*-1) * (width*0.5) )
 	org += ( AnglesToUp( ang ) * (height*0.5) )
 
-	//
+	                                                                               
 	vector right = ( AnglesToRight( ang ) * width )
 	vector down = ( (AnglesToUp( ang )*-1) * height )
 
-	//
-	//
-	//
+	                                    
+	                                            
+	                                           
 
 	var topo = RuiTopology_CreatePlane( org, right, down, true )
 	return topo
@@ -925,7 +1036,7 @@ void function Dev_DestroyTextInfoPanelWithID( int panelID )
 
 void function __Dev_CreateTextInfoPanel( float orgX, float orgY, float orgZ, float angX, float angY, float angZ, bool showPin, float textScale, int panelID = -1 )
 {
-	//
+	                                      
 	vector origin = <orgX,orgY,orgZ>
 	vector angles = <angX,angY,angZ>
 
@@ -933,9 +1044,9 @@ void function __Dev_CreateTextInfoPanel( float orgX, float orgY, float orgZ, flo
 	float height = 360 * textScale
 
 	if ( showPin )
-		DebugDrawSphere( origin, 4.0, 255, 255, 0, false, 99999.0, 3 )
+		DebugDrawSphere( origin, 4.0, COLOR_YELLOW, false, 99999.0, 3 )
 
-	origin += (AnglesToUp( angles )*-1) * (height*0.5)  //
+	origin += (AnglesToUp( angles )*-1) * (height*0.5)                                                                             
 	var topo = CreateRUITopology_Worldspace( origin, angles, width, height )
 
 	var rui = RuiCreate( $"ui/info_debug_text.rpak", topo, RUI_DRAW_WORLD, 0 )
@@ -963,7 +1074,7 @@ void function _Dev_UpdateTextInfoPanelVisibility( var rui, vector origin, int pa
 	if ( panelID != -1 )
 		EndSignal( file.textPanels[ panelID ], "OnDestroy" )
 
-	//
+	                                                   
 	while ( true )
 	{
 		WaitFrame()
@@ -1044,7 +1155,7 @@ bool function ShouldShowWeakpoints( entity ent )
 	if ( !WeaponCanCrit( player.GetActiveWeapon( eActiveInventorySlot.mainHand ) ) )
 		return false
 
-	//
+	  
 	{
 		vector eyePos = player.EyePosition()
 		eyePos.z = 0
@@ -1063,7 +1174,7 @@ bool function ShouldShowWeakpoints( entity ent )
 			return false
 	}
 
-	#if(DEV)
+	#if DEV
 		if ( Dev_CommandLineHasParm( "-noweakpoints" ) )
 			return false
 	#endif
@@ -1071,7 +1182,7 @@ bool function ShouldShowWeakpoints( entity ent )
 	return true
 }
 
-/**/
+                           
 
 var function AddOverheadIcon( entity prop, asset icon, bool pinToEdge = true, asset ruiFile = $"ui/overhead_icon_generic.rpak" )
 {
@@ -1102,7 +1213,7 @@ void function AddOverheadIconThread( entity prop, var rui )
 		}
 	)
 
-	//
+	                                               
 	if ( prop.IsNPC() )
 	{
 		while ( 1 )
@@ -1171,7 +1282,7 @@ var function CreateFullscreenPostFXRui( asset ruiAsset, int sortKey = 0 )
 
 var function CreateTransientFullscreenRui( asset ruiAsset, int sortKey = 0 )
 {
-	//
+	                                                                                 
 	var rui = RuiCreate( ruiAsset, clGlobal.topoFullScreen, RUI_DRAW_POSTEFFECTS, sortKey )
 	InitHUDRui( rui, RUI_TRANSIENT )
 	return rui
@@ -1241,11 +1352,11 @@ var function CreateFixedTitanCockpitRui( asset ruiAsset, int sortKey = 0 )
 
 var function CreateOrientedTopology( vector org, vector ang, float width, float height )
 {
-	//
+	                                                              
 	org += ( (AnglesToRight( ang )*-1) * (width*0.5) )
 	org += ( AnglesToUp( ang ) * (height*0.5) )
 
-	//
+	                                                                               
 	vector right = ( AnglesToRight( ang ) * width )
 	vector down = ( (AnglesToUp( ang )*-1) * height )
 
@@ -1255,11 +1366,11 @@ var function CreateOrientedTopology( vector org, vector ang, float width, float 
 
 void function UpdateOrientedTopologyPos( var topo, vector org, vector ang, float width, float height )
 {
-	//
+	                                                              
 	org += ( (AnglesToRight( ang )*-1) * (width*0.5) )
 	org += ( AnglesToUp( ang ) * (height*0.5) )
 
-	//
+	                                                                               
 	vector right = ( AnglesToRight( ang ) * width )
 	vector down = ( (AnglesToUp( ang )*-1) * height )
 
@@ -1268,11 +1379,11 @@ void function UpdateOrientedTopologyPos( var topo, vector org, vector ang, float
 
 vector function GetCockpitTopoOffsetVector( UISize screenSize )
 {
-	//
-	//
-	//
+	                                                                       
+	                                                                   
+	                                                                                                                                                    
 
-	//
+	                     
 	return <53.6, 0, 0>
 }
 
@@ -1289,12 +1400,30 @@ void function AddCallback_OnStaticPropRUICreated( void functionref( StaticPropRu
 	clGlobal.onStaticPropRUICreatedCallbacks.append( callbackFunc )
 }
 
-#if(DEV)
+#if DEV
 table<int, StaticPropRui> DEV_magicIdStaticPropRuiMap
 bool DEV_staticPropRuiVisibilityDebugEnabled = false
 void function DEV_ToggleStaticPropRuiVisibilityDebug()
 {
 	DEV_staticPropRuiVisibilityDebugEnabled = !DEV_staticPropRuiVisibilityDebugEnabled
+}
+#endif
+
+#if DEV
+void function DevTestForEachLoopDelete()
+{
+	table<int, int> toto
+	toto[1] <- 1
+	toto[2] <- 1
+
+	array<int> tata
+	tata.append(1)
+	tata.append(2)
+
+	foreach ( a in tata )
+	{
+		delete toto[a]
+	}
 }
 #endif
 
@@ -1311,15 +1440,15 @@ void function ClientCodeCallback_OnEnumStaticPropRui( StaticPropRui propRui )
 	}
 	if ( shouldCreateDefaultStaticRui )
 	{
-		//
-		//
+		                                                                                                                      
+		                                                                                 
 
 		var rui = RuiCreateOnStaticProp( propRui )
 		foreach ( callbackFunc in clGlobal.onStaticPropRUICreatedCallbacks )
 			callbackFunc( propRui, rui )
 	}
 
-	#if(DEV)
+	#if DEV
 		DEV_magicIdStaticPropRuiMap[propRui.magicId] <- propRui
 	#endif
 }
@@ -1331,7 +1460,7 @@ void function ClientCodeCallback_OnStaticPropRuiVisibilityChange( array<int> new
 
 	ClApexScreens_OnStaticPropRuiVisibilityChange( newlyVisible, newlyHidden )
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_staticPropRuiVisibilityDebugEnabled )
 		{
 			if ( newlyVisible.len() > 0 )
@@ -1343,19 +1472,19 @@ void function ClientCodeCallback_OnStaticPropRuiVisibilityChange( array<int> new
 			foreach( int magicId in newlyVisible )
 			{
 				StaticPropRui info = DEV_magicIdStaticPropRuiMap[magicId]
-				DebugDrawRotatedBox( <0, 0, 0>, info.spawnMins, info.spawnMaxs, <0, 0, 0>, 100, 225, 115, true, 1.0 )
+				DebugDrawRotatedBox( <0, 0, 0>, info.spawnMins, info.spawnMaxs, <0, 0, 0>, <100, 225, 115>, true, 1.0 )
 			}
 
 			foreach( int magicId in newlyHidden )
 			{
 				StaticPropRui info = DEV_magicIdStaticPropRuiMap[magicId]
-				DebugDrawRotatedBox( <0, 0, 0>, info.spawnMins + <1, 1, 3>, info.spawnMaxs + <1, 1, 3>, <0, 0, 0>, 255, 110, 110, true, 1.0 )
+				DebugDrawRotatedBox( <0, 0, 0>, info.spawnMins + <1, 1, 3>, info.spawnMaxs + <1, 1, 3>, <0, 0, 0>, <255, 110, 110>, true, 1.0 )
 			}
 		}
 	#endif
 }
 
-#if(DEV)
+#if DEV
 void function DumpFullscreenRuis()
 {
 	printt( "DumpFullscreenRuis" )
@@ -1385,75 +1514,75 @@ void function CharacterReadyUpCycle_Stop()
 void function CharacterReadyUpCycle_Start()
 {
 	Assert( false )
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+  	                                             
+
+	                     
+	 
+		                                             
+		      
+	 
+
+	                                      
+	                           
+
+	                                    
+	                                                    
+	 
+		                                                        
+			                                     
+	 
+	                                      
+
+	                                          
+	                                                                               
+
+	                                                                               
+	                                    
+
+	                           
+	                         
+	                      
+
+	                                                                                                                                                                       
+	                                                                     
+
+	                                                                
+	                       
+
+	                                                                                  
+	                                                                                            
+	                               
+	                      
+
+	            
+		                                           
+		 
+			                        
+				                              
+			                
+			               
+			             
+		 
+	 
+
+	                                               
+
+	             
+	 
+		                                                    
+		 
+			                                                                                    
+			                                                                
+
+			                           
+			                                                
+			                                                      
+			        
+			                                                   
+			                                                         
+			        
+		 
+	   
 }
 
 void function _CharacterReadyUpCycleMovement( entity ent )
@@ -1496,63 +1625,175 @@ bool function ShouldShowButtonHints()
 	return file.showButtonHintsInt == 1
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+                                                                                                                          
+                                                                                                                          
+       
+                                                   
+                                          
+                                                         
+                                                               
+                                                                                           
+   
+  	                                                                       
+  	 
+  		         
+  		                                                                                                                                                                                                                                                            
+  			                        
+  		                                                  
+  	 
+  
+  	                                                
+  	                                                         
+  	                                                  
+  
+  	                                                                             
+  	 
+  		                   
+  		                                                                                         
+  		 
+  			                                               
+  			                                                       
+  				                                                         
+  			                                                                                      
+  			              
+  			                      
+  		 
+  		                                                                 
+  	 
+  
+  	                      
+  		                                                        
+  
+  	                
+   
+                                                                
+   
+  	                                                      
+  	                                                 
+  	                                    
+   
+                                            
+   
+  	                                                                             
+  	 
+  		                                               
+  		                                                   
+  			                                                     
+  		                                                                              
+  	 
+   
+        
+                                                                                                                          
+                                                                                                                          
+
+
+
+float function GetFovScalar( entity player )
+{
+	float fov     = DEFAULT_FOV
+	float adsFrac = player.GetAdsFraction()
+	if ( adsFrac == 1.0 )
+	{
+		entity weapon = player.GetLatestPrimaryWeapon( eActiveInventorySlot.mainHand )
+		if ( IsValid( weapon ) )
+			fov = weapon.GetWeaponZoomFOV()
+	}
+
+	return DEFAULT_FOV / fov
+}
+
+string function GetConsoleName()
+{
+	if( PS4_PROG )
+		return "PS4"
+
+	else if ( PS5_PROG )
+		return "PS5"
+
+	else if( DURANGO_PROG )
+		return "XB1"
+
+	else if( XB5_PROG )
+		return "XB5"
+
+	else if( NX_PROG )
+		return "NX"
+
+	else
+		return "PC"
+}
+
+string function ClientCodeCallback_GetAttachmentModelName( int attachmentIndex, bool isViewModel )
+{
+	var attachmentTable = GetDataTable( $"datatable/survival_weapon_mods.rpak" )
+	int col = GetDataTableColumnByName( attachmentTable, "modelAsset" )
+	asset modelAsset = GetDataTableAsset( attachmentTable, attachmentIndex, col )
+
+	var block = GetSettingsBlockForAsset( modelAsset )
+	string result =  isViewModel ? GetSettingsBlockAsset( block, "model1p" ) : GetSettingsBlockAsset( block, "model3p" )
+	return result + ""
+}
+
+string function ClientCodeCallback_GetAttachmentPoint( int attachmentIndex )
+{
+	var attachmentTable = GetDataTable( $"datatable/survival_weapon_mods.rpak" )
+	int col = GetDataTableColumnByName( attachmentTable, "modelAsset" )
+	asset modelAsset = GetDataTableAsset( attachmentTable, attachmentIndex, col )
+
+	var block = GetSettingsBlockForAsset( modelAsset )
+	return GetSettingsBlockString( block, "attachmentPoint" )
+}
+
+ScreenSpaceData function GetScreenSpaceData( entity player, vector position )
+{
+	ScreenSpaceData data
+	int screenWidth          = GetScreenSize().width
+	int screenHeight         = GetScreenSize().height
+
+	bool posOnScreen = false
+	int screenPosX   = -1
+	int screenPosY   = -1
+
+	array<int> results = player.GetPositionInScreenSpace( position )
+
+	#if DEV
+		if ( SCREEN_SPACE_DATA_DEBUG )
+		{
+			DebugDrawMark( position, 5, COLOR_RED, true, 1.5 )
+		}
+	#endif      
+
+	posOnScreen = bool( results[0] )
+	screenPosX = results[1]
+	screenPosY = results[2]
+
+	screenPosX = ClampInt( screenPosX, 0, screenWidth )
+	screenPosY = ClampInt( screenPosY, 0, screenHeight )
+
+	int centerX = screenWidth / 2
+	int centerY = screenHeight / 2
+
+	int deltaX = screenPosX - centerX
+	int deltaY = centerY - screenPosY                                                            
+
+	float angleRad = atan2( deltaX, deltaY )
+
+	float degs = RadToDeg( angleRad )
+	if ( degs < 0 )
+	{
+		degs += 360
+	}
+
+	#if DEV
+		if ( SCREEN_SPACE_DATA_DEBUG )
+		{
+			printt( "posOnScreen: " + posOnScreen + " screenX: " + screenPosX + " screenY: " + screenPosY + " degrees: " + degs)
+		}
+	#endif      
+
+	data.deltaCenterX   = deltaX
+	data.deltaCenterY   = deltaY
+	data.degsFromCenter = degs
+
+	return data
+}

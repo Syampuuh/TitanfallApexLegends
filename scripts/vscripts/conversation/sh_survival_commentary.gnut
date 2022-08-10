@@ -6,14 +6,33 @@ global function PickCommentaryLineFromBucket
 global function AreWeSquadMembers
 global function TryFindSpeakingPlayerOnTeam
 global function TryFindSpeakingPlayerOnTeamDisallowSelf
-global function AllowPlayersToTalkToThemselves
+global function TryFindSpeakingPlayerOnTeam_OnlyAllowSpecificCharacters
 global function IsBattleChatterEnabled
 global function ShouldPlayBattleChatter
+global function ShouldStopBattleChatter
+global function CanPlayerSpeak
+global function SurvivalCommentary_AllowLinePastPlayingState
+                                
+global function GetConditionalAltDialogue
+global function GetConditionalAltMapOnlyDialogue
+global function ShouldForcePlayConditionalAlt
+global function DoesConditionalAltRequireAddressee
+global function GetConditionalAltCondPlayerCharacterFromAlias
+#if CLIENT
+global function GetConditionalAltPingExtension
+#endif          
+                                      
+global function PlayerHasFlavorDibsLineForItem
 
 global function SurvivalCommentary_SetBattleChatterEnabled
+global function SurvivalCommentary_SetHost
+global function SurvivalCommentary_GetHost
+
+global function RegisterDisabledBattleChatterEvents
+global function IsBattleChatterLineEnabled
 
 global function PlayBattleChatterToSelfOnClientAndTeamOnServer
-#if(CLIENT)
+#if CLIENT
 global function PlayBattleChatterToSelfOnClient
 #endif
 
@@ -33,9 +52,11 @@ global const int CHANCE_FOR_CROWD_ON_PILOT_WOUNDED = 50
 global const int CHANCE_FOR_PILOT_KILLED_CHEER = 0
 global const int KILL_LEADER_MIN_KILL_REQUIREMENT = 3
 global const int TIME_BETWEEN_KILLS_TO_TRIGGER_COMMENT = 60 * 3
-global const float NOTEWORTHY_KILL_DISTANCE = 300 * 12 //
-global const float FAR_FROM_CIRCLE_DISTANCE = 2 //
+global const float NOTEWORTHY_KILL_DISTANCE = 300 * 12                               
+global const float FAR_FROM_CIRCLE_DISTANCE = 2                                                                                    
 global const float CROSSHAIR_TARGET_HOLD_TIME_BEFORE_COMMENT = 0.5
+global const float CONDITIONAL_ALT_CONSIDERED_NEAR_DIST = 2048.0
+global const float CONDITIONAL_ALT_CHANCE_TO_PLAY = 0.25
 
 global const int CHANCE_FOR_ADDITIONAL_HOST_COMMENT = 0
 global const int COMMENTARY_BRIDGE_CHANCE = 0
@@ -43,9 +64,16 @@ global const int CHANCE_FOR_CHARACTER_COMMENT = 100
 
 global const int NUM_NEARBY_SPEAKERS_TO_PLAY_FROM = 2
 
+                                
+#if DEV
+global const int CONDITIONAL_ALT_BUG_REPRO_NUM = 5401
+#endif
+global const string CONDITIONAL_ALT_WILD_CARD = "*"
+      
+
 global enum eSurvivalCommentaryPlayerType
 {
-	//
+	                                                          
 	NONE,
 	CHAMPION,
 	KILLLEADER,
@@ -69,13 +97,9 @@ global enum eSurvivalEventType
 	TITANS_DROPPING,
 	CARE_PACKAGE_DROPPING,
 	HOVER_TANK_INBOUND,
-	TWO_SQUADS_LEFT,
 	ONE_VS_ONE,
 	WINNER_WINNER,
 
-	FIRST_CIRCLE_TIMER_STARTED,
-	NEXT_CIRCLE_TIMER_STARTED,
-	FINAL_CIRCLE_TIMER_STARTED,
 	CIRCLE_MOVES_1MIN,
 	CIRCLE_MOVES_45SEC,
 	CIRCLE_MOVES_30SEC,
@@ -101,106 +125,183 @@ global enum eSurvivalEventType
 
 	NO_KILLS_FOR_TIME,
 
+                 
+	REPLICATOR_AIRDROP_INCOMING,
+       
+
 	_count
 }
 
 global enum eSurvivalCommentaryBucket
 {
-	FIRST_CIRCLE_TIMER_START,
-	NEXT_CIRCLE_TIMER_START,
 	CIRCLE_MOVING,
-	FINAL_CIRCLE_TIMER_START,
 	FINAL_CIRCLE_MOVING,
 	CIRCLE_CLOSING_TO_NOTHING,
-	TITAN_DROPPING,
 	CARE_PACKAGE_DROPPING,
 	HOVER_TANK_INBOUND,
-	TWO_SQUADS_LEFT,
-	TWO_SQUADS_LEFT_INTERRUPT,
-	ONE_V_ONE,
-	ONE_V_ONE_INTERRUPT,
 	WINNER,
-	ONE_MIN_TO_CIRCLE_CLOSE,
-	SECONDS_TO_CIRCLE_CLOSE_45,
-	SECONDS_TO_CIRCLE_CLOSE_30,
-	SECONDS_TO_CIRCLE_CLOSE_10,
-	HALF_PLAYERS_LEFT,
-	PLAYERS_LEFT_10,
-	PLAYERS_LEFT_5,
-	HALF_SQUADS_LEFT,
-	SQUADS_LEFT_6,
-	SQUADS_LEFT_3,
-	CHAMPION_DOUBLE_KILL,
-	CHAMPION_DOUBLE_KILL_INTERRUPT,
-	CHAMPION_TRIPLE_KILL,
-	CHAMPION_TRIPLE_KILL_INTERRUPT,
-	CHAMPION_DOMINATING,
-	CHAMPION_DOMINATING_INTERRUPT,
-	CHAMPION_KILLED_KILL_LEADER,
-	CHAMPION_KILLED_KILL_LEADER_INTERRUPT,
 	CHAMPION_ELIMINATED,
-	CHAMPION_EXECUTED,
-	CHAMPION_EXECUTED_INTERRUPT,
+	KILL_LEADER_ELIMINATED,
 
 	NEW_KILL_LEADER,
-	NEW_KILL_LEADER_INTERRUPT,
-
-	KILL_LEADER_DOUBLE_KILL,
-	KILL_LEADER_DOUBLE_KILL_INTERRUPT,
-	KILL_LEADER_TRIPLE_KILL,
-	KILL_LEADER_TRIPLE_KILL_INTERRUPT,
-	KILL_LEADER_DOMINATING,
-	KILL_LEADER_DOMINATING_INTERRUPT,
-	KILL_LEADER_KILLED_CHAMPION,
-	KILL_LEADER_KILLED_CHAMPION_INTERRUPT,
-	KILL_LEADER_ELIMINATED,
-	KILL_LEADER_EXECUTED,
-	KILL_LEADER_EXECUTED_INTERRUPT,
-
-	PLAYER_FINISHER_PLACE,
-	PLAYER_DID_POORLY,
-	PLAYER_DID_OKAY,
-	PLAYER_DID_GOOD,
-	PLAYER_DID_GREAT,
-	PLAYER_MADE_TOP_10,
-	PLAYER_MADE_TOP_3,
-
-	CHAMPION_KILLED_PLAYER,
-	CHAMPION_IS_KILL_LEADER,
-	CHAMPION_DIED_TO_CIRCLE,
-	CHAMPION_LEFT_GAME,
-
-	KILL_LEADER_KILLED_PLAYER,
-	KILL_LEADER_DIED_TO_CIRCLE,
-	KILL_LEADER_LEFT_GAME,
 
 	FIRST_BLOOD,
-	NO_KILLS_FOR_X_SECONDS,
-	BRIDGE,
+	INTRO_CHAMPION_CARD,
 
-	LOADING_INTRO,
-	MATCH_READY,
-	CHOOSE_CLASS_SQUAD,
-	CHOOSE_CLASS_SOLO,
-	INTRO_CHAMPION_SQUAD,
-	INTRO_CHAMPION_SOLO,
-	INTRO_PODS_READY,
-	INTRO_PODS_NAG,
+	BEGIN_ROUND1,
+	BEGIN_ROUND2,
+	BEGIN_ROUND3,
+	BEGIN_ROUND4,
+	BEGIN_ROUND5,
+	BEGIN_ROUND6,
+	BEGIN_ROUND7,
+	BEGIN_ROUND8,
+	BEGIN_ROUND9,
+	BEGIN_ROUND_FINAL,
+
+                                               
+	VICTORY_LEGEND_SOLO,
+	VICTORY_SHADOWSQUAD,
+	SHADOW_PLAYER_RESPAWN,
+	SHADOW_PLAYER_DEATH_FINAL,
+	SHADOW_PLAYER_DEATH_FINAL_REV,
+	SHADOWS_PLAYER_JOIN,
+	SHADOWSQUAD_GROW,
+	SHADOWSQUAD_SPAWNS,
+	CHAR_SELECT_TAUNT_ALT_MAP,
+	STREAK_NEW_KILL_LEADER,
+	CHAMP_DIED_NO_TOP5_STREAK,
+	STREAK_LOST_CHAMP,
+	STREAK_LOST_APEX_PRED,
+	GAMECHANGER_ACTIVATE_SHADOWS,
+	EVAC_SHIP_INCOMING,
+	EVAC_SHIP_INCOMING_SHADOWS,
+	PRE_VICTORY_LEGENDS_SINGLE,
+	PRE_VICTORY_LEGENDS_MULTIPLE,
+	PRE_VICTORY_SHADOWS,
+	SHADOW_REVENGE_KILL,
+                       
+
+                                                                         
+	CHAR_SELECT_TAUNT,
+	GAMECHANGER_ACTIVATE,
+	VICTORY_APEX_CHAMP_SOLO,
+	VICTORY_APEX_CHAMP_SQUAD,
+                                                                               
+
+	MATCH_INTRO,
+
+                      
+                 
+                   
+                   
+              
+              
+            
+                     
+                     
+               
+             
+            
+            
+                            
+
+                
+	DROPPING_REPLICATOR,
+      
+
+                       
+	ROUND1,
+	ROUND2,
+	ROUND3,
+	ROUND4,
+	ROUND5,
+	ROUND6,
+	ROUND7,
+	ROUND8,
+	ROUND9,
+	ROUND_FINAL,
+	ROUND_PREPARE,
+	ONE_TEAM_WINNING,
+	MATCH_POINT,
+	MATCH_POINT_TIED,
+	MATCH_POINT_SQUAD,
+	MATCH_POINT_ENEMY,
+	SUDDEN_DEATH,
+	SCORE_CLOSE,
+	WINNER_HAS_HORIZON,
+	ROUND_WON,
+	ROUND_LOST,
+	ROUND_PERFECT,
+	ROUND_FLAWLESS,
+	ROUND_CLUTCH,
+	MATCH_STOMP,
+	MATCH_COMEBACK,
+	MATCH_SHUTOUT,
+	DOUBLE_KILL,
+	TRIPLE_KILL,
+      
+
+                              
+                  
+                   
+                                    
+
+	VICTORY_APEX_CHAMP_SOLO_YOU,
+	VICTORY_APEX_CHAMP_SQUAD_YOU,
+
+	FIRST_BLOOD_HAS_REV,
+
+                      
+	ARMORY_ACCESS_REQUESTED,
+	ARMORY_THREAT_DETECTED,
+	ARMORY_WAVE_ACTIVATED,
+	ARMORY_30_SECONDS,
+	ARMORY_10_SECONDS,
+	ARMORY_PANIC_BUTTON,
+	ARMORY_SUCCESS,
+	ARMORY_REDEPLOY,
+      
+
+                        
+	CONTROL_CARE_PACKAGE_DROPPING,
+	CONTROL_CAPTURE_BONUS_GENERIC,
+	CONTROL_CAPTURE_BONUS_A,
+	CONTROL_CAPTURE_BONUS_B,
+	CONTROL_CAPTURE_BONUS_C,
+	CONTROL_CAPTURE_BONUS_ENDING,
+	CONTROL_ALL_ZONES_OWNED,
+	CONTROL_NEW_RATINGS_LEADER,
+	CONTROL_RATINGS_LEADER_ELIMINATED,
+	CONTROL_BASE_CAMPER_DETECTED,
+	CONTROL_A_CAPTURED,
+	CONTROL_A_NEUTRALIZED
+	CONTROL_B_CAPTURED,
+	CONTROL_B_NEUTRALIZED,
+	CONTROL_C_CAPTURED,
+	CONTROL_C_NEUTRALIZED,
+	CONTROL_LOCKOUT_BEGIN,
+	CONTROL_LOCKOUT_COMPLETE,
+	CONTROL_LOCKOUT_BROKEN,
+       
+
+	_count
 }
 
 global enum eSurvivalHostType
 {
 	INVALID,
 
-	NONE,
 	AI,
-	LAW,
 	BLISK,
-	OWEN,
-	BILL,
-	JOHN,
-	ICET,
-
+                                               
+	NOC,
+      
+	MIRAGE,
+                       
+	ARENAS,
+      
+	MAGGIE,
 	_count
 }
 
@@ -220,8 +321,8 @@ global struct SurvivalCommentaryEvent
 	vector origin
 	int    eventType = -1
 	float  eventTimeStamp
-	entity victim //
-	entity attacker //
+	entity victim                                    
+	entity attacker                
 	bool   markedDirty = false
 	int    damageType
 	int    damageSourceID
@@ -244,29 +345,47 @@ struct
 {
 	bool commentaryDebug = false
 
-	bool isBattleChatterEnabled = true
+	bool isBattleChatterEnabled
 
+	int mainHost = eSurvivalHostType.AI
+
+	array<string>							linesAllowedPastplaying
 	table<int, table<int, array<string> > > commentaryTables
 	table<int, array<string> >              commentaryBuckets
+	array<string>							disabledBattleChatterEvents
+
+	                                                                                                                     
+	table< string, table< string, table< string, string > > > condAltMap
+	table< string, bool > shouldForcePlayAlias
+	table< string, bool > shouldRequireAddressee
+	table< string, string > aliasToCondPlayer
+
+	table< string, array<string> > flavorDibsMap
 } file
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+                                                                                             
+  
+  	                                                                                                                                                                                                                                                  
+  	                                                                                                                                                                                                                                                    
+  	                                                                                                                                                                                                              
+  	                                                                                                                                                                                                            
+  	                                                                                                                                                                                                     
+  	                                                                                                                                                                                             
+  
+                                                                                             
 
 void function ShSurvivalCommentary_Init()
 {
 	RegisterCSVDialogue( $"datatable/dialogue/survival_host_dialogue.rpak" )
 	RegisterCSVDialogue( $"datatable/battle_chatter_dialogue.rpak" )
-	RegisterCSVDialogue( $"datatable/dialogue/execution_quip_dialogue.rpak" )
 	RegisterCommentaryBuckets( $"datatable/dialogue/survival_host_dialogue.rpak" )
+                                 
+		RegisterConditionalAltDialogue( $"datatable/conditional_alt_dialogue_map.rpak" )
+       
+	RegisterFlavorDibsDialogue( $"datatable/dibs_flavor_dialogue_map.rpak" )
+
+
+	file.isBattleChatterEnabled = GetCurrentPlaylistVarBool( "battlechatter_enabled", true )
 }
 
 
@@ -274,17 +393,19 @@ void function RegisterCommentaryBuckets( asset dt )
 {
 	var dataTable = GetDataTable( dt )
 
+	int columnFeatureFlag      = GetDataTableColumnByName( dataTable, "featureFlag" )
 	int columnName             = GetDataTableColumnByName( dataTable, "name" )
 	int columnRadioDisplayName = GetDataTableColumnByName( dataTable, "radioDisplayName" )
 	int columnBucket           = GetDataTableColumnByName( dataTable, "bucket" )
 
-	int numRows = GetDatatableRowCount( dataTable )
+	int numRows = GetDataTableRowCount( dataTable )
 
 	for ( int i = 0; i < numRows; i++ )
 	{
 		string name             = GetDataTableString( dataTable, i, columnName )
 		string radioDisplayName = GetDataTableString( dataTable, i, columnRadioDisplayName )
 		string bucket           = GetDataTableString( dataTable, i, columnBucket )
+
 
 		if ( name == "" || radioDisplayName == "" || bucket == "" )
 			continue
@@ -308,232 +429,386 @@ void function RegisterCommentaryBuckets( asset dt )
 	}
 }
 
-
-string function PickCommentaryLineFromBucket( int host, int bucket )
+void function RegisterFlavorDibsDialogue( asset dt )
 {
+	var dataTable = GetDataTable( dt )
+
+	int columnSpeakingPlayer 	= GetDataTableColumnByName( dataTable, "voice" )
+	int columnItemName = GetDataTableColumnByName( dataTable, "itemName" )
+
+	int numRows = GetDataTableRowCount( dataTable )
+
+	for ( int i = 0; i < numRows; i++ )
+	{
+		string speakingPlayer = GetDataTableString( dataTable, i, columnSpeakingPlayer )
+		string itemName = GetDataTableString( dataTable, i, columnItemName )
+
+		if ( speakingPlayer == "" )
+			continue
+
+		                 
+		if ( speakingPlayer.slice( 0, 2 ) == "//" )
+			continue
+
+		if ( !GetValidVoices().contains( speakingPlayer ) )
+		{
+			#if SERVER && DEV
+				                                                                                                                                                                   
+						                                                                
+			#endif
+			continue
+		}
+
+		if ( speakingPlayer in file.flavorDibsMap )
+		{
+			Assert( !file.flavorDibsMap[speakingPlayer].contains( itemName ), "Attempted to register a duplicate dibs item " + itemName + " for player " + speakingPlayer + ". Only one entry per player/item pair is required, you should load up the event in miles with alternate .wavs if needed." )
+
+			file.flavorDibsMap[ speakingPlayer ].append( itemName )
+		}
+		else
+		{
+			file.flavorDibsMap[ speakingPlayer ] <- [ itemName ]
+		}
+	}
+}
+
+bool function PlayerHasFlavorDibsLineForItem( entity player, string itemName )
+{
+	if ( !IsValid( player ) )
+		return false
+
+	string voice = GetPlayerVoice( player )
+
+	if ( ! ( voice in file.flavorDibsMap ) )
+		return false
+
+	if ( ! file.flavorDibsMap[voice].contains( itemName ) )
+		return false
+
+	return true
+}
+
+                                
+void function RegisterConditionalAltDialogue( asset dt )
+{
+	var dataTable = GetDataTable( dt )
+
+	int columnName             	= GetDataTableColumnByName( dataTable, "name" )
+	int columnSpeakingPlayer 	= GetDataTableColumnByName( dataTable, "voice" )
+	int columnConditionalPlayer = GetDataTableColumnByName( dataTable, "condPlayer" )
+	int columnConditionalMap	= GetDataTableColumnByName( dataTable, "condMap" )
+	int columnAlias 			= GetDataTableColumnByName( dataTable, "alias" )
+	int columnForcePlay			= GetDataTableColumnByName( dataTable, "alwaysPlay" )
+	int columnRequireAddressee 	= GetDataTableColumnByName( dataTable, "requireAddressee" )
+
+	int numRows = GetDataTableRowCount( dataTable )
+
+	table< string, table< string, bool > > baseNameToSpeakingPlayerToRequireAddressee
+
+	for ( int i = 0; i < numRows; i++ )
+	{
+		string baseEventName = GetDataTableString( dataTable, i, columnName )
+		string speakingPlayer = GetDataTableString( dataTable, i, columnSpeakingPlayer )
+		string condPlayer = GetDataTableString( dataTable, i, columnConditionalPlayer )
+		string condMap = GetDataTableString ( dataTable, i, columnConditionalMap )
+		string milesAlias = GetDataTableString( dataTable, i, columnAlias )
+		bool alwaysPlay = GetDataTableBool( dataTable, i, columnForcePlay )
+		bool requireAddressee = GetDataTableBool( dataTable, i, columnRequireAddressee )
+		if ( baseEventName == "" )
+			continue
+
+		                 
+		if ( baseEventName.slice( 0, 2 ) == "//" )
+			continue
+
+		if ( !GetValidVoices().contains( speakingPlayer ) )
+		{
+			#if SERVER && DEV
+				                                                                                                                                                  
+					                                                                     
+			#endif
+			continue
+		}
+
+		if ( !GetValidVoices().contains( condPlayer ) && condMap == "" )
+		{
+			#if SERVER && DEV
+				                                                                                                                                                                                   
+					                                                                 
+			#endif
+			continue
+		}
+
+		if ( condMap != "" && GetMapName() != condMap )
+		{
+			#if SERVER && DEV
+				                                                                                                                                            
+			#endif
+			continue
+		}
+		else if ( condPlayer == "" )
+		{
+			condPlayer = CONDITIONAL_ALT_WILD_CARD                                                               
+		}
+
+		if ( baseEventName in file.condAltMap )
+		{
+			if ( speakingPlayer in file.condAltMap[baseEventName] )
+			{
+				if ( condPlayer in file.condAltMap[baseEventName][speakingPlayer] )
+				{
+					Assert( 0, "Attempted to have duplicate conditional alt dialogue for event: \"" + baseEventName + "\" speaker: \"" + speakingPlayer +
+							"\" and condPlayer: \"" + condPlayer + "\". Can only have one cond alt for each unique combination of speaker, condPlayer, and event." )
+				}
+				else
+				{
+					file.condAltMap[baseEventName][speakingPlayer][condPlayer] <- milesAlias
+				}
+			}
+			else
+			{
+				table<string, string> condPlayerToEvent
+				condPlayerToEvent[ condPlayer ] <- milesAlias
+
+				file.condAltMap[baseEventName][speakingPlayer] <- condPlayerToEvent
+			}
+		}
+		else
+		{
+			table<string, string> condPlayerToEvent
+			condPlayerToEvent[ condPlayer ] <- milesAlias
+
+			table< string, table< string, string> > speakingPlayerToCondPlayerToEvent
+			speakingPlayerToCondPlayerToEvent[speakingPlayer] <- condPlayerToEvent
+
+			file.condAltMap[baseEventName] <- speakingPlayerToCondPlayerToEvent
+		}
+
+		file.shouldForcePlayAlias[ milesAlias ] <- alwaysPlay
+		file.shouldRequireAddressee[ milesAlias ] <- requireAddressee
+		file.aliasToCondPlayer[ milesAlias ] <- condPlayer
+
+		if ( ! ( baseEventName in baseNameToSpeakingPlayerToRequireAddressee ) )
+		{
+			table<string, bool> speakingPlayerToRequireAddressee
+			speakingPlayerToRequireAddressee[speakingPlayer] <- requireAddressee
+			baseNameToSpeakingPlayerToRequireAddressee[ baseEventName ] <- speakingPlayerToRequireAddressee
+		}
+		else
+		{
+			if ( ! ( speakingPlayer in baseNameToSpeakingPlayerToRequireAddressee[ baseEventName ] ) )
+			{
+				baseNameToSpeakingPlayerToRequireAddressee[ baseEventName ][ speakingPlayer ] <- requireAddressee
+			}
+			else
+			{
+				if ( requireAddressee && baseNameToSpeakingPlayerToRequireAddressee[baseEventName][speakingPlayer] )
+				{
+					Assert( 0, "Tried to require an addressee for multiple different condPlayers for the same pairing of event and speaker. This is currently not supported by the system. Event: " + baseEventName + " Speaker: " + speakingPlayer )
+				}
+			}
+		}
+	}
+	
+}
+
+string function GetConditionalAltDialogue( string dialogueEventName, entity speakingPlayer, entity condPlayer, bool existenceCheck = false )
+{
+	if ( !IsValid( speakingPlayer ) || !speakingPlayer.IsPlayer() )
+		return ""
+
+	if ( !IsValid( condPlayer ) || !condPlayer.IsPlayer() )
+		return ""
+
+	string speakingPlayerVoice = GetPlayerVoice( speakingPlayer )
+	string condPlayerVoice = GetPlayerVoice( condPlayer )
+
+	string condAltAlias
+
+	if ( dialogueEventName in file.condAltMap
+			&& speakingPlayerVoice in file.condAltMap[dialogueEventName]
+			&& condPlayerVoice in file.condAltMap[dialogueEventName][speakingPlayerVoice] )
+	{
+		condAltAlias = file.condAltMap[dialogueEventName][speakingPlayerVoice][condPlayerVoice]
+
+		                                                                            
+		if ( existenceCheck )
+			return condAltAlias
+
+		if ( !file.shouldForcePlayAlias[ condAltAlias ] )
+		{
+			if ( RandomFloat( 1.0 ) > CONDITIONAL_ALT_CHANCE_TO_PLAY )
+			{
+				#if DEV
+					if ( GetBugReproNum() == CONDITIONAL_ALT_BUG_REPRO_NUM )
+						printt( "CONDITIONAL ALT TESTING: Would have played con alt for " + dialogueEventName + " | speaker: " + speakingPlayerVoice + " | condPlayer: " + condPlayerVoice + ", but line is not marked force play and random roll failed." )
+				#endif
+				return ""
+			}
+
+			if ( Distance( speakingPlayer.GetOrigin(), condPlayer.GetOrigin() ) > CONDITIONAL_ALT_CONSIDERED_NEAR_DIST )
+			{
+				#if DEV
+					if ( GetBugReproNum() == CONDITIONAL_ALT_BUG_REPRO_NUM )
+						printt( "CONDITIONAL ALT TESTING: Would have played con alt for " + dialogueEventName + " | speaker: " + speakingPlayerVoice + " | condPlayer: " + condPlayerVoice + ", but line is not marked force play and players are too far away from each other." )
+				#endif
+				return ""
+			}
+		}
+
+		return condAltAlias
+	}
+
+	return ""
+}
+
+string function GetConditionalAltMapOnlyDialogue( string dialogueEventName, entity speakingPlayer )
+{
+	if ( !IsValid( speakingPlayer ) || !speakingPlayer.IsPlayer() )
+		return ""
+
+	string speakingPlayerVoice = GetPlayerVoice( speakingPlayer )
+
+	string condAltAlias
+
+	if ( dialogueEventName in file.condAltMap
+			&& speakingPlayerVoice in file.condAltMap[dialogueEventName]
+			&& CONDITIONAL_ALT_WILD_CARD in file.condAltMap[dialogueEventName][speakingPlayerVoice] )
+	{
+		condAltAlias = file.condAltMap[dialogueEventName][speakingPlayerVoice][CONDITIONAL_ALT_WILD_CARD]
+
+		if ( !file.shouldForcePlayAlias[ condAltAlias ] )
+		{
+			if ( RandomFloat( 1.0 ) > CONDITIONAL_ALT_CHANCE_TO_PLAY )
+			{
+				#if DEV
+					if ( GetBugReproNum() == CONDITIONAL_ALT_BUG_REPRO_NUM )
+						printt( "CONDITIONAL ALT TESTING: Would have played con alt for " + dialogueEventName + " | speaker: " + speakingPlayerVoice + " | condMap: " + GetMapName() + ", but line is not marked force play and random roll failed." )
+				#endif
+				return ""
+			}
+		}
+
+		return condAltAlias
+	}
+
+	return ""
+}
+
+
+#if CLIENT
+string function GetConditionalAltPingExtension( entity speakingPlayer, entity subjectEnt, string pingEventName, string currentExt, bool forceConAlt, bool stompConAlt )
+{
+	if ( !IsValid( speakingPlayer ) )
+		return currentExt
+
+	if ( stompConAlt )
+		return currentExt
+
+	array<string> possibleNewExts
+	array<entity> playersToConsider
+
+	if ( IsValid( subjectEnt ) && subjectEnt.IsPlayer() && ( subjectEnt.GetTeam() == speakingPlayer.GetTeam() ) )
+	{
+		playersToConsider = [ subjectEnt ]
+	}
+	else
+	{
+		playersToConsider = GetPlayerArrayOfTeam_Alive( speakingPlayer.GetTeam() )
+	}
+
+	foreach ( entity squadmate in playersToConsider )
+	{
+		if ( squadmate == speakingPlayer )
+			continue
+
+		string ext = currentExt
+		string condAltAlias = GetConditionalAltDialogue( pingEventName, speakingPlayer, squadmate, true )
+		if ( condAltAlias != "" )
+		{
+			ext = ext + "_cond" + GetPlayerVoice( squadmate )
+
+			                                                                                                
+			if ( file.shouldForcePlayAlias[ condAltAlias ] && DoesAliasExist( GetBattleChatterAlias1P3P( speakingPlayer, (pingEventName + ext), false ) ) )
+				return ext
+
+			possibleNewExts.append( ext )
+		}
+	}
+
+	                                                                                                                       
+	if ( RandomFloat( 1.0 ) > CONDITIONAL_ALT_CHANCE_TO_PLAY && !forceConAlt )
+	{
+		#if DEV
+			if ( GetBugReproNum() == CONDITIONAL_ALT_BUG_REPRO_NUM && possibleNewExts.len() > 0 )
+				printt( "CONDITIONAL ALT TESTING: Con alt is registered for " + pingEventName + " | speaker: " + GetPlayerVoice( speakingPlayer ) + ", but line is not marked force play and random roll failed." )
+		#endif
+		return currentExt
+	}
+
+	foreach ( string possibleExt in clone possibleNewExts )
+	{
+		string potentialAlias = GetBattleChatterAlias1P3P( speakingPlayer, (pingEventName + possibleExt), false )
+
+		if ( !DoesAliasExist( potentialAlias ) )
+			possibleNewExts.fastremovebyvalue( possibleExt )
+	}
+
+	if ( possibleNewExts.len() > 0 )
+		return possibleNewExts.getrandom()
+
+	return currentExt
+}
+#endif          
+
+bool function ShouldForcePlayConditionalAlt( string conAltAlias )
+{
+	if ( ! ( conAltAlias in file.shouldForcePlayAlias ) )
+		return false
+
+	return file.shouldForcePlayAlias[ conAltAlias ]
+}
+
+bool function DoesConditionalAltRequireAddressee( string conAltAlias )
+{
+	return file.shouldRequireAddressee[ conAltAlias ]
+}
+
+ItemFlavor function GetConditionalAltCondPlayerCharacterFromAlias( string conAltAlias )
+{
+ 	return GetItemFlavorByHumanReadableRef( "character_" + file.aliasToCondPlayer[ conAltAlias ] )
+}
+
+                                      
+
+string function PickCommentaryLineFromBucket( int bucket )
+{
+	int host = file.mainHost
+
+	if ( ! ( bucket in file.commentaryTables[host] ) )
+	{
+		Warning( "Invalid bucket for host, attempting AI Host. Bug this!" )
+
+		host = eSurvivalHostType.AI
+
+		if ( ! ( bucket in file.commentaryTables[host] ) )
+		{
+			Assert( 0, "AI Host does not have line for bucket" )
+			return ""
+		}
+	}
+
 	return file.commentaryTables[host][bucket].getrandom()
 }
 
 
 int function ConvertBucketStringToEnum( string bucketName )
 {
-	switch( bucketName )
-	{
-		case "FIRST_CIRCLE_TIMER_START":
-			return eSurvivalCommentaryBucket.FIRST_CIRCLE_TIMER_START
-
-		case "NEXT_CIRCLE_TIMER_START":
-			return eSurvivalCommentaryBucket.NEXT_CIRCLE_TIMER_START
-
-		case "CIRCLE_MOVING":
-			return eSurvivalCommentaryBucket.CIRCLE_MOVING
-
-		case "FINAL_CIRCLE_TIMER_START":
-			return eSurvivalCommentaryBucket.FINAL_CIRCLE_TIMER_START
-
-		case "FINAL_CIRCLE_MOVING":
-			return eSurvivalCommentaryBucket.FINAL_CIRCLE_MOVING
-
-		case "CIRCLE_CLOSING_TO_NOTHING":
-			return eSurvivalCommentaryBucket.CIRCLE_CLOSING_TO_NOTHING
-
-		case "TITAN_DROPPING":
-			return eSurvivalCommentaryBucket.TITAN_DROPPING
-
-		case "CARE_PACKAGE_DROPPING":
-			return eSurvivalCommentaryBucket.CARE_PACKAGE_DROPPING
-
-		case "HOVER_TANK_INBOUND":
-			return eSurvivalCommentaryBucket.HOVER_TANK_INBOUND
-
-		case "TWO_SQUADS_LEFT":
-			return eSurvivalCommentaryBucket.TWO_SQUADS_LEFT
-
-		case "TWO_SQUADS_LEFT_INTERRUPT":
-			return eSurvivalCommentaryBucket.TWO_SQUADS_LEFT_INTERRUPT
-
-		case "ONE_V_ONE":
-			return eSurvivalCommentaryBucket.ONE_V_ONE
-
-		case "ONE_V_ONE_INTERRUPT":
-			return eSurvivalCommentaryBucket.ONE_V_ONE_INTERRUPT
-
-		case "WINNER":
-			return eSurvivalCommentaryBucket.WINNER
-
-		case "ONE_MIN_TO_CIRCLE_CLOSE":
-			return eSurvivalCommentaryBucket.ONE_MIN_TO_CIRCLE_CLOSE
-
-		case "SECONDS_TO_CIRCLE_CLOSE_45":
-			return eSurvivalCommentaryBucket.SECONDS_TO_CIRCLE_CLOSE_45
-
-		case "SECONDS_TO_CIRCLE_CLOSE_30":
-			return eSurvivalCommentaryBucket.SECONDS_TO_CIRCLE_CLOSE_30
-
-		case "SECONDS_TO_CIRCLE_CLOSE_10":
-			return eSurvivalCommentaryBucket.SECONDS_TO_CIRCLE_CLOSE_10
-
-		case "HALF_PLAYERS_LEFT":
-			return eSurvivalCommentaryBucket.HALF_PLAYERS_LEFT
-
-		case "PLAYERS_LEFT_10":
-			return eSurvivalCommentaryBucket.PLAYERS_LEFT_10
-
-		case "PLAYERS_LEFT_5":
-			return eSurvivalCommentaryBucket.PLAYERS_LEFT_5
-
-		case "HALF_SQUADS_LEFT":
-			return eSurvivalCommentaryBucket.HALF_SQUADS_LEFT
-
-		case "SQUADS_LEFT_6":
-			return eSurvivalCommentaryBucket.SQUADS_LEFT_6
-
-		case "SQUADS_LEFT_3":
-			return eSurvivalCommentaryBucket.SQUADS_LEFT_3
-
-		case "CHAMPION_DOUBLE_KILL":
-			return eSurvivalCommentaryBucket.CHAMPION_DOUBLE_KILL
-
-		case "CHAMPION_DOUBLE_KILL_INTERRUPT":
-			return eSurvivalCommentaryBucket.CHAMPION_DOUBLE_KILL_INTERRUPT
-
-		case "CHAMPION_TRIPLE_KILL":
-			return eSurvivalCommentaryBucket.CHAMPION_TRIPLE_KILL
-
-		case "CHAMPION_TRIPLE_KILL_INTERRUPT":
-			return eSurvivalCommentaryBucket.CHAMPION_TRIPLE_KILL_INTERRUPT
-
-		case "CHAMPION_DOMINATING":
-			return eSurvivalCommentaryBucket.CHAMPION_DOMINATING
-
-		case "CHAMPION_DOMINATING_INTERRUPT":
-			return eSurvivalCommentaryBucket.CHAMPION_DOMINATING_INTERRUPT
-
-		case "CHAMPION_KILLED_KILL_LEADER":
-			return eSurvivalCommentaryBucket.CHAMPION_KILLED_KILL_LEADER
-
-		case "CHAMPION_KILLED_KILL_LEADER_INTERRUPT":
-			return eSurvivalCommentaryBucket.CHAMPION_KILLED_KILL_LEADER_INTERRUPT
-
-		case "CHAMPION_ELIMINATED":
-			return eSurvivalCommentaryBucket.CHAMPION_ELIMINATED
-
-		case "CHAMPION_EXECUTED":
-			return eSurvivalCommentaryBucket.CHAMPION_EXECUTED
-
-		case "CHAMPION_EXECUTED_INTERRUPT":
-			return eSurvivalCommentaryBucket.CHAMPION_EXECUTED_INTERRUPT
-
-		case "NEW_KILL_LEADER":
-			return eSurvivalCommentaryBucket.NEW_KILL_LEADER
-
-		case "NEW_KILL_LEADER_INTERRUPT":
-			return eSurvivalCommentaryBucket.NEW_KILL_LEADER_INTERRUPT
-
-		case "KILL_LEADER_DOUBLE_KILL":
-			return eSurvivalCommentaryBucket.KILL_LEADER_DOUBLE_KILL
-
-		case "KILL_LEADER_DOUBLE_KILL_INTERRUPT":
-			return eSurvivalCommentaryBucket.KILL_LEADER_DOUBLE_KILL_INTERRUPT
-
-		case "KILL_LEADER_TRIPLE_KILL":
-			return eSurvivalCommentaryBucket.KILL_LEADER_TRIPLE_KILL
-
-		case "KILL_LEADER_TRIPLE_KILL_INTERRUPT":
-			return eSurvivalCommentaryBucket.KILL_LEADER_TRIPLE_KILL_INTERRUPT
-
-		case "KILL_LEADER_DOMINATING":
-			return eSurvivalCommentaryBucket.KILL_LEADER_DOMINATING
-
-		case "KILL_LEADER_DOMINATING_INTERRUPT":
-			return eSurvivalCommentaryBucket.KILL_LEADER_DOMINATING_INTERRUPT
-
-		case "KILL_LEADER_KILLED_CHAMPION":
-			return eSurvivalCommentaryBucket.KILL_LEADER_KILLED_CHAMPION
-
-		case "KILL_LEADER_KILLED_CHAMPION_INTERRUPT":
-			return eSurvivalCommentaryBucket.KILL_LEADER_KILLED_CHAMPION_INTERRUPT
-
-		case "KILL_LEADER_ELIMINATED":
-			return eSurvivalCommentaryBucket.KILL_LEADER_ELIMINATED
-
-		case "KILL_LEADER_EXECUTED":
-			return eSurvivalCommentaryBucket.KILL_LEADER_EXECUTED
-
-		case "KILL_LEADER_EXECUTED_INTERRUPT":
-			return eSurvivalCommentaryBucket.KILL_LEADER_EXECUTED_INTERRUPT
-
-		case "PLAYER_FINISHER_PLACE":
-			return eSurvivalCommentaryBucket.PLAYER_FINISHER_PLACE
-
-		case "PLAYER_DID_POORLY":
-			return eSurvivalCommentaryBucket.PLAYER_DID_POORLY
-
-		case "PLAYER_DID_OKAY":
-			return eSurvivalCommentaryBucket.PLAYER_DID_OKAY
-
-		case "PLAYER_DID_GOOD":
-			return eSurvivalCommentaryBucket.PLAYER_DID_GOOD
-
-		case "PLAYER_DID_GREAT":
-			return eSurvivalCommentaryBucket.PLAYER_DID_GREAT
-
-		case "PLAYER_MADE_TOP_10":
-			return eSurvivalCommentaryBucket.PLAYER_MADE_TOP_10
-
-		case "PLAYER_MADE_TOP_3":
-			return eSurvivalCommentaryBucket.PLAYER_MADE_TOP_3
-
-		case "CHAMPION_KILLED_PLAYER":
-			return eSurvivalCommentaryBucket.CHAMPION_KILLED_PLAYER
-
-		case "CHAMPION_IS_KILL_LEADER":
-			return eSurvivalCommentaryBucket.CHAMPION_IS_KILL_LEADER
-
-		case "CHAMPION_DIED_TO_CIRCLE":
-			return eSurvivalCommentaryBucket.CHAMPION_DIED_TO_CIRCLE
-
-		case "CHAMPION_LEFT_GAME":
-			return eSurvivalCommentaryBucket.CHAMPION_LEFT_GAME
-
-		case "FIRST_BLOOD":
-			return eSurvivalCommentaryBucket.FIRST_BLOOD
-
-		case "NO_KILLS_FOR_X_SECONDS":
-			return eSurvivalCommentaryBucket.NO_KILLS_FOR_X_SECONDS
-
-		case "BRIDGE":
-			return eSurvivalCommentaryBucket.BRIDGE
-
-		case "LOADING_INTRO":
-			return eSurvivalCommentaryBucket.LOADING_INTRO
-
-		case "MATCH_READY":
-			return eSurvivalCommentaryBucket.MATCH_READY
-
-		case "CHOOSE_CLASS_SQUAD":
-			return eSurvivalCommentaryBucket.CHOOSE_CLASS_SQUAD
-
-		case "CHOOSE_CLASS_SOLO":
-			return eSurvivalCommentaryBucket.CHOOSE_CLASS_SOLO
-
-		case "INTRO_CHAMPION_SQUAD":
-			return eSurvivalCommentaryBucket.INTRO_CHAMPION_SQUAD
-
-		case "INTRO_CHAMPION_SOLO":
-			return eSurvivalCommentaryBucket.INTRO_CHAMPION_SOLO
-
-		case "INTRO_PODS_READY":
-			return eSurvivalCommentaryBucket.INTRO_PODS_READY
-
-		case "INTRO_PODS_NAG":
-			return eSurvivalCommentaryBucket.INTRO_PODS_NAG
-
-		default:
-			return -1
-	}
-
-	unreachable
+	if ( bucketName in eSurvivalCommentaryBucket )
+		return eSurvivalCommentaryBucket[ bucketName ]
+
+	Warning( "Bucket not registered: " + bucketName + "\n" )
+	return -1
 }
 
 
@@ -541,12 +816,23 @@ int function ConvertHostStringToEnum( string hostName )
 {
 	switch( hostName )
 	{
-		case "#HOST_BLISK":
-			return eSurvivalHostType.BLISK
-
 		case "#HOST_AI":
 			return eSurvivalHostType.AI
 
+                       
+		case "#HOST_ARENAS":
+			return eSurvivalHostType.ARENAS
+      
+
+                                               
+		case "#HOST_NOC":
+			return eSurvivalHostType.NOC
+      
+		case "#HOST_MIRAGE":
+			return eSurvivalHostType.MIRAGE
+
+		case "#HOST_MAGGIE":
+			return eSurvivalHostType.MAGGIE
 		default:
 			return eSurvivalHostType.INVALID
 	}
@@ -554,16 +840,32 @@ int function ConvertHostStringToEnum( string hostName )
 	unreachable
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+void function SurvivalCommentary_SetHost( int mainHost )
+{
+	if ( ! ( mainHost in file.commentaryTables ) )
+	{
+		Assert( 0, "Invalid Host" )
+		return
+	}
+
+	file.mainHost = mainHost
+}
+
+int function SurvivalCommentary_GetHost()
+{
+	return file.mainHost
+}
+
+                                                                                   
+  
+  	                                                                                                                                
+  	                                                                                                                                    
+  	                                                                                                         
+  	                                                                                                    
+  	                                                                                                               
+  	                                                                                                           
+  
+                                                                                   
 
 void function CommentaryDebugText( vector origin, string text, float time )
 {
@@ -575,7 +877,7 @@ void function CommentaryDebugText( vector origin, string text, float time )
 void function CommentaryDebugSphere( vector origin, int r, int g, int b, float time, float size = 16 )
 {
 	if ( file.commentaryDebug )
-		DebugDrawSphere( origin, size, r, g, b, true, time )
+		DebugDrawSphere( origin, size, <r, g, b>, true, time )
 }
 
 
@@ -602,14 +904,17 @@ entity function TryFindSpeakingPlayerOnTeam( int team )
 
 	foreach ( playerOnTeam in livingTeammateList )
 	{
-		//
+		                                
 		if ( Bleedout_IsBleedingOut( playerOnTeam ) )
+			continue
+
+		if ( !CanPlayerSpeak( playerOnTeam ) )
 			continue
 
 		return playerOnTeam
 	}
 
-	//
+	                                                                   
 	return null
 }
 
@@ -621,11 +926,14 @@ entity function TryFindSpeakingPlayerOnTeamDisallowSelf( int team, entity forbid
 
 	foreach ( playerOnTeam in livingTeammateList )
 	{
-		//
+		                                
 		if ( Bleedout_IsBleedingOut( playerOnTeam ) )
 			continue
 
-		//
+		if ( !CanPlayerSpeak( playerOnTeam ) )
+			continue
+
+		                             
 		if ( playerOnTeam == forbiddenPlayer )
 			continue
 
@@ -635,10 +943,57 @@ entity function TryFindSpeakingPlayerOnTeamDisallowSelf( int team, entity forbid
 	if ( chooseSelfIfSolo && livingTeammateList.len() == 1 && livingTeammateList[0] == forbiddenPlayer )
 		return forbiddenPlayer
 
-	//
+	                                                                   
 	return null
 }
 
+                                                                                                                                                                                                                 
+entity function TryFindSpeakingPlayerOnTeam_OnlyAllowSpecificCharacters( int team, array<string> allowedCharactersStringArray )
+{
+	Assert( allowedCharactersStringArray.len() > 0, "Running TryFindSpeakingPlayerOnTeam_OnlyAllowSpecificCharacters with no characters in allowedCharactersStringArray, use TryFindSpeakingPlayerOnTeam instead" )
+
+	array<entity> livingTeammateList = GetPlayerArrayOfTeam_Alive( team )
+
+	livingTeammateList.randomize()
+
+	foreach ( playerOnTeam in livingTeammateList )
+	{
+		                                
+		if ( Bleedout_IsBleedingOut( playerOnTeam ) )
+			continue
+
+		if ( !CanPlayerSpeak( playerOnTeam ) )
+			continue
+
+		if ( !LoadoutSlot_IsReady( ToEHI( playerOnTeam ), Loadout_Character() ) )
+			continue
+
+		string playerOnTeamCharacterName = ItemFlavor_GetHumanReadableRef( LoadoutSlot_GetItemFlavor( ToEHI( playerOnTeam ), Loadout_Character() ) )
+		if ( !( allowedCharactersStringArray.contains( playerOnTeamCharacterName ) ) )
+			continue
+
+		return playerOnTeam
+	}
+
+	                                                                   
+	return null
+}
+
+void function SurvivalCommentary_AllowLinePastPlayingState( string conversation )
+{
+	file.linesAllowedPastplaying.append( conversation )
+}
+
+bool function CanPlayerSpeak( entity player )
+{
+	if ( !IsValid( player ) )
+		return false
+
+	if ( IsPlayerShadowZombie( player ) )
+		return false
+	
+	return true
+}
 
 bool function AreWeSquadMembers( entity player1, entity player2 )
 {
@@ -654,11 +1009,6 @@ bool function AreWeSquadMembers( entity player1, entity player2 )
 	}
 
 	return false
-}
-
-bool function AllowPlayersToTalkToThemselves()
-{
-	return ( GetCurrentPlaylistVarInt( "passive_self_chatter", 1 ) == 1 )
 }
 
 bool function IsBattleChatterEnabled()
@@ -682,23 +1032,65 @@ bool function ShouldPlayBattleChatter( string conversationType, entity listening
 	if ( !IsAlive( speakingPlayer ) )
 		return false
 
+	if ( !CanPlayerSpeak( speakingPlayer ) )
+		return false
+
+	if ( !IsBattleChatterAllowedBasedOnGameState( conversationType ) )
+		return false
+
+	if ( !IsBattleChatterLineEnabled( conversationType ) )
+		return false
+
+	return IsBattleChatterEnabled()
+}
+
+bool function IsBattleChatterAllowedBasedOnGameState( string conversationType )
+{
+	if ( file.linesAllowedPastplaying.contains( conversationType ) )
+		return true
+
+	return ( GetGameState() <= eGameState.Playing )
+}
+
+bool function ShouldStopBattleChatter( entity listeningPlayer )
+{
+	if ( !IsAlive( listeningPlayer ) )
+		return false
+
 	if ( GetGameState() > eGameState.Playing )
 		return false
 
 	return IsBattleChatterEnabled()
 }
 
+void function RegisterDisabledBattleChatterEvents( array<string> disabledEvents )
+{
+	foreach( event in disabledEvents )
+	{
+		if ( !file.disabledBattleChatterEvents.contains( event ) )
+			file.disabledBattleChatterEvents.append( event )
+	}
+}
+
+bool function IsBattleChatterLineEnabled( string conversationType )
+{
+	if ( file.disabledBattleChatterEvents.find( conversationType ) > -1 )
+		return false
+
+	return true
+}
+
 void function PlayBattleChatterToSelfOnClientAndTeamOnServer( entity speaker, string chatterLine )
 {
-#if(false)
-
+#if SERVER
+	                                                                
 #endif
-#if(CLIENT)
+#if CLIENT
 	PlayBattleChatterToSelfOnClient( speaker, chatterLine )
 #endif
 }
 
-#if(CLIENT)
+#if CLIENT
 void function PlayBattleChatterToSelfOnClient( entity self, string chatterLine )
 {
 	if ( !ShouldPlayBattleChatter( chatterLine, self, self ) )
@@ -706,4 +1098,4 @@ void function PlayBattleChatterToSelfOnClient( entity self, string chatterLine )
 
 	thread PlayAnyClientSelfDialogueByName( self, chatterLine )
 }
-#endif //
+#endif          

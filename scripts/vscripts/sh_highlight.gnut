@@ -3,44 +3,61 @@ global function GetHighlight
 global function GetHighlightContextForEnt
 
 global function Highlight_SetNeutralHighlight
-global function Highlight_SetPingedHighlight
+global function Highlight_SetPrivateMatchObserverHighlight
 global function Highlight_SetSonarHighlight
 
 global function SetSurvivalPropHighlight
 global function ClearSurvivalPropHighlight
 
-#if(false)
+#if SERVER
+                                              
+                                           
+                                           
+                                                
+                                                   
+                                                   
+                        
+                                                
+      
+                                                  
+                 
+                                                     
+                                                       
+      
 
+                                               
+                                               
 
+                                                   
+              
+                                                      
+      
 
+                                                     
+                                                     
+                                                     
 
+                                                     
+                                                     
+                                                 
+                                           
 
+                                                          
 
+                                                
+                                             
+                                             
+                                               
+                                                            
 
+                                            
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                     
+                                              
+                                          
 #endif
 
-#if(CLIENT)
+#if CLIENT
 global function ClInitHighlight
 global function ClientCodeCallback_HighlightServerContextChanged
 global function ClientCodeCallback_HighlightServerFunctionsChanged
@@ -51,13 +68,19 @@ global function SonarViewModelClearHighlight
 global function SonarPlayerCloneHighlight
 global function DeployableModelHighlight
 global function DeployableModelInvalidHighlight
+global function DeployableModelHighlightNewcastle
 global function PingViewModelHighlight
 global function PingViewModelClearHighlight
 global function ClHighlight_YouRespawned
 global function ClHighlight_YouDied
 global function ClHighlight_HasHighlightContext
+global function ReconScan_ShowHudForTarget
+global function ReconScan_RemoveHudForTarget
 
+global function TargetIsHighlightedForMyTeam
 global function DumpEntityHighlight
+global function AddCallback_HighlightContextChanged
+global function Highlight_SetAllianceProximityDrawFunc
 #endif
 
 global function HighlightContext_SetAfterPostProcess
@@ -66,34 +89,41 @@ global function HighlightContext_SetNearFadeDistance
 global function HighlightContext_SetDrawFunc
 global function HighlightContext_SetFill
 
+global function Highlight_SetGameModeEnemyHighlight
+global function Highlight_IsUsingGameModeEnemyVehicleHighlights
+global function Highlight_GetGameModeEnemyVehicleHighlightString
+global function Highlight_IsUsingGameModeFriendlyVehicleHighlights
+global function Highlight_GetGameModeFriendlyVehicleHighlightString
+
+
 global const HIGHLIGHT_CONTEXT_NONE = -1
 global const HIGHLIGHT_CONTEXT_NEUTRAL = 0
 global const HIGHLIGHT_CONTEXT_FRIENDLY = 1
 global const HIGHLIGHT_CONTEXT_ENEMY = 2
 global const HIGHLIGHT_CONTEXT_OWNED = 3
-global const HIGHLIGHT_CONTEXT_PINGED = 4
-global const HIGHLIGHT_CONTEXT_CAUSTIC_THREAT = 5
+global const HIGHLIGHT_CONTEXT_PRIVATE_MATCH_OBSERVER = 4
+global const HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT = 5
 global const HIGHLIGHT_CONTEXT_DEATH_RECAP = 6
 global const HIGHLIGHT_CONTEXT_SONAR = 7
-global const HIGHLIGHT_MAX_CONTEXTS = 8
+global const HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT_2 = 8                                        
+global const HIGHLIGHT_CONTEXT_FRIENDLY_REVEALED = 9                  
+global const HIGHLIGHT_CONTEXT_MOVEMENT_REVEALED = 10                           
+global const HIGHLIGHT_MAX_CONTEXTS = 11
 
-#if(false)
-
-
-
-
-
-
-
-#endif
+global const PVEMULTI_SQUAD_COLOR_0 = < 57.0 / 255.0, 181.0 / 255.0, 74.0 / 255.0 >
+global const PVEMULTI_SQUAD_COLOR_1 = < 242.0 / 255.0, 101.0 / 255.0, 34.0 / 255.0 >
+global const PVEMULTI_SQUAD_COLOR_2 = < 0 / 255.0, 191.0 / 255.0, 243.0 / 255.0 >
+global const PVEMULTI_SQUAD_COLOR_3 = < 255.0 / 255.0, 222.0 / 255.0, 0 / 255.0 >
+global const vector[4] SQUAD_TEAM_COLORVECS = [ PVEMULTI_SQUAD_COLOR_0, PVEMULTI_SQUAD_COLOR_1, PVEMULTI_SQUAD_COLOR_2, PVEMULTI_SQUAD_COLOR_3 ]
+global const string[4] SQUAD_TEAM_HIGHLIGHTS = ["PVE_multisquad_0", "PVE_multisquad_1", "PVE_multisquad_2", "PVE_multisquad_3"]
 
 global const HIGHLIGHT_COLOR_TEAMMATE_CLASS = <1.0, 1.0, 1.0>
 
 global const CAUSTIC_GAS_THREAT_DIST = 1500.0
 
-global const HIGHLIGHT_COLOR_NEUTRAL = <1, 1, 1> //
-global const HIGHLIGHT_COLOR_FRIENDLY = <0.34, 0.59, 0.86> //
-global const HIGHLIGHT_COLOR_ENEMY = <1, 0.36, 0.12> //
+global const HIGHLIGHT_COLOR_NEUTRAL = <1, 1, 1>                            
+global const HIGHLIGHT_COLOR_FRIENDLY = <0.34, 0.59, 0.86>                            
+global const HIGHLIGHT_COLOR_ENEMY = <1, 0.36, 0.12>                             
 const HIGHLIGHT_COLOR_OWNED = <0.63, 0.8, 1>
 global const HIGHLIGHT_COLOR_INTERACT = <0.63, 0.8, 1>
 global const HIGHLIGHT_COLOR_OBJECTIVE = <0.9, 0.63, 0.09>
@@ -101,63 +131,100 @@ const HIGHLIGHT_COLOR_FOCUSED_LOOT = <0, 1.0, 0>
 const HIGHLIGHT_COLOR_PINGED_LOOT = <0, 1.0, 0>
 
 global const HIGHLIGHT_OUTLINE_NONE = 0
-const HIGHLIGHT_OUTLINE_CUSTOM_COLOR = 101 //
+const HIGHLIGHT_OUTLINE_CUSTOM_COLOR = 101                                
+const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED = 145                                        
+const HIGHLIGHT_FILL_EMPTY_OCCLUDED = 146                                                                                                                      
+
 const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_WEAPON_PICKUP = 110
-const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_PULSE = 120 //
-const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OBEY_Z = 121 //
+const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_PULSE = 120                                                           
+const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OBEY_Z = 121                                 
 const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES = 129
-const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES = 169 //
-const HIGHLIGHT_OUTLINE_SONAR = 103 //
-global const HIGHLIGHT_OUTLINE_INTERACT_BUTTON = 105 //
-global const HIGHLIGHT_FILL_INTERACT_BUTTON = 103 //
-global const HIGHLIGHT_OUTLINE_OBJECTIVE = 125 //
+const HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES = 169                                       
+const HIGHLIGHT_OUTLINE_SONAR = 103                 
+global const HIGHLIGHT_OUTLINE_INTERACT_BUTTON = 105                           
+global const HIGHLIGHT_FILL_INTERACT_BUTTON = 103                          
+global const HIGHLIGHT_OUTLINE_OBJECTIVE = 125                     
 
 const HIGHLIGHT_OUTLINE_VM_CUSTOM_COLOR = 114
 const HIGHLIGHT_FILL_VM_CUSTOM_COLOR = 114
 
 const HIGHLIGHT_FILL_NONE = 0
-const HIGHLIGHT_FILL_CUSTOM_COLOR = 101 //
-global const HIGHLIGHT_FILL_LOBBY_IN_MATCH = 109 //
-global const HIGHLIGHT_FILL_SONAR = 103 //
+const HIGHLIGHT_FILL_CUSTOM_COLOR = 101                       
+global const HIGHLIGHT_FILL_LOBBY_IN_MATCH = 109                               
+global const HIGHLIGHT_FILL_SONAR = 103                
 
-const HIGHLIGHT_OUTLINE_LOOT_DEFAULT = 135 //
-const HIGHLIGHT_OUTLINE_LOOT_FOCUSED = 136 //
+const HIGHLIGHT_OUTLINE_LOOT_DEFAULT = 135                        
+const HIGHLIGHT_OUTLINE_LOOT_FOCUSED = 136                        
 
-const HIGHLIGHT_FILL_LOOT_DEFAULT = 135 //
-const HIGHLIGHT_FILL_LOOT_FOCUSED = 136 //
-#if(false)
-//
-#endif
+const HIGHLIGHT_FILL_LOOT_DEFAULT = 135                       
+const HIGHLIGHT_FILL_LOOT_FOCUSED = 136                                    
+const HIGHLIGHT_FILL_LOOT_SCANNED = 137   
+const HIGHLIGHT_OUTLINE_LOOT_SCANNED = 138   
+                
+                                                  
+                                                     
+      
+
+const HIGHLIGHT_FILL_CRYPTO_DRONE = 139
+const HIGHLIGHT_OUTLINE_CRYPTO_DRONE = 140
 
 
-global const HIGHLIGHT_FILL_OBJECTIVE = 126 //
+global const HIGHLIGHT_FILL_OBJECTIVE = 126                    
 
-global const HIGHLIGHT_OUTLINE_MENU_MODEL_REVEAL = 75 //
-global const HIGHLIGHT_FILL_MENU_MODEL_REVEAL = 75 //
+global const HIGHLIGHT_OUTLINE_MENU_MODEL_REVEAL = 75                             
+global const HIGHLIGHT_FILL_MENU_MODEL_REVEAL = 75                            
+global const HIGHLIGHT_FILL_MENU_MODEL_REVEAL_TSAA = 76                                 
 
-global const MAP_SCAN_FADE_DISTANCE = 16000 //
+                                                                                       
+global const HIGHLIGHT_OUTLINE_MENU_MODEL_REVEAL_DEPTH_DISCARD = 77                                           
+global const HIGHLIGHT_FILL_MENU_MODEL_REVEAL_DEPTH_DISCARD = 77                                          
 
-//
-const HIGHLIGHT_FILL_BLOODHOUND = 12 //
+global const MAP_SCAN_FADE_DISTANCE = 16000                                          
+
+            
+const HIGHLIGHT_FILL_BLOODHOUND = 12                   
+const HIGHLIGHT_FILL_BLOODHOUND_CLONE = 13                   
 global const HIGHLIGHT_COLOR_BLOODHOUND = <1, 0.25, 0>
 
 
-//
+         
 const HIGHLIGHT_FILL_CAUSTIC_THREAT = 133
 const HIGHLIGHT_FILL_CAUSTIC_CANISTER = 134
 global const HIGHLIGHT_COLOR_CAUSTIC = <0.79, 1.0, 0.0>
+global const HIGHLIGHT_FILL_CRYPTO = 133                                                                               
 
-#if(false)
-//
-#endif
+                          
+const HIGHLIGHT_FILL_OBSERVER = 141                               
+global const HIGHLIGHT_FILL_COLOR_OBSERVER_ENEMY = <0.79, 0.25, 0.0>
+      
+
+
+global const HIGHLIGHT_FILL_NEWT = 112                         
+global const HIGHLIGHT_COLOR_BLACKHOLE = <0.1, 0.25, 0.9>
+
+global const HIGHLIGHT_COLOR_MOVEMENT_REVEALED = <1, 0.10, 0>
+
+                 
+global const HIGHLIGHT_COLOR_CASTLE_WALL_FOCUS = <0.1,0.4,0.6>
+      
+
+const HIGHLIGHT_FILL_MOVEMENT_REVEALED = 12                           
+global const PARIAH_PURPLE = <0.5, 0.26, 0.77>
+
+                                                               
+const float HIGHLIGHT_LOS_FAR_FADE_DIST = 15000.0
 
 global enum eHighlightDrawFunc
 {
-	ALWAYS //
-	OCCLUDED //
-	LOS //
-	LOS_LINE //
-	LOS_LINE_ENTSONLYCONTENTSBLOCK    //
+	ALWAYS                             
+	OCCLUDED                                                     
+	LOS                                           
+	LOS_LINE                                                   
+	LOS_LINE_FADE
+                  
+	LOS_LINE_LONGFADE
+       
+	LOS_LINE_ENTSONLYCONTENTSBLOCK                                                  
 	ENT_APPEAR_EFFECT
 	BATTERY_THIEF
 	FW_FRIENDLY_TITAN
@@ -167,19 +234,31 @@ global enum eHighlightDrawFunc
 	SONAR_DETECTED
 	ALWAYS_LONG_FADE
 	CAUSTIC_THREAT
+	ABILITY_REVEAL
+	ALLIANCE_PROXIMITY
+
+	FORCE_ON
 
 	LAST_DRAW_FUNC
 }
 
 struct
 {
-	bool registeringHighlights = false
-	int  colorblindMode
+	bool                                        registeringHighlights = false
+	int                                         colorblindMode
+	array<void functionref( entity, int, int )> highlightChangedCallbacks
 } file
+
+void function AddCallback_HighlightContextChanged( void functionref( entity, int, int ) callbackFunc )
+{
+	file.highlightChangedCallbacks.append( callbackFunc )
+}
+
 
 void function Highlight_Init()
 {
 	RegisterSignal( "ContextChanged" )
+	RegisterSignal( "ReconScan_HUDRemove" )
 
 	int lootHighlightDrawType = eHighlightDrawFunc.ALWAYS
 	if ( GetBugReproNum() == 23966 )
@@ -189,9 +268,9 @@ void function Highlight_Init()
 
 	HighlightContext highlight
 
-	//
-	//
-	//
+	  
+	                                                        
+	  
 
 	highlight = RegisterHighlight( "decoy_prop" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OBEY_Z )
@@ -201,9 +280,17 @@ void function Highlight_Init()
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, DECOY_FADE_DISTANCE )
 
-	//
-	//
-	//
+	  
+	  
+	  
+	highlight = RegisterHighlight( "enemy_sonar" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_SONAR )
+	HighlightContext_SetRadius( highlight, 5 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_SONAR )
+	HighlightContext_SetParam( highlight, 0, <1, 0, 0> )
+	                                                                              
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+	HighlightContext_SetADSFade( highlight, false )
 
 
 	if ( IsLobby() )
@@ -212,9 +299,9 @@ void function Highlight_Init()
 		return
 	}
 
-	//
-	//
-	//
+	  
+	                                                              
+	  
 
 	highlight = RegisterHighlight( "friendly_ai" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_SONAR )
@@ -230,14 +317,36 @@ void function Highlight_Init()
 	HighlightContext_SetRadius( highlight, 2 )
 	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_INTERACT )
 
-	highlight = RegisterHighlight( "enemy_sonar" )
-	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_SONAR )
+                               
+		highlight = RegisterHighlight( "enemy_nightmap" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED )
+		HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_EMPTY_OCCLUDED )
+		HighlightContext_SetRadius( highlight, GetCurrentPlaylistVarFloat( "enemy_nightmap_outline_radius", 1.0 ) )
+		HighlightContext_SetParam( highlight, 0, <1, 0, 0> )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, GetCurrentPlaylistVarFloat( "enemy_nightmap_outline_fade_dist", 3000 ) )
+
+		highlight = RegisterHighlight( "shadow_friendly" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+		HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CUSTOM_COLOR )
+		HighlightContext_SetParam( highlight, 0, <0.72, 0.36, 0.08> )
+		HighlightContext_SetRadius( highlight, 3 )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetAfterPostProcess( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
+                                    
+
+	highlight = RegisterHighlight( "sp_pet_hero" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CUSTOM_COLOR )
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
 	HighlightContext_SetRadius( highlight, 5 )
-	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_SONAR )
-	HighlightContext_SetParam( highlight, 0, <1, 0, 0> )
-	//
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
 	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
 
 	highlight = RegisterHighlight( "bloodhound_sonar" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES )
@@ -247,7 +356,18 @@ void function Highlight_Init()
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetAfterPostProcess( highlight, false )
-	//
+	                                                          
+
+               
+                                                      
+                                                                                          
+                                                        
+                                            
+                                                                  
+                                                                      
+                                                 
+                                                          
+       
 
 	highlight = RegisterHighlight( "caustic_gas_threat" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
@@ -256,8 +376,62 @@ void function Highlight_Init()
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CAUSTIC_THREAT )
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.CAUSTIC_THREAT )
 	HighlightContext_SetADSFade( highlight, false )
-	HighlightContext_SetAfterPostProcess( highlight, true )
+	HighlightContext_SetAfterPostProcess( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, CAUSTIC_GAS_THREAT_DIST )
+
+	highlight = RegisterHighlight( "nova_blackhole_threat" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
+	HighlightContext_SetRadius( highlight, 1 )
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_BLOODHOUND )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_BLOODHOUND )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS_LINE_FADE)
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, true )
+	HighlightContext_SetFarFadeDistance( highlight, 5000.0 )
+
+	highlight = RegisterHighlight( "nova_blackhole_newt" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_NONE )
+	HighlightContext_SetRadius( highlight, 1 )
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_BLACKHOLE )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NEWT )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS_LINE_FADE )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, true )
+	HighlightContext_SetFarFadeDistance( highlight, 5000.0 )
+
+	highlight = RegisterHighlight( "ability_reveal" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES )
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_MOVEMENT_REVEALED )
+	HighlightContext_SetRadius( highlight, 2 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_MOVEMENT_REVEALED )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ABILITY_REVEAL )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 5000.0 )
+	                                                     
+
+                  
+		highlight = RegisterHighlight( "castle_wall_focus" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_CASTLE_WALL_FOCUS )
+		HighlightContext_SetRadius( highlight, 3 )
+	  	                                                                
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetAfterPostProcess( highlight, false )
+
+		                                                                                                                                                           
+		                                                                      
+		highlight = RegisterHighlight( "armored_leap_threat" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
+		HighlightContext_SetRadius( highlight, 1 )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_BLOODHOUND )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS_LINE_LONGFADE )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetAfterPostProcess( highlight, true )
+		HighlightContext_SetFarFadeDistance( highlight, 5000.0 )
+
+       
 
 	highlight = RegisterHighlight( "caustic_gas_canister" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
@@ -266,7 +440,9 @@ void function Highlight_Init()
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CAUSTIC_CANISTER )
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
 	HighlightContext_SetADSFade( highlight, false )
-	HighlightContext_SetAfterPostProcess( highlight, true )
+	                                                         
+	HighlightContext_SetAfterPostProcess( highlight, false )
+
 
 	highlight = RegisterHighlight( "enemy_sonar_movement" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_SONAR )
@@ -281,7 +457,7 @@ void function Highlight_Init()
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
 	HighlightContext_SetRadius( highlight, 5 )
 	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
-	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS_LINE )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, DECOY_FADE_DISTANCE )
 
@@ -311,6 +487,28 @@ void function Highlight_Init()
 	HighlightContext_SetAfterPostProcess( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
 
+                    
+		highlight = RegisterHighlight( "loot_marvin" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+		HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CUSTOM_COLOR )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
+		HighlightContext_SetRadius( highlight, 3 )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetAfterPostProcess( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, 5000.0 )
+       
+
+	highlight = RegisterHighlight( "sp_friendly_hero_force_on" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CUSTOM_COLOR )
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
+	HighlightContext_SetRadius( highlight, 3 )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.FORCE_ON )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
+
 	highlight = RegisterHighlight( "sp_friendly_pilot" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OBEY_Z )
 	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
@@ -320,8 +518,18 @@ void function Highlight_Init()
 	HighlightContext_SetAfterPostProcess( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, 5000.0 )
 
+	highlight = RegisterHighlight( "sp_objective_outline" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_OBJECTIVE )                                 
+	                                                                 
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_OBJECTIVE )
+	HighlightContext_SetRadius( highlight, 2 )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 999999.0 )
+
 	highlight = RegisterHighlight( "sp_objective_entity" )
-	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_OBJECTIVE ) //
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_OBJECTIVE )                                 
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_OBJECTIVE )
 	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_OBJECTIVE )
 	HighlightContext_SetRadius( highlight, 2 )
@@ -332,12 +540,91 @@ void function Highlight_Init()
 
 	highlight = RegisterHighlight( "survival_item_weapon" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_WEAPON_PICKUP )
-	HighlightContext_SetParam( highlight, 0, <.55, .55, .5> )    //
+	HighlightContext_SetParam( highlight, 0, <.55, .55, .5> )                                                
 	HighlightContext_SetRadius( highlight, 8 )
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NONE )
 	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, 3000.0 )
+
+	highlight = RegisterHighlight( "survival_item_heirloom_loba" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_SCANNED )
+	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_SCANNED )
+	HighlightContext_SetParam( highlight, 0, <0.98, 0.78, 0> )             
+	HighlightContext_SetParam( highlight, 1, <.55, .55, .5> )
+	HighlightContext_SetRadius( highlight, 2 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_SCANNED )
+	HighlightContext_SetFillFocused( highlight, HIGHLIGHT_FILL_LOOT_SCANNED )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, GetEyeForQualityRadius() )
+	highlight.colorID = COLORID_LOOT_TIER5
+
+	highlight = RegisterHighlight( "survival_item_legendary_loba" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_SCANNED )
+	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_SCANNED )
+	HighlightContext_SetParam( highlight, 0, <0.98, 0.78, 0> )
+	HighlightContext_SetParam( highlight, 1, <.55, .55, .5> )
+	HighlightContext_SetRadius( highlight, 2 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_SCANNED )
+	HighlightContext_SetFillFocused( highlight, HIGHLIGHT_FILL_LOOT_SCANNED )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, GetEyeForQualityRadius() )
+	highlight.colorID = COLORID_LOOT_TIER4
+
+	highlight = RegisterHighlight( "survival_item_epic_loba" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_SCANNED )
+	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_SCANNED )
+	HighlightContext_SetParam( highlight, 0, <0.34, 0, 0.7> )
+	HighlightContext_SetParam( highlight, 1, <.55, .55, .5> )
+	HighlightContext_SetRadius( highlight, 2 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_SCANNED )
+	HighlightContext_SetFillFocused( highlight, HIGHLIGHT_FILL_LOOT_SCANNED )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, GetEyeForQualityRadius() )
+	highlight.colorID = COLORID_LOOT_TIER3
+
+                  
+                                                              
+                                                                         
+                                                                                
+                                                          
+                                                          
+                                           
+                                                                   
+                                                                          
+                                                                     
+                                                
+                                                                            
+                                       
+
+                                                                
+                                                                         
+                                                                                
+                                                          
+                                                          
+                                           
+                                                                   
+                                                                          
+                                                                     
+                                                
+                                                                            
+                                       
+       
+
+                 
+                                                         
+                                                                                  
+                                                                         
+                                                           
+                                            
+                                                                            
+                                                                      
+                                                 
+                                                          
+       
 
 	highlight = RegisterHighlight( "survival_item_common" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_DEFAULT )
@@ -381,7 +668,7 @@ void function Highlight_Init()
 	highlight = RegisterHighlight( "survival_item_legendary" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_DEFAULT )
 	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_FOCUSED )
-	HighlightContext_SetParam( highlight, 0, <0.98, 0.78, 0> ) //
+	HighlightContext_SetParam( highlight, 0, <0.98, 0.78, 0> )             
 	HighlightContext_SetParam( highlight, 1, <1.0, 0, 0> )
 	HighlightContext_SetRadius( highlight, 1 )
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_DEFAULT )
@@ -390,6 +677,19 @@ void function Highlight_Init()
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, 3000.0 )
 	highlight.colorID = COLORID_LOOT_TIER4
+
+	highlight = RegisterHighlight( "survival_item_heirloom" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_DEFAULT )
+	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_FOCUSED )
+	HighlightContext_SetParam( highlight, 0, <1.0, 0.306, 0.114> )             
+	HighlightContext_SetParam( highlight, 1, <1.0, 0, 0> )
+	HighlightContext_SetRadius( highlight, 1 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_DEFAULT )
+	HighlightContext_SetFillFocused( highlight, HIGHLIGHT_FILL_LOOT_FOCUSED )
+	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 3000.0 )
+	highlight.colorID = COLORID_LOOT_TIER5
 
 	highlight = RegisterHighlight( "survival_item_common_longerHighlightDist" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_DEFAULT )
@@ -433,7 +733,7 @@ void function Highlight_Init()
 	highlight = RegisterHighlight( "survival_item_legendary_longerHighlightDist" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_DEFAULT )
 	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_FOCUSED )
-	HighlightContext_SetParam( highlight, 0, <0.98, 0.78, 0> ) //
+	HighlightContext_SetParam( highlight, 0, <0.98, 0.78, 0> )             
 	HighlightContext_SetParam( highlight, 1, <1.0, 0, 0> )
 	HighlightContext_SetRadius( highlight, 1 )
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_DEFAULT )
@@ -443,11 +743,24 @@ void function Highlight_Init()
 	HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
 	highlight.colorID = COLORID_LOOT_TIER4
 
+	highlight = RegisterHighlight( "survival_item_heirloom_longerHighlightDist" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_LOOT_DEFAULT )
+	HighlightContext_SetOutlineFocused( highlight, HIGHLIGHT_OUTLINE_LOOT_FOCUSED )
+	HighlightContext_SetParam( highlight, 0, <1.0, 0.306, 0.114> )             
+	HighlightContext_SetParam( highlight, 1, <1.0, 0, 0> )
+	HighlightContext_SetRadius( highlight, 1 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_LOOT_DEFAULT )
+	HighlightContext_SetFillFocused( highlight, HIGHLIGHT_FILL_LOOT_FOCUSED )
+	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
+	highlight.colorID = COLORID_LOOT_TIER5
+
 	highlight = RegisterHighlight( "survival_item_ammo_a" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
-	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> ) //
-	//
-	HighlightContext_SetRadius( highlight, 1 ) //
+	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> )                 
+	                                                                              
+	HighlightContext_SetRadius( highlight, 1 )                           
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NONE )
 	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
 	HighlightContext_SetADSFade( highlight, false )
@@ -455,8 +768,8 @@ void function Highlight_Init()
 
 	highlight = RegisterHighlight( "survival_item_ammo_b" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
-	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> ) //
-	//
+	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> )                 
+	                                                             
 	HighlightContext_SetRadius( highlight, 1 )
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NONE )
 	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
@@ -465,8 +778,8 @@ void function Highlight_Init()
 
 	highlight = RegisterHighlight( "survival_item_ammo_shotgun" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
-	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> ) //
-	//
+	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> )                 
+	                                                               
 	HighlightContext_SetRadius( highlight, 1 )
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NONE )
 	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
@@ -475,32 +788,42 @@ void function Highlight_Init()
 
 	highlight = RegisterHighlight( "survival_item_ammo_energy" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
-	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> ) //
-	//
+	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> )                 
+	                                                              
 	HighlightContext_SetRadius( highlight, 1 )
 	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NONE )
 	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetFarFadeDistance( highlight, 3000.0 )
 
-	#if(false)
+                      
+                                                                 
+                                                                                               
+                                                                             
+                                                                   
+                                            
+                                                            
+                                                                  
+                                                 
+                                                          
+       
 
-
-//
-//
-
-
-
-
-
-#endif
+	highlight = RegisterHighlight( "survival_item_ammo_sniper" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
+	HighlightContext_SetParam( highlight, 0, <0.1, 0.1, 0.1> )                 
+	                                                              
+	HighlightContext_SetRadius( highlight, 1 )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_NONE )
+	HighlightContext_SetDrawFunc( highlight, lootHighlightDrawType )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 3000.0 )
 
 	highlight = RegisterHighlight( "survival_friendly_skydiving" )
-	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_OBJECTIVE ) //
-	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_OBJECTIVE ) //
-	HighlightContext_SetParam( highlight, 0, <0, 0.47, 1.96> )//
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_OBJECTIVE )                                       
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_OBJECTIVE )                       
+	HighlightContext_SetParam( highlight, 0, <0, 0.47, 1.96> )                                                                  
 	HighlightContext_SetRadius( highlight, 2 )
-	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS ) //
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )                              
 	HighlightContext_SetADSFade( highlight, false )
 	HighlightContext_SetAfterPostProcess( highlight, true )
 	HighlightContext_SetFarFadeDistance( highlight, 999999.0 )
@@ -508,7 +831,7 @@ void function Highlight_Init()
 
 	highlight = RegisterHighlight( "survival_enemy_skydiving" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_OBJECTIVE )
-	//
+	                                                                 
 	HighlightContext_SetParam( highlight, 0, <0.7, 0.2, 0.2> )
 	HighlightContext_SetRadius( highlight, 1.0 )
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS_LINE )
@@ -519,56 +842,73 @@ void function Highlight_Init()
 
 	highlight = RegisterHighlight( "staging_gun_range_target_appear" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_MENU_MODEL_REVEAL )
-	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_MENU_MODEL_REVEAL )
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_MENU_MODEL_REVEAL_TSAA )
 	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
 	HighlightContext_SetParam( highlight, 1, <2000.0, 0, 0> )
 	HighlightContext_SetRadius( highlight, 1 )
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ENT_APPEAR_EFFECT )
 	HighlightContext_SetADSFade( highlight, false )
-	//
+	                                                          
 	HighlightContext_SetFarFadeDistance( highlight, 999999.0 )
 	HighlightContext_SetNearFadeDistance( highlight, 0.0 )
 
-	#if(false)
-
-//
-//
-//
-
-//
-
-
-
-
-#endif //
-
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-	#if(true)
-		highlight = RegisterHighlight( "survival" )
+                  
+		highlight = RegisterHighlight( "survival_evac_ship" )
 		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
-		HighlightContext_SetRadius( highlight, 1 )
-		//
-		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_ENEMY )
+		HighlightContext_SetRadius( highlight, 5 )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
 		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
 		HighlightContext_SetADSFade( highlight, false )
-		HighlightContext_SetFarFadeDistance( highlight, 2.0 )
-	#endif //
+		HighlightContext_SetFarFadeDistance( highlight, 999999.0 )
+		HighlightContext_SetNearFadeDistance( highlight, 256.0 )
+       
+
+                      
+		highlight = RegisterHighlight( "hover_vehicle_highlight" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+		HighlightContext_SetRadius( highlight, 5 )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, 7000.0 )
+		HighlightContext_SetNearFadeDistance( highlight, 256.0 )
+                            
+
+	highlight = RegisterHighlight( "crypto_camera_friendly" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CRYPTO_DRONE )                                       
+	HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CRYPTO_DRONE )                       
+	HighlightContext_SetParam( highlight, 0, <0.64, 0.86, 0.69> )                                                                  
+	HighlightContext_SetRadius( highlight, 2 )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )                              
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetAfterPostProcess( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 999999.0 )
+	HighlightContext_SetNearFadeDistance( highlight, 0.0 )
+
+	if ( IsPVEMode() )
+	{
+		for ( int idx = 0; idx < SQUAD_TEAM_HIGHLIGHTS.len(); ++idx )
+		{
+			highlight = RegisterHighlight( SQUAD_TEAM_HIGHLIGHTS[idx] )
+			HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+			HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_CUSTOM_COLOR )
+			HighlightContext_SetParam( highlight, 0, SQUAD_TEAM_COLORVECS[idx] )
+			HighlightContext_SetRadius( highlight, 3 )
+			HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+			HighlightContext_SetADSFade( highlight, false )
+			HighlightContext_SetAfterPostProcess( highlight, false )
+			HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
+		}
+	}
+
+	highlight = RegisterHighlight( "survival" )
+	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+	HighlightContext_SetRadius( highlight, 1 )
+	                                                             
+	HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_ENEMY )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+	HighlightContext_SetADSFade( highlight, false )
+	HighlightContext_SetFarFadeDistance( highlight, 2.0 )
 
 	highlight = RegisterHighlight( "dev_emote_hostile" )
 	HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_SONAR )
@@ -586,24 +926,95 @@ void function Highlight_Init()
 	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS )
 	HighlightContext_SetADSFade( highlight, false )
 
-	//
-	//
-	//
+                           
+		highlight = RegisterHighlight( "privatematch_observer_enemy" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_OCCLUDED_NOSCANLINES )
+		HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_OBSERVER )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_FILL_COLOR_OBSERVER_ENEMY )
+		HighlightContext_SetRadius( highlight, 2 )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.OCCLUDED )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetAfterPostProcess( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, 10000.0 )
+                                
+
+		                                                          
+		highlight = RegisterHighlight( "enemy_los_highlight" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+		HighlightContext_SetFill( highlight, HIGHLIGHT_FILL_EMPTY_OCCLUDED )
+		HighlightContext_SetRadius( highlight, 5)
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_ENEMY )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, HIGHLIGHT_LOS_FAR_FADE_DIST )
+
+                      
+		highlight = RegisterHighlight( "vehicle_friendly_los_highlight" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+		HighlightContext_SetRadius( highlight, 5 )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_FRIENDLY )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALWAYS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, HIGHLIGHT_LOS_FAR_FADE_DIST )
+
+		highlight = RegisterHighlight( "vehicle_enemy_los_highlight" )
+		HighlightContext_SetOutline( highlight, HIGHLIGHT_OUTLINE_CUSTOM_COLOR )
+		HighlightContext_SetRadius( highlight, 5 )
+		HighlightContext_SetParam( highlight, 0, HIGHLIGHT_COLOR_ENEMY )
+		HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.LOS )
+		HighlightContext_SetADSFade( highlight, false )
+		HighlightContext_SetFarFadeDistance( highlight, HIGHLIGHT_LOS_FAR_FADE_DIST )
+		                                                          
+                            
+
+                                             
+                                                                   
+                                                                          
+                                            
+                                                                     
+                                                                      
+                                                 
+                                                                               
+                                                            
+
+                                                                
+                                                                          
+                                            
+                                                                  
+                                                                      
+                                                 
+                                                                               
+                                                            
+                                                   
+
+                        
+                                                 
+                                                                          
+                                                                    
+                                           
+                                                                  
+                                                                   
+                                                 
+                                                                               
+                              
+
+	  
+	  
+	  
 
 	Highlight_EndRegisteringHighlights()
 
-	#if(CLIENT)
-		AddCallback_OnPlayerLifeStateChanged( Callback_UpdateHighlight )
+	#if CLIENT
 		AddCallback_PlayerClassChanged( ClHighlight_ClassChanged )
 		AddCallback_OnSettingsUpdated( OnSettingsUpdated )
 		file.colorblindMode = GetConVarInt( "colorblind_mode" )
 	#endif
 
-	#if(false)
-
-
-
-#endif
+	#if SERVER
+		                                                                
+		                                                               
+		                                            
+	#endif
 }
 
 
@@ -623,64 +1034,64 @@ void function InitHighlightSettings( entity ent )
 {
 }
 
-#if(false)
+#if SERVER
+                                                             
+ 
+	                                       
+	                                        
+	                                    
 
+	                         
 
+	                                        
+	 
+		                                                                                         
+			                                                                              
+		    
+			                                                                              
+	 
+	    
+	 
+		                                                                                         
+			                                                                                  
+		    
+			                                                                                  
+	 
+ 
 
+                                                                              
+ 
+	                                                                         
+	                        
+	 
+		                                       
+		      
+	 
 
+	                                    
 
+	                                 
+	 
+		                                           
+	 
+ 
 
+                                                         
+ 
+	       
+	        
+	                         
+		      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
+	                                       
+ 
 #endif
 
 HighlightContext function RegisterHighlight( string assetName )
 {
 	Assert( file.registeringHighlights )
 
-	//
+	                                                                                                                          
 	Assert( shGlobal.highlight.len() <= HIGHLIGHT_STATE_MAX_VALUE, "Too many highlights registered (max " + HIGHLIGHT_STATE_MAX_VALUE + ")" )
 
 	HighlightContext context
@@ -836,6 +1247,11 @@ void function HighlightContext_SetAfterPostProcess( HighlightContext highlight, 
 	highlight.afterPostProcess = value
 }
 
+void function HighlightContext_SetTeamAgnostic( HighlightContext highlight, bool value )
+{
+	highlight.teamAgnostic = value
+}
+
 
 void function Highlight_SetFriendlyHighlight( entity ent, string assetName )
 {
@@ -932,20 +1348,65 @@ void function Highlight_SetDeathRecapHighlight( entity ent, string assetName )
 void function Highlight_SetCausticThreatHighlight( entity ent, string assetName )
 {
 	HighlightContext highlight = GetHighlight( assetName )
-	__SetEntityContextHighlight( ent, HIGHLIGHT_CONTEXT_CAUSTIC_THREAT, highlight )
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT, highlight )
 }
 
 
-void function Highlight_SetPingedHighlight( entity ent, string assetName )
+void function Highlight_SetNovaBlackholeHighlight( entity ent, string assetName )
 {
 	HighlightContext highlight = GetHighlight( assetName )
-	__SetEntityContextHighlight( ent, HIGHLIGHT_CONTEXT_PINGED, highlight )
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT_2, highlight )
+}
+                        
+void function Highlight_SetFuseMortarHighlight( entity ent, string assetName )
+{
+	HighlightContext highlight = GetHighlight( assetName )
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CONTEXT_MOVEMENT_REVEALED, highlight )
+}
+      
+
+void function Highlight_SetMaggieThreatHighlight( entity ent, string assetName )
+{
+	HighlightContext highlight = GetHighlight( assetName )
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CONTEXT_MOVEMENT_REVEALED, highlight )
+}
+
+                 
+void function Highlight_SetCastleWallFocusHighlight( entity ent, string assetName )
+{
+	HighlightContext highlight = GetHighlight( assetName )
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CONTEXT_FRIENDLY_REVEALED, highlight )
+}
+
+void function Highlight_SetArmoredLeapThreatHighlight( entity ent, string assetName )
+{
+	HighlightContext highlight = GetHighlight( assetName )
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT_2, highlight )
+}
+      
+
+              
+                                                                                    
+ 
+                                                       
+                                                                                   
+ 
+      
+
+void function Highlight_SetPrivateMatchObserverHighlight( entity ent, string assetName )
+{
+	HighlightContext highlight = GetHighlight( assetName )
+	if ( ent.IsPlayer() )
+	{
+		highlight.paramVecs[0] = GetSkydiveSmokeColorForTeam( ent.GetTeam() ) / 255.0
+	}
+	__SetEntityContextHighlight( ent, HIGHLIGHT_CONTEXT_PRIVATE_MATCH_OBSERVER, highlight )
 }
 
 
-void function Highlight_ClearPingedHighlight( entity ent )
+void function Highlight_ClearPrivateMatchObserverHighlight( entity ent )
 {
-	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_PINGED, 0, true, 0, 2, 0, false )
+	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_PRIVATE_MATCH_OBSERVER, 0, true, 0, 2, 0, false )
 }
 
 
@@ -958,20 +1419,37 @@ void function Highlight_ClearFriendlyHighlight( entity ent )
 void function Highlight_ClearEnemyHighlight( entity ent )
 {
 	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_ENEMY, 0, true, 0, 2, 0, false )
-	#if(false)
-//
-
-
-#endif
+	#if SERVER
+		                                                    
+		                                                       
+			                                 
+	#endif
 }
 
 
+void function Highlight_SetEnemyHighlightNightmap( entity player )
+{
+                               
+		if ( IsShadowRoyaleMode() )
+		{
+			if ( IsPlayerShadowZombie( player ) && GetCurrentPlaylistVarBool( "enemy_nightmap_outline_enable_for_shadows", false ) == false )
+				return
+
+			Highlight_SetEnemyHighlight( player, "enemy_nightmap" )
+			return
+		}
+       
+}
+
 void function SetDefaultMPEnemyHighlight( entity ent )
 {
-	//
-	//
-	//
-	//
+	                      
+	  	                                                 
+	      
+	  	                                                  
+
+	Highlight_SetGameModeEnemyHighlight( ent )
+
 	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_ENEMY, 0, true, 0, 2, 0, false )
 }
 
@@ -1031,18 +1509,13 @@ bool function Highlight_HasSonarHighlight( entity ent )
 	return false
 }
 
-#if(false)
-
-#else
-
 
 void function SetSurvivalPropHighlight( entity ent, string assetName, bool isFocused, int contextId = HIGHLIGHT_CONTEXT_NEUTRAL )
-#endif
 {
 	HighlightContext highlight = GetHighlight( assetName )
 
 	float baseRadius = highlight.outlineRadius
-	#if(CLIENT)
+	#if CLIENT
 		if ( GetConVarInt( "colorblind_mode" ) != 0 )
 		{
 			switch ( highlight.colorID )
@@ -1068,11 +1541,6 @@ void function SetSurvivalPropHighlight( entity ent, string assetName, bool isFoc
 	int fill         = isFocused && highlight.insideSlotFocused != HIGHLIGHT_USE_DEFAULT ? highlight.insideSlotFocused : highlight.insideSlot
 	int outline      = isFocused && highlight.outsideSlotFocused != HIGHLIGHT_USE_DEFAULT ? highlight.outsideSlotFocused : highlight.outsideSlot
 
-	#if(false)
-
-
-#endif
-
 	ent.Highlight_SetCurrentContext( contextId )
 	ent.Highlight_SetFunctions( contextId, fill, highlight.entityVisible, outline, radius, highlight.highlightId, highlight.afterPostProcess )
 	ent.Highlight_SetParam( contextId, 0, highlight.paramVecs[0] )
@@ -1086,7 +1554,7 @@ void function ClearSurvivalPropHighlight( entity ent, int contextId = HIGHLIGHT_
 	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_NONE, true, HIGHLIGHT_OUTLINE_NONE, 1.0, highlightId, false )
 }
 
-#if(CLIENT)
+#if CLIENT
 void function ClInitHighlight( entity ent )
 {
 	ManageHighlightEntity( ent )
@@ -1116,14 +1584,6 @@ void function ClientCodeCallback_HighlightServerFunctionsChanged( entity ent )
 	ManageHighlightEntity( ent )
 }
 
-void function Callback_UpdateHighlight( entity player, int oldLifeState, int newLifeState )
-{
-	//
-	//
-
-	//
-}
-
 void function ClHighlight_YouRespawned()
 {
 	array<entity> players = GetPlayerArray()
@@ -1143,13 +1603,20 @@ void function ClHighlight_YouDied( entity attacker )
 	ManageHighlightEntity( attacker )
 }
 
-#if(CLIENT)
+#if CLIENT
 void function OnSettingsUpdated()
 {
 	if ( GetConVarInt( "colorblind_mode" ) != file.colorblindMode )
 	{
-		array<entity> loot = GetSurvivalLootNearbyPlayer( GetLocalClientPlayer(), 65536.0, false )
+		array<entity> loot = GetSurvivalLootNearbyPlayer( GetLocalClientPlayer(), 65536.0, false, false, false )
 		foreach ( ent in loot )
+		{
+			ManageHighlightEntity( ent )
+			ApplyEquipmentColorAndFXOverrides( ent )
+		}
+
+		array<entity> deathbox = GetAllDeathBoxes()
+		foreach ( ent in deathbox )
 		{
 			ManageHighlightEntity( ent )
 		}
@@ -1161,16 +1628,32 @@ void function OnSettingsUpdated()
 
 void function ManageHighlightEntity( entity ent )
 {
+	if ( !IsValid( ent ) )
+		return
+
 	if ( !ClHighlight_HasHighlightContext( ent ) )
 		return
 
-	//
-	if ( !GetLocalViewPlayer() )
+	                 
+	if ( !GetLocalViewPlayer() && !IsPrivateMatch() )
 		return
 
-	int contextId = GetHighlightContextForEnt( GetLocalViewPlayer(), ent )
+	int contextId
+	if ( IsPrivateMatch() && IsValid( GetLocalClientPlayer() ) && GetLocalClientPlayer().GetTeam() == TEAM_SPECTATOR )
+	{
+		contextId = GetHighlightContextForEnt( GetLocalClientPlayer(), ent )
+	}
+	else
+	{
+		contextId = GetHighlightContextForEnt( GetLocalViewPlayer(), ent )
+	}
+
 	if ( contextId != ent.Highlight_GetCurrentContext() )
+	{
+		foreach ( callbackFunc in file.highlightChangedCallbacks )
+			callbackFunc( ent, ent.Highlight_GetCurrentContext(), contextId )
 		ent.Signal( "ContextChanged" )
+	}
 
 	ClHighlight_UpdateHighlightFlags( ent, contextId )
 }
@@ -1189,7 +1672,7 @@ void function ClHighlight_UpdateHighlightFlags( entity ent, int contextId )
 
 	if ( highlight.requiresWeakPointsVisible )
 	{
-		thread ClHighlight_DrawWhenLOS_LineThink( ent, highlight ) //
+		thread ClHighlight_DrawWhenLOS_LineThink( ent, highlight )                                                
 		return
 	}
 
@@ -1207,33 +1690,46 @@ void function ClHighlight_UpdateHighlightFlags( entity ent, int contextId )
 	ent.Highlight_SetFlag( HIGHLIGHT_FLAG_REQUIRE_HIGH_MOVEMENT, highlight.requiresStationary )
 	ent.Highlight_SetFlag( HIGHLIGHT_FLAG_DISABLE_DEATH_FADE, highlight.disableDeathFade )
 
-#if(CLIENT)
-	if ( ent.GetNetworkedClassName() == "prop_survival" )
-	{
-		if ( highlight.colorID >= 0 )
+	bool agnosticHighlight = (contextId == HIGHLIGHT_CONTEXT_SONAR) || highlight.teamAgnostic
+	ent.Highlight_SetFlag( HIGHLIGHT_FLAG_TEAM_AGNOSTIC, agnosticHighlight )
+
+	#if CLIENT
+		if ( ent.GetNetworkedClassName() == "prop_survival" )
 		{
-			ent.Highlight_SetParam( contextId, 0, GetKeyColor( highlight.colorID ) / 255.0 )
+			if ( highlight.colorID >= 0 )
+			{
+				ent.Highlight_SetParam( contextId, 0, GetKeyColor( highlight.colorID ) / 255.0 )
+			}
+
+			ent.Highlight_SetParam( contextId, 1, <GetHighlightFillAlphaForLoot( ent ), 0, 0> )
 		}
+		else if (ent.GetNetworkedClassName() == "prop_death_box" )
+		{
+			if ( highlight.colorID >= 0 )
+			{
+				ent.Highlight_SetParam( contextId, 0, GetKeyColor( highlight.colorID ) / 255.0 )
+			}
+			ent.Highlight_SetParam( contextId, 1, <GetHighlightFillAlphaForDeathBox( ent ), 0, 0> )
+		}
+	#endif
 
-		ent.Highlight_SetParam( contextId, 1, <GetHighlightFillAlphaForLoot( ent ), 0, 0> )
-	}
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-#endif //
+	if ( Freelance_IsHubLevel() )
 	{
 		if ( contextId == HIGHLIGHT_CONTEXT_FRIENDLY )
-			ent.Highlight_SetFlag( HIGHLIGHT_FLAG_REQUIRE_FRIENDLY_TEAM, true )
+			ent.Highlight_SetFlag( HIGHLIGHT_FLAG_REQUIRE_SAME_TEAM, true )
 		else if ( contextId == HIGHLIGHT_CONTEXT_ENEMY )
 			ent.Highlight_SetFlag( HIGHLIGHT_FLAG_REQUIRE_ENEMY_TEAM, true )
+	}
+	else
+	{
+		if ( contextId == HIGHLIGHT_CONTEXT_FRIENDLY )
+		{
+			ent.Highlight_SetFlag( HIGHLIGHT_FLAG_REQUIRE_FRIENDLY_TEAM, true )
+		}
+		else if ( contextId == HIGHLIGHT_CONTEXT_ENEMY )
+		{
+			ent.Highlight_SetFlag( HIGHLIGHT_FLAG_REQUIRE_ENEMY_TEAM, true )
+		}
 	}
 
 	int drawFuncId = highlight.drawFuncId
@@ -1271,6 +1767,24 @@ void function ClHighlight_UpdateHighlightFlags( entity ent, int contextId )
 			ent.Highlight_SetFadeOutTime( 0.0 )
 		}
 			break
+
+		case eHighlightDrawFunc.LOS_LINE_FADE:
+		{
+			ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_LOS )
+			ent.Highlight_SetFadeInTime( 0.15 )
+			ent.Highlight_SetFadeOutTime( 0.15 )
+		}
+			break
+
+                   
+		case eHighlightDrawFunc.LOS_LINE_LONGFADE:
+		{
+			ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_LOS )
+			ent.Highlight_SetFadeInTime( 0.15 )
+			ent.Highlight_SetFadeOutTime( 0.75 )
+		}
+			break
+        
 
 		case eHighlightDrawFunc.ENT_APPEAR_EFFECT:
 		{
@@ -1333,14 +1847,12 @@ void function ClHighlight_UpdateHighlightFlags( entity ent, int contextId )
 		}
 			break
 
-#if(true)
-
 		case eHighlightDrawFunc.PICKUP:
 		{
-			//
+			                                                                                                                                                
 			if ( !PlayerCanUseWeapon( GetLocalViewPlayer(), ent.GetWeaponClass() ) )
 				ent.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_ENEMY )
-			else if ( IsCurrentlyFocusedWeapon( ent ) )
+			else if ( IsCurrentlyFocusedUseEnt( ent ) )
 				ent.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_OWNED )
 			else
 				ent.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_NEUTRAL )
@@ -1349,7 +1861,30 @@ void function ClHighlight_UpdateHighlightFlags( entity ent, int contextId )
 			ent.Highlight_SetFadeOutTime( 0.15 )
 		}
 			break
-#endif
+
+		case eHighlightDrawFunc.FORCE_ON:
+		{
+			ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_FORCE_ON )
+			ent.Highlight_SetFadeInTime( 0.15 )
+			ent.Highlight_SetFadeOutTime( 0.15 )
+			break
+		}
+
+		case eHighlightDrawFunc.ABILITY_REVEAL:
+			ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
+			ent.Highlight_SetFadeInTime( 0.15 )
+			ent.Highlight_SetFadeOutTime( 0.5 )
+			break
+
+		case eHighlightDrawFunc.ALLIANCE_PROXIMITY:
+		{
+			ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
+			ent.Highlight_SetFadeInTime( 0.15 )
+			ent.Highlight_SetFadeOutTime( 0.15 )
+			if ( AllianceProximity_IsUsingAllianceProximity() )
+				ent.Highlight_SetFarFadeDist( AllianceProximity_GetMaxDistForProximity() )
+		}
+			break
 	}
 }
 
@@ -1522,7 +2057,7 @@ void function CLHighlight_DONPanel( entity ent, HighlightContext highlight )
 
 float function GetHullTraceSizeForEnt( entity ent )
 {
-	float midHeight = GetMidpointHeight( ent ) - 3.0 //
+	float midHeight = GetMidpointHeight( ent ) - 3.0          
 	return min( midHeight, 10 )
 }
 
@@ -1569,13 +2104,13 @@ void function ClHighlight_DrawWhenLOS_LineThink( entity ent, HighlightContext hi
 
 		deferredTrace = DeferredTraceLine( viewPosition, entPos, ent, TRACE_MASK_BLOCKLOS, TRACE_COLLISION_GROUP_NONE )
 
-		/*
-
-
-
-
-
-*/
+		  
+				                                                                         
+				 
+					                                                             
+					                                
+				 
+		  
 		WaitFrame()
 	}
 }
@@ -1601,7 +2136,7 @@ void function SonarViewModelHighlight( entity viewModelEntity, vector highlightC
 	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
 	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_VM_CUSTOM_COLOR, true, HIGHLIGHT_OUTLINE_VM_CUSTOM_COLOR, 8.0, highlightId, false )
 	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, highlightColor )
-	//
+	                                                                             
 	viewModelEntity.Highlight_SetFadeInTime( 0.25 )
 	viewModelEntity.Highlight_SetFadeOutTime( 0.25 )
 	viewModelEntity.Highlight_SetFlag( HIGHLIGHT_FLAG_CHECK_OFTEN, true )
@@ -1620,7 +2155,8 @@ void function SonarPlayerCloneHighlight( entity ent, vector highlightColor = HIG
 	int highlightId = ent.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
 	ent.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
 	ent.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_NEUTRAL )
-	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_BLOODHOUND, false, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES, 1.0, highlightId, true )
+	int bloodhoundFill = HIGHLIGHT_FILL_BLOODHOUND
+	ent.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, bloodhoundFill, false, HIGHLIGHT_OUTLINE_CUSTOM_COLOR_NOZ_NOSCANLINES, 1.0, highlightId, true )
 	ent.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, highlightColor )
 	ent.Highlight_SetFadeInTime( 0.15 )
 	ent.Highlight_SetFadeOutTime( 0.15 )
@@ -1635,8 +2171,8 @@ void function DeployableModelHighlight( entity viewModelEntity )
 	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
 	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_VM_CUSTOM_COLOR, true, HIGHLIGHT_OUTLINE_VM_CUSTOM_COLOR, 8.0, highlightId, false )
 	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, HIGHLIGHT_COLOR_INTERACT )
-	//
-	//
+	                                                 
+	                                                  
 	viewModelEntity.Highlight_StartOn()
 }
 
@@ -1647,8 +2183,20 @@ void function DeployableModelInvalidHighlight( entity viewModelEntity )
 	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
 	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_VM_CUSTOM_COLOR, true, HIGHLIGHT_OUTLINE_VM_CUSTOM_COLOR, 8.0, highlightId, false )
 	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, <1, 0, 0> )
-	//
-	//
+	                                                 
+	                                                  
+	viewModelEntity.Highlight_StartOn()
+}
+
+void function DeployableModelHighlightNewcastle( entity viewModelEntity )
+{
+	viewModelEntity.Highlight_SetVisibilityType( HIGHLIGHT_VIS_ALWAYS )
+	viewModelEntity.Highlight_SetCurrentContext( HIGHLIGHT_CONTEXT_NEUTRAL )
+	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
+	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_VM_CUSTOM_COLOR, true, HIGHLIGHT_OUTLINE_VM_CUSTOM_COLOR, 8.0, highlightId, false )
+	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, <0.2, 0.8, 1> )
+	                                                 
+	                                                  
 	viewModelEntity.Highlight_StartOn()
 }
 
@@ -1659,7 +2207,7 @@ void function PingViewModelHighlight( entity viewModelEntity, vector highlightCo
 	int highlightId = viewModelEntity.Highlight_GetState( HIGHLIGHT_CONTEXT_NEUTRAL )
 	viewModelEntity.Highlight_SetFunctions( HIGHLIGHT_CONTEXT_NEUTRAL, HIGHLIGHT_FILL_VM_CUSTOM_COLOR, true, HIGHLIGHT_OUTLINE_VM_CUSTOM_COLOR, 8.0, highlightId, false )
 	viewModelEntity.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, highlightColor )
-	//
+	                                                                             
 	viewModelEntity.Highlight_SetFadeInTime( 0.25 )
 	viewModelEntity.Highlight_SetFadeOutTime( 0.25 )
 	viewModelEntity.Highlight_StartOn()
@@ -1717,27 +2265,78 @@ void function DumpEntityHighlight( entity ent )
 		printt( "" )
 	}
 }
+
+                                                                                                                                           
+                                                                                                                                                                                      
+void function Highlight_SetAllianceProximityDrawFunc( entity ent, int contextId )
+{
+	HighlightContext ornull highlight = GetHighlightForId( ent.Highlight_GetState( contextId ) )
+
+	if ( highlight == null )
+		return
+
+	expect HighlightContext( highlight )
+
+	ent.Highlight_SetFarFadeDist( AllianceProximity_GetMaxDistForProximity() )
+	HighlightContext_SetDrawFunc( highlight, eHighlightDrawFunc.ALLIANCE_PROXIMITY )
+}
 #endif
+
+bool function UseDefaultOwnedHighlightBehavior( entity ent )
+{
+	if ( GetCurrentPlaylistVarBool( "squad_pets_enabled", false ) && IsValid( ent ) && ent.IsNPC() )
+		return false
+
+	return true
+}
 
 int function GetHighlightContextForEnt( entity viewPlayer, entity ent )
 {
-	int viewTeam = viewPlayer.GetTeam()
-	int entTeam  = ent.GetTeam()
+	int viewTeam = -1
+	if ( IsValid( viewPlayer ) && viewPlayer.IsPlayer() )
+		viewTeam = viewPlayer.GetTeam()
 
-	if ( ent.GetBossPlayer() == viewPlayer )
+	int entTeam = ent.GetTeam()
+
+	bool viewPlayerEmoting = viewPlayer == ent && viewPlayer.ContextAction_IsEmoting()
+	bool wantsFriendlyHighlight = (!viewPlayerEmoting) || viewPlayer.IsDrivingVehicle()
+
+	if ( ent.GetBossPlayer() == viewPlayer && UseDefaultOwnedHighlightBehavior( ent ) )
 	{
 		return HIGHLIGHT_CONTEXT_OWNED
 	}
-	else if ( IsFriendlyTeam( entTeam, viewTeam ) )
+	else if ( IsFriendlyTeam( entTeam, viewTeam ) && wantsFriendlyHighlight )
 	{
-		if ( StatusEffect_GetSeverity( ent, eStatusEffect.pinged ) && ent.IsHighlightEnabledForTeam( viewTeam ) )
-		{
-			return HIGHLIGHT_CONTEXT_PINGED
-		}
-		else if ( ent.IsPlayer() && Bleedout_IsBleedingOut( ent ) && Bleedout_GetRevivingPlayer( ent ) == viewPlayer )
+                
+                                                                                                                            
+                      
+                                                                             
+                                                                          
+                                                                                                                                              
+    
+                                                                                               
+                                              
+                                                                                                                                                                          
+    
+        
+		if ( ent.IsPlayer() && Bleedout_IsBleedingOut( ent ) && Bleedout_GetRevivingPlayer( ent ) == viewPlayer )
 		{
 			return HIGHLIGHT_CONTEXT_NEUTRAL
 		}
+		else if ( viewTeam == TEAM_SPECTATOR )
+		{
+			entity observerTarget = viewPlayer.GetObserverTarget()
+			if ( IsValid(observerTarget) && ShouldCausticGasHighlight( observerTarget, ent ) )
+				return HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT
+			if ( ShouldPrivateMatchObserverHighlight( viewPlayer, ent ) )
+				return HIGHLIGHT_CONTEXT_PRIVATE_MATCH_OBSERVER
+		}
+                 
+		else if ( ShouldCastleWallHighlight( viewPlayer, ent ) )
+		{
+			return HIGHLIGHT_CONTEXT_FRIENDLY_REVEALED
+		}
+      
 		else
 		{
 			return HIGHLIGHT_CONTEXT_FRIENDLY
@@ -1745,28 +2344,258 @@ int function GetHighlightContextForEnt( entity viewPlayer, entity ent )
 	}
 	else if ( entTeam != TEAM_SPECTATOR )
 	{
-		#if(CLIENT)
+		#if CLIENT
 			if ( ent == clGlobal.lastKiller )
 				return HIGHLIGHT_CONTEXT_DEATH_RECAP
 		#endif
-		if ( StatusEffect_GetSeverity( ent, eStatusEffect.sonar_detected ) && ent.IsHighlightEnabledForTeam( viewPlayer.GetTeam() ) )
-			return HIGHLIGHT_CONTEXT_SONAR
-		else if ( ShouldCausticGasHighlight( viewPlayer, ent ) )
-			return HIGHLIGHT_CONTEXT_CAUSTIC_THREAT
-#if(false)
 
+		if ( IsValid( viewPlayer ) )
+		{
+			entity viewTarget = viewPlayer
+			if ( viewTeam == TEAM_SPECTATOR && IsValid( viewPlayer.GetObserverTarget() ) )
+				viewTarget = viewPlayer.GetObserverTarget()
 
-#endif
-		else if ( entTeam != TEAM_UNASSIGNED )
-			return HIGHLIGHT_CONTEXT_ENEMY
-	}
-	else if ( StatusEffect_GetSeverity( ent, eStatusEffect.pinged ) && ent.IsHighlightEnabledForTeam( viewTeam ) )
-	{
-		return HIGHLIGHT_CONTEXT_PINGED
+			if ( !ent.IsPlayer() && IsFriendlyTeam( viewTarget.GetTeam(), entTeam) )                                                           
+				return HIGHLIGHT_CONTEXT_FRIENDLY
+
+			if ( StatusEffect_GetSeverity( ent, eStatusEffect.sonar_detected ) && (viewPlayerEmoting || ent.IsHighlightEnabledForTeam( HIGHLIGHT_CONTEXT_SONAR, viewTarget.GetTeam() )) )
+			{
+				return HIGHLIGHT_CONTEXT_SONAR
+			}
+                        
+			else if ( StatusEffect_GetSeverity( ent, eStatusEffect.mortar_ring_reveal ) && ent.IsHighlightEnabledForTeam( HIGHLIGHT_CONTEXT_MOVEMENT_REVEALED, viewTarget.GetTeam() ) )
+			{
+				return HIGHLIGHT_CONTEXT_MOVEMENT_REVEALED
+			}
+      
+                   
+			                                                                                                                                                                             
+			 
+				                                            
+			 
+        
+			else if ( ShouldShowNovaBlackholeHighlight( viewTarget, ent ) && ent.IsHighlightEnabledForTeam( HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT_2, viewTarget.GetTeam() ) )
+			{
+				return HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT_2
+			}
+			else if ( ShouldCausticGasHighlight( viewTarget, ent ) )
+			{
+				return HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT
+			}
+			else if ( ShouldMaggieHighlight( viewTarget, ent ) )
+			{
+				return HIGHLIGHT_CONTEXT_MOVEMENT_REVEALED
+			}
+                 
+			else if ( ShouldArmoredLeapThreatHighlight( viewTarget, ent ) )
+			{
+				return HIGHLIGHT_CHARACTER_SPECIAL_HIGHLIGHT_2
+			}
+      
+               
+                                                        
+    
+                                                
+    
+      
+              
+                                                                                                                                                                 
+    
+                                  
+    
+      
+			if ( ShouldPrivateMatchObserverHighlight( viewPlayer, ent ) )
+			{
+				return HIGHLIGHT_CONTEXT_PRIVATE_MATCH_OBSERVER
+			}
+			else if ( entTeam != TEAM_UNASSIGNED )
+			{
+				return HIGHLIGHT_CONTEXT_ENEMY
+			}
+		}
 	}
 
 	return HIGHLIGHT_CONTEXT_NEUTRAL
 }
+
+#if CLIENT
+var function ReconScan_ShowHudForTarget( entity player, entity enemy, bool pinToEdge = true, asset ruiFile = $"ui/recon_scan_target.rpak", void functionref( var, entity, entity ) populateInfoCallback = null )
+{
+	if ( !(enemy in player.p.reconScannedByThisPlayerRefCount) )
+		player.p.reconScannedByThisPlayerRefCount[enemy] <- 0
+
+	player.p.reconScannedByThisPlayerRefCount[enemy]++
+	if ( player.p.reconScannedByThisPlayerRefCount[enemy] > 1 )
+		return
+	int distance = int(Distance( player.GetOrigin(), enemy.GetOrigin() ))
+
+
+	var rui = RuiCreate( ruiFile, clGlobal.topoFullScreen, RUI_DRAW_HUD, RuiCalculateDistanceSortKey( player.EyePosition(), enemy.GetOrigin() ) )
+	InitHUDRui( rui, true )
+
+	RuiSetBool( rui, "isVisible", true )
+	RuiSetBool( rui, "pinToEdge", pinToEdge )
+	RuiSetBool( rui, "showClampArrow", true )
+	RuiSetString( rui, "hint", "" )
+
+	RuiKeepSortKeyUpdated( rui, true, "pos" )
+
+	if(populateInfoCallback != null)                                                          
+		populateInfoCallback( rui, player, enemy )
+
+	entity refEntity = enemy
+	if (refEntity != null && refEntity.IsPlayerDecoy())
+		refEntity = enemy.GetOwner()
+
+	                                                                                     
+	if ( !IsValid( refEntity ) )
+	{
+		return null
+	}
+
+	int armorTier = EquipmentSlot_GetEquipmentTier( refEntity, "armor" )
+	RuiSetInt( rui, "armorTier", armorTier )
+
+	LootData data = EquipmentSlot_GetEquippedLootDataForSlot( refEntity, "armor" )
+	bool isEvolving = data.lootType == eLootType.ARMOR && EvolvingArmor_IsEquipmentEvolvingArmor( data.ref )
+	RuiSetBool( rui, "isEvolvingShield", isEvolving )
+
+	float shieldFrac = GetShieldHealthFrac( refEntity )
+	float healthFrac = GetHealthFrac( refEntity )
+	RuiSetFloat( rui, "shieldFrac", shieldFrac )
+	RuiSetFloat( rui, "healthFrac", healthFrac )
+
+	RuiSetBool( rui, "useShadowFormFrame", refEntity.IsShadowForm() )
+
+	RuiTrackFloat( rui, "shieldFrac", refEntity, RUI_TRACK_SHIELD_FRACTION )
+	RuiTrackFloat( rui, "healthFrac", refEntity, RUI_TRACK_HEALTH )
+	RuiTrackFloat3( rui, "pos", enemy, RUI_TRACK_OVERHEAD_FOLLOW )
+
+	bool isChampion = GradeFlagsHas( enemy, eTargetGrade.CHAMPION )
+	bool isKillLeader = GradeFlagsHas( enemy, eTargetGrade.CHAMP_KILLLEADER )
+	RuiSetBool( rui, "isChampion", isChampion )
+	RuiSetBool( rui, "isKillLeader", isKillLeader )
+
+                         
+		if ( Control_IsModeEnabled() )
+		{
+			bool isEXPLeader = GradeFlagsHas( enemy, eTargetGrade.EXP_LEADER )
+			RuiSetBool( rui, "isEXPLeader", isEXPLeader )
+		}
+                               
+
+	player.p.reconScanRUIs[enemy] <- rui
+	
+	                                                                                                          
+	thread ReconScan_TrackTargetData( refEntity, enemy, player )
+	
+	return rui
+}
+#endif
+
+#if CLIENT
+void function ReconScan_TrackTargetData( entity refEntity, entity enemy, entity player )
+{
+	refEntity.EndSignal("ReconScan_HUDRemove")
+
+	                                                                                      
+	if ( refEntity != enemy )
+		enemy.EndSignal( "ReconScan_HUDRemove" )
+
+	refEntity.EndSignal("OnDeath")
+	refEntity.EndSignal("OnDestroy")
+
+	int curArmorTier = EquipmentSlot_GetEquipmentTier( refEntity, "armor" )
+	int newArmorTier = 0
+
+	LootData data = EquipmentSlot_GetEquippedLootDataForSlot( refEntity, "armor" )
+	bool curIsEvolving =  data.lootType == eLootType.ARMOR && EvolvingArmor_IsEquipmentEvolvingArmor( data.ref )
+	bool newIsEvolving = false
+
+	bool curIsShadowForm =   refEntity.IsShadowForm()
+	bool newIsShadowForm = false
+
+	while( true )
+	{
+		var rui = null
+
+		if ( enemy in player.p.reconScanRUIs )
+		{
+			rui = player.p.reconScanRUIs[enemy]
+		}
+
+		            
+		if( rui != null )
+		{
+			newArmorTier = EquipmentSlot_GetEquipmentTier( refEntity, "armor" )
+
+			if ( newArmorTier != curArmorTier )
+			{
+				curArmorTier = newArmorTier
+				RuiSetInt( rui, "armorTier", curArmorTier )
+			}
+
+			                 
+			data          = EquipmentSlot_GetEquippedLootDataForSlot( refEntity, "armor" )
+			newIsEvolving = data.lootType == eLootType.ARMOR && EvolvingArmor_IsEquipmentEvolvingArmor( data.ref )
+			if ( newIsEvolving != curIsEvolving )
+			{
+				curIsEvolving = newIsEvolving
+				RuiSetBool( rui, "isEvolvingShield", curIsEvolving )
+			}
+
+			             
+			newIsShadowForm = refEntity.IsShadowForm()
+			if ( newIsShadowForm != curIsShadowForm)
+			{
+				curIsShadowForm = newIsShadowForm
+				RuiSetBool( rui, "useShadowFormFrame", curIsShadowForm )
+			}
+
+		}
+		wait 0.1
+	}
+}
+
+#endif
+
+#if CLIENT
+void function ReconScan_RemoveHudForTarget( entity player, entity enemy )
+{
+	if (!(enemy in player.p.reconScannedByThisPlayerRefCount))
+	{
+		player.p.reconScannedByThisPlayerRefCount[enemy] <- 0
+		return
+	}
+
+	player.p.reconScannedByThisPlayerRefCount[enemy]--
+	if ( player.p.reconScannedByThisPlayerRefCount[enemy] > 0 )
+		return
+
+	enemy.Signal("ReconScan_HUDRemove")
+	if ( enemy in player.p.reconScanRUIs )
+	{
+		if ( player.p.reconScanRUIs[enemy] != null )
+		{
+			RuiDestroyIfAlive( player.p.reconScanRUIs[enemy] )
+			player.p.reconScanRUIs[enemy] = null
+		}
+
+		delete player.p.reconScanRUIs[enemy]
+	}
+}
+#endif
+
+#if CLIENT
+bool function TargetIsHighlightedForMyTeam( entity ent )
+{
+	entity viewPlayer = GetLocalViewPlayer()
+	if ( StatusEffect_GetSeverity( ent, eStatusEffect.sonar_detected ) && ent.IsHighlightEnabledForTeam( HIGHLIGHT_CONTEXT_SONAR, viewPlayer.GetTeam() ) )
+		return true
+
+	return false
+}
+#endif
 
 
 HighlightContext ornull function GetHighlightForId( int id )
@@ -1783,7 +2612,7 @@ HighlightContext ornull function GetHighlightForId( int id )
 
 bool function ShouldCausticGasHighlight( entity viewPlayer, entity ent )
 {
-	if ( !viewPlayer.HasPassive( ePassives.PAS_GAS_GEAR ) )
+	if ( !viewPlayer.HasPassive( ePassives.PAS_GAS_GEAR ) && !viewPlayer.HasPassive( ePassives.PAS_GAS_PROTECTION ) )
 		return false
 
 	if ( ent.IsPlayer() && ent.HasPassive( ePassives.PAS_GAS_GEAR ) )
@@ -1796,12 +2625,155 @@ bool function ShouldCausticGasHighlight( entity viewPlayer, entity ent )
 }
 
 
-#if(false)
+                          
+bool function ShouldPrivateMatchObserverHighlight( entity viewPlayer, entity ent )
+{
+	int viewTeam = viewPlayer.GetTeam()
+	int entTeam  = ent.GetTeam()
 
+	if ( !IsPrivateMatch() )
+		return false
 
+	if ( viewTeam != TEAM_SPECTATOR )
+		return false
 
+	if ( !ent.IsPlayer() )
+		return false
 
+	if ( PrivateMatch_IsObserverHighlightEnabled( viewPlayer ) == false )
+		return false
 
+	return true
+}
+                               
 
+#if SERVER
+                                                                                    
+ 
+	                                         
+		                                    
 
+	                                 
+	                                             
+ 
+
+                                                                                    
+ 
+	                                         
+		                                    
+	    
+		                                 
+
+	                                                                              
+
+	                                           
+		                                              
+ 
 #endif
+
+bool function ShouldMaggieHighlight( entity viewPlayer, entity ent )
+{
+	if ( !PlayerHasPassive( viewPlayer, ePassives.PAS_WARLORDS_IRE ) )
+		return false
+
+	return PassiveWarlordsIre_EntityShouldBeHighlighted( ent )
+}
+
+                 
+bool function ShouldCastleWallHighlight( entity viewPlayer, entity ent )
+{
+	int viewTeam = viewPlayer.GetTeam()
+	int entTeam  = ent.GetTeam()
+
+	if ( viewTeam != entTeam )
+		return false
+
+	return CastleWall_EntityShouldBeHighlighted( ent )
+}
+
+bool function ShouldArmoredLeapThreatHighlight( entity viewPlayer, entity ent )
+{
+	if ( !PlayerHasPassive( viewPlayer, ePassives.PAS_AXIOM ) )
+		return false
+
+	return ArmoredLeap_TargetEntityShouldBeHighlighted( ent )
+}
+      
+
+
+
+               
+                                                                     
+ 
+                                                                            
+              
+
+            
+ 
+      
+
+bool function ShouldShowNovaBlackholeHighlight( entity viewPlayer, entity ent )
+{
+	if ( !StatusEffect_GetSeverity( ent, eStatusEffect.in_black_hole_field ) )
+		return false
+
+	return true
+}
+
+                                                                      
+void function Highlight_SetGameModeEnemyHighlight( entity player )
+{
+	if ( !Highlight_IsUsingGameModeEnemyHighlights() )
+		return
+
+	if ( !IsValid( player ) )
+		return
+
+                               
+		if ( IsShadowRoyaleMode() )
+		{
+			Highlight_SetEnemyHighlightNightmap( player )
+			return
+		}
+       
+
+	Highlight_SetEnemyHighlight( player, Highlight_GetGameModeEnemyHighlightString() )
+}
+
+                                                                                         
+bool function Highlight_IsUsingGameModeEnemyHighlights()
+{
+	return GetCurrentPlaylistVarBool( "is_using_gamemode_enemy_highlights", false )
+}
+
+                                                                                                              
+string function Highlight_GetGameModeEnemyHighlightString()
+{
+	return GetCurrentPlaylistVarString( "gamemode_enemy_highlight_override", "enemy_los_highlight" )
+}
+
+                                                                                                             
+bool function Highlight_IsUsingGameModeEnemyVehicleHighlights()
+{
+	return GetCurrentPlaylistVarBool( "is_using_gamemode_enemy_vehicle_highlights", false )
+}
+
+                                                                                                                                  
+string function Highlight_GetGameModeEnemyVehicleHighlightString()
+{
+	return GetCurrentPlaylistVarString( "gamemode_enemy_vehicle_highlight_override", "vehicle_enemy_los_highlight" )
+}
+
+                                                                                                                
+                                                                                                                                                                
+bool function Highlight_IsUsingGameModeFriendlyVehicleHighlights()
+{
+	return GetCurrentPlaylistVarBool( "is_using_gamemode_friendly_vehicle_highlights", false )
+}
+
+                                                                                                                                     
+                                                                                                                                                                
+string function Highlight_GetGameModeFriendlyVehicleHighlightString()
+{
+	return GetCurrentPlaylistVarString( "gamemode_friendly_vehicle_highlight_override", "vehicle_friendly_los_highlight" )
+}

@@ -51,7 +51,7 @@
         maxValue				0.5
         stepSize				0.025
         inverseFill             0
-        showLabel               0
+        showLabel               3
     }
 
     SldGamepadCustomDeadzoneOut
@@ -68,7 +68,7 @@
         maxValue				0.3
         stepSize				0.01
         inverseFill             0
-        showLabel               0
+        showLabel               3
     }
 
     SldGamepadCustomCurve
@@ -79,53 +79,32 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SldGamepadCustomDeadzoneOut
-        navDown					SwchGamepadCustomAssist
+        navDown					BtnLookSensitivityMenu
         conCommand				"gamepad_custom_curve"
         minValue				0.0
         maxValue				30.0
         stepSize				1.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
+	
+	//////////////////////////
+	// Per Optic Settings...
+	//////////////////////////
 
-//		SwchGamepadCustomAssist
-//		{
-//			ControlName				RuiButton
-//			InheritProperties		SwitchButton
-//			style					DialogListButton
-//			pin_to_sibling			SldGamepadCustomCurve
-//			pin_corner_to_sibling	TOP_LEFT
-//			pin_to_sibling_corner	BOTTOM_LEFT
-//			navUp					SldGamepadCustomCurve
-//			navDown					SldGamepadCustomHipYaw
-//			ConVar					"gamepad_custom_assist_on"
-//			list
-//			{
-//				"#SETTING_OFF"		0
-//				"#SETTING_ON"		1
-//			}
-//		}
-
-    SwchGamepadCustomAssist
+	BtnLookSensitivityMenu
     {
         ControlName				RuiButton
-        InheritProperties		SwitchButton
-        style					DialogListButton
-        navUp					SldGamepadCustomCurve
-        navDown					SldGamepadCustomHipYaw
-        ConVar					"gamepad_custom_assist_on"
-        list
-        {
-            "#SETTING_OFF"		0
-            "#SETTING_ON"		1
-        }
+        InheritProperties		SettingBasicButton
 
         pin_to_sibling			SldGamepadCustomCurve
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        childGroupAlways        ChoiceButtonAlways
+        ypos					32
+        navUp					SldGamepadCustomCurve
+        navDown					SldGamepadCustomHipYaw
     }
-
+    
     ///////////////////////////
     // Hipfire
     ///////////////////////////
@@ -134,18 +113,18 @@
     {
         ControlName				SliderControl
         InheritProperties		SliderControl
-        pin_to_sibling			SwchGamepadCustomAssist
+        pin_to_sibling			BtnLookSensitivityMenu
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         ypos					32
-        navUp					SwchGamepadCustomAssist
+        navUp					BtnLookSensitivityMenu
         navDown					SldGamepadCustomHipPitch
         conCommand				"gamepad_custom_hip_yaw"
         minValue				0.0
         maxValue				500.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomHipPitch
@@ -162,7 +141,7 @@
         maxValue				500.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomHipTurnYaw
@@ -178,7 +157,7 @@
         minValue				0.0
         maxValue				250.0
         stepSize				10.0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomHipTurnPitch
@@ -195,7 +174,7 @@
         maxValue				250.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomHipTurnTime
@@ -212,7 +191,7 @@
         maxValue				1.0
         stepSize				0.05
         inverseFill             0
-        showLabel               0
+        showLabel               3
     }
 
     SldGamepadCustomHipTurnDelay
@@ -229,7 +208,7 @@
         maxValue				1.0
         stepSize				0.05
         inverseFill             0
-        showLabel               0
+        showLabel               3
     }
 
     ///////////////////////////
@@ -251,7 +230,7 @@
         maxValue				500.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomADSPitch
@@ -268,7 +247,7 @@
         maxValue				500.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomADSTurnYaw
@@ -285,7 +264,7 @@
         maxValue				250.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomADSTurnPitch
@@ -302,7 +281,7 @@
         maxValue				250.0
         stepSize				10.0
         inverseFill             0
-        showLabel               0
+        showLabel               1
     }
 
     SldGamepadCustomADSTurnTime
@@ -319,7 +298,7 @@
         maxValue				1.0
         stepSize				0.05
         inverseFill             0
-        showLabel               0
+        showLabel               3
     }
 
     SldGamepadCustomADSTurnDelay
@@ -330,15 +309,214 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SldGamepadCustomADSTurnTime
+        navDown					SwchGamepadAimAssist
         conCommand				"gamepad_custom_ads_turn_delay"
         minValue				0.0
         maxValue				1.0
         stepSize				0.05
         inverseFill             0
-        showLabel               0
+        showLabel               3
     }
 
-	PanelBottom
+	///////////////////////////
+    // Aim Assist
+    ///////////////////////////
+    
+	CustomAimAssistHeader
+	{
+		ControlName				ImagePanel
+		InheritProperties		SubheaderBackgroundWide
+		pin_to_sibling			SldGamepadCustomADSTurnDelay
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+		ypos					32
+	}
+	CustomAimAssistHeaderText
+	{
+		ControlName				Label
+		InheritProperties		SubheaderText
+		pin_to_sibling			CustomAimAssistHeader
+		pin_corner_to_sibling	LEFT
+		pin_to_sibling_corner	LEFT
+		labelText				"#GAMEPADCUSTOM_ASSIST"
+	}
+	SwchGamepadAimAssist
+        {
+            ControlName				RuiButton
+            InheritProperties		SwitchButton
+            style					DialogListButton
+            navUp					SldGamepadCustomADSTurnDelay
+            navDown					SwchGamepadAimAssistMelee
+            ConVar					"gamepad_custom_assist_on"
+            list
+            {
+                "#SETTING_OFF"		0
+                "#SETTING_ON"		1
+            }
+
+            pin_to_sibling			CustomAimAssistHeader
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	BOTTOM_LEFT
+            childGroupAlways        ChoiceButtonAlways
+    }
+    SwchGamepadAimAssistMelee
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchGamepadAimAssist
+        navDown					SwchGamepadAimAssistStyle [$GAMECONSOLE]
+		navDown					SwchGamepadAimAssistHipLowPowerScope [$WINDOWS]		
+        ConVar					"gamepad_aim_assist_melee"
+        list
+        {
+            "#SETTING_OFF"		0
+            "#SETTING_ON"		1
+        }
+
+        pin_to_sibling			SwchGamepadAimAssist
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+    }
+    SwchGamepadAimAssistStyle [$GAMECONSOLE]
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchGamepadAimAssistMelee
+        navDown					SwchGamepadAimAssistHipLowPowerScope
+        ConVar					"gamepad_custom_assist_style"
+        list
+        {
+            "#SETTING_DEFAULT"		0
+            "#SETTING_AIMASSISTSTYLE_PCASSIST"		1
+        }
+
+        pin_to_sibling			SwchGamepadAimAssistMelee
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+}
+    /////////////////////////////
+	// Hip Target Compensation
+	/////////////////////////////
+	CustomAimAssistHipHeader
+	{
+		ControlName				ImagePanel
+		InheritProperties		SubheaderBackgroundWide
+		ypos					32
+        pin_to_sibling			SwchGamepadAimAssistStyle [$GAMECONSOLE]
+		pin_to_sibling			SwchGamepadAimAssistMelee [$WINDOWS]
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+	}
+	CustomAimAssistHipHeaderText
+	{
+		ControlName				Label
+		InheritProperties		SubheaderText
+		pin_to_sibling			CustomAimAssistHipHeader
+		pin_corner_to_sibling	LEFT
+		pin_to_sibling_corner	LEFT
+		labelText				"#GAMEPADCUSTOM_ASSIST_HIP"
+	}
+    SwchGamepadAimAssistHipLowPowerScope
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchGamepadAimAssistStyle [$GAMECONSOLE]
+		navUp					SwchGamepadAimAssistMelee [$WINDOWS]
+        navDown					SwchGamepadAimAssistHipHighPowerScope
+        ConVar					"gamepad_aim_assist_hip_low_power_scopes"
+        list
+        {
+            "#SETTING_OFF"		0
+            "#SETTING_ON"		1
+        }
+        pin_to_sibling			CustomAimAssistHipHeader
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+    }
+    SwchGamepadAimAssistHipHighPowerScope
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchGamepadAimAssistHipLowPowerScope
+        navDown					SwchGamepadAimAssistAdsLowPowerScope
+        ConVar					"gamepad_aim_assist_hip_high_power_scopes"
+        list
+        {
+            "#SETTING_OFF"		0
+            "#SETTING_ON"		1
+        }
+        pin_to_sibling			SwchGamepadAimAssistHipLowPowerScope
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+    }
+    ///////////////////////////////////////
+	// ADS Target Compensation
+	///////////////////////////////////////
+	CustomAimAssistAdsHeader
+	{
+		ControlName				ImagePanel
+		InheritProperties		SubheaderBackgroundWide
+		ypos					32
+        pin_to_sibling			SwchGamepadAimAssistHipHighPowerScope
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+	}
+	CustomAimAssistAdsHeaderText
+	{
+		ControlName				Label
+		InheritProperties		SubheaderText
+		pin_to_sibling			CustomAimAssistAdsHeader
+		pin_corner_to_sibling	LEFT
+		pin_to_sibling_corner	LEFT
+		labelText				"#GAMEPADCUSTOM_ASSIST_ADS"
+	}
+    SwchGamepadAimAssistAdsLowPowerScope
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchGamepadAimAssistHipHighPowerScope
+        navDown					SwchGamepadAimAssistAdsHighPowerScope
+        ConVar					"gamepad_aim_assist_ads_low_power_scopes"
+        list
+        {
+            "#SETTING_OFF"		0
+            "#SETTING_ON"		1
+        }
+        pin_to_sibling			CustomAimAssistAdsHeader
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+    }
+    SwchGamepadAimAssistAdsHighPowerScope
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        navUp					SwchGamepadAimAssistAdsLowPowerScope
+        ConVar					"gamepad_aim_assist_ads_high_power_scopes"
+        list
+        {
+            "#SETTING_OFF"		0
+            "#SETTING_ON"		1
+        }
+        pin_to_sibling			SwchGamepadAimAssistAdsLowPowerScope
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        childGroupAlways        ChoiceButtonAlways
+    }
+    ///////////////////////////////////////
+	// Bottom Panel
+	///////////////////////////////////////
+    PanelBottom
 	{
 		ControlName				Label
 		labelText               ""
@@ -349,7 +527,7 @@
 		visible					1
 		enabled 				0
 
-        pin_to_sibling			SldGamepadCustomADSTurnDelay
+        pin_to_sibling			SwchGamepadAimAssistAdsHighPowerScope
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}

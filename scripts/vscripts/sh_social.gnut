@@ -1,29 +1,30 @@
-//
 
-#if CLIENT || UI 
-global function ShSocial_Init
+
+#if SERVER
+                                                                 
+                                                                       
+                                                                
 #endif
 
-#if(false)
-
-
-
-#endif
-
-#if(UI)
+#if UI
 global function GetFriendsData
 global function IsInParty
 global function GetOnlineFriendCount
 global function GetInGameFriendCount
 global function HasCommunityUserPlayedApex
+global function SortFriendGroupStatus
+global function EADP_SocialEnabled
+global function CreateEADPDataFromEAID
+global function ClientToUI_ShowBlockPlayerDialog
+global function ShowBlockPlayerDialog
 #endif
 
-#if UI && DEV 
+#if UI && DEV
 global function Dev_ToggleInvalidFriendData
 global function Dev_SetFillerFriends
 #endif
 
-#if CLIENT || UI 
+#if CLIENT || UI
 global function GetItemFlavorForCommunityUserInfo
 global function GetBadgeItemFlavorForCommunityUserInfo
 global function GetBadgeDataIntegerFromCommunityUserInfo
@@ -32,62 +33,49 @@ global function GetTrackerDataIntegerFromCommunityUserInfo
 #endif
 
 
-//
-//
-//
-//
-//
+                
+                
+                
+                
+                
 
-//
+                                                     
 
-const float PLAYER_STRYDER_CHAR_DATA_ARRAY_CASUAL_UPDATE_DEBOUNCE_INTERVAL = 2.0 //
+const float ONLINE_FRIEND_COUNT_QUERRY_INTERVAL  = 2.0 
+const float PLAYER_STRYDER_CHAR_DATA_ARRAY_CASUAL_UPDATE_DEBOUNCE_INTERVAL = 2.0                   
 
-const bool PLAYER_STRYDER_CHAR_DATA_ARRAY_SEND_DEBUG = true
+const bool PLAYER_STRYDER_CHAR_DATA_ARRAY_SEND_DEBUG = false
 
 
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                       
+                       
+                       
+                       
+                       
+#if SERVER || CLIENT || UI
 struct
 {
-	#if(false)
-
-#endif
-	#if(UI)
+	#if SERVER
+		                                                                                      
+	#endif
+	#if UI
 		bool                        invalidFriendData = false
 		int                         fillerFriends = 0
 		array<CommunityFriendsData> fillerFriendArray
 
 		table<string, string>        slowScriptLowercaseNameCache
+		int                          lastOnlineFriendCount = 0
+		float						 lastOnlineFriendCountTime = 0 
 	#endif
 } file
 #endif
 
-
-//
-//
-//
-//
-//
-#if CLIENT || UI 
-void function ShSocial_Init()
-{
-	#if(false)
-
-#endif
-}
-#endif
-
-
-//
-//
-//
-//
-//
-#if(UI)
+                          
+                          
+                          
+                          
+                          
+#if UI
 FriendsData function GetFriendsData( bool groupByStatus = false )
 {
 	CommunityFriendsWithPresence friendInfo = GetFriendInfoAndPresence()
@@ -95,7 +83,7 @@ FriendsData function GetFriendsData( bool groupByStatus = false )
 	FriendsData returnData
 	returnData.isValid = friendInfo.isValid
 
-	#if(DEV)
+	#if DEV
 		if ( file.invalidFriendData )
 			returnData.isValid = false
 
@@ -120,7 +108,7 @@ FriendsData function GetFriendsData( bool groupByStatus = false )
 
 	array<Friend> friends
 
-	//
+	                         
 
 	foreach ( entry in friendInfo.friends )
 	{
@@ -128,13 +116,19 @@ FriendsData function GetFriendsData( bool groupByStatus = false )
 		friend.id = entry.id
 		friend.hardware = entry.hardware
 		friend.name = entry.name
-		friend.presence = entry.presence
+		friend.presence = StringReplace( entry.presence, "%", "%%" )
 		friend.ingame = entry.ingame
 		friend.inparty = IsInParty( entry.id )
 		friend.away = entry.away
 
-		if ( !(friend.name in file.slowScriptLowercaseNameCache) )
-			file.slowScriptLowercaseNameCache[friend.name] <- friend.name.tolower()
+		string tempName = friend.name;
+
+#if (NX_PROG)
+		tempName = friend.name + friend.id
+#endif
+		
+		if ( !(tempName in file.slowScriptLowercaseNameCache) )
+			file.slowScriptLowercaseNameCache[tempName] <- tempName.tolower()
 
 		if ( entry.online )
 		{
@@ -163,7 +157,18 @@ FriendsData function GetFriendsData( bool groupByStatus = false )
 #endif
 
 
-#if(UI)
+#if UI
+EadpPeopleData function CreateEADPDataFromEAID( string eaid )
+{
+	                                                                       
+	EadpPeopleData eadpData
+	eadpData.eaid = eaid
+	return eadpData
+}
+#endif
+
+
+#if UI
 bool function IsInParty( string id )
 {
 	Party party = GetParty()
@@ -178,72 +183,138 @@ bool function IsInParty( string id )
 #endif
 
 
-#if(UI)
-int function GetOnlineFriendCount( bool filterParty = false )
+#if UI
+int function GetOnlineFriendCount( )
 {
-	CommunityFriendsWithPresence friendsData = GetFriendInfoAndPresence()
-	if ( !friendsData.isValid )
-		return 0
+   if( file.lastOnlineFriendCountTime +  ONLINE_FRIEND_COUNT_QUERRY_INTERVAL  > UITime() )
+   {
+		int count = 0
+		array<string> countedIds
 
-	int count = 0
-	foreach ( friend in friendsData.friends )
-	{
-		if ( !friend.online )
-			continue
+		CommunityFriendsWithPresence friendsData = GetFriendInfoAndPresence()
+		if ( friendsData.isValid )
+		{
+			foreach ( friend in friendsData.friends )
+			{
+				if ( !friend.online )
+					continue
 
-		if ( filterParty && IsInParty( friend.id ) )
-			continue
+				countedIds.append( friend.id )
+				count++
+			}
+		}
 
-		count++
+		if ( EADP_SocialEnabled() )
+		{
+			EadpPeopleList eadpFriendsData = EADP_GetFriendsList()
+
+			if ( eadpFriendsData.isValid )
+			{
+				foreach ( eadpFriend in eadpFriendsData.people )
+				{
+					if ( eadpFriend.presences.len() == 0 )
+						continue
+
+					foreach ( presence in eadpFriend.presences )
+					{
+						if ( !presence.online )
+							continue
+
+						if ( countedIds.contains( presence.firstPartyId ) )
+							continue
+
+						count++
+						break                                          
+					}
+				}
+			}
+		}
+		file.lastOnlineFriendCount = count;
+		file.lastOnlineFriendCountTime = UITime()
 	}
 
-	return count
+	return  file.lastOnlineFriendCount
 }
 #endif
 
 
-#if(UI)
+#if UI
 int function GetInGameFriendCount( bool filterParty = false )
 {
-	CommunityFriendsWithPresence friendsData = GetFriendInfoAndPresence()
-	if ( !friendsData.isValid )
-		return 0
-
 	int count = 0
-	foreach ( friend in friendsData.friends )
+	array<string> countedIds
+
+	CommunityFriendsWithPresence friendsData = GetFriendInfoAndPresence()
+	if ( friendsData.isValid )
 	{
-		if ( !friend.online )
-			continue
+		foreach ( friend in friendsData.friends )
+		{
+			if ( !friend.online )
+				continue
 
-		if ( !friend.ingame )
-			continue
+			if ( !friend.ingame )
+				continue
 
-		if ( filterParty && IsInParty( friend.id ) )
-			continue
+			if ( filterParty && IsInParty( friend.id ) )
+				continue
 
-		count++
+			countedIds.append( friend.id )
+			count++
+		}
+	}
+
+	if ( EADP_SocialEnabled() )
+	{
+		EadpPeopleList eadpFriendsData = EADP_GetFriendsList()
+
+		if ( eadpFriendsData.isValid )
+		{
+			foreach ( eadpFriend in eadpFriendsData.people )
+			{
+				if ( eadpFriend.presences.len() == 0 )
+					continue
+
+				foreach ( presence in eadpFriend.presences )
+				{
+					if ( !presence.online )
+						continue
+
+					if ( !presence.ingame )
+						continue
+
+					if ( filterParty && IsInParty( presence.firstPartyId ) )
+						continue
+
+					if ( countedIds.contains( presence.firstPartyId ) )
+						continue
+
+					count++
+					break                                          
+				}
+			}
+		}
 	}
 
 	return count
 }
 #endif
 
-#if(UI)
+#if UI
 bool function HasCommunityUserPlayedApex( CommunityUserInfo cui )
 {
 	int stryderCharacterData = cui.charData[ ePlayerStryderCharDataArraySlots.CHARACTER ]
 
-	return stryderCharacterData != 0 //
+	return stryderCharacterData != 0                                                                                                                                    
 }
 
 #endif
 
-//
-//
-//
-//
-//
-#if UI && DEV 
+                       
+                       
+                       
+                       
+                       
+#if UI && DEV
 array<string> friendNames = [ "Anderson", "Alavi", "Vinson", "Armstrong", "Perera", "Moy", "Messerly", "Davis", "McCord", "Keating",
 	"Grenier", "Abrahamson", "Sanchez", "Medina", "McCoy", "Horn", "Cavallari", "McCandlish", "Alderman", "DeRose" ]
 
@@ -251,7 +322,7 @@ CommunityFriendsData function Dev_GetFakeFriendData()
 {
 	CommunityFriendsData entry
 	entry.name = friendNames[RandomInt( friendNames.len() )] + "(" + RandomInt( 100000 ) + ")"
-	entry.id = "random" + Time()
+	entry.id = "random" + UITime()
 	entry.ingame = CoinFlip()
 	entry.online = entry.ingame && CoinFlip()
 	entry.presence = entry.online ? "IN-ORIGIN" : "45 minutes ago"
@@ -264,7 +335,7 @@ CommunityFriendsData function Dev_GetFakeFriendData()
 #endif
 
 
-#if UI && DEV 
+#if UI && DEV
 void function Dev_ToggleInvalidFriendData()
 {
 	file.invalidFriendData = !file.invalidFriendData
@@ -272,102 +343,149 @@ void function Dev_ToggleInvalidFriendData()
 #endif
 
 
-#if UI && DEV 
+#if UI && DEV
 void function Dev_SetFillerFriends( int count )
 {
 	file.fillerFriends = count
 }
 #endif
 
-#if(false)
+#if SERVER
+                                                                                
+ 
+	                                                                                                                                                  
+		                         
+			      
 
-
-
-
-
-
-
-
-
+		                                                                 
+	   
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                      
+ 
+	                                                   
+	                                                                        
+	 
+		                                             
+		                                                 
+	 
+
+	          
+	                                                                                                            
+
+	           
+	                                                                                                                                                                       
+	 
+		                  
+
+		                                           
+		                           
+		                                                                                                               
+
+		                                                                 
+		                                                                                                           
+		                                          
+		                                                                                                               
+
+		                                               
+		                                                                                                               
+
+		                                               
+		                                                                                                               
+
+		                                                
+		                                                                                                               
+
+		                                                   
+		 
+			                                                                                                       
+			                                                                                                               
+
+			                                                                                                           
+			                                                                                                               
+		 
+
+		                                                     
+		 
+			                                                                                                             
+			                                                                                                               
+
+			                                                                                                                  
+			                                                                                                               
+		 
+	 
+	                                                                                                
+	 
+		                                                      
+		 
+			                                                                                  
+				        
+
+			                                                                                                                                                                
+
+			                                            
+				        
+
+			                                                                              
+						                                                                                                                
+
+			                                              
+
+			                                                                                                               
+
+			                                             
+				                                                                                  
+					                                                                                                                                                                                
+
+				                                                                                                                                                                         
+			      
+		 
+	 
+
+	                                            
+	                                                                                                
+		            
 
 
+	                                    
+	                         
+	                   
+	                                                     
+	                                             
+		                  
+	      
+	                                                                       
+	 
+		                                                  
+		                                             
+			                                                                                                                                                
+			                                                                                                                                                                                               
+		      
+		                                                         
+			                   
+	 
 
+	                                             
+		                                                                                                                                                 
+	      
 
-
-
-//
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                   
+		                                       
+ 
 #endif
 
 
-#if(false)
-
-
-
-
+#if SERVER
+                                                                                               
+ 
+	                                                               
+ 
 #endif
 
-#if UI || CLIENT 
+#if UI || CLIENT
 ItemFlavor function GetItemFlavorForCommunityUserInfo( CommunityUserInfo userInfo, int slotIndex, int itemType )
 {
 	ItemFlavor ornull requestedFlavor = GetItemFlavorOrNullByGUID( userInfo.charData[slotIndex], itemType )
@@ -375,7 +493,7 @@ ItemFlavor function GetItemFlavorForCommunityUserInfo( CommunityUserInfo userInf
 	LoadoutEntry entry
 	if ( itemType == eItemType.character )
 	{
-		entry = Loadout_CharacterClass()
+		entry = Loadout_Character()
 	}
 	else
 	{
@@ -407,7 +525,7 @@ ItemFlavor function GetItemFlavorForCommunityUserInfo( CommunityUserInfo userInf
 			}
 
 			default:
-				unreachable //
+				unreachable                                                                                                                                                                                                                      
 		}
 	}
 
@@ -422,7 +540,7 @@ ItemFlavor function GetItemFlavorForCommunityUserInfo( CommunityUserInfo userInf
 ItemFlavor function GetBadgeItemFlavorForCommunityUserInfo( CommunityUserInfo userInfo, ItemFlavor character, int badgeIndex )
 {
 	LoadoutEntry entry                = Loadout_GladiatorCardBadge( character, badgeIndex )
-	ItemFlavor ornull badgeItemFlavor = GetItemFlavorOrNullByGUID( userInfo.charData[ ePlayerStryderCharDataArraySlots.BANNER_BADGE1 + 2 * badgeIndex ], eItemType.gladiator_card_badge ) //
+	ItemFlavor ornull badgeItemFlavor = GetItemFlavorOrNullByGUID( userInfo.charData[ ePlayerStryderCharDataArraySlots.BANNER_BADGE1 + 2 * badgeIndex ], eItemType.gladiator_card_badge )                
 
 	if ( badgeItemFlavor == null )
 		badgeItemFlavor = GetDefaultItemFlavorForLoadoutSlot( EHI_null, entry )
@@ -437,14 +555,14 @@ ItemFlavor function GetBadgeItemFlavorForCommunityUserInfo( CommunityUserInfo us
 
 int function GetBadgeDataIntegerFromCommunityUserInfo( CommunityUserInfo userInfo, int badgeIndex )
 {
-	int dataInteger = maxint( 0, userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_BADGE1_TIER + 2 * badgeIndex] - 2 ) //
+	int dataInteger = maxint( 0, userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_BADGE1_TIER + 2 * badgeIndex] - 2 )                 
 	return dataInteger
 }
 
 ItemFlavor function GetTrackerItemFlavorForCommunityUserInfo( CommunityUserInfo userInfo, ItemFlavor character, int trackerIndex )
 {
 	LoadoutEntry entry                  = Loadout_GladiatorCardStatTracker( character, trackerIndex )
-	ItemFlavor ornull trackerItemFlavor = GetItemFlavorOrNullByGUID( userInfo.charData[ ePlayerStryderCharDataArraySlots.BANNER_TRACKER1 + 2 * trackerIndex], eItemType.gladiator_card_stat_tracker )//
+	ItemFlavor ornull trackerItemFlavor = GetItemFlavorOrNullByGUID( userInfo.charData[ ePlayerStryderCharDataArraySlots.BANNER_TRACKER1 + 2 * trackerIndex], eItemType.gladiator_card_stat_tracker )               
 	if ( trackerItemFlavor == null )
 		trackerItemFlavor = GetDefaultItemFlavorForLoadoutSlot( EHI_null, entry )
 
@@ -458,7 +576,7 @@ ItemFlavor function GetTrackerItemFlavorForCommunityUserInfo( CommunityUserInfo 
 
 int function GetTrackerDataIntegerFromCommunityUserInfo( CommunityUserInfo userInfo, int trackerIndex )
 {
-	int dataInteger = maxint( 0, userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_TRACKER1_VALUE + 2 * trackerIndex] - 2 ) //
+	int dataInteger = maxint( 0, userInfo.charData[ePlayerStryderCharDataArraySlots.BANNER_TRACKER1_VALUE + 2 * trackerIndex] - 2 )                 
 	return dataInteger
 }
 #endif
@@ -466,30 +584,100 @@ int function GetTrackerDataIntegerFromCommunityUserInfo( CommunityUserInfo userI
 
 
 
-//
-//
-//
-//
-//
-#if(UI)
+                   
+                   
+                   
+                   
+                   
+#if UI
 int function SortFriendGroupStatus( Friend a, Friend b )
 {
-	if ( a.inparty && !b.inparty )
-		return -1
-	else if ( b.inparty && !a.inparty )
-		return 1
-
 	if ( a.status < b.status )
 		return -1
 	else if ( b.status < a.status )
 		return 1
 
-	if ( file.slowScriptLowercaseNameCache[a.name] > file.slowScriptLowercaseNameCache[b.name] )
+	if ( a.inparty && !b.inparty )
+		return -1
+	else if ( b.inparty && !a.inparty )
 		return 1
 
-	if ( file.slowScriptLowercaseNameCache[a.name] < file.slowScriptLowercaseNameCache[b.name] )
+	string tempNameA = a.name
+	string tempNameB = b.name
+#if NX_PROG
+	tempNameA = a.name + a.id
+	tempNameB = b.name + b.id
+#endif	
+	if ( !(tempNameA in file.slowScriptLowercaseNameCache) )
+		file.slowScriptLowercaseNameCache[tempNameA] <- tempNameA.tolower()
+	if ( !(tempNameB in file.slowScriptLowercaseNameCache) )
+		file.slowScriptLowercaseNameCache[tempNameB] <- tempNameB.tolower()
+
+	if ( file.slowScriptLowercaseNameCache[tempNameA] > file.slowScriptLowercaseNameCache[tempNameB] )
+		return 1
+
+	if ( file.slowScriptLowercaseNameCache[tempNameA] < file.slowScriptLowercaseNameCache[tempNameB] )
 		return -1
 
 	return 0
 }
 #endif
+
+
+#if UI
+bool function EADP_SocialEnabled()
+{
+	if ( EADP_SocialCanRun() == 0 )
+		return false
+
+	if ( GetConVarInt( "crossPlay_enabled" ) != 0 )
+		return true
+
+	return false
+}
+
+
+void function ClientToUI_ShowBlockPlayerDialog( string playerName, string playerHardware, string playerUID, string eaid )
+{
+	printt( "#EADP ClientToUI_ShowBlockPlayerDialog")
+	if ( IsDialog( GetActiveMenu() ) )
+		return
+	printt( "#EADP", playerName, playerHardware, playerUID, eaid )
+
+	if ( EADP_IsBlockedByEAID( eaid ) )
+	{
+		ConfirmDialogData dialogData
+		dialogData.headerText = "#BLOCK_DIALOG_HEADER"
+		dialogData.messageText = Localize( "#BLOCK_DIALOG_ALREADY_BLOCKED_MSG", playerName )
+		dialogData.contextImage = $"ui/menu/common/dialog_notice"
+
+		OpenOKDialogFromData( dialogData )
+		return
+	}
+
+	ShowBlockPlayerDialog( playerName, eaid, void function( int dialogResult, string eaid ) {
+		if ( dialogResult == eDialogResult.YES )
+		{
+			                          
+			printt( "#EADP EADP_BlockByEAID", eaid )
+			EADP_BlockByEAID( eaid )
+		}
+	} )
+}
+
+
+void function ShowBlockPlayerDialog( string playerName, string eaid, void functionref( int, string ) resultCallbackFunc )
+{
+	if ( IsDialog( GetActiveMenu() ) )
+		return
+
+	ConfirmDialogData data
+	data.headerText = "#BLOCK_DIALOG_HEADER"
+	data.messageText = Localize( "#BLOCK_DIALOG_MSG", playerName )
+	data.resultCallback = void function( int dialogResult ) : ( eaid, resultCallbackFunc ) {
+		resultCallbackFunc( dialogResult, eaid )
+	}
+
+	OpenConfirmDialogFromData( data )
+}
+#endif     

@@ -2,18 +2,18 @@ untyped
 
 global function CodeCallback_RegisterClass_CClientScriptHudElement
 
-//
+                                                                                                                                                     
 var function CodeCallback_RegisterClass_CClientScriptHudElement()
 {
 	CClientHudElement.ClassName <- "CClientHudElement"
 
-	CClientHudElement._name <- null //
+	CClientHudElement._name <- null                       
 	CClientHudElement._displayName <- null
 	CClientHudElement.s <- null
 	CClientHudElement.childElements <- null
 	CClientHudElement.classElements <- null
 	CClientHudElement.loadoutID <- null
-	CClientHudElement._parentMenu <- null //
+	CClientHudElement._parentMenu <- null                       
 	CClientHudElement._panelAlpha <- null
 	CClientHudElement._type <- null
 
@@ -36,8 +36,8 @@ var function CodeCallback_RegisterClass_CClientScriptHudElement()
 		return this._type
 	}
 
-	CClientHudElement.__CodeGetName <- CClientHudElement.GetHudName //
-	function CClientHudElement::GetHudName() //
+	CClientHudElement.__CodeGetName <- CClientHudElement.GetHudName                       
+	function CClientHudElement::GetHudName()                       
 	{
 		if ( this._name == null )
 			return this.__CodeGetName()
@@ -45,7 +45,7 @@ var function CodeCallback_RegisterClass_CClientScriptHudElement()
 		return this._name
 	}
 
-	function CClientHudElement::SetHudName( elemName ) //
+	function CClientHudElement::SetHudName( elemName )                       
 	{
 		this._name = elemName
 	}

@@ -7,15 +7,24 @@ global function OnWeaponOwnerChanged_WeaponDefensiveBombardment
 
 const string DEFENSIVE_BOMBARDMENT_MISSILE_WEAPON = "mp_weapon_defensive_bombardment_weapon"
 
-//
+                           
 const asset FX_BOMBARDMENT_MARKER = $"P_ar_artillery_marker"
 
-const float DEFENSIVE_BOMBARDMENT_RADIUS 		 	= 1024 //
-const int	DEFENSIVE_BOMBARDMENT_DENSITY			= 6	//
-const float DEFENSIVE_BOMBARDMENT_DURATION			= 8.0 //
-const float DEFENSIVE_BOMBARDMENT_DELAY 			= 2.0 //
-
+                        
+                                                                                            
+                                                                                        
+                                                                                                                                 
+                                                           
+     
+const float DEFENSIVE_BOMBARDMENT_DURATION			= 6.0                                          
+const float DEFENSIVE_BOMBARDMENT_RADIUS 		 	= 1024                                      
+const int	DEFENSIVE_BOMBARDMENT_DENSITY			= 6	                                                  
 const float DEFENSIVE_BOMBARDMENT_SHELLSHOCK_DURATION = 4.0
+      
+
+const float DEFENSIVE_BOMBARDMENT_DELAY 			= 2.0                                                                       
+
+
 
 const asset FX_DEFENSIVE_BOMBARDMENT_SCAN = $"P_artillery_marker_scan"
 
@@ -26,30 +35,33 @@ void function MpWeaponGrenadeDefensiveBombardment_Init()
 	PrecacheParticleSystem( FX_DEFENSIVE_BOMBARDMENT_SCAN )
 	PrecacheParticleSystem( FX_BOMBARDMENT_MARKER )
 
-	#if(false)
-
-#endif //
+	#if SERVER
+		                                                                                                                
+                          
+                                                                                                                        
+        
+	#endif         
 }
 
 void function OnWeaponOwnerChanged_WeaponDefensiveBombardment( entity weapon, WeaponOwnerChangedParams changeParams )
 {
-	#if(false)
+	#if SERVER
+	                                       
+	 
+		                                       
+		 
+			                                                        
+		 
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+	                                       
+	 
+		                                       
+		 
+			                                                                                                  
+		 
+	 
+	#endif
 }
 
 var function OnWeaponTossReleaseAnimEvent_WeaponDefensiveBombardment( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -59,19 +71,19 @@ var function OnWeaponTossReleaseAnimEvent_WeaponDefensiveBombardment( entity wea
 	if ( !IsValid( owner ) )
 		return
 
-	#if(false)
+	#if SERVER
+	                                                                  
+	                                    
+		                                                                                  
 
-
-
-
-
-#endif
+		                                                          
+	#endif
 
 	Grenade_OnWeaponTossReleaseAnimEvent( weapon, attackParams )
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 
-void function OnProjectileCollision_WeaponDefensiveBombardment( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_WeaponDefensiveBombardment( entity projectile, vector pos, vector normal, entity hitEnt, int hitBox, bool isCritical, bool isPassthrough )
 {
 	entity player = projectile.GetOwner()
 	if ( hitEnt == player )
@@ -80,94 +92,125 @@ void function OnProjectileCollision_WeaponDefensiveBombardment( entity projectil
 	if ( projectile.GrenadeHasIgnited() )
 		return
 
-	table collisionParams =
-	{
-		pos = pos,
-		normal = normal,
-		hitEnt = hitEnt,
-		hitbox = hitbox
-	}
+	DeployableCollisionParams cp
+	cp.pos = pos
+	cp.normal = normal
+	cp.hitEnt = hitEnt
+	cp.hitBox = hitBox
+	cp.isCritical = isCritical
+                     
+	cp.deployableFlags = eDeployableFlags.VEHICLES_NO_STICK
+                           
+	bool didStick = PlantStickyEntityOnWorldThatBouncesOffWalls( projectile, cp, 0.7 )
 
-	bool result = PlantStickyEntityOnWorldThatBouncesOffWalls( projectile, collisionParams, 0.7 )
+	#if SERVER
+		                
+		 
+                        
+				                                  
+					                                                                 
+                              
 
-	#if(false)
-
-
-
-
-
-
-
-
-#endif
+			      
+		 
+		                                                                             
+	#endif
 	projectile.GrenadeIgnite()
 	projectile.SetDoesExplode( false )
 }
 
-void function OnProjectileCollision_WeaponDefensiveBombardmentExplosion( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_WeaponDefensiveBombardmentExplosion( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical, bool isPassthrough )
 {
-	#if(false)
+	#if SERVER
+		                                     
+		                         
+			      
 
+		                                            
 
-
-
-
-#endif
+                          
+                                                                                                               
+       
+			                                                                                                      
+        
+	#endif
 }
 
-#if(false)
+#if SERVER
+                                                        
+ 
+	                                                    
+		            
 
+                  
+		                                       
+		                                                              
+			            
+                       
 
-//
+	           
+ 
 
+#endif         
+#if SERVER
+                                                                                 
+ 
+	                                                                                                         
+	                              
+		      
 
+	                                           
+	 
+		                                     
+		      
+	 
 
-//
-//
+	                                                         
+	                                                               
+	                                                      
+	                          
+	 
+		                                                                                     
+			                                       
+	 
 
+	                        
+		                                                                                
+ 
 
+                                                                      
+ 
+	                                      
 
+	                        
+		      
 
+	                                                                                                 
+	                                    
+		      
 
+	                                      
 
+	                                            
+	                                                                                                                                     
 
+	                                                                                                                                 
 
+	                       
+	                                                                                             
+		                                              
+	    
+		                                               
 
+	                                                                                                                                                       
+		                             
+		                              
+		                               
+		                             
 
+	                                                                 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                         
+		                     
+ 
 #endif

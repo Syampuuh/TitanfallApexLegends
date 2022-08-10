@@ -1,39 +1,62 @@
-global function MpWeaponEnergyShotgun_Init
+global function OnWeaponActivate_weapon_energy_shotgun
+global function OnWeaponDeactivate_weapon_energy_shotgun
 global function OnWeaponPrimaryAttack_weapon_energy_shotgun
 global function OnWeaponChargeLevelIncreased_weapon_energy_shotgun
 global function OnWeaponChargeEnd_weapon_energy_shotgun
 
-#if(false)
 
+#if SERVER
+                                                              
 #endif
-
-//
-//
-array<vector> BLAST_PATTERN_ENERGY_SHOTGUN = [
-	//
-	//
-	< 0.0, 0.0, 	0 >, //
-	< 0.0, 13.75, 	0 >, //
-	< -9.4, 5.4, 	0 >, //
-	< 9.4, 5.4, 	0 >, //
-	< -8.75, -9.4, 	0 >, //
-	< 8.75, -9.4, 	0 >, //
-	< 0.0, 7.5, 	0 >, //
-	< -4.35, 3.75, 	0 >, //
-	< 4.35, 3.75, 	0 >, //
-	< -4.35, -4.3, 	0 >, //
-	< 4.35, -4.35, 	0 >, //
-]
 
 struct
 {
 	EnergyChargeWeaponData chargeWeaponData
 } file
 
-
-void function MpWeaponEnergyShotgun_Init()
+void function OnWeaponActivate_weapon_energy_shotgun( entity weapon )
 {
-	file.chargeWeaponData.blastPattern = BLAST_PATTERN_ENERGY_SHOTGUN
+	OnWeaponActivate_ReactiveKillEffects( weapon )
+
+		if ( weapon.HasMod( KINETIC_LOADER_HOPUP ) )
+		{
+#if SERVER
+			                                                                          
+				                                      
+#endif
+			OnWeaponActivate_Kinetic_Loader( weapon )
+		}
+#if SERVER
+		    
+		 
+			                                             
+				                                         
+
+			                                                                  
+			 
+				                                   
+				                          
+			 
+		 
+
+		                                       
+
+		                    
+			      
+
+		                        
+		 
+			                                                                                  
+		 
+#endif
+}
+
+void function OnWeaponDeactivate_weapon_energy_shotgun( entity weapon )
+{
+	OnWeaponDeactivate_ReactiveKillEffects( weapon )
+
+	OnWeaponDeactivate_Kinetic_Loader( weapon )
+
 }
 
 var function OnWeaponPrimaryAttack_weapon_energy_shotgun( entity weapon, WeaponPrimaryAttackParams attackParams)
@@ -42,19 +65,19 @@ var function OnWeaponPrimaryAttack_weapon_energy_shotgun( entity weapon, WeaponP
 	return Fire_EnergyShotgun( weapon, attackParams, playerFired )
 }
 
-#if(false)
-
-
-
-
-
+#if SERVER
+                                                                                                                    
+ 
+	                        
+	                                                              
+ 
 #endif
 
 int function Fire_EnergyShotgun( entity weapon, WeaponPrimaryAttackParams attackParams, bool playerFired )
 {
 	float patternScale = 1.0
 	if ( weapon.HasMod( "npc_shotgunner" ) )
-		patternScale = expect float( weapon.GetWeaponInfoFileKeyField( "projectile_blast_pattern_npc_scale" ) )
+		patternScale = weapon.GetWeaponSettingFloat( eWeaponVar.blast_pattern_npc_scale )
 
 	return Fire_EnergyChargeWeapon( weapon, attackParams, file.chargeWeaponData, playerFired, patternScale )
 }

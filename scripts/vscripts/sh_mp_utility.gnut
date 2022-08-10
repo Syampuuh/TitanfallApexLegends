@@ -1,5 +1,3 @@
-untyped
-
 globalize_all_functions
 
 struct
@@ -60,23 +58,20 @@ IntFromEntityCompare function GetScoreboardCompareFunc()
 IntFromEntityCompare function ScoreboardCompareFuncForGamemode( string gamemode )
 {
 	IntFromEntityCompare func = GameMode_GetScoreCompareFunc( gamemode )
-	if ( func != null )
-		return func
-
-	return CompareScore
+	return func
 }
 
 bool function IsRoundWinningKillReplayEnabled()
 {
-	return expect bool( level.nv.roundWinningKillReplayEnabled )
+	return GetGlobalNonRewindNetBool("roundWinningKillReplayEnabled")
 }
 
 bool function IsRoundWinningKillReplayPlaying()
 {
-	return expect bool( level.nv.roundWinningKillReplayPlaying )
+	return GetGlobalNonRewindNetBool( "roundWinningKillReplayPlaying" )
 }
 
-bool function HasRoundScoreLimitBeenReached() //
+bool function HasRoundScoreLimitBeenReached()                                                                                                                                                                                    
 {
 	if ( !IsRoundBased() )
 		return false
@@ -100,35 +95,31 @@ bool function IsTitanAvailable( entity player )
 	return false
 }
 
+
+bool function IsRespawnAvailableBits( int index, int mask )
+{
+	Assert( index >= 0 )
+	Assert( index <= 3 )
+
+	return ( GetGlobalNonRewindNetInt( "respawnAvailableBits" +  index) & mask ) != 0
+}
+
 bool function IsRespawnAvailable( entity player )
 {
-	var varIndex = ( player.GetEntIndex() - 1 ) / 32
-	var shiftIndex = player.GetEntIndex() - 1 - (varIndex*32)
-	var elimMask = (1 << shiftIndex)
+	int varIndex = ( player.GetEntIndex() - 1 ) / 32
+	int shiftIndex = player.GetEntIndex() - 1 - (varIndex*32)
+	int elimMask = (1 << shiftIndex)
 
-	switch( varIndex )
-	{
-		case 0:
-			return ( level.nv.respawnAvailableBits0 & elimMask) != 0
-		case 1:
-			return ( level.nv.respawnAvailableBits1 & elimMask) != 0
-		case 2:
-			return ( level.nv.respawnAvailableBits2 & elimMask) != 0
-		case 3:
-			return ( level.nv.respawnAvailableBits3 & elimMask) != 0
-		default:
-			unreachable
-	}
-	return false
+	return IsRespawnAvailableBits( varIndex, elimMask )
 }
 
 bool function IsPrivateMatchSpectator( entity player )
 {
-	//
-	#if(false)
-
-
-#endif
+	      
+	#if SERVER
+	                                        
+		            
+	#endif
 
 	if ( IsPrivateMatch() && player.GetPersistentVarAsInt( "privateMatchState" ) == 1 )
 		return true
@@ -136,20 +127,86 @@ bool function IsPrivateMatchSpectator( entity player )
 	return false
 }
 
-#if(CLIENT)
+#if CLIENT
 void function SendFPSToServer()
 {
-	//
-	//
-	//
+	                                    
+	                                    
+	                                   
 	int frameRate = int( GetClientFPS() + 0.5 )
-	//
-	//
-	//
+	                               
+	                                   
+	                                    
 
 	entity player = GetLocalClientPlayer()
 	player.ClientCommand( "CurrentFPS " + frameRate )
 }
+void function ServerToClient_LeafSystemMarkPvs()
+{
+	entity player = GetLocalClientPlayer()
+	if ( IsValid( player ) )
+		player.ClientCommand( "leafsystem_markpvs" )
+}
 #endif
 
 
+int function GameState_WinBy2GetNumTies()
+{
+	int numRounds = GetRoundsPlayed()
+	int minScore = GameMode_GetWinBy2MinScore( GameRules_GetGameMode() )
+
+	if ( numRounds <= minScore )
+		return 0
+
+	int numTies = (numRounds - minScore + 1) / 2
+	return numTies
+}
+
+bool function GameState_WinBy2IsMatchPoint()
+{
+	if( GameState_IsFinalRound() )
+		return true
+
+	int minScoreToWin = GameMode_GetWinBy2MinScore( GameRules_GetGameMode() )
+
+	array< int > allTeams = GetAllValidPlayerTeams()
+	foreach( int team in allTeams )
+	{
+		int myTeamScore = GameRules_GetTeamScore2( team )
+		if ( myTeamScore+1 >= minScoreToWin )
+		{
+			bool hasCloseMatch = false
+			foreach( int enemyTeam in allTeams )
+			{
+				if ( enemyTeam != team )
+				{
+					int enemyTeamScore = GameRules_GetTeamScore2( enemyTeam )
+					if ( myTeamScore <= enemyTeamScore )
+					{
+						hasCloseMatch = true
+						break
+					}
+				}
+			}
+
+			if ( !hasCloseMatch )
+			{
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+bool function GameState_IsFinalRound()
+{
+	return GetRoundsPlayed() == GetMaxRoundsToPlay() - 1
+}
+
+int function GetMaxRoundsToPlay()
+{
+	Assert( IsRoundBased() )
+
+	return GetRoundScoreLimit_FromPlaylist() * 2 - 1
+}

@@ -1,13 +1,14 @@
 global function ShWeaponInspect_Init
-#if(CLIENT)
+#if CLIENT
 global function SCB_WeaponInspectHint
+global function SCB_AttemptWeaponInspect
 #endif
 
 const float GLADIATOR_CARD_INSPECT_SHOW_TIME = 5.0
 
 struct
 {
-	#if(CLIENT)
+	#if CLIENT
 		var gladiatorCardRui
 		int weaponInspectHideHudCount
 	#endif
@@ -15,25 +16,93 @@ struct
 
 void function ShWeaponInspect_Init()
 {
-	#if(CLIENT)
+	#if CLIENT
 		RegisterConCommandTriggeredCallback( "weapon_inspect", OnInspectKeyPressed )
 
 		RegisterConCommandTriggeredCallback( "scoreboard_profile", function( entity ply ) {
-			//
+			                                                                            
 			GetLocalClientPlayer().ClientCommand( "weapon_inspect" )
 		} )
+
+		AddCreateCallback("player", WeaponInspect_OnPlayerCreated )
 	#endif
 }
 
-#if(CLIENT)
+#if CLIENT
+void function WeaponInspect_OnPlayerCreated( entity player )
+{
+	if ( player == GetLocalClientPlayer() && player.GetTeam() == TEAM_SPECTATOR )
+		thread WeaponInspect_Observer_Think( player )
+}
+
 void function SCB_WeaponInspectHint()
 {
 	if ( GetLocalViewPlayer() != GetLocalClientPlayer() )
 		return
 
-	AddPlayerHint( 4.0, 0.25, $"", "#HINT_WEAPON_INSPECT" )
+	if ( IsControllerModeActive() )
+	{
+		AddPlayerHint( 4.0, 0.25, $"", "HINT_WEAPON_INSPECT_CONTROLLER" )
+	}
+	else
+		AddPlayerHint( 4.0, 0.25, $"", "#HINT_WEAPON_INSPECT" )
+
 }
 
+void function WeaponInspect_Observer_Think( entity localClientPlayer )
+{
+	localClientPlayer.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function() : ()
+		{
+			if( file.weaponInspectHideHudCount > 0 )
+			{
+				Minimap_EnableDraw()
+				Crosshair_SetState( CROSSHAIR_STATE_SHOW_ALL )
+				WeaponInspectHideHudElements( false )
+
+				HideGladiatorCardSidePane()
+			}
+		}
+	)
+
+	bool lastInspectingWeapon = false
+
+	while( true )
+	{
+		bool isInspectingWeapon = false
+		entity viewPlayer = GetLocalViewPlayer()
+		if ( viewPlayer )
+		{
+			entity viewWeapon = viewPlayer.GetActiveWeapon( eActiveInventorySlot.mainHand )
+			isInspectingWeapon = ( viewWeapon != null ) && ( viewWeapon.GetWeaponActivity() == ACT_VM_WEAPON_INSPECT )
+		}
+
+		if( lastInspectingWeapon != isInspectingWeapon )
+		{
+			if( isInspectingWeapon )
+			{
+				Minimap_DisableDraw()
+				Crosshair_SetState( CROSSHAIR_STATE_HIDE_ALL )
+				WeaponInspectHideHudElements( true )
+			}
+			else
+			{
+				if( file.weaponInspectHideHudCount > 0 )
+				{
+					Minimap_EnableDraw()
+					Crosshair_SetState( CROSSHAIR_STATE_SHOW_ALL )
+					WeaponInspectHideHudElements( false )
+				}
+			}
+
+			lastInspectingWeapon = isInspectingWeapon
+		}
+
+		WaitFrame()
+	}
+}
 
 void function OnInspectKeyPressed( entity localPlayer )
 {
@@ -44,20 +113,27 @@ void function OnInspectKeyPressed( entity localPlayer )
 	if ( !weapon.Anim_HasActivity( "ACT_VM_WEAPON_INSPECT" ) )
 		return
 
-	/*
+	  
+		                                                                                                             
+		                                                    
+		                                                   
+			      
 
-
-
-
-
-
-
-
-*/
+		                                                                     
+		                                                
+			                                               
+	  
 
 	thread WatchWeaponInspectState( GetLocalViewPlayer(), weapon )
 }
 
+void function SCB_AttemptWeaponInspect()
+{
+	if ( GetLocalViewPlayer() != GetLocalClientPlayer() )
+		return
+
+	GetLocalClientPlayer().ClientCommand( "weapon_inspect" )
+}
 
 void function ShowGladiatorCard( entity weapon, entity owner )
 {
@@ -68,8 +144,8 @@ void function ShowGladiatorCard( entity weapon, entity owner )
 
 void function WatchWeaponInspectState( entity player, entity weapon )
 {
-	//
-	//
+	                                            
+	                                                                                                                                                                            
 	Minimap_DisableDraw()
 	Crosshair_SetState( CROSSHAIR_STATE_HIDE_ALL )
 	WeaponInspectHideHudElements( true )

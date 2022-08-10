@@ -7,11 +7,6 @@ global function SurvivalMenuSwapWeapon
 global function SurvivalMenuSwapToMelee
 global function SurvivalMenuSwapToOrdnance
 global function IsSurvivalMenuEnabled
-global function Survival_PlayerIsTitan
-global function Survival_SetPlayerIsTitan
-global function Survival_PlayerIsRodeoing
-global function Survival_SetPlayerIsRodeoing
-global function Survival_CanPlayerUseTitanItem
 
 global function SurvivalMenu_OnAction
 global function SurvivalMenu_AckAction
@@ -42,8 +37,6 @@ global function SurvivalInventory_SetBGVisible
 struct
 {
 	var  menu
-	bool playerIsTitan
-	bool playerIsRodeoing
 
 	var quickInventoryPanel
 	var characterDetailsPanel
@@ -53,12 +46,11 @@ struct
 
 	float menuOpenTime
 
-	bool tabsInitialized = false
-
 	array<var> inventoryMenus
 } file
 
-void function InitSurvivalInventoryMenu()
+void function InitSurvivalInventoryMenu( var newMenuArg )
+                                              
 {
 	var menu = GetMenu( "SurvivalInventoryMenu" )
 	file.menu = menu
@@ -74,8 +66,8 @@ void function InitSurvivalInventoryMenu()
 
 	file.quickInventoryPanel = GetPanel( "SurvivalQuickInventoryPanel" )
 
-	HudElem_SetChildRuiArg( Hud_GetChild( menu, "TabsCommon" ), "Background" , "bgColor", <0,0,0>, eRuiArgType.VECTOR )
-	HudElem_SetChildRuiArg( Hud_GetChild( menu, "TabsCommon" ), "Background" , "bgAlpha", 1.6, eRuiArgType.FLOAT )
+	HudElem_SetChildRuiArg( Hud_GetChild( menu, "TabsCommon" ), "Background", "bgColor", <0, 0, 0>, eRuiArgType.VECTOR )
+	HudElem_SetChildRuiArg( Hud_GetChild( menu, "TabsCommon" ), "Background", "bgAlpha", 1.6, eRuiArgType.FLOAT )
 
 	SetTabRightSound( menu, "UI_InGame_InventoryTab_Select" )
 	SetTabLeftSound( menu, "UI_InGame_InventoryTab_Select" )
@@ -87,10 +79,12 @@ bool function PROTO_Survival_DoInventoryMenusUseCommands()
 	return GetCurrentPlaylistVarBool( "survival_menus_use_commands", true )
 }
 
+
 bool function PROTO_ShouldInventoryFooterHack()
 {
 	return IsSurvivalMenuEnabled() && !PROTO_Survival_DoInventoryMenusUseCommands()
 }
+
 
 void function Survival_AddPassthroughCommandsToMenu( var menu )
 {
@@ -139,9 +133,8 @@ void function SurvivalMenu_AckAction()
 }
 
 
-void function OpenSurvivalInventoryMenu( bool playerIsTitan )
+void function OpenSurvivalInventoryMenu()
 {
-	file.playerIsTitan = playerIsTitan
 	CloseAllMenus()
 	AdvanceMenu( file.menu )
 
@@ -152,18 +145,39 @@ void function OpenSurvivalInventoryMenu( bool playerIsTitan )
 
 void function OnSurvivalInventoryMenu_Open()
 {
-	if ( !file.tabsInitialized )
-	{
+	ClearTabs( file.menu )
+
+	TabData tabData = GetTabDataForPanel( file.menu )
+	tabData.centerTabs = true
+
+	bool isScoreboardEnabled = GetCurrentPlaylistVarBool( "enable_inventory_scoreboard", false )
+	bool isScoreboardFirstTab = GetCurrentPlaylistVarBool( "inventory_scoreboard_first_tab", false )
+
+	bool isInventoryTabDisabled = GetCurrentPlaylistVarBool( "inventory_tab_hidden", false )
+
+	if ( isScoreboardEnabled && isScoreboardFirstTab )
+		AddTab( file.menu, Hud_GetChild( file.menu, "GenericScoreboardPanel" ), "#TAB_SCOREBOARD" )                   
+
+	if( !isInventoryTabDisabled )
 		AddTab( file.menu, file.quickInventoryPanel, "#INVENTORY_TITLE" )
-		AddTab( file.menu, Hud_GetChild( file.menu, "SquadPanel" ), "#SQUAD" )
-		AddTab( file.menu, Hud_GetChild( file.menu, "CharacterDetailsPanel" ), "#LEGEND" )
-		file.tabsInitialized = true
-	}
+
+	if ( isScoreboardEnabled && !isScoreboardFirstTab )
+		AddTab( file.menu, Hud_GetChild( file.menu, "GenericScoreboardPanel" ), "#TAB_SCOREBOARD" )                        
+
+	AddTab( file.menu, Hud_GetChild( file.menu, "SquadPanel" ), "BUG THIS" )
+	AddTab( file.menu, Hud_GetChild( file.menu, "CharacterDetailsPanel" ), "#LEGEND" )
+
+	TabData squadData = GetTabDataForPanel( file.menu )
+	TabDef squadDef   = Tab_GetTabDefByBodyName( squadData, "SquadPanel" )
+	if ( IsSoloMode() )
+		squadDef.title = "#STATS"
+	else
+		squadDef.title = "#SQUAD"
 
 	SetTabNavigationEnabled( file.menu, true )
 	EmitUISound( "UI_InGame_Inventory_Open" )
 
-	file.menuOpenTime = Time()
+	file.menuOpenTime = UITime()
 
 	UISize screenSize = GetScreenSize()
 	SetCursorPosition( <1920.0 * 0.5, 1080.0 * 0.5, 0> )
@@ -210,23 +224,27 @@ void function CloseSurvivalInventoryMenu()
 	}
 }
 
+
 void function SurvivalMenuSwapWeapon( var button )
 {
-	if ( Time() > file.menuOpenTime + 0.1 )
+	if ( UITime() > file.menuOpenTime + 0.1 )
 		RunClientScript( "Survival_SwapPrimary" )
 }
 
+
 void function SurvivalMenuSwapToMelee( var button )
 {
-	if ( Time() > file.menuOpenTime + 0.1 )
+	if ( UITime() > file.menuOpenTime + 0.1 )
 		RunClientScript( "Survival_SwapToMelee" )
 }
 
+
 void function SurvivalMenuSwapToOrdnance( var button )
 {
-	if ( Time() > file.menuOpenTime + 0.1 )
+	if ( UITime() > file.menuOpenTime + 0.1 )
 		RunClientScript( "Survival_SwapToOrdnance" )
 }
+
 
 bool function IsSurvivalMenuEnabled()
 {
@@ -234,36 +252,7 @@ bool function IsSurvivalMenuEnabled()
 }
 
 
-void function Survival_SetPlayerIsTitan( bool value )
-{
-	file.playerIsTitan = value
-}
-
-
-bool function Survival_PlayerIsTitan()
-{
-	return file.playerIsTitan
-}
-
-
-void function Survival_SetPlayerIsRodeoing( bool value )
-{
-	file.playerIsRodeoing = value
-}
-
-
-bool function Survival_PlayerIsRodeoing()
-{
-	return file.playerIsRodeoing
-}
-
-
-bool function Survival_CanPlayerUseTitanItem()
-{
-	return file.playerIsTitan || file.playerIsRodeoing
-}
-
-//
+   
 void function SurvivalInventoryMenu_SetInventoryLimit( int limit )
 {
 	file.inventoryLimit = limit
@@ -274,6 +263,7 @@ int function SurvivalInventoryMenu_GetInventoryLimit()
 {
 	return file.inventoryLimit
 }
+
 
 void function SurvivalInventoryMenu_SetInventoryLimitMax( int limitMax )
 {
@@ -286,9 +276,10 @@ int function SurvivalInventoryMenu_GetInventoryLimitMax()
 	return file.maxInventoryLimit
 }
 
+
 int function SurvivalInventoryMenu_GetMaxInventoryLimit()
 {
-	return SURVIVAL_GetMaxInventoryLimit( GetUIPlayer() )
+	return SURVIVAL_GetMaxInventoryLimit( GetLocalClientPlayer() )
 }
 
 
@@ -307,13 +298,15 @@ void function SurvivalInventoryMenu_EndUpdate()
 	{
 		SurvivalQuickInventory_OnUpdate()
 
-		//
-		if( !GetDpadNavigationActive() )
+		                                                                                                    
+		if ( !GetDpadNavigationActive() )
+
 			ForceVGUIFocusUpdate()
 	}
 
 	UpdateQuickSwapMenu()
 }
+
 
 void function TryCloseSurvivalInventoryFromDamage( var button )
 {
@@ -327,11 +320,13 @@ void function TryCloseSurvivalInventoryFromDamage( var button )
 	}
 }
 
+
 void function TryCloseSurvivalInventory( var button )
 {
 	if ( SURVIVAL_IsAnInventoryMenuOpened() )
 		CloseActiveMenu()
 }
+
 
 int function SURVIVAL_GetMaxInventoryLimit( entity player )
 {
@@ -344,10 +339,12 @@ int function SURVIVAL_GetInventoryLimit( entity player )
 	return SurvivalInventoryMenu_GetInventoryLimit()
 }
 
+
 void function Survival_RegisterInventoryMenu( var menu )
 {
 	file.inventoryMenus.append( menu )
 }
+
 
 bool function SURVIVAL_IsAnInventoryMenuOpened()
 {
@@ -359,6 +356,7 @@ bool function SURVIVAL_IsAnInventoryMenuOpened()
 
 	return false
 }
+
 
 void function SurvivalInventory_SetBGVisible( bool visible )
 {

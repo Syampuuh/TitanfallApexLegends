@@ -1,18 +1,14 @@
-//
-
-#if(CLIENT)
-#endif
-
+  
 global function MpAbilityShifter_Init
 global function PhaseShift
 global function CodeCallback_EnterPhaseShift
 global function CodeCallback_ExitPhaseShift
 global function CancelPhaseShift
 
-#if(false)
-
-
-
+#if SERVER
+                                      
+                                         
+                                   
 #endif
 
 const SHIFTER_OUTRO_TIME_BEFORE_END = 1.5
@@ -29,21 +25,46 @@ const SHIFTER_DASH_APPEAR_FX = $"P_phase_dash_end"
 const SHIFTER_DASH_DISAPPEAR_FX = $"P_phase_dash_start"
 const SHIFTER_DASH_DISAPPEAR_ON_WRAITH_FX = $"P_phase_dash_start_mdl"
 
+const string SHIFTER_MOVER_SCRIPTNAME = "phaseshift_mover"
+
+                  
+const SHIFTER_GATE_DISAPPEAR_FX = $"P_wrth_tt_dash_3P"
+      
+
 const SHIFTER_SCREEN_FX = $"P_phase_shift_screen"
 const SHIFTER_PERSONAL_FX = $"P_phase_shift_player"
 const SHIFTER_SCREEN_FX_START = $"P_phase_shift_screen_start"
 const SHIFTER_COLORCORRECTION = "materials/correction/fx_phase_shift.raw_hdr"
 
-const SHIFTER_PRE_SOUND_1P = "Pilot_PhaseShift_PreActivate_1P"
-const SHIFTER_PRE_SOUND_3P = "Pilot_PhaseShift_PreActivate_3P"
+const SHIFTER_PRE_SOUND_1P 			= "Pilot_PhaseShift_PreActivate_1P"
+const SHIFTER_PRE_SOUND_3P 			= "Pilot_PhaseShift_PreActivate_3P"
 global const SHIFTER_START_SOUND_1P = "Pilot_PhaseShift_Activate_1P"
 global const SHIFTER_START_SOUND_3P = "Pilot_PhaseShift_Activate_3P"
-const SHIFTER_LOOP_SOUND_1P = "Pilot_PhaseShift_Loop_1P"
-const SHIFTER_LOOP_SOUND_3P = "Pilot_PhaseShift_Loop_3P"
-const SHIFTER_PRE_END_SOUND_1P = "Pilot_PhaseShift_WarningToEnd_1P"
-const SHIFTER_PRE_END_SOUND_3P = "Pilot_PhaseShift_WarningToEnd_3P"
-global const SHIFTER_END_SOUND_1P = "Pilot_PhaseShift_End_1P"
-global const SHIFTER_END_SOUND_3P = "Pilot_PhaseShift_End_3P"
+const SHIFTER_LOOP_SOUND_1P 		= "Pilot_PhaseShift_Loop_1P"
+const SHIFTER_LOOP_SOUND_3P 		= "Pilot_PhaseShift_Loop_3P"
+const SHIFTER_PRE_END_SOUND_1P 		= "Pilot_PhaseShift_WarningToEnd_1P"
+const SHIFTER_PRE_END_SOUND_3P 		= "Pilot_PhaseShift_WarningToEnd_3P"
+global const SHIFTER_END_SOUND_1P 	= "Pilot_PhaseShift_End_1P"
+global const SHIFTER_END_SOUND_3P 	= "Pilot_PhaseShift_End_3P"
+                                                                       
+const SHIFTER_START_SOUND_3P_BREACH   = "Ash_PhaseBreach_PortalOpen_Enter_3p"
+const SHIFTER_LOOP_SOUND_1P_BREACH    = "Ash_PhaseBreach_loop_1p"
+const SHIFTER_LOOP_SOUND_3P_BREACH    = "Ash_PhaseBreach_loop_3p"
+const SHIFTER_PRE_END_SOUND_1P_BREACH = "Ash_PhaseBreach_warningtoend_1p"
+const SHIFTER_PRE_END_SOUND_3P_BREACH = "Ash_PhaseBreach_warningtoend_3p"
+const SHIFTER_END_SOUND_1P_BREACH 	  = "Ash_PhaseBreach_End_1p"
+const SHIFTER_END_SOUND_3P_BREACH     = "Ash_PhaseBreach_End_3p"
+
+const GATE_PRE_SOUND_1P 			= "Olympus_phaseshift_preactivate_1p"
+const GATE_PRE_SOUND_3P 			= "Olympus_phaseshift_preactivate_3p"
+global const GATE_START_SOUND_1P 	= "Olympus_phaseshift_activate_1p"
+global const GATE_START_SOUND_3P 	= "Olympus_phaseshift_activate_3p"
+const GATE_LOOP_SOUND_1P 			= "Olympus_phaseshift_loop_1p"
+const GATE_LOOP_SOUND_3P 			= "Olympus_phaseshift_loop_3p"
+const GATE_PRE_END_SOUND_1P 		= "Olympus_phaseshift_warningtoend_1p"
+const GATE_PRE_END_SOUND_3P 		= "Olympus_phaseshift_warningtoend_3p"
+global const GATE_END_SOUND_1P 		= "Olympus_phaseshift_end_1p"
+global const GATE_END_SOUND_3P 		= "Olympus_phaseshift_end_3p"
 
 const SHIFTER_PRE_SOUND_1P_TITAN = "Pilot_PhaseShift_PreActivate_1P"
 const SHIFTER_PRE_SOUND_3P_TITAN = "Pilot_PhaseShift_PreActivate_3P"
@@ -60,15 +81,6 @@ global const RECONSTRUCT_REWIND_TICK = 0.1
 global const RECONSTRUCT_REWIND_COUNT = 100
 global const RECONSTRUCT_END_HOLD_TIME = 0.1
 
-
-global enum eShiftStyle
-{
-	Default,
-	Balance,
-	Tunnel,
-	Dash,
-}
-
 const int TELEFRAG_DAMAGE = 5000
 
 struct
@@ -83,9 +95,9 @@ void function CodeCallback_EnterPhaseShift( entity ent )
 
 void function CodeCallback_ExitPhaseShift( entity ent )
 {
-	#if(false)
-
-#endif
+	#if SERVER
+		                       
+	#endif
 }
 
 
@@ -93,34 +105,32 @@ void function CancelPhaseShift( entity ent )
 {
 	ent.PhaseShiftCancel()
 
-	#if(false)
+	#if SERVER
+		                        
+		                                                
+		 
+			                                  
+		 
 
+		                         
 
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+		                                   
+		                                                                 
+		                                             
+	#endif   
 }
 
 
 void function MpAbilityShifter_Init()
 {
-	#if(CLIENT)
-		//
+	#if CLIENT
+		                                                                                  
 
 		ColorCorrection_RegisterPhaseShift( SHIFTER_COLORCORRECTION )
 		thread ClientPhaseShiftFirstPersonFXThread()
 
-		thread ClientRemoteTurretFirstPersonFXThread()
-	#endif //
+		                                                 
+	#endif              
 
 	PrecacheParticleSystem( SHIFTER_PRE_FX )
 	PrecacheParticleSystem( SHIFTER_APPEAR_FX )
@@ -135,6 +145,10 @@ void function MpAbilityShifter_Init()
 	PrecacheParticleSystem( SHIFTER_DASH_DISAPPEAR_FX )
 	PrecacheParticleSystem( SHIFTER_DASH_DISAPPEAR_ON_WRAITH_FX )
 
+                  
+	PrecacheParticleSystem( SHIFTER_GATE_DISAPPEAR_FX )
+      
+
 	MpAbilityPhaseWalk_Init()
 
 	RegisterSignal( "StartPhaseShift" )
@@ -146,74 +160,83 @@ void function MpAbilityShifter_Init()
 	RegisterSignal( "PhaseRewindCrouchPlayer" )
 	RegisterSignal( "PhaseRewindStop" )
 
-
-	#if(false)
-//
-//
-
-//
-#endif
+	#if SERVER
+		                                                              
+		                                                                                
+		                                                                           
+		                                                                            
+	#endif
 }
 
-int function PhaseShift( entity ent, float warmupTime, float duration, int shiftStyle = eShiftStyle.Default, bool fxOnly = false )
+int function PhaseShift( entity ent, float warmupTime, float duration, int shiftStyle = PHASETYPE_DEFAULT, bool fxOnly = false )
 {
 	if ( !IsAlive( ent ) )
 		return 0
 
 	if ( ent.IsPhaseShifted() )
 		return 0
-
-	//
-	//
+	
+	                                          
+	                                                                     
 	if ( ent.IsPlayer() )
 	{
 		entity proxy = ent.GetFirstPersonProxy()
 		if ( ( ent.ContextAction_IsActive() || (proxy != null && proxy.Anim_IsActive()) )
 			&& !ent.IsZiplining()
 			&& !ent.ContextAction_IsLeeching()
-			&& !RodeoState_GetIsPlayerRodeoing( ent ))
+			&& !ent.ContextAction_IsInVehicle()
+			&& !HoverVehicle_IsPlayerInAnyVehicle( ent )
+			&& !Crafting_IsPlayerAtWorkbench( ent )
+			&& !( IsEntNewcastleReviver( ent ) )
+			&& !( IsEntNewcastleReviveTarget( ent ) ) )
 		{
 			return 0
 		}
 
 		switch ( shiftStyle )
 		{
-			case eShiftStyle.Balance:
-			case eShiftStyle.Tunnel:
+			case PHASETYPE_BALANCE:
+				ent.SetSeeOtherNonShifters( true )
+				StatusEffect_AddTimed( ent, eStatusEffect.speed_boost, 0.05, duration, 0.25 )
+				break
+                  
+			case PHASETYPE_GATE:
+      
+			case PHASETYPE_BREACH:
+			case PHASETYPE_TUNNEL:
 				ent.SetSeeOtherNonShifters( false )
 				StatusEffect_AddTimed( ent, eStatusEffect.speed_boost, 0.05, duration, 0.25 )
 			break
-			case eShiftStyle.Dash:
-				#if(false)
-
-
-#endif
+			case PHASETYPE_DASH:
+				#if SERVER
+				                                   
+				#endif
 			default:
 				ent.SetSeeOtherNonShifters( false )
 				break
 		}
 
-		//
+		                                                                         
 		if ( !fxOnly )
-			ent.PhaseShiftBegin( warmupTime, duration )
+			ent.PhaseShiftBegin( warmupTime, duration , shiftStyle )
 
-		#if(false)
-
-#else
-			thread ClientPhaseShiftWarmupThread( ent, warmupTime )
-		#endif //
+		#if SERVER
+			                                                                            
+		#else
+			thread ClientPhaseShiftWarmupThread( ent, warmupTime, shiftStyle )
+		#endif              
 
 		return 1
 	}
 	else
 	{
-		//
+		                                                                         
 		if ( !fxOnly )
-			ent.PhaseShiftBegin( warmupTime, duration )
+			ent.PhaseShiftBegin( warmupTime, duration , shiftStyle)
 
-		#if(false)
-
-#endif //
+		#if SERVER
+			                                                                            
+		#endif              
 
 		return 1
 	}
@@ -221,578 +244,407 @@ int function PhaseShift( entity ent, float warmupTime, float duration, int shift
 	unreachable
 }
 
-#if(false)
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-
-#if(CLIENT)
-void function ClientPhaseShiftWarmupThread( entity player, float warmupTime )
+#if SERVER
+
+                                                                                                           
+ 
+	                          
+	                                      
+
+	                           
+
+	                     
+	 
+		                     
+		  	                                                                 
+
+		                                        
+		                    
+			                                         
+
+		                    
+		 
+			                          
+		 
+	 
+	    
+	 
+		                    
+			                          
+		                                   
+		                                   
+			                                           
+		    
+			                                              
+	 
+
+	                                    
+
+	            
+		                                             
+		 
+			                     
+			 
+				                              
+				           
+				                              
+
+				                                              
+				                                               
+				                                                      
+				                                           
+				                                            
+				                                                    
+				                                                     
+
+				                            
+
+				                     
+				 
+					                  
+					                                     
+
+					                                       
+					 
+						                                      
+						                                         
+						 
+							                                                               
+						 
+					 
+
+					                                        
+					                    
+						                                          
+				 
+				    
+				 
+					                                    
+					                                    
+				 
+
+				                                                               
+				                                
+				 
+					                                    
+						                                                                                                                                                                                       
+					    
+						                                                                             
+				 
+			 
+		 
+	 
+
+	               
+
+	                                 
+
+	                     
+	 
+		                      
+		                       
+		                      
+			                                                                             
+			                                                             
+			                                                                          
+			                                                             
+			     
+		                    
+			                                                                             
+			                                                             
+			                                                                          
+			                                                             
+			     
+                  
+		                    
+			                                                                             
+			                                                             
+
+			     
+      
+		        
+			                                            
+			                                                             
+			     
+	 
+
+	                               
+	                      
+		                              
+	              
+	                       
+	                           
+	                                     
+
+	                     
+	 
+		                   
+
+		                               
+		                    
+		 
+			                                                                         
+			                                                                        
+		 
+		    
+		 
+			                                   
+			 
+				                                                                
+				                                                               
+			 
+			                                          
+			 
+				                                                                                                  
+				                                                                         
+			 
+			    
+			 
+				                                                                   
+				                                                                  
+			 
+		 
+
+		                                                                                                                                                             
+		 
+			                                      
+		 
+
+		                                                  
+	 
+	    
+	 
+		                    
+		 
+			                                                      
+			                                                     
+		 
+		    
+		 
+			                                                
+			                                               
+		 
+	 
+
+	                          
+	                            
+
+	                                 
+	 
+		                                                                                          
+		                   
+	 
+
+	                                                 
+	 
+		                                                
+
+		                     
+		 
+			                    
+			 
+				                                                                         
+				                                                                           
+			 
+			    
+			 
+				                                   
+				 
+					                                                                
+					                                                                  
+				 
+				                                          
+				 
+					                                                                          
+					                                                                            
+				 
+				    
+				 
+					                                                                   
+					                                                                     
+				 
+			 
+		 
+		    
+		 
+			                    
+				                                                        
+			    
+				                                                  
+		 
+
+		                                  
+	 
+	    
+	 
+		              
+	 
+
+	                     
+	 
+		                    
+		                       
+			                                                     
+			     
+		                      
+			                                                                                                               
+			     
+		        
+			                             
+			     
+	 
+
+	                   
+		                   
+ 
+
+                                                
+                                                                            
+ 
+	                          
+		           
+
+	                                                                                 
+ 
+
+                                                                                       
+ 
+	                           
+	                                      
+
+	            
+		                        
+		 
+			                    
+			 
+				                                                                  
+				            
+			 
+			                                                         
+			 
+				                               
+			 
+		 
+	 
+
+	                           
+	                    
+		                
+
+	                                      
+ 
+
+                                                                                                                                          
+ 
+	            
+	                            
+		                       
+	                                
+		                                
+	    
+		                          
+
+	                     
+	 
+		                            
+			                                                            
+		                         
+			                                                                       
+		                                                                                  
+			                                                              
+		    
+			                                                                 
+
+		                            
+			                                                          
+
+		                                                                
+	 
+	    
+	 
+		                    
+			                                                    
+		    
+			                                              
+		                                    
+	 
+
+	           
+ 
+
+                                                                                                                                                  
+ 
+	                           
+		                                    
+
+	                                                
+	                                                 
+
+	             
+	               
+	 
+		                                                                                                              
+		                      
+		                            
+		                                     
+		                                                                                                   
+		                                                                                                                                      
+		                           
+		                                    
+		                      
+		                         
+		                                
+	 
+	    
+	 
+		                                                                                                 
+		                            
+		                                     
+	 
+	             
+ 
+
+  
+                                         
+ 
+	                             
+	                                    
+
+	           
+	 
+		                                   
+		                     
+		                                
+		                              
+		                            
+		                         
+		                       
+		                                                
+		           
+	 
+ 
+  
+
+                                               
+ 
+	                                                                   
+	                                
+	 
+		                                                        
+		                          
+			      
+
+		                                                                       
+			        
+
+		                                      
+	 
+ 
+#endif              
+
+
+#if CLIENT
+void function ClientPhaseShiftWarmupThread( entity player, float warmupTime, int shiftStyle = PHASETYPE_DEFAULT )
 {
 	player.EndSignal( "OnDeath" )
 
@@ -815,9 +667,16 @@ void function ClientPhaseShiftWarmupThread( entity player, float warmupTime )
 	)
 
 	if ( player.IsTitan() )
+	{
 		EmitSoundOnEntity( player, SHIFTER_PRE_SOUND_1P_TITAN )
+	}
 	else
-		EmitSoundOnEntity( player, SHIFTER_PRE_SOUND_1P )
+	{
+		if ( shiftStyle == PHASETYPE_GATE )
+			EmitSoundOnEntity( player, GATE_PRE_SOUND_1P )
+		else
+			EmitSoundOnEntity( player, SHIFTER_PRE_SOUND_1P )
+	}
 
 	wait warmupTime
 }
@@ -848,31 +707,38 @@ void function ClientPhaseShiftFirstPersonFXThread()
 			{
 				if ( IsValid( ourPlayer ) && (ourPlayer == localViewPlayer) )
 				{
-					//
+					     
 					{
 						int fxIndex = GetParticleSystemIndex( SHIFTER_SCREEN_FX_START )
 						StartParticleEffectInWorldWithHandle( fxIndex, ZERO_VECTOR, ZERO_VECTOR )
 					}
 
-					//
+					     
 					{
 						int fxIndex          = GetParticleSystemIndex( SHIFTER_APPEAR_FX )
 						vector viewAngles    = ourPlayer.EyeAngles()
 						vector viewForward   = AnglesToForward( viewAngles )
 						vector viewForward2d = Normalize( <viewForward.x, viewForward.y, 0> )
-						StartParticleEffectOnEntityWithPos( ourPlayer, fxIndex, FX_PATTACH_ABSORIGIN, -1, (viewForward2d * 30), ZERO_VECTOR )
+						StartParticleEffectOnEntityWithPos( ourPlayer, fxIndex, FX_PATTACH_ABSORIGIN, ATTACHMENTID_INVALID, (viewForward2d * 30), ZERO_VECTOR )
 					}
 
 					if ( ourPlayer.IsTitan() )
 					{
 						EmitSoundOnEntity( ourPlayer, SHIFTER_END_SOUND_1P_TITAN )
 					}
+					else if ( StatusEffect_GetSeverity( ourPlayer, eStatusEffect.phase_gate_tracking ) > 0 )
+					{
+						EmitSoundOnEntity( ourPlayer, GATE_END_SOUND_1P )
+					}
 					else
 					{
 						EmitSoundOnEntity( ourPlayer, SHIFTER_END_SOUND_1P )
 					}
+
+					StopSoundOnEntity( ourPlayer, GATE_LOOP_SOUND_1P )
 					StopSoundOnEntity( ourPlayer, SHIFTER_LOOP_SOUND_1P )
 					StopSoundOnEntity( ourPlayer, SHIFTER_LOOP_SOUND_1P_TITAN )
+					StopSoundOnEntity( ourPlayer, SHIFTER_LOOP_SOUND_1P_BREACH )
 				}
 
 				ClientPhaseShift_SCRIPT_HACKS_OFF()
@@ -885,17 +751,6 @@ void function ClientPhaseShiftFirstPersonFXThread()
 
 				Chroma_PhaseShiftEnding()
 			}
-			else if ( IsValid( localViewPlayer ) && localViewPlayer.IsPhaseShifted() )
-			{
-				if ( !endSoundPlayed && (localViewPlayer.PhaseShiftTimeRemaining() <= SHIFTER_OUTRO_TIME_BEFORE_END) )
-				{
-					endSoundPlayed = true
-					if ( localViewPlayer.IsTitan() )
-						EmitSoundOnEntity( localViewPlayer, SHIFTER_PRE_END_SOUND_1P_TITAN )
-					else
-						EmitSoundOnEntity( localViewPlayer, SHIFTER_PRE_END_SOUND_1P )
-				}
-			}
 		}
 
 		if ( !effectsAreActive )
@@ -904,26 +759,26 @@ void function ClientPhaseShiftFirstPersonFXThread()
 
 			if ( IsValid( localViewPlayer ) && localViewPlayer.IsPhaseShifted() && localViewPlayer.GetTeam() != TEAM_SPECTATOR )
 			{
-				//
+				     
 				{
 					int fxIndex   = GetParticleSystemIndex( SHIFTER_PERSONAL_FX )
 					int attachIdx = localViewPlayer.LookupAttachment( "CHESTFOCUS" )
 					effectSparkles = StartParticleEffectOnEntity( localViewPlayer, fxIndex, FX_PATTACH_POINT_FOLLOW, attachIdx )
 				}
 
-				//
+				     
 				{
 					int fxIndex = GetParticleSystemIndex( SHIFTER_SCREEN_FX )
 					effectScreen = StartParticleEffectInWorldWithHandle( fxIndex, ZERO_VECTOR, ZERO_VECTOR )
 				}
 
-				//
+				     
 				{
 					int fxIndex = GetParticleSystemIndex( SHIFTER_SCREEN_FX_START )
 					StartParticleEffectInWorldWithHandle( fxIndex, ZERO_VECTOR, ZERO_VECTOR )
 				}
 
-				//
+				     
 				{
 					entity viewModelEntity  = localViewPlayer.GetViewModelEntity()
 					entity firstPersonProxy = localViewPlayer.GetPredictedFirstPersonProxy()
@@ -945,11 +800,20 @@ void function ClientPhaseShiftFirstPersonFXThread()
 
 				if ( localViewPlayer.IsTitan() )
 					EmitSoundOnEntity( localViewPlayer, SHIFTER_START_SOUND_1P_TITAN )
+				else if ( localViewPlayer.GetPhaseShiftType() == PHASETYPE_GATE )
+					EmitSoundOnEntity( localViewPlayer, GATE_START_SOUND_1P )
+				else if ( localViewPlayer.GetPhaseShiftType() == PHASETYPE_BREACH )
+					EmitSoundAtPosition( TEAM_ANY, localViewPlayer.GetOrigin(), SHIFTER_START_SOUND_3P_BREACH )
 				else
 					EmitSoundOnEntity( localViewPlayer, SHIFTER_START_SOUND_1P )
 
+
 				if ( localViewPlayer.IsTitan() )
 					EmitSoundOnEntity( localViewPlayer, SHIFTER_LOOP_SOUND_1P_TITAN )
+				else if ( localViewPlayer.GetPhaseShiftType() == PHASETYPE_GATE )
+					EmitSoundOnEntity( localViewPlayer, GATE_LOOP_SOUND_1P )
+				else if ( localViewPlayer.GetPhaseShiftType() == PHASETYPE_BREACH )
+					EmitSoundOnEntity( localViewPlayer, SHIFTER_LOOP_SOUND_1P_BREACH )
 				else
 					EmitSoundOnEntity( localViewPlayer, SHIFTER_LOOP_SOUND_1P )
 
@@ -964,53 +828,55 @@ void function ClientPhaseShiftFirstPersonFXThread()
 	}
 }
 
-void function ClientRemoteTurretFirstPersonFXThread()
-{
-	int effectSparkles
-	int effectScreen
-	bool effectsAreActive = false
-	entity ourPlayer      = null
+  
+                                                     
+ 
+	                  
+	                
+	                             
+	                            
 
-	const string TURRET_LOOP_SOUND = "Pilot_RemoteTurret_Loop_1P"
+	                                                             
 
-	while ( true )
-	{
-		if ( effectsAreActive )
-		{
-			entity localViewPlayer = GetLocalViewPlayer()
+	              
+	 
+		                       
+		 
+			                                             
 
-			bool needShutdown = false
-			if ( !IsValid( ourPlayer ) || !IsAlive( ourPlayer ) )
-				needShutdown = true
-			else if ( ourPlayer != localViewPlayer )
-				needShutdown = true
-			else if ( ourPlayer.GetRemoteTurret() == null )
-				needShutdown = true
+			                         
+			                                                     
+				                   
+			                                        
+				                   
+			                                               
+				                   
 
-			if ( needShutdown )
-			{
-				if ( IsValid( ourPlayer ) && (ourPlayer == localViewPlayer) )
-					StopSoundOnEntity( ourPlayer, TURRET_LOOP_SOUND )
+			                   
+			 
+				                                                             
+					                                                 
 
-				effectsAreActive = false
-				ourPlayer = null
-			}
-		}
+				                        
+				                
+			 
+		 
 
-		if ( !effectsAreActive )
-		{
-			entity localViewPlayer = GetLocalViewPlayer()
-			if ( IsValid( localViewPlayer ) && (localViewPlayer.GetRemoteTurret() != null) )
-			{
-				EmitSoundOnEntity( localViewPlayer, TURRET_LOOP_SOUND )
-				effectsAreActive = true
-				ourPlayer = localViewPlayer
-			}
-		}
+		                        
+		 
+			                                             
+			                                                                                
+			 
+				                                                       
+				                       
+				                           
+			 
+		 
 
-		WaitFrame()
-	}
-}
+		           
+	 
+ 
+  
 
 void function ClientPhaseShift_SCRIPT_HACKS_ON()
 {
@@ -1020,35 +886,35 @@ void function ClientPhaseShift_SCRIPT_HACKS_ON()
 
 	if ( localViewPlayer == GetLocalClientPlayer() )
 	{
-		//
-		//
-		//
+		                                              
+		                                               
+		                                               
 	}
 }
 
 void function ClientPhaseShift_SCRIPT_HACKS_OFF()
 {
 	entity localViewPlayer = GetLocalViewPlayer()
-	//
-	//
-	//
+	  
+	                                                  
+	  	                                     
 
-	//
-	//
-	//
+	                                                                                                              
+	                                             
+	   	                                                                     
 }
 
-#endif //
+#endif              
 
-#if(false)
+#if SERVER
+                                                            
+ 
+	                                       
+	 
+		                                                 
+		                               
+	 
 
-
-
-
-
-
-
-
-
-
+	                             
+ 
 #endif

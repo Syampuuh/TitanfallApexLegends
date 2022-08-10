@@ -3,13 +3,13 @@ global function PlayerMatchState_RegisterNetworking
 global function PlayerMatchState_GetFor
 global function AddCallback_OnPlayerMatchStateChanged
 
-#if(false)
+#if SERVER
+                                    
+#endif          
 
-#endif //
-
-#if(CLIENT)
+#if CLIENT
 global function PlayerMatchState_RuiTrackInt
-#endif //
+#endif          
 
 const string NV_PLAYERMATCHSTATE = "nv_PlayerMatchState"
 
@@ -24,7 +24,7 @@ global enum ePlayerMatchState
 
 struct
 {
-	array<void functionref( entity, int, int )> s_playerMatchStateChangedCallbacks
+	array<void functionref( entity, int )> s_playerMatchStateChangedCallbacks
 } file
 
 
@@ -32,12 +32,12 @@ void function PlayerMatchState_RegisterNetworking()
 {
 	RegisterNetworkedVariable( NV_PLAYERMATCHSTATE, SNDC_PLAYER_EXCLUSIVE, SNVT_INT, ePlayerMatchState.NORMAL )
 
-#if(CLIENT)
+#if CLIENT
 	RegisterNetworkedVariableChangeCallback_int( NV_PLAYERMATCHSTATE, OnPlayerMatchStateChanged )
-#endif //
+#endif          
 }
 
-void function AddCallback_OnPlayerMatchStateChanged( void functionref( entity, int, int ) func )
+void function AddCallback_OnPlayerMatchStateChanged( void functionref( entity, int ) func )
 {
 	Assert( !file.s_playerMatchStateChangedCallbacks.contains( func ) )
 	file.s_playerMatchStateChangedCallbacks.append( func )
@@ -49,28 +49,25 @@ int function PlayerMatchState_GetFor( entity player )
 	return result
 }
 
-#if(false)
+#if SERVER
+                                                                         
+ 
+	                                                            
+	                                                               
+	                                                                                           
+		                                
+ 
+#endif          
 
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
-void function OnPlayerMatchStateChanged( entity player, int oldValue, int newValue, bool actuallyChanged )
+#if CLIENT
+void function OnPlayerMatchStateChanged( entity player, int newValue )
 {
-	if ( !actuallyChanged )
-		return
-
-	foreach ( void functionref( entity, int, int ) func in file.s_playerMatchStateChangedCallbacks )
-		func( player, oldValue, newValue )
+	foreach ( void functionref( entity, int ) func in file.s_playerMatchStateChangedCallbacks )
+		func( player, newValue )
 }
 
 void function PlayerMatchState_RuiTrackInt( var rui, string argName, entity player )
 {
 	RuiTrackInt( rui, argName, player, RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( NV_PLAYERMATCHSTATE ) )
 }
-#endif //
+#endif          

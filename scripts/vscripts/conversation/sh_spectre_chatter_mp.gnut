@@ -7,7 +7,7 @@ global const SPECTRE_CHATTER_MP_RANGE_SQUARED = SPECTRE_CHATTER_MP_RANGE * SPECT
 void function ShSpectreChatter_MP_Init()
 {
 	var dataTable = GetDataTable( $"datatable/spectre_chatter_mp.rpak" )
-	int numRows = GetDatatableRowCount( dataTable )
+	int numRows = GetDataTableRowCount( dataTable )
 	for ( int i = 0; i < numRows; i++ )
 	{
 		string conversationName = GetDataTableString( dataTable, i, GetDataTableColumnByName( dataTable, "conversationname" ) )
@@ -30,16 +30,16 @@ bool function ShouldPlaySpectreChatterMPLine( string conversationType, entity pl
 
 	if ( IsForcedDialogueOnly( player ) )
 	{
-		//
+		                                                                                     
 		return false
 	}
 
-	#if(CLIENT)
+	#if CLIENT
 		float debounceTime = GetConversationDebounce( conversationType )
 		float lastPlayedTime = GetConversationLastPlayedTime( conversationType )
 		if ( lastPlayedTime > 0 && lastPlayedTime + debounceTime > Time() )
 		{
-			//
+			                                                                                                                                             
 			return false
 		}
 	#endif
@@ -48,11 +48,10 @@ bool function ShouldPlaySpectreChatterMPLine( string conversationType, entity pl
 
 	if ( distSqr > SPECTRE_CHATTER_MP_RANGE_SQUARED )
 	{
-		//
+		                                                                                                                                                                                  
 		return false
 	}
 
 	return true
 }
-
 

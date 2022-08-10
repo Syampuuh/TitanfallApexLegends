@@ -1,15 +1,18 @@
-//
+  
 
-#if(CLIENT)
+global function Scoreboard_RegisterNetworking
+
+#if CLIENT
 global function ClScoreboard_Init
 #endif
 
-#if(CLIENT)
+#if CLIENT
 global function IsScoreboardShown
 global function UpdateScoreboardVisibility
 global function ShowScoreboard
 global function HideScoreboard
 global function ToggleScoreboard
+
 global function AddScoreboardShowCallback
 global function AddScoreboardHideCallback
 global function TPPromptIsActive
@@ -20,30 +23,36 @@ global function ClientToUI_ShowScoreboardWithTPPrompt
 global function ClientToUI_HideScoreboard
 #endif
 
+#if SERVER
+                                         
+                                          
+#endif
 
-//
-//
-//
-//
-//
+
+                       
+                       
+                       
+                       
+                       
 struct
 {
-	#if(CLIENT)
+	#if CLIENT
 		array<void functionref()> scoreboardShowCallbacks
 		array<void functionref()> scoreboardHideCallbacks
 
 		bool wantsToShowScoreboard = false
+		bool scoreboardEnabled = true
 	#endif
 } file
 
 
 
-//
-//
-//
-//
-//
-#if(CLIENT)
+                         
+                         
+                         
+                         
+                         
+#if CLIENT
 void function ClScoreboard_Init()
 {
 	RegisterConCommandTriggeredCallback( "+showscores", OnScoreboardButtonPressed )
@@ -58,13 +67,23 @@ void function ClScoreboard_Init()
 #endif
 
 
+void function Scoreboard_RegisterNetworking()
+{
+	RegisterNetworkedVariable( "isScoreboardEnabled", SNDC_PLAYER_EXCLUSIVE, SNVT_BOOL, true )
 
-//
-//
-//
-//
-//
-#if(CLIENT)//
+	#if CLIENT
+		RegisterNetworkedVariableChangeCallback_bool( "isScoreboardEnabled", EnableScoreboardStatusChanged )
+	#endif
+}
+
+
+
+                          
+                          
+                          
+                          
+             
+#if CLIENT             
 bool function IsScoreboardShown()
 {
 	return clGlobal.isScoreboardShown
@@ -72,7 +91,7 @@ bool function IsScoreboardShown()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function ShowScoreboard()
 {
 	file.wantsToShowScoreboard = true
@@ -81,7 +100,7 @@ void function ShowScoreboard()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function HideScoreboard()
 {
 	file.wantsToShowScoreboard = false
@@ -90,7 +109,7 @@ void function HideScoreboard()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function ToggleScoreboard()
 {
 	file.wantsToShowScoreboard = !IsScoreboardShown()
@@ -99,7 +118,54 @@ void function ToggleScoreboard()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
+void function EnableScoreboardStatusChanged( entity player, bool newVal )
+{
+	bool shouldDisable = !newVal
+
+	if ( shouldDisable )
+	{
+		HideScoreboard()
+		file.scoreboardEnabled = false
+	}
+	else
+	{
+		file.scoreboardEnabled = true
+	}
+}
+#endif
+
+
+#if CLIENT
+bool function IsScoreboardEnabled()
+{
+	return file.scoreboardEnabled
+}
+#endif
+
+
+#if SERVER
+                                                        
+ 
+	                                      
+	                                                
+		                                                      
+
+	                                                                                                                                    
+ 
+#endif
+
+
+#if SERVER
+                                                         
+ 
+	                                                       
+	                                      
+ 
+#endif
+
+
+#if CLIENT
 void function ClientCodeCallback_ToggleScoreboard()
 {
 	ToggleScoreboard()
@@ -107,7 +173,7 @@ void function ClientCodeCallback_ToggleScoreboard()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function OnScoreboardButtonPressed( entity localPlayer )
 {
 	ToggleScoreboard()
@@ -115,9 +181,47 @@ void function OnScoreboardButtonPressed( entity localPlayer )
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
+
+bool function ShouldShowCharSelectForScoreboard()
+{
+	if ( IsFiringRangeGameMode() && FiringRange_IsCharacterSwitchingEnabled() )
+		return true
+
+	#if DEV
+	bool cheatsEnabled = GetConVarBool( "sv_cheats" )
+	if ( !cheatsEnabled )
+		return false
+	if ( InputIsButtonDown( KEY_LSHIFT ) || InputIsButtonDown( BUTTON_STICK_LEFT ) )
+		return true
+	#endif       
+
+	return false
+}
+
 void function ClientToUI_ToggleScoreboard()
 {
+	if ( IsSurvivalTraining() )
+	{
+		printf( "%s() - Aborting, because we're in Training.", FUNC_NAME() )
+		return
+	}
+
+	if ( ShouldShowCharSelectForScoreboard() )
+	{
+		printf( "%s() - Showing character select because we're in Firing Range.", FUNC_NAME() )
+		RunUIScript( "TryCloseSurvivalInventory", null )
+		EmitSoundOnEntity( GetLocalViewPlayer(), "UI_Menu_accept" )
+		OpenCharacterSelectNewMenu( true )
+		return
+	}
+
+	if ( !IsScoreboardEnabled() )
+	{
+		EmitUISound( "menu_deny" )
+		return
+	}
+
 	ToggleScoreboard()
 }
 void function ClientToUI_ShowScoreboardWithTPPrompt()
@@ -129,7 +233,7 @@ void function ClientToUI_ShowScoreboardWithTPPrompt()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function ClientToUI_HideScoreboard()
 {
 	HideScoreboard()
@@ -137,7 +241,7 @@ void function ClientToUI_HideScoreboard()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 bool s_latestShowWasForTPPrompt = false
 bool s_nextShowWantsTPPrompt = false
 bool function TPPromptIsActive()
@@ -145,23 +249,36 @@ bool function TPPromptIsActive()
 	return (clGlobal.isScoreboardShown && s_latestShowWasForTPPrompt)
 }
 
+bool function ShouldShowScoreboard()
+{
+	if ( GetGameState() == eGameState.WinnerDetermined || GetGameState() > eGameState.Epilogue )
+		return false
+	else if ( IsViewingSquadSummary() || IsViewingDeathRecap() )
+		return false
+	else if ( GetGameState() == eGameState.Prematch && GetCurrentPlaylistVarBool( "enable_map_in_prematch", false ) )
+		return file.wantsToShowScoreboard
+	else if ( GetGameState() < eGameState.Playing && !GetCurrentPlaylistVarBool( "survival_staging_area_enabled", false ) )
+		return false
+                
+	else if ( Crafting_IsPlayerAtWorkbench( GetLocalClientPlayer() ) )
+		return false
+      
+	else if ( !FiringRange_IsCharacterSwitchingEnabled() )
+		return false
+
+	return file.wantsToShowScoreboard
+}
+
 void function UpdateScoreboardVisibility()
 {
 	bool wantsTPPrompt = s_nextShowWantsTPPrompt
 	s_nextShowWantsTPPrompt = false
 
-	bool shouldShow = file.wantsToShowScoreboard
-	if ( GetGameState() >= eGameState.WinnerDetermined )
-		shouldShow = false
-	else if ( IsViewingSquadSummary() )
-		shouldShow = false
-	else if ( GetGameState() < eGameState.Playing && !GetCurrentPlaylistVarBool( "survival_staging_area_enabled", false ) )
-		shouldShow = false
-
-	file.wantsToShowScoreboard = shouldShow //
+	bool shouldShow = ShouldShowScoreboard()
+	file.wantsToShowScoreboard = shouldShow                                                                                        
 
 	if ( shouldShow == IsScoreboardShown() )
-		return //
+		return                                                      
 
 	clGlobal.isScoreboardShown = shouldShow
 
@@ -179,6 +296,7 @@ void function UpdateScoreboardVisibility()
 	else
 	{
 		thread clGlobal.hideScoreboardFunc()
+		Signal( clGlobal.signalDummy, "OnHideScoreboard" )
 
 		RunUIScript( "SetShowingMap", false )
 
@@ -189,7 +307,7 @@ void function UpdateScoreboardVisibility()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function AddScoreboardShowCallback( void functionref() func )
 {
 	file.scoreboardShowCallbacks.append( func )
@@ -197,7 +315,7 @@ void function AddScoreboardShowCallback( void functionref() func )
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function AddScoreboardHideCallback( void functionref() func )
 {
 	file.scoreboardHideCallbacks.append( func )

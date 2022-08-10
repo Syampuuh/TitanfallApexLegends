@@ -93,7 +93,8 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchHoldToCrouch
-        navDown					SwchTriggerDeadzone
+        navDown					SwitchSurvivalSlotToWeaponInspect
+		
         ConVar					"gamepad_toggle_ads"
         list
         {
@@ -103,16 +104,36 @@
 
         childGroupAlways        ChoiceButtonAlways
     }
-    SwchTriggerDeadzone
+    SwitchSurvivalSlotToWeaponInspect
     {
         ControlName				RuiButton
         InheritProperties		SwitchButton
         style					DialogListButton
+        navUp					SwchToggleGamepadADS
+        navDown					SwchTriggerDeadzone [!$NX && !$NX_UI_PC]
+        navDown					SldCursorVelocity   [$NX || $NX_UI_PC]
+        ConVar					"gamepad_toggle_survivalSlot_to_weaponInspect"
+        list
+        {
+            "#SETTING_USE_SURVIVAL_SLOT"    0
+            "#SETTING_USE_WEAPON_INSPECT"   1
+        }
+
         pin_to_sibling			SwchToggleGamepadADS
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchToggleGamepadADS
-        navDown					SwchLookSensitivity
+        childGroupAlways        ChoiceButtonAlways
+    }
+    SwchTriggerDeadzone [!$NX]
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        pin_to_sibling			SwitchSurvivalSlotToWeaponInspect
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+		navUp					SwitchSurvivalSlotToWeaponInspect
+        navDown					SldCursorVelocity
         ConVar					"gamepad_trigger_threshold"
         list
         {
@@ -125,13 +146,32 @@
 
         childGroupAlways        MultiChoiceButtonAlways
     }
+    SldCursorVelocity
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        
+        pin_to_sibling			SwchTriggerDeadzone  [!$NX && !$NX_UI_PC]
+        pin_to_sibling			SwitchSurvivalSlotToWeaponInspect [$NX || $NX_UI_PC]
+        navUp				SwchTriggerDeadzone  [!$NX && !$NX_UI_PC]
+        navUp				SwitchSurvivalSlotToWeaponInspect [$NX || $NX_UI_PC]
+
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+
+        navDown					SwchLookSensitivity
+        minValue				1300.0
+        maxValue				4300.0
+        stepSize				100.0
+        conCommand				"gameCursor_velocity"
+    }
     LookMoveHeader
     {
         ControlName				ImagePanel
         InheritProperties		SubheaderBackgroundWide
         xpos					0
         ypos					6
-        pin_to_sibling			SwchTriggerDeadzone
+        pin_to_sibling			SldCursorVelocity
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
     }
@@ -144,7 +184,6 @@
         pin_to_sibling_corner	LEFT
         labelText				"#MENU_LOOKMOVE"
     }
-
     SwchLookSensitivity
     {
         ControlName				RuiButton
@@ -153,7 +192,7 @@
         pin_to_sibling			LookMoveHeader
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchTriggerDeadzone
+        navUp					SldCursorVelocity
         navDown					SwchLookSensitivityADS
         ConVar					"gamepad_aim_speed"
         list
@@ -192,7 +231,7 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
         navUp					SwchLookSensitivity
-        navDown					SwchLookAiming
+        navDown					BtnLookSensitivityMenu
         ConVar					"gamepad_aim_speed_ads_0"
         list
         {
@@ -213,7 +252,7 @@
     {
         ControlName				Label
         InheritProperties		AdvControlsLabel
-        pin_to_sibling			SwchLookSensitivityADS
+        pin_to_sibling			BtnLookSensitivityMenu
         pin_corner_to_sibling	CENTER
         pin_to_sibling_corner	CENTER
         xpos					0
@@ -222,15 +261,26 @@
         labelText				"#CONTROLS_ADVANCED_LOOK_ENABLED"
         visible                 0
     }
+    BtnLookSensitivityMenu
+    {
+        ControlName				RuiButton
+        InheritProperties		SettingBasicButton
+
+        pin_to_sibling			SwchLookSensitivityADS
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SwchLookSensitivityADS
+        navDown					SwchLookAiming
+    }
     SwchLookAiming
     {
         ControlName				RuiButton
         InheritProperties		SwitchButton
         style					DialogListButton
-        pin_to_sibling			SwchLookSensitivityADS
+        pin_to_sibling			BtnLookSensitivityMenu
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchLookSensitivityADS
+        navUp					BtnLookSensitivityMenu
         navDown					SwchLookDeadzone
         ConVar					"gamepad_look_curve"
         list
@@ -270,7 +320,7 @@
         ConVar					"gamepad_deadzone_index_look"
         list
         {
-            "#SETTING_NONE"		0
+            "#SETTING_NONE"		0       [!$NX]
             "#SETTING_SMALL"	1
             "#SETTING_LARGE"	2
         }
@@ -348,6 +398,32 @@
         childGroupAlways        ChoiceButtonAlways
     }
 
+    BtnControllerOpenAdvancedMenu
+    {
+        ControlName				RuiButton
+        InheritProperties		SettingBasicButton
+        pin_to_sibling			SwchVibration
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SwchVibration
+		navDown					NXMotionOnOff [$NX || $NX_UI_PC]
+        visible                 1
+    }
+    BtnControllerOpenAdvancedMenu_NXMissingProLabel [$NX || $NX_UI_PC]
+    {
+        ControlName				Label
+        InheritProperties		AdvControlsLabel
+        pin_to_sibling			BtnControllerOpenAdvancedMenu
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+        xpos					-10
+        ypos					0
+        font					DefaultBold_27_DropShadow
+        labelText				"#CONTROLS_NX_PRO_CONTROLLER_REQUIRED"
+        visible                 0
+		fontHeight				45
+    }
+
 	PanelBottom
 	{
 		ControlName				Label
@@ -359,21 +435,11 @@
 		visible					1
 		enabled 				0
 
-        pin_to_sibling			SwchVibration
+        pin_to_sibling			BtnControllerOpenAdvancedMenu
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}
 
-    BtnControllerOpenAdvancedMenu
-    {
-        ControlName				RuiButton
-        InheritProperties		SettingBasicButton
-        pin_to_sibling			SwchVibration
-        pin_corner_to_sibling	TOP_LEFT
-        pin_to_sibling_corner	BOTTOM_LEFT
-        navUp					SwchVibration
-        visible                 1
-    }
 //    LblAdvControllerOff
 //    {
 //        ControlName				Label
@@ -406,5 +472,242 @@
 //        labelText				"#SETTING_ENABLED"
 //        font                    DefaultRegularFont
 //        fontHeight              26
+//    }
+	NXMotionControlHeader [$NX]
+    {
+        ControlName				ImagePanel
+        InheritProperties		SubheaderBackgroundWide
+        xpos					0
+        ypos					6
+        pin_to_sibling			BtnControllerOpenAdvancedMenu
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+    }
+    NXMotionControlHeaderText [$NX]
+    {
+        ControlName				Label
+        InheritProperties		SubheaderText
+        pin_to_sibling			NXMotionControlHeader
+        pin_corner_to_sibling	LEFT
+        pin_to_sibling_corner	LEFT
+        labelText				"#MENU_NXMOTIONCONTROL"
+    }
+	NXMotionOnOff [$NX]
+    {
+        ControlName				RuiButton
+        InheritProperties		SwitchButton
+        style					DialogListButton
+        pin_to_sibling			NXMotionControlHeader
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					BtnControllerOpenAdvancedMenu
+        navDown					SldNXMotionSensitivity
+        ConVar					"nx_six_axis_control_on"
+        list
+        {
+            "#SETTING_OFF"			0
+            "#SETTING_ON"			1
+        }
+
+        childGroupAlways        ChoiceButtonAlways
+    }
+	
+	SldNXMotionSensitivity [$NX]
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        pin_to_sibling			NXMotionOnOff
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					NXMotionOnOff
+        navDown					SldNXHorizontalSensitivity
+        conCommand				"nx_six_axis_sensitivity"
+        minValue				0.2
+        maxValue				10.0
+        stepSize				0.2
+        inverseFill             0
+        showLabel               0
+    }
+    TextNXMotionSensitivity [$NX]
+    {
+        ControlName				TextEntry
+        InheritProperties       SliderControlTextEntry
+        syncedConVar            "nx_six_axis_sensitivity"
+        showConVarAsFloat		1
+
+        pin_to_sibling			SldNXMotionSensitivity
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+    }
+	
+	SldNXHorizontalSensitivity [$NX]
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        pin_to_sibling			SldNXMotionSensitivity
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SldNXMotionSensitivity
+        navDown					SldNXVerticalSensitivity
+        conCommand				"nx_six_axis_horizontalScale"
+        minValue				4.0
+        maxValue				20.0
+        stepSize				0.2
+        inverseFill             0
+        showLabel               0
+    }
+    TextNXHorizontalSensitivity [$NX]
+    {
+        ControlName				TextEntry
+        InheritProperties       SliderControlTextEntry
+        syncedConVar            "nx_six_axis_horizontalScale"
+        showConVarAsFloat		1
+
+        pin_to_sibling			SldNXHorizontalSensitivity
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+    }
+	
+	SldNXVerticalSensitivity [$NX]
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        pin_to_sibling			SldNXHorizontalSensitivity
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SldNXHorizontalSensitivity
+        navDown					SldNXADSMotionSensitivity
+        conCommand				"nx_six_axis_verticalScale"
+        minValue				4.0
+        maxValue				20.0
+        stepSize				0.2
+        inverseFill             0
+        showLabel               0
+    }
+    TextNXVerticalSensitivity [$NX]
+    {
+        ControlName				TextEntry
+        InheritProperties       SliderControlTextEntry
+        syncedConVar            "nx_six_axis_verticalScale"
+        showConVarAsFloat		1
+
+        pin_to_sibling			SldNXVerticalSensitivity
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+    }
+	
+	SldNXADSMotionSensitivity [$NX]
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        pin_to_sibling			SldNXVerticalSensitivity
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SldNXVerticalSensitivity
+        navDown					BtnMotionPerOpticMenu
+        conCommand				"nx_six_axis_ads_sensitivity"
+        minValue				0.2
+        maxValue				10.0
+        stepSize				0.2
+        inverseFill             0
+        showLabel               0
+    }
+    TextNXADSMotionSensitivity [$NX]
+    {
+        ControlName				TextEntry
+        InheritProperties       SliderControlTextEntry
+        syncedConVar            "nx_six_axis_ads_sensitivity"
+        showConVarAsFloat		1
+
+        pin_to_sibling			SldNXADSMotionSensitivity
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+    }
+	
+	BtnMotionPerOpticMenu [$NX]
+    {
+        ControlName				RuiButton
+        InheritProperties		SettingBasicButton
+
+        pin_to_sibling			SldNXADSMotionSensitivity
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SldNXADSMotionSensitivity
+        navDown					SldNXADSHorizontalSensitivity
+    }
+	
+	SldNXADSHorizontalSensitivity [$NX]
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        pin_to_sibling			BtnMotionPerOpticMenu
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					BtnMotionPerOpticMenu
+        navDown					SldNXADSVerticalSensitivity
+        conCommand				"nx_six_axis_ads_horizontalScale"
+        minValue				4.0
+        maxValue				20.0
+        stepSize				0.2
+        inverseFill             0
+        showLabel               0
+    }
+    TextNXADSHorizontalSensitivity [$NX]
+    {
+        ControlName				TextEntry
+        InheritProperties       SliderControlTextEntry
+        syncedConVar            "nx_six_axis_ads_horizontalScale"
+        showConVarAsFloat		1
+
+        pin_to_sibling			SldNXADSHorizontalSensitivity
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+    }
+	
+	SldNXADSVerticalSensitivity [$NX]
+    {
+        ControlName				SliderControl
+        InheritProperties		SliderControl
+        pin_to_sibling			SldNXADSHorizontalSensitivity
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	BOTTOM_LEFT
+        navUp					SldNXADSHorizontalSensitivity
+        navDown					""
+        conCommand				"nx_six_axis_ads_verticalScale"
+        minValue				4.0
+        maxValue				20.0
+        stepSize				0.2
+        inverseFill             0
+        showLabel               0
+    }
+    TextNXADSVerticalSensitivity [$NX]
+    {
+        ControlName				TextEntry
+        InheritProperties       SliderControlTextEntry
+        syncedConVar            "nx_six_axis_ads_verticalScale"
+        showConVarAsFloat		1
+
+        pin_to_sibling			SldNXADSVerticalSensitivity
+        pin_corner_to_sibling	RIGHT
+        pin_to_sibling_corner	RIGHT
+    }
+	
+//	NXPersistentTurnOnOff [$NX]
+//    {
+//        ControlName				RuiButton
+//        InheritProperties		SwitchButton
+//        style					DialogListButton
+//        pin_to_sibling			NXADSVerticalSensitivity
+//        pin_corner_to_sibling	TOP_LEFT
+//        pin_to_sibling_corner	BOTTOM_LEFT
+//        navUp					NXADSVerticalSensitivity
+//        ConVar					"nx_six_axis_persist_turn"
+//        list
+//        {
+//            "#SETTING_OFF"			0
+//            "#SETTING_ON"			1
+//        }
+//
+//        childGroupAlways        ChoiceButtonAlways
 //    }
 }

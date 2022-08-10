@@ -1,0 +1,145 @@
+global function ClientCodeCallback_GetPresenceState
+
+string function GetGamemodeLocKey()
+{
+	if (IsRankedGame())
+		return "#PL_Ranked_Leagues"
+
+	if (IsArenasRankedGame())
+		return "#GAMEMODE_ARENAS_RANKED"
+
+	if (IsArenaMode())
+		return "#GAMEMODE_ARENAS"
+
+	if (GetCurrentPlaylistVarBool("is_elite_game", false))
+		return "#CAN_ELITE"
+
+                        
+	if (Control_IsModeEnabled())
+		return "#GAME_MODE_CONTROL"
+      
+
+	string matchType = GetCurrentPlaylistVarString("pin_match_type", "survival")
+	if (matchType == "survival")
+		return "#PL_TRIO"
+
+	if (matchType == "duo")
+		return "#PL_DUO"
+
+	return GetCurrentPlaylistVarString("name", "none")
+}
+
+bool presenceIsInit = false
+int startPlayingTime = 0
+
+void function OnGamestatePlaying()
+{
+	if ( startPlayingTime == 0 )
+		startPlayingTime = GetUnixTimestamp()	                                                                                                   
+												                                                           
+}
+
+void function InitPresence()
+{
+	presenceIsInit = true
+	AddCallback_GameStateEnter( eGameState.Playing, OnGamestatePlaying )
+}
+
+PresenceState function ClientCodeCallback_GetPresenceState( string mapName )
+{
+	if ( !presenceIsInit )
+		InitPresence()
+
+	PresenceState state
+	state.substitutionMode = eRichPresenceSubstitutionMode.NONE
+	state.mapName = "#" + mapName
+	state.gamemode = GetGamemodeLocKey()
+	state.matchStartTime = startPlayingTime
+
+	Party party = GetParty()
+	state.party_slotsUsed = party.numClaimedSlots
+	state.party_slotsMax = party.numSlots
+	state.survival_squadsRemaining = 0
+	state.teams_friendlyScore = 0
+	state.teams_enemyScore = 0
+	
+	if ( IsLobby() )
+	{
+		if (state.party_slotsMax > 0)
+		{
+			state.layout = "#RICHPRESENCE_PARTY_LOBBY_N_N"
+			state.substitutionMode = eRichPresenceSubstitutionMode.PARTYSLOTSUSED_PARTYSLOTSMAX
+		}
+		else
+			state.layout = "#RICHPRESENCE_PARTY_LOBBY"
+
+		return state
+	}
+
+	if ( state.mapName == "" )
+	{
+		state.layout = "#RICHPRESENCE_MAINMENU"
+		startPlayingTime = 0
+		state.matchStartTime = 0
+		return state
+	}
+
+	if ( IsSurvivalTraining() )
+	{
+		state.layout = "#PL_TRAINING"
+		return state
+	}
+
+	if ( IsFiringRangeGameMode() )
+	{
+		state.layout = "#PL_FIRINGRANGE"
+		return state
+	}
+
+	if ( GetLocalClientPlayer() )
+	{
+		if ( IsArenaMode() )
+		{
+			int playerTeam = GetLocalClientPlayer().GetTeam()
+			state.teams_friendlyScore = Arenas_GetTeamWins( playerTeam )
+			state.teams_enemyScore = Arenas_GetTeamWins( Arenas_GetOpposingTeam( playerTeam) )
+			state.layout = "#RICHPRESENCE_PLAYING_MULTIPLAYER_SHORTPLUS"
+			state.substitutionMode = eRichPresenceSubstitutionMode.MODE_MAP_FRIENDLYSCORE_ENEMYSCORE
+			return state
+		}
+
+                        
+		if ( Control_IsModeEnabled() )
+		{
+			int playerTeam = GetLocalClientPlayer().GetTeam()
+			int playerAlliance = AllianceProximity_GetAllianceFromTeam( playerTeam )
+			int enemyAlliance = AllianceProximity_GetOtherAlliance( playerAlliance )
+			int maxScore = Control_GetScoreLimit()
+
+			if ( maxScore > 0 )
+			{
+				state.teams_friendlyScore = (100 * GetAllianceTeamsScore( playerAlliance )) / maxScore
+				state.teams_enemyScore = (100 * GetAllianceTeamsScore( enemyAlliance )) / maxScore
+				state.layout = "#RICHPRESENCE_PLAYING_MULTIPLAYER_SHORTPLUS"
+				state.substitutionMode = eRichPresenceSubstitutionMode.MODE_MAP_FRIENDLYSCORE_ENEMYSCORE_PERCENTAGE
+				return state
+			}
+		}
+      
+	}
+
+	if (GameRules_GetGameMode() == SURVIVAL)
+	{
+		state.survival_squadsRemaining = GetNumTeamsRemaining()
+		if (state.survival_squadsRemaining > 1)
+		{
+			state.substitutionMode = eRichPresenceSubstitutionMode.MODE_MAP_SQUADSLEFT
+			state.layout = "#RICHPRESENCE_PLAYING_MULTIPLAYER_SHORTPLUS"
+			return state
+		}
+	}
+
+	state.layout = "#RICHPRESENCE_PLAYING_MULTIPLAYER_SHORT"
+	state.substitutionMode = eRichPresenceSubstitutionMode.MODE_MAP
+	return state
+}

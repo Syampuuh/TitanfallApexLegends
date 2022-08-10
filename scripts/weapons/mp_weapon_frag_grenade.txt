@@ -9,16 +9,16 @@ WeaponData
 	"menu_icon"										"rui/ordnance_icons/grenade_frag"
 	"hud_icon"										"rui/ordnance_icons/grenade_frag"
 
-	"weaponClass"									"human"
+	"weapon_type_flags"								"WPT_GRENADE"
 	"weaponType"									"anti_titan"
 	"is_toss_weapon"								"1"
 	"menu_category"									"ordnance"
 
 	"minimap_reveal_distance"						"32000"
 	"leveled_pickup"								"1"
-	"dev_menu_type"									"offhand" // fire_mode isn't readable from script
 	"offhand_default_inventory_slot"				"0"
 	"show_grenade_indicator"						"1"
+	"show_grenade_indicator_to_owner"				"1"
 	"projectile_ignores_vortex"						"fall"
     "does_not_interrupt_cloak"						"1"
     "ads_dof_disable"								"1"
@@ -30,9 +30,13 @@ WeaponData
 	"OnWeaponTossCancel"							"Grenade_OnWeaponTossCancelDrop"
 	"OnWeaponDeactivate"							"Grenade_OnWeaponDeactivate"
 	"OnWeaponNpcTossGrenade"						"Grenade_OnPlayerNPCTossGrenade_Common"
+               
+                                                              
+          
 
-	// "OnWeaponActivate"							    ""
+	"OnWeaponActivate"							    "Grenade_OnWeaponActivate"
 	// "OnProjectileIgnite"							"Grenade_OnProjectileIgnite"
+	"OnProjectileExplode"                           "Grenade_UpdateStats"
 
 	"projectile_killreplay_enabled"					"1"
 
@@ -60,7 +64,6 @@ WeaponData
 
 		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
 
-		"damage_heavyarmor_nontitan_scale"				"0.5"
 		"sound_weapon_ready"							"HUD_ordinance_meter_replenished_1P"
 	}
 
@@ -82,7 +85,6 @@ WeaponData
 
 		"enable_highlight_networking_on_creation"		"1"
 
-		"damage_heavyarmor_nontitan_scale"				"1"
 		"sound_weapon_ready"							"HUD_ordinance_meter_replenished_SP"
 	}
 
@@ -91,12 +93,14 @@ WeaponData
 	// Models
 	"playermodel"									"mdl/weapons/grenades/m20_f_grenade.rmdl"
 	"projectilemodel"								"mdl/weapons/grenades/m20_f_grenade_projectile.rmdl"
-	"activitymodifier"								"ordnance"
+	"damage_indicator_model"					    "GRENADE_INDICATOR_FRAG_MODEL"
+	"activitymodifier3p"							"ordnance"
 
 	// Effects
 	"bounce_effect_table"							"bounce_small"
 	"impact_effect_table"							"exp_frag_grenade"
-	"projectile_trail_effect_0"						"P_wpn_grenade_frag_trail"
+	"projectile_trail_effect_0_1p"					"P_wpn_grenade_frag_trail"
+	"projectile_trail_effect_0_3p"					"P_wpn_grenade_frag_trail"
 	"vortex_absorb_effect"							"wpn_vortex_projectile_frag_FP"
 	"vortex_absorb_effect_third_person"				"wpn_vortex_projectile_frag"
 	"vortex_absorb_sound"							"Vortex_Shield_AbsorbBulletLarge"
@@ -112,6 +116,7 @@ WeaponData
 	"sound_dryfire"									"Survival_UI_Ability_NotReady"
 	"sound_cook_warning"							"Weapon_Vortex_Gun.ExplosiveWarningBeep"
 	"battle_chatter_event"							"bc_frag"
+	"battle_chatter_event_fuse"						"bc_fuse_frag"
 
 	// Damage - When Used by Players
 	"damage_type"									"burn"
@@ -122,7 +127,7 @@ WeaponData
 	"damage_near_value_titanarmor"					"0"
 	"damage_far_value_titanarmor"					"0"
 
-	"damage_flags"									"DF_RAGDOLL | DF_EXPLOSION | DF_DISMEMBERMENT"
+	"damage_flags"									"DF_RAGDOLL | DF_EXPLOSION | DF_DISMEMBERMENT | DF_GIB"
 
 	"critical_hit"									"0"
 
@@ -162,12 +167,15 @@ WeaponData
 	"allow_empty_click"								"1"
 	"empty_reload_only"								"0"
 	"trigger_snipercam"								"0"
+
 	"grenade_bounce_vel_frac_shallow"				"0.6"
 	"grenade_bounce_vel_frac_sharp"					"0.4"
 	"grenade_bounce_vel_frac_along_normal"			"0.3"
 	"grenade_bounce_randomness"						"0.05"
 	"grenade_bounce_extra_vertical_randomness"		"0.05"
 	"grenade_roll_vel_frac_per_second"				"0.05"
+	"grenade_touch_triggers_on_impact"				"1"
+
 	"aimassist_disable_hipfire"						"1"
 	"aimassist_disable_ads"							"1"
 	"projectile_launch_speed"						"1300"
@@ -177,6 +185,8 @@ WeaponData
 	"projectile_inherit_owner_velocity_scale"		"1.0"
 
 	"ammo_suck_behavior"							"offhand_weapons"
+
+	"trophy_system_ignores"                          "allowBounce"
 
 	// Bob
 	"bob_cycle_time"  								"0.4"
@@ -300,6 +310,10 @@ WeaponData
 	"fire_anim_rate"									"1"
 	//"sprintcycle_time"								".55"
 
+               
+                                        
+       
+
 	Mods
 	{
 		sp_disable_arc_indicator
@@ -318,6 +332,30 @@ WeaponData
             "regen_ammo_refill_rate"						"0"
             "regen_ammo_refill_start_delay"					"0.0"
             "ammo_no_remove_from_stockpile"					"1"
+        }
+
+                
+                 
+         
+                                                                   
+                                                                   
+                                                                
+                                                                     
+                                          
+                                             
+                                                    
+         
+        
+
+        fuse_long_throw_passive
+        {
+            "projectile_launch_speed"                       "*1.7"
+            "grenade_arc_indicator_bounce_count"		"2"
+			"viewmodel"										"mdl/weapons/grenades/ptpov_fuse_frag_grenade_held.rmdl"
+			"sound_deploy_1p"								"Fuse_Ord_Launcher_Raise_FragGrenade_1P"
+			"sound_deploy_3p"                               "Fuse_Ord_Launcher_Raise_Base_3P"
+			"sound_throw_1p"								"Fuse_Ord_Launcher_Throw_FragGrenade_1P"
+			"sound_throw_3p"								"Fuse_Ord_Launcher_Throw_FragGrenade_3P"
         }
 	}
 

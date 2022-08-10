@@ -2,53 +2,66 @@ global function SV_CL_Shared_Init
 
 void function SV_CL_Shared_Init()
 {
-	#if(false)
+	#if CLIENT
+	if ( !IsLobby() )
+		ClMinimap_Pre_Init()
+	#endif
 
-#endif
+	#if SERVER
+		                                                      
+	#endif
 
 	GameModes_Init()
 	Settings_Init()
+
+                 
+		Crafting_Init()
+       
+
 	if ( IsLobby() )
 	{
 		Shared_Lobby_Init()
+		PlayerWaypoints_Init()
 		return
 	}
 
 	SV_CL_Init()
 
-	#if(false)
+	#if SERVER
+		             
+	#endif
 
-#endif
-
-	#if(CLIENT)
+	#if CLIENT
 		Client_Init()
 	#endif
 
-	#if(false)
+	RemoteFunctions_Init_Finish()
 
-#endif
+	#if SERVER
+		                                                        
+	#endif
 }
 
 
 void function SV_CL_Init()
 {
-	/*
+	  
+	                                                                                                                                                                                                                                                                                                                                                                           
+	                                                                                                                                   
+	      	                                                                                                                                                                                                                                                                                                   
+	      	                                                                                                                                                                                                                                                                                                           
+	      	                                                                                                                                                                                                                                                                                       
+	      	                                                                                                                                                                                                                                                                                             
+	      	                                                                                                                                                                                                                                                                                                             
+	      	                                                                                                                                                                                                                                                                                                     
+	                                                                                                                                   
+	                                                                                                                                                                                                                                                                                                                                                                           
+	                                                                                                                                                                                                                                                                                                                                                                           
+	  
 
-
-
-
-
-
-
-
-
-
-
-*/
-
-	#if(false)
-
-#endif
+	#if SERVER
+		                                               
+	#endif
 
 	ShEHI_LevelInit_Begin()
 	Utility_Shared_Init()
@@ -56,6 +69,7 @@ void function SV_CL_Init()
 	Flags_Init()
 	RemoteFunctions_Init_Begin()
 	ShGamepad_LevelInit()
+	Thirdperson_Init()
 	DeathHints_Init()
 	DamageTypes_Init()
 	WeaponUtility_Init()
@@ -68,6 +82,7 @@ void function SV_CL_Init()
 	MinimapShared_Init()
 	NetworkMarkerShared_Init()
 	PlayerLeechingShared_Init()
+	TriggerFunctions_Init()
 	InitWeaponScripts()
 	Death_Package_Init()
 	Highlight_Init()
@@ -75,359 +90,708 @@ void function SV_CL_Init()
 	StimShared_Init()
 	DialogueShared_Init()
 	SonarShared_Init()
-	#if(false)
-
-#endif
-	ShRodeo_Init()
+                   
+                           
+       
 	Decoy_Init()
 	ShEHI_LevelInit_End()
 
-	ClientSidePickups_Init()
+	NPCPrecache_AllNPCTypes()
+
+                    
+                         
+       
 	GrappleWeaponInit()
-	#if(false)
-
-
-#endif
-	ShDevWeapons_Init()
+	#if DEV
+		ShDevUtility_Init()
+	#endif
+                   
+         
+                            
+        
+       
+        
+                    
+       
 
 	ShPakRequests_LevelInit()
 	ShXP_Init()
 	ShPersistentData_LevelInit_Begin()
 	ScoreShared_Init()
-	//
 	ShItems_LevelInit_Begin()
 	ShGRX_LevelInit()
+	Entitlements_LevelInit()
 	ShLoadouts_LevelInit_Begin()
-	ShCalEvent_LevelInit()
 	ShCharacters_LevelInit()
+	ShPassives_Init()
 	ShCharacterAbilities_LevelInit()
+                    
+              
+                        
+                          
+                                
+                               
+                            
+                          
+                           
+
+                         
+       
 	ShCharacterCosmetics_LevelInit()
+	ShCalEvent_LevelInit()
+	Vouchers_LevelInit()
+	TimeGatedLoginRewards_Init()
+	CollectionEvents_Init()
+	ThemedShopEvents_Init()
+	BuffetEvents_Init()
+	StoryChallengeEvents_Init()
+	ShSkydiveTrails_LevelInit()
+	Sh_Ranked_ItemRegistrationInit()                                           
+                        
+		Sh_ArenasRanked_ItemRegistrationInit()                                           
+		Sh_Arenas_ItemRegistrationInit()
+       
 	ShWeapons_LevelInit()
 	ShWeaponCosmetics_LevelInit()
 	ShGladiatorCards_LevelInit()
-	#if(false)
-
-#endif
+	ShQuips_LevelInit()
+	ShSkydiveEmotes_LevelInit()
+                 
+                        
+       
+	ShMythics_LevelInit()
+	ShLoadscreen_Init()
+	ShLoadscreen_LevelInit()
 	ShMusic_LevelInit()
 	ShBattlePass_LevelInit()
+	PassiveMedic_Init()
+	ShLobaPassiveEyeForQuality_LevelInit()
+	LobaTacticalTranslocation_LevelInit()
+	LobaUltimateBlackMarket_LevelInit()
+
+	PassiveGrenadier_Init()
+
+                 
+                         
+       
+
+	Clubs_Init()
+
+	TreasureBox_SharedInit()
+	SeasonQuest_SharedInit()
+	MenuCamera_Init()
+	MenuScene_Init()
 	ShSceneCapture_LevelInit()
 	ShCommsMenu_Init()
-	#if(false)
-
-#endif
+	ShEmotes_Init()
 	SPDialogueInit()
-	ShPing_Init()
 	MeleeShared_Init()
 	MeleeSyncedShared_Init()
+	ShPing_Init()
 	ShQuickchat_Init()
-	#if(true)
-		ShChallenges_LevelInit_PreStats()
-	#endif
+	ShChallenges_LevelInit_PreStats()
 	ShItems_LevelInit_Finish()
 	ShItemPerPlayerState_LevelInit()
 	ShLoadouts_LevelInit_Finish()
 	ShStatsInternals_LevelInit()
 	ShStats_LevelInit()
-	#if(true)
-		ShChallenges_LevelInit_PostStats()
-	#endif
+	ShChallenges_LevelInit_PostStats()
+	Sh_Ranked_Init()                                                                                                                
+                        
+		Sh_ArenasRanked_Init()                                                                                                                
+       
 	ShDoors_Init()
 	PlayerWaypoints_Init()
 	GameMode_RunSharedInits()
 	DamageHistoryInit()
 	ShPersistentData_LevelInit_Finish()
 
+	ShPlaylist_Init()
+
 	SURVIVAL_Loot_All_InitShared()
 	SURVIVAL_Loot_InitShared()
 	SURVIVAL_LootActions_InitShared()
 	SURVIVAL_LootTypes_InitShared()
 	SURVIVAL_EquipmentSlot_InitShared()
-	#if(false)
-
-#endif
-	#if(false)
-
-#endif
+                     
+                                    
+       
+                         
+                                             
+       
 	ShSurvivalTraining_Init()
+	FiringRangeGameMode_Init()
+	ShFiringRangeStoryEvents_Init()
+	ShFiringRangeChallenges_Init()
+	ShFRC_G7Scout_Init()
+	ShFRC_Bow_Init()
+	ShFRC_p2020_Init()
+	PanicButton_Init()
 	ShGas_Init()
-	#if(false)
-
-#endif
+                 
+                
+                         
+       
+                    
+               
+       
 	ShShellShock_Init()
 	ShCarePackage_Init()
+	ShIncapShield_Init()
 	ShWeaponInspect_Init()
+	Sh_JumpPad_Init()
+	MpSpaceElevator_Init()
 	Consumable_Init()
+                   
+		ShWarpGates_Init()
+       
+
+               
+		Sh_Loot_Vault_Panel_Init()
+       
+
+	ChargePylons_Init()
+	ShDrones_Init()
+	ShLootRollers_Init()
+
+                 
+		GondolaMover_Init()
+       
+
+                       
+                  
+       
+
+                        
+            
+       
 
 	CharacterSelectNewMenu_Init()
 
-	#if(false)
+                   
+                          
+                         
+		ShSpectreChatter_MP_Init()
 
-
-#endif
-
-	ShHoverBike_Init()
 	ShLootBin_Init()
-	#if(true)
-		ShFlyers_Init()
-	#endif
+	ShFlyers_Init()
+
+                  
+		ShGameModeShadowSquad_Init()
+       
+
+                               
+		ShGameModeShadowRoyale_Init()
+		ShPlayerPet_Init()
+       
+
+                         
+                         
+       
+
+                       
+                        
+       
+
+                             
+		ShExplosiveHold_Init()
+       
+
+                     
+                    
+       
+
+                      
+		ShSniperTowers_Init()
+       
+
+                        
+		ShGamemodeArenas_Init()
+       
+
+                       
+         
+                     
+        
+       
+                           
+                           
+       
+
+                           
+                            
+       
+
+                          
+                           
+       
+
+		AirdropExtra_Init()
+
+                          
+		Campfire_Init()
+       
+
+                              
+                      
+       
+	
+                                                                             
+		ShAbilityShadowZombie_Init()
+       
+
 	ShTutorial_Init()
 	Sh_PassiveVoices_Init()
-	#if(false)
+	ShPassiveWarlordsIre_Init()
 
-#endif
-	#if(false)
+                          
+                             
+       
 
-#endif
-	#if(false)
+                  
+                       
+                         
+       
 
-#endif
-	RemoteFunctions_Init_Finish()
+                
+                         
+       
+
+	Sh_PersistentDamageLayer_Init()
+                       
+                      
+       
+
+                           
+		PrivateMatch_Init()
+       
+
+                       
+                      
+       
+
+	if ( GetCurrentPlaylistVarBool( "character_loadouts_enabled", true ) )
+		CharacterLoadouts_Init()
+
+                      
+                             
+       
+
+                        
+		RollingRespawn_Init()
+       
+
+	WaveSpawningOnSquad_Init()
+
+	ShSpawnNearSquad_Init()
+
+                      
+		HoverVehicle_Init()
+       
+
+                    
+                     
+       
+
+	PassiveGunner_Init()
+
+                         
+		ShGameModeExplore_Init()
+       
+
+                      
+                     
+       
+
+                               
+                         
+       
+
+	PassiveHeartbeatSensor_Init()
+
+                           
+		ShGameMode_DeathTrigger_Init()
+		ShGameMode_ShieldRegen_Init()
+		ShGameMode_AutoCards_Init()
+		ShGameMode_SecondChance_Init()
+		ShGameMode_GlowZones_Init()
+		ShGameMode_ArmedDrop_Init()
+       
+
+                    
+		ShLootMarvin_Init()
+       
+
+                              
+                                   
+       
+
+                         
+		Control_Init()
+		ControlGunRacks_Init()
+		ControlGunRackPanels_Init()
+       
+
+	AllianceProximity_Init()
+	LoadoutSelection_Init()
+
+                                
+                           
+       
+
+                                 
+                            
+       
+
+                   
+		Caustic_TT_Init()
+       
+
+                   
+		Rampart_TT_Init()
+       
+
+	TimedEvents_Init()
+
+	#if AUTO_PLAYER
+		AutoPlayer_Init()
+	#endif
+
+	Sh_SkydiveLaunchers_Init()
+
+                                        
+                         
+      
+
+	Armor_ShieldRegen_Init()
+	SuicideSpectres_Init()
+
+                       
+		SpectreShacks_MapInit()
+       
+
+	NET_TraceRoute_Init()
+
+                    
+		MapMetrics_Init()
+       
+
 }
 
-#if(false)
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-#endif //
-
-#if(CLIENT)
+#if SERVER
+                           
+ 
+	  
+	                                                                                                                                                                           
+	                                                                   
+	      	                                                                                                                                                   
+	      	                                                                                                                                                       
+	      	                                                                                                                                               
+	      	                                                                                                                                                   
+	      	                                                                                                                                                 
+	      	                                                                                                                                             
+	                                                                   
+	                                                                                                                                                                           
+	                                                                                                                                                                           
+	  
+
+	                   
+	                            
+	              
+	          
+	           
+	               
+	             
+	              
+	                      
+	                   
+	                
+	                
+	                 
+	              
+
+                                               
+		                
+                            
+                    
+       
+       
+
+                    
+                  
+       
+
+                     
+                   
+       
+
+                   
+                 
+       
+
+                          
+                       
+       
+
+                    
+                
+       
+
+                   
+                
+                  
+                 
+                
+                         
+	                   
+	                  
+	                     
+	                  
+	                  
+	                   
+	                 
+	                   
+	              
+	               
+	                     
+	                     
+	                     
+                       
+		                    
+       
+
+                        
+                       
+       
+
+	                
+	                    
+	                  
+	                 
+	              
+	                    
+	                  
+
+	            
+
+	            
+
+	                     
+	                     
+	                        
+                
+                      
+       
+	                            
+
+                       
+		                         
+       
+
+                 
+                         
+                          
+       
+	                    
+	                       
+                 
+                           
+       
+
+	                          
+
+                       
+                     
+       
+	
+                       
+                  
+       
+
+                        
+                       
+       
+
+	                  
+	                      
+	                   
+
+	                       
+	                         
+
+	                        
+                   
+                        
+                         
+
+	           
+	                   
+
+	                      
+
+	                    
+	                
+	                  
+
+	                   
+	                 
+                       
+		               
+       
+                    
+                  
+       
+
+	       
+		                
+		                      
+	             
+
+                    
+                   
+       
+
+                  
+		                   
+       
+
+                      
+		                    
+       
+
+                     
+		                  
+       
+	
+	                 
+
+	                 
+
+                                     
+                         
+       
+ 
+#endif          
+
+#if CLIENT
 void function Client_Init()
 {
-	/*
+	  
+	                                                                                                                                                                     
+	                                                                 
+	      	                                                                                                                                   
+	      	                                                                                                                                       
+	      	                                                                                                               
+	      	                                                                                                                 
+	      	                                                                                                                                       
+	      	                                                                                                                                   
+	                                                                 
+	                                                                                                                                                                     
+	                                                                                                                                                                     
+	  
 
-
-
-
-
-
-
-
-
-
-
-*/
-
+	Cl_DeathScreen_Init()
 	ClAnim_Init()
 	CLUtilityMenu_Init()
 	CLAnnouncement_Init()
 	CLEventNotification_Init()
-	CLUtilitySplash_Init()
 	ClientCodeCallbacks_Init()
 	ClPip_LevelInit()
 	ClDataKnife_Init()
-	//
+	                       
 	SmartAmmoClient_Init()
 	CLGoblinDropship_Init()
-	ClIntroscreen_Init()
-	ClPlayerADSDofInit()
 	ClPlayer_Init()
-	ClWeaponFlyout_Init()
-	ClDroppedWeaponFlyout_Init()
 	ClMainHud_Init()
-	ClSuicideSpectres_Init()
-	CinematicIntroScreen_Init()
 	ClWeaponStatus_Init()
+	ClCustomUsePrompt_Init()
 	ClScreenfade_Init()
 	ClIndicatorsHud_Init()
 	ClHealthHud_Init()
 	ClScoreboard_Init()
 	ClDialogue_Init()
 	ClEntityCreationFunctions_Init()
-	ClGoblinDropship_Init()
-	ClCrowDropshipHero_Init()
+	ClGoblinDropship_ModelFX_Init()
 	ClDroneMedic_Init()
+	ClDroneCrypto_Init()
 	ClDraconisFlyin_Init()
-	#if(false)
-
-#endif
+                        
+                         
+       
 	ClControlPanel_Init()
 	ClSpectre_Init()
 	ClSuperSpectre_Init()
 	PerfInitLabels()
+	DeathBoxListPanel_VMInit()
+	SurvivalGroundList_LevelInit()
 
 	Cl_Passives_Init()
 
-	#if(true)
-		Sh_InitToolTips()
-	#endif
+	Sh_InitToolTips()
 
 	CLHud_Init()
 	GameMode_RunClientInits()
-	ClRespawnselect_MP_Init()
+	                           
 	ClObituary_Init()
 	ClGameState_Init()
-	ClKillReplayHud_Init()
-	ClScoreboardMp_Init()
-	ClSpectatorHud_Init()
+	                        
+
 	ClMinimap_Init()
+	Cl_FullmapInit()
+
+	GameMode_RunScoreboardInit()
 
 	ClSpectatorModeAudio_Init()
-	#if(false)
-
-
-
-#endif
+                    
+                  
+       
+                   
+                          
+                         
+		Tasklist_ClientInit()
 	ClRadialMenu_Init()
 	CLTrackingVision_Init()
 	CLPassiveAdrenaline_Init()
-	#if(false)
-
-#endif
-	#if(false)
-
-#endif
-	#if(false)
-
-#endif
+                 
+                          
+       
+                 
+                           
+       
+	CLPassiveRepair_Init()
+	CLPassiveCoverFire_Init()
 	CLChroma_Init()
-	ClJumpPad_Init()
+	CLPassiveSoftLandings_Init()
+                  
+		ClMirageVoyage_Init()
+       
+                      
+		ClBloodhound_TT_Init()
+       
+                     
+		ClRisingWalls_Init()
+       
+
+	ShEpilogue_Init()
+
 }
-#endif //
+#endif          
 
 void function Shared_Lobby_Init()
 {
-	/*
-
-
-
-
-
-
-
-
-
-
-
-*/
+	  
+	                                                                                                                                                                                                                                                                     
+	                                                                                                 
+	                                                                                                                                                                                                           
+	                                                                                                                                                                                                                                 
+	                                                                                                                                                                                                                   
+	                                                                                                                                                                                                             
+	                                                                                                                                                                                                                                   
+	                                                                                                                                                                                                                     
+	                                                                                                 
+	                                                                                                                                                                                                                                                                     
+	                                                                                                                                                                                                                                                                     
+	  
 
 	ShEHI_LevelInit_Begin()
 	ShUtilityAll_Init()
@@ -439,82 +803,131 @@ void function Shared_Lobby_Init()
 	RemoteFunctions_Init_Begin()
 	ShPersistentData_LevelInit_Begin()
 	ShAnimWindows_LevelInit()
+
+#if CLIENT
+	AnimEvents_Init()
+#endif
+
 	ShGamepad_LevelInit()
 	ShItems_LevelInit_Begin()
 	ShGRX_LevelInit()
+	Entitlements_LevelInit()
 	ShLoadouts_LevelInit_Begin()
-	ShCalEvent_LevelInit()
 	ShCharacters_LevelInit()
+	ShPassives_Init()
 	ShCharacterAbilities_LevelInit()
+                    
+              
+                        
+                          
+                               
+                                
+                            
+                          
+       
 	ShCharacterCosmetics_LevelInit()
+	ShCalEvent_LevelInit()
+	Vouchers_LevelInit()
+	TimeGatedLoginRewards_Init()
+	CollectionEvents_Init()
+	ThemedShopEvents_Init()
+	BuffetEvents_Init()
+	StoryChallengeEvents_Init()
+	ShSkydiveTrails_LevelInit()
+	Sh_Ranked_ItemRegistrationInit()                                           
+                        
+		Sh_ArenasRanked_ItemRegistrationInit()                                           
+       
 	ShWeapons_LevelInit()
 	ShWeaponCosmetics_LevelInit()
 	ShGladiatorCards_LevelInit()
-	#if(false)
-
-#endif
+	ShQuips_LevelInit()
+	ShSkydiveEmotes_LevelInit()
+                 
+                        
+       
+	ShMythics_LevelInit()
+	ShLoadscreen_Init()
+	ShLoadscreen_LevelInit()
 	ShMusic_LevelInit()
 	ShBattlePass_LevelInit()
+	Clubs_Init()
+	TreasureBox_SharedInit()
+	SeasonQuest_SharedInit()
+	MenuCamera_Init()
+	MenuScene_Init()
 	ShSceneCapture_LevelInit()
 	MeleeShared_Init()
 	MeleeSyncedShared_Init()
-	#if(true)
-		ShChallenges_LevelInit_PreStats()
+	ShPing_Init()
+	ShQuickchat_Init()
+	ShChallenges_LevelInit_PreStats()
+	#if SERVER
+		                      
 	#endif
 	ShItems_LevelInit_Finish()
 	ShItemPerPlayerState_LevelInit()
 	ShLoadouts_LevelInit_Finish()
 	ShStatsInternals_LevelInit()
 	ShStats_LevelInit()
-	#if(false)
+	ShChallenges_LevelInit_PostStats()
+	Sh_Ranked_Init()                                                                                                                
+                        
+		Sh_ArenasRanked_Init()                                                                                                                
+       
 
-#endif
-	#if(true)
-		ShChallenges_LevelInit_PostStats()
-	#endif
-	//
-	#if(false)
+	                        
 
-#endif
 	ShApexScreens_Init()
-	ShPersistentData_LevelInit_Finish() //
+	ShPersistentData_LevelInit_Finish()                  
+	ShPlaylist_Init()
 	ShEHI_LevelInit_End()
 
-	SURVIVAL_Loot_All_InitShared() //
+	SURVIVAL_Loot_All_InitShared()                                     
 
-	#if(false)
-
-
-
-
-#elseif(CLIENT)
+	#if SERVER
+		                   
+		           
+		                   
+	#elseif CLIENT
 		Client_Lobby_Init()
 	#endif
-	#if(false)
 
-#endif
-	#if(true)
-		ShEliteStreak_Init()
-	#endif
+	MpWeaponEmoteProjector_Init()
+	ShEmotes_Lobby_Init()
+                       
+                           
+                                                                               
+       
 
+                           
+		PrivateMatch_Init()
+       
 
 	RemoteFunctions_Init_Finish()
+
+	#if CLIENT
+                         
+			ClInitComicReaderMenu()
+        
+	#endif
 }
 
-#if(false)
+#if SERVER
+                                 
+ 
+	             
+	                    
+	            
+                       
+		                    
+       
+	                       
+	                 
+ 
+#endif          
 
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(CLIENT)
+#if CLIENT
 void function Client_Lobby_Init()
 {
 	CLUtilityMenu_Init()
@@ -526,10 +939,8 @@ void function Client_Lobby_Init()
 	PerfInitLabels()
 	ClPip_LevelInit()
 	ShPassPanel_LevelInit()
-	#if(false)
-
-#endif
+	ClLoadscreensInit()
+	ClImagePakLoadInit()
+	Sh_InitToolTips()
 }
-#endif //
-
-
+#endif          

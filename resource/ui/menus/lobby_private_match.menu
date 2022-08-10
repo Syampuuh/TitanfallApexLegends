@@ -1,0 +1,262 @@
+resource/ui/menus/lobby_private_match.menu
+{
+	menu
+	{
+		ControlName				Frame
+		xpos					0
+		ypos					0
+		zpos					3
+		wide					f0
+		tall					f0
+		autoResize				0
+		pinCorner				0
+		visible					1
+		enabled					1
+		PaintBackgroundType		1
+		infocus_bgcolor_override	"64 64 64 0"
+		outoffocus_bgcolor_override	"64 64 64 0"
+
+        ScreenFrame
+        {
+            ControlName				Label
+            wide					%100
+            tall					%100
+            labelText				""
+            visible				    0
+            bgcolor_override        "255 255 0 10"
+            paintbackground         1
+        }
+
+        PanelFrame
+        {
+            ControlName				Label
+            ypos                    -134
+			wide					1824
+			tall					%82.69
+            labelText				""
+            visible				    0
+            bgcolor_override        "255 255 0 64"
+            paintbackground         1
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        ScreenBlur
+        {
+            ControlName				Label
+            labelText               ""
+            visible                 0
+        }
+
+		MenuHeader
+        {
+            ControlName				RuiPanel
+            ypos					-48
+            wide					1800
+            tall					208
+            visible				    1
+            rui                     "ui/generic_menu_header.rpak"
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP
+            pin_to_sibling_corner	TOP
+        }
+
+        Logo
+        {
+            ControlName				RuiPanel
+			InheritProperties       Logo
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	TOP_LEFT
+        }
+
+        ToolTip
+        {
+            ControlName				RuiPanel
+            InheritProperties       ToolTip
+        }
+
+		FooterButtons
+		{
+			ControlName				CNestedPanel
+			InheritProperties       FooterButtons
+			zpos					1
+			mouseEnabled			0
+			//ypos					r300
+			//wide                    %35 // override default width otherwise some panel buttons overlap and can't be clicked
+		}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        PrivateMatchRosterPanel
+        {
+           ControlName             CNestedPanel
+           controlSettingsFile     "resource/ui/menus/panels/private_match_player_teams.res"
+
+           wide                    1424
+           tall                    823
+           zpos                    2
+
+           pin_to_sibling          PanelFrame
+           pin_corner_to_sibling   TOP_RIGHT
+           pin_to_sibling_corner   TOP_RIGHT
+
+           visible                 1
+        }
+
+        PrivateMatchUserControls
+        {
+           ControlName             CNestedPanel
+           controlSettingsFile     "resource/ui/menus/panels/private_match_user_buttons.res"
+
+            wide					1824
+            tall					823
+
+           pin_to_sibling          PanelFrame
+           pin_corner_to_sibling   BOTTOM_LEFT
+           pin_to_sibling_corner   BOTTOM_LEFT
+
+           visible                 1
+        }
+
+        PrivateMatchSpectatorPanel
+        {
+           ControlName             CNestedPanel
+           controlSettingsFile     "resource/ui/menus/panels/private_match_spectator_roster.res"
+
+           wide                    304
+           tall                    288
+
+           pin_to_sibling          PanelFrame
+           pin_corner_to_sibling   TOP_LEFT
+           pin_to_sibling_corner   TOP_LEFT
+
+           visible                 1
+        }
+
+        PrivateMatchUnassignedPlayersPanel
+        {
+           ControlName             CNestedPanel
+           controlSettingsFile     "resource/ui/menus/panels/private_match_unassigned_roster.res"
+
+           xpos                    0
+           ypos                    32
+
+           wide                    304
+           tall                    298
+
+           pin_to_sibling          PrivateMatchSpectatorPanel
+           pin_corner_to_sibling   TOP_LEFT
+           pin_to_sibling_corner   BOTTOM_LEFT
+
+           visible                 1
+        }
+        
+        LobbyChatBox
+		{
+			ControlName				CBaseHudChat
+			InheritProperties		ChatBox
+
+            destination				"match"
+            interactive				1
+            chatBorderThickness		1
+            messageModeAlwaysOn		1
+            hideInputBox			1 [!$WIN32]
+            font 					Default_27
+            zpos                    100
+			defaultAdminOnly		1
+			setUnusedScrollbarInvisible 1
+			timestampChat			1
+
+			pin_to_sibling			PrivateMatchRosterPanel
+            pin_corner_to_sibling   TOP_LEFT
+            pin_to_sibling_corner   BOTTOM_LEFT
+
+			
+			visible 				1
+			enabled					1
+			ypos					0
+            
+            tall                    110
+		}
+
+        LobbyChatBoxIcon
+        {
+            ControlName				Label
+            pin_to_sibling			LobbyChatBox
+            pin_corner_to_sibling   BOTTOM_LEFT
+            pin_to_sibling_corner   BOTTOM_RIGHT
+
+            labelText               " %[R_TRIGGER|]%"
+            visible                 1
+        }
+		
+        KickButton
+        {
+            ControlName             RuiButton
+			
+			rui                     "ui/private_match_kick_player_widget.rpak"
+			
+			
+			wide                    288
+            tall                    60
+			
+            xpos                    0
+			ypos					0
+							
+            pin_to_sibling			PrivateMatchUnassignedPlayersPanel
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	BOTTOM_LEFT
+
+            visible 1
+        }
+
+        MouseDragIcon
+        {
+            ControlName				RuiPanel
+
+            wide                    288
+            tall                    48
+            visible					0
+            enabled 				1
+            scaleImage				1
+            rui                     "ui/private_match_team_roster_player.rpak"
+            zpos                    20
+        }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //PostGameButton
+        //{
+        //    ControlName				RuiButton
+        //    InheritProperties		CornerButton
+        //    xpos                    13
+        //    zpos                    5
+
+        //    pin_to_sibling			NewsButton
+        //    pin_corner_to_sibling	BOTTOM_RIGHT
+        //    pin_to_sibling_corner	BOTTOM_LEFT
+        //}
+
+        MatchmakingStatus
+        {
+            ControlName		        RuiPanel
+            InheritProperties		MatchmakingStatus
+
+            pin_to_sibling			ScreenFrame
+            pin_corner_to_sibling	BOTTOM
+            pin_to_sibling_corner	BOTTOM
+        }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		ButtonTooltip
+		{
+			ControlName				CNestedPanel
+			InheritProperties		ButtonTooltip
+		}
+	}
+}

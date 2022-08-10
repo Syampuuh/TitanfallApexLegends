@@ -1,0 +1,516 @@
+                                                                                                          
+
+                                                                                                                         
+                                                                               
+                                                                                                                                       
+                                                                                                                                                                                          
+                                                      
+
+global function AllianceProximity_Init
+global function AllianceProximity_IsUsingAlliances
+global function AllianceProximity_IsUsingAllianceProximity
+global function AllianceProximity_IsUsingAllianceProximityDistanceChecks
+global function AllianceProximity_GetMaxNumAlliances
+global function AllianceProximity_GetMaxNumPlayersPerAlliance
+global function AllianceProximity_GetAllianceFromTeam
+global function AllianceProximity_GetTeamsInAlliance
+global function AllianceProximity_GetRepresentativeTeamForAlliance
+global function AllianceProximity_GetTeamsInSameAllianceAsTeam
+global function AllianceProximity_GetMaxDistForProximity
+global function AllianceProximity_IsTeamInAnAlliance
+global function AllianceProximity_GetOtherAlliances
+global function AllianceProximity_GetOtherAlliance
+
+#if SERVER || CLIENT
+global function AllianceProximity_GetOriginalPlayerTeam_FromPlayerEHI
+global function AllianceProximity_GetLivingAllianceMembersInProximity
+global function AllianceProximity_GetLivingPlayerTeamsInAlliance
+global function AllianceProximity_GetAllPlayersInAlliance
+global function AllianceProximity_GetAllPlayersInOtherAlliances
+global function AllianceProximity_GetPlayersInSameAllianceAsTeam
+global function AllianceProximity_GetLivingPlayerTeamsInSameAllianceAsTeam
+#endif                    
+
+#if SERVER
+                                                                  
+                                                                        
+#endif          
+
+#if CLIENT
+global function AllianceProximity_ManageIconVisibility_Thread
+#endif          
+
+struct {
+	bool isUsingAllianceProximity
+	int maxAlliances
+	int maxPlayersPerAlliance
+	float maxDistAllianceProximity
+
+	table< int, int > teamToAllianceTable
+	table< int, array< int > > allianceToTeamsTable
+
+	#if SERVER || CLIENT
+		table< EHI, int > playerEHIToOriginalTeamTable                                                                                         
+		bool isMinimapDisabled
+	#endif                    
+
+} file
+
+                                
+void function AllianceProximity_Init()
+{
+	printf( "ALLIANCE PROXIMITY: Running Init" )
+	                                                                                                                           
+	file.maxAlliances = GetCurrentPlaylistVarInt( "max_alliances", 0 )
+	Assert( file.maxAlliances <= 0 || file.maxAlliances <= GetCurrentPlaylistVarInt( "max_teams", 0 ), "Trying to use Alliances but have set more alliances ( " + file.maxAlliances + " ) than squads ( " + GetCurrentPlaylistVarInt( "max_teams", 0 ) + " )" )
+
+	                                                         
+	if ( !AllianceProximity_IsUsingAlliances() )
+		return
+
+	file.isUsingAllianceProximity = GetCurrentPlaylistVarBool( "use_proximity_alliance_members", false )
+	file.maxDistAllianceProximity = GetCurrentPlaylistVarFloat( "max_dist_proximity_alliance_members", 0.0 )
+	file.maxPlayersPerAlliance = GetCurrentPlaylistVarInt( "max_players", 0 ) / file.maxAlliances
+
+	                                                                                                            
+	AllianceProximity_SetTeamsToAlliances()
+
+	                                                                                                                                   
+	                                                                             
+	#if SERVER
+		                                                                    
+	#endif          
+
+	#if CLIENT
+		AddCreateCallback( "player", AllianceProximity_OnPlayerCreated )
+	#endif          
+
+	#if SERVER || CLIENT
+		file.isMinimapDisabled = GetCurrentPlaylistVarBool( "disable_minimap", false )
+	#endif                    
+}
+
+                                   
+                                                                                                               
+bool function AllianceProximity_IsUsingAlliances()
+{
+	return file.maxAlliances > 0
+}
+
+                                            
+                                                                                                                                     
+bool function AllianceProximity_IsUsingAllianceProximity()
+{
+	return file.isUsingAllianceProximity
+}
+
+                                                                                                                                                       
+                                            
+bool function AllianceProximity_IsUsingAllianceProximityDistanceChecks()
+{
+	return file.maxDistAllianceProximity > 0.0 && AllianceProximity_IsUsingAllianceProximity()
+}
+
+                                        
+bool function AllianceProximity_IsTeamInAnAlliance( int team )
+{
+	return team in file.teamToAllianceTable
+}
+
+                                                
+int function AllianceProximity_GetMaxNumAlliances()
+{
+	return file.maxAlliances
+}
+
+                                                 
+int function AllianceProximity_GetMaxNumPlayersPerAlliance()
+{
+	return file.maxPlayersPerAlliance
+}
+
+                                                         
+int function AllianceProximity_GetAllianceFromTeam( int team )
+{
+	Assert( AllianceProximity_IsTeamInAnAlliance( team ) , "Attempted to get an Alliance from a Team that isn't in the teamToAllianceTable, probably didn't run the AllianceProximity_SetTeamsToAlliances function first" )
+	return file.teamToAllianceTable[ team ]
+}
+
+                                                       
+array< int > function AllianceProximity_GetOtherAlliances( int alliance )
+{
+	array< int > otherAlliances = []
+
+	foreach( key, value in file.allianceToTeamsTable )
+	{
+		if ( key != alliance )
+			otherAlliances.append( key )
+	}
+
+	return otherAlliances
+}
+
+                                                             
+int function AllianceProximity_GetOtherAlliance( int alliance )
+{
+	Assert( file.maxAlliances == 2, "Running AllianceProximity_GetOtherAlliance in a mode with maxAlliances not equal to 2, you probably want to use AllianceProximity_GetOtherAlliances" )
+	return alliance == ALLIANCE_A ? ALLIANCE_B : ALLIANCE_A
+}
+
+#if SERVER || CLIENT
+                                                                                                                           
+int function AllianceProximity_GetOriginalPlayerTeam_FromPlayerEHI( EHI playerEHI )
+{
+	Assert(  EHIHasValidScriptStruct( playerEHI ), "Attempted to run AllianceProximity_GetOriginalPlayerTeam_FromPlayerEHI on an Invalid playerEHI" )
+
+	int team = EHI_GetTeam( playerEHI )
+
+	if ( playerEHI in file.playerEHIToOriginalTeamTable )
+	{
+		team = file.playerEHIToOriginalTeamTable[ playerEHI ]
+	}
+
+	return team
+}
+#endif                    
+
+                                                                                                                                  
+                                                                                                                                                           
+float function AllianceProximity_GetMaxDistForProximity()
+{
+	return file.maxDistAllianceProximity
+}
+
+#if SERVER || CLIENT
+                                                                                                                                                     
+                                                                                                                                       
+array<entity> function AllianceProximity_GetLivingAllianceMembersInProximity( int team, vector origin )
+{
+	array<entity> allianceMembersInProximity = []
+	array<entity> livingAlliancePlayers = AllianceProximity_GetPlayersInSameAllianceAsTeam( team, true )
+
+	                                                                             
+	if ( AllianceProximity_IsUsingAllianceProximityDistanceChecks() )
+	{
+		foreach ( playerAlive in livingAlliancePlayers )
+		{
+			if ( IsPositionWithinRadius( AllianceProximity_GetMaxDistForProximity(), origin, playerAlive.GetOrigin() ) )
+				allianceMembersInProximity.append( playerAlive )
+		}
+	}
+	else                                                                           
+	{
+		allianceMembersInProximity = livingAlliancePlayers
+	}
+
+	return allianceMembersInProximity
+}
+#endif                    
+
+
+#if SERVER || CLIENT
+                                             
+array<entity> function AllianceProximity_GetAllPlayersInAlliance( int alliance, bool shouldReturnOnlyLivingPlayers )
+{
+	array<entity> allianceMembers = []
+	array<entity> players = []
+
+	if ( shouldReturnOnlyLivingPlayers )
+	{
+		players = GetPlayerArray_AliveConnected()
+	}
+	else
+	{
+		players = GetPlayerArray()
+	}
+
+
+	foreach ( playerEnt in players )
+	{
+		if ( IsValid( playerEnt ) )
+		{
+			int playerEntAlliance = AllianceProximity_GetAllianceFromTeam( playerEnt.GetTeam() )
+			if ( playerEntAlliance == alliance )
+				allianceMembers.append( playerEnt )
+		}
+	}
+
+	return allianceMembers
+}
+#endif                    
+
+
+#if SERVER || CLIENT
+                                                            
+array<entity> function AllianceProximity_GetAllPlayersInOtherAlliances( int alliance, bool shouldReturnOnlyLivingPlayers )
+{
+	array <entity> otherAlliancePlayers = []
+	array<entity> players = []
+
+	if ( shouldReturnOnlyLivingPlayers )
+	{
+		players = GetPlayerArray_AliveConnected()
+	}
+	else
+	{
+		players = GetPlayerArray()
+	}
+
+	foreach ( playerEnt in players )
+	{
+		if ( IsValid( playerEnt ) )
+		{
+			int playerEntAlliance = AllianceProximity_GetAllianceFromTeam( playerEnt.GetTeam() )
+			if ( playerEntAlliance != alliance )
+				otherAlliancePlayers.append( playerEnt )
+		}
+	}
+
+	return otherAlliancePlayers
+}
+#endif                    
+
+
+
+#if SERVER || CLIENT
+                                                                      
+array<entity> function AllianceProximity_GetPlayersInSameAllianceAsTeam( int playerTeam, bool shouldReturnOnlyLivingPlayers )
+{
+	int alliance = AllianceProximity_GetAllianceFromTeam( playerTeam )
+	array<entity> allianceMembers = AllianceProximity_GetAllPlayersInAlliance( alliance, shouldReturnOnlyLivingPlayers )
+	array<entity> playersInSameAllianceAsTeam = allianceMembers
+
+	foreach ( playerEnt in allianceMembers )
+	{
+		int playerEntTeam = playerEnt.GetTeam()
+		if ( playerEntTeam == playerTeam )
+			playersInSameAllianceAsTeam.fastremovebyvalue( playerEnt )
+	}
+
+	return playersInSameAllianceAsTeam
+}
+#endif                    
+
+                                                           
+array<int> function AllianceProximity_GetTeamsInSameAllianceAsTeam( int playerTeam )
+{
+	int alliance = AllianceProximity_GetAllianceFromTeam( playerTeam )
+	array<int> uniqueAllianceTeams = AllianceProximity_GetTeamsInAlliance( alliance )
+	array<int> teamsInSameAllianceAsTeam = []
+
+	foreach ( team in uniqueAllianceTeams )
+	{
+		if ( team != playerTeam )
+			teamsInSameAllianceAsTeam.append( team )
+	}
+
+	return teamsInSameAllianceAsTeam
+}
+
+#if SERVER || CLIENT
+                                                                             
+array<int> function AllianceProximity_GetLivingPlayerTeamsInSameAllianceAsTeam( int playerTeam )
+{
+	int alliance = AllianceProximity_GetAllianceFromTeam( playerTeam )
+	array<int> uniqueAllianceTeams = AllianceProximity_GetLivingPlayerTeamsInAlliance( alliance )
+	array<int> teamsInSameAllianceAsTeam = []
+
+	foreach ( team in uniqueAllianceTeams )
+	{
+		if ( team != playerTeam )
+			teamsInSameAllianceAsTeam.append( team )
+	}
+
+	return teamsInSameAllianceAsTeam
+}
+#endif                    
+
+                                          
+array<int> function AllianceProximity_GetTeamsInAlliance( int alliance )
+{
+	Assert( alliance in file.allianceToTeamsTable , "Attempted to get teams from an Alliance that isn't in the allianceToTeamsTable, probably didn't run the AllianceProximity_SetTeamsToAlliances function first" )
+
+	return file.allianceToTeamsTable[ alliance ]
+}
+
+                                                                                                                                                                                        
+int function AllianceProximity_GetRepresentativeTeamForAlliance( int alliance )
+{
+	array<int> teamsInAlliance = AllianceProximity_GetTeamsInAlliance( alliance )
+	Assert( teamsInAlliance.len() > 0, "AllianceProximity_GetRepresentativeTeamForAlliance tried to get a team from an alliance but there are no teams in alliance " + alliance )
+
+	return teamsInAlliance[ 0 ]
+}
+
+#if SERVER || CLIENT
+                                                            
+array<int> function AllianceProximity_GetLivingPlayerTeamsInAlliance( int alliance )
+{
+	array<int> uniqueAllianceTeams = []
+	array<entity> livingPlayers = GetPlayerArray_AliveConnected()
+
+	foreach ( playerEnt in livingPlayers )
+	{
+		int playerEntTeam = playerEnt.GetTeam()
+		int playerEntAlliance = AllianceProximity_GetAllianceFromTeam( playerEntTeam )
+		if ( !uniqueAllianceTeams.contains( playerEntTeam ) && playerEntAlliance == alliance )
+			uniqueAllianceTeams.append( playerEntTeam )
+	}
+
+	return uniqueAllianceTeams
+}
+#endif                    
+
+
+#if SERVER
+                                                                                                                                                                               
+                                                                  
+ 
+	                                                                        
+		                                                                        
+ 
+#endif          
+
+#if CLIENT
+                                                                                                                                                                               
+void function AllianceProximity_OnPlayerCreated( entity player )
+{
+	if ( GetGameState() < eGameState.WinnerDetermined && IsValid( player ) )
+		file.playerEHIToOriginalTeamTable[ ToEHI( player ) ] <- player.GetTeam()
+}
+#endif          
+
+                                                                           
+                                                 
+void function AllianceProximity_SetTeamsToAlliances()
+{
+	int allianceIndex = 0
+	array<int> allTeams = GetAllTeams()
+
+	foreach ( team in allTeams )
+	{
+		printf( "ALLIANCE PROXIMITY: Putting team " + team + " on Alliance " + allianceIndex )
+		#if SERVER
+			                                                
+		#endif          
+
+		file.teamToAllianceTable[ team ] <- allianceIndex
+
+		if ( allianceIndex in file.allianceToTeamsTable )
+		{
+			file.allianceToTeamsTable[ allianceIndex ].append( team )
+		}
+		else
+		{
+			file.allianceToTeamsTable[ allianceIndex ] <- [ team ]
+		}
+
+		allianceIndex++
+
+		if ( allianceIndex >= AllianceProximity_GetMaxNumAlliances() )
+			allianceIndex = 0
+	}
+}
+
+#if CLIENT
+                                                                                                                                                                      
+                                                                                                                     
+void function AllianceProximity_ManageIconVisibility_Thread( entity ent, var rui, bool isFullMapRui, bool ruiHasBuiltInDistTracking )
+{
+	entity player = GetLocalClientPlayer()
+	                                                                                                       
+	if ( !AllianceProximity_IsUsingAllianceProximityDistanceChecks() || !IsValid( player ) || !IsValid( ent ) )
+		return
+
+	                                                                    
+	if ( file.isMinimapDisabled )
+		return
+
+	int playerTeam = player.GetTeam()
+	int entTeam = ent.GetTeam()
+
+	                                                                                                                                              
+	if ( playerTeam == entTeam || !IsFriendlyTeam( playerTeam, entTeam ) || entTeam == 0 )
+		return
+
+	float maxProximity = AllianceProximity_GetMaxDistForProximity()
+
+	                                                                                                                               
+	entity entOwner = ent.GetOwner()
+	if ( IsValid( entOwner ) )
+	{
+		if ( entOwner.IsPlayer() && IsPositionWithinRadius( maxProximity, player.GetOrigin(), entOwner.GetOrigin() ) )
+			return
+	}
+
+	if ( ruiHasBuiltInDistTracking )
+	{
+		RuiSetFloat( rui, "maxDrawDistance", maxProximity )
+		return
+	}
+
+	while ( IsValid( player ) && IsValid( ent ) && IsValid( rui ) )
+	{
+		if ( IsPositionWithinRadius( maxProximity, player.GetOrigin(), ent.GetOrigin() ) )
+		{
+			if ( isFullMapRui )
+			{
+				RuiSetVisible( rui, Fullmap_IsVisible() )
+			}
+			else
+			{
+				RuiSetVisible( rui, true )
+			}
+		}
+		else
+		{
+			RuiSetVisible( rui, false )
+		}
+		WaitFrame()
+	}
+}
+#endif          
+
+#if SERVER
+                                                                                                                                
+                                                                                                             
+ 
+	                                                                              
+	 
+		                                                                                               
+		                                                                              
+		                                                                                                                                           
+		                       
+		 
+			                           
+			                            
+		 
+
+		                                                                                                         
+
+		                                                     
+		 
+			                                                   
+		 
+	 
+ 
+#endif          
+
+#if SERVER
+                                                                                                                                                   
+                                             
+                                                                                             
+ 
+	                     
+		      
+
+	                                                   
+	 
+		                                                   
+	 
+	    
+	 
+		                                      
+	 
+ 
+#endif          

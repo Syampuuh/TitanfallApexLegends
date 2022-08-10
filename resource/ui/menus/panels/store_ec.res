@@ -36,15 +36,50 @@
         rui					    "ui/store_header_ec.rpak"
 	}
 
+	SpecialPageHeader
+	{
+		ControlName				RuiPanel
+        rui					    "ui/store_header_special.rpak"
+
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling			PanelFrame
+        pin_to_sibling_corner	TOP_LEFT
+		xpos					0
+		ypos					0
+		wide					1920
+		tall					160
+
+		visible					0
+	}
+
+	ButtonAnchor
+	{
+		ControlName				Label
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling			PanelFrame
+        pin_to_sibling_corner	TOP_LEFT
+		xpos                    0
+		ypos                    28
+		wide					1
+		tall					1
+
+		labelText				""
+	    bgcolor_override		"70 70 0 128"
+		visible					0
+		paintbackground			1
+        proportionalToParent    1
+	}
+
 	TallButton1
 	{
 		ControlName				RuiButton
 		xpos					0
 		ypos					-112
-		wide					332
-		tall					680
+		zpos                    5
+		wide					420
+		tall					672
 		visible					1
-        rui					    "ui/store_button_ec_tall.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                0
         classname               "FullOfferButton"
 
@@ -52,20 +87,40 @@
 
         tabPosition             1
 
-        pin_to_sibling			PanelFrame
         pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling			ButtonAnchor
         pin_to_sibling_corner	TOP_LEFT
 	}
+	TallButtonFade1
+	{
+		ControlName				RuiPanel
+		xpos					0
+		ypos					-112
+		zpos                    6
+		wide					420
+		tall					672
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                0
+        classname               "FullOfferButtonFade"
+        enable                  0
+
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling			ButtonAnchor
+        pin_to_sibling_corner	TOP_LEFT
+	}
+
 
 	TallButton2
 	{
 		ControlName				RuiButton
-		xpos					16
+		xpos					24
 		ypos					0
-		wide					332
-		tall					680
+		zpos                    5
+		wide					420
+		tall					672
 		visible					1
-        rui					    "ui/store_button_ec_tall.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                1
         classname               "FullOfferButton"
 
@@ -76,16 +131,35 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_RIGHT
 	}
+	TallButtonFade2
+	{
+		ControlName				RuiPanel
+		xpos					24
+		ypos					0
+		zpos                    6
+		wide					420
+		tall					672
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                1
+        classname               "FullOfferButtonFade"
+
+        pin_to_sibling			TallButton1
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_RIGHT
+	}
+
 
 	TallButton3
 	{
 		ControlName				RuiButton
-		xpos					16
+		xpos					24
 		ypos					0
-		wide					332
-		tall					680
+		zpos                    5
+		wide					420
+		tall					672
 		visible					1
-        rui					    "ui/store_button_ec_tall.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                2
         classname               "FullOfferButton"
 
@@ -96,16 +170,34 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_RIGHT
 	}
+	TallButtonFade3
+	{
+		ControlName				RuiPanel
+		xpos					24
+		ypos					0
+		zpos                    6
+		wide					420
+		tall					672
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                2
+        classname               "FullOfferButtonFade"
+
+        pin_to_sibling			TallButton2
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_RIGHT
+	}
 
 	TallButton4
 	{
 		ControlName				RuiButton
-		xpos					16
+		xpos					24
 		ypos					0
-		wide					332
-		tall					680
+		zpos                    5
+		wide					420
+		tall					672
 		visible					1
-        rui					    "ui/store_button_ec_tall.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                3
         classname               "FullOfferButton"
 
@@ -116,18 +208,53 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_RIGHT
 	}
+	TallButtonFade4
+	{
+		ControlName				RuiPanel
+		xpos					24
+		ypos					0
+		zpos                    6
+		wide					420
+		tall					672
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                3
+        classname               "FullOfferButtonFade"
+
+        pin_to_sibling			TallButton3
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_RIGHT
+	}
 
 	TallButton5
 	{
 		ControlName				RuiButton
-		xpos					16
+		xpos					24
 		ypos					0
-		wide					332
-		tall					680
+		zpos                    5
+		wide					420
+		tall					672
 		visible					1
-        rui					    "ui/store_button_ec_tall.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                4
         classname               "FullOfferButton"
+
+        pin_to_sibling			TallButton4
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_RIGHT
+	}
+	TallButtonFade5
+	{
+		ControlName				RuiPanel
+		xpos					24
+		ypos					0
+		zpos                    6
+		wide					420
+		tall					672
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                4
+        classname               "FullOfferButtonFade"
 
         pin_to_sibling			TallButton4
         pin_corner_to_sibling	TOP_LEFT
@@ -137,10 +264,11 @@
 	SquareButton1x1
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                0
         classname               "TopOfferButton"
 
@@ -153,14 +281,30 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}
+	SquareButton1x1Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                0
+        classname               "TopOfferButtonFade"
+
+        pin_to_sibling			TallButton1
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+	}
 
 	SquareButton1x2
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                0
         classname               "BottomOfferButton"
 
@@ -171,14 +315,30 @@
         pin_corner_to_sibling	BOTTOM_RIGHT
         pin_to_sibling_corner	BOTTOM_RIGHT
 	}
+	SquareButton1x2Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                0
+        classname               "BottomOfferButtonFade"
+
+        pin_to_sibling			TallButton1
+        pin_corner_to_sibling	BOTTOM_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+	}
 
 	SquareButton2x1
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                1
         classname               "TopOfferButton"
 
@@ -190,14 +350,30 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}
+	SquareButton2x1Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                1
+        classname               "TopOfferButtonFade"
+
+        pin_to_sibling			TallButton2
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+	}
 
 	SquareButton2x2
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                1
         classname               "BottomOfferButton"
 
@@ -209,14 +385,30 @@
         pin_corner_to_sibling	BOTTOM_RIGHT
         pin_to_sibling_corner	BOTTOM_RIGHT
 	}
+	SquareButton2x2Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                1
+        classname               "BottomOfferButtonFade"
+
+        pin_to_sibling			TallButton2
+        pin_corner_to_sibling	BOTTOM_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+	}
 
 	SquareButton3x1
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                2
         classname               "TopOfferButton"
 
@@ -228,14 +420,30 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}
+	SquareButton3x1Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                2
+        classname               "TopOfferButtonFade"
+
+        pin_to_sibling			TallButton3
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+	}
 
 	SquareButton3x2
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                2
         classname               "BottomOfferButton"
 
@@ -247,14 +455,30 @@
         pin_corner_to_sibling	BOTTOM_RIGHT
         pin_to_sibling_corner	BOTTOM_RIGHT
 	}
+	SquareButton3x2Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                2
+        classname               "BottomOfferButtonFade"
+
+        pin_to_sibling			TallButton3
+        pin_corner_to_sibling	BOTTOM_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+	}
 
 	SquareButton4x1
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                3
         classname               "TopOfferButton"
 
@@ -266,14 +490,30 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}
+	SquareButton4x1Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                3
+        classname               "TopOfferButtonFade"
+
+        pin_to_sibling			TallButton4
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+	}
 
 	SquareButton4x2
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                3
         classname               "BottomOfferButton"
 
@@ -285,14 +525,30 @@
         pin_corner_to_sibling	BOTTOM_RIGHT
         pin_to_sibling_corner	BOTTOM_RIGHT
 	}
+	SquareButton4x2Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                3
+        classname               "BottomOfferButtonFade"
+
+        pin_to_sibling			TallButton4
+        pin_corner_to_sibling	BOTTOM_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+	}
 
 	SquareButton5x1
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                4
         classname               "TopOfferButton"
 
@@ -304,20 +560,51 @@
         pin_corner_to_sibling	TOP_LEFT
         pin_to_sibling_corner	TOP_LEFT
 	}
+	SquareButton5x1Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                4
+        classname               "TopOfferButtonFade"
+
+        pin_to_sibling			TallButton5
+        pin_corner_to_sibling	TOP_LEFT
+        pin_to_sibling_corner	TOP_LEFT
+	}
 
 	SquareButton5x2
 	{
 		ControlName				RuiButton
-		wide					332
-		tall					332
+		zpos                    5
+		wide					370
+		tall					324
 		visible					1
-        rui					    "ui/store_button_ec_square.rpak"
+        rui					    "ui/store_button_ec_v2.rpak"
         scriptID                4
         classname               "BottomOfferButton"
 
         navLeft                 SquareButton3x2
         navRight                TallButton5
         navUp                   SquareButton5x1
+
+        pin_to_sibling			TallButton5
+        pin_corner_to_sibling	BOTTOM_RIGHT
+        pin_to_sibling_corner	BOTTOM_RIGHT
+	}
+	SquareButton5x2Fade
+	{
+		ControlName				RuiPanel
+		zpos                    6
+		wide					370
+		tall					324
+		visible					1
+        rui					    "ui/store_button_ec_v2.rpak"
+        scriptID                4
+        classname               "BottomOfferButtonFade"
 
         pin_to_sibling			TallButton5
         pin_corner_to_sibling	BOTTOM_RIGHT

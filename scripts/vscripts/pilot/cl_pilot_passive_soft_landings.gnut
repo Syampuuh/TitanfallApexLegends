@@ -1,0 +1,129 @@
+global function CLPassiveSoftLandings_Init
+
+const asset SOFTLANDING_SCREEN_FX 		= $"P_soft_landing_1p"
+const string SOFTLANDING_SOUND_START 	= "Nova_Passive_SoftLanding_1P"
+
+
+struct
+{
+	int colorCorrection
+	int ScreenFxId
+} file
+
+                                                                                           
+void function CLPassiveSoftLandings_Init()
+{
+	file.ScreenFxId = PrecacheParticleSystem( SOFTLANDING_SCREEN_FX )
+
+	RegisterSignal( "PassiveSoftLandings_StopColorCorrection" )
+
+	file.colorCorrection = ColorCorrection_Register( "materials/correction/soft_landing_passive.raw_hdr" )
+	StatusEffect_RegisterEnabledCallback( eStatusEffect.softLandings_visuals, PassiveSoftLandings_StartVisualEffect )
+	StatusEffect_RegisterDisabledCallback( eStatusEffect.softLandings_visuals, PassiveSoftLandings_StopVisualEffect )
+}
+
+
+void function PassiveSoftLandings_StartVisualEffect( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	entity viewPlayer = ent
+
+	EmitSoundOnEntity( viewPlayer, SOFTLANDING_SOUND_START )
+
+	                                
+	thread PassiveSoftLandings_UpdatePlayerScreenColorCorrection( viewPlayer )
+
+	int fxHandle = StartParticleEffectOnEntityWithPos( viewPlayer, file.ScreenFxId, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID, viewPlayer.EyePosition(), <0, 0, 0> )
+	EffectSetIsWithCockpit( fxHandle, true )
+
+	thread PassiveAdreneline_ScreenEffectThread( viewPlayer, fxHandle, statusEffect )
+}
+
+
+void function PassiveSoftLandings_StopVisualEffect( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	ent.Signal( "PassiveSoftLandings_StopColorCorrection" )
+}
+
+
+void function CreatePassiveSoftLandingsRUI()
+{
+	                                                       
+	var rui = CreateTransientCockpitRui( $"ui/passive_soft_landing_triggered.rpak", HUD_Z_BASE )
+}
+
+
+void function PassiveSoftLandings_UpdatePlayerScreenColorCorrection( entity player )
+{
+	Assert ( IsNewThread(), "Must be threaded off." )
+	Assert ( player == GetLocalViewPlayer() )
+
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "PassiveSoftLandings_StopColorCorrection" )
+
+	OnThreadEnd(
+		function() : ( player )
+		{
+			ColorCorrection_SetWeight( file.colorCorrection, 0.0 )
+			ColorCorrection_SetExclusive( file.colorCorrection, false )
+		}
+	)
+
+	ColorCorrection_SetExclusive( file.colorCorrection, true )
+	ColorCorrection_SetWeight( file.colorCorrection, 1.0 )
+
+	const LERP_IN_TIME = 0.0125                                                                         
+	float startTime = Time()
+
+	while ( true )
+	{
+		                                             
+		float weight = StatusEffect_GetSeverity( player, eStatusEffect.softLandings_visuals )
+		                  
+		weight = GraphCapped( Time() - startTime, 0, LERP_IN_TIME, 0, weight )
+		ColorCorrection_SetWeight( file.colorCorrection, weight )
+
+		WaitFrame()
+	}
+}
+
+
+void function PassiveAdreneline_ScreenEffectThread( entity viewPlayer, int fxHandle, int statusEffect )
+{
+	EndSignal( viewPlayer, "OnDeath" )
+	EndSignal( viewPlayer, "PassiveSoftLandings_StopColorCorrection" )
+
+	OnThreadEnd(
+		function() : ( fxHandle )
+		{
+			if ( !EffectDoesExist( fxHandle ) )
+				return
+
+			EffectStop( fxHandle, false, true )
+		}
+	)
+
+	while( true )
+	{
+		float severity = StatusEffect_GetSeverity( viewPlayer, statusEffect )
+		                                                        
+
+		if ( !EffectDoesExist( fxHandle ) )
+			break
+
+		EffectSetControlPointVector( fxHandle, 1, <severity, 999, 0> )
+		WaitFrame()
+	}
+}

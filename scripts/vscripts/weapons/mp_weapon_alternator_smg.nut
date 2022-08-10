@@ -2,20 +2,23 @@
 global function OnWeaponPrimaryAttack_alternator_smg
 global function MpWeaponAlternatorSMG_Init
 
-#if(false)
-
+#if SERVER
+                                                       
 #endif
 
-#if(CLIENT)
+#if CLIENT
 	global function OnClientAnimEvent_alternator_smg
 #endif
 
 
 const ALTERNATOR_SMG_TRACER_FX = $"weapon_tracers_xo16_speed"
 
+                        
+                                                          
+      
 void function MpWeaponAlternatorSMG_Init()
 {
-	#if(CLIENT)
+	#if CLIENT
 		PrecacheParticleSystem( ALTERNATOR_SMG_TRACER_FX )
 	#endif
 }
@@ -25,31 +28,31 @@ var function OnWeaponPrimaryAttack_alternator_smg( entity weapon, WeaponPrimaryA
 	return FireWeaponPlayerAndNPC( weapon, attackParams, true )
 }
 
-#if(false)
-
-
-
-
+#if SERVER
+                                                                                                             
+ 
+	                                                            
+ 
 #endif
 
 int function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attackParams, bool playerFired )
 {
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
 	int damageType = weapon.GetWeaponDamageFlags()
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+	                                        
+	  	                                
+	                                                  
+	                                        
+	                                       
+	                                           
+	                                                
+	                                                                                 
 	weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, damageType )
 
 	return 1
 }
 
-#if(CLIENT)
+#if CLIENT
 void function OnClientAnimEvent_alternator_smg( entity weapon, string name )
 {
 	GlobalClientEventHandler( weapon, name )

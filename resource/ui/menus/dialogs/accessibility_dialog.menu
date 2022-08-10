@@ -45,6 +45,7 @@ resource/ui/menus/confirm_dialog.menu
             ControlName				Label
             wide					%100
             tall					545
+            tall_nx_handheld		665
             labelText				""
             bgcolor_override		"0 0 0 255"
             visible					0
@@ -60,9 +61,12 @@ resource/ui/menus/confirm_dialog.menu
             ControlName				RuiPanel
             classname               "MenuButton"
             wide					%100
-            tall					545
+            tall					545 [!$NX && !$NX_UI_PC]
+            tall					665 [$NX || $NX_UI_PC] // must match the rui's fullRes, the rui will pull the bottom up
+            tall_nx_handheld		665
             visible				    1
-            rui                     "ui/accessibility_dialog_content.rpak"
+            rui                     "ui/accessibility_dialog_content.rpak"    [!$NX && !$NX_UI_PC]
+            rui                     "ui/accessibility_dialog_content_nx.rpak" [$NX || $NX_UI_PC]
 
 			pin_to_sibling			DialogFrame
 			pin_corner_to_sibling	TOP
@@ -83,7 +87,7 @@ resource/ui/menus/confirm_dialog.menu
             ypos                    -120
             tabPosition             1
             navDown                 SwchSubtitlesSize
-
+			wide_nx_handheld		1500  [$NX || $NX_UI_PC]
             ConVar                  "closecaption"
             list
             {
@@ -106,6 +110,7 @@ resource/ui/menus/confirm_dialog.menu
             style                   DialogListButton
             navUp                   SwchSubtitles
             navDown                 SwchAccessibility
+			wide_nx_handheld		1500  [$NX || $NX_UI_PC]
 
             pin_to_sibling          SwchSubtitles
             pin_corner_to_sibling   TOP_LEFT
@@ -133,6 +138,7 @@ resource/ui/menus/confirm_dialog.menu
             style                   DialogListButton
             navUp                   SwchSubtitlesSize
             navDown                 SwchChatSpeechToText
+			wide_nx_handheld		1500  [$NX || $NX_UI_PC]
 
             pin_to_sibling          SwchSubtitlesSize
             pin_corner_to_sibling   TOP_LEFT
@@ -157,6 +163,7 @@ resource/ui/menus/confirm_dialog.menu
             style                   DialogListButton
             navUp                   SwchAccessibility
             navDown                 SwchChatTextToSpeech
+			wide_nx_handheld		1500  [$NX || $NX_UI_PC]
 
             pin_to_sibling          SwchAccessibility
             pin_corner_to_sibling   TOP_LEFT
@@ -177,12 +184,13 @@ resource/ui/menus/confirm_dialog.menu
             childGroupAlways        ChoiceButtonAlways
         }
 
-        SwchChatTextToSpeech [$PC]
+        SwchChatTextToSpeech
         {
             ControlName             RuiButton
             InheritProperties       SwitchButton
             style                   DialogListButton
             navUp                   SwchChatSpeechToText
+			wide_nx_handheld		1500  [$NX || $NX_UI_PC]
 
             pin_to_sibling          SwchChatSpeechToText
             pin_corner_to_sibling   TOP_LEFT
@@ -191,8 +199,11 @@ resource/ui/menus/confirm_dialog.menu
             ConVar                  "hudchat_play_text_to_speech"
             list
             {
-                "#SETTING_OFF"  0
+                "#SETTING_SYSTEM_DEFAULT" 0  [$PS4 || $PS5]
+                "#SETTING_CONSOLE_DEFAULT" 0 [$DURANGO || $XB5]
+                "#SETTING_OFF"  0            [!$DURANGO && !$XB5 && !$PS4 && !$PS5]
                 "#SETTING_ON"   1
+                "#SETTING_OFF"  2            [$DURANGO || $XB5 || $PS4 || $PS5]
             }
 
             ruiArgs
@@ -200,7 +211,8 @@ resource/ui/menus/confirm_dialog.menu
                 buttonText      "#MENU_CHAT_TEXT_TO_SPEECH"
             }
             clipRui                 1
-            childGroupAlways        ChoiceButtonAlways
+            childGroupAlways        MultiChoiceButtonAlways [$DURANGO || $XB5 || $PS4 || $PS5]
+            childGroupAlways        ChoiceButtonAlways [!$DURANGO && !$XB5 && !$PS4 && !$PS5]
         }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -210,6 +222,7 @@ resource/ui/menus/confirm_dialog.menu
 			InheritProperties       DialogFooterButtons
 			xpos                    0
             wide					200
+            wide_nx_handheld		300		[$NX || $NX_UI_PC]
 
 			pin_to_sibling			DialogFrame
 			pin_corner_to_sibling	BOTTOM

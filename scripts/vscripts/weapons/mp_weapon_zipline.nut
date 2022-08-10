@@ -1,18 +1,17 @@
-//
+  
 
-#if(false)
+#if SERVER
+       
 
-
-
-#endif //
+                                                       
+#endif              
 
 global function MpWeaponZipline_Init
 global function OnWeaponPrimaryAttack_weapon_zipline
 global function OnProjectileCollision_weapon_zipline
-global function OnWeaponReadyToFire_weapon_zipline
 global function OnWeaponRaise_weapon_zipline
 
-#if(CLIENT)
+#if CLIENT
 global function OnCreateClientOnlyModel_weapon_zipline
 #endif
 
@@ -40,47 +39,46 @@ void function MpWeaponZipline_Init()
 	PrecacheParticleSystem( ZIPLINE_STATION_EXPLOSION )
 
 	PrecacheMaterial( $"cable/zipline" )
-	PrecacheModel( $"cable/zipline.vmt" )
 }
 
-#if(false)
+#if SERVER
+                                                                                                             
+ 
+	        
+ 
+#endif              
 
+#if SERVER
+                                                                           
+ 
+	                           
+	                               
 
+	            
+		                       
+		 
+			                         
+			 
+				      
+			 
 
+			                                      
+			 
+				                                                                                                    
+				                                                       
+				      
+			 
 
-#endif //
+			                                                                                                        
+			                                                                         
+		 
+	 
 
-#if(false)
+	                                
+	                                    
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
+	             
+ 
 #endif
 
 var function OnWeaponPrimaryAttack_weapon_zipline( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -91,14 +89,14 @@ var function OnWeaponPrimaryAttack_weapon_zipline( entity weapon, WeaponPrimaryA
 		return 0
 	}
 
-	#if(false)
-
-
-//
-
-
-
-#endif
+	#if SERVER
+		                                              
+		 
+			                                                                        
+			                  
+			        
+		 
+	#endif
 
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
 	entity weaponOwner = weapon.GetWeaponOwner()
@@ -123,142 +121,149 @@ var function OnWeaponPrimaryAttack_weapon_zipline( entity weapon, WeaponPrimaryA
 
 		entity projectile = weapon.FireWeaponGrenade( fireGrenadeParams )
 
-		#if(false)
+		#if SERVER
+			                                         
+			                                       
+			                                            
+			                             
+			                                               
+			                                                      
 
-
-
-
-
-
-
-
-
-#else
+			                                                          
+			                                                                
+		#else
 			PlayerUsedOffhand( weaponOwner, weapon )
-		#endif //
+		#endif          
 
 	}
 
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
 }
 
-#if(false)
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                                                                                             
+ 
+	                                                                                                          
+
+	                                                                                
+	                                      
+
+	            
+		                                                                                       
+		 
+			                            
+			 
+				                                                                                        
+				                                                           
+				                                                                           
+				                                                                    
+				                                         
+				                    
+			 
+
+			                          
+			 
+				                                                                                      
+				                                                         
+				                                                                         
+				                                                                  
+				                                         
+				                  
+			 
+
+			                              
+			 
+				                      
+			 
+
+			                            
+			 
+				                    
+			 
+
+			                        
+			 
+				                          
+				 
+					                                                                        
+					                                            
+				 
+			 
+		 
+	 
+
+	                            
+	 
+		                                    
+	 
+
+	                          
+	 
+		                                  
+	 
+
+	                              
+	 
+		                                      
+	 
+
+	                            
+	 
+		                                    
+	 
+
+	                        
+
+	                           
+
+	             
+ 
+
+                                                                                                                                                           
+ 
+	                                    
+	                                     
+	                                      
+	                                                 
+
+	                                                
+	                                   
+	                                               
+	                                           
+	                                                                         
+	                                                                                         
+	                                                                                   
+	                                     
+	                                                                                                            
+	                                          
+	                                                  
+
+	                                                                    
+
+	                                      
+	                       
+		                               
+
+	                                                  
+	                                 
+	                                             
+	                                                                       
+	                                                                                                    
+	                                                                
+
+	                                      
+	                              
+
+	                              
+	                            
+
+	                                                                                                    
+	 
+		                                                           
+	 
+
+	                                                                                     
+ 
 
 #endif
 
@@ -272,91 +277,84 @@ bool function CanTetherEntities( entity startEnt, entity endEnt )
 }
 
 
-void function OnProjectileCollision_weapon_zipline( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_weapon_zipline( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical, bool isPassthrough )
 {
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+	#if SERVER
+		                                               
+		             
+
+		                                    
+		                       
+		 
+			                       
+			 
+				                               
+				 
+					                                             
+					                        
+					 
+						                                                     
+						                                   
+						 
+							                                       
+							                                                  
+							                                          
+							 
+								                                                                                                                                                                                 
+								                  
+								 
+									                                                                     
+									                                                                     
+
+									                                  
+									                                                                                                                   
+									                                     
+									                                                
+									                                                                      
+									                                                                                                                       
+									                                                                                                                                                                  
+									                                          
+									 
+										                                                          
+										                                                                 
+									 
+									                               
+
+									                                         
+								 
+							 
+						 
+					 
+				 
+			 
+		 
+
+		                                          
+		 
+			                        
+			 
+				                                                                         
+			 
+
+			                                                      
+			 
+				                          
+				 
+					                  
+				 
+			 
+		 
+
+		                        
+		 
+			                                      
+		 
+		                    
+	#endif
 }
 
 
-void function OnWeaponReadyToFire_weapon_zipline( entity weapon )
-{
-	#if(false)
-
-#endif
-}
-
-#if(CLIENT)
+#if CLIENT
 void function OnCreateClientOnlyModel_weapon_zipline( entity weapon, entity model, bool validHighlight )
 {
 	if ( validHighlight )
@@ -370,65 +368,78 @@ void function OnCreateClientOnlyModel_weapon_zipline( entity weapon, entity mode
 }
 #endif
 
-#if(false)
+#if SERVER
+                                                                 
+ 
+	                                                               
 
+	                                                                                                           
+	                                            
+	                                       
+		                               
+	                                       
+	                          
+		      
+	                                                                                 
+		      
 
-//
+	                                              
+	                               
+		      
 
-//
-//
+	                                         
+		      
 
+	                                                      
+		      
 
+	                                                 
+		      
 
+	                                                         
+	                                                                                   
+	                                                                                   
+	                                                                                                             
+	                                                                     
+	 
+		                      
+		      
+	 
 
+	                                  
+	                                               
+	                                                     
+	                                                                                                                    
+	                                                               
+	                                                              
+	                                                                              
+	                                                                                     
 
+	                                   
+	                                         
+	                                                                                                                                                                
+ 
 
+                                                                                                                     
+ 
+	                                                         
+	                                                       
+	 
+		                                                    
+		                                                        
+	 
 
+	                                                 
+	                                                                 
+	                                               
 
+	                                    
+	                                                          
 
+	            
+ 
 
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-#endif
+#endif          
 
 void function OnWeaponRaise_weapon_zipline( entity weapon )
 {

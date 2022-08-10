@@ -3,60 +3,64 @@ untyped
 global function UIVars_Init
 
 global function GetUIVar
-#if(false)
-
+#if SERVER
+	                        
 #endif
 
-global function ServerCallback_SetUIVar
+global function UICallback_SetUIVar
 global function RegisterUIVarChangeCallback
 
-#if(false)
-
-#endif
-
 table _uiVars = {}
-table _uiEntityVars = {}
-table _uiVarHandles = {}
-int _nextUIVarIndex = 0
+table<string, void functionref(string, var)> _uiVarsSetters = {}
 table _uiVarChangeCallbacks = {}
+
+#if SERVER
+                                                      
+ 
+	                                                          
+ 
+
+                                                      
+ 
+	                                                         
+ 
+#endif
 
 void function UIVars_Init()
 {
-	RegisterUIVar( "gameStartTime", null )
-	RegisterUIVar( "gameStartTimerComplete", false )
-	RegisterUIVar( "nextMapModeSet", false )
-	RegisterUIVar( "nextMapIdx", -1 )
-	RegisterUIVar( "nextModeIdx", -1 )
-	RegisterUIVar( "disableDev", null )
-	RegisterUIVar( "badRepPresent", false )
-	RegisterUIVar( "privatematch_map", 0 )
-	RegisterUIVar( "privatematch_mode", 0 )
-	RegisterUIVar( "privatematch_starting", 0 )
-	RegisterUIVar( "coopLobbyMap", null ) //
-	RegisterUIVar( "createamatch_isPrivate", false )
-	RegisterUIVar( "penalizeDisconnect", true )
-	RegisterUIVar( "rankedPenalizeDisconnect", false )
-	RegisterUIVar( "gameState", -1 )
-	RegisterUIVar( "forceLoadoutEnabled", false )
-	RegisterUIVar( "survivorTitanfallTime", 0 )
-	RegisterUIVar( "putPlayerInMatchmakingAfterDelay", false )
+	                                               
+	                                                                                                
+	                                                                                              
+	                                                                 
+
+	RegisterUIVarTime( "uiGameStartTime", -1.0 )
+	RegisterUIVarBool( "uiDisableDev", true )
+}
+
+void function RegisterUIVarTime(string varName, float value)
+{
+	RegisterUIVar(varName, value)
+
+#if SERVER
+	                                            
+#endif
+}
+
+void function RegisterUIVarBool(string varName, bool value)
+{
+	RegisterUIVar(varName, value)
+
+#if SERVER
+	                                            
+#endif
 }
 
 void function RegisterUIVar( string varName, value )
 {
-	Assert( !(varName in _uiVars ) )
-
-	if ( IsServer() )
-		_uiVarHandles[varName] <- _nextUIVarIndex
-	else
-		_uiVarHandles[_nextUIVarIndex] <- varName
-
-	_nextUIVarIndex++
-
 	_uiVars[varName] <- value
 }
 
-//
+                           
 function GetUIVar( obj, string varName )
 {
 	Assert( varName in _uiVars )
@@ -64,44 +68,28 @@ function GetUIVar( obj, string varName )
 	return _uiVars[varName]
 }
 
-#if(false)
-//
+#if SERVER
+                           
+                                                                      
+ 
+	                            
+	                                   
+	                                  
 
+	                        
+	                                       
 
+	                                    
+	                                       
+ 
+#endif          
 
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-#endif //
-
-function ServerCallback_SetUIVar( varHandle, value )
+                        
+function UICallback_SetUIVar( string varName, value )
 {
-	local varName = _uiVarHandles[varHandle]
-
 	_uiVars[varName] = value
 
-	if ( !(varName in _uiVarChangeCallbacks) )
-		return
-
-	foreach ( callbackFunc in _uiVarChangeCallbacks[varName] )
-		callbackFunc()
+	UIVarChangedCallbacks(varName)
 }
 
 void function RegisterUIVarChangeCallback( string varName, callbackFunc )
@@ -114,20 +102,10 @@ void function RegisterUIVarChangeCallback( string varName, callbackFunc )
 
 void function UIVarChangedCallbacks( string varName )
 {
-	//
+	                                    
 	if ( !( varName in _uiVarChangeCallbacks ) )
 		return
 
 	foreach ( callbackFunc in _uiVarChangeCallbacks[varName] )
 		callbackFunc()
 }
-
-#if(false)
-
-
-
-
-
-
-
-#endif

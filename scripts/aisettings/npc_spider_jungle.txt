@@ -1,0 +1,193 @@
+npc_spider_jungle
+{
+	BaseClass						npc_spider_ranged
+	AIClass							spider_ranged
+	BehaviorSelector				"behavior_spider_jungle"
+
+	title							#NPC_SPIDER
+	ui_targetinfo					"ui/targetinfo_npc_simple"  // what is this?
+
+	HullType						"HULL_SMALL"
+	orientToGround					1
+	//useSequenceBounds		        1                           // what is this? copied from prowler
+	collideWithPlayer		        0
+
+	BodyType						spider_ranged
+	mechanical						0
+    creature						1
+	ArmorType						normal
+
+	TraverseAnimType				frag_drone                  // What is this? what are the options?
+	allowCrouchAnims		        0
+
+	footstep_type					"SpdrJungle"
+
+	health							18
+
+	smart                           0
+
+	DefaultModelName				"mdl/creatures/spider/spider_jungle.rmdl"
+	GibModel0						"mdl/gibs/human_gibs.rmdl"  // replace?
+
+	meleeable				        1
+	meleeImpactEffectTable			"melee_prowler"             // replace?
+
+	DefaultWeapon					"npc_weapon_spider_jungle"
+	//WeaponCapacity				"PilotMainWeapons"          // what is this?
+	WeaponCapacity				    "Locked"                    // what is this?
+
+	// ---
+    //                                          PLAYER AIM ASSIST / TARGET
+    // ---
+
+	smartAmmoLockAttachmentName0	CHESTFOCUS                  // remove?
+
+	aimassist_bounds_override		            25
+    aimassist_adspull_centerAttachmentName		"aimassist_center"
+    aimassist_adspull_centerRadius				6.0
+    aimassist_adspull_headshotAttachmentName	""
+    aimassist_adspull_headshotRadius			0.0
+
+	// ---
+    //                                          BEHAVIOR
+    // ---
+
+	aiEnemy_usePriorityDist			2000
+	aiEnemy_immediateThreatDist		200
+    aiEnemy_currentBonusDist		500
+	aiEnemy_ignoreDownedPlayerTime	100.0
+	aiEnemy_useDamageAggroRules     1
+	ignoreMaxEnemyDistIfWithinAssaultRadius 1
+
+	allowPatrol						1           // this wander or something else?
+	allowFlee				        0
+	allowInvestigate				1           // assuming sound based search?
+
+	canOpenDoors			        0           // does this work?
+
+	tauntInterval			        10
+
+	// ---
+    //                                          MOVEMENT
+    // ---
+
+	traverseCostFactor		        0.1
+
+	leechMaxDist					0           // what is this?
+
+	MinStartMoveDist				32         // what is this?
+	MaxArrivalDist					64         // what is this?
+	MinForceWalkDist				0           // what is this?
+	moveDeflectionLookAheadTime		0.5         // what is this?
+
+	navNearbyReachableMins			"-100 -100 -250"
+	navNearbyReachableMaxs			"100 100 90"
+
+	faceEnemyWhileMovingDist		1000
+	faceEnemyToleranceAngle		    60
+	faceEnemyStrictToleranceAngle	40
+
+	moveYawSpeed					60          // what is this?
+
+	chaseStopDist					48			// meleeRange/meleeChargeRange should be greater than chaseStopDist
+    chaseStopDistHeavyArmor			192
+
+    patrolRangeMin			        200
+    patrolRangeMax			        400
+
+	repositionDistBias 				0.0 //range -1.0 to 1.0 ( 1.0 further -1.0 closer, bias's random towards this number )
+	engagementRangeBias				0.5 //range 0.0 to 1.0 ( just what range between min attack and max attack range to try to position not random)
+
+	// ---
+    //                                          DODGING
+    // ---
+
+	enemyAimAtMeWidth				        20
+	chaseTryRunningDodgeWhenAimedAtMinDist	250  // Should be > MeleeChargeRange so that chargeMelee is prioritized over dodging
+	dodgePeriod 					        5	 // Don't dodge more than maxDodgePerPeriod within this time
+	maxDodgePerPeriod				        1	 // Don't dodge more than this many times in dodgePeriod
+	minAvoidDangerousAreasTime				5	 // Don't move out of dangerous areas more again for at least this many seconds
+
+	// ---
+    //                                          AIMING AND FIRING
+    // ---
+
+	AimAngularSpeed                 20          // what's this?
+
+	aimingPrecisionMin              0.5
+    aimingPrecisionMax              1
+    aimingPrecisionIncreaseRate     0.08
+    aimingPrecisionDecreaseRate     0.125
+
+	waitBetweenWeaponBurst			0
+
+	tauntInterval		            5
+	minDelaySinceLastAttack         0
+
+	// ---
+    //                                          MELEE AND CHARGING
+    // ---
+
+	// can we charge melee if we have too many Spiders shooting? through tickets/tokens
+
+	meleeInterval					1           // "0" allows back to back melee attacks
+	meleeRange						64
+	meleeDamageMin					12
+	meleeDamageMax					12
+	meleeDamageMinHeavyArmor	    12
+    meleeDamageMaxHeavyArmor	    12
+	meleeDamageRadius				32
+
+	meleeChargeInterval				3			// "0" allows back to back melee attacks
+	meleeChargeRange				192
+	meleeChargeRequiresStrictFacing	1
+	meleeChargeDamageMin			12
+	meleeChargeDamageMax			12
+	meleeChargeDamageMinHeavyArmor	12
+	meleeChargeDamageMaxHeavyArmor	12
+	meleeChargeDamageRadius			32
+
+	MeleeDamageForce				2000
+	MeleeChargeDamageForce 			2000
+
+	meleeEnemyArmorType				any
+	meleeChargeEnemyArmorType		any
+
+	meleeNumberOfFailedDodgesToUseAlternateDisengage    2
+	shootAtEnergyBarriers           1
+
+	// ---
+	//                                          PERCEPTION
+	// ---
+
+	// we have no way to control hearing.. all based on ent sound emission and if our AI falls within the range emitted by the source
+	// do we want to create a hearing dampener? that reduces radius checks by percentage? i.e.: 0.5 means the AI would have to be at least half as close the source
+
+	LookDistDefault_Idle			2000
+	LookDistDefault_Alert			2000
+	LookDistDefault_Combat			2000
+
+	FOV_Idle_Near_Horz				360
+	FOV_Idle_Near_Vert				180
+	FOV_Idle_Far_Horz				360
+	FOV_Idle_Far_Vert				180
+
+	FOV_Alert_Near_Horz				360
+	FOV_Alert_Near_Vert				180
+	FOV_Alert_Far_Horz				360
+	FOV_Alert_Far_Vert				180
+
+	FOV_Combat_Near_Horz			360
+	FOV_Combat_Near_Vert			180
+	FOV_Combat_Far_Horz				360
+	FOV_Combat_Far_Vert				180
+
+	// ---
+	//                                           MISCELLANEOUS
+	// ---
+
+    allowSignals			        1
+
+	shootableByFriendlyPlayer		0           // what is this?
+	showFriendlyIcon				1           // what is this?
+}

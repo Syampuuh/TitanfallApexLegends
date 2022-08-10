@@ -61,6 +61,70 @@ resource/ui/menus/social.menu
             pin_to_sibling_corner	BOTTOM
         }
 
+		TabsCommon
+		{
+			ControlName				CNestedPanel
+			classname				"TabsCommonClass"
+			ypos                    -132
+			zpos					1
+			wide					f0
+			tall					44
+			visible					1
+			controlSettingsFile		"resource/ui/menus/panels/tabs_social.res"
+
+			pin_to_sibling			ScreenFrame
+			pin_corner_to_sibling	TOP
+			pin_to_sibling_corner	TOP
+		}
+
+	    FriendsPanel
+	    {
+		    ControlName				CNestedPanel
+		    classname				"TabPanelClass"
+			wide					1728
+			tall					820
+			tall_nx_handheld		845    [$NX || $NX_UI_PC]
+		    visible					0
+		    tabPosition             1
+		    controlSettingsFile		"resource/ui/menus/panels/friend_list_panel.res"
+
+			pin_to_sibling			TabsCommon
+			pin_corner_to_sibling	TOP
+			pin_to_sibling_corner	BOTTOM
+	    }
+
+	    FriendsOtherPanel
+	    {
+		    ControlName				CNestedPanel
+		    classname				"TabPanelClass"
+			wide					1728
+			tall					820
+			tall_nx_handheld		845    [$NX || $NX_UI_PC]
+		    visible					0
+		    tabPosition             1
+		    controlSettingsFile		"resource/ui/menus/panels/friend_list_panel.res"
+
+			pin_to_sibling			TabsCommon
+			pin_corner_to_sibling	TOP
+			pin_to_sibling_corner	BOTTOM
+	    }
+
+	    FriendRequestsPanel
+	    {
+		    ControlName				CNestedPanel
+		    classname				"TabPanelClass"
+			wide					1728
+			tall					820
+			tall_nx_handheld		845    [$NX || $NX_UI_PC]
+		    visible					0
+		    tabPosition             1
+		    controlSettingsFile		"resource/ui/menus/panels/friend_list_panel.res"
+
+			pin_to_sibling			TabsCommon
+			pin_corner_to_sibling	TOP
+			pin_to_sibling_corner	BOTTOM
+	    }
+
         MenuHeader
         {
             ControlName				RuiPanel
@@ -100,6 +164,7 @@ resource/ui/menus/social.menu
             ypos					0
             wide					1800
             tall					660
+            tall_nx_handheld		750		[$NX || $NX_UI_PC]
             labelText				""
             visible				    0
             bgcolor_override        "255 255 0 100"
@@ -114,9 +179,11 @@ resource/ui/menus/social.menu
 		{
             ControlName			    RuiButton
             InheritProperties	    FriendGridButton
+			wide_nx_handheld        500         [$NX || $NX_UI_PC]
+            tall_nx_handheld        120         [$NX || $NX_UI_PC]
             visible			        1
             tabPosition             1
-
+            xpos_nx_handheld        25			[$NX || $NX_UI_PC]
             navDown                 PartyPrivacyButton
             navRight                GridButton0x0
 
@@ -130,7 +197,9 @@ resource/ui/menus/social.menu
             ControlName             RuiButton
             classname               "MenuButton"
             wide                    400
+            wide_nx_handheld        500         [$NX || $NX_UI_PC]
             tall                    80
+            tall_nx_handheld        120         [$NX || $NX_UI_PC]
             xpos                    0
             ypos                    16
             rui                     "ui/generic_left_icon_button.rpak"
@@ -150,8 +219,10 @@ resource/ui/menus/social.menu
         {
             ControlName             RuiButton
             classname               "MenuButton"
-            wide                    400
-            tall                    80
+			wide					400
+			wide_nx_handheld		500			[$NX || $NX_UI_PC]
+			tall					80
+			tall_nx_handheld		120			[$NX || $NX_UI_PC]
             ypos                    16
             rui                     "ui/generic_left_icon_button.rpak"
             labelText               ""
@@ -171,8 +242,10 @@ resource/ui/menus/social.menu
         {
             ControlName             RuiButton
             classname               "MenuButton"
-            wide                    400
+            wide                    400        
+            wide_nx_handheld        500        [$NX || $NX_UI_PC]
             tall                    80
+            tall_nx_handheld        120        [$NX || $NX_UI_PC]
             ypos                    16
             rui                     "ui/generic_left_icon_button.rpak"
             labelText               ""
@@ -180,7 +253,7 @@ resource/ui/menus/social.menu
             cursorVelocityModifier  0.7
 
             navUp                   LeavePartyButton
-            navDown                 SteamLink [!$GAMECONSOLE]
+            navDown                 CrossplayDenyButton
             navRight                GridButton3x0
 
             pin_to_sibling          LeavePartyButton
@@ -188,20 +261,26 @@ resource/ui/menus/social.menu
             pin_to_sibling_corner   BOTTOM_RIGHT
         }
 
-        AddFriendButton
+        CrossplayDenyButton
         {
             ControlName             RuiButton
             classname               "MenuButton"
-            wide                    400
-            tall                    80
-            ypos                    0//96//16
+			wide					400
+			wide_nx_handheld		500			[$NX || $NX_UI_PC]
+			tall					80
+			tall_nx_handheld		120			[$NX || $NX_UI_PC]
+            ypos                    16
             rui                     "ui/generic_left_icon_button.rpak"
             labelText               ""
-            visible                 0
+            visible                 1
             cursorVelocityModifier  0.7
 
-            pin_to_sibling			PanelFrame
-            pin_corner_to_sibling	BOTTOM_LEFT
+            navUp                   LastSquadInvitePrivacyButton
+            navDown                 SteamLink [!$GAMECONSOLE]
+            navRight                GridButton4x0
+
+            pin_to_sibling			LastSquadInvitePrivacyButton
+            pin_corner_to_sibling	TOP_LEFT
             pin_to_sibling_corner	BOTTOM_LEFT
         }
 
@@ -210,18 +289,20 @@ resource/ui/menus/social.menu
             ControlName				RuiButton
             classname               "MenuButton"
             ypos					16
-            wide					400
-            tall					80
+			wide					400
+			wide_nx_handheld		500			[$NX || $NX_UI_PC]
+			tall					80
+			tall_nx_handheld		120			[$NX || $NX_UI_PC]
             visible					1
 
             navUp                   LeavePartyButton
-            navRight                GridButton5x0
+            navRight                GridButton6x0
 
             rui                     "ui/generic_left_icon_button.rpak"
 
-            pin_to_sibling			AddFriendButton
+            pin_to_sibling			PanelFrame
             pin_corner_to_sibling	BOTTOM_LEFT
-            pin_to_sibling_corner	TOP_LEFT
+            pin_to_sibling_corner	BOTTOM_LEFT
         }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,9 +313,17 @@ resource/ui/menus/social.menu
             ControlName				RuiPanel
             rui                     "ui/basic_image.rpak"
             xpos					48
-            wide					1
+            xpos_nx_handheld		18			[$NX || $NX_UI_PC]
+            wide					2
+            wide_nx_handheld		8			[$NX || $NX_UI_PC]
             tall					660
-            visible					1
+            tall_nx_handheld        720			[$NX || $NX_UI_PC]
+            visible					2
+
+            ruiArgs
+            {
+				basicImageColor     "0.2 0.2 0.2"
+            }
 
             pin_to_sibling			FriendGrid
             pin_corner_to_sibling	RIGHT
@@ -246,7 +335,9 @@ resource/ui/menus/social.menu
             ControlName				RuiPanel
             rui                     "ui/grid_spinner.rpak"
             wide                    1300
+            wide_nx_handheld        1230		[$NX || $NX_UI_PC]
             tall                    660
+            tall_nx_handheld        720			[$NX || $NX_UI_PC]
             visible					1
 
             pin_to_sibling			FriendGrid
@@ -258,7 +349,9 @@ resource/ui/menus/social.menu
         {
             ControlName				CNestedPanel
             wide                    1300
+            wide_nx_handheld        1230		[$NX || $NX_UI_PC]
             tall                    660
+            tall_nx_handheld        720			[$NX || $NX_UI_PC]
             visible					1
 
 			controlSettingsFile		"resource/ui/menus/panels/friend_list_grid.res"
@@ -266,6 +359,20 @@ resource/ui/menus/social.menu
             pin_to_sibling          PanelFrame
             pin_corner_to_sibling   TOP_RIGHT
             pin_to_sibling_corner   TOP_RIGHT
+        }
+
+        DiscoverabilityWarning
+        {
+            ControlName				RuiPanel
+            ypos					16
+            wide					850
+            tall					48
+            visible				    1
+            rui                     "ui/friend_discoverability_warning.rpak"
+
+            pin_to_sibling			FriendGrid
+            pin_corner_to_sibling	TOP_LEFT
+            pin_to_sibling_corner	BOTTOM_LEFT
         }
 
         PageButton7

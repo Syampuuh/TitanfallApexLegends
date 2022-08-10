@@ -3,6 +3,10 @@
 #base "_base_projectile_ricochet.txt"
 #base "_base_character_mods.txt"
 
+#base "ap_settings/_ap_weapon_base.txt"
+#base "ap_settings/_ap_weapon_range_short.txt"
+#base "ap_settings/_ap_weapon_pattern_auto.txt"
+
 WeaponData
 {
     MP_BASE
@@ -18,9 +22,10 @@ WeaponData
     }
 
     // General
-    "weaponClass" 									"human"
+	"weapon_type_flags"								"WPT_PRIMARY"
 	"body_type"										"light"
 	"holster_type"									"rifle"
+	"thirdperson_fire_from_mount_point"				"1"
 
 	"pickup_hold_prompt"  							"Hold [USE] [WEAPONNAME]"
 	"pickup_press_prompt" 							"[USE] [WEAPONNAME]"
@@ -48,6 +53,7 @@ WeaponData
 	"ammo_suck_behavior"							"primary_weapons"
 	"allow_empty_click"                        		"1"
 	"empty_reload_only"                        		"0"
+	"secondary_ammo_pool_type"                      ""
 
 	// Rumble
 	"fire_rumble"									"rumble_smg"
@@ -110,16 +116,21 @@ WeaponData
     // Script - Callbacks
     "OnWeaponActivate"								"OnWeaponActivate_weapon_basic_bolt"
     "OnClientAnimEvent"								"OnClientAnimEvent_weapon_basic_bolt"
-    "OnWeaponPrimaryAttack"							"OnWeaponPrimaryAttack_weapon_basic_bolt"
-    "OnWeaponNpcPrimaryAttack"						"OnWeaponNpcPrimaryAttack_weapon_basic_bolt"
-    "OnProjectileCollision"							"OnProjectileCollision_weapon_basic_bolt"
 
     // Crosshair Spread
-	"spread_stand_hip"								"2.5"
-	"spread_stand_hip_run"							"3.5"
-	"spread_stand_hip_sprint"                       "3.5"
-	"spread_crouch_hip"   							"2.0"
-	"spread_air_hip"  								"4.0"
+                         
+    "spread_stand_hip"								"2.0"
+    "spread_stand_hip_run"							"3.0"
+    "spread_stand_hip_sprint"                       "5.0"
+    "spread_crouch_hip"   							"1.6"
+    "spread_air_hip"  								"7.0"
+     
+                                   
+                                      
+                                                         
+                                      
+                                   
+      
 
 	"spread_stand_ads"								"0.35"
 	"spread_crouch_ads"   							"0.25"
@@ -133,17 +144,17 @@ WeaponData
 	"spread_decay_delay"  							"0.15"
 	"spread_decay_rate"   							"12"
 
-	"spread_kick_on_fire_stand_hip"   				"0.15"
-	"spread_kick_on_fire_crouch_hip"  				"0.15"
-	"spread_kick_on_fire_air_hip" 					"0.2"
+   "spread_kick_on_fire_stand_hip"   				"0.18"
+   "spread_kick_on_fire_crouch_hip"  				"0.18"
+   "spread_kick_on_fire_air_hip" 					"0.18"
+
+   "spread_max_kick_stand_hip"   					"2.0"
+   "spread_max_kick_crouch_hip"  					"1.5"
+   "spread_max_kick_air_hip" 						"3.0"
 
 	"spread_kick_on_fire_stand_ads"   				"0.0"
 	"spread_kick_on_fire_crouch_ads"  				"0.0"
 	"spread_kick_on_fire_air_ads" 					"0.0"
-
-	"spread_max_kick_stand_hip"   					"2.0"
-    "spread_max_kick_crouch_hip"  					"2.0"
-    "spread_max_kick_air_hip" 						"2.0"
 
 	"spread_max_kick_stand_ads"   					"0.0"
 	"spread_max_kick_crouch_ads"  					"0.0"
@@ -151,7 +162,8 @@ WeaponData
 
 	// Projectile - General
     "projectilemodel" 								"mdl/dev/empty_model.rmdl"
-    "projectile_trail_effect_0" 					"P_tracer_projectile_smg"
+    "projectile_trail_effect_0_1p" 					"P_tracer_projectile_smg"
+    "projectile_trail_effect_0_3p" 					"P_tracer_projectile_smg"
     "projectile_do_predict_impact_effects"          "1"
     "projectile_lifetime" 							"3.0"
 
@@ -246,8 +258,8 @@ WeaponData
 	"sway_rotate_attach_blend_time_zoomed"			"0.2"
 	"sway_rotate_gain_zoomed"						"5"
 
-	"sway_min_yaw_zoomed"							"-0.04"
-	"sway_max_yaw_zoomed"							"0.04"
+	"sway_min_yaw_zoomed"							"-0.03"
+	"sway_max_yaw_zoomed"							"0.03"
 	"sway_turn_left_rotate_yaw_zoomed"				"-0.085"
 	"sway_turn_right_rotate_yaw_zoomed"				"0.085"
 
@@ -259,8 +271,8 @@ WeaponData
 	"sway_move_right_rotate_roll_zoomed" 			"0.2"
 	"sway_move_left_rotate_roll_zoomed"  			"-0.2"
 
-	"sway_min_pitch_zoomed"  						"-0.03"
-	"sway_max_pitch_zoomed"  						"0.04"
+	"sway_min_pitch_zoomed"  						"-0.015"
+	"sway_max_pitch_zoomed"  						"0.025"
 	"sway_turn_up_rotate_pitch_zoomed"				"0.07"
 	"sway_turn_down_rotate_pitch_zoomed"			"-0.07"
 
@@ -277,4 +289,32 @@ WeaponData
 	"viewdrift_ads_crouch_scale_yaw"			"0.25"
 	"viewdrift_ads_air_scale_pitch"   			"0.55"
 	"viewdrift_ads_air_scale_yaw" 				"0.7"
+
+	"trophy_system_ignores"                          "always"
+
+	Mods
+	{
+        elevator_shooter
+        {
+           "viewkick_air_scale_ads"						"1.0"
+
+           "spread_air_hip"  								"*0.3"
+
+           "spread_kick_on_fire_air_hip" 					"0.18"
+
+           "spread_max_kick_air_hip" 		   				"2.0"
+
+           "spread_air_ads"  								"0.35"
+
+           "spread_kick_on_fire_air_ads" 					"0"
+
+           "spread_max_kick_air_ads" 						"0"
+
+            "viewdrift_ads_air_scale_pitch"   			"0.55"
+            "viewdrift_ads_air_scale_yaw" 				"0.7"
+
+            "viewdrift_hipfire_air_scale_pitch"	            "0.0"
+            "viewdrift_hipfire_air_scale_yaw"               "0.0"
+        }
+    }
 }

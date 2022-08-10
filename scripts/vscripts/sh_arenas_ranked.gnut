@@ -1,0 +1,3442 @@
+global function Sh_ArenasRanked_Init
+global function Sh_ArenasRanked_ItemRegistrationInit
+
+global function GetCurrentArenasRankedDivisionFromScoreAndLadderPosition
+global function GetCurrentArenasRankedDivisionFromScore
+global function GetNextArenasRankedDivisionFromScore
+global function GetPlayerArenasRankScore
+global function IsArenasRankedPersistenceValid
+global function IsArenasRankedInSeason
+global function GetArenasRankedPersistenceData
+
+global function ArenasRanked_GetTiers
+global function ArenasRanked_GetRankedDivisionDataForTier
+global function ArenasRanked_GetNextTierData
+global function ArenasRanked_GetLadderPosition
+
+global function ArenasRanked_GetHistoricalRankScore
+global function ArenasRanked_GetHistoricalFirstSplitRankScore
+global function ArenasRanked_GetHistoricalRankedDivisionFromScore
+global function ArenasRanked_GetHistoricalLadderPosition
+global function ArenasRanked_GetHistoricalLadderOnlyDivision
+
+global function ArenasRanked_PeriodHasLadderOnlyDivision
+
+global function ArenasRanked_UpdateEHIRankScore
+global function ArenasRanked_UpdateEHIRankedLadderPosition
+global function ArenasRanked_GetNumPlayersOnLadder
+global function ArenasRanked_GetStryderLadderNameForLatestRankedPeriod                                                                            
+
+global function ArenasRanked_GetTierOfThresholdForRankedPartyDifferences
+
+#if CLIENT || UI
+global function PopulateRuiWithArenasRankedBadgeDetails
+global function CreateNestedArenasRankedRui
+#endif
+
+#if SERVER || CLIENT
+global function IsArenasRankedGame
+global function ArenasRanked_IsPlayerAbandoning
+global function ArenasRanked_DidPlayerEverHaveAFullTeam
+#endif
+
+#if SERVER
+                                             
+                                                                                                                                                                       
+                                                                  
+                                                                   
+                                                                 
+                                                                  
+                                                   
+                                                       
+                                             
+                                        
+  
+                                                       	                                                                  
+  
+#endif
+
+global function ArenasRanked_GetNumPlacementMatchesRequired
+global function ArenasRanked_GetNumPlacementMatchesCompleted
+global function ArenasRanked_HasFinishedPlacementMatches
+
+#if SERVER && DEV
+                                          
+
+                                     
+                                       
+                                              
+                                            
+  
+                                                       
+                                                            
+                                                                 
+  
+                                                                    
+                                              
+#endif
+
+#if CLIENT
+global function ShArenasRanked_RegisterNetworkFunctions
+#endif
+
+#if UI
+global function IsArenasRankedPlaylist
+global function IsLastPlaylistArenasMode
+global function ArenasRanked_SetupMenuGladCardForUIPlayer
+global function ArenasRanked_SetupMenuGladCardFromCommunityUserInfo		                                                                       
+global function ArenasRanked_ManageDialogFlow
+global function ArenasRanked_ShouldUpdateWithComnunityUserInfo
+global function ArenasRanked_PartyMeetsRankedDifferenceRequirements
+global function ArenasRanked_HasBeenInitialized
+global function ServerToUI_ArenasRanked_NotifyRankedPeriodScoreChanged
+global function ArenasRanked_ConstructSingleRankBadgeForStatsCard
+global function ArenasRanked_ConstructDoubleRankBadgeForStatsCard
+global function ArenasRanked_IsShowingMatchSummary
+#endif
+
+const ARENAS_RANKED_SEASON_10_GUIDSTRING = "SAID00926519318"
+
+global const int ARENAS_RANKED_MIN_SCORE = 1                         
+global const int ARENAS_RANKED_PLACEMENT_SCORE = 0
+global const int ARENAS_RANKED_NUM_PLACEMENT_MATCHES = 10
+global const int ARENAS_RANKED_SPLIT_NUM_PLACEMENT_MATCHES = 5
+
+const int ARENAS_RANKED_ABANDON_AP_LOSS = 15
+
+const string ARENAS_RANKED_RECHECK_SEASONS_STARTING_WITH = "SAID00781342567"                                                                   
+
+global struct ArenasRankedPostGameScoringStruct
+{
+	bool wasAbandoned
+	bool lossForgiveness
+	int  kills
+	int  damage
+	int  placement
+	int  placementScore
+	int  penaltyPointsForAbandoning
+	int  tierDerankingProtectionAdjustment
+	int  lossProtectionAdjustment
+	int  currentScore
+	int  previousScore
+}
+
+struct ArenasRankedResetStruct
+{
+	string previousDivisionName
+	string currentDivisionName
+}
+
+struct
+{
+	bool                                               initialized = false
+	bool                                               itemRegistrationInitialized = false
+	array<SharedRankedTierData>                        rankedTiers
+	array<SharedRankedDivisionData>                    rankedDivisions
+	SharedRankedDivisionData ornull                    ladderOnlyDivision = null
+	int                                                numPlayersOnLadder = 0
+	table<string, int >                                historicalNumPlayersOnLadder
+	table<string, SharedRankedDivisionData >           historicalLadderOnlyDivision
+	table< string, array < SharedRankedTierData > >    historicalRankedTiers
+	table< string, array< SharedRankedDivisionData > > historicalRankedDivisions
+
+	SharedRankedDivisionData& topRankedDivisionData
+
+	table<string, string > stryderLadderNameToPeriodGUIDStringTable
+
+
+	#if SERVER
+		                                                
+	#endif
+
+	#if SERVER
+		                                                          
+		                                                                                   
+		                                                                                   
+		                                                                                                 
+		                                                                                                   
+		                                                                                   
+		                                                                                     
+		                					                                      
+	#endif
+
+	#if UI
+		string              arenasRankedPeriodToAcknowledgeRewards
+		string              arenasRankedSplitResetAcknowledgePersistenceField
+		table<string, bool> arenasRankedPeriodsWithRewardsNotified
+	#endif
+
+} file
+
+void function Sh_ArenasRanked_Init()
+                                                                                                                                                                                                                         
+{
+	if ( !file.initialized )                                                                                         
+	{
+		RegisterSignal( "ArenasRanked_NotifyRankedPeriodScoreChanged" )                       
+		file.initialized = true
+	}
+
+	#if SERVER
+		                                              
+		                                                               
+		                                                                     
+		                                                                             
+
+		                                                                    
+		                                                                    
+		                                                                                      
+
+		                                                         
+
+		       
+			                                                     
+		             
+
+		                
+		 
+			                                                                                 
+			                                                                                                                 
+			 
+				                                                                  
+				                                                                                                                                                                                        
+					        
+
+				                                                            
+					        
+
+				                                                                                  
+			 
+		 
+
+	#endif
+
+	#if SERVER || CLIENT
+
+		Remote_RegisterServerFunction( "ClientCallback_ArenasRankedPeriodRewardAcknowledged", "string" )
+		Remote_RegisterServerFunction( "ClientCallback_ArenasRankedSplitResetAcknowledged" )
+		Remote_RegisterServerFunction( "ClientCallback_ArenasRankedCurrentPeriodAPAdjusted" )
+
+		Remote_RegisterUIFunction( "ServerToUI_ArenasRanked_NotifyRankedPeriodScoreChanged" )                                                                                  
+
+		if ( !IsArenasRankedGame() )
+			return
+
+			#if SERVER
+			                                                                                                       
+			#endif
+
+                      
+		#if SERVER
+			                                                      
+			                                                                       
+		#endif              
+                                 
+
+	#if CLIENT
+		AddCallback_OnScoreboardCreated( OnScoreboardCreated )
+		AddCallback_OnGameStateChanged( OnGameStateChanged )
+
+		Obituary_SetHorizontalOffset( -25 )                                                           
+		AddOnSpectatorTargetChangedCallback( ArenasRanked_OnSpectateTargetChanged )
+	#endif
+
+#endif
+}
+
+
+void function Sh_ArenasRanked_ItemRegistrationInit()
+                                                                                                                                                        
+{
+	if ( !file.itemRegistrationInitialized )                                                                                          
+	{
+		AddCallback_OnItemFlavorRegistered( eItemType.calevent_arenas_ranked_period, OnArenasRankedRegistered )
+		AddCallbackOrMaybeCallNow_OnAllItemFlavorsRegistered( ArenasRanked_AllItemFlavorsRegistered )
+		file.itemRegistrationInitialized = true
+	}
+}
+
+
+void function OnArenasRankedRegistered( ItemFlavor calEventArenasRanked )
+{
+	array< SharedRankedTierData > tierData                                                                                 
+	array< SharedRankedDivisionData  > divisionData
+
+	foreach ( var tierBlock in IterateSettingsAssetArray( ItemFlavor_GetAsset( calEventArenasRanked ), "tiers" ) )
+	{
+		SharedRankedTierData tier
+		tier.name                  = GetSettingsBlockString( tierBlock, "name" )
+		tier.icon                  = GetSettingsBlockAsset( tierBlock, "icon" )
+		tier.bgImage               = GetSettingsBlockAsset( tierBlock, "bgImage" )
+		tier.levelUpRuiAsset       = GetSettingsBlockStringAsAsset( tierBlock, "levelUpRuiAsset" )
+		tier.iconRuiAsset          = GetSettingsBlockStringAsAsset( tierBlock, "iconRuiAsset" )
+		tier.promotionAnnouncement = string( GetSettingsBlockStringAsAsset( tierBlock, "promotionAnnouncement" ) )
+
+		tier.scoreMin = 99999999
+		foreach ( var divBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "divisions" ) ) )
+		{
+			SharedRankedDivisionData data
+			data.divisionName      = GetSettingsBlockString( divBlock, "name" )
+			data.emblemText        = GetSettingsBlockString( divBlock, "emblemText" )
+			data.scoreMin          = GetSettingsBlockInt( divBlock, "scoreMin" )
+			data.emblemDisplayMode = SharedRanked_GetEmblemDisplayModeFromEmblemText( data.emblemText )
+			data.tier              = tier
+
+			if ( data.scoreMin < tier.scoreMin )
+				tier.scoreMin = data.scoreMin
+
+			divisionData.append( data )
+		}
+
+		foreach ( var rewardBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "rewards" ) ) )
+		{
+			SharedRankedReward data
+			data.previewName        = GetSettingsBlockString( rewardBlock, "previewName" )
+			data.previewIcon        = GetSettingsBlockAsset( rewardBlock, "previewIcon" )
+			data.previewIconShowBox = GetSettingsBlockBool( rewardBlock, "previewIconShowBox" )
+			data.previewImage       = GetSettingsBlockAsset( rewardBlock, "previewImage" )
+			data.rewardAsset        = GetSettingsBlockAsset( rewardBlock, "flavor" )
+
+			tier.rewards.append( data )
+		}
+
+		tier.index = tierData.len()
+
+		tierData.append( tier )
+	}
+
+	divisionData.sort( SharedRanked_CompareDivision )
+	for ( int i = 0; i < divisionData.len(); i++ )
+	{
+		SharedRankedDivisionData data = divisionData[i]
+		data.index = i
+	}
+
+	int ladderOnlyTiers = 0
+
+	foreach ( var tierBlock in IterateSettingsAssetArray( ItemFlavor_GetAsset( calEventArenasRanked ), "ladderOnlyTier" ) )                                                                                     
+	{
+		Assert( ladderOnlyTiers == 0 )                                       
+		++ladderOnlyTiers
+
+		SharedRankedTierData ladderOnlyTier
+		ladderOnlyTier.name                  = GetSettingsBlockString( tierBlock, "name" )
+		ladderOnlyTier.icon                  = GetSettingsBlockAsset( tierBlock, "icon" )
+		ladderOnlyTier.bgImage               = GetSettingsBlockAsset( tierBlock, "bgImage" )
+		ladderOnlyTier.levelUpRuiAsset       = GetSettingsBlockStringAsAsset( tierBlock, "levelUpRuiAsset" )
+		ladderOnlyTier.iconRuiAsset          = GetSettingsBlockStringAsAsset( tierBlock, "iconRuiAsset" )
+		ladderOnlyTier.promotionAnnouncement = string( GetSettingsBlockStringAsAsset( tierBlock, "promotionAnnouncement" ) )
+		ladderOnlyTier.isLadderOnlyTier      = true
+		ladderOnlyTier.index                 = tierData.len()
+
+		int ladderOnlyDivisions = 0
+
+		string rpGUIDString = ItemFlavor_GetGUIDString( calEventArenasRanked )
+
+		foreach ( var divBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "divisions" ) ) )
+		{
+			Assert( ladderOnlyDivisions == 0 )                                        
+			++ladderOnlyDivisions
+
+			SharedRankedDivisionData data
+			data.divisionName         = GetSettingsBlockString( divBlock, "name" )
+			data.emblemText           = GetSettingsBlockString( divBlock, "emblemText" )
+			data.scoreMin             = GetSettingsBlockInt( divBlock, "scoreMin" )
+			data.emblemDisplayMode    = SharedRanked_GetEmblemDisplayModeFromEmblemText( data.emblemText )
+			Assert( data.emblemDisplayMode == emblemDisplayMode.DISPLAY_LADDER_POSITION )
+			data.tier                 = ladderOnlyTier
+			data.isLadderOnlyDivision = true
+			data.index                = divisionData.len()
+			ladderOnlyTier.scoreMin   = data.scoreMin
+
+			file.historicalNumPlayersOnLadder[ rpGUIDString ]  <- GetSettingsBlockInt( divBlock, "numPlayersOnLadder" )
+			file.historicalLadderOnlyDivision[ rpGUIDString  ] <- data
+		}
+
+		Assert( ladderOnlyDivisions == 1 )                                          
+
+		foreach ( var rewardBlock in IterateSettingsArray( GetSettingsBlockArray( tierBlock, "rewards" ) ) )
+		{
+			SharedRankedReward data
+			data.previewName        = GetSettingsBlockString( rewardBlock, "previewName" )
+			data.previewIcon        = GetSettingsBlockAsset( rewardBlock, "previewIcon" )
+			data.previewIconShowBox = GetSettingsBlockBool( rewardBlock, "previewIconShowBox" )
+			data.previewImage       = GetSettingsBlockAsset( rewardBlock, "previewImage" )
+			data.rewardAsset        = GetSettingsBlockAsset( rewardBlock, "flavor" )
+
+			ladderOnlyTier.rewards.append( data )
+		}
+	}
+
+	string rankedPeriodGUID = ItemFlavor_GetGUIDString( calEventArenasRanked )
+	file.historicalRankedTiers[ rankedPeriodGUID ] <- tierData
+	file.historicalRankedDivisions[ rankedPeriodGUID ] <- divisionData
+
+	if ( SharedRankedPeriod_HasSplits( calEventArenasRanked ) )
+	{
+		string stryderFirstSplitLadderName = ArenasRanked_GetStryderLadderNameForHistoricalRankedPeriod( calEventArenasRanked, true )
+		file.stryderLadderNameToPeriodGUIDStringTable[ stryderFirstSplitLadderName ] <- rankedPeriodGUID
+		string stryderSecondSplitLadderName = ArenasRanked_GetStryderLadderNameForHistoricalRankedPeriod( calEventArenasRanked, false )
+		file.stryderLadderNameToPeriodGUIDStringTable[ stryderSecondSplitLadderName ] <- rankedPeriodGUID
+	}
+	else
+	{
+		string stryderLadderName = ArenasRanked_GetStryderLadderNameForHistoricalRankedPeriod( calEventArenasRanked, false )
+		file.stryderLadderNameToPeriodGUIDStringTable[ stryderLadderName ] <- rankedPeriodGUID
+	}
+}
+
+
+void function ArenasRanked_AllItemFlavorsRegistered()
+{
+	string latestRankedPeriodGUID = ItemFlavor_GetGUIDString ( GetLatestRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_arenas_ranked_period ) )
+	file.rankedTiers     = file.historicalRankedTiers[ latestRankedPeriodGUID ]
+	file.rankedDivisions = file.historicalRankedDivisions[ latestRankedPeriodGUID ]
+
+	if ( latestRankedPeriodGUID in file.historicalLadderOnlyDivision )
+	{
+		file.ladderOnlyDivision    = file.historicalLadderOnlyDivision[ latestRankedPeriodGUID  ]
+		file.topRankedDivisionData = file.historicalLadderOnlyDivision[ latestRankedPeriodGUID  ]
+		file.numPlayersOnLadder    = file.historicalNumPlayersOnLadder[ latestRankedPeriodGUID ]
+	}
+	else
+	{
+		file.topRankedDivisionData = file.rankedDivisions.top()
+	}
+
+	array<ItemFlavor> rankedPeriods = GetAllRankedPeriodFlavorsByType( eItemType.calevent_arenas_ranked_period )
+	rankedPeriods.sort( CompareRankedPeriodStartTime )
+}
+
+
+int function ArenasRanked_GetNumPlayersOnLadder()
+{
+	ItemFlavor latestRankedPeriod = GetLatestRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_arenas_ranked_period )
+	string playlistOverrideVar    = SharedRanked_GetNumPlayerOnLaddersOverridePlaylistVar( latestRankedPeriod )
+	return GetCurrentPlaylistVarInt( playlistOverrideVar, file.numPlayersOnLadder )
+}
+
+
+SharedRankedTierData function ArenasRanked_GetHighestHistoricalTierAcrossSplitsForPlayer( entity player, ItemFlavor rankedPeriod )
+{
+	Assert( SharedRankedPeriod_HasSplits( rankedPeriod ) )
+	Assert( GetActiveRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_arenas_ranked_period ) != rankedPeriod )
+
+	string rankedPeriodGUID = ItemFlavor_GetGUIDString( rankedPeriod )
+
+	int firstSplitRankedScore                 = ArenasRanked_GetHistoricalFirstSplitRankScore( player, rankedPeriodGUID )
+	int firstSplitLadderPosition              = ArenasRanked_GetHistoricalLadderPosition( player, rankedPeriodGUID, true )
+	SharedRankedTierData firstSplitRankedTier = ArenasRanked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( firstSplitRankedScore, firstSplitLadderPosition, rankedPeriodGUID ).tier
+
+	int secondSplitRankedScore                 = ArenasRanked_GetHistoricalRankScore ( player, rankedPeriodGUID )
+	int secondSplitLadderPosition              = ArenasRanked_GetHistoricalLadderPosition( player, rankedPeriodGUID, false )
+	SharedRankedTierData secondSplitRankedTier = ArenasRanked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( secondSplitRankedScore, secondSplitLadderPosition, rankedPeriodGUID ).tier
+
+	SharedRankedTierData highestTierAchieved = ArenasRanked_GetHigherOfTwoTiers( firstSplitRankedTier, secondSplitRankedTier )
+
+	return highestTierAchieved
+}
+
+
+bool function ArenasRanked_NeedToCheckWithStryderForEndRankedSplitOrPeriod( entity player, string rankedPeriodGUID )
+{
+	if ( !GetCurrentPlaylistVarBool( "arenas_ranked_end_series_stryder_check", true ) )
+		return false
+
+	int numberOfRankedGames = GetStat_Int( player, ResolveStatEntry( CAREER_STATS.arenas_rankedperiod_games_played, rankedPeriodGUID ) )
+	if ( numberOfRankedGames == 0 )
+		return false
+
+	return true
+
+}
+
+
+SharedRankedTierData function ArenasRanked_GetHigherOfTwoTiers( SharedRankedTierData firstTier, SharedRankedTierData secondTier )
+                                                                                                                              
+{
+	SharedRankedTierData highestTierAchieved = firstTier.index > secondTier.index ? firstTier : secondTier
+	return highestTierAchieved
+}
+
+
+string function ArenasRanked_GetStryderLadderNameForLatestRankedPeriod()
+                                                                                                                                                                                           
+{
+	ItemFlavor latestPeriod = GetLatestRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_arenas_ranked_period )
+
+	string baseLadderName = ItemFlavor_GetHumanReadableRef( latestPeriod )
+
+	if ( !SharedRankedPeriod_HasSplits( latestPeriod ) )
+		return baseLadderName
+
+	if ( SharedRankedPeriod_IsFirstSplitActive( latestPeriod ) )
+		return baseLadderName + SHARED_RANKED_SPLIT_1_STRYDER_SUFFIX
+	else                                                                                                                                                                                                                                                                              
+		return baseLadderName + SHARED_RANKED_SPLIT_2_STRYDER_SUFFIX
+
+	unreachable
+}
+
+
+string function ArenasRanked_GetStryderLadderNameForHistoricalRankedPeriod( ItemFlavor rankedPeriod, bool isFirstSplit )
+{
+	Assert( ItemFlavor_GetType( rankedPeriod ) == eItemType.calevent_arenas_ranked_period )
+
+	string baseLadderName = ItemFlavor_GetHumanReadableRef( rankedPeriod )
+
+	if ( !SharedRankedPeriod_HasSplits( rankedPeriod ) )
+		return baseLadderName
+
+	if ( isFirstSplit )
+		return baseLadderName + SHARED_RANKED_SPLIT_1_STRYDER_SUFFIX
+	else
+		return baseLadderName + SHARED_RANKED_SPLIT_2_STRYDER_SUFFIX
+
+	unreachable
+}
+
+
+string function ArenasRanked_GetSeasonGUIDStringFromStryderLadderName( string stryderLadderName )
+{
+	return file.stryderLadderNameToPeriodGUIDStringTable[ stryderLadderName ]
+}
+
+
+bool function ArenasRanked_PeriodHasLadderOnlyDivision( string rankedPeriodGUIDString )
+{
+	return rankedPeriodGUIDString in file.historicalLadderOnlyDivision
+}
+
+
+SharedRankedDivisionData function ArenasRanked_GetHistoricalLadderOnlyDivision( string rankedPeriodGUIDString )
+{
+	Assert( rankedPeriodGUIDString in file.historicalLadderOnlyDivision )
+	return file.historicalLadderOnlyDivision[ rankedPeriodGUIDString  ]
+}
+
+
+int function ArenasRanked_GetHistoricalNumPlayersOnLadder( string rankedPeriodGUIDString )
+{
+	Assert( rankedPeriodGUIDString in file.historicalNumPlayersOnLadder )
+	ItemFlavor historicalRankedPeriod = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( rankedPeriodGUIDString ) )
+	string playlistOverrideVar        = SharedRanked_GetNumPlayerOnLaddersOverridePlaylistVar( historicalRankedPeriod )
+	return  GetCurrentPlaylistVarInt( playlistOverrideVar, file.historicalNumPlayersOnLadder[ rankedPeriodGUIDString ] )
+}
+
+
+#if CLIENT
+void function ShArenasRanked_RegisterNetworkFunctions()
+{
+	if ( !IsArenasRankedGame() )
+		return
+
+	RegisterNetworkedVariableChangeCallback_int( "nv_currentRankedScore", OnArenasRankedScoreChanged )
+	RegisterNetworkedVariableChangeCallback_int( "nv_currentRankedLadderPosition", OnArenasRankedLadderPositionChanged )
+}
+#endif
+
+
+SharedRankedDivisionData function GetCurrentArenasRankedDivisionFromScoreAndLadderPosition( int score, int ladderPosition )
+{
+	int numPlayersOnLadder = ArenasRanked_GetNumPlayersOnLadder()
+	if ( (ladderPosition != SHARED_RANKED_INVALID_LADDER_POSITION) && (numPlayersOnLadder > 0) && (ladderPosition <= numPlayersOnLadder) )
+	{
+		SharedRankedDivisionData ladderDivisionData = expect SharedRankedDivisionData ( file.ladderOnlyDivision )
+		#if DEV
+			if ( ladderDivisionData.scoreMin > score )                                                                                                           
+				return GetCurrentArenasRankedDivisionFromScore( score )
+		#endif
+
+		Assert( ladderDivisionData.scoreMin <= score )
+		return (ladderDivisionData)
+	}
+
+	return GetCurrentArenasRankedDivisionFromScore( score )
+
+}
+
+
+SharedRankedDivisionData function GetCurrentArenasRankedDivisionFromScore( int score )
+{
+	if ( score <= ARENAS_RANKED_PLACEMENT_SCORE )
+	{
+		Assert( file.rankedDivisions.len() > 0 )
+		Assert( file.rankedDivisions[ 0 ].scoreMin == ARENAS_RANKED_PLACEMENT_SCORE )
+		return file.rankedDivisions[ 0 ]
+	}
+
+	bool foundRank = false
+	SharedRankedDivisionData data
+
+	for ( int i = 0; i < file.rankedDivisions.len(); i++ )
+	{
+		if ( file.rankedDivisions[i].scoreMin > score )
+			break
+
+		foundRank = true
+
+		data = file.rankedDivisions[ i ]
+	}
+
+	Assert( foundRank )
+	return data
+}
+
+
+SharedRankedDivisionData ornull function GetNextArenasRankedDivisionFromScore( int score )
+{
+	bool foundRank = false
+	SharedRankedDivisionData data
+
+	                                       
+	if ( score <= ARENAS_RANKED_PLACEMENT_SCORE )
+		return null
+
+	score = maxint( score, ARENAS_RANKED_MIN_SCORE )
+
+	int i = 0
+	for ( ; i < file.rankedDivisions.len(); i++ )
+	{
+		if ( file.rankedDivisions[i].scoreMin > score )
+			break
+
+		foundRank = true
+
+		data = file.rankedDivisions[ i ]
+	}
+
+	if ( i >= file.rankedDivisions.len() )
+	{
+		return null
+	}
+
+	data = file.rankedDivisions[ i ]
+
+	if ( data.isLadderOnlyDivision )
+		return null
+
+	Assert( foundRank )
+
+	return data
+}
+
+int function ArenasRanked_GetNumPlacementMatchesRequired()
+{
+	int currentUnixTime                  = GetUnixTimestamp()
+	ItemFlavor latestRankedPeriod = GetLatestRankedPeriodByType( currentUnixTime, eItemType.calevent_arenas_ranked_period )
+
+	if( SharedRankedPeriod_HasSplits( latestRankedPeriod ) && SharedRankedPeriod_IsSecondSplitActive( latestRankedPeriod ) )
+		return GetCurrentPlaylistVarInt( "arenas_ranked_split_num_placement_matches", ARENAS_RANKED_SPLIT_NUM_PLACEMENT_MATCHES )
+
+	return GetCurrentPlaylistVarInt( "arenas_ranked_num_placement_matches", ARENAS_RANKED_NUM_PLACEMENT_MATCHES )
+}
+
+int function ArenasRanked_GetNumPlacementMatchesCompleted( entity player )
+{
+#if UI
+	if ( !IsFullyConnected() )
+		return 0
+#endif
+
+#if CLIENT
+	if ( !IsConnected() )
+		return 0
+#endif
+
+	return expect int( GetArenasRankedPersistenceData( player, "arenasRankedPlacementMatchesCompleted" ) )
+}
+
+bool function ArenasRanked_HasFinishedPlacementMatches( entity player )
+{
+	return ArenasRanked_GetNumPlacementMatchesCompleted( player ) >= ArenasRanked_GetNumPlacementMatchesRequired()
+}
+
+#if SERVER
+                                                                                      
+ 
+	                                                                       
+
+	                                                                   
+
+	                                                    
+	             
+		                                               
+	    
+		                                                
+
+	                                                         
+ 
+
+                                                              
+ 
+	                                             
+ 
+
+#endif
+
+array<bool> function ArenasRanked_GetPlacementWinsAsArray( entity player )
+{
+	#if DEV
+	if ( DEV_ShouldIgnorePersistence() )
+		return []
+	#endif
+
+	#if UI
+	if ( !IsFullyConnected() )
+		return []
+	#endif
+
+	#if CLIENT
+	if ( !IsConnected() )
+		return []
+	#endif
+
+	int placementWins = 0
+
+	#if UI
+		placementWins = GetPersistentVarAsInt( "placementWins" )
+	#else
+		placementWins = player.GetPersistentVarAsInt( "placementWins" )
+	#endif
+
+	array<bool> placementWinArray = []
+	for( int i = 0; i < ARENAS_RANKED_NUM_PLACEMENT_MATCHES; ++i )
+		placementWinArray.append( (placementWins & (1 << i)) != 0 )
+
+	return placementWinArray
+}
+
+#if SERVER
+                                
+                                
+
+                                                             
+ 
+	                                                                                                 
+	                                         
+
+	                                                      
+	                                                                  
+
+	                                                                                             
+ 
+
+                                                      
+ 
+	                                                                                                 
+	                                         
+
+	                                                      
+	                                                                  
+
+	                                                                                                    
+ 
+
+                                                                     
+ 
+	                                                               
+	                                            
+
+	                   
+	                                                                                                                                
+	                                     
+
+	                                                       
+	                                                                                                                        
+	                                   
+	 
+		                                                                                               
+	 
+
+	                                                                   
+ 
+
+                                                                                              
+ 
+	                                                                                                  
+	                                                                         
+	                                                                                                               
+
+	                                                                                                                                                           
+	                                                                                                                                              
+
+	                                                                                                                                   
+	                                                                                                                                               
+
+	                                                                                                                                                   
+
+	                                                                                                                                                                
+
+	                                               
+	                                                                                                          
+	                                             
+
+	  
+	                 
+	                        
+		              
+
+	                                                         
+	                                                                        
+	                                              
+
+	              
+	 
+		                                        
+		                                          
+	 
+	    
+	 
+		                                                                                 
+		                     
+			                                                 
+
+		                                         
+		                                           
+	 
+
+	                                                                                
+	                                          
+ 
+
+                                                                              
+ 
+	                                                               
+	                                                          
+
+	                                                                                                          
+	                                                                        
+	                                                                            
+	 
+		                                                
+		 
+			                                           
+			     
+		 
+	 
+
+	                                                                       
+		                              
+
+	                                                     
+ 
+
+#endif
+
+int function ArenasRanked_GetPenaltyPointsForAbandon( SharedRankedDivisionData currentDivision )
+{
+	SharedRankedTierData tierData = currentDivision.tier
+	int tierIndex                 = tierData.index
+	string playlistVarString      = "arenasRanked_abandon_cost_" + tierIndex
+	return GetCurrentPlaylistVarInt( playlistVarString, ARENAS_RANKED_ABANDON_AP_LOSS )                                                                                 
+}
+
+
+int function ArenasRanked_GetHistoricalRankScore( entity player, string rankedSeasonGUID )
+{
+#if UI
+	if ( !IsFullyConnected() )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+#endif
+
+#if CLIENT
+	if ( !IsConnected() )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+#endif
+
+	#if CLIENT
+		Assert ( player == GetLocalClientPlayer() )
+	#endif
+
+	#if UI
+		Assert ( player == GetLocalClientPlayer() )
+	#endif
+
+	var score = ArenasRanked_GetHistoricalRankedPersistenceData( player, "highestArenasRankedScore", rankedSeasonGUID )
+	if ( score == null )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+
+	return expect int( score )
+}
+
+
+int function ArenasRanked_GetHistoricalFirstSplitRankScore( entity player, string rankedSeasonGUID )
+                                         
+{
+#if UI
+	if ( !IsFullyConnected() )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+#endif
+
+#if CLIENT
+	if ( !IsConnected() )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+#endif
+
+	#if CLIENT
+		Assert ( player == GetLocalClientPlayer() )
+	#endif
+
+	#if UI
+		Assert ( player == GetLocalClientPlayer() )
+	#endif
+
+	var score = ArenasRanked_GetHistoricalRankedPersistenceData( player, "firstSplitRankedScore", rankedSeasonGUID )
+
+	if ( score == null )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+
+	return expect int( score )
+}
+
+
+SharedRankedDivisionData function ArenasRanked_GetHistoricalRankedDivisionFromScore( int rankScore, string rankedSeasonGUID )
+{
+	Assert( rankedSeasonGUID in file.historicalRankedDivisions )
+
+	array< SharedRankedDivisionData > historicalRankedDivisionData = file.historicalRankedDivisions[ rankedSeasonGUID  ]
+
+	if ( rankScore <= ARENAS_RANKED_PLACEMENT_SCORE )
+	{
+		Assert( historicalRankedDivisionData.len() > 0 )
+		Assert( historicalRankedDivisionData[ 0 ].scoreMin == ARENAS_RANKED_PLACEMENT_SCORE )
+		return historicalRankedDivisionData[ 0 ]
+	}
+
+	bool foundRank = false
+	SharedRankedDivisionData data
+
+	for ( int i = 0; i < historicalRankedDivisionData.len(); i++ )
+	{
+		if ( historicalRankedDivisionData[i].scoreMin > rankScore )
+			break
+
+		foundRank = true
+
+		data = historicalRankedDivisionData[ i ]
+	}
+
+	Assert( foundRank )
+	return data
+}
+
+
+int function ArenasRanked_GetTierOfThresholdForRankedPartyDifferences()
+{
+	array<SharedRankedTierData> tiers = ArenasRanked_GetTiers()
+	foreach ( rankTier in tiers )
+	{
+		if ( rankTier.name == "#ARENAS_RANKED_TIER_PLATINUM" )                              
+			return rankTier.index
+	}
+
+	return tiers.len() + 1                                                                       
+}
+
+
+SharedRankedDivisionData function ArenasRanked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( int rankScore, int ladderPosition, string rankedSeasonGUID )
+{
+	if ( ArenasRanked_PeriodHasLadderOnlyDivision( rankedSeasonGUID ) )
+	{
+		int historicalNumPlayersOnLadder = ArenasRanked_GetHistoricalNumPlayersOnLadder( rankedSeasonGUID )
+		if ( ladderPosition != SHARED_RANKED_INVALID_LADDER_POSITION && ladderPosition > 0 && ladderPosition <= historicalNumPlayersOnLadder )                                                                      
+			return ArenasRanked_GetHistoricalLadderOnlyDivision( rankedSeasonGUID )
+	}
+
+	return ArenasRanked_GetHistoricalRankedDivisionFromScore( rankScore, rankedSeasonGUID )
+
+	unreachable
+}
+
+
+int function ArenasRanked_GetHistoricalLadderPosition( entity player, string rankedSeasonGUID, bool forFirstSplit = false )
+{
+	Assert( rankedSeasonGUID in file.historicalRankedDivisions )
+	ItemFlavor historicalRankedPeriod = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( rankedSeasonGUID ) )
+
+	if ( !SharedRankedPeriod_HasSplits( historicalRankedPeriod ) || !forFirstSplit )
+		return expect int ( ArenasRanked_GetHistoricalRankedPersistenceData( player, "endSeriesLadderPosition", rankedSeasonGUID ) )
+
+	if ( SharedRankedPeriod_HasSplits( historicalRankedPeriod ) && forFirstSplit )
+		return expect int ( ArenasRanked_GetHistoricalRankedPersistenceData( player, "endFirstSplitLadderPosition", rankedSeasonGUID ) )
+
+	unreachable
+}
+
+
+var function ArenasRanked_GetHistoricalRankedPersistenceData( entity player, string persistenceField, string rankedSeasonGUID )
+{
+	#if DEV
+		if ( DEV_ShouldIgnorePersistence() )
+			return null
+	#endif
+
+	Assert( rankedSeasonGUID in file.historicalRankedTiers )
+	#if UI
+		return GetPersistentVar( "arenasRankedData[" + rankedSeasonGUID + "]." + persistenceField )
+	#else
+		return player.GetPersistentVar( "arenasRankedData[" + rankedSeasonGUID + "]." + persistenceField )
+	#endif
+}
+
+
+SharedRankedDivisionData function ArenasRanked_GetNewDivisionForNewSeasonReset( entity player, ItemFlavor newRankedPeriod )
+{
+	string newRankedPeriodRef = ItemFlavor_GetGUIDString( newRankedPeriod )
+	
+	                                
+	SharedRankedDivisionData newDivData = file.historicalRankedDivisions[ newRankedPeriodRef ][ 0 ]
+	return newDivData
+}
+
+
+SharedRankedDivisionData function ArenasRanked_GetNewDivisionForSeasonSplitReset( entity player, ItemFlavor rankedPeriod )
+{
+	string rankedPeriodRef = ItemFlavor_GetGUIDString( rankedPeriod )
+
+	                           
+	SharedRankedDivisionData newDivData = file.historicalRankedDivisions[ rankedPeriodRef ][ 0 ]
+	return newDivData
+}
+
+
+int function GetPlayerArenasRankScore( entity player )
+{
+#if UI
+	if ( !IsFullyConnected() )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+#endif
+
+#if CLIENT
+	if ( !IsConnected() )
+		return ARENAS_RANKED_PLACEMENT_SCORE
+#endif
+
+	#if SERVER
+		                                                                                
+		                                                             
+			                                    
+
+		                          
+	#endif
+
+	#if CLIENT
+		Assert( !IsLobby() )
+		EHI playerEHI = ToEHI( player )
+		return GetEHIScriptStruct( playerEHI ).arenasRankScore
+	#endif
+
+	#if UI
+		if ( !IsLobby() )
+		{
+			EHI playerEHI = ToEHI( player )
+			return GetEHIScriptStruct( playerEHI ).arenasRankScore
+		}
+		else
+		{
+			Assert( player == GetLocalClientPlayer() )
+			var score = GetArenasRankedPersistenceData( player, "currentArenasRankedScore" )
+			if ( score == null || score < ARENAS_RANKED_PLACEMENT_SCORE )
+				return ARENAS_RANKED_PLACEMENT_SCORE
+
+			return expect int( score )
+		}
+	#endif
+
+	unreachable
+}
+
+
+#if SERVER || CLIENT
+bool function IsArenasRankedGame()
+{
+	return GetMatchRankedMode() == MATCHRANKEDMODE_RANKED_ARENA && !IsLobby()                                 
+}
+
+bool function ArenasRanked_IsPlayerAbandoning( entity player )
+                                         
+{
+	if ( !IsArenasRankedGame() )
+		return false
+
+	if ( !GetCurrentPlaylistVarBool( "arenas_ranked_match_abandon_penalty", true ) )
+		return false
+
+	if ( expect bool ( player.GetPersistentVar( "lastGameRankedForgiveness" ) ) )
+		return false
+
+	if ( ArenasRanked_IsMatchOverForPlayer( player ) )
+		return false
+
+	if ( GetGameState() >= eGameState.Prematch && !SharedRanked_DidPlayerEverHaveAFullTeam( player ) )                                                                                                    
+		return false
+
+	return true
+}
+
+bool function ArenasRanked_DidPlayerEverHaveAFullTeam( entity player )
+                                                                                                                                                                    
+{
+	                                                                                                          
+
+	return player.GetPlayerNetBool( "rankedDidPlayerEverHaveAFullTeam" )
+}
+
+bool function ArenasRanked_IsMatchOverForPlayer( entity player )
+{
+	if ( Arenas_IsMatchComplete() )
+		return true
+
+	if ( Arenas_IsFinalRound() && !IsAlive( player ) )
+		return true
+
+	return false
+}
+
+
+bool function ArenasRanked_HasPlayerWaitedTooLongAfterBannerWasPickedUp( entity player )
+{
+	if ( IsAlive( player ) )
+		return false
+
+	if ( PlayerMatchState_GetFor( player ) < ePlayerMatchState.NORMAL )
+		return false
+
+	if ( player.GetPlayerNetInt( "respawnStatus" ) !=  eRespawnStatus.WAITING_FOR_DELIVERY )
+		return false
+
+	Assert( player.GetPlayerNetTime( "respawnBannerPickedUpTime" ) > -1 )
+	float timeSinceBeaconPickedUp = Time() - player.GetPlayerNetTime( "respawnBannerPickedUpTime" )
+
+	return (timeSinceBeaconPickedUp > GetCurrentPlaylistVarFloat( "arenas_ranked_respawn_banner_pickedup_timeout", 150.0 ))
+
+}
+#endif                    
+
+
+var function GetArenasRankedPersistenceData( entity player, string persistenceField )
+{
+	#if DEV
+		if ( DEV_ShouldIgnorePersistence() )
+			return null
+	#endif
+
+	string ornull currentSeasonRefOrNull = GetCurrentStatRankedPeriodRefOrNullByType( eItemType.calevent_arenas_ranked_period )
+
+	if ( currentSeasonRefOrNull != null )
+	{
+		expect string( currentSeasonRefOrNull )
+
+		#if UI
+			return GetPersistentVar( "arenasRankedData[" + currentSeasonRefOrNull + "]." + persistenceField )
+		#else
+			return player.GetPersistentVar( "arenasRankedData[" + currentSeasonRefOrNull + "]." + persistenceField )
+		#endif
+	}
+	else
+	{
+		#if UI
+			return GetPersistentVar( "offSeasonArenasRankedData." + persistenceField )
+		#else
+			return player.GetPersistentVar( "offSeasonArenasRankedData." + persistenceField )
+		#endif
+
+	}
+
+	unreachable
+
+}
+
+#if SERVER
+
+       
+                                         
+ 
+	                                                                         
+	                                                      						  
+	                                                      						                                                                                 
+	                                                      						                                                
+	                                                       						                                                                                    
+	                                                                			                
+	                                                              				                
+	                                                                       		  
+	                                                    						  
+	                                                       						  
+	                                                              				  
+	                                                   							  
+	                                                   							  
+	                                                     						  
+	                                                         					  
+	                                                     						  
+	                                                                   			  
+	                       
+
+	                                                   
+
+	                                                                                                                
+	                                                                               
+
+	                                                
+	                                                      
+	                                                     
+	                                                 
+	                                                              
+	                                                               
+
+	                           
+ 
+
+                                                                                                                                                         
+ 
+	                                                                                                                           
+	                                                                                                                     
+	                                                                                                                     
+	                                                                                                                     
+	                                                                                                              
+	                                                                                                          
+
+	                                                                                                                               
+	                                                                                                                                              
+
+	                                                                                                                       
+		                                                                                                                                                                                                                               
+ 
+
+                                                                                                                                                                                                                                                                                             
+ 
+  
+	               
+	                                                                     	                                                 
+	                                                                    	                                                                          
+	                                                                    	                                                                 
+	                                                                    	                                                                                   
+	                                                                    	                                                                           
+  
+
+	                                             
+	 
+		                                                                                                            
+		                                                          
+		                                                                                                                 
+
+		                                                                    
+		                                                                       
+		                                                                               
+		                                                                                 
+		                                                                       
+		                                                                                   
+
+		                       
+			                                                  
+
+		                                                                          
+		                                                                                                                                       
+
+		                                                                                                                      
+		                                
+		 
+			                                   
+
+			                                                                                                                        
+				                                                                                                                                                                                                                                
+		 
+
+		                                        
+	 
+ 
+
+
+                                                             
+ 
+	                                                          
+	                                                     
+	                                                  
+	                                                             
+	                                                                       
+	                                               
+ 
+
+                                                
+ 
+	                                   
+
+	                                                       
+	                                                               
+	                                                               
+	                           								   
+	                            							   
+	                                                           
+	                                                           
+	                                                           
+	                                                           
+	                                                               
+	                                                                                            
+
+	                                                                     
+ 
+
+                                                
+ 
+	                                                                                                   
+
+	                                               
+		                          
+ 
+
+                                                                                                       
+                                                 
+                          
+                             
+                            
+  
+                              
+                               
+
+                                                                                                                                             
+ 
+	                   
+	                                         
+		                                                                              
+
+	                     
+	                               
+	                                     
+	 
+		                      
+		 
+			               
+			                                       
+		 
+	 
+
+	                                                                                 
+	                                                                                                                    
+ 
+
+                                                                                                                 
+ 
+	                                                         
+
+	                               
+	                     
+	                                                                            
+	 
+		                                                   
+		 
+			                                           
+			     
+		 
+	 
+
+	                                   
+	                                                                     
+		                                                      
+
+	                                  
+	                                             
+	                                                          
+	                            
+
+	                                                                                                                                        
+	                           		                                                               
+
+	                    
+	                                    
+	 
+		                                                          
+
+		                                                            
+		                                                     
+
+		                                                                 
+		              
+
+		                   
+			                           		                                                                                                    
+
+		                                          
+			                    
+	 
+
+	                                                                                                                                          
+	                             
+
+	                   
+ 
+                                                                                                           
+
+  
+                                                                                    
+ 
+	                                             
+	 
+		                     
+		 
+			                                                                                                                          
+			                                                                                                                                           
+
+			                                                                                                    
+			                                                                                
+			                                                                                                                     
+			                                                                                                                            
+			                                                                                                                
+		 
+		    
+		 
+			                                                                                                                 
+			 
+				                                                                  
+				                                                                                                              
+				                                                                                                                     
+				                                                                                                             
+				                                                                                                         
+			 
+		 
+
+		                                                          
+		                                                   
+		                                                                  
+		                                                                                                                                                                                                   
+	 
+ 
+  
+  
+                                                            
+                                   
+ 
+	                                             
+	 
+		                                                                                                                          
+		                                                                              
+		                                                                                                          
+		                                                                                                            
+		                                                                                                        
+		                                                                                                                                 
+		                                                                                                             
+
+		                                                          
+		                                                   
+		                                                                  
+	 
+ 
+  
+  
+                                                                 
+                                   
+ 
+	                                             
+	 
+		                                                                                                                          
+		                                                                              
+		                                                                                                            
+	 
+ 
+  
+               
+
+
+                                                             
+                                                                                                                                                                                    
+ 
+	                              
+	                                             
+	 
+		                                                                                                                         
+			                                                          
+	 
+
+	                                                                                                                    
+	                                                         
+	 
+		                                                                            
+		                                                                                         
+		                             
+		                                                                     
+		 
+			            
+				                                
+		 
+
+		                                                                                      
+	 
+ 
+
+                                                                  
+ 
+	                                
+		      
+
+	                                                                           
+	                                                                                      
+
+	                                                                                                                                                                                                               
+
+	                                                                                                 
+
+	                      
+	 
+		                                                                           
+		                                                                                      
+	 
+
+	                                                                                                                       
+	                                                                                                                                                               
+	                                                                                                                                                            
+
+	                                     
+		                                                                                                                                 
+ 
+
+                                                                                                                          
+ 
+	                                                                                                      
+	                                                                                                                              
+	                                                                                                                          
+	                                                                                                                                            
+	                                                                                                        
+
+	                               
+	 
+		                                                                                                                                       
+		                                                                                                                                                                            
+	 
+	    
+	 
+		                                                                                                                                                        
+	 
+
+	                                                                              
+		                                                                                                                                  
+
+	                                                                                                                                                                                           
+ 
+
+  
+                                                                                  
+ 
+	                         
+		      
+
+	                      
+		      
+
+	                                                                                      
+	                                                                              
+
+	                                                                                
+ 
+  
+
+                                                                                                
+ 
+	                                                         
+	                                                                                                                              
+
+	                                 
+	 
+		                                                                                     
+		                                                                                           
+	 
+	    
+	 
+		                                                                                
+	 
+ 
+
+
+                                                                                                                                         
+ 
+	                                                                                                
+ 
+
+
+                                                                        
+ 
+	                                          
+	                                 
+	                                                                                                                                  
+
+	                                                                                                                                                                                  
+	                                                                          
+	                                                            
+	                                                              
+	                                                                  
+	                                                                                                     
+ 
+
+
+                                                                                                                                          
+                                                                                                                              
+ 
+	                                                                                                                                                                     
+
+	                                                                                            
+	                                                                                  
+	                                  
+
+	                                                                                                        
+	                                                                                                                                                                                       
+
+	                                                                                           
+	                           
+		                                                                                                 
+
+	                                                                                                        
+	                                                                                                                                                                
+	                                
+
+	                
+	                                                         
+	 
+		                                                 
+	 
+	                                                      
+	 
+		                                                               
+		                                            
+		                                                                 
+	 
+
+	                                                                       
+	 
+		                                                         
+		                                     
+	 
+
+	                                         
+
+	                                                                                                                                                                                 
+
+	                                               
+	                                                                                               
+                                  
+	                                                                                                        
+	 
+		                                                                            
+		                                                        
+	 
+
+	                                                                                      
+	                                                                                               
+		                                                                              
+
+	                                                       
+	                                                                              
+	                                                                                        
+	                           								          
+	                            							        
+	                                                                   
+	                                                                                    
+	                                                                                           
+	                                                                                  
+	                                                                           
+	                                                                    
+
+	                                                                     
+ 
+
+                      
+                                                                                            
+ 
+	                                                               
+	                                                                                      
+
+	                            
+		      
+
+	                               
+		      
+
+	                                                         
+	 
+		                                                                                                                                                                        
+		 
+			                                                                         
+			 
+				                                                                                                                                                 
+					                                                                
+			 
+		 
+		                                                                                                           
+		 
+			                                                         
+				                                                            
+		 
+	 
+	    
+	 
+		                                        
+		                                                                                                                                            
+
+		                                                                                                                               
+		                                                                                                            
+
+		                                                                                      
+		 
+			                                                                                                                                                                                 
+			 
+				                                                                                                                                 
+
+				                                                                                                       
+
+				                                                                                                                                
+				 
+					                                                                                                                                   
+				 
+
+				                                                                                           
+				                                                             
+			 
+			    
+			 
+				                                                                                                                                 
+				                                                                                           
+				                                                        
+				                                                                                                                       
+				                                                  
+			 
+		 
+		    
+		 
+			                              
+			 
+				                                                                                                                                 
+				                                                                                           
+				                                                             
+			 
+			    
+			 
+				                                                                                                                                 
+				                                                                                           
+				                                                        
+				                                                                                                                       
+				                                                  
+			 
+		 
+
+		                                                                                      
+		                                                                         
+		 
+			                           
+				        
+
+			                                               
+				        
+
+			                                                                
+		 
+	 
+
+	                                                                            
+	                                                                                                                                                                           
+	                                                                    
+	 
+		                                                                                                                         
+		                                                                         
+		 
+			                                                                                                          
+
+			                                                       
+			                                                                                                    
+		 
+	 
+
+	                                                   
+ 
+                       
+
+                                                                                  
+                                                                                                                   
+ 
+	                                                                                                                    
+
+	                                                                                           
+
+	                                                                                                                                 
+	                                                    
+	 
+		                                                                                                      
+		                                                            
+		                                                                      
+			      
+
+		                                                                 
+
+		                                                          
+
+		                                                                   
+	 
+	                                       
+	 
+		                                                                                                                   
+		                                                                                                                      
+		                                                                   
+
+		                    
+		                                                   
+		 
+			                                                                                                              
+			              
+				                                                                
+		 
+		                                                                                                                      
+
+		                                                                        
+		                                                                               
+		                                                                                                          
+		                                                                                                                                  
+
+		                                                         
+			                                                         
+
+		                                                                                                             
+		                                                                                                                        
+		                                              
+	 
+ 
+
+                                                                                                                                                                  
+                                                                                                                                                                            
+                                                                                                                                     
+ 
+	                                                          
+	                                                                                                                       
+
+	                                                                                                                    
+	                                                                                                                      
+	                                                                    
+	                                                                   
+
+	                                                   
+	 
+		                                                                                                                           
+		                     
+		 
+			                                                          
+			                                                                
+
+			                                                                                                                          
+		 
+	 
+
+	                                                                                                                      
+
+	                                                                                                                                                                 
+
+	                    
+		                                                                                                                                                                                                   
+
+	                                                         
+		                                                         
+
+	                              
+ 
+
+
+                                                              
+ 
+	       
+		                                    
+			      
+	      
+
+	                 
+		      
+
+	                       
+		      
+
+	                                                                                                     
+		      
+
+	                                                                                                           
+	                                                                                                                 
+		      
+
+	                                                                                                                 
+	 
+		                                                                  
+		                                                                            
+			        
+
+		                                                                                                                               
+		                   
+		                                                                                         
+		 
+			                                                                                                              
+			                                                                                        
+		 
+
+		               
+		                                                                                
+		 
+			                                                                                                              
+			                                                                                        
+		 
+
+		                                                                                        
+		                                                                            
+		 
+			                                                                  
+			                                                                                         
+			                                                                                                             
+			                                                                                                                                         
+			                                           
+			 
+				                                                                                                                                  
+				                                                                     
+					                                                                                                                                                                  
+			 
+		 
+	 
+ 
+
+
+                                                              
+ 
+	       
+		                                                               
+		                                    
+			      
+	      
+
+	                 
+		      
+
+	                       
+		      
+
+	                                                                                       
+
+	                                                                                                                                                                                                                                                                                                                                                 
+	 
+		                                                                                                                                                               
+		      
+	 
+
+	                                     
+		                                                             
+
+	                                                                                                                                                                                                                   
+	 
+		                                                                                                                          
+		                                                                                                                         
+			      
+
+		                                                                                        
+		                                                                                                                                                  
+		                                                                                                                                     
+
+		                                                                                                     
+
+		                                     
+			      
+
+		                                                                                                                                                  
+		 
+			                                                                                                                           
+			                                                                                                                
+			                                                                                                                                
+			                                                                            
+			                                                                                                                     
+			      
+		 
+		    
+		 
+			                                                               
+		 
+
+		      
+	 
+
+	                                                                                                                          
+
+	                                                                                                     
+
+	                                                                                                                                                                                                                                      
+	 
+		                                                                     
+		                                                         
+		                                               
+
+		                                                                   
+		                                                                                                                                 
+
+		                                                                                                         
+		 
+			                                                                                                                                                                                     
+			        
+		 
+
+		                                                                                 
+
+		                                                                                                                                                                                                                                                                      
+		 
+			                                         
+			                                                                                  
+
+			                                                                                                                                                                                             
+			                                                                                                                                 
+
+			                                                                                                       
+				                                                                                     
+
+			                              
+			 
+				                                                                                                                                              
+				 
+					                                                                                                                             
+					                                                                                                            
+					                                                                                                                                
+					                                                                                                                                                                                                                                                                                                              
+					      
+				 
+				    
+				 
+					                                                                 
+				 
+			 
+		 
+
+		                                                                                                  
+		                                                                                               
+		 
+			                                                                                                                                                                              
+			      
+		 
+
+		                                                   
+		 
+			                                                                                                                                                                         
+			 
+				                                                                                                                                                                        
+				                                                                                                                                                                  
+				                                                         
+			 
+		 
+	 
+ 
+
+                                                                                                
+ 
+	                                                                 
+	                                                                                                                                                                                                              
+
+	                         
+	 
+		                                                                                                   
+			     
+
+		        
+			                                                                                 
+			                                                                                              
+			                                                                                                                                   
+
+			                                   
+			 
+				                                         
+				                                                                                  
+				                                                                                                                                                                                            
+				 
+					                                                                                                                               
+					                                                                                                             
+
+					                                                                                                                 
+
+					                                                                                                                                                                                                            
+					                                                                                                                                       
+				 
+				    
+				 
+					                                                                                                       
+
+					                             
+					                                  
+					 
+						                                                                                                                                                     
+						                                                                                                                                 
+						                                                                                                                                          
+					 
+					    
+					 
+						                                                                                    
+					 
+
+
+					                               
+					                                                                                                                                                                                                                                     
+					                                                                                                          
+					                                                         
+
+					                                  
+						                                                                                                                                       
+					    
+						                                                                                                         
+
+					                                                                                                                      
+				 
+			 
+		     
+	 
+
+	                                                                                 
+	                                                        
+	                                                      				            
+	                                                            		                               
+	                                                           			                                               
+	                                                                	  
+
+	                                                                                                           
+	                                                                                    
+	                                         
+
+	                                                                                                                          
+	                          
+	                                         
+		                                                                                                                       
+
+	                    
+	 
+		                                                                              
+		                                                                                             
+		                                                                                
+		                                 
+		 
+			                                                                                                                       
+			                                                                                                                              
+			                                                                                                           
+		 
+	 
+
+	                                                                  
+		                                                                                          
+
+	           
+ 
+
+
+                                                                                         
+ 
+	                                                                 
+	                                                                                                                                                                                                             
+
+	                                                                            
+
+	                                                                                     
+
+	                             
+	                                  
+	 
+		                                                                                                                                   
+		                                                                                                               
+		                                                                                                                                 
+	 
+	    
+	 
+		                                                                           
+	 
+
+	                               
+	                                                                                                                            
+	                                                                                                            
+
+	                                  
+		                                                                                                                                       
+	    
+		                                                                                                         
+
+	                                        
+	                                                                                                                      
+	                                                                                                                     
+	                                                                                                        
+	                                                                                    
+	                                         
+
+	                                                                                                                                                                                 
+	 
+		                                                                                                             
+	 
+
+	                                                                                                                          
+	                                                       
+	                                                                       
+	 
+		                                                                                                                        
+		                                                                              
+		                                                                                                                              
+		                                                                                                        
+	 
+
+	                
+		                                                                                          
+ 
+
+
+                                                                   
+                                                       
+ 
+	       
+		                                    
+			      
+	      
+
+	                                                                                            
+
+	                                                         
+		      
+
+	                                                          
+
+	                                                                                                      
+
+	                                                                                                                                                                                                                                   
+	 
+		                                                                       
+		                                                           
+		                                                 
+
+		                                                                  
+		                                                                                      
+		 
+			        
+		 
+
+		                                                                                               
+		 
+			                                                                                                   
+			                                                                                                                                                             
+			 
+				                                                                                                                                                                                                   
+				      
+			 
+		 
+	 
+
+	                                                                                                  
+
+	                                                                                                                 
+	 
+		                                                                       
+		                                                           
+		                                                 
+
+		                                                                  
+		                                                                                                                                                                                                                                                                                  
+		                                                                                      
+		 
+			        
+		 
+
+		                                                                                               
+		 
+			                                                                                                                                                      
+		 
+
+		                                                                                                                                                 
+		                                                                                                                                    
+		                               
+		 
+			                                                                                                                    
+			        
+		 
+
+		                                                                                                                                                       
+
+		                                   
+
+		                                                   
+		 
+			                                                                                                   
+		 
+		    
+		 
+			                                                                                           
+			                                                                                                
+			                                                                                                                                                          
+		 
+
+		                         
+		                                                                     
+		 
+			                                      
+				                                                                  
+		 
+
+		                                            
+		 
+			                                                                                                                                                    
+				        
+
+			                                                                  
+				        
+
+			                                
+			                                                         
+			                                                                                 
+			 
+				                                                                      
+			  
+			                                                                                     
+				                                                                             
+				                           
+					      
+
+				                                                
+			  
+			                                                                          
+			                                             
+		 
+	 
+ 
+
+
+                                                                                                           
+ 
+	                                                            
+		                                                
+
+	                                                                                                                    
+
+	                                                          
+	                                                    	                                                        
+	                                                                  
+ 
+
+
+                                                                                
+ 
+	                                                                        
+	                                                          
+	                                                                                                               
+	                                                                  
+ 
+
+
+                                                                                 
+ 
+	                                                          
+	                                                                                                               
+	                                                                  
+ 
+
+
+                                                                
+ 
+	                
+	 
+		                                
+			                                
+
+		                                                         
+			                                                         
+
+		                                                         
+			                                                         
+
+		                                                         
+			                                                         
+
+		                                                           
+			                                                           
+	 
+ 
+
+
+                                                             
+ 
+	       
+		                                    
+			      
+	      
+
+	                    
+
+	                                                                          
+	                                                             
+	                                                         
+	                                                              
+
+	                                                                                                    
+	                                                                     
+	                                                                                 
+	                                                                               
+	                                                                                        
+
+	                            
+		      
+
+	                                              
+	                                                         
+	                                                        
+	                                  
+
+	                                                             
+	                                                                      
+	                                     
+	 
+		                                       
+		                                                                                 
+			                                                                          
+
+		                                                                                      
+			                                                                       
+	 
+
+	                                                                 
+
+	                                                                                                                    
+	 
+		                                                                                                                                                                                 
+		 
+			                                                                                                             
+			                                                          
+			                                                                                                                    
+			                                                                                  
+			                                                                                 
+		 
+
+		                                                                  
+	 
+
+	                                                                     
+	                                        
+
+	                 
+	 
+		                                                           
+
+		                    
+
+			                
+				                                                                                                                                
+
+			                      
+			 
+				                     
+				                                                                                            
+				                          
+				 
+					            
+
+					                            
+					 
+						               
+						     
+					 
+
+					              
+				 
+
+				               
+					     
+			 
+
+			                       
+			 
+				                                           
+			                                 
+			                                                     
+			                   
+			 
+				       
+				   
+				   
+				  
+			 
+			                                                               
+			                                                          
+
+			                                                                              
+			 
+				                                                        
+				                                         
+				 
+					                                  
+				 
+
+				                                                                                                                                       
+			 
+		 
+	 
+
+	                       
+	 
+		                                           
+		                     
+		                                
+
+		                                                                                                               
+		                                                                                                    
+		                                    
+		                                                           
+	 
+ 
+
+
+                                                                   
+ 
+	                                                         
+	 
+		                                                                                                    
+			                                                                                                                                                      
+
+		                                                         
+	 
+
+	                                                           
+	 
+		                                                                                    
+		 
+			                                                                                                       
+			                                                                                          
+			                                                                                                                                        
+
+			                                                   
+			 
+				                                                                                                                    
+				                                                                                                                                  
+			 
+		 
+
+		                                                           
+	 
+ 
+
+
+                                                                              
+ 
+	                                                            
+
+	                                                  
+	                                      
+		                                                                                        
+
+	                                                                                                
+		                                                       
+
+	            
+ 
+
+
+                                                                                                        
+ 
+	                                                           
+	 
+		                                                                               
+	 
+	    
+	 
+		                                                                            
+	 
+ 
+
+
+                                                                                                                                     
+                                                                                                                            
+                                                                                                           
+ 
+	                                  
+	                                                      
+	                                                     
+
+	                                                         
+	 
+		                                                                       
+	 
+	    
+	 
+		                                                                   
+	 
+ 
+
+
+                                                                       
+ 
+	                                                                                                                                                                                                              
+	                                                                                                                         
+	                                                                                                                                    
+	                                                                                                                                    
+	                                                                                                                                
+	                                                                                                                                        
+	                                                                                                                                      
+	                                                                                                                                    
+	                                                                                                                                         
+
+	                                                                                                                           
+	                                                                                                                                        
+	                                                                                                                                        
+	                                                                                                                                    
+	                                                                                                                                            
+	                                                                                                                                          
+	                                                                                                                                        
+	                                                                                                                                             
+ 
+
+
+                                                                                                                                    
+ 
+	                                                                                                           
+	                                                                               
+	                                                                                                                               
+	                                                                                                                                                                     
+
+	                                      
+	                                                                            
+
+	                                                                    
+		                                                                         
+
+	                                                                                                                                                                                                                          
+	 
+		                                                                                                                           
+		                                                                                                                            
+		                                                                                                                                                                                                  
+		                                              
+		 
+			                                                                              
+			                                                                           
+		 
+		    
+		 
+			                                                                                                                   
+			                                                                                           
+			                                                                                        
+		 
+	 
+
+	           
+ 
+#endif            
+
+#if CLIENT
+void function OnArenasRankedScoreChanged( entity player, int new )
+{
+	if ( IsLobby() )
+		return
+
+	if ( new == SHARED_RANKED_INVALID_RANK_SCORE )                                                                                            
+		return
+
+	EHI playerEHI = ToEHI( player )
+	ArenasRanked_UpdateEHIRankScore( playerEHI, new )
+	RunUIScript( "ArenasRanked_UpdateEHIRankScore", playerEHI, new )
+
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	SetGamestateArenasRankedIcon( new, ArenasRanked_GetLadderPosition( player ) )
+}
+#endif
+
+#if CLIENT
+void function OnArenasRankedLadderPositionChanged( entity player, int new )
+{
+	if ( IsLobby() )
+		return
+
+	if ( new == SHARED_RANKED_INVALID_LADDER_POSITION )                                                                                            
+		return
+
+	EHI playerEHI = ToEHI( player )
+	ArenasRanked_UpdateEHIRankedLadderPosition( playerEHI, new )
+	RunUIScript( "ArenasRanked_UpdateEHIRankedLadderPosition", playerEHI, new )
+
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	SetGamestateArenasRankedIcon( GetPlayerArenasRankScore( player ), new )
+}
+#endif
+
+#if CLIENT
+void function UpdateGamestateArenasRankedIcon()
+{
+	entity viewPlayer = GetLocalViewPlayer()
+	if ( viewPlayer == null )
+		return
+
+	                                                                 
+
+	bool showRankedBadge = IsInMyParty( viewPlayer.GetPlatformUID() )
+	var rui              = ClGameState_GetRui()
+	RuiSetBool( rui, "showRanked", showRankedBadge )
+
+	if ( showRankedBadge )
+	{
+		int score     = GetPlayerArenasRankScore( viewPlayer )
+		int ladderPos = ArenasRanked_GetLadderPosition( viewPlayer )
+		SetGamestateArenasRankedIcon( score, ladderPos )
+	}
+}
+#endif
+
+#if CLIENT
+void function SetGamestateArenasRankedIcon( int score, int ladderPos )
+{
+	var rui = ClGameState_GetRui()
+
+	if ( rui == null )
+		return
+
+	if ( score < 0 )
+		return
+
+	SharedRankedDivisionData data = GetCurrentArenasRankedDivisionFromScoreAndLadderPosition( score, ladderPos )
+	PopulateRuiWithArenasRankedBadgeDetails( rui, score, ladderPos )
+
+	                            
+	                                     
+	   
+	                                                                                                                                                                 
+	                                                                                                                                                                                 
+	   
+}
+#endif
+
+#if CLIENT
+void function ArenasRanked_OnSpectateTargetChanged( entity spectatingPlayer, entity prevSpectatorTarget, entity newSpectatorTarget )
+{
+	if ( IsValid( newSpectatorTarget ) && newSpectatorTarget.IsPlayer() )
+		UpdateGamestateArenasRankedIcon()
+}
+#endif
+
+bool function IsArenasRankedPersistenceValid()
+{
+	#if DEV
+		if ( DEV_ShouldIgnorePersistence() )
+			return false
+	#endif
+
+	return IsArenasRankedInSeason()
+}
+
+
+bool function IsArenasRankedInSeason()
+{
+	string ornull currentSeasonRefOrNull = GetCurrentStatRankedPeriodRefOrNullByType( eItemType.calevent_arenas_ranked_period )
+
+	if ( currentSeasonRefOrNull == null )
+		return false
+
+	return true
+}
+
+#if CLIENT
+void function OnScoreboardCreated()
+{
+	UpdateGamestateArenasRankedIcon()
+}
+#endif
+
+#if CLIENT
+void function OnGameStateChanged( int newVal )
+{
+	if ( IsLobby() )
+		return
+
+	Assert( IsArenasRankedGame() )
+
+	int gameState = newVal
+	if ( gameState >= eGameState.Prematch )
+	{
+		UpdateGamestateArenasRankedIcon()
+	}
+}
+#endif
+
+array<SharedRankedTierData> function ArenasRanked_GetTiers()
+{
+	return file.rankedTiers
+}
+
+
+SharedRankedTierData ornull function ArenasRanked_GetNextTierData( SharedRankedTierData data )
+{
+	if ( data.isLadderOnlyTier )
+		return null
+
+	if ( data.index + 1 < file.rankedTiers.len() )
+		return file.rankedTiers[ data.index + 1 ]
+
+	return null
+}
+
+
+array< SharedRankedDivisionData > function ArenasRanked_GetRankedDivisionDataForTier( SharedRankedTierData tier )
+{
+	if ( tier.isLadderOnlyTier )
+	{
+		Assert( file.ladderOnlyDivision != null )
+		return [ expect SharedRankedDivisionData( file.ladderOnlyDivision ) ]
+	}
+
+	array< SharedRankedDivisionData > data
+
+	for ( int i = 0; i < file.rankedDivisions.len(); i++ )
+	{
+		if ( file.rankedDivisions[ i ].tier == tier )
+			data.append( file.rankedDivisions[ i ] )
+	}
+
+	return data
+}
+
+
+void function ArenasRanked_UpdateEHIRankScore( EHI playerEHI, int rankScore )
+                                                                                                                               
+{
+	EHIScriptStruct ehiss = GetEHIScriptStruct( playerEHI )
+	ehiss.arenasRankScore = rankScore
+}
+
+
+void function ArenasRanked_UpdateEHIRankedLadderPosition( EHI playerEHI, int rankedLadderPosition )
+                                                                                                                               
+{
+	EHIScriptStruct ehiss = GetEHIScriptStruct( playerEHI )
+	ehiss.arenasRankedLadderPosition = rankedLadderPosition
+}
+
+
+int function ArenasRanked_GetLadderPosition( entity player )
+{
+	#if SERVER
+		                               
+		                                                                 
+
+	#endif
+
+	#if CLIENT
+		Assert( !IsLobby() )
+		EHI playerEHI = ToEHI( player )
+		return GetEHIScriptStruct( playerEHI ).arenasRankedLadderPosition
+	#endif
+
+	#if UI
+		if ( !IsLobby() )
+		{
+			EHI playerEHI = ToEHI( player )
+			return GetEHIScriptStruct( playerEHI ).arenasRankedLadderPosition
+		}
+		else
+		{
+			Assert( player == GetLocalClientPlayer() )
+			CommunityUserInfo ornull cui = GetUserInfo( GetPlayerHardware(), GetPlayerUID() )
+
+			if ( cui == null )
+				return -1
+
+			expect CommunityUserInfo( cui )
+			return cui.arenaLadderPos
+		}
+	#endif
+
+	unreachable
+}
+
+#if UI
+void function ArenasRanked_SetupMenuGladCardForUIPlayer()
+{
+	entity player = GetLocalClientPlayer()
+	ArenasRanked_SetupMenuGladCard_internal( ArenasRanked_GetLadderPosition( player ), GetPlayerArenasRankScore( player ) )
+}
+
+
+void function ArenasRanked_SetupMenuGladCardFromCommunityUserInfo( CommunityUserInfo userInfo )
+{
+	ArenasRanked_SetupMenuGladCard_internal( userInfo.arenaLadderPos, userInfo.arenaScore )
+}
+
+
+void function ArenasRanked_SetupMenuGladCard_internal( int ladderPos, int rankScore )
+{
+	int rankShouldShow = IsArenasRankedPlaylist( Lobby_GetSelectedPlaylist() ) ? 1 : 0
+	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.ARENAS_RANKED_SHOULD_SHOW, rankShouldShow, null )
+	SendMenuGladCardPreviewCommand( eGladCardPreviewCommandType.ARENAS_RANKED_DATA, ladderPos, null, rankScore )
+}
+
+bool function ArenasRanked_ManageDialogFlow( bool rankedSplitChangeAudioPlayed = false )
+{
+	bool result = false
+
+	if ( ArenasRanked_HasRankedPeriodMarkedForRewardAcknowledgement() )
+	{
+		string earliestRankedPeriod = ArenasRanked_GetRankedPeriodToAcknowledgReward()
+		Remote_ServerCallFunction( "ClientCallback_ArenasRankedPeriodRewardAcknowledged", earliestRankedPeriod )
+		ArenasRanked_MarkRankedRewardsGivenNotified( earliestRankedPeriod )
+
+		ItemFlavor rankedPeriodToAcknowledgeReward                      = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( earliestRankedPeriod ) )
+		                                                                             
+		ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_rankedperiod )
+		SharedRankedDivisionData rankedDivisionForFollowingRankedPeriod = Ranked_GetNewDivisionForNewSeasonReset( GetLocalClientPlayer(), expect ItemFlavor(activeRankedPeriod) )
+
+		string unlockMessage
+		Assert( IsPersistenceAvailable() )
+		                                                                                                                                               
+		                                                                  
+		 
+			                                                            
+			                                                                                         
+			                                                                                                                                                                                                
+				                                                                                                                               
+		 
+		      
+		{
+			unlockMessage = Localize( "#RANKED_REWARDS_GIVEN_DIALOG_MESSAGE", Localize( ItemFlavor_GetShortName( rankedPeriodToAcknowledgeReward ) ),
+				Localize( rankedDivisionForFollowingRankedPeriod.divisionName ), Localize( ItemFlavor_GetShortName( expect ItemFlavor(activeRankedPeriod) ) ) )
+		}
+
+		if( !rankedSplitChangeAudioPlayed )
+			PlayLobbyCharacterDialogue( "glad_rankNewSeason", 1.7 )                      
+
+		PromoDialog_OpenHijackedUM( Localize( "#RANKED_REWARDS_GIVEN_DIALOG_HEADER" ), unlockMessage, "ranked_rewards" )
+		IncrementNumDialogFlowDialogsDisplayed()
+
+		DialogFlow_DidCausePotentiallyInterruptingPopup()
+
+		result = true
+	}
+	else if ( ArenasRanked_NeedToNotifySplitReset() )
+	{
+		string rankedSplitResetAcknowledgePersistenceField = ArenasRanked_GetSplitResetAcknowledgePersistenceField()
+		SetDialogFlowPersistenceTables( "starterAcknowledged", true )
+		Remote_ServerCallFunction( "ClientCallback_ArenasRankedSplitResetAcknowledged" )
+
+		                                                                             
+		ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_rankedperiod )
+		expect ItemFlavor ( activeRankedPeriod )
+		Assert( SharedRankedPeriod_HasSplits( activeRankedPeriod ) && SharedRankedPeriod_IsSecondSplitActive( activeRankedPeriod ) )
+		SharedRankedDivisionData newRankedDivisionAfterSplit = GetCurrentRankedDivisionFromScore( GetPlayerRankScore( GetLocalClientPlayer() ) )
+		string resetMessage                                  = Localize( "#RANKED_SPLIT_RESET_DIALOG_MESSAGE", Localize( newRankedDivisionAfterSplit.divisionName ) )
+
+		if( !rankedSplitChangeAudioPlayed )
+			PlayLobbyCharacterDialogue( "glad_rankNewSplit", 1.7 )                       
+
+		PromoDialog_OpenHijackedUM( Localize( "#RANKED_SPLIT_RESET_DIALOG_HEADER" ), resetMessage, "ranked_split" )
+		IncrementNumDialogFlowDialogsDisplayed()
+
+		DialogFlow_DidCausePotentiallyInterruptingPopup()
+
+		result = true
+	}
+	                                                                                                                                         
+	 
+		                                                                                 
+		                                                            
+		                                                                                        
+		                                                                                                 
+		                                                                                                                                     
+		                                        
+	   
+
+	return result
+}
+
+
+bool function ArenasRanked_HasRankedPeriodMarkedForRewardAcknowledgement()
+{
+	if( IsFeatureSuppressed( eFeatureSuppressionFlags.RANKED_ARENAS_DIALOG ) )
+		return false
+
+	string earliestRankedPeriod = ArenasRanked_EarliestRankedPeriodWithRewardsNotAcknowledged()
+	if ( earliestRankedPeriod == "" )
+		return false
+
+	                                                         
+	ItemFlavor rankedPeriodToAcknowledgeReward = GetItemFlavorByGUID( ConvertItemFlavorGUIDStringToGUID( earliestRankedPeriod ) )
+	ItemFlavor ornull followingRankedPeriod    = GetFollowingRankedPeriod( rankedPeriodToAcknowledgeReward )
+
+	if ( followingRankedPeriod == null )
+		return false
+
+	file.arenasRankedPeriodToAcknowledgeRewards = earliestRankedPeriod
+	return true
+}
+
+
+string function ArenasRanked_GetRankedPeriodToAcknowledgReward()
+{
+	return file.arenasRankedPeriodToAcknowledgeRewards
+}
+
+
+string function ArenasRanked_EarliestRankedPeriodWithRewardsNotAcknowledged()
+{
+	string rankedPeriodResult = ""
+
+	if ( !IsPersistenceAvailable() )
+		return rankedPeriodResult
+
+	int previousPeriodFinishTime = 0                                                                      
+
+	foreach ( ItemFlavor rankedPeriod in GetAllRankedPeriodFlavorsByType( eItemType.calevent_arenas_ranked_period ) )
+	{
+		int rankedPeriodFinishTime = CalEvent_GetFinishUnixTime( rankedPeriod )
+		Assert( previousPeriodFinishTime < rankedPeriodFinishTime )
+
+		if ( rankedPeriodFinishTime > GetUnixTimestamp() )                                              
+			continue
+
+		previousPeriodFinishTime = rankedPeriodFinishTime
+		string rankedPeriodGUID = ItemFlavor_GetGUIDString( rankedPeriod )
+
+		entity uiPlayer = GetLocalClientPlayer()
+
+		int numberOfRankedGames = GetStat_Int( uiPlayer, ResolveStatEntry( CAREER_STATS.arenas_rankedperiod_games_played, rankedPeriodGUID ) )
+
+		if ( numberOfRankedGames == 0 )                                                                                                            
+			continue
+
+		if ( ArenasRanked_NeedToCheckWithStryderForEndRankedSplitOrPeriod( uiPlayer, rankedPeriodGUID ) )
+		{
+			if ( ArenasRanked_GetHistoricalLadderPosition( uiPlayer, rankedPeriodGUID ) == 0 )                                                                   
+				continue
+		}
+
+		var wasAwardsAcknowledged = ArenasRanked_GetHistoricalRankedPersistenceData( uiPlayer, "arenasRankedRewardsAcknowledged", rankedPeriodGUID )                                                                                                                                                                           
+
+		if ( wasAwardsAcknowledged == null )
+			continue
+
+		expect bool ( wasAwardsAcknowledged  )
+
+		if ( wasAwardsAcknowledged )
+			continue
+
+		if ( ArenasRanked_HasNotifiedRankedRewardsGiven( rankedPeriodGUID ) )
+			continue
+
+		rankedPeriodResult = rankedPeriodGUID
+		break
+	}
+
+	return rankedPeriodResult
+}
+
+
+bool function ArenasRanked_NeedToNotifySplitReset()
+                                                                                                       
+{
+	if ( !IsPersistenceAvailable() )
+		return false
+
+	if ( IsFeatureSuppressed( eFeatureSuppressionFlags.RANKED_SPLIT_DIALOG ) )
+		return false
+
+	ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_arenas_ranked_period )
+
+	if ( activeRankedPeriod == null )
+		return false
+
+	expect ItemFlavor( activeRankedPeriod  )
+
+	if ( !SharedRankedPeriod_HasSplits( activeRankedPeriod ) )
+		return false
+
+	if ( SharedRankedPeriod_IsFirstSplitActive( activeRankedPeriod ) )
+		return false
+
+	if ( !SharedRankedPeriod_IsSecondSplitActive( activeRankedPeriod ) )
+		return false
+
+	var hasRankedSplitOccured = GetArenasRankedPersistenceData( GetLocalClientPlayer(), "hasSplitResetOccured" )
+	if ( hasRankedSplitOccured == null )
+		return false
+
+	expect bool ( hasRankedSplitOccured )
+	if ( !hasRankedSplitOccured )
+		return false
+
+	if ( GetCurrentPlaylistVarBool( "arenas_ranked_end_series_stryder_check", true ) )
+	{
+		if ( ArenasRanked_GetHistoricalLadderPosition( GetLocalClientPlayer(), ItemFlavor_GetGUIDString( activeRankedPeriod ), true ) == 0 )                                                                   
+			return false
+	}
+
+	string rankedPeriodGUID                       = ItemFlavor_GetGUIDString( activeRankedPeriod )
+	string historicalPersistenceFieldAcknowledged = "arenasRankedData[" + rankedPeriodGUID + "]." + "splitResetAcknowledged"
+
+	file.arenasRankedSplitResetAcknowledgePersistenceField = historicalPersistenceFieldAcknowledged
+
+	return (GetDialogFlowTablesValueOrPersistence( historicalPersistenceFieldAcknowledged, 9999 ) == false)
+}
+
+
+string function ArenasRanked_GetSplitResetAcknowledgePersistenceField()
+{
+	return file.arenasRankedSplitResetAcknowledgePersistenceField
+}
+
+  
+                                                     
+ 
+	                                
+		            
+
+	                                                                                                                                 
+
+	                                 
+		            
+
+	                                        
+
+	                                                                                                                                                                                              
+ 
+  
+
+bool function IsArenasRankedPlaylist( string playlist )
+{
+	return GetPlaylistVarBool( playlist, "is_arenas_ranked", false )
+}
+
+
+bool function IsLastPlaylistArenasMode()
+{
+	string playlist = string( GetPersistentVar( "lastPlaylist" ) )
+
+	                                                              
+	if( GetPlaylistIndexForName( playlist ) == -1 || Playlist_ShouldBeHiddenForScheduleBlocks( playlist ) )
+		return false
+
+	                                                  
+	Assert( GetPlaylistGamemodesCount( playlist ) == 1, "This function need to be fixed to support multiple gamemodes per playlist" )
+	return GetPlaylistGamemodeByIndex( playlist, 0 ) == GAMEMODE_ARENAS
+}
+
+
+bool function ArenasRanked_ShouldUpdateWithComnunityUserInfo( int score, int ladderPosition )
+{
+	SharedRankedDivisionData data = GetCurrentArenasRankedDivisionFromScoreAndLadderPosition( score, ladderPosition )
+	if ( data.emblemDisplayMode == emblemDisplayMode.DISPLAY_LADDER_POSITION && ladderPosition == SHARED_RANKED_INVALID_LADDER_POSITION )
+		return true
+
+	if ( file.ladderOnlyDivision != null )
+	{
+		SharedRankedTierData rankedTier = data.tier
+		if ( ArenasRanked_GetNextTierData( rankedTier ) != null )
+		{
+			return false
+		}
+		else
+		{
+
+			return ((expect SharedRankedDivisionData( file.ladderOnlyDivision )).scoreMin <= score)
+		}
+	}
+
+	return false
+}
+
+
+bool function ArenasRanked_PartyMeetsRankedDifferenceRequirements()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( GetCurrentPlaylistVarBool( "ranked_dev_playtest", false ) )
+		return true
+
+	if ( GetCurrentPlaylistVarBool( "arenas_ranked_ignore_party_rank_difference", false ) )
+		return true
+
+	Party party = GetParty()
+	if ( party.members.len() == 0 )
+		return true
+
+	bool allPartyMembersMeetRankedDifferenceRequirements = true
+
+	foreach ( member in party.members )
+	{
+		CommunityUserInfo ornull userInfoOrNull = GetUserInfo( member.hardware, member.uid )
+
+		if ( userInfoOrNull != null )
+		{
+			CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+
+			int rankedTierThresholdIndex = ArenasRanked_GetTierOfThresholdForRankedPartyDifferences()
+
+			SharedRankedTierData tierData = GetCurrentArenasRankedDivisionFromScore( userInfo.arenaScore ).tier
+
+			if ( tierData.index < rankedTierThresholdIndex )
+			{
+				continue
+			}
+			else
+			{
+				foreach ( partyMember in party.members )                                                                              
+				{
+					if ( partyMember.hardware == member.hardware && partyMember.uid == member.uid )
+						continue
+
+					CommunityUserInfo ornull partyMemberUserInfo = GetUserInfo( partyMember.hardware, partyMember.uid )
+					if ( partyMemberUserInfo == null )
+					{
+						allPartyMembersMeetRankedDifferenceRequirements = false
+						break
+					}
+
+					expect CommunityUserInfo( partyMemberUserInfo )
+
+					SharedRankedTierData partyMemberTierData = GetCurrentArenasRankedDivisionFromScore( partyMemberUserInfo.arenaScore ).tier
+
+					if ( abs( partyMemberTierData.index - tierData.index ) > 1 )
+					{
+						allPartyMembersMeetRankedDifferenceRequirements = false
+						break
+					}
+				}
+
+				if ( !allPartyMembersMeetRankedDifferenceRequirements )
+					break
+			}
+		}
+		else
+		{
+			allPartyMembersMeetRankedDifferenceRequirements = false
+			break
+		}
+	}
+
+	return allPartyMembersMeetRankedDifferenceRequirements
+}
+
+
+bool function ArenasRanked_HasBeenInitialized()
+{
+	if ( !IsFullyConnected() )
+		return false
+
+	if ( !IsPersistenceAvailable() )
+		return false
+
+	if ( GetBugReproNum() == 999 )
+		return true
+
+	if ( GetCurrentPlaylistVarBool( "ranked_dev_playtest", false ) )
+		return true
+
+	if ( GetCurrentPlaylistVarBool( "ranked_ignore_intialization_check", false ) )
+		return true
+
+	ItemFlavor ornull activeRankedPeriod = GetActiveRankedPeriodByType( GetUnixTimestamp(), eItemType.calevent_arenas_ranked_period )
+	if ( activeRankedPeriod == null )                                                        
+		return true
+
+	expect ItemFlavor ( activeRankedPeriod )
+
+	entity uiPlayer = GetLocalClientPlayer()
+
+	if ( !GetArenasRankedPersistenceData( uiPlayer, "arenasRankedInitialized" ) )
+		return false
+
+	if ( SharedRankedPeriod_HasSplits( activeRankedPeriod ) )
+	{
+		                                                                                 
+		                                                                                                                                                                  
+		if ( GetCurrentPlaylistVarBool( "arenas_ranked_end_series_stryder_check", true ) )
+		{
+			if ( SharedRankedPeriod_IsSecondSplitActive( activeRankedPeriod ) && GetArenasRankedPersistenceData( uiPlayer, "endFirstSplitLadderPosition" ) == 0 )
+				return false
+		}
+	}
+
+	return true
+
+}
+
+
+void function ServerToUI_ArenasRanked_NotifyRankedPeriodScoreChanged()
+{
+	thread ServerToUI_ArenasRanked_NotifyRankedPeriodScoreChanged_threaded()
+}
+
+
+void function ServerToUI_ArenasRanked_NotifyRankedPeriodScoreChanged_threaded()
+{
+	Signal( uiGlobal.signalDummy, "ArenasRanked_NotifyRankedPeriodScoreChanged" )                                                                
+	EndSignal( uiGlobal.signalDummy, "ArenasRanked_NotifyRankedPeriodScoreChanged" )
+
+	WaitEndFrame()
+	thread TryRunDialogFlowThread()
+}
+
+
+bool function ArenasRanked_HasNotifiedRankedRewardsGiven( string rankedPeriodGUID )
+{
+	return (rankedPeriodGUID in file.arenasRankedPeriodsWithRewardsNotified)
+}
+
+
+void function ArenasRanked_MarkRankedRewardsGivenNotified( string rankedPeriodGUID )
+                                                                                                                                                                  
+{
+	if ( rankedPeriodGUID in file.arenasRankedPeriodsWithRewardsNotified )
+		return
+
+	file.arenasRankedPeriodsWithRewardsNotified[ rankedPeriodGUID  ] <- true
+}
+
+
+void function ArenasRanked_ConstructSingleRankBadgeForStatsCard( var badgeRui, entity player, string rankedPeriodRef )
+{
+	int score                     = ArenasRanked_GetHistoricalRankScore( player, rankedPeriodRef )
+	SharedRankedDivisionData data = ArenasRanked_GetHistoricalRankedDivisionFromScore( score, rankedPeriodRef )
+
+	if ( rankedPeriodRef == GetCurrentStatRankedPeriodRefOrNullByType( eItemType.calevent_arenas_ranked_period ) )
+	{
+		PopulateRuiWithArenasRankedBadgeDetails( badgeRui, score, ArenasRanked_GetLadderPosition( GetLocalClientPlayer() ) )
+	}
+	else
+	{
+		int historicalLadderPosition = ArenasRanked_GetHistoricalLadderPosition( player, rankedPeriodRef, false )
+		PopulateRuiWithHistoricalArenasRankedBadgeDetails( badgeRui, score, historicalLadderPosition, rankedPeriodRef )
+	}
+
+	RuiSetInt( badgeRui, "score", score )
+	RuiSetInt( badgeRui, "scoreMax", 0 )
+	RuiSetFloat( badgeRui, "scoreFrac", 1.0 )
+	RuiSetString( badgeRui, "rankName", data.divisionName )
+}
+
+
+void function ArenasRanked_ConstructDoubleRankBadgeForStatsCard( var firstSplitBadgeRui, var secondSplitBadgeRui, entity player, string rankedPeriodRef )
+{
+	int firstSplitScore                        = ArenasRanked_GetHistoricalFirstSplitRankScore( player, rankedPeriodRef )
+	SharedRankedDivisionData firstSplitDivData = ArenasRanked_GetHistoricalRankedDivisionFromScore( firstSplitScore, rankedPeriodRef )
+	int firstSplitLadderPos                    = ArenasRanked_GetHistoricalLadderPosition( player, rankedPeriodRef, true )
+
+	PopulateRuiWithHistoricalArenasRankedBadgeDetails( firstSplitBadgeRui, firstSplitScore, firstSplitLadderPos, rankedPeriodRef )
+	RuiSetInt( firstSplitBadgeRui, "score", firstSplitScore )
+	RuiSetInt( firstSplitBadgeRui, "scoreMax", 0 )
+	RuiSetFloat( firstSplitBadgeRui, "scoreFrac", 1.0 )
+	RuiSetString( firstSplitBadgeRui, "rankName", firstSplitDivData.divisionName )
+
+	int secondSplitSplitScore                   = ArenasRanked_GetHistoricalRankScore( player, rankedPeriodRef )
+	SharedRankedDivisionData secondSplitDivData = ArenasRanked_GetHistoricalRankedDivisionFromScore( secondSplitSplitScore, rankedPeriodRef )
+
+	if ( rankedPeriodRef == GetCurrentStatRankedPeriodRefOrNullByType( eItemType.calevent_arenas_ranked_period ) )
+	{
+		PopulateRuiWithArenasRankedBadgeDetails( secondSplitBadgeRui, secondSplitSplitScore, ArenasRanked_GetLadderPosition( GetLocalClientPlayer() ) )
+	}
+	else
+	{
+		int historicalLadderPosition = ArenasRanked_GetHistoricalLadderPosition( player, rankedPeriodRef, false )
+		PopulateRuiWithHistoricalArenasRankedBadgeDetails( secondSplitBadgeRui, secondSplitSplitScore, historicalLadderPosition, rankedPeriodRef )
+	}
+
+	RuiSetInt( secondSplitBadgeRui, "score", secondSplitSplitScore )
+	RuiSetInt( secondSplitBadgeRui, "scoreMax", 0 )
+	RuiSetFloat( secondSplitBadgeRui, "scoreFrac", 1.0 )
+	RuiSetString( secondSplitBadgeRui, "rankName", secondSplitDivData.divisionName )
+}
+
+bool function ArenasRanked_IsShowingMatchSummary()
+{
+	return GetPersistentVarAsInt( "showArenasRankedSummary" ) != 0
+}
+
+#endif     
+
+#if CLIENT || UI
+void function PopulateRuiWithArenasRankedBadgeDetails( var rui, int rankScore, int ladderPosition, bool isNested = false )
+{
+	SharedRankedDivisionData currentRank = GetCurrentArenasRankedDivisionFromScoreAndLadderPosition( rankScore, ladderPosition )
+	                                                       
+	SharedRankedTierData currentTier     = currentRank.tier
+	RuiSetImage( rui, "rankedIcon", currentTier.icon )
+	if ( currentTier.isLadderOnlyTier )                                                      
+	{
+		SharedRankedTierData tierByScore = GetCurrentArenasRankedDivisionFromScore( rankScore ).tier
+		RuiSetInt( rui, "rankedIconState", tierByScore.index + 1 )
+	}
+	else
+	{
+		RuiSetInt( rui, "rankedIconState", currentTier.index )
+	}
+
+	SharedRanked_FillInRuiEmblemText( rui, currentRank, rankScore, ladderPosition )
+
+	if ( !isNested )
+	{
+		RuiDestroyNestedIfAlive( rui, "rankedBadgeHandle" )
+		CreateNestedArenasRankedRui( rui, currentRank.tier, "rankedBadgeHandle", rankScore, ladderPosition )
+	}
+}
+
+
+void function PopulateRuiWithHistoricalArenasRankedBadgeDetails( var rui, int rankScore, int ladderPosition, string rankedSeasonGUID, bool isNested = false )
+{
+	Assert( rankedSeasonGUID in file.historicalRankedDivisions )
+	SharedRankedDivisionData historicalRank = ArenasRanked_GetHistoricalRankedDivisionFromScoreAndLadderPosition( rankScore, ladderPosition, rankedSeasonGUID )
+	SharedRankedTierData historicalTier     = historicalRank.tier
+
+	if( historicalTier.scoreMin != ARENAS_RANKED_PLACEMENT_SCORE )
+	{
+		RuiSetImage( rui, "rankedIcon", historicalTier.icon )
+
+		                                                           
+
+		if ( historicalTier.isLadderOnlyTier )                                                      
+		{
+			SharedRankedTierData tierByScore = ArenasRanked_GetHistoricalRankedDivisionFromScore( rankScore, rankedSeasonGUID ).tier
+			RuiSetInt( rui, "rankedIconState", tierByScore.index + 1 )
+		}
+		else
+		{
+			RuiSetInt( rui, "rankedIconState", historicalTier.index )
+		}
+
+		SharedRanked_FillInRuiEmblemText( rui, historicalRank, rankScore, ladderPosition )
+	}
+
+	if ( !isNested )
+	{
+		RuiDestroyNestedIfAlive( rui, "rankedBadgeHandle" )
+		CreateNestedHistoricalArenasRankedRui( rui, historicalRank.tier, rankedSeasonGUID, "rankedBadgeHandle", rankScore, ladderPosition )
+	}
+}
+
+
+var function CreateNestedArenasRankedRui( var pRui, SharedRankedTierData tier, string varName, int score, int ladderPosition )
+{
+	var rui = RuiCreateNested( pRui, varName, tier.iconRuiAsset )
+
+	if( tier.scoreMin == ARENAS_RANKED_PLACEMENT_SCORE )
+	{
+		int completedMatches = ArenasRanked_GetNumPlacementMatchesCompleted( GetLocalClientPlayer() )
+		int startPip = 0                                                                                      
+
+		int currentUnixTime = GetUnixTimestamp()
+		ItemFlavor latestRankedPeriod = GetLatestRankedPeriodByType( currentUnixTime, eItemType.calevent_arenas_ranked_period )
+
+		if( SharedRankedPeriod_HasSplits( latestRankedPeriod ) && SharedRankedPeriod_IsSecondSplitActive( latestRankedPeriod ) )
+		{
+			completedMatches += ARENAS_RANKED_NUM_PLACEMENT_MATCHES - ARENAS_RANKED_SPLIT_NUM_PLACEMENT_MATCHES
+			startPip = ARENAS_RANKED_NUM_PLACEMENT_MATCHES - ARENAS_RANKED_SPLIT_NUM_PLACEMENT_MATCHES
+		}
+
+		RuiSetInt( rui, "placementProgress", completedMatches )
+		RuiSetInt( rui, "startPip", startPip )
+
+		array<bool> placementWins = ArenasRanked_GetPlacementWinsAsArray( GetLocalClientPlayer() )
+		for( int i = startPip; i < placementWins.len(); ++i )
+			RuiSetBool( rui, "wonGame" + i, placementWins[i - startPip] )
+	}
+	else
+		PopulateRuiWithArenasRankedBadgeDetails( rui, score, ladderPosition, true )
+
+	return rui
+}
+
+
+var function CreateNestedHistoricalArenasRankedRui( var pRui, SharedRankedTierData tier, string rankedSeasonGUID, string varName, int score, int ladderPosition )
+{
+	var rui = RuiCreateNested( pRui, varName, tier.iconRuiAsset )
+
+	PopulateRuiWithHistoricalArenasRankedBadgeDetails( rui, score, ladderPosition, rankedSeasonGUID, true )
+
+	return rui
+}
+#endif                

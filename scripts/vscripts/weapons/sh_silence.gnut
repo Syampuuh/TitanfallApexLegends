@@ -1,0 +1,603 @@
+#if SERVER
+                            
+#endif         
+global function MpAbilitySharedSilence_Init
+                              
+                                    
+                                   
+
+                       
+          
+                                                
+                                               
+      
+      
+
+            
+const asset FX_SILENCE_REV_VICTIM_1P = $"P_bSilent_screen_CP"
+const asset FX_SILENCE_REV_VICTIM_3P = $"P_bSilent_body"
+const asset FX_SILENCE_SEER_VICTIM_1P = $"P_foa_disrupt_screen_CP"
+const asset FX_SILENCE_SEER_VICTIM_3P = $"P_foa_victim_disrupt"
+
+global enum eSilenceOwner
+{
+	REVENANT,
+	SEER,
+	_count
+}
+
+const bool SILENCE_DEBUG_STATUSEFFECT = false
+
+struct
+{
+	int colorCorrectionRev
+	int ScreenFxIdRev
+	int colorCorrectionSeer
+	int ScreenFxIdSeer
+	table<int,float> teamDebounceTimes
+
+	array<int> silenceStatusEffects
+
+	float effectDurationRev
+	float effectDurationSeer
+	float interruptedDuration
+
+	#if SERVER
+		                               
+	#endif
+} file
+
+void function MpAbilitySharedSilence_Init()
+{
+	PrecacheParticleSystem( FX_SILENCE_REV_VICTIM_1P )
+	PrecacheParticleSystem( FX_SILENCE_REV_VICTIM_3P )
+	PrecacheParticleSystem( FX_SILENCE_SEER_VICTIM_1P )
+	PrecacheParticleSystem( FX_SILENCE_SEER_VICTIM_3P )
+
+	file.interruptedDuration = GetCurrentPlaylistVarFloat( "silence_interrupt_duration", 0.25 )
+
+	RegisterSignal( "Interrupted" )
+
+#if CLIENT
+	AddCallback_OnWeaponStatusUpdate( Silenced_WeaponStatusCheck )
+
+	RegisterSignal( "AbilitySilence_StopColorCorrection" )
+	file.ScreenFxIdRev = PrecacheParticleSystem( FX_SILENCE_REV_VICTIM_1P )
+	file.colorCorrectionRev = ColorCorrection_Register( "materials/correction/ability_silence.raw_hdr" )
+
+	file.ScreenFxIdSeer = PrecacheParticleSystem( FX_SILENCE_SEER_VICTIM_1P )
+	file.colorCorrectionSeer = ColorCorrection_Register( "materials/correction/ability_silence.raw_hdr" )
+
+	StatusEffect_RegisterEnabledCallback( eStatusEffect.silenced_rev_visuals, AbilitySilence_StartVisualEffect )
+	StatusEffect_RegisterDisabledCallback( eStatusEffect.silenced_rev_visuals, AbilitySilence_StopVisualEffect )
+
+	StatusEffect_RegisterEnabledCallback( eStatusEffect.silenced_seer_visuals, AbilitySilence_StartVisualEffect )
+	StatusEffect_RegisterDisabledCallback( eStatusEffect.silenced_seer_visuals, AbilitySilence_StopVisualEffect )
+
+	StatusEffect_RegisterEnabledCallback( eStatusEffect.interrupted, Interrupted_ClientCallbacks )
+
+#else
+	Bleedout_AddCallback_OnPlayerStartBleedout( OnPlayerStartBleedout_Silence )
+	RegisterSignal( "StopSilence")
+
+	file.abilitiesToCancel = [
+		"mp_weapon_grenade_bangalore",
+		"mp_ability_silence",
+		"mp_ability_gibraltar_shield",
+		"mp_ability_phase_walk",
+		"mp_ability_phase_tunnel",
+		"mp_weapon_zipline",
+		"mp_ability_heartbeat_sensor",
+	]
+
+                               
+                               
+   
+                                                           
+   
+      
+	#endif
+}
+
+#if SERVER
+                                                                                                                                                
+ 
+	                            
+	                          
+	                              
+
+	                                                        
+	                                                       
+	        
+	                              
+	                     
+	                                              
+
+	                                                                   
+	 
+		                                                                        
+		                                                               
+	 
+	                                                                  
+	 
+		                                                                         
+		                                                                
+	 
+
+	                                                                                                         
+	                                                                            
+	                  
+
+	                                   
+	                                                                    
+
+	                                                                                                                                                      
+	                                                                                     
+
+                             
+                                                                                           
+                          
+       
+
+	                        
+	 
+		                                           
+		 
+			                                                  
+			 
+				                                                                 
+				                                                                   
+			 
+		 
+		    
+		 
+			                                                                  
+			                                                                   
+		 
+	 
+
+	                                                                                                                                                                                        
+	                                                  
+	 
+		                               
+
+		          
+			                                              
+		               
+
+		          
+			                                                         
+			                       
+			 
+				                                                            
+					                    
+			 
+		      
+	 
+
+	                                           
+	                                                                                                           
+	                                                                                                       
+
+	                     
+	 
+		                                                                                                                          
+
+		                            
+
+		                                                    
+		 
+			                       
+		 
+
+		                                                   
+		 
+			                                
+			 
+				                                               
+			 
+		 
+
+		                              
+		 
+			                                                                  
+		 
+
+		                                  
+		 
+			                                    
+		 
+	 
+
+	                                                     
+
+	                                                             
+	 
+		                                              
+	 
+
+	                     
+	 
+		                                                                
+	 
+	    
+	 
+		                                             
+	 
+
+	                                               
+	 
+		                                         
+		                                                                                                                                                                                         
+	 
+
+	                      
+	                                                        
+	                              
+	 
+		                                      
+		                              
+		 
+			                                                                                                                                                       
+		 
+
+		                              
+		 
+			                                       
+			                               
+			 
+				                                                                            
+					                                                
+			 
+		 
+	 
+
+	                 
+		                                
+
+	                   
+	                                                     
+
+                               
+                               
+                                           
+                                         
+
+	            
+		                                                           
+		 
+			                     
+			 
+				                                                    
+
+                                  
+                                  
+                                             
+                                           
+
+				                                  
+				                                             
+
+				                                                               
+				 
+					                                                                                                                     
+					                                                
+				 
+			 
+
+			                    
+				                
+		 
+	 
+
+	                          
+	 
+		                                    
+		 
+			                
+			 
+				                                                
+				                 
+			 
+		 
+		    
+		 
+			                 
+			 
+				                                                                                
+				                
+			 
+		 
+
+		           
+	 
+ 
+
+                                                                 
+ 
+	                                                 
+	                          
+	                            
+
+	            
+		                    
+		 
+			                                       
+		 
+	 
+
+	                                        
+
+	             
+ 
+
+                                                                                             
+ 
+	                              
+ 
+#endif         
+
+#if CLIENT
+void function Silenced_WeaponStatusCheck( entity player, var rui, int slot )
+{
+	switch ( slot )
+	{
+		case OFFHAND_LEFT:
+		case OFFHAND_INVENTORY:
+			bool overwrite = false
+			if( slot == OFFHAND_LEFT)
+			{
+				                                                                                                  
+				                     
+				if ( PlayerHasPassive( player, ePassives.PAS_CRYPTO ) )
+				{
+					overwrite = true
+					rui = GetCryptoAnimatedTacticalRui()
+				}
+                   
+				else if ( PlayerHasPassive( player, ePassives.PAS_VANTAGE ) )
+				{
+					overwrite = true
+					rui = GetVantageTacticalRui()
+				}
+          
+			}
+
+			if ( StatusEffect_GetSeverity( player, eStatusEffect.silenced ) )
+			{
+				if( !overwrite )
+					RuiSetString( rui, "hintText", "" )
+				RuiSetBool( rui, "isSilenced", true )
+				if ( StatusEffect_GetSeverity( player, eStatusEffect.silenced_seer_visuals ) )
+				{
+					RuiSetInt( rui, "silenceOwner", eSilenceOwner.SEER )
+				}
+				else if ( StatusEffect_GetSeverity( player, eStatusEffect.silenced_rev_visuals ) )
+				{
+					RuiSetInt( rui, "silenceOwner", eSilenceOwner.REVENANT )
+				}
+			}
+			else
+			{
+				RuiSetBool( rui, "isSilenced", false )
+			}
+			break
+	}
+}
+
+void function AbilitySilence_StartVisualEffect( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	entity viewPlayer = ent
+
+	                                                       
+
+	thread AbilitySilence_UpdatePlayerScreenColorCorrection( viewPlayer, statusEffect )
+	int screenFxId
+
+	switch ( statusEffect )
+	{
+		case eStatusEffect.silenced_rev_visuals:
+			screenFxId = file.ScreenFxIdRev
+			break
+		case eStatusEffect.silenced_seer_visuals:
+			screenFxId = file.ScreenFxIdSeer
+			break
+		default:
+			Warning( FUNC_NAME() + " unknown silence status effect!  Defaulting to Revenants's" )
+			screenFxId = file.ScreenFxIdRev
+			break
+	}
+
+	int fxHandle = StartParticleEffectOnEntityWithPos( viewPlayer, screenFxId, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID, viewPlayer.EyePosition(), <0,0,0> )
+	EffectSetIsWithCockpit( fxHandle, true )
+
+	thread AbilitySilence_ScreenEffectThread( viewPlayer, fxHandle, statusEffect )
+}
+
+
+void function AbilitySilence_StopVisualEffect( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( !actuallyChanged && GetLocalViewPlayer() == GetLocalClientPlayer() )
+		return
+
+	if ( ent != GetLocalViewPlayer() )
+		return
+
+	if ( IsAlive( ent ) )
+	{
+		EmitSoundOnEntity( ent, "Survival_UI_Ability_Ready_SilenceEnded" )
+	}
+
+	ent.Signal( "AbilitySilence_StopColorCorrection" )
+}
+
+
+void function AbilitySilence_UpdatePlayerScreenColorCorrection( entity player, int statusEffect )
+{
+	Assert ( IsNewThread(), "Must be threaded off." )
+	Assert ( player == GetLocalViewPlayer() )
+
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "AbilitySilence_StopColorCorrection" )
+
+	int colorCorrection
+
+	switch( statusEffect )
+	{
+		case eStatusEffect.silenced_rev_visuals:
+			colorCorrection = file.colorCorrectionRev
+			break
+		case eStatusEffect.silenced_seer_visuals:
+			colorCorrection = file.colorCorrectionSeer
+			break
+		default:
+			Warning(FUNC_NAME() + " unhandled silenced status effect, defaulting to Revenant's")
+			colorCorrection = file.colorCorrectionRev
+			break
+	}
+
+	OnThreadEnd(
+		function() : ( player, colorCorrection )
+		{
+			ColorCorrection_SetWeight( colorCorrection, 0.0 )
+			ColorCorrection_SetExclusive( colorCorrection, false )
+		}
+	)
+
+	ColorCorrection_SetExclusive( colorCorrection, true )
+	ColorCorrection_SetWeight( colorCorrection, 1.0 )
+
+	                             	                                                                     
+	float startTime = Time()
+
+	while ( true )
+	{
+		float timeRemaining = StatusEffect_GetTimeRemaining( player, statusEffect )
+		float normalizedTime = timeRemaining / Silence_GetEffectDuration()
+
+		ColorCorrection_SetWeight( colorCorrection, normalizedTime )
+
+		if ( SILENCE_DEBUG_STATUSEFFECT )
+			DebugScreenText( 0.427, 0.69, "ColorCorrection Weight: " + normalizedTime )
+
+		WaitFrame()
+	}
+}
+
+
+void function AbilitySilence_ScreenEffectThread( entity viewPlayer, int fxHandle, int statusEffect )
+{
+	EndSignal( viewPlayer, "OnDeath" )
+	EndSignal( viewPlayer, "AbilitySilence_StopColorCorrection" )
+
+	string silenceSound = ""
+
+	switch ( statusEffect )
+	{
+		case eStatusEffect.silenced_rev_visuals:
+			silenceSound = "Silence_Victim_Loop_1p"
+			break
+		                                                                                                
+		case eStatusEffect.silenced_seer_visuals:
+			break
+		default:
+			Warning( FUNC_NAME() + " unknown silence status effect!  Defaulting to Revenants's" )
+			silenceSound = "Silence_Victim_Loop_1p"
+			break
+	}
+
+	OnThreadEnd(
+		function() : ( fxHandle, viewPlayer, silenceSound )
+		{
+			if ( !EffectDoesExist( fxHandle ) )
+				return
+
+			EffectStop( fxHandle, false, true )
+			if ( IsValid( viewPlayer ) )
+			{
+				if ( silenceSound != "" )
+				{
+					StopSoundOnEntity( viewPlayer, "Silence_Victim_Loop_1p" )
+				}
+			}
+		}
+	)
+
+
+	if ( silenceSound != "" )
+	{
+		EmitSoundOnEntity( viewPlayer, silenceSound )
+	}
+	
+	bool stopSoundOnce = false
+	while( true )
+	{
+		float timeRemaining = StatusEffect_GetTimeRemaining( viewPlayer, statusEffect )
+		float CP1Value = timeRemaining / Silence_GetEffectDuration()
+
+		if ( SILENCE_DEBUG_STATUSEFFECT )
+			DebugScreenText( 0.47, 0.68, "CP1 Value: " + CP1Value )
+
+		if ( !EffectDoesExist( fxHandle ) )
+			break
+
+		EffectSetControlPointVector( fxHandle, 1, <CP1Value,255,255> )
+		if ( ( stopSoundOnce == false ) && ( timeRemaining < 3 ) && ( statusEffect == eStatusEffect.silenced_rev_visuals ) )
+		{
+			stopSoundOnce = true
+			StopSoundOnEntity( viewPlayer, silenceSound )
+		}
+		WaitFrame()
+	}
+}
+
+                                                                                                 
+void function Interrupted_ClientCallbacks( entity ent, int statusEffect, bool actuallyChanged )
+{
+	if ( ent != GetLocalViewPlayer() || ( GetLocalViewPlayer() == GetLocalClientPlayer() && !actuallyChanged) )
+		return
+
+	Signal( ent, "Interrupted" )
+
+	if ( GetCurrentPlaylistVarBool( "interrupted_closes_crafting_menu", true ) )
+		TryCloseCraftingMenu()
+
+	if ( PlayerHasPassive( ent, ePassives.PAS_AXIOM ) )
+	{
+		ArmoredLeap_Handle_StatusEffectInterrupt( ent )
+	}
+}
+#endif         
+
+                              
+                                    
+ 
+                                                                   
+ 
+                                   
+
+bool function InterruptedStopsHeals()
+{
+                             
+                                                                       
+      
+	return GetCurrentPlaylistVarBool( "interrupted_disables_heal", true )
+       
+}
+
+bool function InterruptedStopsFinishers()
+{
+	return GetCurrentPlaylistVarBool( "interrupted_stops_finishers", true )
+}
+
+float function Interrupt_GetEffectDuration()
+{
+	return file.interruptedDuration
+}

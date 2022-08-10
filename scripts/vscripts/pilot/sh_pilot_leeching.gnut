@@ -7,14 +7,14 @@ global function GetTagForDataknife
 
 global function Leech_CanLeech
 
-#if(false)
-
-
-
+#if SERVER
+	                            
+	                              
+	                           
 #endif
 
-const PLAYER_LEECH_PROMPT_ACTIVE_DIST = 96  //
-const PLAYER_LEECH_PROMPT_REQ_DOT = 0.85  //
+const PLAYER_LEECH_PROMPT_ACTIVE_DIST = 96                                       
+const PLAYER_LEECH_PROMPT_REQ_DOT = 0.85                                                     
 
 global struct LeechActionInfo
 {
@@ -54,9 +54,9 @@ struct
 
 void function PlayerLeechingShared_Init()
 {
-	//
-	//
-	//
+	                                    
+	                     
+	                                    
 	LeechActionInfo marvin
 
 	marvin.playerAnimation1pStart = "ptpov_marvin_leech_start"
@@ -77,12 +77,12 @@ void function PlayerLeechingShared_Init()
 
 	file.allLeechActions.append( marvin )
 
-	//
-	//
-	//
+	                                    
+	                      
+	                                    
 	LeechActionInfo spectre
 
-	//
+	                                                                                
 	spectre.playerAnimation1pStart = "ptpov_data_knife_spectre_leech_start"
 	spectre.playerAnimation1pIdle = "ptpov_data_knife_spectre_leech_idle"
 	spectre.playerAnimation1pEnd = "ptpov_data_knife_spectre_leech_end"
@@ -98,23 +98,23 @@ void function PlayerLeechingShared_Init()
 	spectre.direction = <-1,0,0>
 	spectre.leechAnimSet = "spectre"
 	spectre.isValid = true
-	//
+	                        
 
 	file.allLeechActions.append( spectre )
 
 
-	//
-	//
-	//
+	                                    
+	                     
+	                                    
 	LeechActionInfo reaper
 
 	reaper.playerAnimation1pStart = "ptpov_sspec_attack_powerdown_hack"
-	reaper.playerAnimation1pIdle = "ptpov_sspec_attack_powerdown_hack" 	//
-	reaper.playerAnimation1pEnd = "ptpov_sspec_attack_powerdown_hack"		//
+	reaper.playerAnimation1pIdle = "ptpov_sspec_attack_powerdown_hack" 	                                                                         
+	reaper.playerAnimation1pEnd = "ptpov_sspec_attack_powerdown_hack"		                                                                           
 
 	reaper.playerAnimation3pStart = "pt_sspec_attack_powerdown_hack"
-	reaper.playerAnimation3pIdle = "pt_sspec_attack_powerdown_hack"		//
-	reaper.playerAnimation3pEnd = "pt_sspec_attack_powerdown_hack"			//
+	reaper.playerAnimation3pIdle = "pt_sspec_attack_powerdown_hack"		                                                                      
+	reaper.playerAnimation3pEnd = "pt_sspec_attack_powerdown_hack"			                                                                        
 
 	reaper.targetAnimation3pStart = ""
 	reaper.targetAnimation3pIdle = ""
@@ -127,9 +127,9 @@ void function PlayerLeechingShared_Init()
 	file.allLeechActions.append( reaper )
 
 
-	//
-	//
-	//
+	                                    
+	                    
+	                                    
 	LeechActionInfo drone
 
 	drone.playerAnimation1pStart = "ptpov_data_knife_drone_start"
@@ -144,9 +144,9 @@ void function PlayerLeechingShared_Init()
 	drone.targetAnimation3pIdle = ""
 	drone.targetAnimation3pEnd = ""
 
-	//
-	//
-	//
+	                                                            
+	                                                          
+	                                                        
 
 	drone.direction = <-1,0,0>
 	drone.leechAnimSet = "flyingdrone"
@@ -155,9 +155,9 @@ void function PlayerLeechingShared_Init()
 	file.allLeechActions.append( drone )
 
 
-	//
-	//
-	//
+	                                    
+	                      
+	                                    
 	LeechActionInfo gunship
 
 	gunship.playerAnimation1pStart = "ptpov_data_knife_drone_start"
@@ -172,12 +172,12 @@ void function PlayerLeechingShared_Init()
 	gunship.targetAnimation3pIdle = ""
 	gunship.targetAnimation3pEnd = ""
 
-	//
-	//
-	//
+	                                                              
+	                                                            
+	                                                          
 
 	gunship.direction = <-1,0,0>
-	gunship.leechAnimSet = "vehicle"		//
+	gunship.leechAnimSet = "vehicle"		                                                      
 	gunship.isValid = true
 
 	file.allLeechActions.append( gunship )
@@ -241,7 +241,7 @@ LeechActionInfo function FindLeechAction( entity player, entity target )
 	vector relTargetToPlayerDir = CalcRelativeVector( <0, target.GetAngles().y, 0>, absTargetToPlayerDir )
 
 	LeechActionInfo bestAction = invalidAction
-	float bestDot = -2 //
+	float bestDot = -2                               
 
 	foreach ( action in file.allLeechActions )
 	{
@@ -258,7 +258,7 @@ LeechActionInfo function FindLeechAction( entity player, entity target )
 
 	return bestAction
 }
-//
+                                                                                  
 bool function PlayerCanLeechTarget( entity player, entity target )
 {
 	if ( !Leech_CanLeech( player ) )
@@ -266,15 +266,15 @@ bool function PlayerCanLeechTarget( entity player, entity target )
 
 	if ( !IsLeechable( target ) )
 	{
-//
+  		                                                
 		return false
 	}
 
 	if ( !IsAlive( target ) )
 		return false
 
-	//
-	if ( !player.IsOnGround() && !LeechTargetIsAirborne( target ) ) //
+	                                                                                
+	if ( !player.IsOnGround() && !LeechTargetIsAirborne( target ) )                                                                                                                                
 		return false
 
 	if ( !target.Anim_IsActive() && !target.IsOnGround() && !LeechTargetIsAirborne( target ) )
@@ -288,9 +288,9 @@ bool function PlayerCanLeechTarget( entity player, entity target )
 
 bool function Leech_CanLeech( entity player )
 {
-	//
-	//
-	#if(CLIENT)
+	                                                              
+	                                          
+	#if CLIENT
 	if ( !level.clientScriptInitialized )
 		return false
 	#endif
@@ -298,24 +298,24 @@ bool function Leech_CanLeech( entity player )
 	return player.GetPlayerNetBool( "playerAllowedToLeech" )
 }
 
-#if(false)
+#if SERVER
+                                             
+ 
+	                                                        
+ 
 
-
-
-
-
-
-
-
-
+                                          
+ 
+	                                                       
+ 
 #endif
 
 
-//
-//
+                                                                                  
+                                     
 bool function CheckVerticallyCloseEnough( entity attacker, entity target )
 {
-	//
+	                                                                                          
 	if ( LeechTargetIsAirborne( target ) )
 		return true
 
@@ -327,15 +327,15 @@ bool function CheckVerticallyCloseEnough( entity attacker, entity target )
 	Assert( attacker.IsHuman() )
 	float halfHeight = 30.0
 
-	//
+	                                                    
 	return verticalDistance < halfHeight
 }
-//
+                                                                                  
 bool function LeechTargetIsAirborne( entity npc )
 {
 	return npc.AISetting_MaxFlyingSpeed() > 0
 }
-//
+                                                                                  
 bool function IsLeechable( entity ent )
 {
 	if ( !IsValid_ThisFrame( ent ) )
@@ -346,36 +346,36 @@ bool function IsLeechable( entity ent )
 
 	return Leech_IsLeechable( ent )
 }
-//
+                                                                               
 string function GetTagForDataknife( entity target )
 {
 	string tag = target.AISetting_LeechDataKnifeTag()
 
 	if ( tag == "" )
 	{
-		//
+		                              
 		tag = "PROPGUN"
 	}
 
 	return tag
 }
-//
-//
-#if(false)
+                                                                                   
+                             
+#if SERVER
+                                                       
+ 
+	                  
+		      
 
+	                      
+		      
 
+	                                                                                                  
+	  
+	                                                                          
 
-
-
-
-
-
-//
-/*
-
-
-
-
-*/
-
-#endif //
+	                  
+		                          
+	  
+ 
+#endif         

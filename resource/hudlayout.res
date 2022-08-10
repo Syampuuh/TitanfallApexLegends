@@ -48,7 +48,7 @@
 
 		xpos			0
 		ypos			0
-		zpos			-100000
+		zpos			31072		// Was -100000, but that was silently cast to a short, where it became 31072
 		wide	 		1920
 		tall	 		1080
 
@@ -113,7 +113,6 @@
 
 		center_x		0	// center text horizontally
 		mainFont		HUDPrompt
-		xBoxFont		GameUIButtons
 	}
 
 	WeaponPickupPrompt

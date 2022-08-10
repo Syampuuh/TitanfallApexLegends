@@ -29,15 +29,15 @@ void function InitCharacterQuipsPanel( var panel )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, CharacterQuipsPanel_OnShow )
 	AddPanelEventHandler( panel, eUIEvent.PANEL_HIDE, CharacterQuipsPanel_OnHide )
 
-	//
-	//
-	//
-	//
+	                                                                                               
+	                                                                                                              
+	                                                                                  
+	                                                                                      
 
-	//
-	//
-	//
-	//
+	                                                                                                                                           
+	                                                                                                                     
+	                                                                                                                       
+	                                                                                                                        
 
 	AddCallback_OnTopLevelCustomizeContextChanged( panel, CharacterQuipsPanel_OnCustomizeContextChanged )
 
@@ -167,7 +167,7 @@ void function CharacterQuipsPanel_Update()
 
 	ItemFlavor character = GetTopLevelCustomizeContext()
 	ItemFlavor characterSkin = LoadoutSlot_GetItemFlavor( LocalClientEHI(), Loadout_CharacterSkin( character ) )
-	RunClientScript( "UIToClient_PreviewCharacterSkin", ItemFlavor_GetNetworkIndex_DEPRECATED( characterSkin ), ItemFlavor_GetNetworkIndex_DEPRECATED( character ) )
+	RunClientScript( "UIToClient_PreviewCharacterSkin", ItemFlavor_GetNetworkIndex( characterSkin ), ItemFlavor_GetNetworkIndex( character ) )
 }
 
 void function CharacterQuipsPanel_OnHide( var panel )

@@ -2,121 +2,251 @@ global function Cl_Passives_Init
 
 struct
 {
-
-	#if(false)
-
-#endif
+                
+                 
+                
+       
 } file
 
-#if(false)
-//
-#endif
+               
+               
+                                                                                                                                                          
+      
 
 void function Cl_Passives_Init()
 {
-	#if(false)
-//
-//
-
-#endif
+	AddCallback_OnInitWeaponStatusRuis( OnInitWeaponStatusRuis_CLPassives )
+	AddCallback_PlayerClassChanged( OnPlayerClassChanged_CLPassives )
+	AddOnSpectatorTargetChangedCallback( OnSpectatorTargetChanged )
+                
+                                                                                                     
+                                                                                                     
+                                           
+       
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-#endif
-
-
+void function OnInitWeaponStatusRuis_CLPassives( entity player )
+{
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	DestroyPassiveRuis( player )                              
+
+	if ( PlayerHasPassive( player, ePassives.PAS_VALK ) )
+		CreateValkJetPackRui( player )
+
+	if ( PlayerHasPassive( player, ePassives.PAS_CRYPTO ) )
+	{
+		                                                       
+		CreateCryptoCameraCircleRui( player )
+		CreateCryptoTacticalRui( player )
+	}
+
+                
+		if ( PlayerHasPassive( player, ePassives.PAS_VANTAGE ) )
+		{
+			                                                            
+			CreateVantageTacticalRui( player )
+		}
+       
+
+                  
+                                                               
+   
+                                       
+   
+       
+}
+
+void function OnPlayerClassChanged_CLPassives( entity player )
+{
+	if ( player != GetLocalViewPlayer() )
+		return
+
+	DestroyPassiveRuis( player )
+}
+
+                                                                   
+void function OnSpectatorTargetChanged( entity observer, entity prevTarget, entity newTarget )
+{
+	if ( !IsPrivateMatch() )
+		return
+
+	if ( observer.GetTeam() != TEAM_SPECTATOR )
+		return
+
+	DestroyPassiveRuis( newTarget, IsValid(newTarget) )
+}
+
+void function DestroyPassiveRuis( entity player, bool isValidPlayer = true )
+{
+	if ( !isValidPlayer || !PlayerHasPassive( player, ePassives.PAS_VALK ) )
+	{
+		Valk_DestroyJetPackRui()
+	}
+
+	if ( !isValidPlayer || !PlayerHasPassive( player, ePassives.PAS_CRYPTO ) )
+	{
+		DestroyCameraCircleStatusRui()
+		DestroyCryptoAnimatedTacticalRui()
+	}
+                
+		if ( !isValidPlayer || !PlayerHasPassive( player, ePassives.PAS_VANTAGE ) )
+		{
+			DestroyVantageTacticalRui()
+		}
+       
+                  
+                                                                                  
+   
+                                
+   
+       
+}
+
+void function CreateValkJetPackRui( entity player )
+{
+	if ( Valk_GetJetPackRui() != null )
+		return
+
+	Valk_CreateJetPackRui( player )
+}
+
+void function CreateCryptoCameraCircleRui( entity player )
+{
+	if ( GetCameraCircleStatusRui() != null )
+		return
+
+	CreateCameraCircleStatusRui()
+}
+
+void function CreateCryptoTacticalRui( entity player )
+{
+	if ( GetCryptoAnimatedTacticalRui() != null )
+		return
+
+	CreateCryptoAnimatedTacticalRui()
+}
+               
+void function CreateVantageTacticalRui( entity player )
+{
+	if ( GetVantageTacticalRui() != null )
+		return
+
+	CreateVantageTacticalRui_Internal()
+}
+      
+
+                 
+                                                         
+ 
+                                         
+        
+
+                                      
+ 
+      
+
+               
+                                                                                           
+                                                                                                  
+ 
+                                              
+
+                                   
+        
+
+                                 
+        
+
+                                                        
+                      
+
+                                            
+ 
+      
+
+               
+                                                             
+ 
+                                      
+                                
+                                            
+
+             
+                              
+   
+                           
+   
+  
+
+                
+                       
+              
+  
+             
+
+                                                     
+                        
+                                                                        
+   
+                   
+                   
+                   
+   
+                                                                                        
+   
+                   
+   
+
+                  
+   
+                                                              
+                                          
+                                                                                          
+                                     
+            
+                                                                                            
+                                                                                              
+                                                                                                  
+                                                                                                    
+                                                                                                        
+                                                                                                          
+
+                          
+                                                                                                                      
+                                      
+                                                                 
+                                        
+                           
+                                                                                            
+                                      
+                                 
+
+                                  
+                                        
+
+                                                              
+                                               
+                                                                                  
+                                                         
+                                                            
+                                                         
+                                                                                   
+                                                                                       
+                                              
+   
+      
+   
+                                           
+   
+  
+ 
+                     
+
+               
+                                                                                                 
+ 
+                                         
+ 
+      

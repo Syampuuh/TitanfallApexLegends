@@ -1,26 +1,49 @@
-//
-//
-//
-//
-//
-//
-//
-//
-//
-#if(false)
+  
+                                                  
+                                                   
+                                             
+                                                  
+                                                   
+                                                   
+                                                  
+  
 
+global function IsDoorLocked
 
-
-
-
+#if SERVER
+                              
+                                     
+                                  
+                                      
+                        
+                          
+                        
+                         
+                                         
+                                         
+                                       
+                                  
+                                            
+                          
+                            
+                                 
+                                         
+#endif
+#if SERVER
+                                       
+                               
+                                
+                                       
 #endif
 
 global function ShDoors_Init
 global function IsDoor
+global function IsCodeDoor
+global function IsDoorOpen
 global function GetAllPropDoors
 
-#if(false)
-
+#if SERVER && DEV
+                                        
 #endif
 
 global function CodeCallback_OnDoorInteraction
@@ -35,50 +58,71 @@ enum eDoorType
 	CODE,
 }
 
+struct DoorData
+{
+	string          className
+	string          scriptName
+	vector          origin
+	vector          angles
+	int             realm
+	asset           modelName
+	entity          linkDoor
+	bool            hasLinkDoor
+	DoorData ornull linkDoorData
+}
+
 struct
 {
-	#if(false)
+	#if SERVER && DEV
+		                           
+	#endif
 
-#endif
+	#if SERVER
+		                                  
+		                                
+		                                                                            
+	#endif         
 
-	#if(false)
-
-#endif //
-
-	#if(CLIENT)
+	#if CLIENT
 		array<entity> allPropDoors
-	#endif //
+	#endif         
 
 } file
 
 void function ShDoors_Init()
 {
-	#if(false)
+	#if SERVER
+		                                            
+		                                         
+		                                      
+		                            
+		                                 
+		                                          
+		                                     
+		                                               
+		                                           
+		                                     
+		                               
 
+		                                                                   
+		                                                                   
+		                                                                     
+		                                                  
+                        
+			                                                                          
+        
 
+		                                              
 
+		                                                       
 
+		       
+			                                 
+			                                                                                                     
+		      
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-	#if(CLIENT)
+	#endif
+	#if CLIENT
 		AddCreateCallback( "prop_dynamic", OnSomePropCreated )
 		AddCreateCallback( "script_mover", OnSomePropCreated )
 		AddCreateCallback( "door_mover", OnSomePropCreated )
@@ -89,6 +133,7 @@ void function ShDoors_Init()
 	SurvivalDoorSliding_Init()
 	BlockableDoor_Init()
 }
+
 
 bool function IsDoor( entity ent )
 {
@@ -102,424 +147,520 @@ bool function IsDoor( entity ent )
 		case "survival_door_sliding":
 		case "survival_door_blockable":
 		case "survival_door_code":
-		return true
+			return true
 	}
 
 	return false
 }
 
-array<entity> function GetAllPropDoors()
+
+bool function IsDoorOpen( entity door )
 {
-	#if(false)
+	if ( !IsDoor( door ) )
+		return false
 
+	if ( IsCodeDoor( door ) )
+	{
+		return door.IsDoorOpen()
+	}
+	else
+	{
+		return GradeFlagsHas( door, eGradeFlags.IS_OPEN )                                                   
+	}
 
-#endif //
-
-	#if(CLIENT)
-		return file.allPropDoors
-	#endif //
+	return false
 }
 
-#if(false)
 
+array<entity> function GetAllPropDoors()
+{
+	#if SERVER
+		                                                                         
+		            
+	#endif         
 
+	#if CLIENT
+		return file.allPropDoors
+	#endif         
+}
 
+#if SERVER && DEV
+                                                                                         
+ 
+	                            
+		                                                                            
+		                                                                 
+	 
 
-
-
-
-
-
-//
-
-
-
-
-
-
-
+	                                            
+	                                           
+	                                                                                   
+	                                                                                         
+	                           
+	                                                                                                                       
+	                     
+ 
 #endif
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+                   
+                                                                                                     
+   
+  	  
+  	               
+  	                                             
+  	                     
+  	                     
+  	                     
+  	                     
+  	                     
+  	                     
+  	                     
+  	                               
+  	                                             
+  	  
+  	                                                                          
+  	                                                                                                     
+  	                                                   
+  	                                           
+  	  
+  	  
+  	                                                
+  	                                                                                 
+  	                                 
+  	                                 
+  	                                 
+  	                                 
+  	                                 
+  	                                 
+  	                                 
+  	                                                     
+  	                                                                                 
+  	  
+   
+        
 
 
 bool function DoorsAreEnabled()
 {
-	return GetCurrentPlaylistVarBool( "survival_enable_doors", true ) //
+	return GetCurrentPlaylistVarBool( "survival_enable_doors", true )                                                                  
 }
 
 
-#if(false)
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                               
+ 
+	                                     
+ 
+
+                                            
+ 
+	                                         
+
+	                                 
+
+	                            
+	 
+		                                      
+			        
+
+		                                                                                     
+
+		                                
+		                                                           
+
+		                                           
+
+		                  
+		 
+			                                      
+		 
+
+		                             
+
+		                                        
+		 
+			              
+			                      
+			 
+				                  
+				                            
+				                          
+				                            
+
+				                  
+				 
+					                                     
+					                                   
+					                                     
+				 
+			 
+			    
+			 
+				                        
+				                                    
+
+				                  
+				 
+					                                                                                                                 
+					                         
+					                                                          
+				 
+			 
+		 
+	 
+ 
+
+
+                                          
+ 
+	                                                                                
+
+	                         
+	 
+		              
+		      
+	 
+
+	                                        
+
+	            
+	                    
+	 
+		                           
+			                                                
+			                                                                                                   
+			                                 
+			                                                                                            
+			                                                                                  
+			                   
+			 
+				                                                 
+				                                                        
+				                                                        
+
+				                              
+				 
+					                                                         
+						                      
+						                   
+						                              
+						                                                                              
+						     
+
+					                                                          
+						                    
+						                   
+						                                                            
+						                                                                             
+						     
+
+					                                                         
+						                        
+
+					                                                         
+						                     
+						                   
+						                    
+						                              
+						                                                                              
+						                                                             
+						                                                                              
+						     
+				 
+
+				              
+				                         
+
+				                    
+				                     
+				                   
+				 
+					                                                                                                       
+					                    
+				 
+
+				                    
+				 
+					                                                                                                          
+
+					                       
+					                                         
+					                                         
+				 
+
+				                    
+				 
+					                              
+					                                                   
+				 
+				                     
+				 
+					                               
+					                                                    
+					                               
+				 
+			 
+			                             
+			 
+				                                                 
+				                                                        
+				                                                        
+
+				                             
+				 
+					                                                         
+						                      
+						                   
+						                              
+						                                                                                
+						     
+
+					                                                         
+						                        
+						                   
+						                    
+						                                                            
+						                                                                                 
+						                                                             
+						                                                                                   
+						     
+
+					                                                          
+						                    
+						                    
+						                               
+						                                                                                
+						     
+
+					                                                         
+						                     
+						                   
+						                    
+						                                                            
+						                                                                                 
+						                                                             
+						                                                                                   
+						     
+				 
+
+				                           
+				                   
+				 
+					                                                                                                                                            
+					                                                        
+					                                 
+
+					              
+					                    
+					                              
+				 
+
+				                    
+				 
+					                                                                                                                                                       
+					                                                         
+					                                   
+
+					                            
+					 
+						              
+						                     
+						                              
+					 
+					    
+					 
+						                                         
+						                                         
+						                               
+					 
+				 
+			 
+			    
+			 
+				                                                                         
+				 
+					          
+					                                                                                  
+					 
+						                                                                                                                                                   
+					 
+					                                                                                      
+					 
+						                                                                                                                                                                                 
+					 
+
+					                  
+					 
+						                                            
+						              
+
+						                                                
+						                            
+						                         
+						                        
+						                                              
+						                                             
+						                                 
+						                                   
+						                                     
+						                                
+						                                    
+						                                  
+						                                    
+						                                  
+						                     
+
+						                     
+
+						                    
+						      
+					 
+				 
+
+				                                                                                  
+				 
+					                                                           
+					                                                                         
+					                                                                                                                                 
+					                                                         
+					                                                                          
+					                                                       
+					                                                
+					                          
+					              
+					                
+				 
+				    
+				 
+					                          
+				 
+			 
+
+			     
+
+		                           
+			                                      
+			                                                   
+			                                                                                                                 
+			                          
+			     
+
+		                             
+			                            
+			     
+
+		                               
+			                              
+			     
+
+		                          
+			                         
+			     
+                        
+		                                  
+			                            
+			       
+			     
+        
+	 
+
+	                                     
+
+	                  
+	 
+		                       
+		 
+			                                                                             
+			                                                                      
+			                                       
+			     
+		 
+
+		                         
+		 
+			                              
+			     
+		 
+
+		                    
+		 
+			                                                         
+			                           
+			     
+		 
+
+		        
+		 
+			                                          
+			     
+		 
+	 
+
+	                       
+	                                          
+
+	       
+		                               
+	      
+ 
 #endif
 
-#if(false)
+#if SERVER && DEV
+                                        
+ 
+	                                                      
+	 
+		                       
+			        
 
+		                              
 
+		                  
+		 
+			                       
+			 
+				                                       
+				     
+			 
 
+			                         
+			 
+				                              
+				     
+			 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+			        
+			 
+				                                          
+				     
+			 
+		 
+	 
+ 
 #endif
 
-#if(CLIENT)
+#if CLIENT
 void function OnSomePropCreated( entity prop )
 {
 	if ( prop.GetScriptName() == "survival_door_sliding" )
+	{
 		SetCallback_CanUseEntityCallback( prop, Survival_DoorSliding_CanUseFunction )
+		StreamModelHint( prop.GetModelName() )
+	}
 
 	if ( prop.GetScriptName() == "survival_door_blockable" )
+	{
 		OnBlockableDoorSpawned( prop )
+		StreamModelHint( prop.GetModelName() )
+	}
 }
 
 void function OnCodeDoorCreated_Client( entity door )
 {
 	door.SetDoDestroyCallback( true )
 	file.allPropDoors.append( door )
+
+	StreamModelHint( door.GetModelName() )
 }
 
 void function OnCodeDoorDestroyed_Client( entity door )
@@ -528,175 +669,231 @@ void function OnCodeDoorDestroyed_Client( entity door )
 }
 #endif
 
-#if(false)
+#if SERVER
+                                                                            
+ 
+	                                                     
+	                             
+		      
+	                          
+		      
+	                                       
+		      
 
+	                                        
+ 
+#endif              
 
+#if SERVER
+                                                       
+ 
+	                                    
+	                                        
+	                         
+	 
+		                                                                                                 
+		      
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-#if(false)
-
-
-//
-
-
-
-
-
-
-
-
-
+	                                                      
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
+#if SERVER
+                                                  
+ 
+	                                             
+	                                            
+	             
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
+#if SERVER
+                                                     
+ 
+	                                              
+	                                    
+	                                                   
+ 
 #endif
 
-#if(false)
+#if SERVER
+                                                 
+ 
+	                                           
+	                                                                                                  
 
+	               
+	                                         
+	                                         
+	                                         
+	                                         
+	                              
+		                      
+	    
+		                      
 
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                       
+ 
+	                     
+
+	                                         
+	                                      
+	              
+ 
+
+                                              
+ 
+	                     
+
+	                                                                  
+	                                                                  
+	                                                                    
+	                                                                      
+	              
+ 
+
+                                           
+ 
+	                     
+
+	                                                                 
+	                                                             
+	              
+ 
+#endif         
+
+
+#if SERVER
+                                              
+                                                         
+ 
+	                                                        
+
+	                                              
+	       
+		                               
+	      
+	                                     
+	                       
+	                      
+	                                                    
+	                              
+	                                  
+	                                   
+	                              
+	                                  
+	                                
+	                                  
+	                                
+	                   
+
+	                                          
+	                                                                                                                                      
+	                                                       
+ 
+
+                                                                                    
+ 
+	                                 
+
+	                                                                   
+	                                           
+	                            
+
+	           
+ 
+
+                                                                                                 
+ 
+	                                  
+
+	                      
+	                       
+	 
+		                                                          
+			                     
+	 
+	              
+ 
+
+                                                                           
+ 
+	                                           
+	                                                            
+ 
+
+                                                                   
+ 
+	                                                         
+	                                                        
+	                       
+		           
+
+	                 
+ 
+
+#endif             
+
+
+#if SERVER
+                                     
+ 
+	                         
+	 
+		                          
+		      
+	 
+
+	                        
+	                                   
+
+ 
+
+                                                 
+ 
+	                                                                             
+	                   
+	                             
+
+	                                                                                                      
+
+	                       
+		      
+
+	                    
+		                                                                                                                 
+	    
+		                                                                      
+ 
+
+
+                                       
+ 
+	                         
+	 
+		                           
+		      
+	 
+
+	                         
+	                    
+		                                                                    
+	    
+		                                                                  
+ 
+
+                                               
+ 
+	                        
+ 
 #endif
+
 
 bool function IsCodeDoor( entity door )
 {
@@ -706,221 +903,219 @@ bool function IsCodeDoor( entity door )
 }
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                             
+ 
+	                                     
+	            
+	                                  
+ 
+                                                                           
+ 
+	                    
+	                                     
+	                                       
+		                                  
+	   
+
+	                                          
+	                     
+ 
+
+                                                            
+ 
+	                                                                                     
+
+	                             
+	       
+		                                 
+	      
+	                                                             
+		                      
+			                               
+	   
+
+	                
+	                  
+	                                                                  
+	                                
+
+	                     
+	                                            
+	                              
+	                                                                           
+	                                                     
+
+	                  
+	 
+		                              
+		                                   
+	 
+
+	                                  
+		                                                                   
+
+	                                   
+
+	           
+	 
+		                                                                                   
+		                                                     
+		                                                     
+
+		                        
+		 
+			                                                       
+				        
+		 
+		                                                      
+		 
+			        
+		 
+
+		                                                                                 
+		      
+			                        
+				                                                                                                                     
+		      
+
+		                              
+
+		                                                       
+			                                                           
+
+		                                  
+			                            
+
+		                    
+		 
+			                                                     
+			                     
+			                                            
+
+			                                                     
+
+			                        
+				                                    
+
+			                                  
+			 
+				                                 
+				                                                    
+			 
+
+			                                  
+			 
+				                                                         
+			 
+			                                       
+			 
+				                                                        
+				             
+			 
+		 
+		    
+		 
+			                                                    
+			                    
+			                                          
+			                                                 
+
+			                        
+				                                                     
+
+			                        
+				                                   
+
+			                                  
+			 
+				                                  
+
+				                                
+				                     
+				 
+					                                   
+					        
+				 
+				                              
+
+				                                                           
+				                                                                                
+					                                                  
+				    
+					                               
+
+				                        
+			 
+			                                       
+			 
+				                        
+				 
+					                                                                        
+					                                          
+				 
+				                                   
+				 
+					                         
+				 
+
+				                                                        
+			 
+			                                       
+			 
+				               
+
+				                        
+				 
+					                                       
+					                             
+					                               
+
+					                 
+					                 
+					                       
+
+					                                                     
+
+					                          
+				 
+
+				                                                                      
+				                                                    
+				             
+			 
+		 
+
+		                                 
+			        
+
+		                    
+			                                                                    
+		    
+			                                                                  
+	 
+ 
 #endif
 
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+  
+                             
+                                                    
+                                                     
+                                                 
+                                                    
+                                                     
+                                        
+                                        
+                                                                                                                                                           
+                                                                                                                                                            
+                                                                                                                                                                                
+                                                                                                                                                                                 
+                                                                                                                                                                                 
+                                                                                                                                                                                 
+                                                                                                                                                    
+                                                                                                                                                   
 
 const float BLOCKABLE_DOOR_EXTRA_USE_DEBOUNCE = 0.21
 
@@ -934,9 +1129,9 @@ const float BLOCKABLE_DOOR_TEMP_HARDCODED_DOOR_HEIGHT = 108.0
 const float BLOCKABLE_DOOR_TRACE_ANGLE_DELTA = 11.0
 const float BLOCKABLE_DOOR_TRACE_EXTRA_THICKNESS = 3.8
 const float BLOCKABLE_DOOR_TRACE_SWING_EDGE_INSET = 0.2
-const float BLOCKABLE_DOOR_TRACE_HINGE_EDGE_INSET = 4.0//
+const float BLOCKABLE_DOOR_TRACE_HINGE_EDGE_INSET = 4.0      
 const float BLOCKABLE_DOOR_TRACE_MAX_CAPSULE_GAP = 7.0
-const float BLOCKABLE_DOOR_TRACE_HEIGHT_INSET = 9.0 //
+const float BLOCKABLE_DOOR_TRACE_HEIGHT_INSET = 9.0                       
 
 const asset BLOCKABLE_DOOR_MODEL = $"mdl/door/door_104x64x8_elevatorstyle01_right_animated.rmdl"
 const asset BLOCKABLE_DOOR_DAMAGED_MODEL = $"mdl/door/canyonlands_door_single_02_damaged.rmdl"
@@ -953,7 +1148,7 @@ enum eDoorFlags
 	IS_BUSY = (1 << 2),
 }
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function BlockableDoor_Init()
 {
 	PrecacheModel( BLOCKABLE_DOOR_MODEL )
@@ -963,13 +1158,13 @@ void function BlockableDoor_Init()
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function OnBlockableDoorSpawned( entity door )
 {
-	#if(false)
-
-
-#elseif(CLIENT)
+	#if SERVER
+		                                     
+		                                 
+	#elseif CLIENT
 		SetCallback_CanUseEntityCallback( door, BlockableDoorCanUseCheck )
 		AddEntityCallback_GetUseEntOverrideText( door, BlockableDoorUseTextOverride )
 	#endif
@@ -990,307 +1185,338 @@ const table<int, vector> BLOCKABLE_DOOR_NOTCH_ROTATIONS = {
 }
 
 
-#if(false)
+#if SERVER
+                                                                                  
+ 
+	                                                       
+	                                                                                             
+	                                                                                                           
+	                                                                                                                                    
 
+	                        
+		                                                                 
+		                                                                               
+		                                                                                                                         
+	      
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                        
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                      
+ 
+	                                      
+	                                                                                                      
+	                                                                          
 
+	                                                                                         
 
-//
+	                                                                                                                                                                    
+	                                                                                                                                                                     
+	                             
+	  	                                                                                        
 
+	               
+		                                 
+	                           
+		                                             
 
-
-//
-
-//
-//
-//
-//
-
-
-
-
-
-
-
-
+	                                         
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                 
+ 
+	                                                     
+	                                                     
+	                                                                                                                                           
+	                                                                                                           
+	                                                                                                                              
 
+	                 
+	 
+		                                                                    
+		                                                 
+			                                 
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                                                                
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                       
+ 
+	                                            
+	 
+		                                                 
+			                                         
+		    
+			                                             
+	 
+	                                 
+ 
 #endif
 
-#if(false)
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                                           
+ 
+	                                                                                     
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                              
+ 
+	                            
+ 
 
+                                          
+ 
+	                                                                            
+	                                     
+	                                    
+	                                   
+                 
+                                        
+                                       
+       
+	                                                               
+	                                    
+	                                       
+	                            
 
+	                           
+	                                                      
 
-//
-//
+	                       
+	                                          
+	                                                           
 
+	                                                          
+	                     
+	                             
 
+	                  
+		                                   
 
+	                             
 
+	              
 
+	                         
+	                       
 
+	                                        
+	 
+		                                                       
+		                                                         
+	 
 
+	                                 
+		                                                                                                               
+		 
+			                                                                                                        
+		 
+	 
+ 
 
+                                                                             
+ 
+	      
+		                                                                                                                                 
+	      
+ 
 
+                                               
+ 
+	                             
+	       
+		                                 
+	      
+	                                    
+		                      
+		 
+			                                    
+			                                                                  
+			                                          
+		 
+	   
+
+	                      
+
+	                                                                            
+	                                     
+	                                    
+	                                   
+	                                                     
+	                                        
+	                                    
+	                                                               
+	                           
+	                                                      
+
+	                  
+
+	                            
+	                                                                  
+
+	                      
+
+	                                                                                                                     
+
+	                                                                                        
+
+	                                    
+
+	                                        
+
+	              
+	 
+		                                                                    
+
+		                                                                  
+		                                                                               
+		 
+			                                                     
+				                              
+
+			                                                                                 
+		 
+
+		                                                                                                                                                
+
+		                                                                      
+		              
+		                                                
+
+		                
+		                                      
+		 
+			                                                     
+			 
+				                                              
+					                                                                   
+				    
+					                                         
+			 
+			    
+			 
+				                                                                    
+			 
+			      
+				                                                                                                                                                     
+			      
+
+			                                                 
+
+			                                                                        
+			 
+				                                  
+				                                                                                                   
+				                                                                       
+			 
+			    
+			 
+				                
+			 
+
+			                        
+				                                                           
+			      
+
+			                                                 
+			 
+				                                                                                      
+				                                                               
+			 
+			    
+			 
+				                                                                                     
+				                                                               
+			 
+		 
+		                                                 
+		 
+			                                            
+		 
+
+		                                                 
+		 
+			                                               
+		 
+		    
+		 
+			                                            
+			                                                         
+				                                                 
+			    
+				                                                    
+		 
+	 
+ 
 #endif
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+#if SERVER
+                                                              
+ 
+	                                                                 
+	                                          
+	                                       
+
+	                  
+	 
+		                  
+		          
+	 
+	                                                                                       
+	                                                
+ 
+#endif
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
+            
+                                                                          
+   
+  	                            
+  	                                          
+  	                                                                        
+  	                                               
+  	                               
+  	                           
+  	                                                                
+  
+  	                           
+  	 
+  		                                  
+  		                                
+  		                                                                     
+  	 
+   
+        
 
 
-#if(CLIENT)
-bool function BlockableDoorCanUseCheck( entity player, entity door )
+            
+                                                                       
+   
+  	                                        
+  
+  	                           
+  		                                        
+   
+        
+
+
+#if SERVER || CLIENT
+bool function BlockableDoorCanUseCheck( entity player, entity door, int useFlags )
 {
-	//
+	                                   
 
 	float doorUseRangeMax = 130.0
 	float doorUseRangeMin = 30.0
@@ -1302,10 +1528,10 @@ bool function BlockableDoorCanUseCheck( entity player, entity door )
 	float doorUseRange = GraphCapped( lookDot, -1.0, 1.0, doorUseRangeMin, doorUseRangeMax )
 	doorUseRange += GraphCapped( fabs( DotProduct( AnglesToRight( door.GetAngles() ), -playerToDoor ) ), 0.0, 1.0, 0.0, BLOCKABLE_DOOR_TEMP_HARDCODED_DOOR_LENGTH / 2.0 )
 
-	#if(false)
-//
-
-#endif
+	#if BLOCKABLE_DOOR_DEBUG
+		                                                                              
+		                                                                       
+	#endif
 
 	if ( LengthSqr( playerToDoor ) > doorUseRange * doorUseRange )
 		return false
@@ -1320,10 +1546,10 @@ bool function BlockableDoorCanUseCheck( entity player, entity door )
 			vector ornull moveIntersectOrNull = GetIntersectionOfLineAndPlane( sidePoint, sidePoint + 1000.0 * moveIntention, door.GetOrigin(), AnglesToForward( door.GetAngles() ) )
 			if ( moveIntersectOrNull != null )
 			{
-				#if(false)
-
-
-#endif
+				#if BLOCKABLE_DOOR_DEBUG
+					                                                                                          
+					                                                                                 
+				#endif
 
 				if ( DotProduct( moveIntention, Normalize( (expect vector(moveIntersectOrNull)) - sidePoint ) ) > 0.0 )
 				{
@@ -1339,7 +1565,7 @@ bool function BlockableDoorCanUseCheck( entity player, entity door )
 	vector ornull lookIntersectOrNull = GetIntersectionOfLineAndPlane( player.EyePosition(), player.EyePosition() + 1000.0 * player.GetViewVector(), door.GetOrigin(), AnglesToForward( door.GetAngles() ) )
 	if ( lookDot > 0.0 && lookIntersectOrNull != null )
 	{
-		//
+		                                                                                   
 		vector localLookIntersect = WorldPosToLocalPos( expect vector(lookIntersectOrNull), door )
 		bool doesLookIntersect    = PointIsWithinBounds( localLookIntersect, door.GetBoundingMins(), door.GetBoundingMaxs() )
 		if ( doesLookIntersect )
@@ -1351,11 +1577,11 @@ bool function BlockableDoorCanUseCheck( entity player, entity door )
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 string function BlockableDoorUseTextOverride( entity door )
 {
-	//
-	//
+	                                   
+	  	                            
 
 	if ( ShDoors_IsDoorGoalToOpen( door ) )
 		return "#SURVIVAL_CLOSE_DOOR"
@@ -1365,179 +1591,179 @@ string function BlockableDoorUseTextOverride( entity door )
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                                                                                        
+ 
+	                             
+	                                 
+	       
+		                                 
+	      
+
+	                                       
+
+	                                    
+		                      
+		 
+			                                          
+		 
+	   
+
+	                                
+	                                                                                                 
+	                                                  
+
+	                                           
+
+	                                                                                                                
+	                                                                                    
+	                                                                                                                                                                  
+	                                                                                                                                                      
+	                                                                                                                              
+	                                                                                                                      
+
+	                                                                      
+	                                                      
+	                                                                                      
+	                                               
+	                                                                                                       
+	                                                                                                         
+	                                                                                                                         
+
+	                                  
+	                                                                                                                                       
+	                             
+	                                 
+	                                                                                          
+	 
+		                                                                                                                            
+
+		                                                 
+		                                                               
+		 
+			                                                                                   
+			                                                                                          
+			                                                                                                   
+			                                                                                      
+			                                        
+			                                                                                                                    
+			                                                                                                              
+			                                                                                                                      
+			                                               
+			 
+				                                              
+					                                        
+					                                                                                                                                                               
+				 
+				                         
+					                                                                                           
+			 
+		 
+		                                                
+
+		                                                                                                                                    
+
+		                                                                                      
+		                                                                             
+
+		                                                                                                                     
+
+		                                                                                                
+		                                                        
+		                         
+
+		                   
+		             
+		                                                                  
+		 
+			                                                                                   
+			 
+				                                                                                                                                               
+				                                                                                                                                             
+				                                    
+				                                           
+					                                                                                                               
+				 
+				                        
+					                                                                                                                                                                                                    
+					                                                                                                                                                                                                      
+					                                                                                         
+					                                                                                                                 
+					                                                                                           
+					                                                                                                                   
+				      
+
+				                                                                                           
+				   
+				  	                                                                                                                               
+				  	                                                                
+				   
+
+				                                                         
+				 
+					                                  
+					 
+						                         
+						                                                              
+						                             
+						 
+							                           
+							                                                           
+							        
+						 
+					 
+
+					             
+					     
+				 
+				                                                          
+				     
+			 
+			             
+				     
+		 
+		             
+		 
+			                                                                        
+			 
+				                       
+				                                                        
+			 
+			           
+		 
+		    
+		 
+			                                       
+			                              
+			                                                                                                 
+			                 
+		 
+	 
+
+	                     
+	 
+		                                              
+			                                                         
+		    
+			                                                        
+	 
+ 
 #endif
 
 
 bool function CircleIntersectsArc(
-		vector circleCenterIn, float circleRadius,
-		vector arcCornerIn, float arcRadius, float arcStartAng, float arcEndAng )
+vector circleCenterIn, float circleRadius,
+vector arcCornerIn, float arcRadius, float arcStartAng, float arcEndAng )
 {
-	#if(false)
-
-#endif
+	#if BLOCKABLE_DOOR_DEBUG
+		                                                                                  
+	#endif
 	bool intersect = true
 
-	vector circleCenter = FlattenVector( circleCenterIn )
-	vector arcCorner    = FlattenVector( arcCornerIn )
+	vector circleCenter = FlattenVec( circleCenterIn )
+	vector arcCorner    = FlattenVec( arcCornerIn )
 
-	//
+	                                                        
 	if ( AngleDiff( arcStartAng, arcEndAng ) > AngleDiff( arcEndAng, arcStartAng ) )
 	{
 		float temp = arcStartAng
@@ -1552,16 +1778,16 @@ bool function CircleIntersectsArc(
 	float startAngPlaceCircleCenterDist = Distance2D( startAngPlaneClosestPoint, circleCenter )
 	if ( DotProduct( startAngPlaneInnerDir, startAngPlaneCircleCenterDir ) < 0.0 && startAngPlaceCircleCenterDist > circleRadius )
 	{
-		#if(false)
-
-#endif
+		#if BLOCKABLE_DOOR_DEBUG
+			                                                                                                         
+		#endif
 		intersect = false
 	}
 	else
 	{
-		#if(false)
-
-#endif
+		#if BLOCKABLE_DOOR_DEBUG
+			                                                                                                         
+		#endif
 	}
 
 	vector endAngPlaneAlongDir        = AnglesToForward( <0, arcEndAng, 0> )
@@ -1571,247 +1797,400 @@ bool function CircleIntersectsArc(
 	float endAngPlaceCircleCenterDist = Distance2D( endAngPlaneClosestPoint, circleCenter )
 	if ( DotProduct( endAngPlaneInnerDir, endAngPlaneCircleCenterDir ) < 0.0 && endAngPlaceCircleCenterDist > circleRadius )
 	{
-		#if(false)
-
-#endif
+		#if BLOCKABLE_DOOR_DEBUG
+			                                                                                                      
+		#endif
 		intersect = false
 	}
 	else
 	{
-		#if(false)
-
-#endif
+		#if BLOCKABLE_DOOR_DEBUG
+			                                                                                                      
+		#endif
 	}
 
 	float arcCornerCircleCenterDist = Distance2D( arcCorner, circleCenter )
 	if ( arcCornerCircleCenterDist > arcRadius + circleRadius )
 	{
-		#if(false)
-
-#endif
+		#if BLOCKABLE_DOOR_DEBUG
+			                                                                              
+		#endif
 		intersect = false
 	}
 	else
 	{
-		#if(false)
-
-#endif
+		#if BLOCKABLE_DOOR_DEBUG
+			                                                                              
+		#endif
 	}
 
 	return intersect
 }
 
 
-#if(false)
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-
+#if SERVER
+                                                                                                                                                           
+ 
+	                                                                     
+
+	                         
+	 
+		                                      
+
+		                               
+		 
+			                       
+			                                                                                                  
+		 
+	 
+
+	                                    
+ 
+
+                                                                                           
+ 
+	             
+	                                                              
+	                                      
+	                              
+	                        
+	                          
+	                             
+
+	                         
+	 
+		                                      
+	 
+
+	           
+ 
+
+                                                                           
+ 
+	                                               
+	                                  
+	                                        
+
+	                                
+	                                
+
+	                                                         
+
+	                    
+
+	                          
+	 
+		                             
+	 
+
+	                        
+
+	                             
+	                                
+	                                
+
+	                    
+
+	              
+ 
+
+                                                                                                     
+ 
+	                           
+		            
+
+	                                                             
+		           
+
+	                        
+	 
+		                                                                                                                                           
+		                      
+			           
+	 
+
+	                                       
+		           
+
+	            
+ 
+
+                                                                   
+ 
+	               				                                      
+	                			                                       
+	                     		                                    
+	             				                                    
+	                   			                                                    
+	               				                                       
+	                  			                                                               
+	                        	       
+	                     		       
+	                    		       
+
+	                                                                                        
+	 
+		                          
+		 
+			                                                  
+			                      
+		 
+	 
+	                                                                                                                                                      
+	 
+		                                                                                                    
+                  
+                                                     
+    
+                                                                 
+    
+        
+		                                                                                     
+
+
+                         
+                                                                 
+   
+                                                 
+                          
+   
+      
+
+		                  
+		 
+			                               
+			 
+				                                           
+				                                              
+				                       
+			 
+			                                  
+			 
+				                                                                             
+				                                     
+				      
+			 
+		 
+	 
+	                                                                        
+	 
+		                                              
+		                       
+	 
+	                                                                                                      
+	 
+		                                                                                                      
+		                                                                                      
+	 
+	                                                                             
+	 
+		                                                                                                 
+		                          
+
+		                                                                  
+		 
+			                                              
+		 
+	 
+	                                                                    
+	 
+		                          
+	 
+	                                                                                               
+	 
+		                               
+		                        
+		 
+			                                                                        
+			                                           
+			 
+				                                                
+				 
+					                                                  
+					                                                   
+
+					                                                                        
+					 
+						                                                        
+						                                             
+					 
+					                     
+				 
+			 
+		 
+		                   
+		 
+			                   
+		 
+	 
+
+                 
+                                                                                    
+       
+
+	                                                   
+	                           
+		                                           
+
+	                                                                                         
+	 
+		                                               
+		                          
+			                   
+		                                                   
+		                                                                                            
+		                                                    
+	 
+
+	                                                                                                      
+	 
+		                         
+			                                         
+			                                                                                         
+			                                                                                                      
+			                                                                              
+			                                                                                    
+		 
+	 
+
+	              
+	                     
+	                                       
+
+	                                                    
+
+	                                          
+	                                           
+	                                      
+	                                                                       
+	                        
+		                                                                                     
+	      
+	                                                                   
+	                                                        
+		                                                                                                                    
+	                                                                                  
+
+	                    
+	 
+		                                                                                                                          
+
+		                                                                   
+		 
+			                                                            
+			                                                                 
+		 
+		    
+		 
+			                                               
+			                                                    
+		 
+		                                        
+
+		                                                                         
+			                                          
+
+		                                                                                   
+		 
+			                                                                        
+			 
+				                                                        
+				                                             
+			 
+		 
+
+		                                         
+		                                              
+		 
+			                                                                                                     
+		 
+	 
+	    
+	 
+		                                                                                                                              
+		                             
+		                                                  
+		                                                                    
+			                                  
+		                                                                             
+			                                           
+		                                                               
+
+		                                                 
+			                                                                                                                                               
+
+		                                                   
+		 
+			                                             
+		 
+
+		                                         
+		                                                                          
+		 
+			                                                                                                           
+			                                                                                                            
+		 
+		                                                   
+		 
+			                                                                                                     
+		 
+	 
+ 
+
+                                                                      
+ 
+	                             
+
+	                                                           
+	                                                            
+	                      
+	 
+		                                            
+		                                                    
+		                                                        
+		                                                         
+		                                                                   
+	 
+
+	                                                   
+		                                                                                                       
+
+	                                                                                                                                     
+
+	                                                         
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                        
+ 
+	                             
+	                                            
+	                                               
 
+	                                                                          
 
+	                                
+	                                                 
+	                                                                                            
+	                                                
+	 
+		                                                                                                                                      
 
+		         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
+		                                                                
+		             
+	 
+ 
 #endif
 
 
 bool function ShDoors_IsDoorGoalToOpen( entity door )
 {
 	if ( door.GetNetworkedClassName() != "door_mover" )
-		return false //
+		return false                                                       
 
 	return bool(door.GetDoorFlags() & eDoorFlags.GOAL_IS_OPEN)
 
@@ -1821,7 +2200,7 @@ bool function ShDoors_IsDoorGoalToOpen( entity door )
 bool function ShDoors_IsDoorBusy( entity door )
 {
 	if ( door.GetNetworkedClassName() != "door_mover" )
-		return false //
+		return false                                                       
 
 	return bool(door.GetDoorFlags() & eDoorFlags.IS_BUSY)
 }
@@ -1829,14 +2208,14 @@ bool function ShDoors_IsDoorBusy( entity door )
 
 
 
-/*
-
-
-
-
-
-
-*/
+  
+                                                    
+                                                          
+                                                           
+                                                            
+                                                           
+						       
+  
 
 const float SURVIVAL_SLIDING_DOOR_USE_RANGE = 80.0
 const float SURVIVAL_SLIDING_DOOR_FACING_AWAY_USE_RANGE = 30.0
@@ -1873,7 +2252,7 @@ struct SlidingDoorData
 }
 array<SlidingDoorData> PROTO_slidingDoorData
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function SurvivalDoorSliding_Init()
 {
 	PrecacheParticleSystem( SURVIVAL_SLIDING_DOOR_DESTRUCTION_FX )
@@ -1881,270 +2260,270 @@ void function SurvivalDoorSliding_Init()
 #endif
 
 
-#if(false)
-
-
-
-
-
+#if SERVER
+                                                                                                     
+ 
+	                                               
+	                      
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                          
+ 
+	       
+		                                      
+	      
+
+	                                            
+
+	                     
+	                       
+	                                                                       
+	                                     
+	                                                      
+	                                         
+	                                                      
+	                                                   
+
+	                    
+
+	                                               
+	                      
+
+	                      
+	                        
+	                     
+
+	                                      
+
+	                                                              
+	                                                                                        
+
+	                                
+		                                                                          
+
+	                               
+	 
+		                                      
+
+		                                                           
+		                                                           
+
+		                                                                                    
+		                                                                                    
+	 
+
+	           
+	 
+		                                                                                                   
+
+		                      
+
+		                     
+		 
+			                                                                                 
+			      
+				                                                                                                                          
+			      
+		 
+
+		                                                    
+		 
+			                                                                              
+				                                                                     
+			    
+				                                                                    
+
+			                                          
+
+			                                   
+			                              
+			                                 
+			                                                                
+			 
+				                                             
+				                                                   
+				 
+					                           
+					          
+					                                                                
+					                                                   
+					 
+						                             
+						     
+					 
+				 
+
+				           
+			 
+
+			                             
+			 
+				                      
+				                                                                  
+				        
+			 
+
+
+			                                                          
+			                                                                       
+			                                     
+
+			                                                          
+
+			                                                      
+			                                                     
+
+			                                                       
+			                                                                          
+			                                                           
+			                                                        
+		 
+		    
+		 
+			                                                                              
+				                                                                     
+			    
+				                                                                    
+
+			                                                         
+
+			                                                                         
+
+			                                                          
+
+			                                                                         
+			                                                          
+
+			                                                    
+			                                      
+		 
+	 
+ 
 #endif
 
-#if(false)
+#if SERVER
+                                                         
+ 
+	                      
+	 
+		                           
+			            
+	 
 
-
-
-
-
-
-
-
-
-
+	           
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
-
+#if SERVER
+                                                                       
+ 
+	                                           
+	 
+		                                            
+	 
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
-
+#if SERVER
+                                                                       
+ 
+	                                           
+	 
+		                                         
+	 
+ 
 #endif
 
-#if(false)
+#if SERVER
+                                                                                                         
+ 
+	       
+		                                      
+	      
+	                              
+	             
+	 
+		                                                
+		                                                    
 
+		                                                                                                   
+		 
+			                                                    
+			                                    
+			                                                          
+			                                      
+			                                                                         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+			        
+			                                                                      
+			                                                           
+		 
+	 
+ 
 #endif
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                                                                         
+ 
+	       
+		                                      
+	      
+	                              
+	             
+	 
+		                                             
+		                                                    
+		                                                             
+			                                                      
+	 
+ 
 #endif
 
-#if(false)
+#if SERVER
+                                                                         
+ 
+	                                                                 
+	                                                    
+	                                                                        
+	                                                              
 
+	                                                                                                   
+	 
+		                                     
+		      
+	 
 
+	                                                      
+	                          
+	 
+		                                                                                                                                                                                                                                                                                                                                                                      
+	 
 
+	                                         
+	 
+		                                                                   
+		                 
 
+		                                   
+		                                                
+		                  
 
+		                                                
+		 
+			                    
+		 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
+		                                                                                                                                                              
+		                                                                                                                                            
+	 
+ 
 #endif
 
-#if(CLIENT)
-bool function Survival_DoorSliding_CanUseFunction( entity playerUser, entity doorModel )
+#if SERVER || CLIENT
+bool function Survival_DoorSliding_CanUseFunction( entity playerUser, entity doorModel, int useFlags )
 {
 	float doorUseRangeSquared = SURVIVAL_SLIDING_DOOR_USE_RANGE_SQUARED
 	float doorUseRange        = SURVIVAL_SLIDING_DOOR_USE_RANGE
@@ -2157,10 +2536,10 @@ bool function Survival_DoorSliding_CanUseFunction( entity playerUser, entity doo
 	if ( doorToPlayer.z < -SURVIVAL_SLIDING_DOOR_USE_NEGATIVE_HEIGHT || doorToPlayer.z > SURVIVAL_SLIDING_DOOR_USE_HEIGHT )
 		return false
 
-	//
+	                                                                            
 	doorToPlayer.z = 0.0
 
-	//
+	                                                               
 	vector playerFacing = playerUser.GetViewForward()
 	playerFacing.z = 0.0
 
@@ -2172,8 +2551,8 @@ bool function Survival_DoorSliding_CanUseFunction( entity playerUser, entity doo
 
 	if ( SURVIVAL_SLIDING_DOOR_DEBUG_DRAW )
 	{
-		DebugDrawLine( playerPos, doorModelPos, 200, 200, 50, true, 1.0 )
-		DebugDrawTrigger( doorModelPos, doorUseRange, 200, 200, 50, 1.0, true )
+		DebugDrawLine( playerPos, doorModelPos, <200, 200, 50>, true, 1.0 )
+		DebugDrawTrigger( doorModelPos, doorUseRange, <200, 200, 50>, 1.0, true )
 	}
 
 	float diffLengthSquared = LengthSqr( doorToPlayer )
@@ -2184,11 +2563,184 @@ bool function Survival_DoorSliding_CanUseFunction( entity playerUser, entity doo
 
 void function CodeCallback_OnDoorInteraction( entity door, entity user, entity oppositeDoor, bool opening )
 {
-	#if(false)
-
-
-
-
-
-#endif
+	#if SERVER
+		                      
+		 
+			                                                        
+			                                
+		 
+	#endif
 }
+
+
+#if SERVER
+                                      
+ 
+	                                    
+	 
+		                       
+		                         
+		 
+			                                                                            
+			                                     
+			                                 
+		 
+		                                            
+	 
+
+	                                    
+
+	                                                  
+	 
+		                              
+
+		                                         
+		 
+			                   
+
+			                                                     
+				        
+
+			                       
+			 
+				                               
+				 
+					                            
+				 
+				    
+				 
+					                                                                         
+					                                                         
+				 
+			 
+			                     
+			 
+				        
+			 
+
+			                                                      
+			                                                 
+		 
+	 
+
+	                             
+ 
+
+
+                                                    
+ 
+	                         
+	 
+		                     
+		      
+	 
+
+	                    
+		      
+
+	                          
+ 
+
+
+                                                     
+ 
+	                                                    
+	                         
+	 
+		                                
+		                      
+		      
+	 
+
+	                     
+	 
+		                              
+		      
+	 
+
+	                          
+ 
+
+
+                                                      
+ 
+	                          
+	                        
+	 
+		                             
+		                                                  
+	 
+	    
+	 
+		                                 
+		                                                            
+	 
+ 
+
+
+                                         
+ 
+	                                          
+	 
+		                       
+			        
+		                      
+		                
+		                                                  
+	 
+ 
+
+                                                                            
+ 
+	                                                          
+ 
+
+
+                                                                          
+ 
+	                                                       
+ 
+
+                                                                                             
+ 
+	                                              
+ 
+#endif         
+
+bool function IsDoorLocked( entity door )
+{
+	if ( IsCodeDoor( door ) )
+		return door.GetDoorIsLocked()
+
+	#if SERVER
+	                        
+	#endif
+
+	return false
+}
+
+#if SERVER
+                                       
+ 
+	                         
+	 
+		                          
+		      
+	 
+
+	                        
+ 
+
+                                         
+ 
+	                      
+	                         
+	 
+		                                    
+		                           
+		      
+	 
+
+	                         
+ 
+#endif         

@@ -1,0 +1,518 @@
+global function FiringRangeGameMode_Init
+
+#if SERVER
+                                                         
+                                                        
+                                                          
+                                                   
+                                     
+                                                              
+                         
+                                                              
+                                   
+                                                           
+      
+
+       
+                                                 
+             
+#endif          
+
+#if CLIENT
+global function SCB_BroadcastFriendlyFireChange
+global function FiringRange_IsCharacterSwitchingEnabled
+global function SCB_FiringRange_EnableCharacterChange
+global function SCB_FiringRange_SetPlayerInFinale
+global function FiringRange_IsPlayerInFinale
+#endif          
+
+
+
+struct {
+                         
+          
+                                                
+      
+      
+	#if CLIENT
+		bool characterSwitchingEnabled = true
+		bool inFinale = false
+	#endif
+}file
+
+
+
+global const string FIRING_RANGE_DUMMIE_SCRIPT_NAME = "npc_dummie"
+global const string FIRING_RANGE_COMBAT_DUMMIE_SCRIPT_NAME = "npc_dummie_combat"
+
+void function FiringRangeGameMode_Init()
+{
+	if ( !IsFiringRangeGameMode() )
+		return
+
+	Remote_RegisterClientFunction( "SCB_BroadcastFriendlyFireChange", "entity" )
+	Remote_RegisterServerFunction( "ClientCallback_firingrange_toggle_friendlyfire" )
+                          
+                                                                                  
+       
+
+	#if SERVER
+		                                                  
+		                                                           
+		                                                
+		                                            
+
+		                   
+		                     
+		                                 
+
+		                              
+	#endif          
+
+	#if CLIENT
+		AddCallback_OnClientScriptInit( OnClientScriptInit )
+
+		IntroDisplayThread()
+	#endif          
+}
+
+#if CLIENT
+void function SCB_BroadcastFriendlyFireChange( entity playerThatChanged )
+{
+	entity localPlayer = GetLocalClientPlayer()
+	bool isEnabled = IsTeamRabid( localPlayer.GetTeam() )
+	string mainText = (isEnabled ? "#NOTIFY_FRIENDLY_FIRE_ON" : "#NOTIFY_FRIENDLY_FIRE_OFF")
+	string subText = (IsValid( playerThatChanged ) ? Localize( "#NOTIFY_FRIENDLY_FIRE_SUBTEXT", playerThatChanged.GetPlayerName() ) : "")
+	vector titleColor = (isEnabled ? ENEMY_COLOR : FRIENDLY_COLOR)
+	AnnouncementMessage( localPlayer, mainText, subText, titleColor )
+}
+
+bool function FiringRange_IsCharacterSwitchingEnabled()
+{
+	return file.characterSwitchingEnabled
+}
+
+void function SCB_FiringRange_EnableCharacterChange( bool enable )
+{
+	file.characterSwitchingEnabled = enable
+	if ( !enable )
+		CloseCharacterSelectNewMenu()
+	RunUIScript( "EnableCharacterChangeInFiringRange", enable )
+}
+
+void function SCB_FiringRange_SetPlayerInFinale( bool inFinale )
+{
+	file.inFinale = true
+	SCB_FiringRange_EnableCharacterChange ( false )
+}
+
+bool function FiringRange_IsPlayerInFinale()
+{
+	return file.inFinale
+}
+#endif          
+
+#if SERVER
+                                                                             
+ 
+	                                    
+	 
+		                                                                                                                                   
+		      
+	 
+
+	                           
+	                                                                    
+	                             
+	 
+		                                                                                                                                             
+		      
+	 
+
+	                                            
+	                                                                                                                      
+	                                        
+
+	                                           
+		                                                                                      
+ 
+
+                         
+                                                                             
+ 
+                              
+ 
+
+                                                                          
+ 
+                                                               
+ 
+
+                                                                        
+ 
+                                                                 
+        
+
+                                                                                                                 
+        
+
+                                           
+                                                
+        
+
+                                                                       
+                                                                 
+                  
+
+              
+  
+                                                              
+
+                                                                            
+                                                        
+  
+     
+  
+                                                                
+
+                                                                            
+                                                                   
+  
+ 
+      
+
+                                    
+
+                                             
+                                                        
+                                                                     
+                                       
+
+                                                
+ 
+	                                        
+	                                                     
+
+	  
+	                                         
+ 
+
+                                                      
+ 
+	                                                                
+
+	  
+	                                   
+
+	  
+	                                           
+	 
+		                                                        
+		                        
+		 
+			                      
+			 
+				                                                                                                        
+				              
+			 
+		 
+		                                            
+	 
+
+	  
+	                                                        
+		                                                         
+
+	  
+	                           
+	                                                            
+	                     
+		                             
+ 
+
+                                                                                               
+ 
+	                                  
+		      
+
+	                              
+		                          
+
+	                                                        
+	 
+		                                                                    
+		                      
+		 
+			                     
+			 
+				                                                                                                             
+				             
+			 
+		 
+		            
+	 
+ 
+
+                                                          
+ 
+	                      
+	                                        
+	 
+		                      
+			                           
+	 
+
+	                                 
+	                                          
+	 
+		                                                    
+		                            
+	 
+ 
+
+                                                                                    
+ 
+	                                  
+		      
+
+	                         
+
+	                                                        
+	                               
+	                                                     
+	 
+		                               
+		                                                                                                            
+		              
+	 
+
+	                   
+ 
+
+                                                                                   
+ 
+	                                  
+		      
+
+	                         
+
+	                                                                    
+	                              
+	                  
+ 
+
+                                              
+ 
+	                              
+	 
+		                               
+		                             
+		                                 
+
+		                                  
+		           
+
+		                                
+
+                           
+                                      
+        
+
+		                                                            
+		 
+			                                          
+			                            
+		 
+	   
+ 
+
+                                                                              
+ 
+	                              
+	                               
+ 
+
+                                                                  
+ 
+	                              
+		                          
+
+	                                   
+
+	                                           
+	 
+		                                                        
+		                        
+		 
+			                      
+			 
+				              
+			 
+		 
+		                                          
+	 
+ 
+
+#endif          
+
+#if CLIENT
+
+void function OnClientScriptInit( entity player )
+{
+	if( GetFirstTimePlayerState() < eNewPlayerState.FIRING_RANGE_COMPLETED )
+	{
+		SetFirstTimePlayerState( eNewPlayerState.FIRING_RANGE_COMPLETED )
+	}
+}
+
+void function IntroDisplayThread()
+{
+	thread function() : ()
+	{
+		FlagWait( "EntitiesDidLoad" )
+		wait 3.0
+
+		entity viewPlayer = GetLocalViewPlayer()
+		if ( IsValid( viewPlayer ) )
+			MapZones_ZoneIntroText( viewPlayer, ("#" + GetMapName()), -1 )
+	}()
+}
+#endif          
+
+
+#if SERVER
+                                                                                   
+                                 
+ 
+	                                       
+ 
+
+       
+                                                                                       
+ 
+	                                                  
+	                                     
+	                                                 
+
+	                                                                 
+	                                 
+	          
+ 
+             
+
+                                                                                                    
+ 
+	                                                                                     
+	                                                                  
+	                                                                                                             
+	                                                                          
+	                    
+
+	                  
+	                      
+
+	                 	         
+	                   
+	                    
+	             
+	                    
+	 
+                  
+          
+                       
+                 
+            
+                  
+        
+       
+		                      
+			             	      
+			                
+			         
+			      
+		       
+			             	                                                          
+			               
+			         
+			     
+		       
+			             	       
+			               
+			         
+			     
+		       
+			             	         
+			                
+			         
+			     
+		       
+			             	      
+			                
+			         
+			     
+	 
+	                     
+	                        
+
+	                     
+	                                                                          
+	                                                                              
+
+	                             
+	                          
+	                                    
+	                                 
+
+	                                                    
+
+	                                     
+
+	  
+	                                                                              
+	 
+		                                                          
+		                                                
+		                               
+		                                                     
+
+		                                                                                 
+	   
+
+	  
+	                                                                                                               
+	 
+		                                   
+		 
+			                                                      
+				           
+			         
+			                      
+				      
+			                     
+			                                      
+			                                                                          
+		   
+	   
+
+	          
+ 
+
+                                                            
+ 
+	                                 
+		        
+
+	                                         
+
+	                                      
+	                          
+		                                     
+	                              
+		                                     
+	    
+		                                     
+
+	             
+ 
+
+#endif          

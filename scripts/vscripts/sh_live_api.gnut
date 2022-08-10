@@ -1,0 +1,225 @@
+global function LiveAPI_RegisterNetworking
+global function LiveAPI_GetEventNameFromEnum
+global function LiveAPI_ConvertVectorToTable
+global function LiveAPI_GetPlayerIdentity
+global function LiveAPI_GetPlayerIdentityTable
+global function LiveAPI_GetWritableData
+
+global enum eLiveAPI_EventTypes
+{
+	                 
+	init,
+	matchSetup,
+	gameStateChanged,
+	matchStateEnd,
+
+	         
+	playerConnected,
+	playerDisconnected,
+
+	           
+	characterSelected,
+
+	             
+    playerDamaged,
+	playerDowned,
+	playerRevive,
+	playerKilled,
+	playerAssist,
+	bannerCollected,
+	playerRespawnTeam,
+	squadEliminated,
+	playerStatChanged,
+
+	                
+	playerAbilityUsed,
+	blackMarketAction,
+	ziplineUsed,
+	warpGateUsed,
+	wraithPortal,
+	gibraltarShieldAbsorbed,
+
+	           
+	inventoryAction,
+	inventoryPickUp,
+	inventoryDrop,
+	inventoryUse,
+
+	         
+	grenadeThrown,
+	ammoUsed,
+	weaponSwitched,
+
+	                
+	ringStartClosing,
+	ringFinishedClosing
+
+	                  
+	arenasItemSelected,
+	arenasItemDeselected,
+
+	                   
+	observerSwitched,
+
+    MAX
+}
+
+const table< int, array< string > > EVENT_FIELD_NAMES = {
+	[eLiveAPI_EventTypes.playerAssist] = [ "assistant", "victim" ],
+	[eLiveAPI_EventTypes.observerSwitched] = [ "observer", "target","targetTeam" ],
+	[eLiveAPI_EventTypes.playerRevive] = [ "player", "revived" ],
+	[eLiveAPI_EventTypes.bannerCollected] = [ "player", "collected" ]
+}
+
+       
+table< string, var > function LiveAPI_GetWritableData( int eventEnum, array< var > logData, array< string > defaultFieldNames = [] )
+{
+	table< string , var > data = {}
+
+	array< string > fieldNames = defaultFieldNames
+	if ( eventEnum in EVENT_FIELD_NAMES )
+		fieldNames = EVENT_FIELD_NAMES[ eventEnum ]
+
+	if ( fieldNames.len() > logData.len() )
+	{
+		Warning( "LiveAPI: More fields defined for event %s than data passed in, missing %d items!", LiveAPI_GetEventNameFromEnum( eventEnum ), (fieldNames.len() - logData.len()) )
+	}
+	else if ( logData.len() > fieldNames.len() )
+	{
+		Warning( "liveAPI: Missing field names for event %s, given data passed in, using default names!", LiveAPI_GetEventNameFromEnum( eventEnum ) )
+	}
+
+	for( int i = 0; i <  fieldNames.len(); ++i )
+	{
+		if( i >= logData.len() )
+			return data
+
+		data[fieldNames[i]] <- logData[i]
+	}
+
+	for( int i = fieldNames.len(); i < logData.len(); ++i )
+	{
+		data[("event_field_"+i)] <- logData[i]
+	}
+
+	return data
+}
+
+var function LiveAPI_ConvertVectorToTable( vector vec )
+{
+	return {
+		x = vec.x,
+		y = vec.y,
+		z = vec.z
+	}
+}
+
+var function LiveAPI_GetPlayerIdentityTable( entity player )
+{
+	if ( player == null || player.IsWorld() )
+		return { name = "World" }
+
+	if ( player.IsPlayer() )
+	{
+		EHI ehi = ToEHI( player )
+		int playerTeamID = player.GetTeam()
+
+		table<var> data = {
+			name			= player.GetPlayerName(),
+			         		                                        
+			teamId			= playerTeamID,
+			pos				= LiveAPI_ConvertVectorToTable( player.GetOrigin() ),
+			angles			= LiveAPI_ConvertVectorToTable ( player.GetAngles() ),
+			currentHealth	= player.GetHealth(),
+			maxHealth		= player.GetMaxHealth(),
+			shieldHealth	= player.GetShieldHealth(),
+			shieldMaxHealth	= player.GetShieldHealthMax()
+		}
+
+		if ( GameRules_IsTeamIndexValid( playerTeamID ) )
+		{
+			#if CLIENT
+				string teamName = GameRules_GetTeamName( playerTeamID )
+				data.teamName <- ( teamName != "" ) ? teamName : Localize( "#TEAM_NUMBERED", playerTeamID - 1 )
+			#else
+				data.teamName <- GameRules_GetTeamName( playerTeamID )
+			#endif
+		}
+
+	#if CLIENT
+		array<entity> playerSquad = GetPlayerArrayOfTeam( playerTeamID )
+		playerSquad.sort(PrivateMatch_SortPlayersByName);
+		int sortedPlayerSquadIndex = playerSquad.find(player)
+		data.squadIndex <- sortedPlayerSquadIndex >= 0 ? sortedPlayerSquadIndex : EEH_GetTeamMemberIndex( ehi )
+
+		data.nucleusHash <- player.GetHashedEadpUserIdStr()
+
+		if ( LoadoutSlot_IsReady( ehi, Loadout_Character() ) )
+		{
+			ItemFlavor character = LoadoutSlot_GetItemFlavor( ehi, Loadout_Character() )
+			data.character <- Localize( ItemFlavor_GetLongName( character ) )
+			if ( LoadoutSlot_IsReady( ehi, Loadout_CharacterSkin( character ) ) )
+			{
+				ItemFlavor currentSkin = LoadoutSlot_GetItemFlavor( ehi, Loadout_CharacterSkin( character ) )
+				data.skin <- Localize( ItemFlavor_GetLongName( currentSkin ) )
+			}
+		}
+
+	#endif         
+
+		return data
+	}
+
+	return { name = expect string( player.GetNetworkedClassName() ) }
+}
+
+string function LiveAPI_GetPlayerIdentity( entity player )
+{
+	if ( player == null || player.IsWorld() )
+		return "World"
+
+	if ( player.IsPlayer() )
+	{
+		return player.GetPlayerName()
+	}
+
+	return expect string( player.GetNetworkedClassName() )
+}
+
+string function LiveAPI_GetEventNameFromEnum( int enumVal )
+{
+    return GetEnumString( "eLiveAPI_EventTypes", enumVal )
+}
+
+void function LiveAPI_RegisterNetworking()
+{
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_OnePlayer",       "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity" )
+    Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_OnePlayerAndEnt", "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity", "entity" )
+    Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_TwoPlayer",       "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity", "entity" )
+
+    Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_CombatInstance",  "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity", "entity", "entity", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX )
+    Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_OnePlayerItem",   "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity", "string" )
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_Int",             "int", INT_MIN, eLiveAPI_EventTypes.MAX, "int", INT_MIN, INT_MAX )
+
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_PlayerIntStatChanged", "entity"           , "string"             , "int", INT_MIN, INT_MAX              )
+
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_RespawnTeam",     "entity", "string" )
+
+                                                                                  
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_InventoryAction", "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity"           , "string"            , "entity"               , "int", INT_MIN, INT_MAX                )
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_InventoryActionWithMods", "int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity"           , "string"            , "entity"               , "int", INT_MIN, INT_MAX               , "string"                  )
+
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_AmmoChanged", "entity", "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX, "int", INT_MIN, INT_MAX )
+
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_ArenasBuyMenu",	"int", INT_MIN, eLiveAPI_EventTypes.MAX, "entity", "string" )
+
+	Remote_RegisterClientFunction( "ServerCallback_LiveAPI_LogNetwork_MatchSetup",		"string", "string", "string" )
+
+	                               
+    Remote_RegisterServerFunction( "ClientCallback_LiveAPI_JoinObservers" )
+	Remote_RegisterServerFunction( "ClientCallback_LiveAPI_LeaveObservers" )
+
+#if SERVER
+                        
+#endif
+}

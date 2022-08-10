@@ -1,0 +1,1756 @@
+global function Cl_FullmapInit
+global function Fullmap_SetupScoreboard
+
+global function AddMinimapLabel
+global function SURVIVAL_AddMinimapLevelLabel
+
+global function FullMap_CommonAdd
+global function FullMap_CommonTrackEntOrigin
+global function FullMap_PingLocation
+global function FullMap_PingEntity
+global function FullMap_SetDeathFieldRadius
+global function FullMap_UpdateTopologies
+global function FullMap_UpdateAimPos
+global function FullMap_AddEnemyLocation
+global function FullMap_AddIconAtPos
+global function FullMap_PlayCryptoPulseSequence
+
+global function Fullmap_ClearInWorldMinimaps
+global function Fullmap_ClearInputContext
+
+global function Fullmap_HandleKeyInput
+global function Fullmap_HandleMoveInput
+global function Fullmap_HandleViewInput
+
+global function ShowFullmap
+global function HideFullmap
+
+global function AddCallback_Targetname_AddToFullMapAndInWorldMapGeneric
+global function AddCallback_Targetname_AddToFullMapAndInWorldMapCustom
+
+global function AddCallback_OnFindFullMapAimEntity
+global function RemoveCallback_OnFindFullMapAimEntity
+global function HasCallback_OnFindFullMapAimEntity
+
+global function ClientCodeCallback_ToggleFullMapNames
+
+global function SetCurrentZoom
+
+global const FULLMAP_OBJECT_RUI = $"ui/in_world_minimap_object.rpak"
+global const FULLMAP_OBJECTIVE_AREA_RUI = $"ui/in_world_minimap_objective_area.rpak"
+
+const FULLMAP_ZOOM_SPEED_MOUSE = 0.5
+const FULLMAP_ZOOM_SPEED_CONTROLLER = 0.1
+
+const FULLMAP_SELECT_RANGE = 750
+const float FULLMAP_ENTITY_SELECT_RANGE_NORMALIZED = 0.02
+const float OVERVIEW_MAP_SIZE = 4096                                           
+
+struct MinimapLabelStruct
+{
+	string name
+	vector pos
+	float  width = 200
+	float  scale = 1.0
+}
+
+global struct GenericFullmapSetupStruct
+{
+	asset ruiAsset = FULLMAP_OBJECT_RUI
+	asset defaultIcon
+	asset clampedIcon
+	vector iconScale = <1,1,0>
+	vector iconColor = <1,1,1>
+	bool friendlyOnly = true
+	bool hudMapOnly = false
+	void functionref( var, entity ) setupFunc
+}
+
+struct AimTargetStruct
+{
+	entity highlightedEntity
+	bool functionref( entity ) actionFunc
+}
+
+struct
+{
+
+	array<var>         minimapTopos
+	table<entity, var> minimapTopoClientEnt
+
+	                 
+	var   mapAimRui
+	var   mapTopo
+	var   mapTopoBG
+	float mapCornerX
+	float mapCornerY
+	float mapScale
+	float threatMaxDist
+
+	var inWorldMinimapDeathFieldRui
+
+	bool mapContextPushed = false
+	bool toposInitialized = false
+
+	vector fullmapAimPos = <0.5, 0.5, 0>
+	vector fullmapZoomPos = <0.5, 0.5, 0>
+	float  fullmapZoomFactor = 1.0
+	float  moveInputPrevTime = 0.0
+
+	array<MinimapLabelStruct> 	minimapLabels
+	table<EHI, var> 			fullmapPlayerItems
+
+	entity 						highlightedPlayer
+	int							playerTagMode = OBS_PLAYERTAG_MODE_ALL
+	bool						updatePlayerTags = true
+	AimTargetStruct				mapAimTarget
+
+	table<string, GenericFullmapSetupStruct> customAddToFullMapAndInWorldMapCallbacks
+	table<string, GenericFullmapSetupStruct> genericAddToFullMapAndInWorldMapCallbacks
+	table<entity functionref( vector, float ), bool functionref( entity )> fullMapAimTargetCallbacks
+} file
+
+void function Cl_FullmapInit()
+{
+	AddCallback_EntitiesDidLoad( Fullmap_EntitiesDidLoad )
+
+	asset mapImage = Minimap_GetAssetForKey( "minimap" )
+	file.mapCornerX = Minimap_GetFloatForKey( "pos_x" )
+	file.mapCornerY = Minimap_GetFloatForKey( "pos_y" )
+	file.mapScale = max( Minimap_GetFloatForKey( "scale" ), 1.0 )
+	float displayDist    = Minimap_GetFloatForKey( "displayDist" )
+	float threatDistNear = Minimap_GetFloatForKey( "threatNearDist" )
+	float threatDistFar  = Minimap_GetFloatForKey( "threatFarDist" )
+	file.threatMaxDist = Minimap_GetFloatForKey( "threatMaxDist" )
+
+	AddCallback_MinimapEntSpawned( AddInWorldMinimapObject )
+	AddCallback_OnClientScriptInit( OnClientScriptInit )
+
+	AddOnSpectatorTargetChangedCallback( OnSpectatorTargetChanged )
+	AddOnSpectatorTagModeChangedCallback( OnSpectatorTagModeChanged )
+}
+
+void function Fullmap_SetupScoreboard()
+{
+	clGlobal.initScoreboardFunc = InitFullmap
+	clGlobal.showScoreboardFunc = ShowFullmap
+	clGlobal.hideScoreboardFunc = HideFullmap
+	                                                  
+
+	Teams_AddCallback_ScoreboardData( Survival_GetScoreboardData )
+	Teams_AddCallback_Header( Survival_ScoreboardUpdateHeader )
+	Teams_AddCallback_PlayerScores( Survival_GetPlayerScores )
+	Teams_AddCallback_SortScoreboardPlayers( Survival_SortPlayersByScore )
+}
+
+#if CLIENT
+ScoreboardData function Survival_GetScoreboardData()
+{
+	bool isWinterExpress = false
+                       
+                                                 
+       
+
+	ScoreboardData data
+	if( isWinterExpress )
+	{
+		data.numScoreColumns = 3
+		data.columnDisplayIcons.append( $"rui/hud/gamestate/player_kills_icon" )
+		data.columnDisplayIconsScale.append( 1.0 )
+		data.columnNumDigits.append( 2 )
+
+		data.columnDisplayIcons.append( $"rui/hud/gamestate/assist_count_icon2" )
+		data.columnDisplayIconsScale.append( 0.8 )
+		data.columnNumDigits.append( 2 )
+
+		data.columnDisplayIcons.append( $"rui/hud/gamestate/player_damage_dealt_icon" )
+		data.columnDisplayIconsScale.append( 1.0 )
+		data.columnNumDigits.append( 4 )
+	}
+
+	return data
+}
+#endif          
+
+#if CLIENT
+array< int > function Survival_GetPlayerScores( entity player )
+{
+	bool isWinterExpress = false
+                       
+                                                 
+       
+
+	array< int > scores
+
+	if( isWinterExpress )
+	{
+		int eliminations = player.GetPlayerNetInt( "kills" )                                       
+		scores.append( eliminations )
+
+		int assists = player.GetPlayerNetInt( "assists" )                                                         
+		scores.append( assists )
+
+		int damage = player.GetPlayerNetInt( "damageDealt" )
+		scores.append( damage )
+	}
+
+	return scores
+}
+#endif          
+
+
+#if CLIENT
+array< entity > function Survival_SortPlayersByScore( array< entity > teamPlayers, ScoreboardData gameData )
+{
+	teamPlayers.sort( int function( entity a, entity b )
+	{
+		                               
+		int aScore
+		int bScore
+		aScore = a.GetPlayerNetInt( "kills" )
+		bScore = b.GetPlayerNetInt( "kills" )
+
+		if ( aScore > bScore ) return -1
+		else if ( aScore < bScore ) return 1
+		return 0
+	}
+	)
+
+	return teamPlayers
+}
+#endif          
+
+#if CLIENT
+void function Survival_ScoreboardUpdateHeader( var headerRui, var frameRui, int team )
+{
+	int myTeam = GetLocalClientPlayer().GetTeam()
+	int squadIndex = team
+
+	bool isWinterExpress = false
+                       
+                                                 
+       
+
+	bool isFriendly = team == myTeam
+
+	if( headerRui != null )
+	{
+
+	}
+}
+#endif          
+
+void function InitFullmap()
+{
+
+}
+
+void function OnClientScriptInit( entity player )
+{
+	SetBigMapZoomScale( 1.0 )
+	CreateFullmap()
+	HideMapRui()
+
+	asset mapImage       = Minimap_GetAssetForKey( "minimap" )
+	float displayDist    = Minimap_GetFloatForKey( "displayDist" )
+	float threatDistNear = Minimap_GetFloatForKey( "threatNearDist" )
+	float threatDistFar  = Minimap_GetFloatForKey( "threatFarDist" )
+
+	file.mapCornerX = Minimap_GetFloatForKey( "pos_x" )
+	file.mapCornerY = Minimap_GetFloatForKey( "pos_y" )
+	file.mapScale = max( Minimap_GetFloatForKey( "scale" ), 1.0 )
+
+	var rui = RuiCreate( $"ui/in_world_minimap_base.rpak", file.mapTopo, FULLMAP_RUI_DRAW_LAYER, FULLMAP_Z_BASE )
+	RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0> )
+	RuiSetFloat( rui, "mapScale", file.mapScale )
+	RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+	RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+	RuiSetImage( rui, "mapImage", mapImage )
+	RuiSetImage( rui, "mapBgTileImage", GetMinimapBackgroundTileImage() )
+	RuiSetBool( rui, "hudVersion", true )
+
+	Fullmap_AddRui( rui )
+	Fullmap_AddTintableRui( rui )
+}
+
+void function Fullmap_EntitiesDidLoad()
+{
+	InitInWorldScreens()
+
+	foreach ( data in file.minimapLabels )
+	{
+		AddMinimapLabel( data.name, data.pos.x, data.pos.y, data.width, data.scale )
+	}
+
+	file.toposInitialized = true
+}
+
+void function InitInWorldScreens()
+{
+	array<entity> screens = GetEntArrayByScriptName( "inworld_minimap" )
+	array<var> topos
+
+	float size = 800 * 2
+
+	foreach ( screen in screens )
+	{
+		topos.append( AddInWorldMinimapTopo( screen, size, size ) )
+	}
+
+	asset mapImage = Minimap_GetAssetForKey( "minimap" )
+
+	file.mapCornerX = Minimap_GetFloatForKey( "pos_x" )
+	file.mapCornerY = Minimap_GetFloatForKey( "pos_y" )
+	float displayDist    = Minimap_GetFloatForKey( "displayDist" )
+	float threatDistNear = Minimap_GetFloatForKey( "threatNearDist" )
+	float threatDistFar  = Minimap_GetFloatForKey( "threatFarDist" )
+	file.mapScale = max( Minimap_GetFloatForKey( "scale" ), 1.0 )
+
+	file.threatMaxDist = Minimap_GetFloatForKey( "threatMaxDist" )
+
+	foreach ( screen in topos )
+	{
+		var rui2 = RuiCreate( $"ui/basic_image.rpak", screen, RUI_DRAW_WORLD, FULLMAP_Z_BASE )
+		RuiSetFloat3( rui2, "basicImageColor", <0, 0, 0> )
+
+		var rui = RuiCreate( $"ui/in_world_minimap_base.rpak", screen, RUI_DRAW_WORLD, FULLMAP_Z_BASE )
+		RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0> )
+		RuiSetFloat( rui, "mapScale", file.mapScale )
+		RuiSetImage( rui, "mapImage", mapImage )
+		RuiSetImage( rui, "mapBgTileImage", GetMinimapBackgroundTileImage() )
+		entity ent = CreateClientSidePropDynamic( <0, 0, 0>, <0, 0, 0>, $"mdl/dev/empty_model.rmdl" )
+		file.minimapTopoClientEnt[ ent ] <- screen
+		thread CleanupRuiOnTopoDestroy( rui, screen )
+		thread CleanupRuiOnTopoDestroy( rui2, screen )
+	}
+
+	file.minimapTopos.extend( topos )
+}
+
+var function AddInWorldMinimapTopo( entity ent, float width, float height )
+{
+	vector ang   = ent.GetAngles()
+	vector right = ((AnglesToRight( ang ) * -1) * width * 0.5)
+	vector down  = ((AnglesToUp( ang ) * -1) * height * 0.5)
+
+	vector org = ent.GetOrigin()
+
+	org = ent.GetOrigin() - right * 0.5 - down * 0.5
+
+	var topo = RuiTopology_CreatePlane( org, right, down, true )
+	return topo
+}
+
+void function Fullmap_ClearInWorldMinimaps()
+{
+	array<entity> keysToClear
+	foreach ( topo in file.minimapTopos )
+	{
+		if ( topo != file.mapTopo )
+		{
+			entity ent = GetClientEntFromTopo( topo )
+			ent.Signal( "OnDestroy" )
+			RuiTopology_Destroy( topo )
+			keysToClear.append( ent )
+		}
+	}
+	foreach ( ent in keysToClear )
+	{
+		delete file.minimapTopoClientEnt[ ent ]
+		ent.Destroy()
+	}
+	file.minimapTopos.clear()
+	file.minimapTopos.append( file.mapTopo )
+}
+
+void function CleanupRuiOnTopoDestroy( var rui, var topo )
+{
+	entity clientEnt = GetClientEntFromTopo( topo )
+	if ( clientEnt != null )
+		clientEnt.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function () : ( rui )
+		{
+			Fullmap_RemoveRui( rui )
+		}
+	)
+
+	WaitForever()
+}
+
+void function AddMinimapLabel( string title, float xPos, float yPos, float width = 200, float scale = 1.0 )
+{
+	foreach ( topo in file.minimapTopos )
+	{
+		int drawType = RUI_DRAW_WORLD
+		int sort     = FULLMAP_Z_BASE
+		if ( topo == file.mapTopo )
+		{
+			drawType = FULLMAP_RUI_DRAW_LAYER
+			sort = FULLMAP_Z_BASE + 20
+		}
+
+		var rui = RuiCreate( $"ui/in_world_minimap_label.rpak", topo, drawType, sort )
+		RuiSetString( rui, "title", title )
+		RuiSetFloat2( rui, "pos", <xPos, yPos, 0> )
+		RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+		RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+		RuiSetFloat( rui, "width", width )
+		RuiSetFloat( rui, "scale", scale )
+		RuiSetBool( rui, "hudVersion", topo == file.mapTopo )
+
+		if ( topo != file.mapTopo )
+		{
+			thread CleanupRuiOnTopoDestroy( rui, topo )
+		}
+
+		if ( topo == file.mapTopo )
+			Fullmap_AddRui( rui )
+	}
+}
+
+void function SURVIVAL_AddMinimapLevelLabel( string name, float x, float y, float scale = 1.0, float width = 200, bool overrideLabelDisable = false )
+{
+	if ( GetCurrentPlaylistVarBool( "disable_minimap_labels", false ) && !overrideLabelDisable )
+		return
+
+	MinimapLabelStruct s
+	s.name = name
+	s.pos = <x, y, 0>
+	s.scale = scale
+	s.width = width
+	file.minimapLabels.append( s )
+}
+
+var function FullMap_CommonAdd( asset ruiAsset, int zOrder = 50 )
+{
+	if ( !file.mapTopo )
+		return null
+	var rui = RuiCreate( ruiAsset, file.mapTopo, FULLMAP_RUI_DRAW_LAYER, FULLMAP_Z_BASE + zOrder )
+
+	RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0> )
+	RuiSetFloat( rui, "mapScale", file.mapScale )
+	RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+	RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+
+	if ( ruiAsset == FULLMAP_OBJECT_RUI )
+	{
+		RuiSetBool( rui, "hudVersion", true )
+	}
+
+	return rui
+}
+
+
+void function FullMap_CommonTrackEntOrigin( var rui, entity ent, bool doTrackAngles )
+{
+	RuiTrackFloat3( rui, "objectPos", ent, RUI_TRACK_ABSORIGIN_FOLLOW )
+	if ( doTrackAngles )
+		RuiTrackFloat3( rui, "objectAngles", ent, RUI_TRACK_EYEANGLES_FOLLOW )
+}
+
+
+var function FullMap_Ping_( float radius, vector color, float pulseDuration, float lifeTime, bool reverse, asset customRing = $"" )
+{
+	var rui = FullMap_CommonAdd( $"ui/in_world_minimap_ping.rpak" )
+
+	RuiSetFloat3( rui, "objColor", SrgbToLinear( color ) )
+	RuiSetFloat( rui, "objectRadius", max( radius, 1000 ) )
+	RuiSetGameTime( rui, "startTime", Time() )
+	RuiSetFloat( rui, "pulseDuration", pulseDuration )
+	RuiSetBool( rui, "reverse", reverse )
+	RuiSetImage( rui, "marker", $"" )
+
+	if ( customRing != "" )
+		RuiSetImage( rui, "pulse", customRing )
+
+	Fullmap_AddRui( rui )
+
+	if ( lifeTime > 0 )
+	{
+		RuiSetFloat( rui, "lifeTime", lifeTime )
+		delaythread( lifeTime - (1 / 60.0) ) Fullmap_RemoveRui( rui )
+	}
+
+	return rui
+}
+
+
+var function FullMap_AddEnemyLocation( entity enemy )
+{
+	var rui = FullMap_CommonAdd( $"ui/in_world_minimap_square_simple.rpak" )
+
+	RuiSetFloat3( rui, "objectPos", enemy.GetOrigin() )
+	RuiSetFloat3( rui, "objectAngles", ( enemy.GetAngles() + <0, -90, 0> ) )
+	RuiSetFloat3( rui, "objColor", GetKeyColor( COLORID_MINIMAP_ENEMY_REF ) * ( 1.0 / 255.0 ) )
+	RuiSetFloat( rui, "objectSize", 5.0 )
+	RuiSetBool( rui, "doAnnounceEffect", true )
+	RuiSetImage( rui, "iconImage", $"rui/hud/minimap/compass_icon_player" )
+
+	Fullmap_AddRui( rui )
+	return rui
+}
+
+var function FullMap_AddIconAtPos( vector position, vector angles, asset icon, float scale, vector iconColor )
+{
+	var rui = FullMap_CommonAdd( $"ui/in_world_minimap_square_simple.rpak" )
+
+	RuiSetFloat3( rui, "objectPos", position )
+	RuiSetFloat3( rui, "objectAngles", angles )
+	RuiSetFloat3( rui, "objColor", iconColor )
+	RuiSetFloat( rui, "objectSize", scale )
+	RuiSetBool( rui, "doAnnounceEffect", true )
+	RuiSetImage( rui, "iconImage", icon )
+
+	Fullmap_AddRui( rui )
+	return rui
+}
+
+var function FullMap_AddCryptoRingPulse( vector pulseOrg )
+{
+	var rui = FullMap_CommonAdd( $"ui/in_world_crypto_tt_map_pulse.rpak" )
+
+	RuiSetFloat3( rui, "objectPos", pulseOrg )
+	RuiSetFloat3( rui, "ellipseColor", < 131.0/255.0, 216.0/255.0, 255.0/255.0 > )
+	RuiSetFloat( rui, "objectSize", 20.0 )
+	RuiSetBool( rui, "scaleWithZoom", true )
+	RuiSetImage( rui, "iconImage", $"rui/events/s05_CryptoTT/crypto_tt_map_ring_main" )
+
+	Fullmap_AddRui( rui )
+
+	return rui
+}
+
+void function FullMap_PlayCryptoPulseSequence( vector pulseOrigin, bool tintMap, float tintDuration )
+{
+	thread Fullmap_PlayCryptoPulseSequence_Thread( pulseOrigin, tintMap, tintDuration )
+}
+
+void function Fullmap_PlayCryptoPulseSequence_Thread( vector pulseOrigin, bool tintMap, float tintDuration )
+{
+	if ( tintMap )
+	{
+		Fullmap_SetTintParams( Time(), tintDuration, GetKeyColor( COLORID_MINMAP_CRYPTO_PULSE_TINT ) )
+		Minimap_SetTintParams( Time(), tintDuration, GetKeyColor( COLORID_MINMAP_CRYPTO_PULSE_TINT ) )
+	}
+
+	wait 0.5
+	var pulseRui = FullMap_AddCryptoRingPulse( pulseOrigin )
+	var minimapPulseRui = Minimap_AddCryptoPulseToMinimap( pulseOrigin )
+	RuiSetGameTime( pulseRui, "pulseSequenceEndTime", Time() + ( tintDuration - 1 ) )
+	RuiSetGameTime( minimapPulseRui, "pulseSequenceEndTime", Time() + ( tintDuration - 1 ) )
+
+	wait tintDuration
+	Fullmap_RemoveRui( pulseRui )
+	RuiDestroy( pulseRui )
+	Minimap_CommonCleanup( minimapPulseRui )
+}
+
+var function FullMap_PingLocation( vector origin, float radius, vector color, float pulseDuration, float lifeTime = -1, bool reverse = false, asset altIcon = $"" )
+{
+	if ( !file.mapTopo )
+		return null
+
+	var rui
+	if ( altIcon != $"" )
+		rui = FullMap_Ping_( radius, color, pulseDuration, lifeTime, reverse, altIcon )
+	else
+		rui = FullMap_Ping_( radius, color, pulseDuration, lifeTime, reverse )
+
+	RuiSetFloat3( rui, "objectPos", origin )
+	RuiSetFloat3( rui, "objectAngles", <0, 0, 0> )
+	return rui
+}
+
+
+var function FullMap_PingEntity( entity ent, float radius, vector color, float pulseDuration, float lifeTime = -1, bool reverse = false )
+{
+	if ( !file.mapTopo )
+		return null
+
+	var rui = FullMap_Ping_( radius, color, pulseDuration, lifeTime, reverse )
+	FullMap_CommonTrackEntOrigin( rui, ent, false )
+	return rui
+}
+
+void function AddInWorldMinimapObjectiveInternal( entity ent, var screen )
+{
+	if ( !IsValid( ent ) )
+		return
+
+	int customState    = ent.Minimap_GetCustomState()
+	asset minimapAsset = FULLMAP_OBJECTIVE_AREA_RUI
+	int zOrder         = ent.Minimap_GetZOrder()
+	entity viewPlayer  = GetLocalViewPlayer()
+
+	int drawType = RUI_DRAW_WORLD
+	if ( screen == file.mapTopo )
+		drawType = FULLMAP_RUI_DRAW_LAYER
+
+	var rui = RuiCreate( minimapAsset, screen, drawType, FULLMAP_Z_BASE + zOrder )
+
+	RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0.0> )
+	RuiSetFloat( rui, "mapScale", file.mapScale )
+	RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+	RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+	RuiTrackFloat3( rui, "objectPos", ent, RUI_TRACK_ABSORIGIN_FOLLOW )
+	RuiTrackFloat3( rui, "objectAngles", ent, RUI_TRACK_EYEANGLES_FOLLOW )
+	if ( ent.IsClientOnly() )
+	{
+		RuiSetInt( rui, "objectFlags", ent.e.clientEntMinimapFlags )
+		RuiSetInt( rui, "customState", ent.e.clientEntMinimapCustomState )
+	}
+	else
+	{
+		RuiTrackInt( rui, "objectFlags", ent, RUI_TRACK_MINIMAP_FLAGS )
+		RuiTrackInt( rui, "customState", ent, RUI_TRACK_MINIMAP_CUSTOM_STATE )
+	}
+	RuiSetFloat( rui, "displayDist", max( file.threatMaxDist, 2200 ) )
+	RuiSetBool( rui, "hudVersion", screen == file.mapTopo )
+
+	Survival_MinimapPackage_ObjectiveAreaInit( ent, rui )
+
+	Fullmap_AddRui( rui )
+
+	OnThreadEnd(
+		function() : ( rui )
+		{
+			Fullmap_RemoveRui( rui )
+			RuiDestroy( rui )
+		}
+	)
+
+	ent.EndSignal( "OnDestroy" )
+	entity clientEnt = GetClientEntFromTopo( screen )
+	if ( clientEnt != null )
+		clientEnt.EndSignal( "OnDestroy" )
+
+	if ( ent.IsPlayer() )
+	{
+		while ( IsValid( ent ) )
+		{
+			WaitSignal( ent, "SettingsChanged", "OnDeath" )
+			RuiSetFloat2( rui, "iconScale", ent.IsTitan() ? <1.0, 1.0, 0.0> : <2.0, 2.0, 0.0> )
+		}
+	}
+	else
+	{
+		ent.WaitSignal( "OnDestroy" )
+	}
+}
+
+
+void function AddInWorldMinimapDeathFieldInternal( entity ent, var screen )
+{
+	if ( !IsValid( ent ) )
+		return
+
+	int customState    = ent.Minimap_GetCustomState()
+	asset minimapAsset = $"ui/in_world_minimap_death_field.rpak"
+	int zOrder         = ent.Minimap_GetZOrder()
+	entity viewPlayer  = GetLocalViewPlayer()
+
+	int drawType = RUI_DRAW_WORLD
+	if ( screen == file.mapTopo )
+		drawType = FULLMAP_RUI_DRAW_LAYER
+
+	var rui = RuiCreate( minimapAsset, screen, drawType, FULLMAP_Z_BASE + zOrder )
+	file.inWorldMinimapDeathFieldRui = rui
+	asset mapImage = Minimap_GetAssetForKey( "minimap" )
+
+	RuiSetImage( rui, "mapImage", mapImage )
+	RuiSetImage( rui, "mapBgTileImage", GetMinimapBackgroundTileImage() )
+
+	RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0.0> )
+	RuiSetFloat( rui, "mapScale", file.mapScale )
+	RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+	RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+	RuiTrackFloat3( rui, "objectPos", ent, RUI_TRACK_ABSORIGIN_FOLLOW )
+	if ( ent.IsClientOnly() )
+		RuiSetInt( rui, "objectFlags", ent.e.clientEntMinimapFlags )
+	else
+		RuiTrackInt( rui, "objectFlags", ent, RUI_TRACK_MINIMAP_FLAGS )
+	RuiSetFloat( rui, "displayDist", max( file.threatMaxDist, 2200 ) )
+	RuiSetBool( rui, "hudVersion", screen == file.mapTopo )
+
+	RuiSetFloat( rui, "radiusScale", SURVIVAL_MINIMAP_RING_SCALE )
+	FullMap_SetDeathFieldRadius( Cl_SURVIVAL_GetDeathFieldCurrentRadius() )
+
+	Fullmap_AddRui( rui )
+	Fullmap_AddTintableRui( rui )
+
+	OnThreadEnd(
+		function() : ( rui )
+		{
+			Fullmap_RemoveRui( rui )
+			RuiDestroy( rui )
+			file.inWorldMinimapDeathFieldRui = null
+		}
+	)
+
+	ent.EndSignal( "OnDestroy" )
+	entity clientEnt = GetClientEntFromTopo( screen )
+	if ( clientEnt != null )
+		clientEnt.EndSignal( "OnDestroy" )
+
+	ent.WaitSignal( "OnDestroy" )
+}
+
+
+void function FullMap_SetDeathFieldRadius( float radius )
+{
+	if ( file.inWorldMinimapDeathFieldRui == null )
+		return
+
+	RuiSetFloat( file.inWorldMinimapDeathFieldRui, "objectRadius", radius / SURVIVAL_MINIMAP_RING_SCALE )
+}
+
+
+void function AddInWorldMinimapObjectInternal( entity ent, var screen, asset ruiAsset = FULLMAP_OBJECT_RUI, asset defaultIcon = $"", asset clampedDefaultIcon = $"", vector iconScale = <1.0, 1.0, 0.0>, vector iconColor = <1, 1, 1>, void functionref(var,entity) func = null )
+{
+	entity viewPlayer  = GetLocalViewPlayer()
+	bool isNPCTitan    = ent.IsNPC() && ent.IsTitan()
+	bool isPetTitan    = ent == viewPlayer.GetPetTitan()
+	bool isLocalPlayer = ent == viewPlayer
+	int customState    = ent.Minimap_GetCustomState()
+	bool isFriendlyAlly = ent.GetTeam() != viewPlayer.GetTeam() && IsFriendlyTeam( ent.GetTeam(), viewPlayer.GetTeam() )
+	asset minimapAsset = ruiAsset
+
+	int zOrder       = ent.Minimap_GetZOrder()
+	int zOrderOffset = 2                                                   
+
+	int drawType = RUI_DRAW_WORLD
+	if ( screen == file.mapTopo )
+		drawType = FULLMAP_RUI_DRAW_LAYER
+
+	var rui = RuiCreate( minimapAsset, screen, drawType, FULLMAP_Z_BASE + zOrder + zOrderOffset )
+
+	if ( func != null )
+		func( rui, ent )
+
+	RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0.0> )
+	RuiSetFloat( rui, "mapScale", file.mapScale )
+	RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+	RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+
+	RuiTrackFloat3( rui, "objectPos", ent, RUI_TRACK_ABSORIGIN_FOLLOW )
+	RuiTrackFloat3( rui, "objectAngles", ent, RUI_TRACK_EYEANGLES_FOLLOW )
+	if ( ent.IsClientOnly() )
+	{
+		RuiSetInt( rui, "objectFlags", ent.e.clientEntMinimapFlags )
+		RuiSetInt( rui, "customState", ent.e.clientEntMinimapCustomState )
+	}
+	else
+	{
+		RuiTrackInt( rui, "objectFlags", ent, RUI_TRACK_MINIMAP_FLAGS )
+		RuiTrackInt( rui, "customState", ent, RUI_TRACK_MINIMAP_CUSTOM_STATE )
+	}
+	RuiSetFloat( rui, "displayDist", max( file.threatMaxDist, 2200 ) )
+	RuiSetFloat( rui, "iconBlend", 1.0 )
+	RuiSetFloat( rui, "iconPremul", 0.0 )
+	RuiSetFloat2( rui, "iconScale", ent.IsTitan() ? <1.5, 1.5, 0.0> : <2.0, 2.0, 0.0> )
+	RuiSetBool( rui, "hudVersion", screen == file.mapTopo )
+
+	#if MEMBER_COLORS
+		if ( ent.IsPlayer() )
+			RuiTrackInt( rui, "teamMemberIndex", ent, RUI_TRACK_PLAYER_TEAM_MEMBER_INDEX )
+	#endif
+
+	if ( ent.IsPlayer() )
+		RuiTrackInt( rui, "squadID", ent, RUI_TRACK_SQUADID )
+
+	if ( isLocalPlayer )
+	{
+		RuiSetBool( rui, "isLocalPlayer", isLocalPlayer )
+	}
+
+	if ( !ent.IsPlayer() )
+	{
+		if ( isNPCTitan )
+		{
+			                                         
+			                                                
+		}
+		else
+		{
+			RuiSetImage( rui, "defaultIcon", defaultIcon )
+			RuiSetImage( rui, "clampedDefaultIcon", clampedDefaultIcon )
+			RuiSetFloat2( rui, "iconScale", iconScale )
+			RuiSetFloat3( rui, "iconColor", iconColor )
+		}
+	}
+
+	if ( ent.IsPlayer() )
+	{
+		bool viewerIsSpectator = IsSpectator( GetLocalClientPlayer() )
+		RuiSetBool( rui, "viewerIsSpectator", viewerIsSpectator )
+
+		vector smokeColor = SrgbToLinear(GetSkydiveSmokeColorForTeam( ent.GetTeam() ) / 255.0)
+		RuiSetFloat3( rui, "smokeColor", smokeColor )
+
+
+		RuiSetString( rui, "playerName", viewerIsSpectator ? ent.GetPlayerNameWithClanTag() : "" )
+		if ( isFriendlyAlly )
+			RuiSetFloat3( rui, "iconColorOverride", (GetKeyColor( COLORID_FRIENDLY ) / 255.0)  )
+
+		if( viewerIsSpectator )
+		{
+			RuiTrackGameTime( rui, "lastFireTime", ent, RUI_TRACK_LAST_FIRED_TIME )
+		}
+
+		EHI ehi = ToEHI( ent )
+		if( ehi in file.fullmapPlayerItems )
+		{
+			Fullmap_RemoveRui( file.fullmapPlayerItems[ehi] )	                                                                                                                                                                           
+			file.fullmapPlayerItems[ehi] = null
+		}
+
+		file.fullmapPlayerItems[ehi] <- rui
+	}
+
+	Fullmap_AddRui( rui )
+
+	OnThreadEnd(
+		function() : ( rui, ent )
+		{
+			Fullmap_RemoveRui( rui )
+			RuiDestroy( rui )
+		}
+	)
+
+	ent.EndSignal( "OnDestroy" )
+	entity clientEnt = GetClientEntFromTopo( screen )
+	if ( clientEnt != null )
+		clientEnt.EndSignal( "OnDestroy" )
+
+	if ( ent.IsPlayer() )
+	{
+		while ( IsValid( ent ) )
+		{
+			WaitSignal( ent, "SettingsChanged", "OnDeath" )
+			RuiSetFloat2( rui, "iconScale", ent.IsTitan() ? <1.0, 1.0, 0.0> : <2.0, 2.0, 0.0> )
+			if ( isFriendlyAlly && !ent.IsTitan() )
+				RuiSetFloat2( rui, "iconScale", <1.0, 1.0, 0.0> )
+		}
+	}
+	else
+	{
+		ent.WaitSignal( "OnDestroy" )
+	}
+}
+
+void function CreateFullmap()
+{
+	FullmapDrawParams fp = GetFullmapDrawParams()
+	file.mapTopoBG = RuiTopology_CreatePlane( fp.org, fp.right, fp.down, false )
+	file.mapTopo = RuiTopology_CreatePlane( fp.org, fp.right, fp.down, true )
+	file.minimapTopos.append( file.mapTopo )
+
+	file.mapAimRui = RuiCreate( $"ui/survival_map_selector.rpak", file.mapTopoBG, FULLMAP_RUI_DRAW_LAYER, RUI_SORT_SCREENFADE - 2 )
+	Fullmap_AddRui( file.mapAimRui )
+}
+
+struct FullmapDrawParams
+{
+	vector org
+	vector right
+	vector down
+}
+
+FullmapDrawParams function GetFullmapDrawParams()
+{
+	UISize screenSize = GetScreenSize()
+
+	float mapSizeScale = GetCurrentPlaylistVarFloat( "fullmap_size_scale", 0.94 )
+	float posScaleX    = GetCurrentPlaylistVarFloat( "fullmap_pos_x", -0.5 )
+	float posScaleY    = GetCurrentPlaylistVarFloat( "fullmap_pos_y", -0.5                            )
+
+	float size  = (screenSize.height * mapSizeScale)
+	float baseX = (screenSize.width * 0.5)
+	float baseY = (screenSize.height * 0.5)
+
+	float posX = baseX + (screenSize.height * posScaleX)
+	float posY = baseY + (screenSize.height * posScaleY)
+
+	FullmapDrawParams fp
+	fp.org = <posX, posY, 0.0>
+	fp.right = <size, 0, 0>
+	fp.down = <0, size, 0>
+	return fp
+}
+
+
+void function FullMap_UpdateAimPos()
+{
+	RuiSetGameTime( file.mapAimRui, "updateTime", Time() )
+}
+
+
+void function FullMap_UpdateTopologies()
+{
+	FullmapDrawParams fp = GetFullmapDrawParams()
+
+	RuiTopology_UpdatePos( file.mapTopoBG, fp.org, fp.right, fp.down )
+	RuiTopology_UpdatePos( file.mapTopo, fp.org, fp.right, fp.down )
+}
+
+
+
+
+void function HideMapRui()
+{
+	Fullmap_SetVisible( false )
+	UpdateMainHudVisibility( GetLocalViewPlayer() )
+}
+
+
+void function ShowMapRui()
+{
+	Fullmap_SetVisible( true )
+	UpdateMainHudVisibility( GetLocalViewPlayer() )
+}
+
+
+bool function MapDevCheatsAreActive()
+{
+	#if DEV
+		if ( !GetConVarBool( "sv_cheats" ) )
+			return false
+		if ( InputIsButtonDown( KEY_LSHIFT ) || InputIsButtonDown( BUTTON_STICK_LEFT ) )
+			return true
+	#endif
+
+	return false
+}
+
+
+void function UpdateMap_THREAD()
+{
+	EndSignal( clGlobal.signalDummy, "OnHideScoreboard" )
+
+	Fullmap_SetVisible( true )
+	UpdateMainHudVisibility( GetLocalViewPlayer() )
+
+	OnThreadEnd(
+		function() : ()
+		{
+			Fullmap_SetVisible( false )
+			UpdateMainHudVisibility( GetLocalViewPlayer() )
+		}
+	)
+
+	                                                                  
+	if ( GetCurrentPlaylistVarFloat( "fullmapCustomZoomFactor", 0 ) > 0 )
+	{
+		float fullmapCustomZoomFactor = GetCurrentPlaylistVarFloat( "fullmapCustomZoomFactor", 0 )
+		file.fullmapZoomFactor = fullmapCustomZoomFactor
+		SetBigMapZoomScale( file.fullmapZoomFactor )
+	}
+
+	for ( ; ; )
+	{
+		if ( IsValid( file.mapAimRui ) )
+		{
+			RuiSetBool( file.mapAimRui, "devCheatsAreActive", MapDevCheatsAreActive() )
+			RuiSetBool( file.mapAimRui, "tpPromptIsActive", TPPromptIsActive() )
+		}
+
+		if ( InputIsButtonDown( BUTTON_TRIGGER_RIGHT ) )
+			ChangeFullMapZoomFactor( FULLMAP_ZOOM_SPEED_CONTROLLER )
+
+		if ( InputIsButtonDown( BUTTON_TRIGGER_LEFT ) )
+			ChangeFullMapZoomFactor( -FULLMAP_ZOOM_SPEED_CONTROLLER )
+
+		if ( IsSpectator( GetLocalClientPlayer() ) && file.updatePlayerTags == true)
+		{
+			array< entity > sortedPlayers = GetPlayerArray()
+			sortedPlayers.sort( int function(entity playerA, entity playerB){
+				entity player = GetLocalViewPlayer()
+				if ( playerA.GetTeam() == playerB.GetTeam() && playerA.GetTeam() == player.GetTeam() )
+				{
+					return -1
+				}
+
+				vector playerOrigin = player.GetOrigin()
+				vector distToPlayerA = playerA.GetOrigin() - playerOrigin
+				vector distToPlayerB = playerB.GetOrigin() - playerOrigin
+				if(distToPlayerA > distToPlayerB)
+				{
+					return 1
+				}
+				else if ( distToPlayerA < distToPlayerB )
+				{
+					return -1
+				}
+
+				return 0
+			});
+
+			int playersShownCount = 0
+			foreach ( ent in sortedPlayers )
+			{
+				if ( !IsValid( ent ) || !ent.IsPlayer() )
+					continue
+
+				EHI ehi = ToEHI( ent )
+				var rui = file.fullmapPlayerItems[ehi]
+
+				if ( !IsValid( rui ) )
+					continue
+
+				entity player = GetLocalViewPlayer()
+
+				bool showNameTag = false
+				switch( file.playerTagMode )
+				{
+					case OBS_PLAYERTAG_MODE_NONE:
+						printt("PlayerTagMode_None")
+						showNameTag = false
+						break;
+
+					case OBS_PLAYERTAG_MODE_5_TEAMS:
+						showNameTag = playersShownCount < 15
+						playersShownCount++;
+						break;
+					case OBS_PLAYERTAG_MODE_7_TEAMS:
+						showNameTag = playersShownCount < 21
+						playersShownCount++;
+						break;
+					case OBS_PLAYERTAG_MODE_11_TEAMS:
+						showNameTag = playersShownCount < 33
+						playersShownCount++;
+						break;
+					case OBS_PLAYERTAG_MODE_ALL:
+						showNameTag = true
+						break;
+
+					case OBS_PLAYERTAG_MODE_TEAM:
+						showNameTag = (ent.GetTeam() == player.GetTeam())
+						break;
+				}
+
+				if ( showNameTag )
+				{
+					string name = ent.GetPlayerNameWithClanTag()
+					if ( IsPrivateMatch() )
+					{
+						bool showTeamNames = GetConVarBool( "hud_setting_showTeamNamesOnMap" ) == true
+						if ( showTeamNames )
+							name = PrivateMatch_GetTeamName( ent.GetTeam() )
+					}
+
+					RuiSetString( rui, "playerName", name )
+				}
+				else
+					RuiSetString( rui, "playerName", "" )
+
+				if ( ent == player )
+					RuiSetFloat2( rui, "highlightScaleTarget", < 1.5, 1.5, 0.0 > )
+				else if ( ent == file.highlightedPlayer )
+					RuiSetFloat2( rui, "highlightScaleTarget", < 1.5, 1.5, 0.0 > )
+				else
+					RuiSetFloat2( rui, "highlightScaleTarget", < 0.8, 0.8, 0.0 > )
+
+				RuiSetBool( rui, "viewerIsSpectator", true )
+
+				vector smokeColor = SrgbToLinear( GetSkydiveSmokeColorForTeam( ent.GetTeam() ) / 255.0 )
+				RuiSetFloat3( rui, "smokeColor", smokeColor )
+			}
+
+			file.updatePlayerTags = false
+		}
+
+		WaitFrame()
+	}
+}
+
+void function ClientCodeCallback_ToggleFullMapNames()
+{
+	print("[Lucid] ClientCodeCallback_ToggleFullMapNames")
+	file.updatePlayerTags = true
+}
+
+void function ChangeFullMapZoomFactor( float delta )
+{
+	if ( IsViewingDeathScreen() )
+	{
+		                                           
+		file.fullmapZoomFactor = 1.0
+		SetBigMapZoomScale( 1.0 )
+		return
+	}
+
+	vector oldAimPos = GetMapNormalizedAimCoordinate()
+
+	file.fullmapZoomFactor *= pow( 1.5, delta )
+
+	if ( file.fullmapZoomFactor > 6.0 )
+		file.fullmapZoomFactor = 6.0
+
+	if ( file.fullmapZoomFactor < 1 )
+		file.fullmapZoomFactor = 1
+
+	SetBigMapZoomScale( file.fullmapZoomFactor )
+
+	vector newAimPos = GetMapNormalizedAimCoordinate()
+
+	vector zoomDelta = oldAimPos - newAimPos
+
+	float zoomScreenWidth       = 1.0 / GetBigMapZoomScale()
+	float zoomAreaUpperLeftFrac = 1.0 - zoomScreenWidth
+
+	if ( zoomAreaUpperLeftFrac > 0 )
+	{
+		file.fullmapZoomPos += zoomDelta / zoomAreaUpperLeftFrac
+		file.fullmapZoomPos = <clamp( file.fullmapZoomPos.x, 0, 0.99999 ), clamp( file.fullmapZoomPos.y, 0, 0.99999 ), 0>
+		SetBigMapZoomAnchor( file.fullmapZoomPos.x, file.fullmapZoomPos.y )
+	}
+}
+
+
+void function ShowFullmap()
+{
+	if ( !GetCurrentPlaylistVarBool( "fullmap_enabled", true ) )
+		return
+
+	if ( Freelance_IsHubLevel() )
+		return
+
+	if ( RadialMenu_IsShowing() )
+		RadialMenu_Destroy()
+
+	Scoreboard_SetVisible( true )
+	ShowMapRui()
+	UpdateFullmapRuiTracks()
+
+	thread UpdateMap_THREAD()
+
+	if ( !IsSpectating() && !IsPlayerInPlane( GetLocalViewPlayer() ) )
+	{
+		if ( GetCurrentPlaylistVarFloat( "fullmapCustomZoomAnchorX", 100 ) < 100 && GetCurrentPlaylistVarFloat( "fullmapCustomZoomAnchorY", 100 ) < 100 )
+		{
+			                                 
+			float customX = GetCurrentPlaylistVarFloat( "fullmapCustomZoomAnchorX", 0.5 )
+			float customY = GetCurrentPlaylistVarFloat( "fullmapCustomZoomAnchorY", 0.5 )
+			file.fullmapZoomPos = < customX, customY, 0 >
+			file.fullmapAimPos = file.fullmapZoomPos
+		}
+		else
+		{
+			                                          
+			vector normalized = NormalizeWorldPos( GetLocalViewPlayer().GetOrigin() )
+			file.fullmapAimPos = normalized
+			file.fullmapZoomPos = normalized
+		}
+	}
+
+	if ( IsValid( file.mapAimRui ) )
+		RuiSetFloat2( file.mapAimRui, "pos", file.fullmapAimPos )
+
+	s_inputDebounceIsActive = true
+	HudInputContext inputContext
+	inputContext.keyInputCallback = Fullmap_HandleKeyInput
+	inputContext.moveInputCallback = Fullmap_HandleMoveInput
+	inputContext.viewInputCallback = Fullmap_HandleViewInput
+	inputContext.hudInputFlags = (HIF_ALLOW_AUTOSPRINT_FORWARD)
+	HudInput_PushContext( inputContext )
+	file.mapContextPushed = true
+}
+
+
+void function HideFullmap()
+{
+	if ( !GetCurrentPlaylistVarBool( "fullmap_enabled", true ) )
+		return
+
+	if ( Freelance_IsHubLevel() )
+		return
+
+	Scoreboard_SetVisible( false )
+	HideMapRui()
+	Fullmap_ClearInputContext()
+}
+
+void function Fullmap_ClearInputContext()
+{
+	if ( file.mapContextPushed )
+	{
+		HudInput_PopContext()
+		file.mapContextPushed = false
+	}
+}
+
+void function AddInWorldMinimapObject( entity ent )
+                                                                                                              
+{
+	Assert( IsValid( ent ) )
+	thread AddInWorldMinimapObject_WhenValid( ent )
+}
+
+
+void function AddInWorldMinimapObject_WhenValid( entity ent )
+{
+	ent.EndSignal( "OnDestroy" )
+
+	while ( !file.toposInitialized )
+		WaitFrame()
+
+	switch ( ent.GetTargetName() )
+	{
+		case "deathField":
+			thread AddInWorldMinimapDeathFieldInternal( ent, file.mapTopo )
+			return
+	}
+
+	if ( ent.GetTargetName() in file.customAddToFullMapAndInWorldMapCallbacks )
+	{
+		GenericFullmapSetupStruct data = file.customAddToFullMapAndInWorldMapCallbacks[ ent.GetTargetName() ]
+		if ( !data.friendlyOnly || IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
+		{
+			foreach ( screen in file.minimapTopos )
+			{
+				if ( data.hudMapOnly && screen != file.mapTopo )
+					continue
+
+				thread AddToFullMapCustom( ent, screen, data )
+			}
+		}
+	}
+
+	if ( ent.GetTargetName() in file.genericAddToFullMapAndInWorldMapCallbacks )
+	{
+		GenericFullmapSetupStruct data = file.genericAddToFullMapAndInWorldMapCallbacks[ ent.GetTargetName() ]
+		if ( !data.friendlyOnly || IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
+		{
+			foreach ( screen in file.minimapTopos )
+			{
+				if ( data.hudMapOnly && screen != file.mapTopo )
+					continue
+
+				thread AddInWorldMinimapObjectInternal( ent, screen,
+					data.ruiAsset,
+					data.defaultIcon,
+					data.clampedIcon,
+					data.iconScale,
+					data.iconColor,
+					data.setupFunc )
+			}
+		}
+	}
+
+	if ( !ent.IsPlayer() && !ent.IsTitan() )
+		return
+
+	while ( IsValid( ent ) )
+	{
+		if ( IsPVEMode() && ent.IsPlayer() && IsMultiTeamMission() )
+			break
+
+		if ( GameMode_DoesModeDisplayIconsForAllTeams( GameRules_GetGameMode() ) )
+			break
+
+		if ( GameMode_DoesModeDisplayIconsForAllFriendlyTeams( GameRules_GetGameMode() ) )
+		{
+			if ( ent.IsPlayer() && IsFriendlyTeam( ent.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
+			{
+				break
+			}
+		}
+
+		                                                        
+		if ( !IsSpectator( GetLocalClientPlayer() ) )
+		{
+			if ( ent.IsPlayer() && ent.GetTeam() != GetLocalViewPlayer().GetTeam() )
+			{
+				waitthread WaitForEntUpdate( ent, GetLocalViewPlayer() )
+				continue
+			}
+			else if ( ent.IsTitan() && ent.GetTeam() != GetLocalViewPlayer().GetTeam() )
+			{
+				wait 0.5
+				continue
+			}
+		}
+
+		if ( IsValid( GetLocalViewPlayer() ) )
+		{
+			break
+		}
+		WaitFrame()
+	}
+
+	ent.SetDoDestroyCallback( true )
+
+	thread AddInWorldMinimapObjectInternal( ent, file.mapTopo, $"ui/in_world_minimap_player.rpak" )
+}
+
+void function AddCallback_Targetname_AddToFullMapAndInWorldMapGeneric( string targetname, GenericFullmapSetupStruct data )
+{
+	Assert( !( targetname in file.genericAddToFullMapAndInWorldMapCallbacks ) )
+	file.genericAddToFullMapAndInWorldMapCallbacks[ targetname ] <- data
+}
+
+void function AddCallback_Targetname_AddToFullMapAndInWorldMapCustom( string targetname, GenericFullmapSetupStruct data )
+{
+	Assert( !( targetname in file.customAddToFullMapAndInWorldMapCallbacks ) )
+	file.customAddToFullMapAndInWorldMapCallbacks[ targetname ] <- data
+}
+
+void function AddCallback_OnFindFullMapAimEntity( entity functionref( vector, float ) targetCallback, bool functionref( entity ) actionCallback )
+{
+	Assert( !( targetCallback in file.fullMapAimTargetCallbacks ), "Already added " + string( targetCallback ) + " with AddCallback_OnFindFullMapAimEntity" )
+	file.fullMapAimTargetCallbacks[ targetCallback ] <- actionCallback
+}
+
+void function RemoveCallback_OnFindFullMapAimEntity( entity functionref( vector, float ) targetCallback )
+{
+	Assert( targetCallback in file.fullMapAimTargetCallbacks, "Callback " + string( targetCallback ) + "not previously added with AddCallback_OnFindFullMapAimEntity" )
+	delete file.fullMapAimTargetCallbacks[ targetCallback ]
+}
+
+bool function HasCallback_OnFindFullMapAimEntity( entity functionref( vector, float ) targetCallback  )
+{
+	return (targetCallback in file.fullMapAimTargetCallbacks)
+}
+
+void function AddToFullMapCustom( entity ent, var topo, GenericFullmapSetupStruct data )
+{
+	int drawMode = RUI_DRAW_WORLD
+	if ( topo == file.mapTopo )
+		drawMode = FULLMAP_RUI_DRAW_LAYER
+
+	var rui = RuiCreate( data.ruiAsset, topo, drawMode, FULLMAP_Z_BASE )
+	RuiSetFloat3( rui, "mapCorner", <file.mapCornerX, file.mapCornerY, 0> )
+	RuiSetFloat( rui, "mapScale", file.mapScale )
+	RuiSetFloat( rui, "displayDist", max( file.threatMaxDist, 2200 ) )
+	RuiSetBool( rui, "hudVersion", drawMode == FULLMAP_RUI_DRAW_LAYER )
+	RuiTrackFloat2( rui, "zoomPos", null, RUI_TRACK_BIG_MAP_ZOOM_ANCHOR )
+	RuiTrackFloat( rui, "zoomFactor", null, RUI_TRACK_BIG_MAP_ZOOM_SCALE )
+	RuiTrackFloat3( rui, "objectPos", ent, RUI_TRACK_ABSORIGIN_FOLLOW )
+	RuiTrackFloat3( rui, "objectAngles", ent, RUI_TRACK_EYEANGLES_FOLLOW )
+	RuiTrackInt( rui, "objectFlags", ent, RUI_TRACK_MINIMAP_FLAGS )
+
+	if ( data.setupFunc != null )
+	{
+		data.setupFunc( rui, ent )
+	}
+
+	if ( topo == file.mapTopo )
+		Fullmap_AddRui( rui )
+
+	OnThreadEnd(
+		function () : ( rui, topo )
+		{
+			if ( topo == file.mapTopo )
+				Fullmap_RemoveRui( rui )
+
+			RuiDestroy( rui )
+		}
+	)
+
+	ent.WaitSignal( "OnDestroy" )
+}
+
+void function WaitForEntUpdate( entity ent, entity viewPlayer )
+{
+	EndSignal( ent, "SettingsChanged", "OnDeath", "TeamChanged" )
+
+	EndSignal( viewPlayer, "SettingsChanged", "OnDeath", "TeamChanged" )
+
+	WaitForever()
+}
+
+
+
+vector function NormalizeWorldPos( vector pos, float zoomFactor = 1.0 )
+{
+	float mapScaleTweak  = max( file.mapScale * OVERVIEW_MAP_SIZE, 1 )
+	vector normalizedPos = (pos - <file.mapCornerX, file.mapCornerY, 0>) / mapScaleTweak
+	normalizedPos = <normalizedPos.x, -1 * normalizedPos.y, 0> * zoomFactor
+	return normalizedPos
+}
+
+vector function ConvertNormalizedPosToWorldPos( vector normalizedPos, float zoomFactor = 1.0 )
+{
+	vector fixedPos     = <normalizedPos.x, -1 * normalizedPos.y, 0> / zoomFactor
+	float mapScaleTweak = max( file.mapScale * OVERVIEW_MAP_SIZE, 1 )
+	vector pos          = (fixedPos * mapScaleTweak) + <file.mapCornerX, file.mapCornerY, 0>
+	return pos
+}
+
+bool function Fullmap_HandleViewInput( float x, float y )
+{
+	if ( IsControllerModeActive() )
+		return false
+
+	                                                                       
+
+	vector oldAimPos = GetMapNormalizedAimCoordinate()
+
+	file.fullmapAimPos += <x, -y, 0> * 0.001
+	vector desiredFullMapPos = file.fullmapAimPos
+
+	if ( InputIsButtonDown( MOUSE_RIGHT ) )                                         
+	{
+		vector newAimPos = GetMapNormalizedAimCoordinate()
+
+		vector delta = oldAimPos - newAimPos
+
+		float zoomScreenWidth       = 1.0 / file.fullmapZoomFactor
+		float zoomAreaUpperLeftFrac = 1.0 - zoomScreenWidth
+
+		if ( zoomAreaUpperLeftFrac > 0 )
+			file.fullmapZoomPos += delta / zoomAreaUpperLeftFrac
+	}
+
+	file.fullmapAimPos = <clamp( file.fullmapAimPos.x, 0, 0.99999 ), clamp( file.fullmapAimPos.y, 0, 0.99999 ), 0>
+	vector clampDiff = desiredFullMapPos - file.fullmapAimPos
+	if ( file.fullmapZoomFactor > 0 )
+		file.fullmapZoomPos += clampDiff / file.fullmapZoomFactor
+
+	file.fullmapZoomPos = <clamp( file.fullmapZoomPos.x, 0, 0.99999 ), clamp( file.fullmapZoomPos.y, 0, 0.99999 ), 0>
+	SetBigMapZoomAnchor( file.fullmapZoomPos.x, file.fullmapZoomPos.y )
+
+	if ( IsValid( file.mapAimRui ) )
+		RuiSetFloat2( file.mapAimRui, "pos", file.fullmapAimPos )
+
+	entity playerUnderAim = GetPlayerUnderAim()
+	if ( playerUnderAim != file.highlightedPlayer )
+	{
+		file.highlightedPlayer = playerUnderAim
+		file.updatePlayerTags = true
+	}
+
+	Fullmap_HandleAimInput_Common()
+
+	return true
+}
+
+
+bool s_inputDebounceIsActive = false
+bool function Fullmap_HandleMoveInput( float x, float y )
+{
+	if ( !IsValid( file.mapAimRui ) )
+		return false
+	if ( !IsControllerModeActive() )
+		return false
+
+	if ( s_inputDebounceIsActive )
+	{
+		const float DEBOUNCE_THRESHOLD = 0.4
+		float len = min( Length2D( <x, y, 0> ), 1.0 )
+		if ( len > DEBOUNCE_THRESHOLD )
+			return true
+		s_inputDebounceIsActive = false
+	}
+
+	float deltaTime = Time() - file.moveInputPrevTime
+	file.moveInputPrevTime = Time()
+
+	if ( deltaTime > 1.0 )
+		deltaTime = 0.01
+
+	vector smoothed = SmoothInput( <x, y, 0> )
+	file.fullmapAimPos += <smoothed.x, (-1.0 * smoothed.y), 0> * deltaTime / file.fullmapZoomFactor
+	file.fullmapAimPos = <clamp( file.fullmapAimPos.x, 0, 0.99999 ), clamp( file.fullmapAimPos.y, 0, 0.99999 ), 0>
+	file.fullmapZoomPos = file.fullmapAimPos
+	RuiSetFloat2( file.mapAimRui, "pos", file.fullmapAimPos )
+	SetBigMapZoomAnchor( file.fullmapZoomPos.x, file.fullmapZoomPos.y )
+
+	Fullmap_HandleAimInput_Common()
+
+	return true
+}
+
+
+void function Fullmap_HandleAimInput_Common()
+{
+	float adjustedRange = FULLMAP_ENTITY_SELECT_RANGE_NORMALIZED * max( file.mapScale * OVERVIEW_MAP_SIZE, 1 ) / file.fullmapZoomFactor
+	array< AimTargetStruct > aimTargets
+	foreach( aimTargetCallback, actionCallback in file.fullMapAimTargetCallbacks )
+	{
+		AimTargetStruct possibleTarget
+		possibleTarget.highlightedEntity = aimTargetCallback( ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() ), adjustedRange )
+		if ( IsValid( possibleTarget.highlightedEntity ) )
+		{
+			possibleTarget.actionFunc = actionCallback
+			aimTargets.append( possibleTarget )
+		}
+	}
+
+	                                                                                            
+	if ( aimTargets.len() > 0 )
+	{
+		file.mapAimTarget.highlightedEntity = aimTargets[0].highlightedEntity
+		file.mapAimTarget.actionFunc = aimTargets[0].actionFunc
+	}
+	else
+	{
+		file.mapAimTarget.highlightedEntity = null
+	}
+}
+
+
+                                                                                                                                                             
+bool function Fullmap_HandleKeyInput( int key )
+{
+#if DEV
+	if ( MapDevCheatsAreActive() )
+	{
+		switch ( key )
+		{
+			case BUTTON_A:
+			case MOUSE_LEFT:
+				vector worldPos = ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() )
+				GetLocalClientPlayer().ClientCommand( format( "GoToMapPoint %.3f %.3f %.3f", worldPos.x, worldPos.y, worldPos.z ) )
+				ScreenFlash( 0.0, 0.0, 0.0, 0.1, 0.5 )
+				EmitSoundOnEntity( GetLocalViewPlayer(), "dropship_mp_epilogue_warpout" )
+				delaythread( 0.25 ) HideScoreboard()
+				return true
+
+			case BUTTON_B:
+			case MOUSE_RIGHT:
+				vector worldPos = ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() )
+				GetLocalClientPlayer().ClientCommand( format( "UpdateCirclePos %.3f %.3f %.3f", worldPos.x, worldPos.y, worldPos.z ) )
+				delaythread( 0.25 ) HideScoreboard()
+				return true
+		}
+
+		return false
+	}
+	else
+#endif       
+	{
+		if ( TPPromptIsActive() )
+		{
+			switch ( key )
+			{
+				case BUTTON_A:
+				case MOUSE_LEFT:
+					vector worldPos = ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() )
+					Remote_ServerCallFunction( "ClientCallback_TPPromptGoToMapPoint", worldPos.x, worldPos.y )
+					ScreenFlash( 0.0, 0.0, 0.0, 0.1, 0.5 )
+					EmitSoundOnEntity( GetLocalViewPlayer(), "dropship_mp_epilogue_warpout" )
+					delaythread( 0.25 ) HideScoreboard()
+					return true
+			}
+		}
+	}
+
+	bool pressedPing  = false
+	bool swallowInput = false
+	switch ( key )
+	{
+		case MOUSE_WHEEL_UP:
+			ChangeFullMapZoomFactor( FULLMAP_ZOOM_SPEED_MOUSE )
+			swallowInput = true
+			break
+
+		case MOUSE_WHEEL_DOWN:
+			ChangeFullMapZoomFactor( -FULLMAP_ZOOM_SPEED_MOUSE )
+			swallowInput = true
+			break
+
+		case BUTTON_TRIGGER_RIGHT:
+		case BUTTON_TRIGGER_RIGHT_FULL:
+			ChangeFullMapZoomFactor( FULLMAP_ZOOM_SPEED_CONTROLLER )
+			swallowInput = true
+			break
+
+		case BUTTON_TRIGGER_LEFT:
+		case BUTTON_TRIGGER_LEFT_FULL:
+			ChangeFullMapZoomFactor( -FULLMAP_ZOOM_SPEED_CONTROLLER )
+			swallowInput = true
+			break
+
+		case BUTTON_SHOULDER_RIGHT:
+		case MOUSE_LEFT:
+			if( GetLocalClientPlayer().GetTeam() == TEAM_SPECTATOR )
+			{
+				Spectator_ViewPlayer( GetLocalClientPlayer() )
+				swallowInput = true
+			}
+			else
+			{
+				pressedPing = true
+			}
+			break
+
+		case MOUSE_RIGHT:
+		case BUTTON_X:
+			Ping_ClearMapWaypoint( GetLocalClientPlayer() )
+			swallowInput = true
+			break
+
+		case KEY_Y:
+			swallowInput = Fullmap_IsVisible()
+			break
+
+		case BUTTON_A:
+			if ( IsPrivateMatch() && GetLocalClientPlayer().GetTeam() == TEAM_SPECTATOR )
+				return false
+			break
+
+		case BUTTON_B:
+			HideScoreboard()
+			swallowInput = true
+			break
+
+		case MOUSE_MIDDLE:
+		case BUTTON_STICK_RIGHT:
+		case BUTTON_Y:
+		case BUTTON_DPAD_RIGHT:
+		case BUTTON_DPAD_LEFT:
+			swallowInput = true
+			break
+		case BUTTON_DPAD_UP:
+		case KEY_F2:
+			RunUIScript( "UI_OpenGameModeRulesDialog" )
+			swallowInput = true
+			break
+	}
+
+	if ( pressedPing )
+		printt( "pressedPing", key )
+
+	if ( ButtonIsBoundToAction( key, "use" ) )
+		return true
+
+	if ( ButtonIsBoundToAction( key, "+jump" ) )
+		return true
+
+	if ( ButtonIsBoundToAction( key, "offhand1" ) )
+		return true
+
+	if ( ButtonIsBoundToAction( key, "offhand4" ) )
+		return true
+
+	if ( (!IsControllerModeActive() && ButtonIsBoundToPing( key )) || pressedPing )
+	{
+		if ( IsValid( file.mapAimTarget.highlightedEntity ) )
+		{
+			swallowInput = file.mapAimTarget.actionFunc( file.mapAimTarget.highlightedEntity )
+		}
+		else
+		{
+			if( !Control_IsModeEnabled() )                                   
+			{
+				vector worldPos = ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() )
+				Ping_SetMapWaypoint( GetLocalClientPlayer(), worldPos )
+			}
+			swallowInput = true
+		}
+	}
+
+	return swallowInput
+}
+
+
+vector function SmoothInput( vector vecIn )
+{
+	const float DEADZONE = 0.05
+
+	float len = min( Length2D( vecIn ), 1.0 )
+	if ( len < DEADZONE )
+		return <0, 0, 0>
+
+	float factor = (len * len)
+	return (vecIn * factor)
+}
+
+
+vector function GetMapNormalizedAimCoordinate()
+{
+	float zoomScreenWidth = 1.0 / file.fullmapZoomFactor
+
+	float zoomAreaUpperLeftFrac = 1.0 - zoomScreenWidth
+	vector zoomAreaUpperLeft    = file.fullmapZoomPos * zoomAreaUpperLeftFrac
+	return zoomAreaUpperLeft + file.fullmapAimPos * zoomScreenWidth
+}
+
+
+entity function GetPlayerUnderAim()
+{
+	vector worldPos = ConvertNormalizedPosToWorldPos( GetMapNormalizedAimCoordinate() )
+	                                                    
+
+	array<entity> playerArray = GetPlayerArray_Alive()
+	foreach ( player in playerArray )
+	{
+		if( !IsValid( player ) )
+			continue
+
+		vector playerOrigin = player.GetOrigin()
+		if( fabs( playerOrigin.x - worldPos.x ) <= FULLMAP_SELECT_RANGE &&
+				fabs( playerOrigin.y - worldPos.y ) <= FULLMAP_SELECT_RANGE )
+		{
+			return player
+		}
+	}
+
+	return null
+}
+
+void function Spectator_ViewPlayer( entity spectatorPlayer )
+{
+	if ( !IsPrivateMatch() )
+		return
+
+	entity player = GetPlayerUnderAim()
+	if ( IsValid( player ) )
+	{
+		Remote_ServerCallFunction( "ClientCallback_PrivateMatchChangeObserverTarget", player )
+	}
+}
+
+entity function GetClientEntFromTopo( var screen )
+{
+	entity entToReturn
+	foreach ( ent, topo in file.minimapTopoClientEnt )
+	{
+		if ( topo == screen )
+		{
+			entToReturn = ent
+		}
+	}
+
+	return entToReturn
+}
+
+void function OnSpectatorTargetChanged( entity player, entity previousTarget, entity currentTarget )
+{
+	if ( IsValid( currentTarget ) && currentTarget.IsPlayer() )
+	{
+		thread InitSurvivalHealthBar()
+		ScorebarInitTracking( currentTarget, ClGameState_GetRui() )
+	}
+
+	file.updatePlayerTags = true
+}
+
+void function OnSpectatorTagModeChanged( entity player, int newMode )
+{
+	file.playerTagMode = newMode
+	file.updatePlayerTags = true
+}
+
+void function SetCurrentZoom(float zoomFactor, vector zoomPos , bool adjustValues = true){
+	if(adjustValues)
+	{	                                                        
+		vector normalized  = NormalizeWorldPos( zoomPos )
+		float zoomDiff     = 1.0 / zoomFactor
+		float zoomOverHead = ( zoomDiff * 0.5 )
+		normalized          = ( normalized * ( 1.0 + zoomDiff ) ) - <zoomOverHead, zoomOverHead, 0.0>
+		clamp( normalized.x, 0, 0.99999 )
+		clamp( normalized.y, 0, 0.99999 )
+		file.fullmapAimPos  = <0.5, 0.5, 0>
+		file.fullmapZoomPos = normalized
+	}
+	else
+		file.fullmapZoomPos = zoomPos
+
+	file.fullmapZoomFactor = zoomFactor
+	SetBigMapZoomScale( file.fullmapZoomFactor )
+	SetBigMapZoomAnchor( file.fullmapZoomPos.x, file.fullmapZoomPos.y )
+}

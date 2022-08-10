@@ -1,0 +1,615 @@
+global function QuestS05EndInit
+#if CLIENT
+global function SCB_HatchOpenMoment
+global function SCB_EntranceStingerMoment
+#endif          
+
+#if SERVER
+#endif          
+
+const string SIG_GOT_NEAR_HATCH = "got_near_hatch"
+const string SIG_GOT_INTO_BUNKER = "got_into_bunker"
+
+void function QuestS05EndInit()
+{
+	RegisterCSVDialogue( $"datatable/dialogue/nightrun_dialogue.rpak" )
+
+	UsePoint_Init()
+
+	#if CLIENT
+		                                                    
+		                                                                  
+		#if CLIENT
+			Waypoints_RegisterCustomType( WAYPOINTTYPE_WHISPERS, InstanceWhispers )
+		#endif
+	#endif          
+
+	Remote_RegisterClientFunction( "SCB_HatchOpenMoment" )
+	Remote_RegisterClientFunction( "SCB_EntranceStingerMoment" )
+
+	#if SERVER
+		                                    
+		                                     
+
+		                                                       
+		 
+		   
+
+		                                                                                                   
+		 
+			                           
+			                                         
+			                                         
+			  
+			                                     
+			  	                                
+		   
+
+		                                                                    
+		 
+			                   
+		   
+
+		                                                                                        
+		   
+		  	                                                             
+		  	                                     
+		  		                                                           
+		     
+
+		  
+	#endif          
+}
+
+#if CLIENT
+const asset subbedChampionScreeen = $"ui/champion_screen_nightrun.rpak"
+void function ChampionScreenSetExtraInfo( var rui )
+{
+	RuiSetBool( rui, "isMissionSuccess", FreelanceMode_GetIsVictoryForAll() )
+}
+
+void function SCB_EntranceStingerMoment()
+{
+	MapZones_ZoneIntroTextFullscreenWithSubtext( GetLocalViewPlayer(), "#ZONE_NAME_SQ05_FINALE_TITLE", 5, "#ZONE_NAME_SQ05_FINALE_SUBTITLE" )
+}
+
+void function SCB_HatchOpenMoment()
+{
+	entity emitter = GetClosest( GetEntArrayByScriptName( "Canyonlands_Mu2_Emit_OminousHatch" ), GetLocalViewPlayer().GetOrigin() )
+	if ( IsValid( emitter ) )
+		emitter.SetEnabled( true )
+}
+#endif          
+
+#if SERVER
+
+                                                               
+                                           
+                                                         
+                                           
+                                                         
+                                           
+
+                          
+ 
+	                        
+	                    
+	                         
+	                       
+
+	                             
+	                          
+	 
+		                                      
+		 
+			                         	                            
+			                                    
+
+			                                
+			                                
+			                                 
+			                                            
+			                                       
+			                                                  
+		 
+
+		                                                                      
+			                                                                 
+
+
+		                                                  
+		   
+		  	                                    
+		  	                                                           
+		  	                                                                                                            
+		   
+
+		              
+		                                        
+		  	                                       
+	   
+
+	                                    
+	                                                 
+
+	                                                                   
+
+	  
+	             
+ 
+
+
+                
+                                                  
+ 
+	                              
+	 
+		                                                  
+
+		            
+		                                                                                                             
+		                                    
+		                                                 
+	   
+ 
+
+                                      
+ 
+	                      
+	 
+		                                                                 
+		                                 
+		                                     
+
+		                   
+		          
+		 
+			           
+			                                              
+			                         
+				        
+
+			                                                   
+			                                                           
+			                                                  
+
+			                                           
+			 
+				                                                  
+				             
+			 
+			                          
+				        
+
+			                                                                                                                      
+			                                      
+			 
+				                               
+
+				                                                  
+
+				                                                        
+				                                             
+				           
+				                                  
+				                    
+				           
+				                               
+				           
+				  
+
+				                                
+				                                
+				                                            
+				                                                       
+				                                       
+				           
+				                                 
+				                   
+
+			   
+
+			              
+		 
+
+		  
+	   
+ 
+
+                                  
+ 
+	                      
+	 
+		                                                                 
+		                                      
+		                                
+
+		                                                                              
+
+		                             
+
+		                        
+		                             
+		          
+		 
+			           
+			                                              
+			                         
+				        
+
+			                                                           
+			                                                                 
+			                              
+
+			                                                  
+			 
+				                                               
+				                                                 
+				                  
+			 
+			                          
+				        
+
+			                        
+			     
+		 
+
+		         
+		                                                                       
+		                                                                     
+
+		                                                                     
+		 
+			                            
+				                                                
+		 
+
+		                                    
+		                                                 
+
+		                                                   
+		            
+		                                                 
+		            
+		                                                 
+		                                                 
+		                                                 
+	   
+ 
+
+                                       
+ 
+	                      
+	 
+		          
+		 
+			                                                            
+			                                                 
+			                                                  
+			                         
+				        
+
+			                                                
+			                           
+				                   
+			                                                                    
+			                                                                    
+			                                                               
+			                                                         
+			                                                      
+			                               
+			                                    
+			                                               
+			                  
+			                                                                                              
+			     
+		 
+
+		    
+		          
+		 
+			                                                               
+			                                
+
+			           
+			                                              
+			                         
+				        
+
+			                                                   
+			                                                         
+			                          
+				        
+
+			                                                                                              
+			     
+		 
+
+		    
+		          
+		 
+			                                                              
+			                                
+
+			           
+			                                              
+			                         
+				        
+
+			                                                   
+			                                                         
+			                          
+				        
+
+			                                                                                              
+			     
+		 
+
+		          
+		 
+			                                                            
+			                                                 
+			                                                  
+			                         
+				        
+
+			                           
+				                   
+			                                                                      
+			                                                                    
+			                                                                
+			                                 
+			                                                 
+			     
+		 
+
+	   
+ 
+
+                   
+ 
+	              
+	                    
+	               
+
+	              
+	                 
+ 
+                                     
+ 
+	                      
+	 
+		                 
+		                                                              
+		                                                               
+		                                                                                                                                                         
+		                                                                  
+
+		                    
+		                                                                                                  
+		         
+		 
+			                                                    
+			                                            
+			                       
+				        
+			             
+			     
+		 
+
+		                                                             
+		                      
+		                 
+		                                                                   
+		                                
+	   
+ 
+
+                                                                  
+ 
+	                               
+
+	                                                       
+
+	                                                                                    
+	                                   
+		                                               
+
+	                             
+	                      
+	                 
+	                   
+	                                        	                                                             
+	                                          	                                       
+	                                                     
+	 
+		                         
+			      
+		                                    
+		                            
+		                                
+		                                
+		                                  
+		                                  
+	 
+
+	                        
+	                                  
+
+	                                         
+	                                 
+	 
+		                               
+		           
+		                              
+	   
+
+	  
+	                            
+	 
+		                               
+	   
+
+	                                                                   
+	                                                                          
+	                                                      
+
+	       
+		                              
+		 
+			                                                                        
+			                      
+			           
+			                                
+			             
+		 
+	             
+
+	                                          
+	                       
+
+	                                            
+	 
+		                                                           
+		                                                      
+		                                                  
+		                                                                                    
+			                                                
+	 
+
+	           
+	                                        
+	             
+ 
+
+#endif          
+
+
+             
+               
+
+const string USE_POINT_SCRIPTNAME = "s5_end_usepoint"
+
+#if SERVER
+                                                              
+ 
+	                                                                                             
+	                       
+	                      
+	                                         
+	                    
+	          
+ 
+#endif          
+
+void function UsePoint_Init()
+{
+	#if SERVER
+		                                                                      
+	#endif         
+
+	#if CLIENT
+		AddCreateCallback( "prop_dynamic", OnCreate_UsePoint )
+	#endif         
+}
+
+void function OnCreate_UsePoint( entity usePoint )
+{
+	if ( usePoint.GetScriptName() != USE_POINT_SCRIPTNAME )
+		return
+
+	#if SERVER
+		                    
+		                                                                                                                                 
+		                                                  
+		                                                                          
+		                        
+
+		                                
+		   
+		  	          
+		  	 
+		  		           
+		  		                                                                      
+		  	 
+		     
+
+	#endif
+
+	SetCallback_CanUseEntityCallback( usePoint, CanUse_UsePoint )
+	                                                                 
+}
+
+bool function CanUse_UsePoint( entity user, entity usePoint, int useFlags )
+{
+	if ( Bleedout_IsBleedingOut( user ) )
+		return false
+	if ( user.ContextAction_IsActive() )
+		return false
+	entity activeWeapon = user.GetActiveWeapon( eActiveInventorySlot.mainHand )
+	if ( IsValid( activeWeapon ) && activeWeapon.IsWeaponOffhand() )
+		return false
+	if ( user.IsCrouched() )
+		return false
+
+	vector buttonForward = usePoint.GetForwardVector()
+	vector buttonToUser = Normalize( user.UseableEyePosition( usePoint ) - usePoint.GetOrigin() )
+	float dot = buttonForward.Dot( buttonToUser )
+	if ( dot < DOT_60DEGREE )
+		return false
+
+	return true
+}
+  
+            
+
+
+
+              
+                       
+
+const string WAYPOINTTYPE_WHISPERS = "end_area_whispers"
+
+#if SERVER
+                    
+                                
+ 
+	                                                              
+	                                                                                 
+ 
+                               
+ 
+	                               
+		                       
+ 
+#endif          
+
+#if CLIENT
+void function InstanceWhispers( entity wp )
+{
+	printf( "%s(): %s", FUNC_NAME(), string( wp ) )
+
+	thread function() : ( wp )
+	{
+		wp.EndSignal( "OnDestroy" )
+
+		wait RandomFloatRange( 3.0, 4.0 )
+		int cycleCnt = 0
+		for ( ;; )
+		{
+			int num = (1 + (cycleCnt % 16))
+
+			const string FIRST_LOOP_PRE_SOUND = "diag_mp_questTBG_assembleRelic_relicAi_sys_stinger2"
+			EmitSoundAtPosition( TEAM_ANY, wp.GetOrigin(), FIRST_LOOP_PRE_SOUND )
+			wait RandomFloatRange( 2.5, 3.5 )
+
+			string eventName = format( "diag_mp_questtbg_assemblerelic_relicai_%02d_3p", num )
+			var handle = EmitSoundAtPosition( TEAM_ANY, wp.GetOrigin(), eventName )
+			if ( handle != null )
+				WaitSignal( handle, "OnSoundFinished" )
+			wait RandomFloatRange( 3.0, 5.5 )
+			++cycleCnt
+		}
+	}()
+}
+#endif          

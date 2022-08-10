@@ -5,7 +5,7 @@ global function Chroma_Lobby
 global function Chroma_LootCeremonyStart
 global function Chroma_StartMatchmaking
 
-#if(CLIENT)
+#if CLIENT
 global function Chroma_SetPlayerZone
 global function Chroma_UpdateBackground
 
@@ -39,8 +39,8 @@ global function Chroma_ConsumableSucceeded
 
 global function Chroma_BeginRevive
 global function Chroma_EndRevive
-//
-//
+                                             
+                                           
 global function Chroma_RespawningInDropship
 global function Chroma_RespawnComplete
 
@@ -71,17 +71,17 @@ global function Chroma_EMPEffect
 
 struct
 {
-	int zoneId = -1
+	int    zoneId = -1
 	string chromaZoneBackgroundName
 	string chromaBackgroundName
-	bool phaseShifted
-	bool outsideRing
-	bool bannerTransitionActive
-	bool inCharacterSelect
-	bool respawning
-	bool victory
-	bool huntMode
-	array signalEnt
+	bool   phaseShifted
+	bool   outsideRing
+	bool   bannerTransitionActive
+	bool   inCharacterSelect
+	bool   respawning
+	bool   victory
+	bool   huntMode
+	array  signalEnt
 
 	int logoHandle = -1
 
@@ -99,23 +99,23 @@ struct
 
 void function CLChroma_Init()
 {
-	//
-	//
+	                                                                                       
+	                                                                                         
 
 	RegisterSignal( "skydiveover" )
 
-	#if(CLIENT)
+	#if CLIENT
 		AddCallback_LocalPlayerPickedUpLoot( Chroma_PickedUpLoot )
 		AddLocalPlayerTookDamageCallback( Chroma_TookDamage )
 		AddCallback_OnYouDied( Chroma_PlayerDied )
 		AddCallback_OnViewPlayerChanged( Chroma_ViewPlayerChanged )
 		AddCallback_OnBleedoutEnded( Chroma_OnBleedoutEnded )
 
-		file.healthOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_SMOOTHNOISE, CHROMALOOP_SMOOTHNOISE, CHROMATRANS_BLEND, {[0.0] = <1,0,0>}, 0.0, 0.1 )
+		file.healthOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_SMOOTHNOISE, CHROMALOOP_SMOOTHNOISE, CHROMATRANS_BLEND, {[0.0] = <1, 0, 0>}, 0.0, 0.1 )
 	#endif
 }
 
-#if(CLIENT)
+#if CLIENT
 void function DEV_Chroma_ForceBackground( string bg )
 {
 	file.chromaZoneBackgroundName = bg
@@ -185,46 +185,49 @@ const table< float, vector > redFlagGradient =
 void function Chroma_MainMenu()
 {
 	Chroma_SetBaseLayer( CHROMALOOP_SOFTRIPPLES, CHROMATRANS_FLAGS, redFlagGradient, 2.0 )
-	//
-
+	                                                                                                                                        
 }
+
 
 void function Chroma_RemoveLogo()
 {
-	//
-	//
+	                                                                           
+	                      
 }
+
 
 void function Chroma_Lobby()
 {
-	//
+	             
 	Chroma_RemoveLogo()
-	Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_FLAGS, {[1.0] = <.25,0,0>, [0.5] = <.2,.6,1>, [0.0] = <1,1,1>}, 2.0, 0.5 )
+	Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_FLAGS, {[1.0] = <.25, 0, 0>, [0.5] = <.2, .6, 1>, [0.0] = <1, 1, 1>}, 2.0, 0.5 )
 }
+
 
 void function Chroma_LootCeremonyStart()
 {
-	Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, {[0.0] = <0,0,0>}, 2.0 )
+	Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, {[0.0] = <0, 0, 0>}, 2.0 )
 	foreach ( idx, color in file.lootCeremonyColors )
-		file.lootCeremonyColors[idx] = <0,0,0>
+		file.lootCeremonyColors[idx] = <0, 0, 0>
 }
+
 
 void function Chroma_StartMatchmaking()
 {
-	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1,0,0>}, 3.0 )
+	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1, 0, 0>}, 3.0 )
 }
 
-#if(CLIENT)
+#if CLIENT
 string function Chroma_GetActualBackground()
 {
 	entity player = GetLocalViewPlayer()
-	//
+	                                                                         
 	if ( file.bannerTransitionActive )
 		return "flags"
 	if ( file.inCharacterSelect )
 		return "characterselect"
 	if ( file.victory )
-		return "none" //
+		return "none"                                            
 	if ( file.respawning )
 		return "respawning"
 
@@ -243,6 +246,7 @@ string function Chroma_GetActualBackground()
 
 		case ePlayerMatchState.SKYDIVE_PRELAUNCH:
 			return "none"
+
 		case ePlayerMatchState.SKYDIVE_FALLING:
 			return "skydive"
 	}
@@ -254,9 +258,10 @@ string function Chroma_GetActualBackground()
 
 	switch ( file.chromaZoneBackgroundName )
 	{
-		//
+		               
 		case "wetland":
 			return "river"
+
 		case "swamp":
 			return "grass"
 	}
@@ -268,7 +273,7 @@ const float SkyDiveLayerTransitionTime = 2.0
 Assert( CHROMALOOP_CONEWAVELEFT + 1 == CHROMALOOP_CONEWAVEMIDDLE )
 Assert( CHROMALOOP_CONEWAVELEFT + 2 == CHROMALOOP_CONEWAVERIGHT )
 Assert( CHROMATRANS_CONELEFT + 1 == CHROMATRANS_CONEMIDDLE )
-Assert( CHROMATRANS_CONELEFT + 2 == CHROMATRANS_CONERIGHT)
+Assert( CHROMATRANS_CONELEFT + 2 == CHROMATRANS_CONERIGHT )
 
 void function Chroma_SkyDiveUpdate()
 {
@@ -279,17 +284,17 @@ void function Chroma_SkyDiveUpdate()
 	overlays[1] = -1
 	overlays[2] = -1
 
-	entity[3][2] players //
+	entity[3][2] players                        
 	int playerPingPong = 0
 
 	OnThreadEnd( function() : ( overlays ) {
 		foreach ( idx, overlay in overlays )
 			Chroma_RemovePersistentOverlay( overlay, CHROMATRANS_CONELEFT + idx, SkyDiveLayerTransitionTime )
-	})
+	} )
 
-	LoadoutEntry characterSlot = Loadout_CharacterClass()
+	LoadoutEntry characterSlot = Loadout_Character()
 
-	Chroma_SetBaseLayer( CHROMALOOP_SMOOTHNOISE, CHROMATRANS_FLAGS, {[0.0] = <0,0,0>}, 2.0 )
+	Chroma_SetBaseLayer( CHROMALOOP_SMOOTHNOISE, CHROMATRANS_FLAGS, {[0.0] = <0, 0, 0>}, 2.0 )
 
 	while ( 1 )
 	{
@@ -299,16 +304,16 @@ void function Chroma_SkyDiveUpdate()
 		int prevPlayerPingPong = playerPingPong
 		playerPingPong = 1 - playerPingPong
 
-		//
+		                                          
 		{
-			entity player = GetLocalViewPlayer()
+			entity player       = GetLocalViewPlayer()
 			entity parentPlayer = player.GetParent()
 
 			vector right = player.GetRightVector()
 
 			if ( IsValid( parentPlayer ) && parentPlayer.IsPlayer() )
 			{
-				printt( "parented" )
+				                      
 
 				players[playerPingPong][1] = parentPlayer
 
@@ -357,7 +362,7 @@ void function Chroma_SkyDiveUpdate()
 			}
 		}
 
-		//
+		                                                  
 		for ( int i = 0; i < 3; i++ )
 		{
 			if ( players[prevPlayerPingPong][i] == players[playerPingPong][i] )
@@ -368,10 +373,10 @@ void function Chroma_SkyDiveUpdate()
 			entity player = players[playerPingPong][i]
 			if ( player )
 			{
-				ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( player ), characterSlot )
+				ItemFlavor character            = LoadoutSlot_GetItemFlavor( ToEHI( player ), characterSlot )
 				table< float, vector > gradient = CharacterClass_GetChromaGradient( character )
 
-				//
+				                  
 				table< float, vector > gradientInv
 				foreach ( key, val in gradient )
 					gradientInv[1.0 - key] <- val
@@ -394,7 +399,7 @@ const float ZoneBackgroundBrightness = 0.7
 void function Chroma_UpdateBackground()
 {
 	string bg = Chroma_GetActualBackground()
-	//
+	                           
 	if ( bg == file.chromaBackgroundName )
 		return
 
@@ -404,53 +409,56 @@ void function Chroma_UpdateBackground()
 	file.chromaBackgroundName = bg
 
 	table< float, vector > gradient
-	float rate = 0.5
+	float rate           = 0.5
 	float transitionTime = 3.0
-	int anim = CHROMALOOP_SMOOTHNOISE
-	int transition = CHROMATRANS_BLEND
+	int anim             = CHROMALOOP_SMOOTHNOISE
+	int transition       = CHROMATRANS_BLEND
 
 	switch ( file.chromaBackgroundName )
 	{
 		case "phase":
 			gradient = {
-				[0.0] = <0,0,0>,
-				[0.25] = <.7,.7,1>,
-				[0.5] = <.7,.7,1>,
-				[0.75] = <0,0,0>,
-				[1.0] = <.7,.7,1>,
+				[0.0] = <0, 0, 0>,
+				[0.25] = <.7, .7, 1>,
+				[0.5] = <.7, .7, 1>,
+				[0.75] = <0, 0, 0>,
+				[1.0] = <.7, .7, 1>,
 			}
 			rate = 2
 			break
+
 		case "ring":
 			gradient = {
-				[0.0] = <0,0,0>,
-				[0.6] = <1,.25,.15>,
-				[0.9] = <1,.78,.3>,
+				[0.0] = <0, 0, 0>,
+				[0.6] = <1, .25, .15>,
+				[0.9] = <1, .78, .3>,
 			}
 			rate = 2
 			break
+
 		case "flags":
 			gradient = redFlagGradient
 			anim = CHROMALOOP_SOFTRIPPLES
 			break
+
 		case "characterselect":
 			gradient = {
-				[0.0] = <1,.9,.5>,
-				[0.5] = <1,.5,.1>,
-				[1.0] = <1,.5,.1> * 0.3
+				[0.0] = <1, .9, .5>,
+				[0.5] = <1, .5, .1>,
+				[1.0] = <1, .5, .1> * 0.3
 			}
 			anim = CHROMALOOP_SMOKE
 			transition = CHROMATRANS_VERTICAL
 			transitionTime = 0.5
-			//
+			                                                                                                                    
 			break
 
 		case "sky":
 			gradient = {
-				[0.0] = <.75,1,1> * ZoneBackgroundBrightness,
-				[0.75] = <.5,.5,.55> * ZoneBackgroundBrightness,
+				[0.0] = <.75, 1, 1> * ZoneBackgroundBrightness,
+				[0.75] = <.5, .5, .55> * ZoneBackgroundBrightness,
 			}
-			//
+			            
 			break
 
 		case "skydive":
@@ -459,9 +467,9 @@ void function Chroma_UpdateBackground()
 
 		case "respawning":
 			gradient = {
-				[0.0] = <.8,.9,1>,
-				[0.5] = <1,0.5,0.4>,
-				[1.0] = <0.2,0,0.2>,
+				[0.0] = <.8, .9, 1>,
+				[0.5] = <1, 0.5, 0.4>,
+				[1.0] = <0.2, 0, 0.2>,
 			}
 			anim = CHROMALOOP_SMOKE
 			transition = CHROMATRANS_SMOKE
@@ -469,60 +477,67 @@ void function Chroma_UpdateBackground()
 			break
 
 		case "none":
-			gradient = {[0.0] = <0,0,0>,}
+			gradient = {[0.0] = <0, 0, 0>, }
 			transition = CHROMATRANS_FLAGS
 			transitionTime = 2.0
 			break
 
 		case "huntmode":
 			gradient = {
-				[0.0] = <0,0,0>,
-				[1.0] = <.3,.3,.3>,
+				[0.0] = <0, 0, 0>,
+				[1.0] = <.3, .3, .3>,
 			}
 			transitionTime = 0.5
 			break
 
 		case "industrial":
 			gradient = {
-				[0.0] = <.5,.5,.5> * ZoneBackgroundBrightness,
-				[0.75] = <.4,.4,.45> * ZoneBackgroundBrightness,
-				[1.0] = <.5,.2,.1> * ZoneBackgroundBrightness,
+				[0.0] = <.5, .5, .5> * ZoneBackgroundBrightness,
+				[0.75] = <.4, .4, .45> * ZoneBackgroundBrightness,
+				[1.0] = <.5, .2, .1> * ZoneBackgroundBrightness,
 			}
 			break
-		case "": //
+
+		case "":           
+
 		case "wetland":
 		case "river":
 			gradient = {
-				[0.3] = <.4,.5,.15> * ZoneBackgroundBrightness,
-				[0.7] = <.15,.4,.4> * ZoneBackgroundBrightness,
+				[0.3] = <.4, .5, .15> * ZoneBackgroundBrightness,
+				[0.7] = <.15, .4, .4> * ZoneBackgroundBrightness,
 			}
 			break
+
 		case "grass":
 		case "swamp":
 			gradient = {
-				[0.0] = <.4,.5,.15> * ZoneBackgroundBrightness,
-				[1.0] = <.5,.3,.1> * ZoneBackgroundBrightness,
+				[0.0] = <.4, .5, .15> * ZoneBackgroundBrightness,
+				[1.0] = <.5, .3, .1> * ZoneBackgroundBrightness,
 			}
 			break
+
 		case "burnt":
 			gradient = {
-				[0.0] = <.4,.25,.12> * ZoneBackgroundBrightness,
-				[0.95] = <.25,.25,.25> * ZoneBackgroundBrightness,
-				[1.0] = <1,.5,.15> * 0.7 * ZoneBackgroundBrightness,
+				[0.0] = <.4, .25, .12> * ZoneBackgroundBrightness,
+				[0.95] = <.25, .25, .25> * ZoneBackgroundBrightness,
+				[1.0] = <1, .5, .15> * 0.7 * ZoneBackgroundBrightness,
 			}
 			break
+
 		case "rocky":
 			gradient = {
-				[0.0] = <1,.65,.5> * ZoneBackgroundBrightness,
-				[1.0] = <.6,.3,.15> * ZoneBackgroundBrightness,
+				[0.0] = <1, .65, .5> * ZoneBackgroundBrightness,
+				[1.0] = <.6, .3, .15> * ZoneBackgroundBrightness,
 			}
 			break
+
 		case "desert":
 			gradient = {
-				[0.3] = <.53,.25,.12> * ZoneBackgroundBrightness,
-				[1.0] = <1,.72,.42> * 0.8 * ZoneBackgroundBrightness,
+				[0.3] = <.53, .25, .12> * ZoneBackgroundBrightness,
+				[1.0] = <1, .72, .42> * 0.8 * ZoneBackgroundBrightness,
 			}
 			break
+
 		default:
 			Assert( false, "unknown chroma background " + file.chromaBackgroundName )
 			break
@@ -568,13 +583,13 @@ void function Chroma_PredictedLootPickup( entity ent )
 
 void function Chroma_PickedUpLoot( entity player, LootData lootData, int lootAction )
 {
-	//
-	//
+	                                    
+	                                                      
 }
 
 void function Chroma_PickedUpLoot2( entity player, LootData lootData, int lootAction )
 {
-	//
+	                                                       
 	switch ( lootAction )
 	{
 		case eLootAction.PICKUP:
@@ -594,11 +609,11 @@ void function Chroma_PickedUpLoot2( entity player, LootData lootData, int lootAc
 
 Assert( CHROMAWAVE_VERTICALONE + 1 == CHROMAWAVE_VERTICALTWO )
 Assert( CHROMAWAVE_VERTICALONE + 2 == CHROMAWAVE_VERTICALTHREE )
-//
+                                                                 
 
 vector function GetAmmoChromaColor( string ref )
 {
-	vector color = ammoColors[ref]
+	vector color  = GetAmmoColorByType( ref )
 	float maxComp = max( max( max( color.x, color.y ), color.z ), 0.1 )
 	return color / maxComp
 }
@@ -622,29 +637,50 @@ void function Chroma_LootPickupEffects( LootData lootData )
 		case eLootType.HEALTH:
 		case eLootType.JUMPKIT:
 		case eLootType.ORDNANCE:
+		case eLootType.GADGET:
 		case eLootType.ATTACHMENT:
 		case eLootType.CUSTOMPICKUP:
-#if(false)
+                   
 
-#endif
+		case eLootType.MARVIN_ARM:
+      
+
+                       
+
+                            
+      
+
 		case eLootType.BACKPACK:
-#if(false)
+                  
 
-#endif
+                           
+      
+
+                            
+
+                                  
+      
+
 		case eLootType.BLANK:
 		case eLootType.RESOURCE:
-#if(false)
+                      
 
-#endif
-#if(false)
+		case eLootType.DATAKNIFE:
+      
+                  
+		case eLootType.SHIPKEYCARD:
+      
+                    
 
-#endif
-#if(false)
+                             
+      
+                       
 
-#endif
-
+                                 
+      
+		case eLootType.LOCKBOX:
 			effect = CHROMAWAVE_VERTICALONE
-			Assert( lootData.tier <= 4 )
+			Assert( lootData.tier <= MAX_LOOT_TIER )
 			if ( lootData.tier > 2 )
 			{
 				int add = lootData.tier - 2
@@ -664,7 +700,7 @@ void function Chroma_LootPickupEffects( LootData lootData )
 			Assert( false, "unhandled loot type " + lootData.lootType + " in Chroma_LootPickupEffects" )
 	}
 
-	//
+	                                                 
 	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, effect, {[0.0] = color}, duration )
 }
 
@@ -687,14 +723,14 @@ void function Chroma_FiredWeapon( entity weapon )
 	}
 
 	vector color = weapon.GetWeaponSettingVector( eWeaponVar.chroma_color )
-	if ( color == <0,0,0> )
+	if ( color == <0, 0, 0> )
 	{
-		int ammoType = weapon.GetWeaponAmmoPoolType()
+		int ammoType        = weapon.GetWeaponAmmoPoolType()
 		string ammoTypeName = AmmoType_GetRefFromIndex( ammoType )
 		color = GetAmmoChromaColor( ammoTypeName )
 	}
 
-	Chroma_AddOverlay( CHROMALOOP_FADE, CHROMAWAVE_FLASH, {[0.0] = <1,1,1>, [colorfrac] = color}, duration, 1 / duration )
+	Chroma_AddOverlay( CHROMALOOP_FADE, CHROMAWAVE_FLASH, {[0.0] = <1, 1, 1>, [colorfrac] = color}, duration, 1 / duration )
 }
 
 void function Chroma_UpdateHealthOverlay()
@@ -721,27 +757,43 @@ void function Chroma_HealthChanged()
 
 void function Chroma_TookDamage( float damage, vector damageOrigin, int damageType, int damageSourceId, entity attacker )
 {
-	if ( damageSourceId == eDamageSourceId.outOfBounds )
+	if ( damageSourceId == eDamageSourceId.outOfBounds || damageSourceId == eDamageSourceId.deathField )
 		return
 
-	float duration = GraphCapped( damage, 20.0, 100.0,  1.0, 5.0 )
+                       
+                                                                     
+         
+       
+
+                               
+                                                            
+                                                                        
+         
+       
+
+	float duration = GraphCapped( damage, 20.0, 100.0, 1.0, 5.0 )
 
 	Chroma_UpdateHealthOverlay()
-	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1,0,0>}, duration )
+	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1, 0, 0>}, duration )
 }
 
 void function Chroma_ViewPlayerChanged( entity player )
 {
 	Chroma_UpdateHealthOverlay()
+	if( file.consumableOverlayHandle != -1 )
+		EndProgressOverlay()
 }
 
 
 void function Chroma_UltimateReady()
 {
-	entity player = GetLocalViewPlayer()
+	entity player              = GetLocalViewPlayer()
+	LoadoutEntry characterSlot = Loadout_Character()
 
-	LoadoutEntry characterSlot = Loadout_CharacterClass()
-	ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( player ), characterSlot )
+	if ( !LoadoutSlot_IsReady( ToEHI( player ), characterSlot ) )
+		return
+
+	ItemFlavor character                    = LoadoutSlot_GetItemFlavor( ToEHI( player ), characterSlot )
 	CharacterHudUltimateColorData colorData = CharacterClass_GetHudUltimateColorData( character )
 
 	table< float, vector > gradient = {[0.5] = colorData.ultimateColor, [1.0] = colorData.ultimateColorHighlight}
@@ -790,20 +842,24 @@ vector function GetConsumableColor( ConsumableInfo info )
 	if ( info.healAmount > 0 )
 	{
 		if ( info.shieldAmount > 0 )
-			return GetKeyColor( COLORID_TEXT_LOOT_TIER0, 3 ) / 255.0 //
+			return GetKeyColor( COLORID_TEXT_LOOT_TIER0, 3 ) / 255.0                                
 		else
-			return <0.05, 1, 0.3> //
+			return <0.05, 1, 0.3>                    
 	}
 	else if ( info.shieldAmount > 0 )
 	{
-		return <0.4, 0.4, 1> //
+		return <0.4, 0.4, 1>                   
 	}
-	return <1,1,1> //
+	return <1, 1, 1>                                 
 }
 
 void function BeginProgressOverlay( vector color, float duration )
 {
-	Assert( file.consumableOverlayHandle == -1 )
+	if( file.consumableOverlayHandle != -1 )
+	{
+		Warning("cl_chroma: Trying to begin progress overlay while one is already running, clearing currently running one first")
+		EndProgressOverlay()
+	}
 	file.consumableOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_SMOOTHNOISE, CHROMALOOP_PROGRESSBAR, CHROMATRANS_BLEND, {[0.0] = color}, 0.0, 1.0, 5.0 / duration )
 }
 
@@ -842,29 +898,29 @@ void function Chroma_EndRevive()
 {
 	EndProgressOverlay()
 }
-/*
+  
+                                                           
+ 
+	                                             
+ 
 
-
-
-
-
-
-
-
-
-*/
+                                         
+ 
+	                    
+ 
+  
 void function Chroma_OnBleedoutEnded( entity victim )
 {
 	if ( victim != GetLocalViewPlayer() )
 		return
 
-	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <0.7,1,0.9>}, 2.0 )
+	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <0.7, 1, 0.9>}, 2.0 )
 }
 
 void function Chroma_RespawningInDropship()
 {
 	file.respawning = true
-	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1,1,1>}, 4.0 )
+	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1, 1, 1>}, 4.0 )
 	Chroma_UpdateBackground()
 }
 
@@ -879,16 +935,19 @@ void function Chroma_PlayerUsedAbility( entity player, entity offhandWeapon )
 	string weaponName = offhandWeapon.GetWeaponClassName()
 	if ( weaponName == "mp_ability_area_sonar_scan" )
 	{
-		Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_SEMICIRCLE, {[0.0] = <1,0.4,0>}, 2.0 )
+		Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_SEMICIRCLE, {[0.0] = <1, 0.4, 0>}, 2.0 )
 		return
 	}
-#if(false)
+	else if ( weaponName == "mp_weapon_trophy_defense_system" )
+	{
+		Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_SEMICIRCLE, {[0.0] = <1, .7, 0>}, 2.0 )
+		return
+	}
 
-
-
-
-
-#endif
+	LoadoutEntry characterSlot = Loadout_Character()
+	if ( !LoadoutSlot_IsReady( ToEHI( player ), characterSlot ) )
+		return
+	ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( player ), characterSlot )
 
 	array<int> offhandIndices = [ OFFHAND_TACTICAL, OFFHAND_ULTIMATE ]
 	foreach ( index in offhandIndices )
@@ -900,8 +959,6 @@ void function Chroma_PlayerUsedAbility( entity player, entity offhandWeapon )
 		if ( weapon != offhandWeapon )
 			continue
 
-		LoadoutEntry characterSlot = Loadout_CharacterClass()
-		ItemFlavor character = LoadoutSlot_GetItemFlavor( ToEHI( player ), characterSlot )
 		table< float, vector > gradient = CharacterClass_GetChromaGradient( character )
 
 		Chroma_AddOverlay( CHROMALOOP_SMOKE, CHROMAWAVE_FLASH, gradient, 2.0 )
@@ -910,7 +967,6 @@ void function Chroma_PlayerUsedAbility( entity player, entity offhandWeapon )
 
 		return
 	}
-
 }
 
 void function Chroma_VictoryScreen()
@@ -930,10 +986,15 @@ vector function RandomFireworkColor()
 	switch( RandomInt( 6 ) )
 	{
 		case 0: return <min, mid, max>
+
 		case 1: return <mid, min, max>
+
 		case 2: return <mid, max, min>
+
 		case 3: return <min, max, mid>
+
 		case 4: return <max, min, mid>
+
 		case 5: return <max, mid, min>
 	}
 	unreachable
@@ -949,25 +1010,25 @@ table< float, vector > function RandomFireGradient()
 
 void function Chroma_VictorySequence()
 {
-	//
-	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1,1,1>}, 2.5 )
+	                                                                                          
+	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_FLASH, {[0.0] = <1, 1, 1>}, 2.5 )
 
 	table< float, vector > gradient = {
-		[0.0] = <1,.75,.2>,
-		[0.5] = <.75,.3,.05>,
-		[1.0] = <.3,.1,0>,
+		[0.0] = <1, .75, .2>,
+		[0.5] = <.75, .3, .05>,
+		[1.0] = <.3, .1, 0>,
 	}
 
 	Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, RandomFireGradient(), 3.0, 2.0 )
 	wait 2.0
 
-	for ( ;; )
+	for ( ; ; )
 	{
 		Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, RandomFireGradient(), 3.0, 2.0 )
 
 		wait RandomFloatRange( 1.0, 8.0 )
 
-		Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, {[0.0] = <0,0,0>}, 2.0 )
+		Chroma_SetBaseLayer( CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, {[0.0] = <0, 0, 0>}, 2.0 )
 		wait 1.0
 
 		int count = RandomIntRange( 2, 8 )
@@ -1006,8 +1067,8 @@ void function Chroma_StartSmokescreenEffect()
 	Chroma_EndSmokescreenEffect()
 
 	table< float, vector > gradient = {
-		[0.0] = <1,1,1> * 0.3,
-		[1.0] = <1,1,1> * 0.6,
+		[0.0] = <1, 1, 1> * 0.3,
+		[1.0] = <1, 1, 1> * 0.6,
 	}
 
 	file.smokescreenOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_SMOOTHNOISE, CHROMALOOP_SMOKE, CHROMATRANS_SMOKE, gradient, 2.0 )
@@ -1026,7 +1087,7 @@ void function Chroma_OnBubbleShieldCreated( entity bubbleShield )
 	if ( player.GetTeam() != bubbleShield.GetTeam() )
 		return
 
-	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_SEMICIRCLE, {[0.0] = <0.4,0.5,1>}, 2.0 )
+	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_SEMICIRCLE, {[0.0] = <0.4, 0.5, 1>}, 2.0 )
 }
 
 void function Chroma_StartHuntMode()
@@ -1046,10 +1107,10 @@ void function Chroma_StartHealingDroneEffect()
 	Chroma_EndHealingDroneEffect()
 
 	table< float, vector > gradient = {
-		[0.0] = <0,0,0>,
-		[0.4] = <0,0.5,0>,
-		[0.6] = <.4,.7,.4>,
-		[0.9] = <1,1,1>
+		[0.0] = <0, 0, 0>,
+		[0.4] = <0, 0.5, 0>,
+		[0.6] = <.4, .7, .4>,
+		[0.9] = <1, 1, 1>
 	}
 	file.healDroneOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_HEARTRATE, CHROMALOOP_HEARTRATE, CHROMATRANS_HORIZONTAL, gradient, 3.0 )
 }
@@ -1065,8 +1126,8 @@ void function Chroma_StartStimEffect()
 	Chroma_EndStimEffect()
 
 	table< float, vector > gradient = {
-		[0.0] = <0.2,1,1>,
-		[1.0] = <0,.6,1>,
+		[0.0] = <0.2, 1, 1>,
+		[1.0] = <0, .6, 1>,
 	}
 	file.stimOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_VERTICALGRADIENT, CHROMALOOP_SPEED, CHROMATRANS_VERTICAL, gradient, 0.25 )
 }
@@ -1079,18 +1140,18 @@ void function Chroma_EndStimEffect()
 
 void function Chroma_ZiplineThread()
 {
-	//
+	                                                                                                                                                                              
 
 	if ( file.ziplineOverlayHandle != -1 )
-		return //
+		return                          
 
 	table< float, vector > gradient = {
-		[0.0] = <1,.9,0>,
-		[1.0] = <1,1,.5>,
+		[0.0] = <1, .9, 0>,
+		[1.0] = <1, 1, .5>,
 	}
 	file.ziplineOverlayHandle = Chroma_AddPersistentOverlay( CHROMALOOP_VERTICALGRADIENT, CHROMALOOP_SPEED, CHROMATRANS_VERTICAL, gradient, 1.0 )
 
-	for ( ;; )
+	for ( ; ; )
 	{
 		wait 0.5
 
@@ -1109,21 +1170,21 @@ void function Chroma_ZiplineThread()
 void function Chroma_UsedJumpPad()
 {
 	table< float, vector > gradient = {
-		[0.0] = <1,.5,.1>,
-		[1.0] = <1,.7,.3>,
+		[0.0] = <1, .5, .1>,
+		[1.0] = <1, .7, .3>,
 	}
 	Chroma_AddOverlay( CHROMALOOP_VERTICALGRADIENT, CHROMAWAVE_VERTICALTWO, gradient, 1.25 )
 }
 
 void function Chroma_EMPEffect()
 {
-	wait 0.1 //
+	wait 0.1                                               
 
 	table< float, vector > gradient = {
-		[0.0] = <.2,.4,1>,
-		[0.7] = <1,1,1>,
+		[0.0] = <.2, .4, 1>,
+		[0.7] = <1, 1, 1>,
 	}
 	Chroma_AddOverlay( CHROMALOOP_SMOOTHNOISE, CHROMAWAVE_SPARKLE, gradient, 1.5, 5.0 )
 }
 
-#endif
+#endif              

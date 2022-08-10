@@ -1,15 +1,15 @@
-//
+  
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global function Survival_DoesTeamHaveCharacter
 global function Survival_HasPlayerLockedInCharacter
 #endif
 
-#if(UI)
+#if UI
 global function ServerToUI_CharacterLockRejected
 #endif
 
-#if(UI)
+#if UI
 table<int, bool> PROTO_playerCharacterLockStateMap = {}
 void function ClientToUI_OnPlayerUpdatedCharacterLock( bool clearAllHack, EHI playerEHI, bool locked )
 {
@@ -18,25 +18,25 @@ void function ClientToUI_OnPlayerUpdatedCharacterLock( bool clearAllHack, EHI pl
 
 	PROTO_playerCharacterLockStateMap[playerEHI] <- locked
 
-	//
-	//
+	                                                                    
+	                                   
 }
 #endif
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function Survival_HasPlayerLockedInCharacter( EHI playerEHI )
 {
-	#if(CLIENT)
+	#if SERVER || CLIENT
 		entity player = FromEHI( playerEHI )
 		if ( player == null || !IsValid( player ) )
 			return false
 
-		if ( Time() > GetGlobalNetTime( "squadPresentationStartTime" ) && GetGlobalNetTime( "squadPresentationStartTime" ) != -1 )
+		if ( Time() > GetGlobalNetTime( "allSquadsPresentationStartTime" ) && GetGlobalNetTime( "allSquadsPresentationStartTime" ) != -1 )
 			return true
 
-		return player.GetPlayerNetBool( "hasLockedInCharacter" )
-	#elseif(UI)
-		//
+		return player.GetPlayerNetBool( CHARACTER_SELECT_NETVAR_HAS_LOCKED_IN_CHARACTER )
+	#elseif UI
+		              
 		if ( playerEHI in PROTO_playerCharacterLockStateMap )
 			return PROTO_playerCharacterLockStateMap[playerEHI]
 		return false
@@ -44,7 +44,7 @@ bool function Survival_HasPlayerLockedInCharacter( EHI playerEHI )
 }
 #endif
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function Survival_DoesTeamHaveCharacter( int team, ItemFlavor checkCharacter, EHI ignorePlayerEHI = EHI_null )
 {
 	foreach ( EHI teammateEHI in GetPlayerEHIArrayOfTeam( team ) )
@@ -55,9 +55,9 @@ bool function Survival_DoesTeamHaveCharacter( int team, ItemFlavor checkCharacte
 		if ( !Survival_HasPlayerLockedInCharacter( teammateEHI ) )
 			continue
 
-		if ( LoadoutSlot_IsReady( teammateEHI, Loadout_CharacterClass() ) )
+		if ( LoadoutSlot_IsReady( teammateEHI, Loadout_Character() ) )
 		{
-			if ( LoadoutSlot_GetItemFlavor( teammateEHI, Loadout_CharacterClass() ) == checkCharacter )
+			if ( LoadoutSlot_GetItemFlavor( teammateEHI, Loadout_Character() ) == checkCharacter )
 				return true
 		}
 	}
@@ -66,25 +66,25 @@ bool function Survival_DoesTeamHaveCharacter( int team, ItemFlavor checkCharacte
 }
 #endif
 
-#if(UI)
+#if UI
 void function DisableReadyMode()
 {
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+	                                              
+	  
+	                                             
+	  
+	                                      
+	                                                  
+	                                     
+	  
+	                                                    
 }
 #endif
 
-#if(UI)
+#if UI
 void function ServerToUI_CharacterLockRejected()
 {
-	//
-	//
+	                    
+	                                           
 }
 #endif

@@ -1,70 +1,82 @@
 global function ClientCodeCallback_SetupRumble
 
 
-void function DefineRumble( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
+void function DefineRumble( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor, table<string, var> playParams = {} )
 {
 	Rumble_CreateGraphAll( rumbleName, heavyMotor, lightMotor )
-	Rumble_CreatePlayParamsAll( rumbleName, { name = rumbleName } )
+	playParams.name <- rumbleName
+	Rumble_CreatePlayParamsAll( rumbleName, playParams )
 }
 
 void function DefineWeaponAttackRumble( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
 {
 	DefineRumblePS4( rumbleName, heavyMotor, lightMotor )
 	DefineRumble360( rumbleName, heavyMotor, lightMotor )
-
-#if DURANGO_PROG || PC_PROG 
+	DefineRumbleNX( rumbleName, heavyMotor, lightMotor )
+	
+#if (XBOX_PROG || PC_PROG )
 	array<vector> rightTrigger = CopyRA( lightMotor, 1.0, 0.1 )
-	DefineRumbleXB1( rumbleName, heavyMotor, lightMotor, [], rightTrigger )
-#endif //
+	DefineRumbleXBOX( rumbleName, heavyMotor, lightMotor, [], rightTrigger )
+#endif                               
 }
 
 void function DefineWeaponAttackRumble_NoTriggers( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
 {
 	DefineRumblePS4( rumbleName, heavyMotor, lightMotor )
 	DefineRumble360( rumbleName, heavyMotor, lightMotor )
-	DefineRumbleXB1( rumbleName, heavyMotor, lightMotor, [], [] )
+	DefineRumbleXBOX( rumbleName, heavyMotor, lightMotor, [], [] )
+	DefineRumbleNX( rumbleName, heavyMotor, lightMotor )
 }
+
+void function DefineRumbleNX( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
+{
+#if (NX_PROG || PC_PROG )
+	Rumble_CreateGraphNX( rumbleName, heavyMotor, lightMotor )
+	Rumble_CreatePlayParamsNX( rumbleName, { name = rumbleName } )
+#endif   
+}
+
 
 void function DefineRumblePS4( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
 {
-#if PS4_PROG || PC_PROG 
+#if (PLAYSTATION_PROG || PC_PROG )
 	Rumble_CreateGraphPS4( rumbleName, heavyMotor, lightMotor )
 	Rumble_CreatePlayParamsPS4( rumbleName, { name = rumbleName } )
-#endif //
+#endif   
 }
 
 void function DefineRumble360( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
 {
-#if(PC_PROG)
+#if (PC_PROG )
 	Rumble_CreateGraph360( rumbleName, heavyMotor, lightMotor )
 	Rumble_CreatePlayParams360( rumbleName, { name = rumbleName } )
-#endif //
+#endif   
 }
 
-void function DefineRumbleXB1( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor, array<vector> leftTrigger, array<vector> rightTrigger )
+void function DefineRumbleXBOX( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor, array<vector> leftTrigger, array<vector> rightTrigger )
 {
-#if DURANGO_PROG || PC_PROG 
-	Rumble_CreateGraphXB1( rumbleName, heavyMotor, lightMotor, leftTrigger, rightTrigger )
-	Rumble_CreatePlayParamsXB1( rumbleName, { name = rumbleName } )
-#endif //
+#if (XBOX_PROG || PC_PROG )
+	Rumble_CreateGraphXBOX( rumbleName, heavyMotor, lightMotor, leftTrigger, rightTrigger )
+	Rumble_CreatePlayParamsXBOX( rumbleName, { name = rumbleName } )
+#endif   
 }
 
 void function DefineRumbleAll_Scale360( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor, float scale360 )
 {
-	DefineRumbleXB1( rumbleName, heavyMotor, lightMotor, [], [] )
+	DefineRumbleXBOX( rumbleName, heavyMotor, lightMotor, [], [] )
 	DefineRumblePS4( rumbleName, heavyMotor, lightMotor )
 
-#if(PC_PROG)
+#if (PC_PROG )
 	array<vector> hmScaled = CopyRA( heavyMotor, 1.0, scale360 )
 	array<vector> lmScaled = CopyRA( lightMotor, 1.0, scale360 )
 	Rumble_CreateGraph360( rumbleName, hmScaled, lmScaled )
 	Rumble_CreatePlayParams360( rumbleName, { name = rumbleName } )
-#endif //
+#endif   
 }
 
-void function DefineRumblePS4XB1( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
+void function DefineRumblePS4XBOX( string rumbleName, array<vector> heavyMotor, array<vector> lightMotor )
 {
-	DefineRumbleXB1( rumbleName, heavyMotor, lightMotor, [], [] )
+	DefineRumbleXBOX( rumbleName, heavyMotor, lightMotor, [], [] )
 	DefineRumblePS4( rumbleName, heavyMotor, lightMotor )
 }
 
@@ -84,41 +96,43 @@ array<vector> function CopyRA( array<vector> originalArray, float scaleTime, flo
 
 void function ClientCodeCallback_SetupRumble()
 {
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+	                                              
+	         
+	                
+	                
+	                       
+	                        
+	  
+	                                     
+	                               
+	  
+	                                
+	                      
+	  
 
-	//
+	  
 	array<vector> graph_quickStrong				= [ pt( 0.0, 1.0 ),		pt( 0.20, 1.0 ),	pt( 0.25, 0.0 )	]
 	array<vector> graph_quickStrong_cutoff		= [ pt( 0.0, 1.0 ),		pt( 0.20, 1.0 ) ]
 	array<vector> graph_longMedium				= [	pt( 0.0, 0.45 ),	pt( 0.15, 0.35 ),	pt( 0.30, 0.25 ),	pt( 0.50, 0.15 ),	pt( 0.70, 0.075 ),	pt( 0.85, 0.025 ),	pt( 1.0, 0.0 ) ]
 	array<vector> graph_quickWeak				= [ pt( 0.0, 0.05 ),	pt( 1.0, 0.05 )	]
 
-	//
+	           
 	DefineWeaponAttackRumble( "rumble_assault_rifle",		CopyRA( graph_quickStrong, 0.5, 1.0 ),		CopyRA( graph_longMedium, 0.5, 1.0 ) )
 	DefineWeaponAttackRumble( "rumble_smg", 				CopyRA( graph_quickStrong, 0.5, 0.75 ),		CopyRA( graph_longMedium, 0.5, 0.75 ) )
 	DefineWeaponAttackRumble( "rumble_lmg",					CopyRA( graph_quickStrong, 0.65, 1.0 ),		CopyRA( graph_longMedium, 0.45, 1.0 ) )
 	DefineWeaponAttackRumble( "rumble_sniper",				CopyRA( graph_quickStrong, 1.25, 1.0 ),		CopyRA( graph_longMedium, 0.5, 1.5 ) )
+	DefineWeaponAttackRumble( "rumble_marksman",			CopyRA( graph_quickStrong, 1.0, 1.0 ),		CopyRA( graph_longMedium, 0.5, 1.25 ) )
 	DefineWeaponAttackRumble( "rumble_shotgun",				CopyRA( graph_quickStrong, 1.5, 1.0 ),		CopyRA( graph_longMedium, 0.45, 1.75 ) )
 	DefineWeaponAttackRumble( "rumble_grenadier",			CopyRA( graph_quickStrong, 1.15, 1.5 ),		CopyRA( graph_longMedium, 0.5, 0.2 ) )
 	DefineWeaponAttackRumble( "rumble_pistol", 				CopyRA( graph_quickStrong, 0.45, 0.7 ),		CopyRA( graph_longMedium, 0.5, 1.5 ) )
 	DefineWeaponAttackRumble( "rumble_pistol_heavy",		CopyRA( graph_quickStrong, 1.0, 1.0 ),		CopyRA( graph_longMedium, 0.5, 2.0 ) )
 	DefineWeaponAttackRumble( "rumble_antititan",			CopyRA( graph_quickStrong, 2.0, 1.0 ),		CopyRA( graph_longMedium, 0.4, 1.0 ) )
 
-	//
+	            
 	DefineWeaponAttackRumble( "rumble_lstar",				CopyRA( graph_quickStrong, 0.45, 0.5 ),		CopyRA( graph_longMedium, 0.85, 2.2 ) )
+	DefineWeaponAttackRumble( "rumble_bow_max_charge",		CopyRA( graph_quickStrong, 0.35, 1.0 ),		CopyRA( graph_longMedium, 0.3, 0.75 ) )
 
-	//
+	                   
 	DefineWeaponAttackRumble_NoTriggers( "rumble_grapple_attach",		CopyRA( graph_quickStrong_cutoff, 0.5, 1.0 ),		CopyRA( graph_quickStrong_cutoff, 0.5, 1.0 ) )
 	DefineWeaponAttackRumble_NoTriggers( "rumble_burn_card_activate",	[],													CopyRA( graph_quickStrong_cutoff, 0.65, 0.8 ) )
 	DefineWeaponAttackRumble_NoTriggers( "rumble_stim_activate",		CopyRA( graph_quickStrong, 0.75, 2.0 ),				CopyRA( graph_quickStrong_cutoff, 4.0, 0.3 ) )
@@ -129,11 +143,11 @@ void function ClientCodeCallback_SetupRumble()
 			[ pt( 0.0, 0.9 ),		pt( 0.12, 0.9 ),	pt( 0.15, 0.0 )	]
 	)
 
-	//
+	             
 	DefineWeaponAttackRumble_NoTriggers( "rumble_gibraltar_shield_activate",	CopyRA( graph_quickStrong, 1.5, 2.0 ),			CopyRA( graph_longMedium, 1.0, 0.25 ) )
 
-	//
-	//
+	                            
+	          
 
 	DefineRumble( "pilot_melee_hit_partial",
 					[	pt( 0, 0.5 ),	pt( 0.15, 0.5 ),											pt( 0.75, 0 )	],
@@ -145,19 +159,19 @@ void function ClientCodeCallback_SetupRumble()
 					[	pt( 0, 1.0 ),	pt( 0.1, 0.5 ),											    pt( 0.5, 0 )	],
 					[	pt( 0, 1.0 ),						pt( 0.25, 0.5 ),	pt( 0.3, 0.4 ),	    pt( 0.5, 0 )	] )
 
-	//
-	//
-	//
-	//
-	DefineRumblePS4XB1( "rumble_pilotOnJump",				CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnDoubleJump",			CopyRA( graph_quickStrong, 0.5, 0.5 ),		CopyRA( graph_quickStrong, 1.5, 0.5 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnWallrunStart",		CopyRA( graph_quickStrong, 0.5, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.5 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnWallrunTimeout",		CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnWallHangStart",		CopyRA( graph_quickStrong, 0.2, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 2.0 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnSlideBegin",			CopyRA( graph_quickStrong, 0.5, 0.2 ),		CopyRA( graph_quickStrong, 1.25, 0.8 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnZiplineAttach",		CopyRA( graph_quickStrong, 0.5, 0.25 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
-	DefineRumblePS4XB1( "rumble_pilotOnZiplineDetach",		CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
-	//
+	                            
+	                           
+	  
+	              
+	DefineRumblePS4XBOX( "rumble_pilotOnJump",				CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnDoubleJump",			CopyRA( graph_quickStrong, 0.5, 0.5 ),		CopyRA( graph_quickStrong, 1.5, 0.5 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnWallrunStart",		CopyRA( graph_quickStrong, 0.5, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.5 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnWallrunTimeout",		CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnWallHangStart",		CopyRA( graph_quickStrong, 0.2, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 2.0 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnSlideBegin",			CopyRA( graph_quickStrong, 0.5, 0.2 ),		CopyRA( graph_quickStrong, 1.25, 0.8 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnZiplineAttach",		CopyRA( graph_quickStrong, 0.5, 0.25 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
+	DefineRumblePS4XBOX( "rumble_pilotOnZiplineDetach",		CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
+	       
 	DefineRumble360( "rumble_pilotOnJump",					CopyRA( graph_quickStrong, 0.75, 0.2 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
 	DefineRumble360( "rumble_pilotOnDoubleJump",			CopyRA( graph_quickStrong, 0.5, 0.25 ),		CopyRA( graph_quickStrong, 1.5, 0.4 ) )
 	DefineRumble360( "rumble_pilotOnWallrunStart",			CopyRA( graph_quickStrong, 0.5, 0.25 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
@@ -166,28 +180,40 @@ void function ClientCodeCallback_SetupRumble()
 	DefineRumble360( "rumble_pilotOnSlideBegin",			CopyRA( graph_quickStrong, 0.5, 0.1 ),		CopyRA( graph_quickStrong, 1.25, 0.4 ) )
 	DefineRumble360( "rumble_pilotOnZiplineAttach",			CopyRA( graph_quickStrong, 0.5, 0.125 ),	CopyRA( graph_quickStrong, 0.5, 0.125 ) )
 	DefineRumble360( "rumble_pilotOnZiplineDetach",			CopyRA( graph_quickStrong, 0.75, 0.25 ),	CopyRA( graph_quickStrong, 0.5, 0.125 ) )
-	//
+	      
+	DefineRumbleNX( "rumble_pilotOnJump",					CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumbleNX( "rumble_pilotOnDoubleJump",				CopyRA( graph_quickStrong, 0.5, 0.5 ),		CopyRA( graph_quickStrong, 1.5, 0.5 ) )
+	DefineRumbleNX( "rumble_pilotOnWallrunStart",			CopyRA( graph_quickStrong, 0.5, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.5 ) )
+	DefineRumbleNX( "rumble_pilotOnWallrunTimeout",			CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumbleNX( "rumble_pilotOnWallHangStart",			CopyRA( graph_quickStrong, 0.2, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 2.0 ) )
+	DefineRumbleNX( "rumble_pilotOnSlideBegin",				CopyRA( graph_quickStrong, 0.5, 0.2 ),		CopyRA( graph_quickStrong, 1.25, 0.8 ) )
+	DefineRumbleNX( "rumble_pilotOnZiplineAttach",			CopyRA( graph_quickStrong, 0.5, 0.25 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
+	DefineRumbleNX( "rumble_pilotOnZiplineDetach",			CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.25 ) )
+	  
 	DefineRumblePS4( "rumble_pilotOnLandingSoft",			CopyRA( graph_quickStrong, 0.5, 0.45 ),		CopyRA( graph_quickStrong, 0.5, 0.4 ) )
 	DefineRumblePS4( "rumble_pilotOnLandingHard",			CopyRA( graph_quickStrong, 0.65, 1.0 ),		CopyRA( graph_quickStrong, 0.5, 0.5 ) )
-	DefineRumbleXB1( "rumble_pilotOnLandingSoft",			CopyRA( graph_quickStrong, 0.5, 0.45 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ), [], [] )
-	DefineRumbleXB1( "rumble_pilotOnLandingHard",			CopyRA( graph_quickStrong, 0.65, 1.0 ),		CopyRA( graph_quickStrong, 0.5, 0.2 ), [], [] )
+	DefineRumbleXBOX( "rumble_pilotOnLandingSoft",			CopyRA( graph_quickStrong, 0.5, 0.45 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ), [], [] )
+	DefineRumbleXBOX( "rumble_pilotOnLandingHard",			CopyRA( graph_quickStrong, 0.65, 1.0 ),		CopyRA( graph_quickStrong, 0.5, 0.2 ), [], [] )
 	DefineRumble360( "rumble_pilotOnLandingSoft",			CopyRA( graph_quickStrong, 0.5, 0.25 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
 	DefineRumble360( "rumble_pilotOnLandingHard",			CopyRA( graph_quickStrong, 0.65, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
-	//
+	DefineRumbleNX( "rumble_pilotOnLandingSoft",			CopyRA( graph_quickStrong, 0.5, 0.45 ),		CopyRA( graph_quickStrong, 0.5, 0.4 ) )
+	DefineRumbleNX( "rumble_pilotOnLandingHard",			CopyRA( graph_quickStrong, 0.65, 1.0 ),		CopyRA( graph_quickStrong, 0.5, 0.5 ) )
+	  
 	DefineRumblePS4( "titan_cockpit_footstep",				CopyRA( graph_quickStrong, 0.25, 0.25 ),	CopyRA( graph_quickStrong, 0.5, 0.0 ) )
 	DefineRumble360( "titan_cockpit_footstep",				CopyRA( graph_quickStrong, 0.10, 0.25 ),	CopyRA( graph_quickStrong, 0.5, 0.0 ) )
-	DefineRumbleXB1( "titan_cockpit_footstep",				CopyRA( graph_quickStrong, 0.25, 0.25 ),	CopyRA( graph_quickStrong, 0.5, 0.0 ), [], [] )
+	DefineRumbleXBOX( "titan_cockpit_footstep",				CopyRA( graph_quickStrong, 0.25, 0.25 ),	CopyRA( graph_quickStrong, 0.5, 0.0 ), [], [] )
+	DefineRumbleNX( "titan_cockpit_footstep",				CopyRA( graph_quickStrong, 0.25, 0.25 ),	CopyRA( graph_quickStrong, 0.5, 0.0 ) )
 
 	DefineRumble( "rumble_titanOnLandingSoft",				CopyRA( graph_quickStrong, 0.65, 1.0 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
 	DefineRumble( "rumble_titanOnLandingHard",				CopyRA( graph_quickStrong, 0.95, 2.0 ),		CopyRA( graph_quickStrong, 1.5, 0.4 ) )
 
 	DefineRumble( "rumble_pilot_hurt",		CopyRA( graph_quickStrong_cutoff, 2.0, 1.0 ),		CopyRA( graph_quickStrong, 1.5, 1.0 ) )
 
-	DefineWeaponAttackRumble_NoTriggers( "out_of_bounds_pain",		CopyRA( graph_quickStrong, 0.5, 1.0 ),		CopyRA( graph_longMedium, 0.5, 1.0 ) )
+	DefineWeaponAttackRumble_NoTriggers( "death_field_pain",		CopyRA( graph_quickStrong, 0.5, 1.0 ),		CopyRA( graph_longMedium, 0.5, 1.0 ) )
 
 
-	//
-	//
+	                            
+	                  
 
 	DefineRumble( "reload_pilot_small",
 					[],
@@ -209,7 +235,7 @@ void function ClientCodeCallback_SetupRumble()
 
 	DefineRumble( "QuickDeath",						CopyRA( graph_quickStrong, 1.0, 0.5 ),		CopyRA( graph_longMedium, 1.0, 0.5 ) )
 
-	//
+	          
 	DefineRumble( "skydive_jump",
 		[	pt( 0.0, 0.5 ),	pt( 0.15, 0.5 ),	pt( 0.25, 0.0 )	],
 		[	pt( 0.0, 1.0 ),	pt( 0.15, 1.0 ),	pt( 0.3, 0.0 )	] )
@@ -220,9 +246,43 @@ void function ClientCodeCallback_SetupRumble()
 		DefineRumble( "skydive_speed_" + i, CopyRA( graph_quickStrong, 0.25, scale ), CopyRA( graph_quickStrong, 0.25, scale ) )
 	}
 
-	//
-	//
+	                            
+	                      
 	DefineRumble( "wraith_phase_buildup",
 		[ pt(0.0,0.01), pt(0.6,0.05), pt(0.8,0.1), pt(1.0,0.15), pt(1.2,0.2), pt(1.4,0.3), pt(1.6,0.4), pt(1.8,0.5), pt(2.0,0.7), pt(2.2,0.9), pt(2.4,1.0) ],
 		[ pt(0.0,0.01), pt(0.6,0.05), pt(0.8,0.1), pt(1.0,0.15), pt(1.2,0.2), pt(1.4,0.3), pt(1.6,0.4), pt(1.8,0.5), pt(2.0,0.7), pt(2.2,0.9), pt(2.4,1.0) ] )
+
+	DefineRumble( "loba_tactical_pull",
+		[	pt( 0.00, 0.10 ),	pt( 0.10, 0.25 ),	pt( 0.15, 0.00 )											],
+		[	pt( 0.00, 1.00 ),	pt( 0.10, 0.00 ),						pt( 0.20, 1.00 ),	pt( 0.10, 0.00 )	] )
+	DefineRumble( "loba_tactical_toss",
+		[	pt( 0.00, 1.00 ),						pt( 1.00, 0.00 )						],
+		[						pt( 0.20, 1.00 ),						pt( 1.20, 0.00 )	] )
+	DefineRumble( "loba_tactical_toss_loop",
+		[	pt( 0.00, 0.00 )											],
+		[	pt( 0.00, 0.07 ),	pt( 0.80, 0.16 ),	pt( 1.60, 0.07 )	] )
+	DefineRumble( "loba_tactical_impact_and_teleport",
+		[	pt( 0.00, 1.00 ),	pt( 0.20, 0.00 ),	pt( 0.45, 0.00 )	pt( 0.5, 1.00 ),	pt( 1.10, 0.00 )	],
+		[	pt( 0.00, 0.00 ),						pt( 0.45, 1.00 )											] )
+	DefineRumble( "loba_ultimate_deploy",
+		[	pt( 0.00, 1.00 ),	pt( 0.10, 0.00 ),						],
+		[	pt( 0.00, 1.00 ),						pt( 1.00, 0.00 )	],
+		{  distanceMin = 128.0, scaleMin = 1.0, distanceMax = 500.0, scaleMax = 0.0 } )
+
+
+                     
+	                            
+	                   
+	  
+	DefineRumblePS4XBOX( "rumble_hoverveh_boost",		CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumble360( "rumble_hoverveh_boost",			CopyRA( graph_quickStrong, 0.75, 0.2 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumbleNX( "rumble_hoverveh_boost",			CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+
+	  
+	DefineRumblePS4XBOX( "rumble_hoverveh_airbrake",		CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumble360( "rumble_hoverveh_airbrake",			CopyRA( graph_quickStrong, 0.75, 0.2 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+	DefineRumbleNX( "rumble_hoverveh_airbrake",			CopyRA( graph_quickStrong, 0.75, 0.5 ),		CopyRA( graph_quickStrong, 0.5, 0.0 ) )
+                               
 }
+
+

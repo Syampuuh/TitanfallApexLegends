@@ -1,14 +1,19 @@
-untyped
-
-global function MpWeaponDmr_Init
-
 global function OnWeaponActivate_weapon_dmr
 global function OnWeaponDeactivate_weapon_dmr
-
-#if(CLIENT)
+global function MpWeaponDmr_Init
+#if CLIENT
 global function OnClientAnimEvent_weapon_dmr
-#endif //
+#endif              
 
+void function OnWeaponActivate_weapon_dmr( entity weapon )
+{
+	OnWeaponActivate_ReactiveKillEffects( weapon )
+}
+
+void function OnWeaponDeactivate_weapon_dmr( entity weapon )
+{
+	OnWeaponDeactivate_ReactiveKillEffects( weapon )
+}
 
 void function MpWeaponDmr_Init()
 {
@@ -21,22 +26,7 @@ void function DMRPrecache()
 	PrecacheParticleSystem( $"wpn_mflash_snp_hmn_smoke_side" )
 }
 
-void function OnWeaponActivate_weapon_dmr( entity weapon )
-{
-	if ( !( "zoomTimeIn" in weapon.s ) )
-		weapon.s.zoomTimeIn <- weapon.GetWeaponSettingFloat( eWeaponVar.zoom_time_in )
-
-	#if(CLIENT)
-		if ( weapon.GetWeaponOwner() != GetLocalViewPlayer() )
-			return
-	#endif
-}
-
-void function OnWeaponDeactivate_weapon_dmr( entity weapon )
-{
-}
-
-#if(CLIENT)
+#if CLIENT
 void function OnClientAnimEvent_weapon_dmr( entity weapon, string name )
 {
 	GlobalClientEventHandler( weapon, name )
@@ -45,7 +35,7 @@ void function OnClientAnimEvent_weapon_dmr( entity weapon, string name )
 	{
 		if ( IsOwnerViewPlayerFullyADSed( weapon ) )
 			return
-		if ( !weapon.HasMod( "silencer" ) )
+		if ( !weapon.HasMod( "barrel_stabilizer_l4_flash_hider" ) )
 		{
 			weapon.PlayWeaponEffect( $"wpn_mflash_snp_hmn_smoke_side_FP", $"wpn_mflash_snp_hmn_smoke_side", "muzzle_flash_L" )
 			weapon.PlayWeaponEffect( $"wpn_mflash_snp_hmn_smoke_side_FP", $"wpn_mflash_snp_hmn_smoke_side", "muzzle_flash_R" )
@@ -57,7 +47,7 @@ void function OnClientAnimEvent_weapon_dmr( entity weapon, string name )
 		thread DelayedCasingsSound( weapon, 0.6 )
 	}
 }
-#endif //
+#endif              
 
 void function DelayedCasingsSound( entity weapon, float delayTime )
 {

@@ -6,29 +6,64 @@ global function SURVIVAL_Loot_IsLootIndexValid
 global function SURVIVAL_Loot_GetLootDataByRef
 global function SURVIVAL_Loot_IsRefValid
 global function SURVIVAL_Loot_IsRefDisabled
+global function SURVIVAL_Loot_IsReforBaseWeaponDisabled
+global function SURVIVAL_Loot_AddDisabledRef
 global function SURVIVAL_Loot_GetByType
 global function SURVIVAL_Loot_GetLootTypeFromString
+global function SURVIVAL_Loot_GetAttachmentType_Enum
 global function SURVIVAL_Loot_GetByTier
+
+#if CLIENT || SERVER
+global function SURVIVAL_Loot_IsRestrictedPanelLocked
+global function SURVIVAL_Loot_GetRestrictedLootType
+global function SURVIVAL_Loot_GetRestrictedPanel
+#endif
+
+#if SERVER
+                                                                
+                                              
+#endif
+
+#if UI
+global function SURVIVAL_Loot_GetRestrictedDialogArray
+#endif
+
+#if CLIENT || UI
+global function SURVIVAL_Loot_GetPickupString
+global function SURVIVAL_Loot_GetDesc
+
+global function AddCallback_EditLootDesc
+global function RemoveCallback_EditLootDesc
+#endif
+
+
 
 global function SURVIVAL_Loot_IsUniqueAmmoWeapon
 
-#if(CLIENT)
+#if CLIENT
 global function GetRarityColor
 #endif
 
-#if CLIENT && DEV 
+#if SERVER
+                                             
+#endif
+
+#if CLIENT && DEV
 global function DumpModdedKeyColors
 global function DiffKeyColors
 #endif
 
-global function GetFXRarityColorForTier //
-global function GetFXRarityColorForUnlockable //
+                                           
+global function GetFXRarityColorForTier                             
+global function GetFXRarityColorForUnlockable                             
 
-#if(false)
-
-#elseif(false)
-
-#endif
+                  
+      
+                                                   
+     
+                                                            
+      
+      
 
 global enum eLootTier
 {
@@ -52,6 +87,7 @@ global struct LootData
 	asset         model
 	int           skinOverride
 	asset         hudIcon
+	asset		  craftingIcon
 	asset         emptyImage
 	string        attachSound
 	string        pickupSound_1p
@@ -59,33 +95,52 @@ global struct LootData
 	string        carrySound
 	string        pickupString
 	string        desc
+	string        hopupPopupDesc
 	string        specialCaseInvalidReason
 	int           countPerDrop
 	int           lootType
 	string        netInt
 	array<string> supportedAttachments
+	array<string> disabledAttachments
 	array<string> lootTags
 	string        ammoType
-	float         minInWorld
+	string        secondaryAmmoType
 	bool          isActive = false
 	int           passive = -1
 	string        attachmentStyle = ""
+	int 		  attachmentType = -1
 	int           scrapValue
 	bool          droppodRotate = false
 	bool          isDynamic = false
 	bool          conditional = false
+	bool          printPickupToObituary = false
+	bool          pretendsToBeBlank = false
+	bool          noDrop = false
 
 	string        baseWeapon
 	array<string> baseMods
 
 	asset         fakeAmmoIcon
 	array<string> fakeMods
+
+	bool functionref( entity, entity, int ) extraCanUseFunction = null
+}
+
+global enum eWeaponAttachmentType
+{
+	NONE = -1,
+	MAG,
+	SCOPE,
+	BARREL,
+	STOCK,
+	HOPUP
 }
 
 global enum eLootType
 {
-	MAINWEAPON
-	AMMO
+	INVALID
+	MAINWEAPON                                               
+	AMMO                                         
 	HEALTH
 	ARMOR
 	INCAPSHIELD
@@ -94,52 +149,105 @@ global enum eLootType
 	ATTACHMENT
 	CUSTOMPICKUP
 	BACKPACK
-	#if(false)
-
-#endif
+                   
+           
+       
+                             
+                 
+       
 	HELMET
-	#if(false)
-
-#endif
+                        
+            
+       
 	BLANK
-	#if(false)
-
-#endif
+                       
+		DATAKNIFE
+       
+                   
+		SHIPKEYCARD
+       
 	RESOURCE
-	#if(false)
+                     
+             
+       
 
-#endif
+	LOCKBOX
+	GADGET
 
-	//
-	#if(false)
+                    
+		MARVIN_ARM
+       
 
-#endif
+                        
+                 
+       
 
 	_count
 }
 
-#if(false)
+global const int NORMAL_UNRESTRICTED_LOOT = -1
+global enum eRestrictedLootTypes
+{
+	VAULT,
+	SHIP_VAULT,
+	BLOODHOUND_TT,
+	CAUSTIC_TT,
+                   
+		RAMPART_TT,
+       
+                       
+		SPECTRE_SHACK,
+       
+}
 
-#endif
+struct RestrictedLootInfo
+{
+	#if SERVER || CLIENT
+		entity functionref( entity ) getRestrictedPanel
+		bool functionref( entity ) isRestrictedPanelLocked
+	#endif
+	#if SERVER
+		                                                                             
+	#endif
+	#if UI
+		string dialogPopupHeader
+		string dialogPopupAreYouSure
+		string dialogPopupDeny
+	#endif
+}
 
-#if(true)
+                  
+                                      
+      
+
+                         
 global const int HAS_DEATHBOX_OVERRIDE_FRIEND_PROFILES_TO_SEND = 3
+      
+
+                         
+#if SERVER
+                                                        
+                                   
+                                                
+                                        
+#endif              
+                                   
+
+                         
+#if SERVER && DEV
+                                              
+#endif                     
+                                   
+
+global function IsDeathboxAutoPickupEnabled
+
+#if CLIENT || SERVER
+global function SetCallback_LootTypeExtraCanUseFunction
+global function ClearCallback_LootTypeExtraCanUseFunction
 #endif
 
 
-#if(false)
-
-
-
-
-#endif
-
-#if(false)
-
-#endif
-
-
-#if(true)
+                         
 global struct OverrideDeathBoxRUI_NetworkOptimizedStruct
 {
 	string name
@@ -158,7 +266,7 @@ global struct OverrideDeathBoxRUI_NetworkOptimizedStruct
 
 	bool isValid = false
 }
-#endif
+      
 
 
 struct
@@ -169,28 +277,40 @@ struct
 	array<string>             disabledRefs
 	array<string>             uniqueAmmoWeaponRefs
 
-	#if(true)
+	table<int, RestrictedLootInfo> restrictedLootInfo
+
+                          
 		table<EHI, array< OverrideDeathBoxRUI_NetworkOptimizedStruct > > EHIToOverrideDeathBoxRUIProfilesTable
 		table<string, EHI>                                               corpseToEHITable
 		array< OverrideDeathBoxRUI_NetworkOptimizedStruct >              handcraftedProfiles
-		array< OverrideDeathBoxRUI_NetworkOptimizedStruct >              handcraftedProfilesMasterList //
+		array< OverrideDeathBoxRUI_NetworkOptimizedStruct >              handcraftedProfilesMasterList                                                                                                 
+       
+
+                          
+		#if UI
+			bool                                                      overrideDeathBoxRUI_Initialized = false
+			table<string, OverrideDeathBoxRUI_NetworkOptimizedStruct> overrideDeathBoxRUIProfilesTable
+			int                                                       profilesSent = 0
+		#endif          
+                                    
+
+	#if CLIENT || UI
+	array<string functionref( string, entity , string)> editLootDescCallbacks
 	#endif
 
-	#if(UI)
-		bool                                                      overrideDeathBoxRUI_Initialized = false
-		table<string, OverrideDeathBoxRUI_NetworkOptimizedStruct> overrideDeathBoxRUIProfilesTable
-		int                                                       profilesSent = 0
-	#endif
 } file
 
 
-array<string> attachmentSortOrder = ["barrel", "mag", "sight", "grip", "hopup"]
-
+array<string> attachmentSortOrder = ["barrel", "mag", "sight", "grip", "hopup", "hopupMulti_a", "hopupMulti_b"]
 
 string function GetLootTableString( string ref, var datatable, int rowIndex, string columnName )
 {
 	string val = GetDataTableString( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
-	return GetCurrentPlaylistVarString( (ref + "_dt_override_" + columnName), val )
+
+	if ( ShouldUsePlaylistOverridesBasedOnCalendarTime( ref, columnName ) )
+		return GetCurrentPlaylistVarString( (ref + "_dt_override_" + columnName), val )
+
+	return val
 }
 
 
@@ -203,57 +323,93 @@ asset function GetLootTableAsset( string ref, var datatable, int rowIndex, strin
 int function GetLootTableInt( string ref, var datatable, int rowIndex, string columnName )
 {
 	int val = GetDataTableInt( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
-	return GetCurrentPlaylistVarInt( (ref + "_dt_override_" + columnName), val )
+
+	if ( ShouldUsePlaylistOverridesBasedOnCalendarTime( ref, columnName ) )
+		return GetCurrentPlaylistVarInt( (ref + "_dt_override_" + columnName), val )
+
+	return val
 }
 
 
 bool function GetLootTableBool( string ref, var datatable, int rowIndex, string columnName )
 {
 	bool val = GetDataTableBool( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
-	return GetCurrentPlaylistVarBool( (ref + "_dt_override_" + columnName), val )
+
+	if ( ShouldUsePlaylistOverridesBasedOnCalendarTime( ref, columnName ) )
+		return GetCurrentPlaylistVarBool( (ref + "_dt_override_" + columnName), val )
+
+	return val
 }
 
 
 float function GetLootTableFloat( string ref, var datatable, int rowIndex, string columnName )
 {
 	float val = GetDataTableFloat( datatable, rowIndex, GetDataTableColumnByName( datatable, columnName ) )
-	return GetCurrentPlaylistVarFloat( (ref + "_dt_override_" + columnName), val )
+
+	if ( ShouldUsePlaylistOverridesBasedOnCalendarTime( ref, columnName ) )
+		return GetCurrentPlaylistVarFloat( (ref + "_dt_override_" + columnName), val )
+
+	return val
+}
+
+
+bool function ShouldUsePlaylistOverridesBasedOnCalendarTime( string ref, string columnName )
+{
+	int startTime = expect int( GetCurrentPlaylistVarTimestamp( (ref + "_dt_override_unixTimeStart_" + columnName), UNIX_TIME_FALLBACK_2038 ) )
+	int endTime   = expect int( GetCurrentPlaylistVarTimestamp( (ref + "_dt_override_unixTimeEnd_" + columnName), UNIX_TIME_FALLBACK_2038 ) )
+
+	if ( startTime != UNIX_TIME_FALLBACK_2038 )
+	{
+		int unixTimeNow = GetUnixTimestamp()
+		if ( (unixTimeNow >= startTime) && (unixTimeNow < endTime) )
+		{
+			return true
+		}
+		else
+		{
+			return false
+		}
+	}
+
+	return true
 }
 
 
 void function SURVIVAL_Loot_All_InitShared()
 {
-	#if(!UI)
-		//
+	#if !UI
+		                                                 
 	#endif
 
 	var dt = GetDataTable( $"datatable/survival_loot.rpak" )
 	file.lootIndexToString.clear()
 	file.lootData.clear()
+	file.restrictedLootInfo.clear()
 
 	var attachmentTable = GetDataTable( $"datatable/survival_weapon_mods.rpak" )
 
+	#if UI
 	file.disabledRefs.clear()
+	#endif
 	string disabledRefs = GetCurrentPlaylistVarString( "survival_disabled_loot", " " )
-	file.disabledRefs = split( disabledRefs, " " )
+	file.disabledRefs.extend( split( disabledRefs, WHITESPACE_CHARACTERS ) )
 
-	int numRows = GetDatatableRowCount( dt )
+	disabledRefs = GetCurrentPlaylistVarString( "survival_disabled_weapons", " " )
+	file.disabledRefs.extend( split( disabledRefs, WHITESPACE_CHARACTERS ) )
+
+	disabledRefs = GetCurrentPlaylistVarString( "global_disabled_loot", " " )
+	file.disabledRefs.extend( split( disabledRefs, WHITESPACE_CHARACTERS ) )
+
+	int numRows = GetDataTableRowCount( dt )
 	for ( int i = 0; i < numRows; i++ )
 	{
 		LootData data
 		data.ref = GetDataTableString( dt, i, GetDataTableColumnByName( dt, "ref" ) )
 
-		string featureFlagRef = GetLootTableString( data.ref, dt, i, "featureFlag" )
-		if ( featureFlagRef != "" && !GetFeatureFlagByString( featureFlagRef ) )
-		{
-			printf( "Skipping loot ref %s because feature flag %s is off.", data.ref, featureFlagRef )
-			continue
-		}
-
 		string pingCommsActionName = GetLootTableString( data.ref, dt, i, "pingCommsAction" )
 
-		#if(CLIENT)
-			data.pingCommsAction = GetCommsActionForName( pingCommsActionName )
+		#if (SERVER || CLIENT)
+			data.pingCommsAction = GetCommsActionEnumForName( pingCommsActionName )
 		#endif
 
 		string lootType = GetLootTableString( data.ref, dt, i, "type" )
@@ -267,7 +423,7 @@ void function SURVIVAL_Loot_All_InitShared()
 
 		data.fakeAmmoIcon = GetLootTableAsset( data.ref, dt, i, "fakeAmmoIcon" )
 
-		data.baseMods = split( GetLootTableString( data.ref, dt, i, "baseMods" ), " " )
+		data.baseMods = split( GetLootTableString( data.ref, dt, i, "baseMods" ), WHITESPACE_CHARACTERS )
 
 		data.model = GetLootTableAsset( data.ref, dt, i, "pickupModel" )
 		data.skinOverride = GetLootTableInt( data.ref, dt, i, "skinOverride" )
@@ -279,19 +435,25 @@ void function SURVIVAL_Loot_All_InitShared()
 		data.scrapValue = GetLootTableInt( data.ref, dt, i, "scrapValue" )
 		data.droppodRotate = GetLootTableBool( data.ref, dt, i, "droppodRotate" )
 		data.isDynamic = GetLootTableBool( data.ref, dt, i, "isDynamic" )
+		data.pretendsToBeBlank = GetLootTableBool( data.ref, dt, i, "pretendsToBeBlank" )
+		data.noDrop = GetLootTableBool( data.ref, dt, i, "noDrop" )
 		data.conditional = GetLootTableBool( data.ref, dt, i, "conditional" )
+		data.printPickupToObituary = (data.ref == "treasure_box")                                                                  
 
 		data.pickupString = GetLootTableString( data.ref, dt, i, "pickupString" )
 		data.desc = GetLootTableString( data.ref, dt, i, "desc" )
 
 		data.countPerDrop = GetLootTableInt( data.ref, dt, i, "countPerDrop" )
 		data.tier = GetLootTableInt( data.ref, dt, i, "tier" )
-		#if(false)
+		#if SERVER
+			                                                                  
+		#endif
 
-#endif
+		if ( GetLootTableBool( data.ref, dt, i, "isDisabled" ) )
+			file.disabledRefs.append( data.ref )
 
 		string supportedAttachmentsString  = GetLootTableString( data.ref, dt, i, "supportedAttachments" )
-		array<string> supportedAttachments = split( supportedAttachmentsString, " " )
+		array<string> supportedAttachments = split( supportedAttachmentsString, WHITESPACE_CHARACTERS )
 		supportedAttachments.sort(
 			int function( string attachmentA, string attachmentB ) : ()
 			{
@@ -307,23 +469,11 @@ void function SURVIVAL_Loot_All_InitShared()
 		)
 		data.supportedAttachments = supportedAttachments
 
-		data.lootTags = split( GetLootTableString( data.ref, dt, i, "lootTags" ), " " )
+		data.lootTags = split( GetLootTableString( data.ref, dt, i, "lootTags" ), WHITESPACE_CHARACTERS )
 
 		data.lootType = SURVIVAL_Loot_GetLootTypeFromString( lootType )
 		data.netInt = GetLootTableString( data.ref, dt, i, "netInt" )
 		data.inventorySlotCount = GetLootTableInt( data.ref, dt, i, "inventorySlotCount" )
-
-#if(CLIENT)
-		data.minInWorld = GetLootTableFloat( data.ref, dt, i, "minInWorld" )
-		if ( IsTestMap() )
-			data.minInWorld = max( -1, data.minInWorld )
-		//
-		#if(false)
-
-
-#endif
-
-		#endif
 
 		string passiveRef = GetLootTableString( data.ref, dt, i, "passive" )
 		if ( passiveRef == "" )
@@ -334,7 +484,7 @@ void function SURVIVAL_Loot_All_InitShared()
 		{
 			Assert( passiveRef in ePassives )
 			data.passive = ePassives[passiveRef]
-			#if CLIENT || UI 
+			#if CLIENT || UI
 				Assert( data.passive in PASSIVE_NAME_MAP )
 				Assert( data.passive in PASSIVE_DESCRIPTION_SHORT_MAP )
 			#endif
@@ -344,15 +494,75 @@ void function SURVIVAL_Loot_All_InitShared()
 		{
 			case eLootType.MAINWEAPON:
 				RegisterWeaponForUse( data.baseWeapon )
-				data.pickupString = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "printName" )
-				data.desc = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "description" )
+				data.pickupString = GetWeaponInfoFileKeyField_WithMods_GlobalString( data.baseWeapon, data.baseMods, "printName" )
+				data.desc = GetWeaponInfoFileKeyField_WithMods_GlobalString( data.baseWeapon, data.baseMods, "description" )
 				data.hudIcon = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "hud_icon" )
+				data.craftingIcon = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "crafting_icon" )
 				data.model = GetWeaponInfoFileKeyFieldAsset_Global( data.baseWeapon, "playermodel" )
-				if ( GetWeaponInfoFileKeyField_Global( data.baseWeapon, "ammo_pool_type" ) != null )
-					data.ammoType = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "ammo_pool_type" )
-				else
-					data.ammoType = ""
+				if ( GetWeaponInfoFileKeyField_Global( data.baseWeapon, "ammo_pool_type" ) != null && GetWeaponInfoFileKeyField_Global( data.baseWeapon, "uses_ammo_pool" ) != false )
+				{
+					                                           
+					                                                                                           
+					int type = GetWeaponInfoFileKeyField_GlobalInt( data.baseWeapon, "ammo_pool_type" )
+					switch( type )
+					{
+						case 0:
+							data.ammoType = "bullet"
+							break
+						case 1:
+							data.ammoType = "highcal"
+							break
+						case 2:
+							data.ammoType = "special"
+							break
+						case 3:
+							data.ammoType = "shotgun"
+							break
+						case 4:
+							data.ammoType = "sniper"
+							break
+						case 5:
+							data.ammoType = "arrows"
+							break
+						default:
+							data.ammoType = ""
+							break
+					}
 
+				}
+				else
+				{
+					data.ammoType = ""
+				}
+
+				if ( GetWeaponInfoFileKeyField_Global( data.baseWeapon, "secondary_ammo_pool_type" ) != null )
+				{
+					string type = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "secondary_ammo_pool_type" )
+					switch( type )
+					{
+						case "bullet":
+							data.secondaryAmmoType = "bullet"
+							break
+						case "highcal":
+							data.secondaryAmmoType = "highcal"
+							break
+						case "special":
+							data.secondaryAmmoType = "special"
+							break
+						case "shotgun":
+							data.secondaryAmmoType = "shotgun"
+							break
+						case "sniper":
+							data.secondaryAmmoType = "sniper"
+							break
+						case "arrows":
+							data.secondaryAmmoType = "arrows"
+							break
+						default:
+							data.secondaryAmmoType = ""
+							break
+					}
+				}
 				if ( data.fakeAmmoIcon != "" )
 				{
 					file.uniqueAmmoWeaponRefs.append( data.ref )
@@ -363,13 +573,13 @@ void function SURVIVAL_Loot_All_InitShared()
 				{
 					expect ItemFlavor( weaponFlavor )
 
-					int availableState = ItemFlavor_GetPlaylistOpinion( weaponFlavor )
+					int availableState = ItemFlavor_GetPlaylistAvailability( weaponFlavor )
 					bool shouldBeEnabled
-					if ( availableState == eItemFlavorPlaylistOpinion.FORCE_UNLOCK_FOR_SPECIAL_EVENT )
+					if ( availableState == eItemFlavorPlaylistAvailability.FORCE_UNLOCK_FOR_SPECIAL_EVENT )
 						shouldBeEnabled = true
-					else if ( availableState == eItemFlavorPlaylistOpinion.HIDDEN )
+					else if ( availableState == eItemFlavorPlaylistAvailability.HIDDEN )
 						shouldBeEnabled = false
-					else if ( availableState == eItemFlavorPlaylistOpinion.DISABLED )
+					else if ( availableState == eItemFlavorPlaylistAvailability.DISABLED )
 						shouldBeEnabled = false
 					else
 						shouldBeEnabled = ItemFlavor_IsActiveForEdition( weaponFlavor, GetConVarInt( "mtx_svEdition" ) )
@@ -377,9 +587,11 @@ void function SURVIVAL_Loot_All_InitShared()
 					if ( !shouldBeEnabled )
 						file.disabledRefs.append( data.ref )
 				}
+
 				break
 
 			case eLootType.ORDNANCE:
+			case eLootType.GADGET:
 				RegisterWeaponForUse( data.baseWeapon )
 				data.pickupString = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "printName" )
 				data.desc = GetWeaponInfoFileKeyField_GlobalString( data.baseWeapon, "description" )
@@ -392,22 +604,28 @@ void function SURVIVAL_Loot_All_InitShared()
 				break
 
 			case eLootType.ATTACHMENT:
-				int row = GetDataTableRowMatchingStringValue( attachmentTable, PILOT_WEAPON_MOD_COMMON_COLUMN, data.ref )
-				data.pickupString = GetDataTableString( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_NAME_COLUMN )
-				data.desc = GetDataTableString( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_DESCRIPTION_COLUMN )
+				int row = GetDataTableRowMatchingStringValue( attachmentTable, GetDataTableColumnByName( attachmentTable, "mod" ), data.ref )
+				data.pickupString = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "name" ) )
+				data.desc = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "description" ) )
+				data.hopupPopupDesc = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "hopupPopupDesc" ) )
 
 				data.ammoType = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "ammoType" ) )
 				data.hudIcon = GetLootTableAsset( data.ref, dt, i, "icon" )
-				data.specialCaseInvalidReason = ""//
+				data.specialCaseInvalidReason = ""                                                                                                                     
 				if ( data.hudIcon == $"" )
-					data.hudIcon = GetDataTableAsset( attachmentTable, row, PILOT_WEAPON_MOD_COMMON_IMAGE_COLUMN )
+					data.hudIcon = GetDataTableAsset( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "image" ) )
 
-				string attachmentPoint = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "attachmentPoint" ) )
+				string attachmentPointStr = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "attachmentPoint" ) )
+				array<string> attachmentPointList = split( attachmentPointStr, WHITESPACE_CHARACTERS )
 				data.attachmentStyle = GetDataTableString( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "type" ) )
+				data.attachmentType = SURVIVAL_Loot_GetAttachmentType_Enum( attachmentPointList[0] )
 				data.emptyImage = GetDataTableAsset( attachmentTable, row, GetDataTableColumnByName( attachmentTable, "emptyImage" ) )
 
-#if(CLIENT)
-				RegisterAttachmentPoint( attachmentPoint )
+#if (SERVER || CLIENT)
+				foreach ( string attachmentPoint in attachmentPointList )
+				{
+					RegisterAttachmentPoint( attachmentPoint )
+				}
 #endif
 				break
 		}
@@ -417,51 +635,51 @@ void function SURVIVAL_Loot_All_InitShared()
 			file.lootIndexToString.append( data.ref )
 			file.lootData[ data.ref ] <- data
 
-			#if(false)
-
-#endif
+			#if SERVER
+				                                       
+			#endif
 		}
 
-		#if(!UI)
+		#if !UI
 			if ( data.model != $"" )
 				PrecacheModel( data.model )
 		#endif
 	}
 
-#if(false)
-//
+                  
+                       
+                    
+   
+         
+                        
+        
+                                     
+            
+                                         
+                                                      
+                                              
+    
+                                                                     
+                                              
+                             
+    
+                                                                                                 
+   
+                        
 
+                         
+		#if UI
+			RegisterSignal( "GatherFriendInfo" )
+			RegisterSignal( "GatheredEnoughFriendInfo" )
+			SURVIVAL_UIInit_Override_DeathBox_RUI()
+		#endif          
 
+		#if SERVER
+			                                           
+		#endif              
+                                    
 
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-	#if(UI)
-		RegisterSignal( "GatherFriendInfo" )
-		RegisterSignal( "GatheredEnoughFriendInfo" )
-		SURVIVAL_UIInit_Override_DeathBox_RUI()
-	#endif
-
-	#if(false)
-
-#endif
+	SURVIVAL_Loot_InitRestrictedLoot()
 
 	file.initialized = true
 }
@@ -486,7 +704,6 @@ array<LootData> function SURVIVAL_Loot_GetByType( int lootType )
 
 	return lootOfType
 }
-
 
 array<LootData> function SURVIVAL_Loot_GetByTier( int tier )
 {
@@ -547,17 +764,22 @@ int function SURVIVAL_Loot_GetLootTypeFromString( string lootTypeString )
 		case "helmet":
 			return eLootType.HELMET
 
-#if(false)
+                       
 
+                    
+                              
+      
 
+                      
 
-#endif
+		case "data_knife":
+			return eLootType.DATAKNIFE
+      
 
-#if(false)
-
-
-
-#endif
+                  
+		case "ship_keycard":
+			return eLootType.SHIPKEYCARD
+      
 
 		case "blank":
 			return eLootType.BLANK
@@ -565,33 +787,73 @@ int function SURVIVAL_Loot_GetLootTypeFromString( string lootTypeString )
 		case "resource":
 			return eLootType.RESOURCE
 
-#if(false)
+                    
+                     
+                               
+      
 
+		case "lockbox":
+			return eLootType.LOCKBOX
 
+                  
+                   
+                             
+      
 
-#endif
+                            
+                          
+                                     
+      
 
-#if(false)
+		case "gadget":
+			return eLootType.GADGET
 
+                   
+		case "marvin_arm":
+			return eLootType.MARVIN_ARM
+      
 
-
-#endif
-
-#if(false)
-
-
-
-#endif
+                       
+                         
+                                   
+                             
 
 		default:
-			//
-			Warning( "Error Building LootData Struct: Unknown loot type string: " + lootTypeString )
+			                                                                                                
+			string warnMsg = "Error Building LootData Struct: Unknown loot type string: "
+			Warning( warnMsg + lootTypeString )
 			return eLootType.BLANK
 	}
 
 	unreachable
 }
 
+int function SURVIVAL_Loot_GetAttachmentType_Enum( string attachmentType )
+{
+	int attachmentStyle = eWeaponAttachmentType.NONE
+	switch( attachmentType )
+	{
+		case "mag":
+			attachmentStyle = eWeaponAttachmentType.MAG
+			break
+		case "sight":
+			attachmentStyle = eWeaponAttachmentType.SCOPE
+			break
+		case "barrel":
+			attachmentStyle = eWeaponAttachmentType.BARREL
+			break
+		case "grip":
+		case "stock":
+			attachmentStyle = eWeaponAttachmentType.STOCK
+			break
+		case "hopup":
+			attachmentStyle = eWeaponAttachmentType.HOPUP
+			break
+		default:
+			break
+	}
+	return attachmentStyle
+}
 
 LootData function SURVIVAL_Loot_GetLootDataByIndex( int index )
 {
@@ -601,12 +863,21 @@ LootData function SURVIVAL_Loot_GetLootDataByIndex( int index )
 
 bool function SURVIVAL_Loot_IsLootIndexValid( int index )
 {
-	return (index in file.lootIndexToString)
+	return file.lootIndexToString.isvalidindex( index )
 }
 
 
 LootData function SURVIVAL_Loot_GetLootDataByRef( string ref )
 {
+	#if SERVER || CLIENT
+		if ( ref == "" )
+		{
+			                                                                                             
+			                                                                                    
+			string stack = GetStack(3)
+			ForceScriptError("Calling SURVIVAL_Loot_GetLootDataByRef with empty string from " + stack)
+		}
+	#endif                    
 	return file.lootData[ ref ]
 }
 
@@ -617,34 +888,34 @@ bool function SURVIVAL_Loot_IsRefValid( string ref )
 }
 
 
-#if(false)
+                  
+      
+                                                  
+     
+                                                                          
+      
+ 
+               
+                                                        
+  
+                                                           
+                                           
+           
 
+                                                             
 
+        
+                                                   
+       
+                                                          
+        
 
+                     
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+              
+ 
+                        
 
 
 bool function SURVIVAL_Loot_IsRefDisabled( string ref )
@@ -652,8 +923,33 @@ bool function SURVIVAL_Loot_IsRefDisabled( string ref )
 	return file.disabledRefs.contains( ref )
 }
 
+bool function SURVIVAL_Loot_IsReforBaseWeaponDisabled( string ref )
+{
+	if( SURVIVAL_Loot_IsRefDisabled( ref ) )
+		return true
 
-#if(CLIENT)
+	                                               
+	if( !SURVIVAL_Loot_IsRefValid( ref ) )
+		return true
+
+	                                                                  
+	LootData lootData = SURVIVAL_Loot_GetLootDataByRef( ref )
+	if( lootData.lootType == eLootType.MAINWEAPON && SURVIVAL_Loot_IsRefDisabled( lootData.baseWeapon ) )
+		return true
+
+	return false
+}
+
+void function SURVIVAL_Loot_AddDisabledRef( string ref )
+{
+	if ( !file.disabledRefs.contains( ref ) )
+	{
+		file.disabledRefs.append( ref )
+	}
+}
+
+
+#if CLIENT
 vector function GetRarityColor( entity ent )
 {
 	int lootIndex = ent.GetSurvivalInt()
@@ -665,57 +961,66 @@ vector function GetRarityColor( entity ent )
 #endif
 
 
-#if(false)
-//
+#if SERVER
+                                                                           
+                     
+                      
+                      
 
+                      
+                     
+                      
 
+                           
+                           
+                          
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                        
+                                                
+                                                       
+                                                       
+                                                                           
+                                              
+                                                    
 #endif
 
 
-//
+                                                          
+   
+  	                     
+   
+
+
+                            
 vector function GetFXRarityColorForTier( int tier )
 {
-	#if(false)
+	#if SERVER
+		               
+		 
+			                    
+				                      
 
+			                      
+				                        
 
+			                    
+				                      
 
+			                    
+				                      
 
+			                         
+				                           
 
+			                        
+				                          
 
+			        
+				                      
+		 
+	#endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-	#if(true)
+	#if !SERVER
 		return GetKeyColor( COLORID_FX_LOOT_TIER0, tier )
 	#endif
 
@@ -723,37 +1028,36 @@ vector function GetFXRarityColorForTier( int tier )
 }
 
 
-//
+                            
 vector function GetFXRarityColorForUnlockable( int tier )
 {
-	#if(false)
+	#if SERVER
+		               
+		 
+			                    
+				                      
 
+			                      
+				                        
 
+			                    
+				                      
 
+			                    
+				                      
 
+			                         
+				                           
 
+			                        
+				                          
 
+			        
+				                      
+		 
+	#endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-	#if(true)
+	#if !SERVER
 		return GetKeyColor( COLORID_FX_LOOT_TIER0, tier + 1 )
 	#endif
 
@@ -761,7 +1065,7 @@ vector function GetFXRarityColorForUnlockable( int tier )
 }
 
 
-#if CLIENT && DEV 
+#if CLIENT && DEV
 void function DumpModdedKeyColors( int colorID, float modVal )
 {
 	for ( int index = 0; index < 6; index++ )
@@ -777,7 +1081,7 @@ void function DumpModdedKeyColors( int colorID, float modVal )
 #endif
 
 
-#if CLIENT && DEV 
+#if CLIENT && DEV
 void function DiffKeyColors( int baseColorID, int colorID )
 {
 	var datatable = GetDataTable( $"datatable/colorpalette_table.rpak" )
@@ -806,16 +1110,69 @@ bool function SURVIVAL_Loot_IsUniqueAmmoWeapon( string ref )
 }
 
 
-#if(UI)
+#if CLIENT || UI
+string function SURVIVAL_Loot_GetPickupString( LootData data, entity forPlayer )
+{
+	string result = Localize( data.pickupString )
+
+	if ( data.passive != ePassives.INVALID )
+	{
+		string passiveName = PASSIVE_NAME_MAP[data.passive]
+		result = Localize( "#HUD_LOOT_WITH_PASSIVE", result, Localize( passiveName ) )
+	}
+
+	return result
+}
+#endif
+
+
+#if CLIENT || UI
+string function SURVIVAL_Loot_GetDesc( LootData data, entity forPlayer )
+{
+	string result = Localize( data.desc )
+
+	if ( data.passive != ePassives.INVALID )
+	{
+		string passiveName = PASSIVE_NAME_MAP[data.passive]
+		string passiveDesc = PASSIVE_DESCRIPTION_SHORT_MAP[data.passive]
+		result = Localize( "#HUD_LOOT_WITH_PASSIVE_DESC", result, Localize( passiveName ).toupper(), Localize( passiveDesc ) )
+	}
+
+	                
+	foreach ( func in file.editLootDescCallbacks )
+	{
+		result = func( data.ref, forPlayer, result )
+	}
+
+	return result
+}
+
+void function AddCallback_EditLootDesc( string functionref( string, entity, string ) callback )
+{
+	Assert( !file.editLootDescCallbacks.contains( callback ), "Tried to add a callback that was already added" )
+	file.editLootDescCallbacks.append( callback )
+}
+void function RemoveCallback_EditLootDesc( string functionref( string, entity, string ) callback )
+{
+	Assert( file.editLootDescCallbacks.contains( callback ), "Tried to remove a callback that was not added" )
+	file.editLootDescCallbacks.fastremovebyvalue( callback )
+}
+
+#endif
+
+
+
+                         
+#if UI
 void function SURVIVAL_UIInit_Override_DeathBox_RUI()
 {
 	if ( !IsConnected() )
 		return
 
-	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 1 ) != 1 )
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 0 ) != 1 )
 		return
 
-	if ( !file.overrideDeathBoxRUI_Initialized ) //
+	if ( !file.overrideDeathBoxRUI_Initialized )                                                                        
 	{
 		AddUICallback_OnLevelInit( SURVIVAL_UI_OnLevelInit )
 		AddCallbackAndCallNow_UserInfoUpdated( HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated )
@@ -823,10 +1180,8 @@ void function SURVIVAL_UIInit_Override_DeathBox_RUI()
 
 	file.overrideDeathBoxRUI_Initialized = true
 }
-#endif
 
 
-#if(UI)
 void function SURVIVAL_UI_OnLevelInit()
 {
 	if ( IsLobby() )
@@ -839,13 +1194,10 @@ void function SURVIVAL_UI_OnLevelInit()
 
 	thread SURVIVAL_UI_GatherFriendInfo()
 }
-#endif
 
-
-#if(UI)
 void function SURVIVAL_UI_GatherFriendInfo()
 {
-	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 1 ) <= 0 )
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 0 ) <= 0 )
 		return
 
 	Signal( uiGlobal.signalDummy, "GatherFriendInfo" )
@@ -867,31 +1219,32 @@ void function SURVIVAL_UI_GatherFriendInfo()
 		Friend friend   = fData.friends[ randomIndex  ]
 		fData.friends.fastremove( randomIndex )
 
-		if ( friend.ingame == true ) //
+		if ( friend.ingame == true )                                                                                               
 			continue
 
 		OverrideDeathBoxRUI_NetworkOptimizedStruct profileData
 
 		file.overrideDeathBoxRUIProfilesTable[ friend.hardware + friend.id  ] <- profileData
 
-		CommunityUserInfo ornull cui = GetCommunityUserInfo( friend.hardware, friend.id ) //
+		CommunityUserInfo ornull cui = GetUserInfo( friend.hardware, friend.id )                                                                                                                                              
 
-		if ( !file.overrideDeathBoxRUIProfilesTable[ friend.hardware + friend.id  ].isValid ) //
+		if ( !file.overrideDeathBoxRUIProfilesTable[ friend.hardware + friend.id  ].isValid )                                                                            
 		{
-			wait 2.0 //
+			wait 2.0                                                   
 		}
 	}
 }
-#endif
 
-
-#if(UI)
+                                                           
 void function HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated( string hardware, string id )
 {
-	if ( !IsConnected()  ) //
+	if ( !IsConnected() )                                                                                                                                                
 		return
 
-	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 1 ) != 1 )
+	if( !IsValid( GetLocalClientPlayer() ) )
+		return
+
+	if ( GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", 0 ) != 1 )
 		return
 
 	if ( IsLobby() )
@@ -900,12 +1253,12 @@ void function HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated( string hardware, string i
 	if ( hardware == "" && id == "" )
 		return
 
-	CommunityUserInfo ornull cui = GetCommunityUserInfo( hardware, id )
+	CommunityUserInfo ornull cui = GetUserInfo( hardware, id )
 
 	if ( cui == null )
 		return
 
-	if ( !((hardware + id) in file.overrideDeathBoxRUIProfilesTable) ) //
+	if ( !((hardware + id) in file.overrideDeathBoxRUIProfilesTable) )                                                                   
 		return
 
 	expect CommunityUserInfo( cui )
@@ -922,7 +1275,7 @@ void function HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated( string hardware, string i
 	profileData.playerID = cui.uid
 
 	ItemFlavor character               = GetItemFlavorForCommunityUserInfo( cui, ePlayerStryderCharDataArraySlots.CHARACTER, eItemType.character )
-	LoadoutEntry characterLoadoutEntry = Loadout_CharacterClass()
+	LoadoutEntry characterLoadoutEntry = Loadout_Character()
 	profileData.characterIndex = ConvertItemFlavorToLoadoutSlotContentsIndex( characterLoadoutEntry, character )
 
 	ItemFlavor skin               = GetItemFlavorForCommunityUserInfo( cui, ePlayerStryderCharDataArraySlots.CHARACTER_SKIN, eItemType.character_skin )
@@ -962,294 +1315,472 @@ void function HAS_DEATHBOX_OVERRIDE_OnUserInfoUpdated( string hardware, string i
 
 	file.overrideDeathBoxRUIProfilesTable[ hardware + id  ] = profileData
 
-	//
-	string clientCommandString = "ClientCommand_RUIProfileList "
-	clientCommandString += profileData.name
-	clientCommandString += " "
-	clientCommandString += profileData.hardware
-	clientCommandString += " "
-	clientCommandString += profileData.playerID
-	clientCommandString += " "
-	clientCommandString += profileData.characterIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.skinIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.frameIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.stanceIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.firstBadgeIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.firstBadgeDataInt.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.secondBadgeIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.secondBadgeDataInt.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.thirdBadgeIndex.tostring()
-	clientCommandString += " "
-	clientCommandString += profileData.thirdBadgeDataInt.tostring()
-
-	//
-	ClientCommand( clientCommandString )
+	                                                                                  
+	Remote_ServerCallFunction("ClientCallback_RUIProfileList",
+		profileData.name, profileData.hardware, profileData.playerID, profileData.characterIndex, profileData.skinIndex,
+		profileData.frameIndex, profileData.stanceIndex, profileData.firstBadgeIndex, profileData.firstBadgeDataInt,
+		profileData.secondBadgeIndex, profileData.secondBadgeDataInt, profileData.thirdBadgeIndex, profileData.thirdBadgeDataInt )
 
 	if ( ++file.profilesSent >= GetCurrentPlaylistVarInt( "flyer_deathbox_friendlist_rui", HAS_DEATHBOX_OVERRIDE_FRIEND_PROFILES_TO_SEND ) )
 	{
-		Signal( uiGlobal.signalDummy, "GatheredEnoughFriendInfo" ) //
+		Signal( uiGlobal.signalDummy, "GatheredEnoughFriendInfo" )                                        
 	}
+}
+#endif          
+
+
+#if SERVER
+                                                         
+ 
+	                                                         
+		      
+
+	                                                                                                       
+	                                                 
+
+	                                   
+	 
+		                            
+
+		                                                             
+
+		                                                                                                           
+		                                  
+
+		                                                                                                                                                                             
+		                                                 
+
+		                                                                                                                              
+		                                                        
+		                    
+		                                                         
+			        
+		    
+			                                                           
+
+		                                                                                                                   
+
+
+		                                                                                                                    
+		                                                                  
+		               
+		                                                                       
+			        
+		    
+			                                                 
+
+		                                                                                                    
+
+
+		                                                                                                                      
+		                                                                        
+		                
+		                                                                        
+			        
+		    
+			                                                   
+
+		                                                                                                       
+
+		                                                                                                                        
+		                                                                          
+		                 
+		                                                                         
+			        
+		    
+			                                                     
+
+		                                                                                                          
+
+		                                                                                                                                
+		                                                                                
+		                     
+		                                                                             
+			        
+		    
+			                                                             
+
+		                                                                                                                      
+		                                                                                                                                      
+
+		                                                                                                                                  
+		                                                                                 
+		                      
+		                                                                              
+			        
+		    
+			                                                               
+
+		                                                                                                                         
+		                                                                                                                                        
+
+		                                                                                                                                
+		                                                                                
+		                     
+		                                                                             
+			        
+		    
+			                                                             
+
+		                                                                                                                      
+		                                                                                                                                      
+		                                                               
+	 
+ 
+
+                                                                                                                              
+	                                                                                                                                         
+	                                           
+ 
+	                                                                                                                      
+		      
+
+	                                                         
+	                                                                                                                                                                                                                                        
+		      
+
+	                                                      
+
+	                       
+	                               
+	                               
+	                                           
+	                                 
+	                                   
+	                                     
+	                                             
+	                                                 
+	                                               
+	                                                   
+	                                             
+	                                                 
+
+	                                                                   
+
+	                                                                                                            
+		      
+
+	                                                         
+		      
+
+	                                                  
+	                                                           
+		                                                                                                                                                                                  
+	    
+		                                                                        
+ 
+
+                                                                                                          
+ 
+	                                                        
+	                                                                                            
+		            
+
+	                                                                                                                       
+
+	                                                                  
+
+	                                                                                  
+		            
+
+	                                                                        
+	                                                                                    
+		            
+
+	                                                                          
+	                                                                                      
+		            
+
+	                                                                                
+	                                                                                              
+		            
+
+	                                                                                 
+	                                                                                                
+		            
+
+	                                                                                
+	                                                                                              
+		            
+
+	                                                                                                                                        
+	                                                                                                                                              
+		            
+
+	                                                                                                                                                
+		            
+
+	                                                                                                                                              
+		            
+
+	           
+ 
+
+                                                                                                                    
+ 
+	                                                 
+
+ 
+
+                                                 
+ 
+	                            
+
+ 
+
+                         
+                                                                 
+ 
+	                                   
+
+	                                                                                             
+	                                          
+	                                           
+	                                                              
+	                                                    
+	                                                      
+	                                                        
+	                                                                
+	                                                                    
+	                                                                  
+	                                                                      
+	                                                                
+	                                                                    
+ 
+      
+
+                                                                                            
+ 
+	                                          
+		                                                                                                                                                                                               
+
+	                                             
+
+	                                            
+	 
+		                                                                   
+	 
+
+	                                                             
+
+	                                                                                                   
+
+	                                                  
+
+	                     
+
+ 
+#endif              
+
+#if SERVER && DEV
+                                                         
+ 
+	                                       
+ 
+#endif                     
+
+                                   
+
+bool function IsDeathboxAutoPickupEnabled()
+{
+                            
+                        
+      
+		bool defaultVal = false
+       
+	return GetCurrentPlaylistVarBool( "survival_deathbox_autopickup_enabled", defaultVal )
+}
+
+#if CLIENT || SERVER
+void function SetCallback_LootTypeExtraCanUseFunction( LootData data, bool functionref( entity, entity, int ) func )
+{
+	Assert( IsValid( data ) )
+	Assert( data.extraCanUseFunction == null, "Tried to set extraCanUseFunction for ref " + data.ref + " but it already has one." )
+	data.extraCanUseFunction = func
+}
+
+void function ClearCallback_LootTypeExtraCanUseFunction( LootData data )
+{
+	Assert( IsValid( data ) )
+	data.extraCanUseFunction = null
 }
 #endif
 
-
-#if(false)
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER || CLIENT
+bool function SURVIVAL_Loot_IsRestrictedPanelLocked ( int restrictedLootType, entity vendPanel )
+{
+	return file.restrictedLootInfo[ restrictedLootType ].isRestrictedPanelLocked( vendPanel )
+}
+
+                                                                                                         
+bool function IsPanelWithGradeFlagsLocked( entity vendPanel )
+{
+	return GradeFlagsHas( vendPanel, eGradeFlags.IS_LOCKED )
+}
+
+entity function SURVIVAL_Loot_GetRestrictedPanel( int restrictedLootType, entity lootEnt )
+{
+	return file.restrictedLootInfo[ restrictedLootType ].getRestrictedPanel( lootEnt )
+}
+
+int function SURVIVAL_Loot_GetRestrictedLootType ( entity lootEnt )
+{
+	foreach ( int restrictedLootType in eRestrictedLootTypes )
+	{
+		if ( SURVIVAL_Loot_GetRestrictedPanel ( restrictedLootType, lootEnt ) != null )
+			return restrictedLootType
+	}
+	return -1
+}
 #endif
 
+#if SERVER
+                                                                                                                                     
+ 
+	                                                                                                                  
+ 
 
-#if(false)
+                                                               
+ 
+	                                                                        
 
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
+	                                                                      
+	 
+		                                                                                         
+		                                                                                                               
+			           
+	 
+	            
+ 
 #endif
 
+#if UI
+array< string > function SURVIVAL_Loot_GetRestrictedDialogArray( int restrictedLootType )
+{
+	array< string > dialogArray = [ file.restrictedLootInfo[ restrictedLootType ].dialogPopupHeader,
+	                                file.restrictedLootInfo[ restrictedLootType ].dialogPopupAreYouSure,
+	                                file.restrictedLootInfo[ restrictedLootType ].dialogPopupDeny ]
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-//
-
-
-//
-
-
-
-
+	return dialogArray
+}
 #endif
 
+#if SERVER || CLIENT || UI
+void function SURVIVAL_Loot_InitRestrictedLoot()
+{
+	{
+		RestrictedLootInfo emptyLoot
+		             
+		file.restrictedLootInfo[ eRestrictedLootTypes.VAULT ] <- emptyLoot
+		#if SERVER || CLIENT
+			file.restrictedLootInfo[ eRestrictedLootTypes.VAULT ].getRestrictedPanel = GetVaultPanelForLoot
+			file.restrictedLootInfo[ eRestrictedLootTypes.VAULT ].isRestrictedPanelLocked = IsPanelWithGradeFlagsLocked
+		#endif
+		#if SERVER
+			                                                                                                                            
+		#endif
+		#if UI
+			file.restrictedLootInfo[ eRestrictedLootTypes.VAULT ].dialogPopupHeader = "#LOBA_ULT_BLACK_MARKET_VAULT_CONFIRM_HEADER"
+			file.restrictedLootInfo[ eRestrictedLootTypes.VAULT ].dialogPopupAreYouSure = "#LOBA_ULT_BLACK_MARKET_VAULT_CONFIRM_BODY"
+			file.restrictedLootInfo[ eRestrictedLootTypes.VAULT ].dialogPopupDeny = "#LOBA_ULT_BLACK_MARKET_VAULT_DENY_BODY"
+		#endif
+	}
 
-#if(false)
+	{
+		RestrictedLootInfo emptyLoot
+		              
+		file.restrictedLootInfo[ eRestrictedLootTypes.SHIP_VAULT ] <- emptyLoot
+		#if SERVER || CLIENT
+			file.restrictedLootInfo[ eRestrictedLootTypes.SHIP_VAULT ].getRestrictedPanel = GetVaultPanelForLoot
+			file.restrictedLootInfo[ eRestrictedLootTypes.SHIP_VAULT ].isRestrictedPanelLocked = IsPanelWithGradeFlagsLocked
+		#endif
+		#if SERVER
+			                                                                                                                                 
+		#endif
+		#if UI
+			file.restrictedLootInfo[ eRestrictedLootTypes.SHIP_VAULT ].dialogPopupHeader = "#LOBA_ULT_BLACK_MARKET_BRIDGE_VAULT_CONFIRM_HEADER"
+			file.restrictedLootInfo[ eRestrictedLootTypes.SHIP_VAULT ].dialogPopupAreYouSure = "#LOBA_ULT_BLACK_MARKET_BRIDGE_VAULT_CONFIRM_BODY"
+			file.restrictedLootInfo[ eRestrictedLootTypes.SHIP_VAULT ].dialogPopupDeny = "#LOBA_ULT_BLACK_MARKET_BRIDGE_VAULT_DENY_BODY"
+		#endif
+	}
 
+	{
+		RestrictedLootInfo emptyLoot
+		                     
+		file.restrictedLootInfo[ eRestrictedLootTypes.BLOODHOUND_TT ] <- emptyLoot
+		#if SERVER || CLIENT
+			file.restrictedLootInfo[ eRestrictedLootTypes.BLOODHOUND_TT ].getRestrictedPanel = GetBloodTTRewardPanelForLoot
+			file.restrictedLootInfo[ eRestrictedLootTypes.BLOODHOUND_TT ].isRestrictedPanelLocked = IsPanelWithGradeFlagsLocked
+		#endif
+		#if SERVER
+			                                                                                                                                      
+		#endif
+		#if UI
+			file.restrictedLootInfo[ eRestrictedLootTypes.BLOODHOUND_TT ].dialogPopupHeader = "#LOBA_ULT_BLACK_MARKET_BLOODTT_CONFIRM_HEADER"
+			file.restrictedLootInfo[ eRestrictedLootTypes.BLOODHOUND_TT ].dialogPopupAreYouSure = "#LOBA_ULT_BLACK_MARKET_BLOODTT_CONFIRM_BODY"
+			file.restrictedLootInfo[ eRestrictedLootTypes.BLOODHOUND_TT ].dialogPopupDeny = "#LOBA_ULT_BLACK_MARKET_BLOODTT_DENY_BODY"
+		#endif
+	}
 
+	{
+		RestrictedLootInfo emptyLoot
+		                  
+		file.restrictedLootInfo[ eRestrictedLootTypes.CAUSTIC_TT ] <- emptyLoot
+                    
+		#if SERVER || CLIENT
 
+		file.restrictedLootInfo[ eRestrictedLootTypes.CAUSTIC_TT ].getRestrictedPanel = GetCausticTTCanisterFrameForLoot
+		file.restrictedLootInfo[ eRestrictedLootTypes.CAUSTIC_TT ].isRestrictedPanelLocked = AreCausticTTCanistersClosed
+		#endif
+		#if SERVER
+			                                                                                                                                     
+		#endif
+        
+		#if UI
+			file.restrictedLootInfo[ eRestrictedLootTypes.CAUSTIC_TT ].dialogPopupHeader = "#LOBA_ULT_BLACK_MARKET_CAUSTICTT_CONFIRM_HEADER"
+			file.restrictedLootInfo[ eRestrictedLootTypes.CAUSTIC_TT ].dialogPopupAreYouSure = "#LOBA_ULT_BLACK_MARKET_CAUSTICTT_CONFIRM_BODY"
+			file.restrictedLootInfo[ eRestrictedLootTypes.CAUSTIC_TT ].dialogPopupDeny = "#LOBA_ULT_BLACK_MARKET_CAUSTICTT_DENY_BODY"
+		#endif
+	}
 
+	{
+		RestrictedLootInfo emptyLoot
+                    
+			                  
+			file.restrictedLootInfo[ eRestrictedLootTypes.RAMPART_TT ] <- emptyLoot
+			#if SERVER || CLIENT
+			file.restrictedLootInfo[ eRestrictedLootTypes.RAMPART_TT ].getRestrictedPanel = GetRampartTTPanelForLoot
+			file.restrictedLootInfo[ eRestrictedLootTypes.RAMPART_TT ].isRestrictedPanelLocked = IsPanelWithGradeFlagsLocked
+			#endif
+			#if SERVER
+				                                                                                                                                     
+			#endif
+			#if UI
+				file.restrictedLootInfo[ eRestrictedLootTypes.RAMPART_TT ].dialogPopupHeader = "#LOBA_ULT_BLACK_MARKET_RAMPARTTT_CONFIRM_HEADER"
+				file.restrictedLootInfo[ eRestrictedLootTypes.RAMPART_TT ].dialogPopupAreYouSure = "#LOBA_ULT_BLACK_MARKET_RAMPARTTT_CONFIRM_BODY"
+				file.restrictedLootInfo[ eRestrictedLootTypes.RAMPART_TT ].dialogPopupDeny = "#LOBA_ULT_BLACK_MARKET_RAMPARTTT_DENY_BODY"
+			#endif
+        
+	}
 
+	{
+		RestrictedLootInfo emptyLoot
+                        
+			                           
+			file.restrictedLootInfo[ eRestrictedLootTypes.SPECTRE_SHACK ] <- emptyLoot
+			#if SERVER || CLIENT
+				file.restrictedLootInfo[ eRestrictedLootTypes.SPECTRE_SHACK ].getRestrictedPanel = GetSpectreShackSmartLootBinForLoot
+				file.restrictedLootInfo[ eRestrictedLootTypes.SPECTRE_SHACK ].isRestrictedPanelLocked = IsSpectreShackSmartLootLocked
+			#endif
+			#if SERVER
+				                                                                                                                           
+			#endif
+			#if UI
+				file.restrictedLootInfo[ eRestrictedLootTypes.SPECTRE_SHACK ].dialogPopupHeader = "#LOBA_ULT_BLACK_MARKET_SMARTLOOT_CONFIRM_HEADER"
+				file.restrictedLootInfo[ eRestrictedLootTypes.SPECTRE_SHACK ].dialogPopupAreYouSure = "#LOBA_ULT_BLACK_MARKET_SMARTLOOT_CONFIRM_BODY"
+				file.restrictedLootInfo[ eRestrictedLootTypes.SPECTRE_SHACK ].dialogPopupDeny = "#LOBA_ULT_BLACK_MARKET_SMARTLOOT_DENY_BODY"
+			#endif
+        
+	}
+}
 #endif
-
-
-#if(false)
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-#endif
-

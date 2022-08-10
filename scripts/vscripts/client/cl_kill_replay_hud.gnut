@@ -21,7 +21,7 @@ void function ClKillReplayHud_Init()
 
 void function EntitiesDidLoad()
 {
-	if ( !IsRoundWinningKillReplayEnabled() ) //
+	if ( !IsRoundWinningKillReplayEnabled() )                                                                                              
 		return
 
 	AddCallback_KillReplayStarted( RoundWinningKillReplayClientHud_Activate )
@@ -46,7 +46,7 @@ string function GetRefFromDamageSourceId( int damageSourceId )
 			damageSourceIndexToName[index] = string( name )
 	}
 
-	if ( damageSourceId in damageSourceIndexToName )
+	if ( damageSourceIndexToName.isvalidindex( damageSourceId ) )
 		return damageSourceIndexToName[damageSourceId]
 	else
 		return ""
@@ -59,17 +59,17 @@ void function KillReplayHud_Activate()
 	if ( IsReplayRoundWinning() )
 		return
 
-	//
+	                                                             
 
 	var rui = RuiCreate( $"ui/kill_replay_overlay.rpak", clGlobal.topoFullScreen, RUI_DRAW_HUD, 900 )
-	//
+	                                                                 
 	file.killReplayOverlayRui = rui
 
 	RuiSetString( rui, "killReplayTitleText", "#KILL_REPLAY" )
 
 	AttackerDisplayNameStruct nameOfLastKiller = clGlobal.nameOfLastKiller
 
-	if ( nameOfLastKiller.attackerName != "" /**/ )
+	if ( nameOfLastKiller.attackerName != ""                                               )
 	{
 		entity player = GetLocalClientPlayer()
 
@@ -114,13 +114,13 @@ void function KillReplayHud_Deactivate()
 	if ( IsReplayRoundWinning() )
 		return
 
-	//
+	                                                                                  
 
 	RuiDestroy( file.killReplayOverlayRui )
 
 	entity player = GetLocalClientPlayer()
 
-	//
+	                           
 
 	player.Signal( "DeactivateKillReplayHud" )
 }
@@ -135,7 +135,7 @@ void function RoundWinningKillReplayClientHud_Activate()
 
 	entity clientPlayer = GetLocalClientPlayer()
 
-	StopLocal1PDeathSound() //
+	StopLocal1PDeathSound()                                                          
 
 	clientPlayer.EndSignal( "OnDestroy" )
 
@@ -152,10 +152,10 @@ void function RoundWinningKillReplayClientHud_Activate()
 
 	RuiSetString( file.killReplayOverlayRui, "killReplayTitleText", announcementText )
 
-	ClearAnnouncements() //
+	ClearAnnouncements()                                                       
 
 	entity viewEntity = GetViewEntity()
-	if ( viewEntity == null ) //
+	if ( viewEntity == null )                                                                                                                
 		return
 
 	AttackerDisplayNameStruct names = GetAttackerDisplayNamesFromClassname( viewEntity, true )
@@ -169,23 +169,23 @@ void function RoundWinningKillReplayClientHud_Activate()
 	else
 		killerName = attackerName
 
-	RuiSetString( file.killReplayOverlayRui, "killerName", killerName ) //
+	RuiSetString( file.killReplayOverlayRui, "killerName", killerName )                                   
 
 	if ( !viewEntity.IsPlayer() )
 		return
 
 	RuiSetBool( file.killReplayOverlayRui, "showKillerInfo", true )
-	RuiSetFloat( file.killReplayOverlayRui, "killerHealthFrac", expect float( level.nv.roundWinningKillReplayEntHealthFrac ) )
+	RuiSetFloat( file.killReplayOverlayRui, "killerHealthFrac", GetGlobalNonRewindNetFloat("roundWinningKillReplayEntHealthFrac") )
 }
 
-void function RoundWinningKillReplayClientHud_Deactivate() //
+void function RoundWinningKillReplayClientHud_Deactivate()                                                    
 {
 	if ( IsRoundWinningKillReplayEnabled() == false )
 		return
 
 	if ( IsReplayRoundWinning() )
 	{
-		//
+		                                                                                
 		RuiDestroy( file.killReplayOverlayRui )
 
 		entity player = GetLocalClientPlayer()

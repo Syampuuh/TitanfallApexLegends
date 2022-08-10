@@ -1,58 +1,70 @@
-//
+  
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 global function PassivesShared_Init
+global function ShPassives_Init
 #endif
 
 
-#if(CLIENT)
+#if SERVER || CLIENT
 global function PlayerHasPassive
 global function AddCallback_OnPassiveChanged
 global function RemoveCallback_OnPassiveChanged
+global function Pas_GetWattsonUltAccelExtraCount
 #endif
 
-#if(false)
+#if SERVER
+                           
+                           
+                               
 
-
-
+                               
+                                             
 #endif
 
-#if CLIENT && DEV 
+#if (SERVER || CLIENT) && DEV
 global function DEV_PrintAllPassives
 #endif
 
 
-//
-#if(CLIENT)
+                                                                           
+#if SERVER || CLIENT
 global function PlayerHasStealthMovement
+               
+                                                    
+      
 #endif
 
-#if(false)
-
+global const string MIRAGE_DECOY_DROP_SCRIPTNAME 		= "mirage_decoy_drop"
+const string MIRAGE_DECOY_DROP_MOVER_SCRIPTNAME 		= "mirage_decoy_drop_mover"
+#if SERVER
+                                
+               
+                                                  
+      
 #endif
 
 
-//
-#if(CLIENT)
+            
+#if CLIENT
 global function ClientCodeCallback_OnPassiveChanged
 #endif
 
-
-
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                      
+                      
+                      
+                      
+                      
+#if SERVER || CLIENT || UI
 global enum ePassives
 {
 	INVALID = -1,
 
-	//
+	                                                                                            
 	PAS_ADRENALINE,
 	PAS_ADS_SHIELD,
 	PAS_FAST_HEAL,
+	PAS_BONUS_SMALL_HEAL,
 	PAS_GAS_GEAR,
 	PAS_GAS_PROTECTION,
 	PAS_MEDIC,
@@ -62,51 +74,73 @@ global enum ePassives
 	PAS_TRACKING_VISION,
 	PAS_VOICES,
 	PAS_OCTANE,
+	PAS_CRYPTO,
+	PAS_GUARDIAN_ANGEL
+	PAS_DEATHSTALKER,
+                 
+                 
+                  
+       
+	PAS_WARLORDS_IRE,
+                          
+                   
+       
+                 
+               
+       
+                
+             
+       
+              
+            
+       
+                
+              
+       
+	PAS_REPAIR,
+	PAS_COVER_FIRE,
+	PAS_GUNNER,
+	PAS_LOBA_EYE_FOR_QUALITY,
+                
+                 
+       
+	PAS_BATTERY_POWERED,
+	PAS_WATTSON_CIRCLE_REFUND,
+                 
+                   
+       
+	PAS_VALK,
+                    
+                 
+       
+              
+            
+       
+                
+              
+       
+                 
+                     
+       
+              
+                         
+       
+                   
+                         
+       
+                  
+                   
+                     
+       
+                
+                    
+       
+	PAS_DUMMIE,
+	           
+	                      
+	                       
 
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-#endif //
-	#if(false)
-
-
-#endif //
-	#if(false)
-
-#endif //
-
-	//
-	//
-	//
+	PAS_ASH,
 
 	PAS_DOWN_HEALTH,
 	PAS_DOWN_REGEN,
@@ -121,6 +155,37 @@ global enum ePassives
 	PAS_REDUCED_COOLDOWN_ULT,
 	PAS_SELF_REVIVE,
 	PAS_SYRINGE_BONUS,
+	PAS_FORTIFIED,
+	PAS_LOWPROFILE,
+	PAS_INFINITE_HEAL,
+                       
+		PAS_EXTRA_MED_INV
+       
+
+	PAS_NOVA,
+	PAS_PARIAH,
+	PAS_FUSE,
+               
+             
+       
+                  
+		PAS_AXIOM,
+       
+               
+             
+       
+                
+		PAS_VANTAGE,
+       
+                 
+               
+       
+               
+             
+       
+                        
+                      
+       
 
 
 	_count,
@@ -128,126 +193,207 @@ global enum ePassives
 #endif
 
 
-#if CLIENT || UI 
+#if CLIENT || UI
 global const table<int, string> PASSIVE_NAME_MAP = {
 	[ePassives.PAS_REDUCED_COOLDOWNS_TAC_ULT] = "#PAS_COMBINED_COOLDOWN",
 	[ePassives.PAS_EXEC_BONUS_ARMOR] = "#PAS_EXEC_BONUS_ARMOR",
 	[ePassives.PAS_SELF_REVIVE] = "#PAS_AVAT",
 	[ePassives.PAS_FAST_HEAL] = "#PAS_FAST_HEAL",
-
+	[ePassives.PAS_BONUS_SMALL_HEAL ] = "#PAS_BONUS_SMALL_HEAL",
+	[ePassives.PAS_GUARDIAN_ANGEL] = "#PAS_GUARDIAN_ANGEL",
+	[ePassives.PAS_FORTIFIED] = "#PAS_FORTIFIED",
+	[ePassives.PAS_LOWPROFILE] = "#PAS_LOW_PROFILE",
+                      
+	[ePassives.PAS_EXTRA_MED_INV] = "#PAS_EXTRA_MED_INV",
+      
 }
+
 global const table<int, string> PASSIVE_DESCRIPTION_SHORT_MAP = {
 	[ePassives.PAS_REDUCED_COOLDOWNS_TAC_ULT] = "#PAS_COMBINED_COOLDOWN_DESC",
 	[ePassives.PAS_EXEC_BONUS_ARMOR] = "#PAS_EXEC_BONUS_ARMOR_DESC",
 	[ePassives.PAS_SELF_REVIVE] = "#PAS_AVAT_DESC",
 	[ePassives.PAS_FAST_HEAL] = "#PAS_FAST_HEAL_DESC",
+	[ePassives.PAS_BONUS_SMALL_HEAL] = "#PAS_BONUS_SMALL_HEAL_DESC",
+	[ePassives.PAS_GUARDIAN_ANGEL] = "#PAS_GUARDIAN_ANGEL_DESC",
+	[ePassives.PAS_FORTIFIED] = "#PAS_FORTIFIED_DESC",
+	[ePassives.PAS_LOWPROFILE] = "#PAS_LOW_PROFILE_DESC",
+                      
+	[ePassives.PAS_EXTRA_MED_INV] = "#PAS_EXTRA_MED_INV_DESC",
+      
 }
-#endif
+#endif	              
 
+global const string PASSIVE_MOVER_SCRIPTNAME = "passive_mover"
 
-
-//
-//
-//
-//
-//
+                       
+                       
+                       
+                       
+                       
 struct
 {
-	#if(CLIENT)
+	#if SERVER
+		                                                              
+	#endif
+
+	#if SERVER || CLIENT
 		table<int, array<void functionref( entity, int, bool, bool )> > passiveChangedCallbackListMap
+
+		int wattson_ult_accel_extra
 	#endif
 } file
 
+global ItemFlavor& PAS_FORTIFIED_FLAV
+global ItemFlavor& PAS_LOW_PROFILE_FLAV
 
-
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                         
+                         
+                         
+                         
+                         
+#if SERVER || CLIENT || UI
 void function PassivesShared_Init()
 {
-	#if(CLIENT)
+	#if SERVER || CLIENT
+		file.wattson_ult_accel_extra = GetCurrentPlaylistVarInt( "wattson_ult_accel_extra", 1 )
+
 		for ( int passiveIdx = 0; passiveIdx < ePassives._count; passiveIdx++ )
 			file.passiveChangedCallbackListMap[ passiveIdx ] <- []
 	#endif
 
-	#if(false)
-//
-//
-//
+#if SERVER
+	                                                                                    
+	                                                       
+	                                                       
+	                                                                            
 
+	                                                                       
+	 
+		                                                                                  
+	 
+	                                                                    
+	 
+		                                          
+		                                                                           
+	 
+	                                                                            
+	 
+		                                                     
+		                                                                       
+		                                                                     
+	 
 
+               
+                                                                           
+        
+                 
+                                                                               
+        
+		                                                                              
 
+                 
+                                             
+        
+                
+                                                                             
+        
+                     
+                                                                                       
+        
 
+		                                                                    
+		                                                                 
+	#endif
 
-
-
-
-
-#endif
-
-	#if(CLIENT)
+	#if CLIENT
 		PrecacheParticleSystem( $"P_core_DMG_boost_screen" )
 	#endif
+
+}
+
+
+void function ShPassives_Init()
+{
+	AddCallback_RegisterRootItemFlavors( OnRegisterRootItemFlavors )
+}
+
+
+void function OnRegisterRootItemFlavors()
+{
+	PAS_FORTIFIED_FLAV = expect ItemFlavor( RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/ability/pas_fortified.rpak" ) )
+	PAS_LOW_PROFILE_FLAV = expect ItemFlavor( RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/ability/pas_low_profile.rpak" ) )
 }
 #endif
 
 
 
-//
-//
-//
-//
-//
-#if(false)
+                          
+                          
+                          
+                          
+                          
+#if SERVER
+                                                       
+ 
+	                                                  
 
+	                                                                 
+	                             
 
+	                     
+		      
 
-
-//
-
-
-
-
-
-
-
-
+	                                                                                                               
+		                                                 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                       
+ 
+	                                                  
 
+	                                                                
+	                               
 
+	                      
+		      
 
-
-//
-
-
-
-
-
-
-
-
+	                                                                                                               
+		                                                  
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
+#if SERVER
+                                              
+ 
+	                                                                       
+	 
+		                                      
+			                                 
+	 
+ 
 #endif
 
+#if SERVER
+                                                           
+ 
+	                                                   
+	 
+		                       
+	 
+ 
 
-#if(CLIENT)
+                                                                                   
+ 
+	                                                           
+	                                              
+ 
+#endif
+
+#if SERVER || CLIENT
 bool function PlayerHasPassive( entity player, int passive )
 {
 	return player.HasPassive( passive )
@@ -255,7 +401,7 @@ bool function PlayerHasPassive( entity player, int passive )
 #endif
 
 
-#if(CLIENT)
+#if SERVER || CLIENT
 bool function PlayerHasStealthMovement( entity player )
 {
 	return false
@@ -263,7 +409,7 @@ bool function PlayerHasStealthMovement( entity player )
 #endif
 
 
-#if(CLIENT)
+#if SERVER || CLIENT
 void function AddCallback_OnPassiveChanged( int passive, void functionref( entity, int, bool, bool ) callback )
 {
 	Assert( !file.passiveChangedCallbackListMap[ passive ].contains( callback ), "Tried to add a callback that was already added" )
@@ -278,12 +424,12 @@ void function RemoveCallback_OnPassiveChanged( int passive, void functionref( en
 
 
 
-//
-//
-//
-//
-//
-#if CLIENT && DEV 
+                       
+                       
+                       
+                       
+                       
+#if (SERVER || CLIENT) && DEV
 void function DEV_PrintAllPassives( entity player )
 {
 	for ( int passiveIdx = 0; passiveIdx < ePassives._count; passiveIdx++ )
@@ -296,279 +442,598 @@ void function DEV_PrintAllPassives( entity player )
 
 
 
-//
-//
-//
-//
-//
-#if(CLIENT)
+                   
+                   
+                   
+                   
+                   
+#if CLIENT
 void function ClientCodeCallback_OnPassiveChanged( entity player, int passiveIdx )
 {
 	if ( !IsValid( player ) )
 		return
 
 	bool nowHasPassive  = player.HasPassive( passiveIdx )
-	bool didHavePassive = !nowHasPassive //
+	bool didHavePassive = !nowHasPassive                             
 
-	foreach( callback in file.passiveChangedCallbackListMap[passiveIdx] )
+	foreach ( callback in file.passiveChangedCallbackListMap[passiveIdx] )
 		callback( player, passiveIdx, didHavePassive, nowHasPassive )
 }
 #endif
 
 
-/*
+  
+          
+                                                                                       
+ 
+	                           
+		      
+
+	                           
+		      
+
+	                         
+		      
+
+ 
+      
 
 
+          
+                                                                       
+ 
+	                           
+		      
 
+	                           
+		      
 
+	                         
+		      
+ 
+      
+  
 
+#if SERVER
+                                                                                              
+ 
+	                                                       
+	 
+		                                                                                     
+		 
+			                                                                                                                   
+			                                                                                     
+		 
 
+		                          
+	 
+ 
+#endif
 
+#if SERVER
+                                                                              
+ 
+	                                                                                          
+	 
+		                                  
+	 
+ 
 
+                                                
+ 
+	                             
+	                                                       
+	                                        
 
+	            
+		                           
+		 
+			                                 
+		 
+	 
 
+	             
+ 
 
+                                                                             
+ 
+	                                                       
+	 
+		                                                    
+	 
+ 
 
+                                                                                                                           
+ 
+	                                                                                                    
+	 
+		                                                
 
+		                                                                                                             
+	 
+ 
 
+                                                                                                                
+ 
+	                                  
+	                                
+		      
 
+	                                                
+	                                  
+	                                    
+	                                                   
 
+	                                                  
+	                                                      
 
+	            
+		                                                               
+		 
+			                             
+			 
+				                                                
+			 
+			                               
+			 
+				                                                    
+			 
+		 
+	 
 
+	                                                                         
+ 
 
+                                                              
+ 
+	                                                                                          
+	 
+		                                     
+	 
+ 
 
+                                                   
+ 
+	                             
 
+	                                        
 
+	            
+		                           
+		 
+			                        
+			 
+				                                      
+			 
+		 
+	 
 
+	           
 
-
-
-
-
-
-*/
-
-#if(false)
-
-
-
-
-//
-
-
-
-
-
-
-
-
+	                                  
+		           
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                  
+ 
+	                                                     
+		                                                                                                               
 
+	                                                             
+		           
 
+	            
+ 
 
+                                               
+ 
+	                                                     
+	                                                                                         
+	  	      
+	  
+	                                                    
+	                           
+	  	      
 
+	                                   
+		      
 
+	                                      
+	 
+		                                                                                                           
+		 
+			                                                                
+			 
+				                                                                                                                                          
+				 
+					                                         
+					                                               
+				 
+			 
+		 
+		    
+		 
+			                                       
+			                                             
+		 
 
-
-
-
-
+		                             
+		                                       
+			                                                                                     
+	 
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                                                          
+ 
+	                               
+	                             
+
+	                                             
+	                                                                   
+	                                                                                                                                       
+	                      
+	 
+		                                                                                                                               
+		                                       
+	 
+	                                                                   
+	                                                                      
+	                                                                                                          
+	                                         
+
+	                                                                                                        
+	                                                            
+	                                            
+	                         
+	                                           
+	                                                            
+	                                                 
+	                                                                               
+	                                                                            
+	                                                                  
+	                                 
+	                                  
+	                                                                
+	                      
+	 
+		                                                           
+	 
+	    
+	 
+		                                                                                        
+	 
+
+	                                           
+	                                                                                          
+	                                                                                                    
+	                                                                         
+	                                                                      
+	                                                                         
+	                                            
+
+	                     
+	                                                                         
+	                                                                                                                                            
+	                                         
+	                                   
+	                      
+	 
+		                                                             
+	 
+	    
+	 
+		                                                                
+	 
+
+	                                  
+
+
+	                                                                                                     
+	                                                                            
+	                 
+
+	                       
+	 
+		                                        
+		 
+			                                                                                                                                                                                                       
+
+			                                           
+				                                                            
+			    
+				                                  
+
+			                                                                 
+			                                          
+			                                                          
+			                               
+		 
+	 
+
+	                                        
+	 
+		                                                                                                                                                                                                          
+
+		                                           
+			                                                            
+		    
+			                                  
+
+		                                                              
+		                                             
+		                                   
+		                      
+		 
+			                                                             
+		 
+		    
+		 
+			                                                                
+		 
+		                                  
+	 
+
+	                   
+	                                                                        
+
+	            
+		                                               
+		 
+			                         
+			 
+				                    
+					            
+				                                
+					                        
+				                       
+					               
+			 
+		 
+	 
+
+	                                                                     
+	                                                                  
+	                                                    
+	                                     
+	                                 
+	                              
+	                                                                        
+
+	                                                                                                                                                              
+	                                                                          
+	                     
+	                                                                                                                         
+	                      
+		                                              
+
+	                                
+	                                                                                                                                                                  
+	                                                                         
+	                                                                                    
+	                                                                         
+
+	                                          
+	                              
+	                                                
+	 
+		                                                                    
+		                                                                 
+		 
+			                                                            
+			                        
+		 
+		        
+	 
+
+	                     
+ 
+#endif
+
+               
+          
+                                                                                            
+ 
+                                                                                                                     
+                          
+        
+
+               
+  
+                                                 
+  
+
+              
+  
+                                                 
+  
+ 
+                    
+                         
+
+                   
+          
+                                                                                                
+ 
+                                                                                                                     
+                          
+        
+
+                                                        
+
+               
+  
+                                                   
+  
+
+              
+  
+                                                   
+  
+ 
+                    
+                             
+
+             
+          
+                                                                                          
+ 
+                                                                                                                     
+                          
+        
+
+                                                                        
+                                                                   
+               
+  
+                                   
+   
+                                                       
+   
+  
+
+              
+  
+                                   
+   
+                                                      
+   
+  
+ 
+                    
+                       
+
+
+#if SERVER
+                                                                                             
+ 
+	                                                                                                                    
+	                         
+		      
+
+	              
+	 
+		                                          
+	 
+
+	             
+	 
+		                                          
+	 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                                            
+ 
+	                         
+		      
 
+	              
+	 
+		                                         
+		                             
+			                                          
+	 
 
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
+	             
+	 
+		                                                           
+			                                          
+		                                         
+	 
+ 
 #endif
 
+               
+          
+                                                                  
+ 
+                        
+                                                                   
+                                
+  
+                                               
+           
 
-#if(false)
+                          
+   
+                                                                                            
+                      
+   
+  
 
+                                                                              
 
-//
+                   
+ 
+      
 
+                    
+                                                                    
+ 
+                   
+                                                                   
+                                
+  
+                                               
+           
 
+                          
+   
+                                                                                            
+                
+   
+  
 
-//
+                                                                     
 
+                                                                          
 
+                                             
+ 
+      
+                         
 
+              
+          
+                                                                                           
+ 
+                
+    
+                                                                        
+    
+ 
+      
+      
 
+#if SERVER
+                                                                                      
+ 
+	                                                              
+		      
 
+	                                                         
+ 
 
+                                                   
+ 
+	                                                              
+		      
 
+	                                                         
+ 
+#endif             
 
-
-
-
-
-
-
-
-
-
+#if SERVER || CLIENT
+int function Pas_GetWattsonUltAccelExtraCount()
+{
+	return file.wattson_ult_accel_extra
+}
 #endif
-
-#if(false)
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-

@@ -3,19 +3,30 @@ global function ClObituary_Init
 global function Obituary
 global function Obituary_GetEntityInfo
 global function Obituary_Print_Localized
+global function Obituary_Print_PlayerDeath
 global function Obituary_SetEnabled
 global function Obituary_SetIndexOffset
+global function Obituary_SetHorizontalOffset
+global function Obituary_SetVerticalOffset
+global function Obituary_ClearObituary
 global function ShouldShowObituaryLineForPlayer
 
-const NUM_OBITUARY_LINES = 4		//
+                        
+global function Obituary_Print_Control_ObjectivePing
+global function Obituary_Print_Control_Ping
+                              
+
+const NUM_OBITUARY_LINES = 4		                                                                          
 const obituaryTextBoxWidth = 500
 const obituaryTextBoxHeight = 20
 const defaultCharacterWidth = 5
+const int MAX_OBITUARY_ENTRIES = 20
 
 struct ObituaryData
 {
 	float startTime
 	var	rui
+	string stringData
 }
 
 struct
@@ -23,6 +34,14 @@ struct
 	array<ObituaryData>		obituaryQueue = []
 	bool obituariesEnabled = true
 	int indexOffest = 0
+	int horizontalOffset = 0
+	int verticalOffset = 0
+
+                         
+		array<entity> obituaryControlObjectivePingQueue = []
+		table< entity, ObituaryData > controlObjectiveToObituaryDataTable
+                               
+
 } file
 
 struct ObitEntityInfo
@@ -30,6 +49,13 @@ struct ObitEntityInfo
 	string displayName = ""
 	vector displayColor = OBITUARY_COLOR_WEAPON
 	string petDisplayName = ""
+}
+
+global struct ObitRankBadgeInfo
+{
+	bool shouldShowRank = false
+	asset attackerRankBadge = $""
+	asset victimRankBadge = $""
 }
 
 global struct ObitStringData
@@ -59,7 +85,7 @@ ObitEntityInfo function Obituary_GetEntityInfo( entity ent, int damageSourceId, 
 	if ( !IsValid( ent ) )
 	{
 		string name = GetAttackerDisplayNamesDamageSourceId( damageSourceId )
-		info.displayColor = GetKeyColor( COLORID_ENEMY ) //
+		info.displayColor = GetKeyColor( COLORID_ENEMY )                                                                       
 		info.displayName = name
 
 		return info
@@ -69,24 +95,36 @@ ObitEntityInfo function Obituary_GetEntityInfo( entity ent, int damageSourceId, 
 	info.displayName = names.attackerName
 	info.petDisplayName = names.attackerPetName
 
-	entity localPlayer = GetLocalClientPlayer()
+	entity localPlayer = GetLocalViewPlayer()
 
-	info.displayColor = localPlayer.GetTeam() == ent.GetTeam() ? GetKeyColor( COLORID_MEMBER_COLOR0, ent.GetTeamMemberIndex() ) : <255, 255, 255>//
+	if ( ent.IsNPC() )
+	{
+		info.displayColor = <255, 255, 255>
+	}
+	else
+	{
+		if ( GetCurrentPlaylistVarBool( "show_team_color_obituary", false) && ent.IsPlayer() )
+		{
+			info.displayColor = GetPlayerInfoColor( ent )
 
-/*
+				if ( GetCurrentPlaylistVarBool( "show_team_color_obituary_enemies_red", false) && !IsFriendlyTeam( localPlayer.GetTeam(), ent.GetTeam() ) )
+				{
+					info.displayColor = OBITUARY_COLOR_ENEMY
+				}
+		}
+		else
+		{
+			info.displayColor = localPlayer.GetTeam() == ent.GetTeam() ? GetPlayerInfoColor( ent ) : <255, 255, 255>                              
+		}
+	}
 
-
-
-
-
-
-
-
-
-
-
-*/
-
+	                                                                                                             
+	if ( AllianceProximity_IsUsingAllianceProximity() )
+	{
+		if ( localPlayer.GetTeam() != ent.GetTeam() && IsFriendlyTeam( localPlayer.GetTeam(), ent.GetTeam() ) )
+			info.displayColor = TEAM_COLOR_FRIENDLY
+	}
+	
 	return info
 }
 
@@ -103,19 +141,19 @@ void function Obituary( entity attacker, string attackerClass, entity victim, in
 	{
 		if ( victim.IsPlayer() )
 		{
-			//
+			          
 			if ( !OBITUARY_ENABLED_PLAYERS )
 				return
 		}
 		else if ( victim.IsTitan() )
 		{
-			//
+			             
 			if ( !OBITUARY_ENABLED_NPC_TITANS )
 				return
 		}
 		else
 		{
-			//
+			      
 			if ( !OBITUARY_ENABLED_NPC )
 				return
 		}
@@ -124,16 +162,16 @@ void function Obituary( entity attacker, string attackerClass, entity victim, in
 	if ( damageSourceId == eDamageSourceId.round_end )
 		return
 
-	/**/
-	/**/
-	/**/
+	                                             
+	                                             
+	                                             
 
 	bool isRelatedAttacker = (victim.GetTeam() == GetLocalClientPlayer().GetTeam())
 	ObitEntityInfo attackerInfo = Obituary_GetEntityInfo( attacker, damageSourceId, isRelatedAttacker )
 	ObitEntityInfo victimInfo = Obituary_GetEntityInfo( victim, damageSourceId, false )
 	bool isDeathSuicide = IsSuicide( attacker, victim, damageSourceId )
 
-	//
+	                                                                                   
 	if ( isDeathSuicide && victim.IsNPC() )
 		return
 
@@ -146,12 +184,16 @@ void function Obituary( entity attacker, string attackerClass, entity victim, in
 		LootData lootData = SURVIVAL_Loot_GetLootDataByRef( damageRef )
 		isMainWeapon = lootData.lootType == eLootType.MAINWEAPON
 	}
+	else if ( GetIsAdditionalMainWeapon( damageSourceId ) )
+	{
+		isMainWeapon = true
+	}
 
 	sourceDisplayName = GetObitFromDamageSourceID( damageSourceId )
 
-	/**/
-	/**/
-	/**/
+	                                              
+	                                              
+	                                              
 
 	bool printDebugInfo = false
 	string debugSourceDisplayName = sourceDisplayName
@@ -200,9 +242,9 @@ void function Obituary( entity attacker, string attackerClass, entity victim, in
 		printt( "------------------------------------------" )
 	}
 
-	/**/
-	/**/
-	/**/
+	                            
+	                            
+	                            
 
 	if ( isDeathSuicide )
 	{
@@ -211,8 +253,8 @@ void function Obituary( entity attacker, string attackerClass, entity victim, in
 	}
 
 	asset weaponIcon = GetObitImageFromDamageSourceID( damageSourceId )
-	//
-	//
+	                   
+	  	                                          
 
 	string attackerString
 	string weaponString
@@ -251,12 +293,71 @@ void function Obituary( entity attacker, string attackerClass, entity victim, in
 	else if ( isHeadShot )
 		modifierIcon = $"rui/hud/obituary/obituary_headshot"
 
+	ObitRankBadgeInfo badgeInfo
+	if (GetCurrentPlaylistVarBool( "ranked_survival_showEmblemOnKill_enabled", true ))
+	{
+		if ( ShouldShowRankBadges (attacker, isDownShot) )
+		{
+			badgeInfo.shouldShowRank = true
+
+			                                                                                                  
+			EHIScriptStruct attackerEHIScriptStruct =  GetEHIScriptStruct(ToEHI( attacker ))
+			int attackerLadderPos   = attackerEHIScriptStruct.rankedLadderPosition
+			int attackerLadderScore = attackerEHIScriptStruct.rankScore
+
+			EHIScriptStruct victimEHIScriptStruct =  GetEHIScriptStruct(ToEHI( victim ))
+			int victimLadderPos   = victimEHIScriptStruct.rankedLadderPosition
+			int victimLadderScore = victimEHIScriptStruct.rankScore
+
+			badgeInfo.attackerRankBadge = GetCurrentRankedDivisionFromScoreAndLadderPosition (attackerLadderScore , attackerLadderPos ).tier.icon
+			badgeInfo.victimRankBadge   = GetCurrentRankedDivisionFromScoreAndLadderPosition (victimLadderScore, victimLadderPos ).tier.icon
+		}
+	}
+
 	if ( weaponIcon == $"" )
-		Obituary_Print_Localized( localizedObit, attackerInfo.displayColor, victimInfo.displayColor, <255,255,255>, <0, 0, 0>, 0 )
+	{
+		Obituary_Print_PlayerDeath( attackerString, weaponIcon, Localize( sourceDisplayName ), modifierIcon, victimString, badgeInfo, attackerInfo.displayColor, victimInfo.displayColor, <255, 255, 255>, false )
+	}
 	else
-		Obituary_Print_PlayerDeath( attackerString, weaponIcon, modifierIcon, victimString, attackerInfo.displayColor, victimInfo.displayColor, <255, 255, 255>, isMainWeapon )
+	{
+		Obituary_Print_PlayerDeath( attackerString, weaponIcon, "", modifierIcon, victimString, badgeInfo, attackerInfo.displayColor, victimInfo.displayColor, <255, 255, 255>, isMainWeapon )
+	}
 }
 
+bool function ShouldShowRankBadges ( entity attacker, bool isDownShot )
+{
+	if (isDownShot) 
+	{
+		return false
+	}
+
+	if (IsArenaMode())
+	{
+		return false
+	}
+
+	if ( !IsValid( attacker )  )
+	{
+		return false
+	}
+	
+	if ( !IsValid( GetLocalClientPlayer() ) )
+	{
+		return false
+	}
+
+	if ( !attacker.IsPlayer())
+	{
+		return false
+	}
+
+	if ( attacker.GetTeam() != GetLocalClientPlayer().GetTeam())
+	{
+		return false
+	}
+
+	return IsRankedGame()
+}
 
 bool function ShouldShowObituaryLineForPlayer( entity player )
 {
@@ -274,51 +375,75 @@ bool function ShouldShowObituaryLineForPlayer( entity player )
 			return false
 	}
 
-#if(false)
-
-
-
-
-
-#endif //
+  	                             
+  	 
+  		                                                                                         
+  			            
+  	 
 
 	return true
 }
 
 
-void function Obituary_Print_Localized( string localizedPrint, vector altColor1 = <255,255,255>, vector altColor2 = <255,255,255>, vector altColor3 = <255,255,255>, vector backgroundColor = <255,255,255>, float backgroundAlpha = 0.0 )
+void function Obituary_Print_Localized( string localizedPrint, vector altColor1 = <255,255,255>, vector altColor2 = <255,255,255>, vector altColor3 = <255,255,255>, vector backgroundColor = <255,255,255>, float backgroundAlpha = 0.0, bool bCheckForDuplicateEntry = false )
 {
 	if ( !file.obituariesEnabled )
 		return
 
-	var rui = CreatePermanentCockpitPostFXRui( $"ui/obituary_crawl_localized.rpak" )
-	RuiSetGameTime( rui, "startTime", Time() )
-	RuiSetGameTime( rui, "updateTime", Time() )
-	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
+	bool bFoundDuplicateEntry = false
+	if( bCheckForDuplicateEntry )
+	{
+		for ( int index = file.obituaryQueue.len() - 1; index >= 0; index-- )
+		{
+			ObituaryData obitData = file.obituaryQueue[index]
+			bFoundDuplicateEntry = (obitData.stringData == localizedPrint)
 
-	//
+			if(bFoundDuplicateEntry)
+				break
+		}
+	}
 
-	RuiSetString( rui, "obitString", localizedPrint )
+	if( !bCheckForDuplicateEntry || (bCheckForDuplicateEntry && !bFoundDuplicateEntry ) )
+	{
+		var rui = CreatePermanentCockpitPostFXRui( $"ui/obituary_crawl_localized.rpak", HUD_Z_BASE )
 
-	RuiSetFloat3( rui, "string1Color", SrgbToLinear( altColor1 / 255.0 ) )
-	RuiSetFloat3( rui, "string2Color", SrgbToLinear( altColor2 / 255.0 ) )
-	RuiSetFloat3( rui, "string3Color", SrgbToLinear( altColor3 / 255.0 ) )
+		if  (ObituaryHudIsDisabled())
+			RuiSetBool( rui, "isVisible", false )
 
-	ObituaryData newObituary
-	newObituary.rui = rui
-	newObituary.startTime = Time()
-	file.obituaryQueue.insert( 0, newObituary )
+		RuiSetGameTime( rui, "startTime", Time() )
+		RuiSetGameTime( rui, "updateTime", Time() )
+		RuiSetFloat( rui, "duration", OBITUARY_DURATION )
 
-	UpdateObituaryQueue()
+		RuiSetString( rui, "obitString", localizedPrint )
+
+		RuiSetFloat3( rui, "string1Color", SrgbToLinear( altColor1 / 255.0 ) )
+		RuiSetFloat3( rui, "string2Color", SrgbToLinear( altColor2 / 255.0 ) )
+		RuiSetFloat3( rui, "string3Color", SrgbToLinear( altColor3 / 255.0 ) )
+
+		RuiSetBool( rui, "showObitsDuringSpectate", GetCurrentPlaylistVarBool( "show_obits_during_spectate", true ) )
+
+		ObituaryData newObituary
+		newObituary.rui = rui
+		newObituary.startTime = Time()
+		
+		if( bCheckForDuplicateEntry )
+			newObituary.stringData = localizedPrint
+
+		file.obituaryQueue.insert( 0, newObituary )
+		UpdateObituaryQueue()
+	}
 }
 
-
-void function Obituary_Print_PlayerDeath( string attackerString, asset weaponIcon, asset modifierIcon, string victimString, vector attackerColor = <255,255,255>, vector victimColor = <255,255,255>, vector weaponColor = <255,255,255>, bool tempIsMainWeapon = false )
+void function Obituary_Print_PlayerDeath( string attackerString, asset weaponIcon, string weaponDisplayName, asset modifierIcon,  string victimString, ObitRankBadgeInfo badgeInfo, vector attackerColor = <255,255,255>, vector victimColor = <255,255,255>, vector weaponColor = <255,255,255>, bool tempIsMainWeapon = false )
 {
 	if ( !file.obituariesEnabled )
 		return
 
 	var rui = CreatePermanentCockpitPostFXRui( $"ui/obituary_crawl_player_death.rpak" )
+
+	if  (ObituaryHudIsDisabled())
+		RuiSetBool( rui, "isVisible", false )
+
 	RuiSetGameTime( rui, "startTime", Time() )
 	RuiSetGameTime( rui, "updateTime", Time() )
 	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
@@ -326,17 +451,21 @@ void function Obituary_Print_PlayerDeath( string attackerString, asset weaponIco
 	RuiSetString( rui, "attackerString", attackerString )
 	RuiSetString( rui, "victimString", victimString )
 	RuiSetImage( rui, "weaponIcon", weaponIcon )
+	RuiSetString( rui, "weaponDisplayName", weaponDisplayName )
 	RuiSetImage( rui, "modifierIcon", modifierIcon )
 
 	RuiSetFloat3( rui, "attackerColor", SrgbToLinear( attackerColor / 255.0 ) )
 	RuiSetFloat3( rui, "victimColor", SrgbToLinear( victimColor / 255.0 ) )
 	RuiSetFloat3( rui, "weaponColor", SrgbToLinear( weaponColor / 255.0 ) )
 
-	//
-	//
+	RuiSetImage( rui, "victimRankBadge", badgeInfo.victimRankBadge )
+	RuiSetImage( rui, "attackerRankBadge", badgeInfo.attackerRankBadge )
+	RuiSetBool( rui, "showRank", badgeInfo.shouldShowRank )
 
 	RuiSetBool( rui, "tempIsMainWeapon", tempIsMainWeapon )
 	RuiSetBool( rui, "tempHasModifier", modifierIcon != $"" )
+
+	RuiSetBool( rui, "showObitsDuringSpectate", GetCurrentPlaylistVarBool( "show_obits_during_spectate", true ) )
 
 	ObituaryData newObituary
 	newObituary.rui = rui
@@ -346,84 +475,348 @@ void function Obituary_Print_PlayerDeath( string attackerString, asset weaponIco
 	UpdateObituaryQueue()
 }
 
+                        
+                                                                                                            
+void function Obituary_Print_Control_Ping( string localizedPrint, bool isAlliancePing = false, vector altColor1 = <255,255,255>, vector altColor2 = <255,255,255>, vector altColor3 = <255,255,255>, vector backgroundColor = <255,255,255>, float backgroundAlpha = 0.0 )
+{
+	if ( !file.obituariesEnabled )
+		return
+
+	var rui = CreatePermanentCockpitPostFXRui( $"ui/obituary_crawl_localized.rpak", HUD_Z_BASE )
+	RuiSetGameTime( rui, "startTime", Time() )
+	RuiSetGameTime( rui, "updateTime", Time() )
+	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
+
+	RuiSetString( rui, "obitString", localizedPrint )
+
+	RuiSetFloat3( rui, "string1Color", SrgbToLinear( altColor1 / 255.0 ) )
+	RuiSetFloat3( rui, "string2Color", SrgbToLinear( altColor2 / 255.0 ) )
+	RuiSetFloat3( rui, "string3Color", SrgbToLinear( altColor3 / 255.0 ) )
+
+	if ( isAlliancePing )
+	{
+		RuiSetFloat3( rui, "defaultTextColor", SrgbToLinear( TEAM_COLOR_FRIENDLY / 255.0 ) )
+	}
+
+	RuiSetBool( rui, "showObitsDuringSpectate", GetCurrentPlaylistVarBool( "show_obits_during_spectate", true ) )
+
+	ObituaryData newObituary
+	newObituary.rui = rui
+	newObituary.startTime = Time()
+	file.obituaryQueue.insert( 0, newObituary )
+
+	UpdateObituaryQueue()
+}
+
+                                                                                        
+void function Obituary_Print_Control_ObjectivePing( entity subjectEnt, string localizedPrint, vector altColor1 = <255,255,255>, vector altColor2 = <255,255,255>, vector altColor3 = <255,255,255>, vector backgroundColor = <255,255,255>, float backgroundAlpha = 0.0 )
+{
+	if ( !file.obituariesEnabled )
+		return
+
+	if ( !Control_IsModeEnabled() )
+		return
+
+	if ( !IsValid( subjectEnt ) || !IsValid( subjectEnt.GetOwner() ) || subjectEnt.GetOwner().GetWaypointType() != eWaypoint.CONTROL_OBJECTIVE )
+		return
+
+	entity objectiveWaypoint = subjectEnt.GetOwner()
+
+
+	var rui = CreatePermanentCockpitPostFXRui( $"ui/obituary_crawl_localized.rpak", HUD_Z_BASE )
+	RuiSetGameTime( rui, "startTime", Time() )
+	RuiSetGameTime( rui, "updateTime", Time() )
+	RuiSetFloat( rui, "duration", OBITUARY_DURATION )
+
+	RuiSetString( rui, "obitString", localizedPrint )
+
+	RuiSetFloat3( rui, "string1Color", SrgbToLinear( altColor1 / 255.0 ) )
+	RuiSetFloat3( rui, "string2Color", SrgbToLinear( altColor2 / 255.0 ) )
+	RuiSetFloat3( rui, "string3Color", SrgbToLinear( altColor3 / 255.0 ) )
+
+	entity localPlayer = GetLocalViewPlayer()
+	if ( IsValid( localPlayer ) && subjectEnt.GetTeam() != localPlayer.GetTeam() )
+	{
+		if ( IsFriendlyTeam( subjectEnt.GetTeam(), localPlayer.GetTeam() ) )
+			RuiSetFloat3( rui, "defaultTextColor", SrgbToLinear( TEAM_COLOR_FRIENDLY / 255.0 ) )
+	}
+
+	RuiSetBool( rui, "showObitsDuringSpectate", GetCurrentPlaylistVarBool( "show_obits_during_spectate", true ) )
+
+	ObituaryData newObituary
+	newObituary.rui = rui
+	newObituary.startTime = Time()
+
+	                                                                                                                                            
+	array<entity> tempSortedObitQueue = []
+	foreach ( objectivePing in file.obituaryControlObjectivePingQueue )
+	{
+		if ( IsValid( objectivePing ) && IsValid( objectivePing.GetOwner() ) )
+		{
+			                                                                                                
+			if ( objectivePing.GetOwner() in file.controlObjectiveToObituaryDataTable )
+			{
+				ObituaryData obitData = file.controlObjectiveToObituaryDataTable[ objectivePing.GetOwner() ]
+				file.obituaryQueue.removebyvalue( obitData )
+
+				                                                                                                                      
+				if ( Time() - obitData.startTime >= OBITUARY_DURATION || objectivePing.GetOwner() == objectiveWaypoint )
+				{
+					if ( obitData.rui != null )
+					{
+						RuiDestroy( obitData.rui )
+						obitData.rui = null
+					}
+
+					delete file.controlObjectiveToObituaryDataTable[ objectivePing.GetOwner() ]
+				}
+				else
+				{
+					                      
+					tempSortedObitQueue.append( objectivePing )
+				}
+			}
+		}
+	}
+	                                    
+	tempSortedObitQueue.append( subjectEnt )
+	file.controlObjectiveToObituaryDataTable[ objectiveWaypoint ] <- newObituary
+
+	                              
+	if ( tempSortedObitQueue.len() > 1 )
+	{
+		tempSortedObitQueue.sort( Obituary_SortControlObjectivePingsByCount )
+	}
+
+	                                                            
+	file.obituaryControlObjectivePingQueue = tempSortedObitQueue
+
+	                                                                                                         
+	int index = 0
+	foreach ( sortedPing in file.obituaryControlObjectivePingQueue )
+	{
+		if ( IsValid( sortedPing ) && IsValid( sortedPing.GetOwner() ) )
+		{
+			if ( sortedPing.GetOwner() in file.controlObjectiveToObituaryDataTable )
+			{
+				ObituaryData obitToAdd = file.controlObjectiveToObituaryDataTable[ sortedPing.GetOwner() ]
+				file.obituaryQueue.insert( index, obitToAdd )
+				index++
+			}
+		}
+	}
+
+	UpdateObituaryQueue()
+}
+
+                                                                       
+int function Obituary_SortControlObjectivePingsByCount( entity objectivePingA, entity objectivePingB )
+{
+	int objectiveAPingCount = Control_GetPingCountForObjectiveForAlliance( objectivePingA.GetOwner(), AllianceProximity_GetAllianceFromTeam( objectivePingA.GetTeam() ) )
+	int objectiveBPingCount = Control_GetPingCountForObjectiveForAlliance( objectivePingB.GetOwner(), AllianceProximity_GetAllianceFromTeam( objectivePingB.GetTeam() ) )
+
+	if ( objectiveAPingCount > objectiveBPingCount )
+		return -1
+
+	if ( objectiveBPingCount < objectiveBPingCount )
+		return 1
+
+	return 0
+}
+
+                                                                                                
+int function Obituary_SortObituaryQueueByObituaryType( ObituaryData obituaryA, ObituaryData obituaryB )
+{
+	bool isObituaryAControlObjectivePing = Obituary_IsObituaryDataForControlObjectivePing( obituaryA )
+	bool isObituaryBControlObjectivePing = Obituary_IsObituaryDataForControlObjectivePing( obituaryB )
+
+	                                                        
+	if ( isObituaryAControlObjectivePing == isObituaryBControlObjectivePing  )
+		return 0
+
+	if ( isObituaryAControlObjectivePing == true )
+		return -1
+
+	if ( isObituaryBControlObjectivePing == true )
+		return 1
+
+	return 0
+}
+
+                                                                                                                             
+bool function Obituary_IsObituaryDataForControlObjectivePing( ObituaryData obituary )
+{
+	array< ObituaryData > ControlObjectivePingObits
+	foreach ( objectivePing in file.obituaryControlObjectivePingQueue )
+	{
+		if ( IsValid( objectivePing ) && IsValid( objectivePing.GetOwner() ) )
+		{
+			if ( objectivePing.GetOwner() in file.controlObjectiveToObituaryDataTable )
+			{
+				ObituaryData obitData = file.controlObjectiveToObituaryDataTable[ objectivePing.GetOwner() ]
+				ControlObjectivePingObits.append( obitData )
+			}
+		}
+	}
+
+	return ControlObjectivePingObits.contains( obituary ) ? true : false
+}
+
+                                                                                              
+entity function Obituary_GetControlObjectivePingFromObituaryDataOrNull( ObituaryData obituary )
+{
+	foreach ( objectivePing in file.obituaryControlObjectivePingQueue )
+	{
+		if ( IsValid( objectivePing ) && IsValid( objectivePing.GetOwner() ) )
+		{
+			if ( objectivePing.GetOwner() in file.controlObjectiveToObituaryDataTable )
+			{
+				ObituaryData obitData = file.controlObjectiveToObituaryDataTable[ objectivePing.GetOwner() ]
+				if ( obitData == obituary )
+					return objectivePing
+			}
+		}
+	}
+
+	return null
+}
+
+                                                                                            
+void function Obituary_CleanupControlObjectivePingData( ObituaryData obitData )
+{
+	if ( Control_IsModeEnabled() )
+	{
+		if ( Obituary_IsObituaryDataForControlObjectivePing( obitData ) )
+		{
+			entity objectivePing = Obituary_GetControlObjectivePingFromObituaryDataOrNull( obitData )
+
+			if ( objectivePing != null && IsValid( objectivePing ) )
+			{
+				if ( file.obituaryControlObjectivePingQueue.contains( objectivePing ) )
+					file.obituaryControlObjectivePingQueue.removebyvalue( objectivePing )
+
+				if ( objectivePing.GetOwner() in file.controlObjectiveToObituaryDataTable )
+					delete file.controlObjectiveToObituaryDataTable[ objectivePing.GetOwner() ]
+			}
+		}
+	}
+}
+                              
 
 void function UpdateObituaryQueue()
 {
-	#if(false)
+	int EXTRA_OFFSET = (IsPVEMode() ? 1 : 0)
+	int netGraphOffset = GetConVarInt( "net_netGraph2" ) == 1 ? 2 : 0
 
-#else //
-	const int EXTRA_OFFSET = 0
-	#endif //
+                         
+		                                                                  
+		if ( Control_IsModeEnabled() )
+		{
+			if ( file.obituaryQueue.len() > 1 )
+			{
+				file.obituaryQueue.sort( Obituary_SortObituaryQueueByObituaryType )
+			}
+		}
+                               
 
 	for ( int index = file.obituaryQueue.len() - 1; index >= 0; index-- )
 	{
 		ObituaryData obitData = file.obituaryQueue[index]
 
-		if ( Time() - obitData.startTime >= OBITUARY_DURATION || index > 20 )
+		if ( Time() - obitData.startTime >= OBITUARY_DURATION || index > MAX_OBITUARY_ENTRIES || !IsValid( obitData.rui ) )
 		{
-			RuiDestroy( obitData.rui )
+			if ( IsValid( obitData.rui ) )
+			{
+				RuiDestroy( obitData.rui )
+				obitData.rui = null
+			}
+			
 			file.obituaryQueue.remove( index )
+
+                           
+				                                                                                                
+				Obituary_CleanupControlObjectivePingData( obitData )
+                                 
+
 			continue
 		}
 
-		RuiSetInt( obitData.rui, "offset", (EXTRA_OFFSET + index + file.indexOffest) )
+		RuiSetInt( obitData.rui, "offset", (EXTRA_OFFSET + netGraphOffset + index + file.indexOffest) )
+		RuiSetInt( obitData.rui, "horizontalOffset", file.horizontalOffset  )
+		RuiSetInt( obitData.rui, "verticalOffset", file.verticalOffset )
 		RuiSetGameTime( obitData.rui, "updateTime", Time() )
 	}
 }
 
-/*
+  
+                                         
+ 
+	                                    
+	                            
+
+	                                                           
+		                                                                                    
+
+	                                                         
+		                                                                                
 
 
+	                                                
+		                                                                                                                                                         
+	    
+		                                                                               
+	                                                                                                                 
 
+	                                                                                                                             
+	                                                                                                             
 
+	                                              
+		                                                                                                                                                   
+	    
+		                                                                           
+	                                                                                                             
 
+	                              
+	 
+		                                                                   
+		                                                                                                                                       
+	 
+	    
+	 
+		                                             
+	 
 
+	                                                   
 
+	                                            	 
+	 
+		                    
+		                                                                            
+		           
+	 
 
+	                                             
+	                             
+	                                                        
+		                               
+ 
+  
 
+void function Obituary_ClearObituary()
+{
+	ObituaryData obitData
+	for ( int index = file.obituaryQueue.len() - 1; index >= 0; index-- )
+	{
+		obitData = file.obituaryQueue[index]
+		RuiDestroy( obitData.rui )
+		obitData.rui = null
+		file.obituaryQueue.remove( index )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+                          
+			Obituary_CleanupControlObjectivePingData( obitData )
+                                
+	}
+}
 
 void function Obituary_SetEnabled( bool state )
 {
@@ -435,4 +828,23 @@ void function Obituary_SetIndexOffset( int offset )
 	file.indexOffest = offset
 
 	UpdateObituaryQueue()
+}
+
+void function Obituary_SetHorizontalOffset( int offset )
+{
+	file.horizontalOffset = offset
+
+	UpdateObituaryQueue()
+}
+
+void function Obituary_SetVerticalOffset( int offset )
+{
+	file.verticalOffset = offset
+
+	UpdateObituaryQueue()
+}
+
+bool function ObituaryHudIsDisabled()
+{
+	return GetCurrentPlaylistVarBool( "hide_ui_obituary", false )
 }

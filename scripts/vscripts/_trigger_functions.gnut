@@ -1,0 +1,973 @@
+global function TriggerFunctions_Init
+global function InitFlagMaskTriggers
+global function TriggerInit
+global function AddToFlagTriggers
+global function AddTriggerEditorClassFunc
+
+#if SERVER
+                                                 
+                                            
+                                      
+                               
+
+                                 
+                                   
+                                    
+#endif
+
+const bool DEBUG_DEADLY_FOG = false
+const asset BIRD_ALERT_FX = $"P_bird_alert_white"
+struct BirdAlertInfo
+{
+	entity scriptRef                   
+	array<entity> triggers
+	float lastUseTime
+}
+
+struct
+{
+	                        
+	                         
+	                         
+	table<string, array<void functionref( entity )> > triggerEditorClassFunctions
+
+	table<string, int> flagTriggerEntArrayIndex
+	array<BirdAlertInfo> birdAlerts
+
+	table<entity, entity> _flagTriggers
+} file
+
+void function TriggerFunctions_Init()
+{
+	AddCallback_EntitiesDidLoad( InitFlagMaskTriggers )
+
+#if SERVER
+	                                                               
+	                                                                        
+	                                                                            
+	                                                                                  
+	                                                                                      
+	       
+		                                                                       
+	      
+
+	                                      		             
+	                                  			             
+	                                  			             
+	                                          	             
+
+	          
+	                                       		                   
+	      
+
+	                                                                   
+	                                                                                             
+
+	                                                                                               
+
+	                                                                               
+
+	                                       
+
+	                                  
+	                             
+
+	                                                    
+
+#elseif CLIENT
+	AddTriggerEditorClassFunc( "trigger_multiple_clientside", TriggerTouchingFlagOnTrigger )
+	AddCreateCallback( "trigger_multiple_clientside", TriggerInit )
+
+	RegisterSignal( "OnStartTouch" )
+	RegisterSignal( "OnEndTouch" )
+#endif
+}
+
+#if SERVER
+                                                        
+ 
+	                                                                  
+
+	                               
+	 
+		                              
+		 
+			                            
+			 
+				                                         
+			 
+		 
+	 
+   
+
+                                                       
+ 
+	                                
+
+	                   
+	                                      
+		                                                                                     
+	                                           
+		                                                                                     
+
+	                                                                                     
+	                 
+	                                       
+		                                        
+
+	                                                                                                                         
+
+	              
+	 
+		                                 
+
+		                
+			          
+
+		                               
+			               
+
+		                  
+			      
+
+		                              
+	 
+ 
+
+                                                         
+ 
+	           
+	                                      
+		                                              
+	                                             
+		                                                
+
+	                                                                                                                    
+
+	                                        
+ 
+
+                                                                  
+ 
+	                                                    
+	                                                    
+ 
+
+                                                                    
+ 
+	                                                         
+		                
+ 
+
+                                                                    
+ 
+	                                                         
+		                  
+ 
+
+                                                        
+ 
+	                                   
+		                
+	    
+		                 
+ 
+
+                                                              
+ 
+	                                                    
+	                                                 
+		      
+
+	                                                                                          
+	                               
+	 
+		                                   
+	 
+ 
+
+  
+                                  
+                                  
+                                  
+
+                                
+                          
+                          
+                              
+                          
+                          
+                                
+
+                                  
+                                  
+                                  
+  
+                                               
+ 
+	                                                       
+	                                                   
+ 
+
+                                                                                    
+ 
+	                                        
+ 
+
+                                                                                  
+ 
+	                     
+		                          
+ 
+
+                                                             
+ 
+	                                             
+		      
+
+	                             
+	                                 
+	                           
+
+	                    
+	                         
+
+	                                          
+	              
+	 
+		                      
+		 
+			             
+			        
+		 
+
+		                                     
+		                                                                  
+
+		                    
+
+		                                                                                                                                                     
+
+		                     
+			                                                              
+
+		             
+	 
+ 
+
+  
+                                                                                              
+                                                                                              
+                                                                                              
+
+                                                                                         
+                                                                                          
+                                                                                    
+                                                                                           
+                                                                                          
+                                                                                          
+                                                                                         
+
+                                                                                              
+                                                                                              
+                                                                                              
+  
+                                                    
+ 
+	                                                            
+	                                                        
+
+	                                                                             
+		                                  
+ 
+
+                                                                                         
+ 
+	                                             
+ 
+
+                                                                  
+ 
+	                                             
+		      
+
+	                                  
+	                                 
+	                           
+
+	                                                  
+	                                                  
+	                                     
+		      
+
+	                    
+	                         
+
+	                                          
+	              
+	 
+		                      
+		 
+			        
+			        
+		 
+
+		                                      
+		 
+			        
+			        
+		 
+
+		                                     
+		 
+			        
+			        
+		 
+
+		                            
+		                                                                          
+		                                                                                                                         
+		                                                                  
+
+		                                                                           
+
+		                                                                                                                                                           
+
+		                     
+			                                                              
+
+		        
+	 
+ 
+
+                                                                                       
+ 
+	                     
+		                               
+ 
+
+                                                
+ 
+	        
+
+	                         
+	                                              
+	                                              
+	                                          
+	                       
+	 
+		                                                                              
+		                                                                 
+	 
+
+	                                          
+	                                                   
+
+	                                                                
+	                                                                
+	                                                        
+
+	                                                               
+	                                                                                                                                  
+
+	                                        
+	                                        
+	                                        
+	                                                            
+	                                                            
+	                                                            
+
+	                                                                 
+	                                                                           
+	                                                                           
+	                                                                           
+
+	                                          
+	 
+		                                                  
+		                                 
+			        
+
+		                                                 
+		 
+			                                                 
+			 
+				                                                                                        
+				                                                 
+			 
+		 
+	 
+ 
+
+                                                                  
+ 
+	                                                      
+	                                                             
+	                          
+	                                                      
+	                          
+	                       
+
+	                                           
+	                                          
+	                       
+	 
+		                                                                           
+		                                                          
+	 
+
+	              
+	 
+		                                 
+
+		                                                                                                                         
+
+		                       
+			                                                  
+
+		                       
+		                        
+		                                          
+	 
+ 
+
+                                                
+ 
+	                                 
+
+	              
+	 
+		                                                 
+		                                                  
+		                         
+			        
+
+		                                                        
+		 
+			                                                                                   
+			        
+		 
+
+		                                               
+			        
+
+		                         
+		 
+			                                    
+			        
+		 
+
+		                               
+			        
+
+		                             
+
+		                                            
+		                    
+		                    
+		                                                                               
+
+		                                   
+		                             
+		 
+			                                                                                                          
+				     
+			           
+		 
+
+		                               
+			        
+
+		                        
+		 
+			                                           
+				                                        
+			    
+				                                          
+
+			      
+		 
+	 
+ 
+
+
+                                         
+ 
+	                  
+	                    
+	                                                    
+	                                     
+	 
+		                               
+		                                                            
+	 
+	                              
+ 
+
+                                                                                         
+ 
+	                                                                        
+	                               
+	 
+		                        
+		                                                
+			      
+
+		                                                                                                                               
+		                          
+	 
+ 
+
+                                                                           
+ 
+	                               
+	                                         
+	 
+		                                              
+			                               
+	 
+
+	                 
+	           
+ 
+
+                                                             
+ 
+	                                                      
+
+	                           
+	 
+		                                                  
+			           
+	 
+
+	            
+ 
+
+                                                       
+ 
+	                      
+	                               
+	                                                      
+	                           
+	 
+		                                                  
+			                          
+	 
+
+	                                                                                       
+	                                                     
+ 
+
+                                                                      
+ 
+	                                                                            
+	                                              
+		                                        
+
+	                                         
+ 
+
+                                                 
+ 
+	                                 
+
+	                                  
+
+	                      
+
+	                                                   
+	 
+		                                                                                                            
+		 
+			                                       
+			                                                         
+			 
+				                                                      
+					                               
+			 
+		 
+
+		                                                                             
+		                                               
+			                      
+	 
+
+	                                             
+	 
+		                                 
+	 
+ 
+
+                                                   
+ 
+	                                 
+
+	                      
+
+	             
+	                          
+	                          
+	                           
+	                           
+	                      
+
+	                           
+	 
+		                                                    
+		                                         
+		 
+			                                                 
+			                                  
+		 
+		                
+		 
+			                                                
+			                                                
+			                                                 
+			                                                 
+			                                                                
+			                                                                
+			                                                                  
+			                                                                
+			                                                                                                                                 
+			                                                                                                                                 
+			                                                                                                                                   
+			                                                                                                                                                                             
+			                                              
+				                                                                   
+		 
+
+		                                                                                            
+			                                                
+	 
+
+	                               
+	 
+		                                      
+		      
+	 
+
+	                                  
+	 
+		                                     
+		      
+	 
+
+	                              
+
+	                   
+	 
+		                            
+			                                
+
+		                                  
+		                    
+		       
+
+		                      
+			                                         
+
+		                                                       
+		                                 
+		                                 
+	 
+ 
+
+
+                                                    
+ 
+	                                
+
+	                                                                            
+	                                  
+	                                      
+	                                          
+	                                    
+	                                        
+	                                       
+	                                   
+	                                       
+	                                     
+	                                                                 
+
+	                                                                         
+	  	                              
+	     
+	                                                                                                                   
+	  	                                                
+	     
+
+	                                                     
+	                                                                                                                              
+
+	                                                                             
+
+	                            
+	                                           
+		                                                                      
+
+	          
+	              
+	 
+		                                                 
+		                                        
+		                     
+		 
+			                                           
+
+			                        
+				                          
+
+			                                      
+			                       
+
+			                
+			 
+				                                      
+				                       
+			 
+		 
+	 
+ 
+#endif          
+
+void function AddTriggerEditorClassFunc( string editorClass, void functionref( entity ) triggerFunc )
+{
+	if ( !( editorClass in file.triggerEditorClassFunctions ) )
+		file.triggerEditorClassFunctions[ editorClass ] <- []
+
+	file.triggerEditorClassFunctions[ editorClass ].append( triggerFunc )
+}
+
+void function TriggerInit( entity trigger )
+{
+#if SERVER
+	                                      
+		                                         
+#elseif CLIENT
+	string className = expect string( trigger.GetNetworkedClassName() )
+	if ( className.len() > 0 )
+		RunTriggerEditorClassFunctions( trigger )
+#endif
+
+	InitFlagsFromTrigger( trigger )
+	AddKeyPairFunctionality( trigger )
+	AddToFlagTriggers( trigger )
+}
+
+
+void function InitFlagsFromTrigger( entity trigger )
+{
+	array<string> check = GetFlagRelatedKeys()
+	array<string> flags
+
+	foreach ( field in check )
+	{
+		if ( !trigger.HasKey( field ) )
+			continue
+		flags = GetFlagsFromField( trigger, field )
+
+		foreach ( flag in flags )
+		{
+			                                                                
+			FlagInit( flag )
+		}
+	}
+}
+
+void function AddKeyPairFunctionality( entity trigger )
+{
+	table<string, void functionref( entity, string )> funcs
+	funcs[ "scr_flagSet" ] <- TriggerFlagSet
+	funcs[ "scr_flagClear" ] <- TriggerFlagClear
+
+	foreach ( key, func in funcs )
+	{
+		if ( trigger.HasKey( key ) )
+		{
+			thread func( trigger, expect string( trigger.kv[ key ] ) )
+		}
+	}
+}
+
+void function TriggerFlagSet( entity trigger, string flagString )
+{
+	thread TriggerChangesFlagOnTrigger( trigger, flagString, FlagSet )
+}
+
+void function TriggerFlagClear( entity trigger, string flagString )
+{
+	thread TriggerChangesFlagOnTrigger( trigger, flagString, FlagClear )
+}
+
+void function TriggerChangesFlagOnTrigger( entity trigger, string flagsCommaSeparated, void functionref( string ) func )
+{
+	trigger.EndSignal( "OnDestroy" )
+
+	array<string> flags = GetFlagsFromString( flagsCommaSeparated )
+	bool triggerOnce = trigger.HasKey( "trigger_once" ) && trigger.kv.trigger_once == "1"
+
+	for ( ;; )
+	{
+		trigger.WaitSignal( "OnTrigger" )
+
+		foreach ( flag in flags )
+			func( flag )
+
+		if ( triggerOnce )
+			return
+	}
+}
+
+void function RunTriggerEditorClassFunctions( entity trigger )
+{
+	string className = ""
+#if SERVER
+	                                                   
+#elseif CLIENT
+	className = expect string( trigger.GetNetworkedClassName() )
+#endif
+
+	if ( !( className in file.triggerEditorClassFunctions ) )
+		return
+
+	foreach ( func in file.triggerEditorClassFunctions[ className ] )
+	{
+		thread func( trigger )
+	}
+}
+
+void function AddToFlagTriggers( entity self )
+{
+	file._flagTriggers[ self ] <- self
+}
+
+void function InitFlagMaskTriggers()
+{
+	table<entity, entity> triggers = GetFlagTriggers()
+	array<string> check = GetFlagRelatedKeys()
+	array<string> flags
+	table allTriggersWithFlags
+
+	foreach ( trigger in triggers )
+	{
+		if ( trigger.HasKey( "scr_flagTrueAll" ) )
+		{
+			Assert( !trigger.HasKey( "scr_flagTrueAny" ), "Trigger at " + trigger.GetOrigin() + " has flag all and flag any" )
+		}
+		else
+		if ( trigger.HasKey( "scr_flagTrueAny" ) )
+		{
+			Assert( !trigger.HasKey( "scr_flagTrueAll" ), "Trigger at " + trigger.GetOrigin() + " has flag all and flag any" )
+		}
+
+		if ( trigger.HasKey( "scr_flagFalseAll" ) )
+		{
+			Assert( !trigger.HasKey( "scr_flagFalseAny" ), "Trigger at " + trigger.GetOrigin() + " has flag all and flag any" )
+		}
+		else
+		if ( trigger.HasKey( "scr_flagFalseAny" ) )
+		{
+			Assert( !trigger.HasKey( "scr_flagFalseAll" ), "Trigger at " + trigger.GetOrigin() + " has flag all and flag any" )
+		}
+
+		foreach ( field in check )
+		{
+			if ( trigger.HasKey( field ) )
+			{
+				allTriggersWithFlags[ trigger ] <- true
+				flags = GetFlagsFromField( trigger, field )
+
+				foreach ( flag in flags )
+				{
+					#if SERVER
+						                                                 
+							                                                                      
+
+						                                                                            
+					#endif
+
+					                                                                
+					FlagInit( flag )
+				}
+			}
+		}
+	}
+
+#if SERVER
+	                                              
+	 
+		                        
+		                                   
+	 
+#endif
+}
+
+table<entity, entity> function GetFlagTriggers()
+{
+	foreach ( guy in clone file._flagTriggers )
+	{
+		if ( IsValid_ThisFrame( guy ) )
+			continue
+
+		delete file._flagTriggers[ guy ]
+	}
+
+	return file._flagTriggers
+}
+
+array<string> function GetFlagRelatedKeys()
+{
+	array<string> check
+	check.append( "scr_flagTrueAll" )
+	check.append( "scr_flagTrueAny" )
+	check.append( "scr_flagFalseAll" )
+	check.append( "scr_flagFalseAny" )
+	check.append( "scr_flag" )
+	check.append( "script_flag" )
+	check.append( "scr_flagSet" )
+	check.append( "scr_flagClear" )
+
+	return check
+}
+
+void function TriggerTouchingFlagOnTrigger( entity trigger )
+{
+	trigger.EndSignal( "OnDestroy" )
+
+	string className = ""
+	array<string> flags = GetTrimmedSplitString( expect string( trigger.kv.script_flag ), "," )
+
+#if SERVER
+	                                     
+#elseif CLIENT
+	className = expect string( trigger.GetNetworkedClassName() )
+#endif
+
+	Assert( flags.len() > 0, "Trigger " + className + " at " + trigger.GetOrigin() + "has empty flag value" )
+
+	while ( true )
+	{
+		if ( !trigger.IsTouched() )
+			trigger.WaitSignal( "OnStartTouch" )
+
+		foreach( string flag in flags )
+			FlagSet( flag )
+
+		if ( trigger.IsTouched() )
+		{
+			#if SERVER
+				                                     
+			#elseif CLIENT
+				trigger.WaitSignal( "OnEndTouch" )
+			#endif
+		}
+
+		foreach( string flag in flags )
+			FlagClear( flag )
+	}
+	                                                                              
+	                                                       
+	                                                     
+}

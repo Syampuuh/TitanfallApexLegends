@@ -1,11 +1,11 @@
-//
+  
 
-#if UI || CLIENT 
+#if UI || CLIENT
 global function ReserveVideoChannel
 global function ReleaseVideoChannel
 #endif
 
-#if(UI)
+#if UI
 global function VideoChannelManager_OnLevelShutdown
 global function IsVideoChannelAvailable
 global function ClientToUI_RequestVideoChannel
@@ -13,14 +13,14 @@ global function ClientToUI_ReleaseVideoChannel
 global function UICodeCallback_VideoChannelFinishedPlaying
 #endif
 
-#if(CLIENT)
+#if CLIENT
 global function UIToClient_VideoChannelReserved
 global function UIToClient_VideoChannelFinishedPlaying
 #endif
 
-const int NUM_BINK_CHANNELS = 10 //
+const int NUM_BINK_CHANNELS = 10                                                      
 
-#if(UI)
+#if UI
 enum eVideoChannelStatus
 {
 	AVAILABLE,
@@ -32,24 +32,24 @@ enum eVideoChannelStatus
 
 struct
 {
-	#if(UI)
+	#if UI
 		int[NUM_BINK_CHANNELS] videoChannelStatusList
 	#endif
 
-	#if(CLIENT)
+	#if CLIENT
 		int videoChannelFromUI = -1
 	#endif
 
-	#if UI || CLIENT 
+	#if UI || CLIENT
 		table<int, void functionref(int)> channelOnFinishedCallbackMap
 	#endif
 } file
 
 
-#if(UI)
+#if UI
 void function VideoChannelManager_OnLevelShutdown()
 {
-	//
+	                                                                           
 	for ( int channelIndex = 0; channelIndex < NUM_BINK_CHANNELS; channelIndex++ )
 	{
 		if ( file.videoChannelStatusList[channelIndex] == eVideoChannelStatus.RESERVED_BY_CLIENT )
@@ -61,13 +61,13 @@ void function VideoChannelManager_OnLevelShutdown()
 #endif
 
 
-#if UI || CLIENT 
+#if UI || CLIENT
 int function ReserveVideoChannel( void functionref( int channel ) onFinishedCallback = null )
 {
 	int channel
-	#if(UI)
+	#if UI
 		channel = ReserveVideoChannelInternal( true )
-	#elseif(CLIENT)
+	#elseif CLIENT
 		RunUIScript( "ClientToUI_RequestVideoChannel" )
 		Assert( file.videoChannelFromUI != -1 )
 		channel = file.videoChannelFromUI
@@ -82,7 +82,7 @@ int function ReserveVideoChannel( void functionref( int channel ) onFinishedCall
 #endif
 
 
-#if(UI)
+#if UI
 int function ReserveVideoChannelInternal( bool calledFromUI )
 {
 	for ( int channelIndex = 0; channelIndex < NUM_BINK_CHANNELS; channelIndex++ )
@@ -101,7 +101,7 @@ int function ReserveVideoChannelInternal( bool calledFromUI )
 #endif
 
 
-#if(UI)
+#if UI
 void function ClientToUI_RequestVideoChannel()
 {
 	int channel = ReserveVideoChannelInternal( false )
@@ -110,7 +110,7 @@ void function ClientToUI_RequestVideoChannel()
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function UIToClient_VideoChannelReserved( int channel )
 {
 	file.videoChannelFromUI = channel
@@ -118,12 +118,12 @@ void function UIToClient_VideoChannelReserved( int channel )
 #endif
 
 
-#if UI || CLIENT 
+#if UI || CLIENT
 void function ReleaseVideoChannel( int channel )
 {
-	#if(UI)
+	#if UI
 		ReleaseVideoChannelInternal( channel )
-	#elseif(CLIENT)
+	#elseif CLIENT
 		RunUIScript( "ClientToUI_ReleaseVideoChannel", channel )
 	#endif
 
@@ -133,7 +133,7 @@ void function ReleaseVideoChannel( int channel )
 #endif
 
 
-#if(UI)
+#if UI
 void function ReleaseVideoChannelInternal( int channelIndex )
 {
 	Assert( file.videoChannelStatusList[channelIndex] != eVideoChannelStatus.AVAILABLE, "Attempted to call ReleaseVideoChannel on a video channel that was not in use." )
@@ -145,7 +145,7 @@ void function ReleaseVideoChannelInternal( int channelIndex )
 #endif
 
 
-#if(UI)
+#if UI
 void function ClientToUI_ReleaseVideoChannel( int channel )
 {
 	ReleaseVideoChannelInternal( channel )
@@ -153,10 +153,10 @@ void function ClientToUI_ReleaseVideoChannel( int channel )
 #endif
 
 
-#if(UI)
+#if UI
 bool function IsVideoChannelAvailable()
 {
-	#if(UI)
+	#if UI
 		for ( int channelIndex = 0; channelIndex < NUM_BINK_CHANNELS; channelIndex++ )
 		{
 			if ( file.videoChannelStatusList[channelIndex] == eVideoChannelStatus.AVAILABLE )
@@ -164,12 +164,12 @@ bool function IsVideoChannelAvailable()
 		}
 		return false
 	#endif
-	//
+	                                                 
 }
 #endif
 
 
-#if(UI)
+#if UI
 void function UICodeCallback_VideoChannelFinishedPlaying( int channel )
 {
 	if ( channel in file.channelOnFinishedCallbackMap )
@@ -177,12 +177,13 @@ void function UICodeCallback_VideoChannelFinishedPlaying( int channel )
 		file.channelOnFinishedCallbackMap[channel]( channel )
 	}
 
-	RunClientScript( "UIToClient_VideoChannelFinishedPlaying", channel )
+	if ( CanRunClientScript() )
+		RunClientScript( "UIToClient_VideoChannelFinishedPlaying", channel )
 }
 #endif
 
 
-#if(CLIENT)
+#if CLIENT
 void function UIToClient_VideoChannelFinishedPlaying( int channel )
 {
 	if ( channel in file.channelOnFinishedCallbackMap )

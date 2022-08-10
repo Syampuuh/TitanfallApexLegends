@@ -1,33 +1,48 @@
-//
-//
-//
-//
+                      
+            
+                
+                 
 
 global function UICodeCallback_UIInit
 global function UICodeCallback_UIShutdown
 global function UICodeCallback_ControllerModeChanged
 global function UICodeCallback_OnVideoOver
 global function AddUICallback_OnLevelInit
-global function UICodeCallback_SmokeTestRunning
 global function AddUICallback_InputModeChanged
 global function AddUICallback_KeyBindSet
 global function AddUICallback_UIShutdown
 
-global function SetShowingMap
-global function IsShowingMap
+
+global struct CTAData
+{
+	void functionref() showFunc
+	void functionref() visitFunc
+}
 
 global struct TabDef
 {
-	var                button
-	var                panel
-	var				   parentPanel
-	string             title
-	bool               enabled = true
-	bool               new = false
+	var                                                    button
+	var                                                    panel
+	var                                                    parentPanel
+	string                                                 title
+	bool                                                   visible = true
+	bool                                                   enabled = true
+	bool                                                   new = false
+	bool                                                   wantDividerAfter = false
+	float                                                  tabBarLeftOffsetFracIfVisible = 0.0
 	bool functionref( var panel, int destinationTabIndex ) canNavigateFunc = null
+	CTAData ornull										   ctaData
+
+	bool   useCustomColors
+	vector customDefaultBGCol = <1.0, 1.0, 1.0>
+	vector customDefaultBarCol = <1.0, 1.0, 1.0>
+	vector customFocusedBGCol = <1.0, 1.0, 1.0>
+	vector customFocusedBarCol = <1.0, 1.0, 1.0>
+	vector customSelectedBGCol = <1.0, 1.0, 1.0>
+	vector customSelectedBarCol = <1.0, 1.0, 1.0>
 }
 
-//
+                   
 global const int LEFT = 0
 global const int RIGHT = 1
 
@@ -89,7 +104,6 @@ global struct DialogData
 	bool                   forceChoice = false
 	bool                   noChoice = false
 	bool                   noChoiceWithNavigateBack = false
-	bool                   showSpinner = false
 	bool                   showPCBackButton = false
 	float                  inputDisableTime = 0
 	table<int, bool>       coloredButton
@@ -97,6 +111,7 @@ global struct DialogData
 	bool                   useFullMessageHeight = false
 	float                  timeoutDuration = -1
 	int                    magicNumber = 0
+	bool                   showSpinner = false
 
 	array<DialogButtonData> buttonData
 	array<DialogFooterData> footerData
@@ -106,20 +121,21 @@ global struct MenuDef
 {
 	var menu
 
-	void functionref()             initFunc
+	void functionref( var )        initFunc
 	void functionref()             openFunc
+	void functionref()			   preCloseFunc
 	void functionref()             closeFunc
 	void functionref()             showFunc
 	void functionref()             hideFunc
 	void functionref()             getTopLevelFunc
 	void functionref()             loseTopLevelFunc
 	void functionref()             navBackFunc
-	//
+	                                        
 	void functionref()             inputModeChangedFunc
 	array<void functionref( var )> thinkFuncs
 
-	array<void functionref( var )> openFuncs //
-	array<void functionref( var )> closeFuncs //
+	array<void functionref( var )> openFuncs                                                                                           
+	array<void functionref( var )> closeFuncs                                                                                           
 
 	array<InputDef>                     footerData
 	table<int, void functionref( var )> registeredInput
@@ -128,6 +144,7 @@ global struct MenuDef
 
 	bool        isDialog = false
 	bool        isPopup = false
+	bool        allowControllerFooterClick = false
 	DialogData& dialogData
 	bool        isDynamicHeight = false
 	bool        gamepadCursorEnabled = true
@@ -135,6 +152,7 @@ global struct MenuDef
 	bool   clearBlur = true
 	float  enterTime
 	string pin_fromId = ""
+	table  pin_metaData = {}
 }
 
 global struct PanelDef
@@ -152,7 +170,7 @@ global struct PanelDef
 
 	array<InputDef>                     footerData
 	table<int, void functionref( var )> registeredInput
-	table<int, void functionref( var )> panelInputs //
+	table<int, bool functionref( var )> panelInputs                                                                                           
 
 	bool hasTabs = false
 
@@ -161,6 +179,8 @@ global struct PanelDef
 	bool  isActive = false
 	bool  isCurrentlyShown = false
 	float enterTime
+	bool  panelClearBlur = false
+	table pin_metaData = {}
 }
 
 global struct PieChartEntry
@@ -179,74 +199,53 @@ global struct PieChartData
 	float                sum = 0.0
 }
 
-global enum eMenuMusicContext
+global struct ConfirmDialogData
 {
-	NONE,
-	MAIN_MENU,
-	LOBBY,
-	CUSTOM,
+	string        headerText = "headerText"
+	string        messageText = "messageText"
+	array<string> okText = ["#B_BUTTON_CLOSE", "#B_BUTTON_CLOSE"]
+	array<string> yesText = ["#A_BUTTON_YES", "#YES"]
+	array<string> noText = ["#B_BUTTON_CANCEL", "#B_BUTTON_CANCEL"]
+	asset         contextImage = $""
+
+	float timerEndTime = -1.0
+
+	void functionref( int )    resultCallback
+
+	int dialogType
+	var __menu
+	bool extendedUseYes = false
+	float timePenaltyWarning = 0.0
+
+	float dialogConfirmDelay = -1.0
+}
+
+global struct HSV
+{
+	float hue
+	float saturation
+	float value
 }
 
 global struct UIGlobals
 {
-	table               menus = {}
-	array               allMenus = []
-	array<MenuDef>      menuStack
-	string              loadingLevel = ""
-	string              loadedLevel = ""
-	string              previousLevel = ""
-	string              previousPlaylist = ""
-	var                 activeMenu = null
-	array<var>          activePanels = []
-	bool                lastMenuNavDirection = MENU_NAV_FORWARD
-	bool                lobbyFromLoadingScreen = false
-	bool                eventHandlersAdded = false
-	bool                loadoutsInitialized = false
-	bool                matchmaking = false
-	var                 dialogCloseCallback = null
-	table               signalDummy = {}
-	float               dialogInputEnableTime = 0.0
-	int              	activeMusicContext = eMenuMusicContext.NONE
-	string              activeMusic = ""
-	bool                isShowingMap = false //
-
-	//
-	int titanSpawnLoadoutIndex = -1
-
-	bool updatePilotSpawnLoadout = false
-	bool updateTitanSpawnLoadout = false
-
-	string editingLoadoutType = "pilot"
-	string editingLoadoutProperty = ""
-	int    editingLoadoutIndex = -1
-	string editingItemRef = ""
-	int    editingItemType = -1
-	var    editingParentItemRef = null
-	int    editingWeaponCategory = -1
-
-	ItemFlavor ornull topLevelCustomizeContext
-
-	table<string, var>    ui_ChallengeProgress = {}
-
-	var                     ConfirmMenuMessage
-	var                     ConfirmMenuErrorCode
-	array<DialogButtonData> dialogButtonData
+	table             menus = {}
+	array             allMenus = []
+	string            loadingLevel = ""
+	string            loadedLevel = ""
+	array<var>        activePanels = []
+	table             signalDummy = {}
+	float             dialogInputEnableTime = 0.0
 
 	array    buttonConfigs
 	array    stickConfigs
 
-	bool videoSettingsChanged = false
-
-	bool playingVideo = false
-	bool playingCredits = false
-
-	array<void functionref()>               resolutionChangedCallbacks
-	array<void functionref(bool)>           inputModeChangeCallbacks
-	array<void functionref(string, string)> keyBindSetCallbacks
-	array<void functionref()> 				uiShutdownCallbacks
+	array<void functionref()>                resolutionChangedCallbacks
+	array<void functionref(bool)>            inputModeChangeCallbacks
+	array<void functionref(string, string)>  keyBindSetCallbacks
+	array<void functionref()>                uiShutdownCallbacks
 
 	table<var, MenuDef> menuData
-	string              pin_lastMenuId
 
 	table<string, int>                        intVars
 	table<string, bool>                       boolVars
@@ -255,30 +254,12 @@ global struct UIGlobals
 
 	array<void functionref()> onLevelInitCallbacks
 
-	bool tabButtonsRegistered = false
-
 	table                panels = {}
 	array<var>           allPanels
 	table<var, PanelDef> panelData
-
-	int launching = eLaunching.FALSE
-
-	bool updateCachedNewItems = true
-
-	bool cachedLoadoutsReady = false
-	bool commsMenuOpen = false
-
-	bool isOptInEnabled = false
 }
 
 global UIGlobals uiGlobal
-
-
-void function UICodeCallback_SmokeTestRunning( string param )
-{
-	printt( "UICodeCallback_SmokeTestRunning : " + param );
-}
-
 
 void function UICodeCallback_UIInit()
 {
@@ -295,20 +276,15 @@ void function UICodeCallback_UIInit()
 
 	UtilityUI_Init()
 
-	Settings_Init() //
+	Settings_Init()                                                         
 	GameModes_Init()
 	UIVars_Init()
 
 	PassivesShared_Init()
-	//
-	//
 	ShXP_Init()
 
 	MenuGamepadLayout_Init()
-	//
 	MenuUtility_Init()
-	//
-	//
 
 	RegisterSignal( "LevelShutdown" )
 	RegisterSignal( "CleanupInGameMenus" )
@@ -316,37 +292,29 @@ void function UICodeCallback_UIInit()
 	RegisterSignal( "ActiveMenuChanged" )
 	RegisterSignal( "LevelFinishedLoading" )
 	RegisterSignal( "OpenErrorDialog" )
+	RegisterSignal( "ReconnectFailed" )
 	RegisterSignal( "BoughtItem" )
 	RegisterSignal( "TrackIsOverScrollBar" )
-	RegisterSignal( "PlayContextualMenuMusicThread" )
+	RegisterSignal( "UpdateUIMusicOnMusicPackLoadoutSlotReadyThread" )
 
 	thread UpdateClientMenuOpenStateThread()
 
 	InitGamepadConfigs()
-	InitMenus()
 	EmbeddedText_Init()
+	InitMenus()
 
-	ListPanelInit()
 	ScrollPanelInit()
 	GridPanelInit()
 
 	ShGladiatorCards_Init()
 
-	#if(true)
-		Sh_InitToolTips()
-	#endif
+	Sh_InitToolTips()
 
 	ShLoadouts_VMInit()
 
-	#if(DEV)
-		if ( IsFullyConnected() ) //
-		{
-			#if(false)
-
-
-#endif
-		}
-	#endif
+	DeathBoxListPanel_VMInit()
+	SurvivalGroundList_LevelInit()
+	ShLoadscreen_Init()
 }
 
 
@@ -356,14 +324,12 @@ void function UICodeCallback_UIShutdown()
 	{
 		func()
 	}
-
-	//
 }
 
 
 void function UICodeCallback_ControllerModeChanged( bool controllerModeEnabled )
 {
-	//
+	                                                                                    
 	foreach ( callbackFunc in uiGlobal.inputModeChangeCallbacks )
 	{
 		callbackFunc( controllerModeEnabled )
@@ -378,16 +344,14 @@ void function UICodeCallback_ControllerModeChanged( bool controllerModeEnabled )
 
 	UpdateFooterOptions()
 
-	if ( IsDialog( activeMenu ) && activeMenu != GetMenu( "PromoDialog" ) ) //
+	if ( IsDialog( activeMenu ) )                                                     
 		UpdateDialogFooterVisibility( activeMenu, controllerModeEnabled )
 }
 
 
 void function UICodeCallback_OnVideoOver()
 {
-	SetIntroViewed( true )
-
-	Signal( uiGlobal.signalDummy, "PlayVideoEnded" )
+	TriggerVideoEnd()
 }
 
 
@@ -419,21 +383,11 @@ void function AddUICallback_OnLevelInit( void functionref() callbackFunc )
 }
 
 
-void function SetShowingMap( bool val )
-{
-	uiGlobal.isShowingMap = val
-}
-
-
-bool function IsShowingMap()
-{
-	return uiGlobal.isShowingMap
-}
-
 void function AddUICallback_UIShutdown( void functionref() callbackFunc )
 {
 	uiGlobal.uiShutdownCallbacks.append( callbackFunc )
 }
+
 
 void function AddUICallback_InputModeChanged( void functionref( bool ) callbackFunc )
 {

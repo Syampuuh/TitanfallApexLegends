@@ -1,5 +1,5 @@
 global function UserInfoPanels_LevelInit
-//
+                                      
 
 
 struct SingleCurrencyBalanceElement
@@ -20,21 +20,29 @@ void function UserInfoPanels_LevelInit()
 	FileStruct_LifetimeLevel newFileLevel
 	fileLevel = newFileLevel
 
-	SetupUserInfoPanelToolTips()
+	                              
 	AddCallbackOrMaybeCallNow_OnAllItemFlavorsRegistered( SetupUserInfoPanels )
 }
 
-//
-//
-//
-//
+                                              
+   
+  	  
+   
 
 
-void function SetupUserInfoPanelToolTips()
+void function SetupUserInfoPanelToolTips( int currency1, int currency2, int currency3 )
 {
 	ToolTipData ttd
 	ttd.tooltipStyle = eTooltipStyle.CURRENCY
-	ttd.descText = "#CURRENCIES_TOOLTIP"
+	ttd.actionHint1 = FormatAndLocalizeNumber( "1", float( currency1 ), true )
+	ttd.actionHint2 = FormatAndLocalizeNumber( "1", float( currency2 ), true )
+	ttd.actionHint3 = FormatAndLocalizeNumber( "1", float( currency3 ), true )
+
+	int nextExpirationAmount = GRX_GetNextCurrencyExpirationAmt()
+	if( nextExpirationAmount > 0 )
+		ttd.descText = Localize( "#CURRENCIES_TOOLTIP_EXPIRATION", nextExpirationAmount, ( GRX_GetNextCurrencyExpirationTime() - GetUnixTimestamp() ) / SECONDS_PER_DAY )
+	else
+		ttd.descText = ""
 
 	foreach ( var menu in uiGlobal.allMenus )
 	{
@@ -61,18 +69,18 @@ void function SetupUserInfoPanels()
 				RuiSetImage( rui, "symbol2", ItemFlavor_GetIcon( GRX_CURRENCIES[GRX_CURRENCY_CREDITS] ) )
 				RuiSetImage( rui, "symbol3", ItemFlavor_GetIcon( GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] ) )
 
-				fileLevel.activeUserInfoPanelSet[elem] <- true //
+				fileLevel.activeUserInfoPanelSet[elem] <- true            
 			}
 
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//
+			                                                                                         
+			  	                                       
+			  		                                              
+			     
+			  
+			                                                                                          
+			  	                                       
+			  		                                             
+			     
 		}
 	}
 
@@ -107,25 +115,25 @@ void function UpdateActiveUserInfoPanels()
 	int premiumBalance, creditsBalance, craftingBalance
 	if ( isReady )
 	{
-		premiumBalance = GRXCurrency_GetPlayerBalance( GetUIPlayer(), GRX_CURRENCIES[GRX_CURRENCY_PREMIUM] )
-		creditsBalance = GRXCurrency_GetPlayerBalance( GetUIPlayer(), GRX_CURRENCIES[GRX_CURRENCY_CREDITS] )
-		craftingBalance = GRXCurrency_GetPlayerBalance( GetUIPlayer(), GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] )
+		premiumBalance = GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), GRX_CURRENCIES[GRX_CURRENCY_PREMIUM] )
+		creditsBalance = GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), GRX_CURRENCIES[GRX_CURRENCY_CREDITS] )
+		craftingBalance = GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] )
 	}
 
 	foreach( var elem, bool unused in fileLevel.activeUserInfoPanelSet )
 	{
 		var rui = Hud_GetRui( elem )
-		//
+		                                                  
 		RuiSetBool( rui, "isQuerying", !isReady )
 
 		if ( isReady )
 		{
-			#if(DEV)
+			#if DEV
 				RuiSetBool( rui, "hasUnknownItems", GetConVarBool( "grx_hasUnknownItems" ) )
 			#endif
-			RuiSetInt( rui, "count1", premiumBalance )
-			RuiSetInt( rui, "count2", creditsBalance )
-			RuiSetInt( rui, "count3", craftingBalance )
+			RuiSetString( rui, "count1",  FormatAndLocalizeNumber( "1", float( premiumBalance ), true ) )
+			RuiSetString( rui, "count2", LocalizeAndShortenNumber_Float( float( creditsBalance ) ) )
+			RuiSetString( rui, "count3", LocalizeAndShortenNumber_Float( float( craftingBalance ) ) )
 		}
 	}
 
@@ -135,35 +143,37 @@ void function UpdateActiveUserInfoPanels()
 		RuiSetBool( rui, "isQuerying", !isReady )
 
 		if ( isReady )
-			RuiSetInt( rui, "count", GRXCurrency_GetPlayerBalance( GetUIPlayer(), scbe.currency ) )
+			RuiSetInt( rui, "count", GRXCurrency_GetPlayerBalance( GetLocalClientPlayer(), scbe.currency ) )
 	}
+
+	SetupUserInfoPanelToolTips( premiumBalance, creditsBalance, craftingBalance )
 }
 
 
-/*
+                                      
+ 
+	                                                       
 
+	              
+	 
+		                             
+		             
+		 
+			                                                       
+			                                                    
+			                                                       
+			                                                           
+			                                                             
+			                                                                                 
 
+			                                                                    
+			 
+				                            
+				                                      
+				                                                
+			 
+		 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+		                             
+	 
+   

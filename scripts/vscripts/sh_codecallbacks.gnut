@@ -6,9 +6,11 @@ global function CodeCallback_CanUseEntity
 global function ClearCallback_CanUseEntityCallback
 global function SetCallback_CanUseEntityCallback
 global function CodeCallback_CanUseZipline
+global function CodeCallback_ShouldUseBlockReload
+global function SetCallback_ShouldUseBlockReloadCallback
 global function CodeCallback_PlayerClassChanged
 global function CodeCallback_OnUseEntity
-//
+                                         
 global function CodeCallback_OnUseEnd
 global function CodeCallback_OnUseButtonPressed
 global function CodeCallback_OnUseButtonReleased
@@ -20,11 +22,13 @@ global function RemoveCallback_OnUseButtonReleased
 global function CodeCallback_ForceScriptError
 
 global function AddCallback_PlayerClassChanged
+global function AddCallback_PlayerClassActuallyChanged
 global function AddCallback_PlayerCanUseZipline
 
 global function CodeCallback_CanPlayerReload
+global function CodeCallback_CanHitPingTrace
 
-#if(CLIENT)
+#if CLIENT
 global function CodeCallback_OnTurretCancelPressed
 global function CodeCallback_OnWeaponDisable
 global function ClientCodeCallback_PartyUpdated
@@ -35,28 +39,28 @@ global function AddCallback_OnPartyUpdated
 global function RemoveCallback_OnPartyUpdated
 #endif
 
-#if(false)
-
-
-
-
+#if SERVER
+                                           
+                                          
+                                                  
+                                                 
+                                                
+                                               
 #endif
+
+global function CodeCallback_OnPlayerWeaponActivated
+global function AddCallback_OnPlayerWeaponSwitched
 
 global function AddCallback_OnVehicleLaunch
 global function CodeCallback_OnVehicleLaunch
 global function AddCallback_OnVehicleCollide
 global function CodeCallback_OnVehicleCollide
 
-global function AddCallback_OnPlayerChangedTeam
 global function AddCallback_OnPlayerZoomIn
 global function AddCallback_OnPlayerZoomOut
 
 global function AddCallback_CheckPlayerCanUse
 global function RemoveCallback_CheckPlayerCanUse
-
-#if(CLIENT)
-global function ServerCallback_PlayerChangedTeams
-#endif
 
 global function CodeCallback_OnPlayerStartZoomIn
 global function CodeCallback_OnPlayerStartZoomOut
@@ -64,14 +68,25 @@ global function CodeCallback_OnPlayerStartZoomOut
 global function CodeCallback_CanStartCustomWeaponActivity
 global function AddCallback_CanStartCustomWeaponActivity
 
+global function CodeCallback_CheckPassThroughAddsMods
+global function AddCallback_OnPassThrough
+
+global function CodeCallback_GetLatestRankedPeriodName
+global function CodeCallback_GetLatestArenaPeriodName
+
+global function CodeCallback_GivePlayerDoubleJump
+global function AddCallback_GivePlayerDoubleJump
+global function RemoveCallback_GivePlayerDoubleJump
+
+
 struct
 {
-	#if(false)
-
-
-
-#endif
-	#if(CLIENT)
+	#if SERVER
+		                                                         
+		                                                                
+		                                                      
+	#endif
+	#if CLIENT
 		var disembarkRUI
 
 		array< void functionref() > partyUpdatedCallbacks
@@ -79,6 +94,8 @@ struct
 
 	array<bool functionref( entity, entity )> canPlayerUseCheckCallbacks
 
+	array<void functionref( entity, entity, entity )> onPlayerSwitchedWeaponCallbacks
+	table<entity , entity>							  playerPreviousActiveWeapon
 } file
 
 void function CodeCallbacksShared_Init()
@@ -88,33 +105,36 @@ void function CodeCallbacksShared_Init()
 	RegisterSignal( "SettingsChanged" )
 	RegisterSignal( "OnPrimaryAttack" )
 
-	//
+	                                                                     
 	RegisterSignal( "OnPlayerUse" )
 	RegisterSignal( "OnPlayerUseLong" )
 	RegisterSignal( "OnPlayerUseAlt" )
 
-	//
+	                                                                          
 	RegisterSignal( "PlayerPressedUse" )
 
-	#if(CLIENT)
+	#if CLIENT
 		RegisterConCommandTriggeredCallback( "-useAndReload", CancelDisembark )
 		RegisterConCommandTriggeredCallback( "-use", CancelDisembark )
 	#endif
 
-	#if(false)
-
-#endif
-
-	#if(false)
-
-
-
-#endif
+	#if SERVER
+		                                                  
+		                                                        
+	#endif
 }
-
 
 void function CodeCallback_AnimationDone( entity ent )
 {
+	#if SERVER
+	                                           
+	 
+		                                      
+		                                      
+		                    
+		                    
+	 
+	#endif
 	Signal( ent, "OnAnimationDone" )
 }
 
@@ -124,7 +144,7 @@ void function CodeCallback_AnimationInterrupted( entity ent )
 	Signal( ent, "OnAnimationInterrupted" )
 }
 
-//
+                                                                                                          
 
 void function ClearCallback_CanUseEntityCallback( entity ent )
 {
@@ -132,14 +152,14 @@ void function ClearCallback_CanUseEntityCallback( entity ent )
 }
 
 
-void function SetCallback_CanUseEntityCallback( entity ent, bool functionref( entity, entity ) callbackFunc )
+void function SetCallback_CanUseEntityCallback( entity ent, bool functionref( entity, entity, int ) callbackFunc )
 {
 	Assert( ent.e.canUseEntityCallback == null )
 	ent.e.canUseEntityCallback = callbackFunc
 }
 
 
-bool function CodeCallback_CanUseEntity( entity player, entity ent )
+bool function CodeCallback_CanUseEntity( entity player, entity ent, int useFlags )
 {
 	if ( !IsAlive( player ) )
 		return false
@@ -147,7 +167,7 @@ bool function CodeCallback_CanUseEntity( entity player, entity ent )
 	if ( player.IsPhaseShifted() )
 		return false
 
-	if ( GetGameState() >= eGameState.WinnerDetermined )
+	if ( GetGameState() == eGameState.WinnerDetermined || GetGameState() > eGameState.Epilogue )
 		return false
 
 	if ( ent == player )
@@ -155,7 +175,7 @@ bool function CodeCallback_CanUseEntity( entity player, entity ent )
 
 	if ( ent.IsNPC() )
 	{
-		//
+		                             
 		if ( Leech_IsLeechable( ent ) )
 			return false
 	}
@@ -167,7 +187,7 @@ bool function CodeCallback_CanUseEntity( entity player, entity ent )
 		return false
 
 	if ( ent.e.canUseEntityCallback != null )
-		return ent.e.canUseEntityCallback( player, ent )
+		return ent.e.canUseEntityCallback( player, ent, useFlags )
 
 	foreach ( bool functionref( entity, entity ) callbackFunc in file.canPlayerUseCheckCallbacks )
 	{
@@ -178,6 +198,24 @@ bool function CodeCallback_CanUseEntity( entity player, entity ent )
 	return true
 }
 
+void function ClearCallback_ShouldUseBlockReloadCallback( entity ent, bool functionref( entity, entity ) callbackFunc )
+{
+	ent.e.shouldUseBlockReloadCallback = null
+}
+
+void function SetCallback_ShouldUseBlockReloadCallback( entity ent, bool functionref( entity, entity ) callbackFunc )
+{
+	Assert( ent.e.shouldUseBlockReloadCallback == null )
+	ent.e.shouldUseBlockReloadCallback = callbackFunc
+}
+
+bool function CodeCallback_ShouldUseBlockReload( entity player, entity ent )
+{
+	if ( ent.e.shouldUseBlockReloadCallback != null )
+		return ent.e.shouldUseBlockReloadCallback( player, ent )
+
+	return true;
+}
 
 const float ZIPLINE_MAX_USE_ANGLE = 35.0
 bool function CodeCallback_CanUseZipline( entity player, entity zipline, vector ziplineClosestPoint )
@@ -195,16 +233,16 @@ bool function CodeCallback_CanUseZipline( entity player, entity zipline, vector 
 			return false
 	}
 
-	if ( GetGameState() >= eGameState.WinnerDetermined )
+	if ( GetGameState() == eGameState.WinnerDetermined || GetGameState() > eGameState.Epilogue )
 		return false
 
-	#if(false)
-
-
-
-
-
-#else
+	#if SERVER
+		                                                   
+		 
+			                                                    
+				            
+		 
+	#else
 		foreach ( func in clGlobal.canUseZiplineCallbacks )
 		{
 			if ( !func( player, zipline, ziplineClosestPoint ) )
@@ -218,9 +256,9 @@ bool function CodeCallback_CanUseZipline( entity player, entity zipline, vector 
 
 void function AddCallback_PlayerCanUseZipline( bool functionref( entity, entity, vector ) callbackFunc )
 {
-	#if(false)
-
-#else
+	#if SERVER
+		                                                      
+	#else
 		clGlobal.canUseZiplineCallbacks.append( callbackFunc )
 	#endif
 }
@@ -234,15 +272,30 @@ bool function CodeCallback_CanPlayerReload( entity player )
 	return true
 }
 
+
+bool function CodeCallback_CanHitPingTrace( entity ent )
+{
+	return !ent.e.ignorePingTrace
+}
+
+
 void function AddCallback_PlayerClassChanged( void functionref( entity ) callbackFunc )
 {
-	#if(false)
-
-#else
+	#if SERVER
+		                                                             
+	#else
 		clGlobal.onPlayerClassChangedCallbacks.append( callbackFunc )
 	#endif
 }
 
+void function AddCallback_PlayerClassActuallyChanged( void functionref( entity ) callbackFunc )
+{
+	#if SERVER
+		                                                                     
+	#else
+		clGlobal.onPlayerClassActuallyChangedCallbacks.append( callbackFunc )
+	#endif
+}
 
 void function CodeCallback_PlayerClassChanged( entity player, bool actualSettingsFileChanged )
 {
@@ -255,101 +308,142 @@ void function CodeCallback_PlayerClassChanged( entity player, bool actualSetting
 	player.Signal( "SettingsChanged" )
 	string newClass = player.GetPlayerClass()
 
-	#if(false)
+#if SERVER
+	                                                                  
+	 
+		                      
+	 
 
+	                                
+	 
+		                                                                          
+		 
+			                      
+		 
+	 
 
-
-
-
-
-
-
-
-
-
+	                                                                                                                    
+	 
+		                                                                                          
+		                                                                                  
+		                                     
+		                                  
+	 
 #else
-		foreach ( callbackFunc in clGlobal.onPlayerClassChangedCallbacks )
+	foreach ( callbackFunc in clGlobal.onPlayerClassChangedCallbacks )
+	{
+		callbackFunc( player )
+	}
+
+	if ( actualSettingsFileChanged )
+	{
+		foreach ( callbackFunc in clGlobal.onPlayerClassActuallyChangedCallbacks )
 		{
 			callbackFunc( player )
 		}
-	#endif
+	}
 
-	#if(CLIENT)
+#endif
+
+	#if CLIENT
 		player.classChanged = true
-		//
-		//
+		player.p.classActuallyChanged = actualSettingsFileChanged
+
+		                                              
+		                                                  
 
 		UpdatePlayerStatusCounts()
 
-		/*
-*/
+		                           
+			                                
 	#else
 		player.kv.renderColor = "255 255 255 255"
 
 		InitDamageStates( player )
 	#endif
 
-	//
-	//
+	                                        
+	  	                
 
-	//
-	//
+	                          
+	  	                                      
 
-	#if(false)
+	#if SERVER
+		                                       
+		                                
+			                                                       
 
-
-
-#endif
+		                                      
+	#endif
 }
 
-#if(false)
 
+#if SERVER
+                                                          
+ 
+	                                            
+	                              
+		      
 
+	                              
+		      
 
+	                              
+		      
 
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                                                        
+	                                                                         
+		                 
+ 
 #endif
+
+
+#if SERVER
+                                                                               
+ 
+	                                               
+ 
+#endif
+
+
+#if SERVER
+                                                                                      
+ 
+	                                                      
+ 
+#endif
+
+
+#if SERVER
+                                                                 
+ 
+	                                                                                
+		            
+ 
+#endif
+
+void function AddCallback_OnPlayerWeaponSwitched( void functionref(entity, entity, entity) callback )
+{
+	file.onPlayerSwitchedWeaponCallbacks.append( callback )
+}
+
+void function CodeCallback_OnPlayerWeaponActivated( entity player, entity activatedWeapon )
+{
+	if( !( player in file.playerPreviousActiveWeapon ) )
+		file.playerPreviousActiveWeapon[player] <- null
+
+	if( file.playerPreviousActiveWeapon[player] != activatedWeapon )
+	{
+		foreach ( void functionref(entity, entity, entity) cb in file.onPlayerSwitchedWeaponCallbacks )
+			cb(player, activatedWeapon, file.playerPreviousActiveWeapon[player])
+		file.playerPreviousActiveWeapon[player] = activatedWeapon
+	}
+}
+
 
 bool function CodeCallback_OnUseEntity( entity player, entity ent, int useInputFlags )
 {
-	//
+	                                                                                     
 	foreach ( callbackFunc in ent.e.onUseEntityCallbacks )
 	{
 		callbackFunc( ent, player, useInputFlags )
@@ -362,15 +456,15 @@ bool function CodeCallback_OnUseEntity( entity player, entity ent, int useInputF
 	if ( useInputFlags & USE_INPUT_ALT )
 		Signal( ent, "OnPlayerUseAlt", { player = player } )
 
-	#if(CLIENT)
+	#if CLIENT
 		if ( IsFirstTimePredicted() )
 		{
 			if ( useInputFlags & USE_INPUT_DEFAULT && ent.e.predictedUseSuccess )
 				ent.e.predictedUseCount += 1
 		}
-	#endif //
+	#endif          
 
-	//
+	                                                             
 	return true
 }
 
@@ -389,7 +483,7 @@ void function RemoveCallback_CheckPlayerCanUse( bool functionref( entity, entity
 }
 
 
-#if(CLIENT)
+#if CLIENT
 void function CancelDisembark( entity player )
 {
 	if ( file.disembarkRUI != null )
@@ -400,11 +494,11 @@ void function CancelDisembark( entity player )
 }
 #endif
 
-/*
-
-
-
-*/
+  
+                                                      
+ 
+ 
+  
 
 void function CodeCallback_OnUseEnd( entity player )
 {
@@ -433,7 +527,7 @@ void function RemoveCallback_OnUseButtonPressed( entity player, void functionref
 void function CodeCallback_OnUseButtonPressed( entity player )
 {
 	player.Signal( "PlayerPressedUse" )
-	//
+	                                                                                             
 	foreach ( callbackFunc in player.e.onPlayerUseButtonPressed )
 	{
 		callbackFunc( player )
@@ -460,14 +554,14 @@ void function RemoveCallback_OnUseButtonReleased( entity player, void functionre
 
 void function CodeCallback_OnUseButtonReleased( entity player )
 {
-	//
+	                                                                                              
 	foreach ( callbackFunc in player.e.onPlayerUseButtonReleased )
 	{
 		callbackFunc( player )
 	}
 }
 
-#if(CLIENT)
+#if CLIENT
 void function CodeCallback_OnTurretCancelPressed( entity player )
 {
 	if ( InPrediction() && !IsFirstTimePredicted() )
@@ -475,9 +569,9 @@ void function CodeCallback_OnTurretCancelPressed( entity player )
 
 	ScreenFade( player, 0, 0, 0, 255, 0.1, 1.0, FFADE_OUT )
 }
-#endif //
+#endif              
 
-//
+                                                   
 void function CodeCallback_ForceScriptError( entity ent, string errorMsg )
 {
 	Assert( 0, errorMsg )
@@ -494,7 +588,7 @@ void function AddCallback_OnVehicleLaunch( entity ent, void functionref( entity 
 
 void function CodeCallback_OnVehicleLaunch( entity vehicle )
 {
-	//
+	                                                                                          
 	foreach ( callbackFunc in vehicle.e.onVehicleLaunchCallbacks )
 	{
 		callbackFunc( vehicle )
@@ -512,29 +606,32 @@ void function AddCallback_OnVehicleCollide( entity ent, void functionref( entity
 
 void function CodeCallback_OnVehicleCollide( entity vehicle )
 {
-	//
+	                                                                                           
 	foreach ( callbackFunc in vehicle.e.onVehicleCollideCallbacks )
 	{
 		callbackFunc( vehicle )
 	}
 }
 
-
-array <void functionref(entity, int, int)> s_callbacksOnPlayerChangedTeam
-void function AddCallback_OnPlayerChangedTeam( void functionref( entity player, int oldTeam, int newTeam ) func )
-{
-	s_callbacksOnPlayerChangedTeam.append( func )
-}
+#if SERVER
+                                                                         
+                                                                                                                 
+ 
+	                                             
+ 
+#endif
 
 array <void functionref(entity)> s_callbacksOnPlayerZoomIn
 void function AddCallback_OnPlayerZoomIn( void functionref( entity player ) func )
 {
+	Assert( !s_callbacksOnPlayerZoomIn.contains( func ), "Callback registered twice" )
 	s_callbacksOnPlayerZoomIn.append( func )
 }
 
 array <void functionref(entity)> s_callbacksOnPlayerZoomOut
 void function AddCallback_OnPlayerZoomOut( void functionref( entity player ) func )
 {
+	Assert( !s_callbacksOnPlayerZoomOut.contains( func ), "Callback registered twice" )
 	s_callbacksOnPlayerZoomOut.append( func )
 }
 
@@ -550,71 +647,37 @@ void function AddCallback_CanStartCustomWeaponActivity( int activity, bool funct
 	s_callbacksCanStartCustomWeaponActivity[activity].append( func )
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-#endif
-
-#if(CLIENT)
-void function ServerCallback_PlayerChangedTeams( entity player, int oldTeam, int newTeam )
+array <void functionref( entity )> s_callbacksOnPassThrough
+void function AddCallback_OnPassThrough( void functionref( entity hitEnt ) func )
 {
-	if ( !IsValid( player ) )
-		return //
-
-	ShEHI_OnPlayerChangedTeam( player, oldTeam, newTeam )
-
-	foreach( void functionref(entity, int, int) callbackFunc in s_callbacksOnPlayerChangedTeam )
-		callbackFunc( player, oldTeam, newTeam )
-
-	#if(DEV)
-		if ( oldTeam == TEAM_INVALID || newTeam == TEAM_INVALID )
-			return
-
-		if ( !IsValid( player ) )
-			return
-
-		string playerName = player.GetPlayerName()
-		vector playerNameColor = OBITUARY_COLOR_ENEMY
-		string teamString      = "Team " + newTeam
-
-		if ( newTeam == 1 )
-		{
-			playerNameColor = <200, 200, 210>
-			teamString = "Spectator"
-		}
-		else if ( newTeam == GetLocalViewPlayer().GetTeam() )
-		{
-			playerNameColor = OBITUARY_COLOR_FRIENDLY
-			//
-		}
-
-		//
-		//
-	#endif
-	//
+	Assert( !s_callbacksOnPassThrough.contains( func ) )
+	s_callbacksOnPassThrough.append( func )
 }
+
+#if SERVER
+                                                
+ 
+	                                                     
+ 
+
+
+                                                   
+ 
+	                                          
+		                                        
+ 
+
+                                                               
+ 
+	                                                                                                      
+	                              
+
+	                                       
+	                                                                                   
+
+	                                                                                             
+		                                        
+ 
 #endif
 
 void function CodeCallback_OnPlayerStartZoomIn( entity player )
@@ -649,7 +712,69 @@ bool function CodeCallback_CanStartCustomWeaponActivity( entity player, int acti
 	return true
 }
 
-#if(CLIENT)
+
+string function CodeCallback_CheckPassThroughAddsMods( entity player, entity hitEnt, entity passingEntOrWeapon, string currWeaponName, array<string> currMods )
+{
+	foreach ( func in s_callbacksOnPassThrough )
+	{
+		func( hitEnt )
+	}
+
+	if ( !IsValid( player ) )
+		return ""
+
+	if ( StatusEffect_GetSeverity( hitEnt, eStatusEffect.pass_through_amps_weapon ) > 0 )
+	{
+		if ( passingEntOrWeapon.IsProjectile() )
+		{
+			if ( currMods.contains( "amped_damage" ) )
+			{
+				#if SERVER
+					                               
+						                                                                                                                                 
+				#endif
+			}
+		}
+		else if ( passingEntOrWeapon.IsWeaponX() )
+		{
+			if ( currMods.contains( "amped_damage" ) || currMods.contains( "amped_damage_alt"  ) )
+			{
+				#if SERVER
+					                               
+						                                                                                                                       
+				#endif
+			}
+
+			if ( passingEntOrWeapon.GetWeaponClassName() == "mp_weapon_energy_ar" )
+			{
+				return "amped_damage_alt"
+			}
+		}
+
+		return "amped_damage"
+	}
+
+	                    
+	  	                                                                                 
+	  		                                
+	        
+
+	return ""
+}
+
+
+string function CodeCallback_GetLatestRankedPeriodName()
+{
+	return Ranked_GetStryderLadderNameForLatestRankedPeriod()
+}
+
+string function CodeCallback_GetLatestArenaPeriodName()
+{
+	                                                                            
+	return ArenasRanked_GetStryderLadderNameForLatestRankedPeriod()
+}
+
+#if CLIENT
 void function CodeCallback_OnWeaponDisable( entity weapon )
 {
 	entity weaponOwner = weapon.GetWeaponOwner()
@@ -708,3 +833,40 @@ void function RemoveCallback_OnPartyUpdated( void functionref() callbackFunc )
 	file.partyUpdatedCallbacks.fastremovebyvalue( callbackFunc )
 }
 #endif
+
+void function CodeCallback_GivePlayerDoubleJump ( entity player )
+{
+	#if SERVER
+		                                                          
+		 
+			              
+		 
+	#else
+		foreach ( func in clGlobal.givePlayerDoubleJumpCallbacks )
+		{
+			func( player )
+		}
+	#endif
+}
+
+void function AddCallback_GivePlayerDoubleJump( void functionref( entity player ) func )
+{
+	#if SERVER
+		                                                              
+			                                                     
+	#else
+		if( !clGlobal.givePlayerDoubleJumpCallbacks.contains( func ) )
+			clGlobal.givePlayerDoubleJumpCallbacks.append( func )
+	#endif
+}
+
+void function RemoveCallback_GivePlayerDoubleJump( void functionref( entity player ) func )
+{
+	#if SERVER
+		                                                             
+	    	                                                                
+	#else
+		if( clGlobal.givePlayerDoubleJumpCallbacks.contains( func ) )
+			clGlobal.givePlayerDoubleJumpCallbacks.fastremovebyvalue( func )
+	#endif
+}

@@ -14,16 +14,14 @@ WeaponData
 	"readymessage"              					"#HUD_BURNMETER_READY_BUBBLE_BUNKER"
 	"readyhint"                 					"#HUD_BURNMETER_READY_BUBBLE_BUNKER_HINT"
 
-	"weaponClass" 									"human"
 	"fire_mode"   									"offhand"
 	"is_toss_weapon"								"1"
 	"minimap_reveal_distance"						"32000"
 	"fast_swap_to"									"1"
-	"dev_menu_type"									"offhand" // fire_mode isn't readable from script
 
 	"does_not_interrupt_cloak"						"1"
+    "trophy_system_ignores"                          "always"
 
-	"OnWeaponAttemptOffhandSwitch"					"OnWeaponAttemptOffhandSwitch_weapon_deployable_medic"
 	"OnWeaponTossPrep"								"OnWeaponTossPrep_weapon_deployable_medic"
 	"OnWeaponTossReleaseAnimEvent"					"OnWeaponTossReleaseAnimEvent_weapon_deployable_medic"
 //	"OnProjectileCollision"							"OnProjectileCollision_weapon_deployable"
@@ -37,18 +35,18 @@ WeaponData
 
 	// Models
 	"viewmodel"										"mdl/weapons/lifeline_drone/ptpov_lifeline_drone_held.rmdl"
-	"playermodel" 									"mdl/weapons/empty_handed/w_empty_handed_human.rmdl"
+	"playermodel" 									"mdl/weapons/lifeline_drone/w_lifeline_drone.rmdl"
 	"projectilemodel" 								"mdl/props/lifeline_drone/lifeline_drone.rmdl"
 	"offhand_default_inventory_slot"				"1"
 	"leveled_pickup"								"1"
-
-	"sound_weapon_ready"							"survival_ui_tactical_ready"
+	"offhand_cancelled_by_melee"					"1"
 
 	// Effects
 	"bounce_effect_table"							"deployable_cover_bounce_table"
 	"impact_effect_table" 							"exp_deployable_cover"
-	//"projectile_trail_effect_0"						"P_arcTrap_light"
-	//"projectile_trail_attachment" 					"fx_center"
+	//"projectile_trail_effect_0_1p"				"P_arcTrap_light"
+	//"projectile_trail_effect_0_3p"				"P_arcTrap_light"
+	//"projectile_trail_attachment" 				"fx_center"
 	"vortex_absorb_effect"							"wpn_vortex_projectile_prox_mine_FP"
 	"vortex_absorb_effect_third_person"				"wpn_vortex_projectile_prox_mine"
 	"vortex_absorb_sound"							"Vortex_Shield_AbsorbBulletLarge"
@@ -58,10 +56,12 @@ WeaponData
 
 	"grenade_disc_throw"							"1"
 	"projectile_gravity_scale"						"0.005"
+	"projectile_inherit_owner_velocity_scale"		"0.9"  //when sprinting
 
 	"stick_pilot"                                   "0"
 	"stick_titan"                                   "0"
 	"stick_npc"                                     "0"
+	"stick_drone"                                   "0"
 
 	"projectile_visible_to_smart_ammo"				"0"
 
@@ -73,7 +73,6 @@ WeaponData
 	"sound_throw_3p"								""
 	"sound_deploy_3p"								"Lifeline_Drone_Deploy"
 	"sound_grenade_projectile"						""
-	"sound_dryfire"									"Survival_UI_Ability_NotReady"
 
 	// Damage - When Used by Players
 	"damage_type" 									"burn"
@@ -112,8 +111,8 @@ WeaponData
 	"aimassist_disable_ads"							"1"
 	"grenade_inherit_owner_velocity"				"1"
 	"cooldown_type"									"ammo_timed"
-	"toss_pullout_time"								"0.5"
-	"toss_time"										"0.7"
+	"toss_pullout_time"								"0.25"
+	"toss_time"										"0.35"
 	"toss_overhead_time"							"0.55"
 
 
@@ -222,34 +221,14 @@ WeaponData
 	"viewkick_spring" 								"pistol"
 
 	"ammo_drains_to_empty_on_fire"					"1"
-
-	MP_BASE
-	{
-		"ammo_clip_size"   								"300"
-		"ammo_default_total"							"300"
-		"ammo_display"									"bar"
-		"ammo_min_to_fire"								"300"
-		"ammo_per_shot"									"300"
-		"ammo_stockpile_max"							"300"
-		"regen_ammo_refill_rate"						"5"
-		"regen_ammo_refill_start_delay"					"0.0"
-
-		"enable_highlight_networking_on_creation"		"<KEEP_DEFAULT>"
-	}
-
-	SP_BASE
-	{
-		"ammo_clip_size"   								"40"
-		"ammo_default_total"							"40"
-		"ammo_display"									"bar"
-		"ammo_min_to_fire"								"20"
-		"ammo_per_shot"									"20"
-		"ammo_stockpile_max"							"100"
-		"regen_ammo_refill_rate"						"1"
-		"regen_ammo_refill_start_delay"					"0.0"
-
-		"enable_highlight_networking_on_creation"		"1"
-	}
+    "ammo_clip_size"   								"450"
+    "ammo_default_total"							"450"
+    "ammo_display"									"bar"
+    "ammo_min_to_fire"								"450"
+    "ammo_per_shot"									"450"
+    "ammo_stockpile_max"							"450"
+    "regen_ammo_refill_rate"						"10"
+    "regen_ammo_refill_start_delay"					"0.0"
 
 	// Rumble
 	"rumble"  										"3"
@@ -266,10 +245,23 @@ WeaponData
 			"regen_ammo_refill_rate"    "*1.25"
 		}
 
-		burn_card_weapon_mod
-		{
+                            
+        arenas_tac_max
+        {
+			"ammo_clip_size"   								"3"
+            "ammo_default_total"							"1"
+            "ammo_min_to_fire"								"1"
+            "ammo_per_shot"									"1"
+            "ammo_stockpile_max"							"1"
+        }
 
-		}
+        arenas_tac_max_cooldown
+        {
+            "ammo_regen_takes_from_stockpile"               "1"
+            "ammo_default_total"							"450" // 450 * 1 charges
+            "ammo_stockpile_max"							"900" // 450 * 2 charges
+        }
+           
 
 		survival_finite_ordnance
 		{

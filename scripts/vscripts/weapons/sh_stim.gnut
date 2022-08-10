@@ -2,14 +2,14 @@ global function StimShared_Init
 global function StimPlayer
 global function StimPlayerWithOffhandWeapon
 
-#if(false)
+#if SERVER
+                                  
+                                  
+                                                                   
+#endif          
 
 
-//
-#endif //
-
-
-const float STIM_EFFECT_DEFAULT_SEVERITY = 0.15	//
+const float STIM_EFFECT_DEFAULT_SEVERITY = 0.15	                                                   
 
 
 int s_cockpitFx
@@ -20,9 +20,9 @@ void function StimShared_Init()
 	s_cockpitFx = PrecacheParticleSystem( $"P_pilot_stim_hld_FP" )
 	s_headFx = PrecacheParticleSystem( $"P_stim_3p_head" )
 	s_bodyFx = PrecacheParticleSystem( $"P_stim_3p_body" )
-	#if(false)
-
-#else
+	#if SERVER
+	                                           
+	#else
 	StatusEffect_RegisterEnabledCallback( eStatusEffect.stim_visual_effect, StimVisualsEnabled )
 	StatusEffect_RegisterDisabledCallback( eStatusEffect.stim_visual_effect, StimVisualsDisabled )
 	#endif
@@ -41,6 +41,7 @@ void function StimPlayerWithOffhandWeapon( entity player, float duration, entity
 	StimPlayer_Internal( player, duration, STIM_EFFECT_DEFAULT_SEVERITY, offhandWeapon )
 }
 
+const float USE_TIME_INFINITE = -1.0
 void function StimPlayer_Internal( entity player, float duration, float effectSeverity, entity offhandWeapon )
 {
 	int endlessStatusEffectHandle = 0
@@ -50,20 +51,23 @@ void function StimPlayer_Internal( entity player, float duration, float effectSe
 	}
 	else
 	{
-		float stimSpeed = StatusEffect_GetSeverity( player, eStatusEffect.speed_boost )
-		//
-		if ( StatusEffect_GetSeverity( player, eStatusEffect.stim_visual_effect ) == 0.0 )
-			stimSpeed += effectSeverity
+#if CLIENT
+		if ( InPrediction() )
+#endif
+		{
+			GivePlayerSettingsMods( player, [ "stim_sprint" ] )
+		}
+		thread RemovePlayerClassModAfterDuration( player, "stim_sprint", duration )
 
-		StatusEffect_AddTimed( player, eStatusEffect.anti_slow, 0.5, duration + 0.5, 0.5 ) //
-		StatusEffect_AddTimed( player, eStatusEffect.speed_boost, stimSpeed, duration + 0.5, 0.5 ) //
+		StatusEffect_AddTimed( player, eStatusEffect.anti_slow, 0.5, duration + 0.5, 0.5 )                         
+		StatusEffect_AddTimed( player, eStatusEffect.speed_boost, effectSeverity, duration + 0.5, 0.5 )                         
 		StatusEffect_AddTimed( player, eStatusEffect.stim_visual_effect, 1.0, duration, duration )
 	}
 
-#if(false)
+#if SERVER
+	                                                                              
 
-
-#else //
+#else          
 	if ( IsFirstTimePredicted() )
 		ScreenFlash( 2, 3.5, 2, 0.15, 0.3 )
 
@@ -72,197 +76,211 @@ void function StimPlayer_Internal( entity player, float duration, float effectSe
 		return
 
 	HealthHUD_ClearFX( player )
-#endif //
+#endif                  
 }
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-/*
-
-
-
-
-
-
-
-
-
-*/
-//
-
-//
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#else //
-
-
-//
+void function RemovePlayerClassModAfterDuration( entity player, string mod, float duration )
+{
+	player.EndSignal( "OnDeath" )
+
+	OnThreadEnd(
+		function() : ( player, mod )
+		{
+			TakePlayerSettingsMods( player, [ "stim_sprint" ] )
+		}
+	)
+
+	wait duration
+}
+
+#if SERVER
+                                                                                                             
+ 
+	                             
+	                                                          
+	                             
+	                                     
+		                                     
+	                                           
+	                                        
+	                             
+	                                   
+
+	                        
+	 
+		                                               
+		                                                                          
+		                                                                            
+	 
+	    
+	 
+		                                        
+		                                                      
+	 
+
+	                                                            
+
+	                                                                                                                      
+	                         
+	                                                                                                    
+
+	                                                                 
+
+	                                                                                                                              
+	                             
+	                                                                                                        
+
+	            
+		                                                                                     
+		 
+			                         
+				      
+			                        
+				                    
+			                            
+				                        
+
+			                                                                                                                                                                 
+			                                                                                                                                                                                     
+			 
+				                                                             
+				                                                               
+				                                                                      
+				                                          
+				                                            
+			 
+
+			                                                      
+			                                                      
+
+			                                     
+				                                                      
+
+			                          
+		 
+	 
+
+	                                    
+		             
+
+	                   
+
+	                        
+	 
+		                                                                                
+		                                                                                  
+	 
+	    
+	 
+		                                                            
+	 
+
+	        
+ 
+
+
+
+                                                                                         
+  
+
+                                                                  
+                                                                   
+                                                             
+                                                                  
+                                                                   
+                                                                   
+                                                                  
+
+  
+                                                                                         
+
+                                                                   
+                                                           
+ 
+	                                                                   
+	                                                                                   
+	                          
+	                         
+	                                 
+	                                                   
+	                                           
+	                                       
+	                           
+	                                   
+	                                              
+	                                    
+	                        
+	                                                     
+
+	                               
+	                                                                                                                                                      
+	                                 
+
+	                 
+ 
+
+                                               
+ 
+	                                                                            
+	                             
+		      
+	                                                   
+ 
+
+                                                     
+ 
+	                                                        
+	                                           
+	                            
+	 
+		                     
+			             
+	 
+
+	                    
+ 
+
+                                                                     
+ 
+	                      
+		      
+	                   
+
+	                                                                       
+	                  
+	                                                    
+		      
+
+	                                     
+	                       
+	                          
+	                                                           
+	                                                           
+
+	                                                                             
+	                                                                               
+	                                     
+	                         
+
+ 
+
+                                                 
+ 
+	                         
+		      
+	                     
+	                             
+	                                                                                       
+	              
+	                                                                                      
+
+ 
+
+
+#else              
+
+
+        
 void function StimVisualsEnabled( entity ent, int statusEffect, bool actuallyChanged )
 {
 	if ( ent != GetLocalViewPlayer() )
@@ -274,9 +292,11 @@ void function StimVisualsEnabled( entity ent, int statusEffect, bool actuallyCha
 	if ( !IsValid( cockpit ) )
 		return
 
+	Signal( player, "WreckingBall_CleanupFX" )
+
 	Chroma_StartStimEffect()
 
-	int fxHandle = StartParticleEffectOnEntity( cockpit, s_cockpitFx, FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+	int fxHandle = StartParticleEffectOnEntity( cockpit, s_cockpitFx, FX_PATTACH_ABSORIGIN_FOLLOW, ATTACHMENTID_INVALID )
 	thread StimScreenFXThink( player, fxHandle, cockpit )
 }
 
@@ -324,4 +344,4 @@ void function StimScreenFXThink( entity player, int fxHandle, entity cockpit )
 
 
 
-#endif //
+#endif                       

@@ -14,14 +14,14 @@ void function MpWeaponWraithKunaiPrimary_Init()
 
 void function OnWeaponActivate_weapon_wraith_kunai_primary( entity weapon )
 {
-	//
+	                                                      
 
-	weapon.PlayWeaponEffect( KUNAI_FX_GLOW_FP, KUNAI_FX_GLOW_3P, "knife_base" )
+	weapon.PlayWeaponEffect( KUNAI_FX_GLOW_FP, KUNAI_FX_GLOW_3P, "knife_base", true )
 }
 
 void function OnWeaponDeactivate_weapon_wraith_kunai_primary( entity weapon )
 {
-	//
+	                                                        
 
 	weapon.StopWeaponEffect( KUNAI_FX_GLOW_FP, KUNAI_FX_GLOW_3P )
 }

@@ -1,0 +1,208 @@
+global function ShPassiveWarlordsIre_Init
+
+global function PassiveWarlordsIre_EntityShouldBeHighlighted
+#if CLIENT
+global function ServerCallback_WarlordsIre_HighlightTargetRemote
+#endif
+
+const float WARLORDS_IRE_DURATION_BASE 			= 0.8
+const float WARLORDS_IRE_DURATION_EXPLOSION 	= 0.4
+const float WARLORDS_IRE_SPEEDUP_INFO_DURATION 	= 3.0
+
+global const string WARLORDS_IRE_MOD_NAME = "breacher"
+                                                                            
+
+struct
+{
+	#if CLIENT
+		table<entity, float> playerHighlightEndTime
+		array<entity> displayedWeapons
+	#endif
+
+	float balance_warlordsIreHighlightDurationBase
+	float balance_warlordsIreHighlightDurationExplode
+} file
+
+void function ShPassiveWarlordsIre_Init()
+{
+	AddCallback_OnPassiveChanged( ePassives.PAS_WARLORDS_IRE, PassiveWarlordsIre_OnPassiveChanged )
+
+	#if SERVER
+		                                                                
+		                                                                     
+	#endif
+
+	#if CLIENT
+		AddCallback_PlayerClassChanged( OnPlayerClassChanged )
+		AddLocalPlayerDidDamageCallback( PassiveWarlordsIre_OnLocalPlayerDidDamage )
+		AddCallback_OnPrimaryWeaponStatusUpdate( OnPrimaryWeaponStatusUpdate )
+	#endif
+
+	file.balance_warlordsIreHighlightDurationBase 		= GetCurrentPlaylistVarFloat( "warlordsire_duration_base_override", WARLORDS_IRE_DURATION_BASE )
+	file.balance_warlordsIreHighlightDurationExplode 	= GetCurrentPlaylistVarFloat( "warlordsire_duration_explosion_override", WARLORDS_IRE_DURATION_EXPLOSION )
+
+	Remote_RegisterClientFunction( "ServerCallback_WarlordsIre_HighlightTargetRemote", "entity", "entity", "int", INT_MIN, INT_MAX )
+}
+
+
+void function PassiveWarlordsIre_OnPassiveChanged( entity player, int passive, bool didHave, bool nowHas )
+{
+#if SERVER
+	             
+		                                        
+	    
+		                                        
+#endif
+}
+
+#if SERVER
+                                                              
+ 
+	                                                           
+ 
+
+                                                                                 
+ 
+	                                                      
+
+	                                                                                                              
+		      
+
+	                                                                       
+	                                                                                                                                       
+
+	                                                        
+	                                                          
+ 
+#endif
+
+#if CLIENT
+void function PassiveWarlordsIre_OnLocalPlayerDidDamage( entity attacker, entity target, vector damagePosition, int damageType, float damageAmount )
+{
+	if ( !PassiveWarlordsIre_ValidWarlordsIreHighlightPostDamage( attacker, target ) )
+		return
+
+	float highlightDuration = file.balance_warlordsIreHighlightDurationBase
+	highlightDuration += ( damageType & DF_EXPLOSION ) ? file.balance_warlordsIreHighlightDurationExplode : 0.0
+
+	if ( (target in file.playerHighlightEndTime) )
+		file.playerHighlightEndTime[ target ] <- ( Time() + highlightDuration )
+	else
+		thread PassiveWarlordsIre_HighlightThink( target, highlightDuration )
+}
+
+void function PassiveWarlordsIre_HighlightThink( entity target, float highlightDuration )
+{
+	if ( !IsValid( target ) || ( highlightDuration <= 0.0 ) )
+		return
+
+	EndSignal( target, "OnDeath", "OnDestroy" )
+
+	file.playerHighlightEndTime[ target ] <- ( Time() + highlightDuration )
+	ManageHighlightEntity( target )
+
+	OnThreadEnd(
+		function() : ( target )
+		{
+			if ( (target in file.playerHighlightEndTime) )
+				delete file.playerHighlightEndTime[ target ]
+
+			if ( IsValid( target ) )
+				ManageHighlightEntity( target )
+		}
+	)
+
+	while( ( file.playerHighlightEndTime[ target ] > Time() ) )
+		WaitFrame()
+}
+
+void function ServerCallback_WarlordsIre_HighlightTargetRemote( entity attacker, entity target, int damageType )
+{
+	PassiveWarlordsIre_OnLocalPlayerDidDamage( attacker, target, target.GetOrigin(), damageType, 0 )
+}
+#endif
+
+bool function PassiveWarlordsIre_ValidWarlordsIreHighlightPostDamage( entity attacker, entity target )
+{
+	if ( !IsAlive( attacker ) )
+		return false
+
+	if ( !attacker.IsPlayer() )
+		return false
+
+	if ( !target.IsPlayer() && !target.IsNPC() )
+		return false
+
+	if ( attacker == target )
+		return false
+
+	if ( !PlayerHasPassive( attacker, ePassives.PAS_WARLORDS_IRE ) )
+		return false
+
+	return true
+}
+
+bool function PassiveWarlordsIre_EntityShouldBeHighlighted( entity target )
+{
+	#if CLIENT
+	if ( (target in file.playerHighlightEndTime) )
+	{
+		if ( file.playerHighlightEndTime[ target ] >= Time() )
+			return true
+	}
+	#endif
+
+	return false
+}
+
+#if CLIENT
+void function OnPlayerClassChanged( entity player )
+{
+	                                 
+	if( player == GetLocalClientPlayer()  )
+		OnPrimaryWeaponStatusUpdate( player.GetActiveWeapon( eActiveInventorySlot.mainHand ), ClWeaponStatus_GetWeaponHudRui( player ) )
+}
+
+void function OnPrimaryWeaponStatusUpdate( entity selectedWeapon, var weaponRui )
+{
+	if ( !IsValid( selectedWeapon ) )
+		return
+
+	if ( !PlayerHasPassive( GetLocalViewPlayer(), ePassives.PAS_WARLORDS_IRE ) )
+		return
+
+	entity lastSelectedWeapon = GetLastSelectedPrimaryWeapon()
+
+	entity weaponInSlot0	= GetLocalViewPlayer().GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_0 )
+	entity weaponInSlot1 	= GetLocalViewPlayer().GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_1 )
+	bool noWeapon        	= !IsValid( weaponInSlot0 ) && !IsValid( weaponInSlot1 )
+	bool meleeSelected 		= GetLocalViewPlayer().GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_2 ) == selectedWeapon
+
+	if ( selectedWeapon.HasMod( WARLORDS_IRE_MOD_NAME ) )
+	{
+		if ( !file.displayedWeapons.contains( selectedWeapon ) )
+		{
+			RuiSetBool( weaponRui, "showPassiveBonusWeaponInfo", true )
+			RuiSetString( weaponRui, "passiveBonusWeaponInfoText", Localize( "#PAS_WARLORDS_IRE_HUD" ) )
+			RuiSetWallTimeWithOffset( weaponRui, "fadeBonusWeaponInfoStartTime", WARLORDS_IRE_SPEEDUP_INFO_DURATION )
+			file.displayedWeapons.append( selectedWeapon )
+		}
+		else
+		{
+			RuiSetBool( weaponRui, "showPassiveBonusWeaponInfo", false )
+		}
+
+		RuiSetBool( weaponRui, "showPassiveBonusIconWeapon", true )
+		RuiSetImage( weaponRui, "passiveBonusIconWeapon", $"rui/hud/character_abilities/madmaggie_passive_weapon_hud_dongle" )
+	}
+	else if ( ( IsValid( lastSelectedWeapon ) && !lastSelectedWeapon.HasMod( WARLORDS_IRE_MOD_NAME ) ) || noWeapon )
+	{
+		RuiSetBool( weaponRui, "showPassiveBonusWeaponInfo", false )
+		RuiSetString( weaponRui, "passiveBonusWeaponInfoText", "" )
+		RuiSetWallTimeBad( weaponRui, "fadeBonusWeaponInfoStartTime" )
+
+		RuiSetBool( weaponRui, "showPassiveBonusIconWeapon", false )
+		RuiSetImage( weaponRui, "passiveBonusIconWeapon", $"" )
+	}
+}
+#endif

@@ -1,27 +1,36 @@
 global function ShBattlePass_LevelInit
 
-//
-#if CLIENT || UI 
+                         
+#if SERVER || CLIENT || UI
 global function IsBattlePassEnabled
+global function GetActiveBattlePass
 global function GetPlayerActiveBattlePass
 global function GetPlayerLastActiveBattlePass
 global function GetPlayerBattlePassXPProgress
 global function GetBattlePassLevelForXP
 global function GetBattlePassXPForLevel
 global function GetPlayerBattlePassLevel
-global function GetPlayerBattlePassCharacterXP
-global function GetBattlePassCharacterBonusXPMax
-global function GetBattlePassCharacterWeeklyXPMax
 global function GetBattlePassLevelRewards
 global function GetBattlePassBaseRewards
 global function GetBattlePassXPEventValue
 global function GetBattlePassXPEventCount
 global function GetTotalXPToCompletePassLevel
+global function BattlePass_GetBasicPurchasePack
+global function BattlePass_GetBundlePurchasePack
+global function BattlePass_GetXPPurchaseFlav
+global function BattlePass_GetXPBoostFlav
+global function BattlePass_GetRerollFlav
 global function BattlePass_GetScheduleDatatable
+global function BattlePass_GetBulletText
+global function BattlePass_ShouldEarnGrindForXP
+global function BattlePass_UseStarsToProgress
+global function BattlePass_WeeklyRecurringResetsEveryWeek
 global function GetBattlePassDisplayLevel
 global function GetBattlePassDisplayBadge
 global function GetBattlePassMaxLevelIndex
+global function GetBattlePassMaxPurchaseLevels
 global function GetPlayerBattlePassPurchasableLevels
+global function GetRewardPromptLevelArray
 
 global function BattlePassPurchasedXP_GetXPAmount
 
@@ -29,52 +38,58 @@ global function GetPlayerBattlePassEarnedXP
 global function GetPlayerBattlePassPurchasedXP
 global function GetPlayerBattlePassLastSeenPremium
 global function GetPlayerBattlePassPurchasedLevels
-global function GetPlayerBattlePassXPBoostCount
-global function GetPlayerBattlePassXPBoostPercent
 global function GetPlayerBattlePassLastSeenXP
 
 global function DoesPlayerOwnBattlePass
+global function GetCurrentBattlePassWeek
+global function GetCurrentBattlePassWeekExpirationTime
+global function GetBattlePassProgressBadge
+global function GetBattlePassChallenges
+global function GetNumBattlePassChallengesWeeks
+global function BattlePassHasWeeklyChallenge
+global function GetBattlePassRecurringStarChallenge
+global function GetBattlePassRecurringGrindlordChallenge
+global function ItemFlavorBagToBattlePassRewardByIndex
 #endif
 
 
-#if(false)
+#if SERVER
+                                
+                                         
+                                      
 
+                                           
+                                        
 
-
-
-
-
-
-
+                                                       
 #endif
 
-#if(UI)
+#if SERVER || UI
 global function CanPlayerPurchaseBattlePass
 #endif
 
-#if(UI)
+#if UI
 global function GetBattlePassXPEventValueDisplay
-global function GetImageForBattlePassReward
-global function GetStringForBattlePassReward
 global function ShouldBattlePassTabBeEnabled
 #endif
 
-#if DEV && ( CLIENT || UI ) 
+#if DEV && (SERVER || CLIENT || UI)
 global function DEV_BattlePass
 #endif
 
-#if(false)
-
-
+#if DEV && SERVER
+                                     
 #endif
 
 
-//
-//
-//
-//
-//
+                      
+                      
+                      
+                      
+                      
 global const int MAX_BATTLEPASS_CHARACTER_BONUS_XP_DEFAULT = 250000
+global const int STARS_TO_COMPLETE_BP_LEVEL = 10
+global const int BATTLEPASS_MAX_LEVEL = 110
 
 global struct BattlePassReward
 {
@@ -82,6 +97,8 @@ global struct BattlePassReward
 	int         quantity
 	int         level
 	bool        isPremium
+	bool		isEventReward = false
+	string		eventName = ""
 }
 
 
@@ -93,185 +110,332 @@ struct BattlePassData
 	int         maxPassLevel
 	int         maxPurchaseLevels = 99
 
-	array<asset> baseRewardAssets = [
-		$"settings/itemflav/character_skin/lifeline/season01_rare_01.rpak"
-		$"settings/itemflav/character_skin/mirage/season01_rare_01.rpak"
-		$"settings/itemflav/character_skin/wraith/season01_rare_01.rpak"
-	]
+	table< int, table< int, array<ItemFlavor> > > challenges
+	ItemFlavor ornull recurringStarChallenge
+	ItemFlavor ornull recurringGrindlordChallenge
 }
 
-//
-//
-//
-//
-//
+                       
+                       
+                       
+                       
+                       
 struct FileStruct_LifetimeLevel
 {
 	array<ItemFlavor> battlePassList
 
 	table<ItemFlavor, BattlePassData> battlePassMap
+	ItemFlavor ornull currentSeason
+	ItemFlavor ornull currentBattlePass
+	int expirationTimestamp
+	bool battlePassIsEnabled
 }
 FileStruct_LifetimeLevel& fileLevel
 
-
-global ItemFlavor& BATTLEPASS_SEASON1_PURCAHSED_XP_FLAV
-global ItemFlavor& BATTLEPASS_SEASON1_XP_BOOST_FLAV
-
-global const asset BATTLEPASS_MODEL_BOOST = $"mdl/menu/xp_badge.rmdl"
+global const asset CHALLENGE_REWARD_MODEL = $"mdl/menu/challenge_reward_star/challenge_reward_star.rmdl"
+global const asset BATTLEPASS_STAR_REWARD_MODEL = $"mdl/menu/reward_star.rmdl"
 global const asset BATTLEPASS_MODEL_APEX_COINS = $"mdl/menu/coin.rmdl"
 global const asset BATTLEPASS_MODEL_CRAFTING_METALS = $"mdl/currency/crafting/currency_crafting_epic.rmdl"
-global const float BATTLEPASS_XP_BOOST_AMOUNT = 2.5
+global const float BATTLEPASS_XP_BOOST_AMOUNT = 0.1
 
-//
-//
-//
-//
-//
+                         
+                         
+                         
+                         
+                         
 void function ShBattlePass_LevelInit()
 {
 	FileStruct_LifetimeLevel newFileLevel
 	fileLevel = newFileLevel
 
-	#if(false)
+	fileLevel.battlePassIsEnabled = GetCurrentPlaylistVarBool( "enable_battlepass", true )
 
+	RefreshCachedSeasonInfo()
 
-
-
-
-
-
-
-
-
-
-
+#if SERVER || CLIENT
+	Remote_RegisterServerFunction( "ClientCallback_UpdateBattlePassLastInfo", "int", INT_MIN, INT_MAX )
 #endif
 
-	AddCallback_RegisterRootItemFlavors( void function() {
-		BATTLEPASS_SEASON1_PURCAHSED_XP_FLAV = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/battlepass_purchased_xp/season1_single_level.rpak" ))
-		BATTLEPASS_SEASON1_XP_BOOST_FLAV = expect ItemFlavor(RegisterItemFlavorFromSettingsAsset( $"settings/itemflav/xp_boost/battlepass_season01.rpak" ))
-	} )
+	#if SERVER
+		                                       
+		                                             
+		                                            
+		                                                 
+
+		                                                                             
+
+		       
+			                                                  
+		      
+	#endif
 
 	AddCallback_OnItemFlavorRegistered( eItemType.battlepass, void function( ItemFlavor pass ) {
+		RegisterItemFlavorFromSettingsAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "basicPurchasePack" ) )
+		RegisterItemFlavorFromSettingsAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "bundlePurchasePack" ) )
+		RegisterItemFlavorFromSettingsAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "xpPurchaseFlav" ) )
+		RegisterItemFlavorFromSettingsAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "xpBoostFlav" ) )
+
+		asset reroll = GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "challengeRerollFlav" )
+		if ( reroll != $"" )
+			RegisterItemFlavorFromSettingsAsset( reroll )
+
 		fileLevel.battlePassList.append( pass )
+
+		#if CHALLENGE_DEBUG
+			                     
+		#endif
 
 		BattlePassData passData
 		passData.pass = pass
 
 		var passDataTable = BattlePass_GetScheduleDatatable( pass )
-		int numRows       = GetDatatableRowCount( passDataTable )
+		int numRows       = GetDataTableRowCount( passDataTable )
 		int maxLevels     = GetDataTableInt( passDataTable, numRows - 1, GetDataTableColumnByName( passDataTable, "levelIndex" ) ) + 1
 		int cumulativeXP  = 0
+		bool isExpired    = false
+
+		if ( GetCalEventBeingProcessed() != null )
+		{
+			#if CLIENT || UI
+				Assert( IsConnected(), "We're not connected to a server. This will result in excess challenges being loaded. This won't break anything, but it also shouldn't happen." )
+				if ( IsConnected() )
+			#endif                                                                                    
+				{
+					isExpired = CalEvent_GetFinishUnixTime( expect ItemFlavor( GetCalEventBeingProcessed() ) ) < GetUnixTimestamp()
+				}
+		}
 
 		passData.totalXPToCompleteLevel.resize( maxLevels )
 
 		int lastLevelIndex = -1
 		for ( int levelIndex = 0; levelIndex < maxLevels; levelIndex++ )
 		{
-			int xpToCompleteLevel = GetXPToCompleteLevel( pass )
+			int xpToCompleteLevel = GetXPToCompleteBPLevel()
 
 			cumulativeXP += xpToCompleteLevel
 			passData.totalXPToCompleteLevel[levelIndex] = cumulativeXP
 			passData.maxPassLevel = levelIndex
 		}
 
+		array<asset> dupeCheck = []
+
+		passData.challenges[ eChallengeTimeSpanKind.DAILY ] <- {}
+		passData.challenges[ eChallengeTimeSpanKind.DAILY ][-1] <- []
+		if ( isExpired == false )
+		{
+			foreach ( var block in IterateSettingsAssetArray( ItemFlavor_GetAsset( pass ), "dailyChallenges" ) )
+			{
+				asset chAsset = GetSettingsBlockAsset( block, "flavor" )
+
+				Assert( !dupeCheck.contains( chAsset ) )
+				dupeCheck.append( chAsset )
+
+			ItemFlavor ornull challenge = RegisterChallengeFromAsset( chAsset )
+				if ( challenge != null )
+					passData.challenges[ eChallengeTimeSpanKind.DAILY ][-1].append( expect ItemFlavor( challenge ) )
+			}
+		}
+
+		dupeCheck.clear()
+
+		passData.challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY_RECURRING ] <- {}
+		passData.challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY_RECURRING ][-1] <- []
+		if ( isExpired == false )
+		{
+			foreach ( var block in IterateSettingsAssetArray( ItemFlavor_GetAsset( pass ), "weeklyRecurringChallenges" ) )
+			{
+				asset chAsset = GetSettingsBlockAsset( block, "flavor" )
+
+				Assert( !dupeCheck.contains( chAsset ) )
+				dupeCheck.append( chAsset )
+
+			ItemFlavor ornull challenge = RegisterChallengeFromAsset( chAsset )
+				if ( challenge != null )
+				{
+					expect ItemFlavor( challenge )
+					passData.challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY_RECURRING ][-1].append( challenge )
+
+					if ( Challenge_GetStatRefs( challenge, 0 ).len() > 0 )
+					{
+						bool isStarChallenge = false
+						bool isGrindlordChallenge = false
+
+						string recurringStarChallengeString = "stats.challenge_xp_earned"
+						string recurringGrindlordChallengeString = "stats.challenge_xp_earned"
+
+						if ( GetGlobalSettingsBool( ItemFlavor_GetAsset( pass ), "useStarsToProgress" ) )
+							recurringStarChallengeString = "stats.challenge_stars_earned"
+
+						foreach ( sref in Challenge_GetStatRefs( challenge, 0 ) )
+						{
+							if ( sref == recurringStarChallengeString )
+							{
+								isStarChallenge = true
+							}
+							else
+							{
+								isStarChallenge = false
+								break
+							}
+						}
+
+						foreach ( sref in Challenge_GetStatRefs( challenge, 0 ) )
+						{
+							if ( sref == recurringGrindlordChallengeString )
+							{
+								isGrindlordChallenge = true
+							}
+							else
+							{
+								isGrindlordChallenge = false
+								break
+							}
+						}
+
+						if ( isStarChallenge )
+						{
+							passData.recurringStarChallenge = challenge
+						}
+
+						if ( isGrindlordChallenge )
+						{
+							passData.recurringGrindlordChallenge = challenge
+						}
+					}
+				}
+			}
+		}
+
+		dupeCheck.clear()
+
+		passData.challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY ] <- {}
+		if ( isExpired == false )
+		{
+			foreach ( var block in IterateSettingsAssetArray( ItemFlavor_GetAsset( pass ), "weeklyChallenges" ) )
+			{
+				int week = GetSettingsBlockInt( block, "weekNumber" )
+				passData.challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY ][week] <- []
+				foreach ( var chBlock in IterateSettingsArray( GetSettingsBlockArray( block, "challenges" ) ) )
+				{
+					asset chAsset = GetSettingsBlockAsset( chBlock, "flavor" )
+
+					Assert( !dupeCheck.contains( chAsset ) )
+					dupeCheck.append( chAsset )
+
+					ItemFlavor ornull challenge = RegisterChallengeFromAsset( chAsset )
+					if ( challenge != null )
+					{
+						expect ItemFlavor( challenge )
+						passData.challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY ][week].append( challenge )
+					}
+				}
+			}
+		}
+
+		dupeCheck.clear()
+
 		fileLevel.battlePassMap[pass] <- passData
 	} )
 }
 
-
 int function GetMaxBattlePassLevelIndex( var passDataTable )
 {
-	int numRows = GetDatatableRowCount( passDataTable )
+	int numRows = GetDataTableRowCount( passDataTable )
 	return GetDataTableInt( passDataTable, numRows - 1, GetDataTableColumnByName( passDataTable, "levelIndex" ) ) + 1
 }
 
 
-int function GetXPToCompleteLevel( ItemFlavor pass )
+int function GetXPToCompleteBPLevel()
 {
-	var passDataTable = BattlePass_GetScheduleDatatable( pass )
-	return GetDataTableInt( passDataTable, 0, GetDataTableColumnByName( passDataTable, "xpPerLevel" ) )
+	return STARS_TO_COMPLETE_BP_LEVEL
 }
 
-//
-//
-//
-//
-//
-#if CLIENT || UI 
+                          
+                          
+                          
+                          
+                          
+#if SERVER || CLIENT || UI
 bool function IsBattlePassEnabled()
 {
-	return GetCurrentPlaylistVarBool( "enable_battlepass", true )
+	return fileLevel.battlePassIsEnabled
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+ItemFlavor ornull function GetActiveBattlePass()
+{
+	if ( !IsBattlePassEnabled() )
+		return null
+
+	if ( fileLevel.expirationTimestamp < GetUnixTimestamp() )
+		RefreshCachedSeasonInfo()
+
+	return fileLevel.currentBattlePass
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 ItemFlavor ornull function GetPlayerActiveBattlePass( EHI playerEHI )
 {
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-	if ( !IsBattlePassEnabled() )
-		return null
+	                               
+	  	           
 
-	//
-	//
-	//
-	//
-	//
+	                                                      
+	  	           
+	  
+	                                                                                                                           
+	  	           
 
-	ItemFlavor ornull seasonOrNull = GetActiveSeason( GetUnixTimestamp() )
-	if ( seasonOrNull == null )
-		return null
-
-	return Season_GetBattlePass( expect ItemFlavor(seasonOrNull) )
+	return GetActiveBattlePass()
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 ItemFlavor ornull function GetPlayerLastActiveBattlePass( EHI playerEHI )
 {
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
 	if ( !IsBattlePassEnabled() )
 		return null
 
-	//
-	//
-	//
-	//
-	//
+	                                                      
+	  	           
+	  
+	                                                                                                                           
+	  	           
 
-	ItemFlavor ornull seasonOrNull = GetLatestSeason( GetUnixTimestamp() )
-	if ( seasonOrNull == null )
-		return null
+	if ( fileLevel.expirationTimestamp < GetUnixTimestamp() )
+		RefreshCachedSeasonInfo()
 
-	return Season_GetBattlePass( expect ItemFlavor(seasonOrNull) )
+	return fileLevel.currentBattlePass
+
+	                                                                      
 }
 #endif
 
 
-#if(UI)
+#if UI
 bool function ShouldBattlePassTabBeEnabled()
 {
 	if ( !IsBattlePassEnabled() )
 		return false
 
-	ItemFlavor ornull seasonOrNull = GetLatestSeason( GetUnixTimestamp() )
-	if ( seasonOrNull == null )
-		return false
-
-	return GetUnixTimestamp() < CalEvent_GetHideUnixTime( expect ItemFlavor( seasonOrNull ) )
+	return true
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function DoesPlayerOwnBattlePass( entity player, ItemFlavor pass )
 {
 	return GRX_IsItemOwnedByPlayer( pass, player )
@@ -279,20 +443,22 @@ bool function DoesPlayerOwnBattlePass( entity player, ItemFlavor pass )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassXPProgress( EHI playerEHI, ItemFlavor pass, bool getPreviousProgress = false )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return 0
 	#endif
 
-	int earnedBattlePassXP    = FromEHI( playerEHI ).GetPersistentVarAsInt( format( getPreviousProgress ? "battlePasses[%s].previousEarnedXP" : "battlePasses[%s].earnedXP", ItemFlavor_GetGUIDString( pass ) ) )
+	entity player = FromEHI( playerEHI )
+
+	int earnedBattlePassXP    = player == null ? 0 : player.GetPersistentVarAsInt( format( getPreviousProgress ? "battlePasses[%s].previousEarnedXP" : "battlePasses[%s].earnedXP", ItemFlavor_GetGUIDString( pass ) ) )
 	int purchasedBattlePassXP = GetPlayerBattlePassPurchasedXP( playerEHI, pass )
 
 	BattlePassData passData = fileLevel.battlePassMap[pass]
@@ -301,15 +467,15 @@ int function GetPlayerBattlePassXPProgress( EHI playerEHI, ItemFlavor pass, bool
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassLastSeenXP( EHI playerEHI, ItemFlavor pass )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return 0
 	#endif
@@ -322,15 +488,15 @@ int function GetPlayerBattlePassLastSeenXP( EHI playerEHI, ItemFlavor pass )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassPurchasedXP( EHI playerEHI, ItemFlavor pass, bool getPreviousProgress = false )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return 0
 	#endif
@@ -338,7 +504,7 @@ int function GetPlayerBattlePassPurchasedXP( EHI playerEHI, ItemFlavor pass, boo
 	if ( getPreviousProgress )
 		return FromEHI( playerEHI ).GetPersistentVarAsInt( format( "battlePasses[%s].lastSeenPurchasedXP", ItemFlavor_GetGUIDString( pass ) ) )
 	else
-		return GetPlayerBattlePassPurchasedLevels( playerEHI, pass ) * GetXPToCompleteLevel( pass )
+		return GetPlayerBattlePassPurchasedLevels( playerEHI, pass ) * GetXPToCompleteBPLevel()
 
 	unreachable
 }
@@ -346,15 +512,15 @@ int function GetPlayerBattlePassPurchasedXP( EHI playerEHI, ItemFlavor pass, boo
 
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassEarnedXP( EHI playerEHI, ItemFlavor pass, bool getPreviousProgress = false )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return 0
 	#endif
@@ -364,15 +530,15 @@ int function GetPlayerBattlePassEarnedXP( EHI playerEHI, ItemFlavor pass, bool g
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 bool function GetPlayerBattlePassLastSeenPremium( EHI playerEHI, ItemFlavor pass )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return false
 	#endif
@@ -383,26 +549,25 @@ bool function GetPlayerBattlePassLastSeenPremium( EHI playerEHI, ItemFlavor pass
 
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassPurchasedLevels( EHI playerEHI, ItemFlavor pass )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
+	#if CLIENT || UI
 		Assert( playerEHI == LocalClientEHI() )
 	#endif
 
-#if(DEV)
-	if ( DEV_ShouldIgnorePersistence() )
-		return 0
-#endif
+	#if DEV
+		if ( DEV_ShouldIgnorePersistence() )
+			return 0
+	#endif
 
-	#if(false)
+	ItemFlavor xpPurchaseFlav = BattlePass_GetXPPurchaseFlav( pass )
 
-#elseif(CLIENT)
-		Warning( "GetPlayerBattlePassPurchasedLevels called in UI... it always returns zero!!!!!!!!" )
-		int numPurchasedLevels = 0 //
-	#else
-		int numPurchasedLevels = GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( BATTLEPASS_SEASON1_PURCAHSED_XP_FLAV ) )
+	#if SERVER
+		                                                                                                                 
+	#elseif CLIENT || UI
+		int numPurchasedLevels = GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( xpPurchaseFlav ) )
 	#endif
 
 	return numPurchasedLevels
@@ -410,52 +575,31 @@ int function GetPlayerBattlePassPurchasedLevels( EHI playerEHI, ItemFlavor pass 
 #endif
 
 
-#if CLIENT || UI 
-int function GetPlayerBattlePassXPBoostCount( EHI playerEHI, ItemFlavor pass )
-{
-	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
-		Assert( playerEHI == LocalClientEHI() )
-	#endif
+#if SERVER
+                                                        
+ 
+	       
+		                                    
+			          
+	      
 
-#if(DEV)
-	if ( DEV_ShouldIgnorePersistence() )
-		return 0
-#endif
+	                                                                        
+	                               
+		          
+	                                     
 
-	#if(false)
+	                                                                      
+	                  
+	                                                        
+	                                         
+		                                                                                      
 
-#elseif(CLIENT)
-		int numXPBoosts = 0 //
-	#else
-		int numXPBoosts = GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( BATTLEPASS_SEASON1_XP_BOOST_FLAV ) )
-	#endif
-
-	return numXPBoosts
-}
-#endif
-
-
-#if CLIENT || UI 
-float function GetPlayerBattlePassXPBoostPercent( EHI playerEHI, ItemFlavor pass )
-{
-	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
-	#if CLIENT || UI 
-		Assert( playerEHI == LocalClientEHI() )
-	#endif
-
-	#if(DEV)
-		if ( DEV_ShouldIgnorePersistence() )
-			return 1.0
-	#endif
-
-	int numXPBoosts = GetPlayerBattlePassXPBoostCount( playerEHI, pass )
-	return numXPBoosts * BATTLEPASS_XP_BOOST_AMOUNT
-}
+	                                                      
+ 
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetTotalXPToCompletePassLevel( ItemFlavor pass, int levelIndex )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
@@ -484,36 +628,36 @@ int function GetBattlePassLevelForXP( ItemFlavor pass, int xp )
 	}
 
 	return levelIndex
-	/*
+	  
 
+		                                       
 
+		                                                                
+		                                                           
+		                                                                             
+		                                                                             
+		                                                                       
+		                        
+		                                                     
 
+		                  
+		                                             
+		 
+			                             
+			 
+				                                                                                       
+				                 
+			 
 
+			                                                                                     
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
+			                                                       
+			                             
+				                 
+		 
+		                                                  
+		           
+	  
 }
 
 int function GetBattlePassMaxLevelIndex( ItemFlavor pass )
@@ -521,34 +665,52 @@ int function GetBattlePassMaxLevelIndex( ItemFlavor pass )
 	BattlePassData passData = fileLevel.battlePassMap[pass]
 	return passData.maxPassLevel
 }
-#endif
 
 
-#if CLIENT || UI 
-int function GetBattlePassXPForLevel( ItemFlavor pass, int goalLevel )
+int function GetBattlePassMaxPurchaseLevels( ItemFlavor pass )
 {
-	return GetTotalXPToCompletePassLevel( pass, goalLevel )
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
+	BattlePassData passData = fileLevel.battlePassMap[pass]
+	return passData.maxPurchaseLevels
+}
+
+array<int> function GetRewardPromptLevelArray( ItemFlavor pass )
+{
+	array<int> rtnArray
+	foreach ( var block in IterateSettingsAssetArray( ItemFlavor_GetAsset( pass ), "rewardPopupLevels" ) )
+	{
+		int level = GetSettingsBlockInt( block, "popupLevel" )
+		rtnArray.append(level)
+	}
+	return rtnArray
 }
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+int function GetBattlePassXPForLevel( ItemFlavor pass, int goalLevel )
+{
+	return GetTotalXPToCompletePassLevel( pass, goalLevel )
+	                                                              
+	                          
+	                                                          
+	                                                           
+	  
+	                                                                               
+	                                                                            
+	                          
+	                                                       
+	                                                   
+	   
+	  	                                                                                                            
+	  	                                                                                
+	   
+	  
+	                         
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassLevel( entity player, ItemFlavor pass, bool getPreviousLevel )
 {
 	return GetBattlePassLevelForXP( pass, GetPlayerBattlePassXPProgress( ToEHI( player ), pass, getPreviousLevel ) )
@@ -556,52 +718,10 @@ int function GetPlayerBattlePassLevel( entity player, ItemFlavor pass, bool getP
 #endif
 
 
-#if CLIENT || UI 
-int function GetPlayerBattlePassCharacterXP( entity player, ItemFlavor pass, ItemFlavor character )
-{
-	#if(DEV)
-		if ( DEV_ShouldIgnorePersistence() )
-			return 0
-	#endif
-
-	string characterGS        = ItemFlavor_GetGUIDString( character )
-	string pdefCharacterXpKey = format( "battlePasses[%s].characterXP[%s]", ItemFlavor_GetGUIDString( pass ), characterGS )
-
-	return player.GetPersistentVarAsInt( pdefCharacterXpKey )
-}
-#endif
-
-#if CLIENT || UI 
-int function GetBattlePassCharacterBonusXPMax( ItemFlavor pass )
-{
-	return GetCurrentPlaylistVarInt( "battlepass_character_max_xp", MAX_BATTLEPASS_CHARACTER_BONUS_XP_DEFAULT )
-}
-
-
-int function GetBattlePassCharacterWeeklyXPMax( ItemFlavor pass )
-{
-	return GetCurrentPlaylistVarInt( "battlepass_character_max_weekly_xp", MAX_BATTLEPASS_CHARACTER_BONUS_XP_DEFAULT / 10 )
-}
-#endif
-
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 array<BattlePassReward> function GetBattlePassBaseRewards( ItemFlavor pass )
 {
-	array<BattlePassReward> rewardList = []
-
-	foreach ( rewardAsset in fileLevel.battlePassMap[pass].baseRewardAssets )
-	{
-		BattlePassReward reward
-		reward.flav = GetItemFlavorByAsset( rewardAsset )
-		reward.quantity = 1
-		reward.level = -1
-		reward.isPremium = true
-
-		rewardList.append( reward )
-	}
-
-	return rewardList
+	return GetBattlePassLevelRewards( pass, 0 )
 }
 
 
@@ -615,7 +735,7 @@ array<BattlePassReward> function GetBattlePassLevelRewards( ItemFlavor pass, int
 	array<BattlePassReward> rewardList = []
 
 	int rowIndex = 0
-	int numRows  = GetDatatableRowCount( scheduleDT )
+	int numRows  = GetDataTableRowCount( scheduleDT )
 
 	while( rowIndex < numRows )
 	{
@@ -658,14 +778,20 @@ array<BattlePassReward> function GetBattlePassLevelRewards( ItemFlavor pass, int
 
 				rewardList.append( reward )
 			}
-			else Warning( "BattlePass reward is disabled: %s", string(rewardAsset) )
+			else
+			{
+				Warning( "BattlePass reward is disabled: %s", string(rewardAsset) )
+			}
 		}
-		else Assert( rewardQty == 0, "Invalid BattlePass reward quantity for level " + levelIndex )
+		else
+		{
+			Assert( rewardQty == 0, "Invalid BattlePass reward quantity for level " + levelIndex )
+		}
 
 		rowIndex++
 	}
 
-	#if(DEV)
+	#if DEV
 		foreach( BattlePassReward reward in rewardList )
 		{
 			Assert( reward.quantity > 0, "Invalid BattlePass reward quantity for level " + levelIndex )
@@ -677,8 +803,17 @@ array<BattlePassReward> function GetBattlePassLevelRewards( ItemFlavor pass, int
 }
 #endif
 
+#if SERVER || CLIENT || UI
+BattlePassReward function ItemFlavorBagToBattlePassRewardByIndex( ItemFlavorBag bag, int index )
+{
+	BattlePassReward bpReward
+	bpReward.flav = bag.flavors[ index ]
+	bpReward.quantity = bag.quantities[ index ]
+	return bpReward
+}
+#endif
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 void function SubstituteBattlePassRewardsForUserRestrictions( entity player, BattlePassReward reward )
 {
 	bool lootBoxesAllowed = !GRX_IsOfferRestricted( player )
@@ -706,7 +841,7 @@ void function SubstituteBattlePassRewardsForUserRestrictions( entity player, Bat
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetBattlePassXPEventValue( entity player, int xpType )
 {
 	ItemFlavor ornull activeBattlePass = GetPlayerActiveBattlePass( ToEHI( player ) )
@@ -714,7 +849,7 @@ int function GetBattlePassXPEventValue( entity player, int xpType )
 		return 0
 	expect ItemFlavor(activeBattlePass)
 
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return 0
 	#endif
@@ -725,10 +860,10 @@ int function GetBattlePassXPEventValue( entity player, int xpType )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetBattlePassXPEventCount( entity player, int xpType )
 {
-	#if(DEV)
+	#if DEV
 		if ( DEV_ShouldIgnorePersistence() )
 			return 0
 	#endif
@@ -744,7 +879,82 @@ int function GetBattlePassXPEventCount( entity player, int xpType )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+ItemFlavor function BattlePass_GetBasicPurchasePack( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "basicPurchasePack" ) )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+ItemFlavor function BattlePass_GetBundlePurchasePack( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "bundlePurchasePack" ) )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+ItemFlavor function BattlePass_GetXPPurchaseFlav( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "xpPurchaseFlav" ) )
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+ItemFlavor function BattlePass_GetXPBoostFlav( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "xpBoostFlav" ) )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+ItemFlavor function BattlePass_GetRerollFlav( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetItemFlavorByAsset( GetGlobalSettingsAsset( ItemFlavor_GetAsset( pass ), "challengeRerollFlav" ) )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+bool function BattlePass_ShouldEarnGrindForXP( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( pass ), "awardGrindlordForXP" )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+bool function BattlePass_UseStarsToProgress( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( pass ), "useStarsToProgress" )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+bool function BattlePass_WeeklyRecurringResetsEveryWeek( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	return GetGlobalSettingsBool( ItemFlavor_GetAsset( pass ), "weeklyRecurringResetsEveryWeek" )
+}
+#endif
+
+#if SERVER || CLIENT || UI
 var function BattlePass_GetScheduleDatatable( ItemFlavor pass )
 {
 	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
@@ -754,10 +964,23 @@ var function BattlePass_GetScheduleDatatable( ItemFlavor pass )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
+array<string> function BattlePass_GetBulletText( ItemFlavor pass, bool restricted )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	array<string> bulletText = []
+	foreach ( var bulletBlock in IterateSettingsAssetArray( ItemFlavor_GetAsset( pass ), restricted ? "bulletTextRestricted" : "bulletTextStandard" ) )
+		bulletText.append( GetSettingsBlockString( bulletBlock, "text" ) )
+	return bulletText
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
 int function BattlePassPurchasedXP_GetXPAmount( ItemFlavor purchasedXPFlav )
 {
-	Assert( ItemFlavor_GetType( purchasedXPFlav ) == eItemType.battlepass )
+	Assert( ItemFlavor_GetType( purchasedXPFlav ) == eItemType.battlepass_purchased_xp )
 
 	return GetGlobalSettingsInt( ItemFlavor_GetAsset( purchasedXPFlav ), "xpAmount" )
 }
@@ -765,345 +988,377 @@ int function BattlePassPurchasedXP_GetXPAmount( ItemFlavor purchasedXPFlav )
 
 
 
-//
-//
-//
-//
-//
-#if(false)
+                   
+                   
+                   
+                   
+                   
+#if SERVER
+                                               
+ 
+	                                                                  	                                                                                                                                      
 
+	       
+		                                    
+			      
+	      
 
-//
+	                                                                          
+	                                 
+	  	      
+	  
+	                                     
 
+	                                                                          
+	                                   
+	 
+		                                                                              
+		                                                                      
+		                                                                    
+		                                                       
+	 
 
-
-
-
-
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                 
+ 
 #endif
 
 
-#if(false)
+#if SERVER
+                                                                            
+ 
+	                             
+		      
 
+	                                                                        
+	                               
+		      
+	                                   
 
+	                                                
+	                                                                                                 
+	                                                                                      
 
+	                                                                    
+		      
 
+	                                                                                                                               
+	                                                                                    
+		                                                                             
 
+	                                           
+		      
 
+	       
+		                                    
+			      
+	      
 
+	                              
+	 
+		                                                                               
+		                                                                                         
+	 
 
+	 
+		                                                                                                    
+		                                                        
+		                                                                               
+	 
 
+	                                        
+	                                                                    
 
-
-
-
-
-
-
+	                                                                                                                                     
+	                              
+	 
+		                                                           
+		                                    
+			                                                                   
+		    
+			                                                    
+	 
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if SERVER
+                                                                                                  
+                                                          
+ 
+	                                                  
+ 
+
+                                                    
+                                                                
+ 
+	                                
+
+	                             
+		      
+
+	                                                                                   
+		      
+
+	                                                                                      
+
+	                                                                                       
+
+	            
+		                                        
+		 
+			                                            
+
+			                      
+				                              
+					                                              
+					             
+				 
+		 
+	 
+	                                           
+
+	                                         
+		           
+
+	                                
+	                         
+	 
+		                                                         
+			                         
+
+		                                            
+	 
+
+	                                                                                   
+	                                                             
+	 
+		                         
+		 
+			                                   
+				        
+		 
+		    
+		 
+			                                                                                      
+			                                                                     
+				        
+		 
+
+		                              
+		                       
+		                                                                                                                       
+		                                                                                   
+		                                                                                                                             
+		                                                                                         
+
+		                         
+		                                                                                             
+
+		                         
+		                                                             
+		                                                                                                                 
+		 
+			                                             
+			                                                                                        
+
+			                                             
+			 
+				                       
+					        
+
+				                             
+
+				                                                                      
+					        
+
+				                                                     
+					        
+
+				                                                                         
+				 
+					                                                     
+						        
+				 
+
+				                                         
+				                                                
+			 
+			                             
+		 
+
+		                                             
+
+		                                                                                                               
+		                                                                                            
+		 
+			                                
+			                                                                  
+			                                                                                                                                                      
+			 
+				                                                                                                                                                                   
+			  
+			                               
+			                                      
+
+			                                          
+				           
+
+			                                                                 
+			 
+				                                                   
+			 
+			    
+			 
+				                                                                          
+			 
+		 
+
+		                      
+			                              
+				                                                                                             
+				             
+			 
+
+		                                                                                  
+		 
+			                      
+				                              
+					                                                                                          
+					             
+				 
+			        
+		 
+
+		                                                                        
+		 
+			                      
+				                              
+					                                                                                          
+					             
+				 
+			        
+		 
+
+		                            
+		                                                                   
+		                                                                                                                    
+		 
+			                                             
+
+			                          
+			                                                                         
+			                                                                                    
+			                               
+			           
+			                
+			 
+				                                                                                        
+				                                             
+				 
+					                        
+						        
+
+					                             
+
+					                                                                      
+						        
+
+					                                                     
+						        
+
+					                                                                         
+					 
+						                                                     
+							        
+					 
+
+					                                            
+					                                                   
+				 
+			 
+
+
+			                                
+		 
+
+		                      
+			                              
+				                                                                              
+					           
+					                   
+					                               
+					                              
+					                             
+					                                         
+				             
+			 
+
+		                                                           
+		 
+			                                                                                                  
+		 
+
+		                                                   
+
+		                                                                                                                        
+		                                                                                                     
+		 
+			                                
+			                                                                  
+			                                                                                                                                                                  
+			 
+				                                                                                                                                                                               
+			  
+			                                                                                                                                                                 
+			 
+				                                                                    
+					                                  
+			  
+			                                      
+
+			                                          
+				           
+
+			                                                                 
+			 
+				                                                   
+			 
+			    
+			 
+				                                                                             
+			 
+		 
+	 
+ 
 #endif
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(UI)
+#if UI
 string function GetBattlePassXPEventValueDisplay( entity player, int xpType )
 {
-	//
+	                                   
 	return Localize( "#EOG_XP_PLUSNUMBER", GetBattlePassXPEventValue( player, xpType ) )
 }
 #endif
 
 
 
-//
-//
-//
-//
-//
-#if DEV && ( CLIENT || UI ) 
+                       
+                       
+                       
+                       
+                       
+#if DEV && (SERVER || CLIENT || UI)
 ItemFlavor function DEV_BattlePass( EHI playerEHI = EHI_null )
 {
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                               
+	#elseif CLIENT
 		if ( playerEHI == EHI_null )
 			playerEHI = ToEHI( GetLocalClientPlayer() )
 	#else
 		if ( playerEHI == EHI_null )
-			playerEHI = ToEHI( GetUIPlayer() )
+			playerEHI = ToEHI( GetLocalClientPlayer() )
 	#endif
 
 	return expect ItemFlavor( GetPlayerActiveBattlePass( playerEHI ) )
@@ -1111,39 +1366,43 @@ ItemFlavor function DEV_BattlePass( EHI playerEHI = EHI_null )
 #endif
 
 
-#if(false)
+#if SERVER && DEV
+                                      
+ 
+	                                    
+	                                        
+	                                                                           
+	 
+		                                                          
+		                                                                    
+	 
+	                                                                                                                  
+	                                  
+	                                                                               
+	                                                   
+	                                      
+	                                              
+	                                               
+	                                              
+	                                                 
+	                                                
+	                                                  
+	                                              
+	                                                 
+	                                            
+	                       
 
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	                                                 
+	                                                                                            
+	                           
+ 
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlayerBattlePassPurchasableLevels( EHI playerEHI, ItemFlavor pass )
 {
-	int currentLevel = GetPlayerBattlePassLevel( FromEHI( playerEHI ), pass, false )
+	int currentLevel      = GetPlayerBattlePassLevel( FromEHI( playerEHI ), pass, false )
 	int purchasableLevels = fileLevel.battlePassMap[pass].maxPurchaseLevels - GetPlayerBattlePassPurchasedLevels( playerEHI, pass )
 
 	return maxint( minint( purchasableLevels, fileLevel.battlePassMap[pass].maxPurchaseLevels - currentLevel ), 0 )
@@ -1156,7 +1415,13 @@ string function GetBattlePassDisplayLevel( int levelIndex, bool showBonus = fals
 	if ( levelIndex > 99 && showBonus )
 		return "#BATTLE_PASS_BONUS"
 
-	return string( levelIndex + 1 )
+	                                                                                                                                                          
+	                                                                                                                    
+	int displayVal = levelIndex + 1
+	if ( displayVal > BATTLEPASS_MAX_LEVEL )
+		displayVal = BATTLEPASS_MAX_LEVEL
+
+	return string( displayVal )
 }
 
 
@@ -1211,216 +1476,181 @@ asset function GetBattlePassDisplayBadge( int levelIndex )
 }
 
 
-#if(UI)
-asset function GetImageForBattlePassReward( BattlePassReward reward )
-{
-	ItemFlavor flavor = reward.flav
-	int itemType      = ItemFlavor_GetType( flavor )
-	asset buttonImage = $""
+#if SERVER
+                                                                                      
+ 
+	                                 
+		      
 
-	switch ( itemType )
-	{
-		case eItemType.account_pack:
-			buttonImage = $"rui/menu/buttons/battlepass/apex_pack"
-			break
+	                                                                                       
+	                     
+		      
 
-		case eItemType.character_skin:
-			buttonImage = ItemFlavor_GetIcon( flavor )
-			Assert( buttonImage != $"" )
-			break
+	                                              
+		      
 
-		case eItemType.weapon_skin:
-			buttonImage = ItemFlavor_GetIcon( flavor )
-			Assert( buttonImage != $"" )
-			break
+	                           
 
-		case eItemType.gladiator_card_frame:
-			buttonImage = $"rui/menu/buttons/battlepass/banner_frame"
-			break
-
-		case eItemType.gladiator_card_intro_quip:
-		case eItemType.gladiator_card_kill_quip:
-			buttonImage = $"rui/menu/buttons/battlepass/quip"
-			break
-
-		case eItemType.gladiator_card_stat_tracker:
-			buttonImage = $"rui/menu/buttons/battlepass/tracker"
-			break
-
-		case eItemType.gladiator_card_stance: //
-
-		case eItemType.gladiator_card_badge:
-			buttonImage = $"rui/menu/buttons/battlepass/badge"
-			break
-
-		case eItemType.xp_boost:
-			buttonImage = $"rui/menu/buttons/battlepass/xp_boost"
-			break
-
-		case eItemType.account_currency:
-			if ( flavor == GRX_CURRENCIES[GRX_CURRENCY_PREMIUM] )
-			{
-				buttonImage = $"rui/menu/buttons/battlepass/currency_coins"
-			}
-			else if ( flavor == GRX_CURRENCIES[GRX_CURRENCY_CRAFTING] )
-			{
-				buttonImage = $"rui/menu/buttons/battlepass/currency_crafting"
-			}
-			else
-			{
-				Assert( flavor == GRX_CURRENCIES[GRX_CURRENCY_CREDITS] )
-				buttonImage = $"rui/menu/buttons/battlepass/currency_tokens"
-			}
-			break
-
-		default:
-			Warning( "Unknown item type passed to GetImageForBattlePassReward() " + DEV_GetEnumStringSafe( "eItemType", itemType ) )
-			break
-	}
-
-	return buttonImage
-}
-#endif
-
-#if(UI)
-string function GetStringForBattlePassReward( BattlePassReward reward )
-{
-	if ( reward.quantity > 1 )
-		return ShortenNumber( string( reward.quantity ) )
-
-	return ItemFlavor_GetShortName( reward.flav )
-}
+	                                                                                    
+	                                                                                                                         
+	                                                                                                                     
+	                                                                                                          
+ 
 #endif
 
 
-#if(false)
+#if SERVER && DEV
+                                                    
+ 
+	                                                             
+	 
+		                                                                                         
+		                                                                                                        
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		                                                      
+		                                                              
+		                                                               
+		                                                              
+		                                                                 
+		                                                              
+		                                                                 
+	 
+ 
 #endif
 
 
-#if(false)
-
-
-/*
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-
-#if(UI)
+#if SERVER || UI
 bool function CanPlayerPurchaseBattlePass( entity player, ItemFlavor activeBattlePass )
 {
 	if ( DoesPlayerOwnBattlePass( player, activeBattlePass ) )
+	{
+		printt("CanPlayerPurchaseBattlePass - returning false because player already owns battlepass" + ItemFlavor_GetHumanReadableRef( activeBattlePass ))
 		return false
+	}
 
-	//
-	#if(UI)
-		if ( GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( GRX_BATTLEPASS_PURCHASE_PACK_BASIC ) ) != 0 )
+	                           
+	#if UI
+		if ( GRX_GetPackCount( ItemFlavor_GetGRXIndex( BattlePass_GetBasicPurchasePack( activeBattlePass ) ) ) != 0 )
+		{
+			printt("CanPlayerPurchaseBattlePass - returning false because for battlepass" + ItemFlavor_GetHumanReadableRef( activeBattlePass ) + "and GRX_GetPackCount( ItemFlavor_GetGRXIndex( BattlePass_GetBasicPurchasePack( activeBattlePass ) ) ) != 0")
 			return false
-		else if ( GRX_GetConsumableCount( ItemFlavor_GetGRXIndex( GRX_BATTLEPASS_PURCHASE_PACK_BUNDLE ) ) != 0 )
+		}
+		if ( GRX_GetPackCount( ItemFlavor_GetGRXIndex( BattlePass_GetBundlePurchasePack( activeBattlePass ) ) ) != 0 )
+		{
+			printt("CanPlayerPurchaseBattlePass - returning false because for battlepass" + ItemFlavor_GetHumanReadableRef( activeBattlePass ) + "and GRX_GetPackCount( ItemFlavor_GetGRXIndex( BattlePass_GetBundlePurchasePack( activeBattlePass ) ) ) != 0")
 			return false
-#else
-		//
-		//
-		//
-		//
+		}
 	#endif
+	       
+	  	           
+	        
 
 	return true
 }
 #endif
 
+#if SERVER || CLIENT || UI
+int function GetCurrentBattlePassWeek()
+{
+	int currentTime                = GetUnixTimestamp()
+	ItemFlavor ornull activeSeason = GetActiveSeason( currentTime )
+	if ( activeSeason == null )
+		return 0
+
+	expect ItemFlavor( activeSeason )
+	int seasonStartUnixTime  = CalEvent_GetStartUnixTime( activeSeason )
+	int seasonFinishUnixTime = CalEvent_GetFinishUnixTime( activeSeason )
+
+	if ( currentTime < seasonStartUnixTime || currentTime > seasonFinishUnixTime )
+		return 0
+
+	return ((currentTime - seasonStartUnixTime) / SECONDS_PER_WEEK) + 1
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+int function GetCurrentBattlePassWeekExpirationTime()
+{
+	int currentTime                = GetUnixTimestamp()
+	ItemFlavor ornull activeSeason = GetActiveSeason( currentTime )
+	if ( activeSeason == null )
+		return 0
+
+	expect ItemFlavor( activeSeason )
+	int seasonStartUnixTime  = CalEvent_GetStartUnixTime( activeSeason )
+	int seasonFinishUnixTime = CalEvent_GetFinishUnixTime( activeSeason )
+
+	if ( currentTime < seasonStartUnixTime || currentTime > seasonFinishUnixTime )
+		return 0
+
+
+	int expireTime = seasonStartUnixTime
+	while( expireTime <= currentTime )
+		expireTime += SECONDS_PER_WEEK
+
+	if ( expireTime > seasonFinishUnixTime )
+		return seasonFinishUnixTime
+
+	return expireTime
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+ItemFlavor function GetBattlePassProgressBadge( ItemFlavor pass )
+{
+	Assert( ItemFlavor_GetType( pass ) == eItemType.battlepass )
+
+	asset passAsset  = ItemFlavor_GetAsset( pass )
+	asset badgeAsset = GetGlobalSettingsAsset( passAsset, "progressBadge" )
+
+	return GetItemFlavorByAsset( badgeAsset )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+int function GetNumBattlePassChallengesWeeks( ItemFlavor pass )
+{
+	return fileLevel.battlePassMap[ pass ].challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY ].len()
+}
+
+array<ItemFlavor> function GetBattlePassChallenges( ItemFlavor pass, int challengeTimeSpanKind, int groupIndex )
+{
+	return fileLevel.battlePassMap[ pass ].challenges[ challengeTimeSpanKind ][ groupIndex ]
+}
+
+ItemFlavor ornull function GetBattlePassRecurringStarChallenge( ItemFlavor pass )
+{
+	return fileLevel.battlePassMap[ pass ].recurringStarChallenge
+}
+
+ItemFlavor ornull function GetBattlePassRecurringGrindlordChallenge( ItemFlavor pass )
+{
+	return fileLevel.battlePassMap[ pass ].recurringGrindlordChallenge
+}
+
+bool function BattlePassHasWeeklyChallenge( ItemFlavor pass, ItemFlavor challenge, int week )
+{
+	return fileLevel.battlePassMap[ pass ].challenges[ eChallengeTimeSpanKind.SEASON_WEEKLY ][ week ].contains( challenge )
+}
+#endif
+
+#if SERVER || CLIENT || UI
+void function RefreshCachedSeasonInfo()
+{
+	#if CLIENT || UI
+		if ( IsConnected() == false )
+			return
+	#endif
+
+	fileLevel.currentSeason = GetActiveSeason( GetUnixTimestamp() )
+	fileLevel.currentBattlePass = null
+	fileLevel.expirationTimestamp = 0
+	if ( fileLevel.currentSeason != null )
+	{
+		fileLevel.currentBattlePass = Season_GetBattlePass( expect ItemFlavor( fileLevel.currentSeason ) )
+		fileLevel.expirationTimestamp = CalEvent_GetFinishUnixTime( expect ItemFlavor( fileLevel.currentSeason ) )
+	}
+}
+#endif

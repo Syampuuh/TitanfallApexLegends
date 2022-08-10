@@ -29,8 +29,11 @@ resource/ui/menus/panels/tabs_weapon_customize.res
 	{
 		ControlName				RuiPanel
 		xpos                    -40
+		xpos_nx_handheld        -50   [$NX || $NX_UI_PC]
 		wide                    76
+		wide_nx_handheld        116   [$NX || $NX_UI_PC]
 		tall					28
+		tall_nx_handheld		38    [$NX || $NX_UI_PC]
 		visible					1
 		rui                     "ui/shoulder_navigation_shortcut_angle.rpak"
 		activeInputExclusivePaint	gamepad
@@ -45,7 +48,7 @@ resource/ui/menus/panels/tabs_weapon_customize.res
 		ControlName				RuiButton
 		InheritProperties		TabButtonWeaponCustomize
 		scriptID				0
-		xpos                    -460
+		xpos                   	-40
 
 		pin_to_sibling			Anchor
 		pin_corner_to_sibling	BOTTOM_LEFT
@@ -139,9 +142,12 @@ resource/ui/menus/panels/tabs_weapon_customize.res
 	RightNavButton
 	{
 		ControlName				RuiPanel
-		xpos                    16
+		xpos                    -25
+		xpos_nx_handheld        -20    [$NX || $NX_UI_PC]
 		wide                    76
+		wide_nx_handheld        116    [$NX || $NX_UI_PC]
 		tall					28
+		tall_nx_handheld		38     [$NX || $NX_UI_PC]
 		visible					1
 		rui                     "ui/shoulder_navigation_shortcut_angle.rpak"
 		activeInputExclusivePaint	gamepad

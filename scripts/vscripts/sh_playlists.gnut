@@ -1,301 +1,390 @@
-//
-//
+  
+  
 
-#if CLIENT || UI 
-global function ShPlaylists_LevelInit
-
-global function GetCurrentPlaylistVarString
-global function GetCurrentPlaylistVarBool
-global function GetCurrentPlaylistVarInt
-global function GetCurrentPlaylistVarFloat
-global function GetPlaylistVarString
-global function GetPlaylistVarBool
-global function GetPlaylistVarInt
-global function GetPlaylistVarFloat
+#if SERVER || CLIENT || UI
+global function GetCurrentPlaylistVarTimestamp
 
 global function GetMaxTeamSizeForPlaylist
 global function GetPlaylistMaps
 
-global function GetPlaylistIndexForName
-#endif
-
-#if CLIENT || UI 
-global function CanPlaylistFitPartySize
-#endif
-
-#if(UI)
 global function GetVisiblePlaylistNames
+global function GetPlaylistModNames
+global function GetPlaylistIndexForName
+global function Playlist_GetLTMSlotPlaylist
+global function Playlist_GetNewModeVersion
+global function Playlist_GetScheduleData
+global function Playlist_ShouldBeHiddenForScheduleBlocks
+global function ShPlaylist_Init
+global function GetPlaylistRotationGroup
 #endif
 
-#if ( CLIENT || UI ) && DEV 
+#if CLIENT || UI
+global function CanPlaylistFitPartySize
+global function GetModeEmblemImage
+global function GetImageFromImageMap
+global function GetThumbnailImageFromImageMap
+global function GetGamemodeLogoFromImageMap
+global function GetImageFromMiniIconMap
+global function GetBinkFromBinkMap
+#endif
+
+#if UI
+global function GetEmblemColor
+global function GetPlaylistRotationNextTime
+global function GetPlaylistRotationNextTimeFormatedString
+global function GetPlaylistsInCurrentRotationGroup
+global function GetPanelImageKeyForCurrentRotationGroup
+global function GetMapDisplayNameForCurrentRotationGroup
+global function GetCurrentPlaylistInUiSlot
+global function PlaylistHasRotationGroup
+global function GetDefaultPlaylist
+global function PartyHasPlaylistAccountLevelRequired
+
+global int rotationDurationMoreThanDayCount = 0
+#endif
+
+#if (SERVER || CLIENT || UI) && DEV
 global function PrintPlaylists
 #endif
 
 
+#if CLIENT || UI
+global const table<string, asset> GAMEMODE_IMAGE_MAP = {
+	play_apex = $"rui/menu/gamemode/play_apex",
+	apex_elite = $"rui/menu/gamemode/apex_elite",
+	training = $"rui/menu/gamemode/training",
+	firing_range = $"rui/menu/gamemode/firing_range",
+	generic_01 = $"rui/menu/gamemode/generic_01",
+	generic_02 = $"rui/menu/gamemode/generic_02",
+	ranked_1 = $"rui/menu/gamemode/playlist_bg_kc_mu2_ranked",
+	ranked_2 = $"rui/menu/gamemode/playlist_bg_worldsedge_ranked",
+	ranked_3 = $"rui/menu/gamemode/playlist_bg_olympus_mu2_ranked",
+	ranked_4 = $"rui/menu/gamemode/playlist_bg_storm_point_ranked",
+	solo_iron_crown = $"rui/menu/gamemode/solo_iron_crown",
+	solo = $"rui/menu/gamemode/solo_iron_crown",
+	duos = $"rui/menu/gamemode/duos_v2",
+	trios = $"rui/menu/gamemode/trios",
+	panel_worlds_edge = $"rui/menu/gamemode/playlist_bg_worldsedge_vanilla",
+	panel_worlds_edge_mu1 = $"rui/menu/gamemode/worlds_edge_mu1",
+	panel_worlds_edge_mu2 = $"rui/menu/gamemode/playlist_bg_worldsedge_mu2",
+	panel_worlds_edge_mu3 = $"rui/menu/gamemode/playlist_bg_worldsedge_mu3",
+	panel_olympus = $"rui/menu/gamemode/playlist_bg_olympus",
+	panel_olympus_mu1 = $"rui/menu/gamemode/playlist_bg_olympus_mu1",
+	panel_olympus_mu2 = $"rui/menu/gamemode/playlist_bg_olympus_mu2",
+	canyon_land_mu1 = $"rui/menu/gamemode/play_apex",
+	panel_canyon_land = $"rui/menu/gamemode/playlist_bg_kc_vanilla",
+	panel_canyon_land_mu1 = $"rui/menu/gamemode/playlist_bg_kc",
+	panel_canyon_land_mu2 = $"rui/menu/gamemode/playlist_bg_kc_mu2",
+	panel_canyon_land_mu3 = $"rui/menu/gamemode/playlist_bg_kc_mu3",
+	panel_canyon_land_mu3_hu1 = $"rui/menu/gamemode/playlist_bg_kc_mu3_hu1",
+	panel_canyon_land_night = $"rui/menu/gamemode/playlist_bg_kc_night",
+	shotguns_and_snipers = $"rui/menu/gamemode/playlist_bg_shotguns_and_snipers",
+	panel_storm_point = $"rui/menu/gamemode/playlist_bg_storm_point",
+	panel_storm_point_mu1 = $"rui/menu/gamemode/playlist_bg_storm_point_mu1",
 
-//
-//
-//
-//
-//
+	panel_worlds_edge_mu2_airdrop = $"rui/menu/gamemode/playlist_bg_worldsedge_airdrop",
+	panel_olympus_airdrop = $"rui/menu/gamemode/playlist_bg_olympus_airdrop",
+	panel_canyon_land_mu2_airdrop = $"rui/menu/gamemode/playlist_bg_kc_mu2_airdrop",
+	duos_airdrop = $"rui/menu/gamemode/duos_v2",
+	trios_airdrop = $"rui/menu/gamemode/trios",
+
+                  
+		shadow_squad = $"rui/menu/gamemode/shadow_squad",
+       
+                               
+		shadow_royale = $"rui/menu/gamemode/playlist_bg_shadow_royale",
+       
+                       
+                                                       
+       
+                           
+		tournament = $"rui/menu/gamemode/tournament",
+       
+                           
+		salvo_wargames_kc = $"rui/menu/gamemode/salvo_wargames_kc",
+		salvo_wargames_oly = $"rui/menu/gamemode/salvo_wargames_oly",
+		wargames_duos = $"rui/menu/gamemode/wargames_duos",
+		wargames_trios = $"rui/menu/gamemode/wargames_trios",
+		deathtrigger = $"rui/menu/gamemode/playlist_bg_deathtrigger",
+		deathtrigger_kc = $"rui/menu/gamemode/playlist_bg_kc_mu3_deathtrigger",
+		deathtrigger_oly = $"rui/menu/gamemode/playlist_bg_olympus_mu1_deathtrigger",
+		deathtrigger_we = $"rui/menu/gamemode/playlist_bg_worldsedge_mu3_deathtrigger",
+       
+                               
+                                                     
+                                                                                     
+                                                                                            
+                                                                                                
+       
+	live_die_live = $"rui/menu/gamemode/live_die_live",
+	third_person = $"rui/menu/gamemode/third_person",
+	always_be_closing = $"rui/menu/gamemode/always_be_closing",
+	night = $"rui/menu/gamemode/night",
+	dummies = $"rui/menu/gamemode/dummies",
+	deja_loot = $"rui/menu/gamemode/deja_loot",
+                          
+		campfire = $"rui/menu/gamemode/flashpoint",
+		campfire_oly = $"rui/menu/gamemode/playlist_bg_olympus_mu2_flashpoint",
+       
+	explore_mode = $"rui/menu/gamemode/playlist_bg_olympus_explore",
+
+                        
+		arenas_party_crasher = $"rui/menu/gamemode/playlist_bg_arena_party_crasher",
+		arenas_phase_runner = $"rui/menu/gamemode/playlist_bg_arena_phase_runner",
+		arenas_overflow = $"rui/menu/gamemode/playlist_bg_arena_overflow",
+		arenas_skull_town = $"rui/menu/gamemode/playlist_bg_arena_skull_town",
+		arenas_dome = $"rui/menu/gamemode/playlist_bg_arena_dome",
+		arenas_oasis = $"rui/menu/gamemode/playlist_bg_arena_oasis",
+		arenas_encore = $"rui/menu/gamemode/playlist_bg_arena_encore",
+		arenas_habitat = $"rui/menu/gamemode/playlist_bg_arena_habitat",
+		arenas_drop_off = $"rui/menu/gamemode/playlist_bg_arena_drop_off",
+
+		                                                                                             
+		                                                                                  
+		                                                                                
+		                                                                      
+		                                                              
+		                                                            
+		                                                                      
+		                                                                    
+       
+                         
+		control_barometer = $"rui/menu/gamemode/playlist_bg_control_barometer",
+		control_hammond_labs = $"rui/menu/gamemode/playlist_bg_control_hammond_labs",
+		control_caustic_tt = $"rui/menu/gamemode/playlist_bg_control_caustic_tt",
+		control_lava_siphon = $"rui/menu/gamemode/playlist_bg_control_lava_siphon",
+       
+}
+
+global const table<string, asset> GAMEMODE_THUMBNAIL_IMAGE_MAP = {
+	play_apex = $"rui/menu/gamemode/play_apex",
+	apex_elite = $"rui/menu/gamemode/apex_elite",
+	training = $"rui/menu/gamemode/playlist_bg_sq_training",
+	firing_range = $"rui/menu/gamemode/playlist_bg_sq_firing_range",
+	generic_01 = $"rui/menu/gamemode/generic_01",
+	generic_02 = $"rui/menu/gamemode/generic_02",
+	ranked_1 = $"rui/menu/gamemode/playlist_bg_kc_mu2_ranked",
+	ranked_2 = $"rui/menu/gamemode/playlist_bg_worldsedge_ranked",
+	ranked_3 = $"rui/menu/gamemode/playlist_bg_olympus_mu2_ranked",
+	ranked_4 = $"rui/menu/gamemode/playlist_bg_storm_point_ranked",
+	solo_iron_crown = $"rui/menu/gamemode/solo_iron_crown",
+	solo = $"rui/menu/gamemode/solo_iron_crown",
+	duos = $"rui/menu/gamemode/playlist_bg_sq_duos",
+	trios = $"rui/menu/gamemode/playlist_bg_sq_trios",
+	panel_worlds_edge = $"rui/menu/gamemode/playlist_bg_worldsedge_vanilla",
+	panel_worlds_edge_mu1 = $"rui/menu/gamemode/worlds_edge_mu1",
+	panel_worlds_edge_mu2 = $"rui/menu/gamemode/playlist_bg_worldsedge_mu2",
+	panel_worlds_edge_mu3 = $"rui/menu/gamemode/playlist_bg_worldsedge_mu3",
+	panel_olympus = $"rui/menu/gamemode/playlist_bg_olympus",
+	panel_olympus_mu1 = $"rui/menu/gamemode/playlist_bg_olympus_mu1",
+	panel_olympus_mu2 = $"rui/menu/gamemode/playlist_bg_olympus_mu2",
+	canyon_land_mu1 = $"rui/menu/gamemode/play_apex",
+	panel_canyon_land = $"rui/menu/gamemode/playlist_bg_kc_vanilla",
+	panel_canyon_land_mu1 = $"rui/menu/gamemode/playlist_bg_kc",
+	panel_canyon_land_mu2 = $"rui/menu/gamemode/playlist_bg_kc_mu2",
+	panel_canyon_land_mu3 = $"rui/menu/gamemode/playlist_bg_kc_mu3",
+	panel_canyon_land_mu3_hu1 = $"rui/menu/gamemode/playlist_bg_kc_mu3_hu1",
+	panel_canyon_land_night = $"rui/menu/gamemode/playlist_bg_kc_night",
+	shotguns_and_snipers = $"rui/menu/gamemode/playlist_bg_sq_shotguns_and_snipers",
+	panel_storm_point = $"rui/menu/gamemode/playlist_bg_storm_point",
+	panel_storm_point_mu1 = $"rui/menu/gamemode/playlist_bg_storm_point_mu1",
+
+	panel_worlds_edge_mu2_airdrop = $"rui/menu/gamemode/playlist_bg_worldsedge_airdrop",
+	panel_olympus_airdrop = $"rui/menu/gamemode/playlist_bg_olympus_airdrop",
+	panel_canyon_land_mu2_airdrop = $"rui/menu/gamemode/playlist_bg_kc_mu2_airdrop",
+	duos_airdrop = $"rui/menu/gamemode/playlist_bg_sq_duos",
+	trios_airdrop = $"rui/menu/gamemode/playlist_bg_sq_trios",
+
+                  
+		shadow_squad = $"rui/menu/gamemode/shadow_squad",
+       
+                               
+		shadow_royale = $"rui/menu/gamemode/playlist_bg_sq_shadow_royale",
+       
+                       
+                                                       
+       
+                           
+		tournament = $"rui/menu/gamemode/tournament",
+       
+                           
+		salvo_wargames_kc = $"rui/menu/gamemode/salvo_wargames_kc",
+		salvo_wargames_oly = $"rui/menu/gamemode/salvo_wargames_oly",
+		wargames_duos = $"rui/menu/gamemode/wargames_duos",
+		wargames_trios = $"rui/menu/gamemode/wargames_trios",
+		deathtrigger = $"rui/menu/gamemode/playlist_bg_sq_deathtrigger",
+		deathtrigger_kc = $"rui/menu/gamemode/playlist_bg_sq_kc_mu3_deathtrigger",
+		deathtrigger_oly = $"rui/menu/gamemode/playlist_bg_sq_olympus_mu1_deathtrigger",
+		deathtrigger_we = $"rui/menu/gamemode/playlist_bg_sq_worldsedge_mu3_deathtrigger",
+       
+                               
+                                                     
+                                                                                     
+                                                                                            
+                                                                                                
+       
+	live_die_live = $"rui/menu/gamemode/live_die_live",
+	third_person = $"rui/menu/gamemode/third_person",
+	always_be_closing = $"rui/menu/gamemode/always_be_closing",
+	night = $"rui/menu/gamemode/night",
+	dummies = $"rui/menu/gamemode/dummies",
+	deja_loot = $"rui/menu/gamemode/deja_loot",
+                          
+		campfire = $"rui/menu/gamemode/flashpoint",
+		campfire_oly = $"rui/menu/gamemode/playlist_bg_sq_olympus_mu2_flashpoint",
+       
+	explore_mode = $"rui/menu/gamemode/playlist_bg_olympus_explore",
+
+                        
+		arenas_party_crasher = $"rui/menu/gamemode/playlist_bg_sq_arena_party_crasher"
+		arenas_phase_runner = $"rui/menu/gamemode/playlist_bg_sq_arena_phase_runner",
+		arenas_overflow = $"rui/menu/gamemode/playlist_bg_sq_arena_overflow",
+		arenas_skull_town = $"rui/menu/gamemode/playlist_bg_sq_arena_skull_town",
+		arenas_encore = $"rui/menu/gamemode/playlist_bg_sq_arena_encore",
+		arenas_habitat = $"rui/menu/gamemode/playlist_bg_sq_arena_habitat",
+		arenas_drop_off = $"rui/menu/gamemode/playlist_bg_sq_arena_drop_off",
+
+		                                                                                             
+		                                                                                     
+		                                                                                   
+		                                                                         
+		                                                                 
+		                                                               
+		                                                                         
+		                                                                       
+       
+
+                         
+		control_barometer = $"rui/menu/gamemode/playlist_bg_sq_control_barometer",
+		control_hammond_labs = $"rui/menu/gamemode/playlist_bg_sq_control_hammond_labs",
+		control_caustic_tt = $"rui/menu/gamemode/playlist_bg_sq_control_caustic_tt",
+		control_lava_siphon = $"rui/menu/gamemode/playlist_bg_sq_control_lava_siphon",
+       
+}
+
+global const table<string, asset> GAMEMODE_MINI_ICON_MAP = {
+	airdrop = $"rui/menu/gamemode_emblem/airdrop_takeover",
+}
+
+global const string GAMEMODE_DEFAULT_LOGO_NAME = "BATTLE_ROYALE"
+global const asset GAMEMODE_LOGO_SHAREDMAP = $"settings/sharedmap/gamemode_logos.rpak"
+
+const table<string, asset> GAMEMODE_BINK_MAP = {
+	play_apex = $"media/gamemodes/play_apex.bik",
+	apex_elite = $"media/gamemodes/apex_elite.bik",
+	training = $"media/gamemodes/training.bik",
+	generic_01 = $"media/gamemodes/generic_01.bik",
+	generic_02 = $"media/gamemodes/generic_02.bik",
+	ranked_1 = $"media/gamemodes/ranked_1.bik",
+	ranked_2 = $"media/gamemodes/ranked_2.bik",
+	ranked_3 = $"media/gamemodes/ranked_3.bik",
+	solo_iron_crown = $"media/gamemodes/solo_iron_crown.bik",
+	solo = $"media/gamemodes/solo_iron_crown.bik",
+	duos = $"media/gamemodes/duos_v2.bik",
+	trios = $"media/gamemodes/trios.bik",
+	worlds_edge = $"media/gamemodes/worlds_edge.bik",
+	worlds_edge_mu1 = $"media/gamemodes/worlds_edge_mu1.bik",
+	canyon_land_mu1 = $"media/gamemodes/play_apex.bik",
+	shotguns_and_snipers = $"media/gamemodes/shotguns_and_snipers.bik",
+                  
+		shadow_squad = $"media/gamemodes/shadow_squad.bik",
+       
+                               
+		shadow_royale = $"media/gamemodes/shadow_squad.bik",
+       
+                       
+                                                         
+       
+                           
+		tournament = $"media/gamemodes/play_apex.bik",
+       
+	live_die_live = $"media/gamemodes/live_die_live.bik",
+	third_person = $"media/gamemodes/third_person.bik",
+	always_be_closing = $"media/gamemodes/always_be_closing.bik",
+	night = $"media/gamemodes/night.bik",
+	dummies = $"media/gamemodes/dummies.bik",
+	deja_loot = $"media/gamemodes/deja_loot.bik",
+                          
+	campfire = $"media/gamemodes/campfire.bik",
+       
+}
+#endif               
+
+
+                      
+                      
+                      
+                      
+                      
 
 global typedef PlaylistName string
 global typedef PlaylistVarName string
 
-
-
-//
-//
-//
-//
-//
-#if CLIENT || UI 
-struct FileStruct_LifetimeLevel
+#if SERVER || CLIENT || UI
+global struct TimestampRange
 {
-	//
+	int startUnixTime             
+	int endUnixTime             
 }
-FileStruct_LifetimeLevel& fileLevel
+global struct PlaylistScheduleData
+{
+	array<TimestampRange> blocks
+	TimestampRange ornull currentBlock
+	TimestampRange ornull nextBlock
+}
 #endif
 
 
-#if(ASSERTING)
+
+                       
+                       
+                       
+                       
+                       
+
+#if ASSERTING
 var ASSERTING_integerRegexp = null
 var ASSERTING_floatRegexp = null
 #endif
 
-
-
-//
-//
-//
-//
-//
-#if CLIENT || UI 
-void function ShPlaylists_LevelInit()
+struct CachedPlaylistData
 {
-	FileStruct_LifetimeLevel newFileLevel
-	fileLevel = newFileLevel
+	string name
+	int    index
+
+	PlaylistScheduleData& playlistSchedule
+}
+
+struct
+{
+	array<CachedPlaylistData> cachedPlaylistArray
+	table<string, CachedPlaylistData> cachedPlaylistMap
+
+} file
+
+
+
+                         
+                         
+                         
+                         
+                         
+
+#if SERVER || CLIENT || UI
+int ornull function GetCurrentPlaylistVarTimestamp( string varName, int defaultVal )
+{
+	return DateTimeStringToUnixTimestamp( GetCurrentPlaylistVarString( varName, string(defaultVal) ) )
 }
 #endif
 
 
-#if CLIENT || UI 
-string function GetCurrentPlaylistVarString( PlaylistVarName varName, string fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
-	if ( stringValueOrNull != null )
-		return expect string( stringValueOrNull )
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
-bool function GetCurrentPlaylistVarBool( PlaylistVarName varName, bool fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
-	if ( stringValueOrNull != null )
-	{
-		string sanitizedValue = strip( expect string(stringValueOrNull) ).tolower()
-		if ( sanitizedValue == "1" || sanitizedValue == "true" )
-			return true
-		Assert( sanitizedValue == "0" || sanitizedValue == "false", format( "In playlist '%s', playlist var '%s' must be '1', 'true', '0', or 'false', but it's value is '%s'", GetCurrentPlaylistName(), varName, sanitizedValue ) )
-		return false
-	}
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
-int function GetCurrentPlaylistVarInt( PlaylistVarName varName, int fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
-	if ( stringValueOrNull != null )
-	{
-		string stringValue = expect string(stringValueOrNull)
-		#if(ASSERTING)
-			if ( ASSERTING_integerRegexp == null )
-				ASSERTING_integerRegexp = MakeRegexp( "^\\s*\\-?\\d+\\s*$" )
-			Assert( Regexp_DoesMatch( ASSERTING_integerRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid integer: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
-		#endif
-		return int( stringValue )
-	}
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
-float function GetCurrentPlaylistVarFloat( PlaylistVarName varName, float fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string ornull stringValueOrNull = Code_GetCurrentPlaylistVar( varName )
-	if ( stringValueOrNull != null )
-	{
-		string stringValue = expect string(stringValueOrNull)
-		#if(ASSERTING)
-			if ( ASSERTING_floatRegexp == null )
-				ASSERTING_floatRegexp = MakeRegexp( "^[-+]?\\d*\\.?\\d*(?:[eE][-+]?\\d+)?$" )
-			Assert( Regexp_DoesMatch( ASSERTING_floatRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid float: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
-		#endif
-		return float( stringValue )
-	}
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
-string function GetPlaylistVarString( PlaylistName playlistName, PlaylistVarName varName, string fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	return GetPlaylistVarOrUseValue( playlistName, varName, fallbackValue )
-}
-#endif
-
-
-#if CLIENT || UI 
-bool function GetPlaylistVarBool( PlaylistName playlistName, PlaylistVarName varName, bool fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string stringValue = GetPlaylistVarOrUseValue( playlistName, varName, "" )
-	if ( stringValue != "" )
-	{
-		string sanitizedValue = strip( stringValue ).tolower()
-		if ( sanitizedValue == "1" || sanitizedValue == "true" )
-			return true
-		Assert( sanitizedValue == "0" || sanitizedValue == "false", format( "In playlist '%s', playlist var '%s' must be '1', 'true', '0', or 'false', but it's value is '%s'", GetCurrentPlaylistName(), varName, sanitizedValue ) )
-		return false
-	}
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
-int function GetPlaylistVarInt( PlaylistName playlistName, PlaylistVarName varName, int fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string stringValue = GetPlaylistVarOrUseValue( playlistName, varName, "" )
-	if ( stringValue != "" )
-	{
-		#if(ASSERTING)
-			if ( ASSERTING_integerRegexp == null )
-				ASSERTING_integerRegexp = MakeRegexp( "^\\s*\\-?\\d+\\s*$" )
-			Assert( Regexp_DoesMatch( ASSERTING_integerRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid integer: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
-		#endif
-		return int( stringValue )
-	}
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
-float function GetPlaylistVarFloat( PlaylistName playlistName, PlaylistVarName varName, float fallbackValue )
-{
-	#if(CLIENT)
-		if ( !IsConnected() ) //
-		{
-			Warning( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName )
-			return fallbackValue
-		}
-	#elseif(UI)
-		Assert( IsConnected(), format( "Tried to access playlist var '%s' in the UI VM while not connected to a server.", varName ) )
-	#endif
-
-	string stringValue = GetPlaylistVarOrUseValue( playlistName, varName, "" )
-	if ( stringValue != "" )
-	{
-		#if(ASSERTING)
-			if ( ASSERTING_floatRegexp == null )
-				ASSERTING_floatRegexp = MakeRegexp( "^[-+]?\\d*\\.?\\d+(?:[eE][-+]?\\d+)?$" )
-			Assert( Regexp_DoesMatch( ASSERTING_floatRegexp, stringValue ), format( "In playlist '%s', playlist var '%s' is not a valid float: '%s'", GetCurrentPlaylistName(), varName, stringValue ) )
-		#endif
-		return float( stringValue )
-	}
-
-	return fallbackValue
-}
-#endif
-
-
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetMaxTeamSizeForPlaylist( PlaylistName playlistName )
 {
+	int maxTeamSize = GetPlaylistVarInt( playlistName, "max_team_size", 0 )
+	if ( maxTeamSize > 0 )
+		return maxTeamSize
+
 	int maxPlayers = GetPlaylistVarInt( playlistName, "max_players", 0 )
 	int maxTeams   = GetPlaylistVarInt( playlistName, "max_teams", 0 )
 	if ( maxTeams == 0 )
@@ -305,7 +394,7 @@ int function GetMaxTeamSizeForPlaylist( PlaylistName playlistName )
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 array<string> function GetPlaylistMaps( PlaylistName playlistName )
 {
 	array<string> mapsArray
@@ -329,20 +418,17 @@ array<string> function GetPlaylistMaps( PlaylistName playlistName )
 #endif
 
 
-#if CLIENT || UI 
+#if CLIENT || UI
 bool function CanPlaylistFitPartySize( PlaylistName playlistName, int partySize, bool sendOpenInvite )
 {
-	int maxPlayers        = GetMaxPlayersForPlaylistName( playlistName )
-	int maxTeams          = GetMaxTeamsForPlaylistName( playlistName )
-	int maxPlayersPerTeam = int( max( maxPlayers / maxTeams, 1 ) )
-	bool partiesAllowed   = GetPlaylistVarBool( playlistName, "parties_allowed", true )
-
+	int maxPlayersPerTeam = GetMaxTeamSizeForPlaylist( playlistName )
 	if ( partySize > maxPlayersPerTeam )
 		return false
 
 	if ( sendOpenInvite && maxPlayersPerTeam == 1 )
 		return false
 
+	bool partiesAllowed = GetPlaylistVarBool( playlistName, "parties_allowed", true )
 	if ( !partiesAllowed )
 	{
 		if ( partySize > 1 )
@@ -354,70 +440,376 @@ bool function CanPlaylistFitPartySize( PlaylistName playlistName, int partySize,
 
 	return true
 }
+
+asset function GetImageFromMiniIconMap( string keyName )
+{
+	asset imageAsset = $"rui/menu/lobby/settings_icon"
+	if ( keyName != "" )
+	{
+		if ( keyName in GAMEMODE_MINI_ICON_MAP )
+			imageAsset = GAMEMODE_MINI_ICON_MAP[keyName]
+		else
+			Warning( "Invalid mini icon value for 'mini_icon': %s", keyName )
+	}
+	return imageAsset
+}
+
+asset function GetImageFromImageMap( string keyName )
+{
+	asset imageAsset = $"white"
+	if ( keyName != "" )
+	{
+		if ( keyName in GAMEMODE_IMAGE_MAP )
+			imageAsset = GAMEMODE_IMAGE_MAP[keyName]
+		else
+		{
+			#if DEV
+				if ( GetConVarBool( "ui_automation_enabled" ) )
+					return imageAsset                    
+			#endif       
+
+			Warning( "Invalid playlist value for 'image': %s", keyName )
+		}
+	}
+	return imageAsset
+}
+
+asset function GetThumbnailImageFromImageMap( string keyName )
+{
+	asset imageAsset = $"white"
+	if ( keyName != "" )
+	{
+		if ( keyName in GAMEMODE_THUMBNAIL_IMAGE_MAP )
+			imageAsset = GAMEMODE_THUMBNAIL_IMAGE_MAP[keyName]
+		else
+		{
+			#if DEV
+				if ( GetConVarBool( "ui_automation_enabled" ) )
+					return imageAsset                    
+			#endif       
+
+			Warning( "Invalid playlist value for 'image': %s", keyName )
+		}
+	}
+	return imageAsset
+}
+
+asset function GetGamemodeLogoFromImageMap( string keyName )
+{
+	asset imageAsset = $"white"
+	if ( keyName != "" )
+	{
+		bool foundLogo = false
+		var parentBlock = GetSettingsBlockForAsset( GAMEMODE_LOGO_SHAREDMAP )
+		var arrField    = GetSettingsBlockArray( parentBlock, "gamemodeLogos" )
+
+		foreach ( var entryBlock in IterateSettingsArray( arrField ) )
+		{
+			string modeName = GetSettingsBlockString( entryBlock, "mode" )
+
+			if( modeName.tolower() == keyName.tolower() )
+			{
+				imageAsset = GetSettingsBlockAsset( entryBlock, "logo" )
+				foundLogo = true
+				break
+			}
+		}
+
+		if ( !foundLogo )
+		{
+			#if DEV
+				if ( GetConVarBool( "ui_automation_enabled" ) )
+					return imageAsset                    
+			#endif       
+
+			Warning( "Invalid playlist value for 'image': %s", keyName )
+		}
+	}
+	return imageAsset
+}
+
+
+asset function GetBinkFromBinkMap( string keyName )
+{
+	asset desiredVideoAsset = $""
+	if ( keyName != "" )
+	{
+		if ( keyName in GAMEMODE_BINK_MAP )
+			desiredVideoAsset = GAMEMODE_BINK_MAP[keyName]
+		else
+			Warning( "Invalid playlist value for 'video': %s", keyName )
+	}
+	return desiredVideoAsset
+}
 #endif
 
 
-#if CLIENT || UI 
+#if SERVER || CLIENT || UI
 int function GetPlaylistIndexForName( PlaylistName playlistName )
 {
-	int count = GetPlaylistCount()
-	for ( int idx = 0; idx < count; ++idx )
-	{
-		string ornull thisPlaylist = GetPlaylistName( idx )
-		if ( thisPlaylist == playlistName )
-			return idx
-	}
+	if ( playlistName in file.cachedPlaylistMap )
+		return file.cachedPlaylistMap[playlistName].index
 
 	return -1
 }
 #endif
 
 
-#if(UI)
-array<string> function GetVisiblePlaylistNames()
+#if SERVER || CLIENT || UI
+PlaylistScheduleData function Playlist_GetScheduleData( string plName )
 {
-	int numPlaylists          = GetPlaylistCount()
-	bool pveLoadingIsForcedOn = IsPvELoadingForcedOn()
+	if ( plName in file.cachedPlaylistMap )
+	{
+		                                                                   
+		if ( file.cachedPlaylistMap[plName].playlistSchedule.currentBlock == null && file.cachedPlaylistMap[plName].playlistSchedule.nextBlock == null )
+			return file.cachedPlaylistMap[plName].playlistSchedule
 
-	string forcedVisiblePlaylistsString  = GetConVarString( "match_visiblePlaylists" )
-	array<string> forcedVisiblePlaylists = split( forcedVisiblePlaylistsString, " " )
+		if ( file.cachedPlaylistMap[plName].playlistSchedule.currentBlock != null )
+		{
+			                                                                        
+			TimestampRange currentBlock = expect TimestampRange( file.cachedPlaylistMap[plName].playlistSchedule.currentBlock )
+			if ( currentBlock.endUnixTime > GetUnixTimestamp() )
+				return file.cachedPlaylistMap[plName].playlistSchedule	                                                                   
+		}
+
+		if ( file.cachedPlaylistMap[plName].playlistSchedule.nextBlock != null )
+		{
+			                                                           
+			TimestampRange nextBlock = expect TimestampRange( file.cachedPlaylistMap[plName].playlistSchedule.nextBlock )
+			if ( nextBlock.startUnixTime > GetUnixTimestamp() )
+				return file.cachedPlaylistMap[plName].playlistSchedule	                                                               
+		}
+
+		file.cachedPlaylistMap[plName].playlistSchedule = Playlist_GetNonCachedScheduleData( plName )
+		return file.cachedPlaylistMap[plName].playlistSchedule	                                
+	}
+
+	return Playlist_GetNonCachedScheduleData( plName )
+}
+
+PlaylistScheduleData function Playlist_GetNonCachedScheduleData( string plName )
+{
+	PlaylistScheduleData data
+
+	int utNow = GetUnixTimestamp()
+	const int MAX_SCHEDULE_BLOCKS_PER_PLAYLIST = 5
+	for ( int blockIdx = 0; blockIdx < MAX_SCHEDULE_BLOCKS_PER_PLAYLIST + 1; ++blockIdx )
+	{
+		                             
+		string varName = format( "visible_schedule_block_%d", blockIdx )
+		string varVal  = GetPlaylistVarString( plName, varName, "" )
+		if ( varVal.len() == 0 )
+		{
+			continue
+		}
+		else if ( blockIdx >= MAX_SCHEDULE_BLOCKS_PER_PLAYLIST )
+		{
+			Assert( false, format( "Only %d visible blocks are supported per playlist, but we tried to specify more for playlist '%s': \"%s\" \"^s\"", MAX_SCHEDULE_BLOCKS_PER_PLAYLIST, plName, varName, varVal ) )
+			break
+		}
+
+		array<string> fields = GetTrimmedSplitString( varVal, "|" )
+
+		int ornull startTime = null
+		int ornull endTime   = null
+
+		if ( fields.len() == 1 )
+		{
+			if ( !IsValidItemFlavorHumanReadableRef( fields[0] ) )
+			{
+				Assert( false, format( "Bad itemflavor in playlist '%s' for setting '%s': '%s'", plName, varName, fields[0] ) )
+				break
+			}
+
+			ItemFlavor calEvent = GetItemFlavorByHumanReadableRef( fields[0] )
+			Assert( ItemFlavor_GetType( calEvent ) > eItemType._CALEVENT_RANGE_START && ItemFlavor_GetType( calEvent ) < eItemType._CALEVENT_RANGE_END )
+
+			startTime = CalEvent_GetStartUnixTime( calEvent )
+			endTime = CalEvent_GetFinishUnixTime( calEvent )
+		}
+		else
+		{
+			if ( fields.len() != 2 )
+			{
+				Assert( false, format( "Bad format in playlist '%s' for setting '%s': '%s'", plName, varName, varVal ) )
+				break
+			}
+
+			startTime = DateTimeStringToUnixTimestamp( fields[0] )
+			endTime = DateTimeStringToUnixTimestamp( fields[1] )
+		}
+
+		if ( startTime == null || endTime == null )
+		{
+			Assert( false, format( "Bad format in playlist '%s' for setting '%s': '%s'", plName, varName, varVal ) )
+			break
+		}
+
+		TimestampRange block
+		block.startUnixTime = expect int( startTime )
+		block.endUnixTime = expect int( endTime )
+
+		#if ASSERTING
+			Assert( block.startUnixTime < block.endUnixTime, format( "Bad times in playlist '%s' for setting '%s': '%s'", plName, varName, varVal ) )
+			foreach ( TimestampRange otherBlock in data.blocks )
+			{
+				Assert( block.endUnixTime < otherBlock.startUnixTime || otherBlock.endUnixTime < block.startUnixTime,
+					format( "Playlist '%s' has two visible schedule blocks that overlap. One of them is: \"%s\" \"%s\"", plName, varName, varVal ) )
+			}
+		#endif
+
+		data.blocks.append( block )
+
+
+		if ( utNow >= block.startUnixTime && utNow < block.endUnixTime )
+		{
+			Assert( data.currentBlock == null, format( "Playlist '%s' has two visible schedule blocks that overlap. One of them is: \"%s\" \"%s\"", plName, varName, varVal ) )
+			data.currentBlock = block
+		}
+		else if ( block.startUnixTime > utNow )
+		{
+			if ( data.nextBlock == null || block.startUnixTime < (expect TimestampRange(data.nextBlock)).startUnixTime )
+				data.nextBlock = block
+		}
+	}
+
+	return data
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+bool function Playlist_ShouldBeHiddenForScheduleBlocks( string plName )
+{
+	PlaylistScheduleData scheduleData = Playlist_GetScheduleData( plName )
+	if ( scheduleData.blocks.len() > 0 )
+	{
+		if ( scheduleData.currentBlock == null )
+			return true
+
+		TimestampRange currentBlock = expect TimestampRange( scheduleData.currentBlock )
+		if ( currentBlock.startUnixTime > GetUnixTimestamp() || currentBlock.endUnixTime < GetUnixTimestamp() )
+			return true
+	}
+
+	return false
+}
+#endif
+
+
+#if SERVER || CLIENT || UI
+void function ShPlaylist_Init()
+{
+	#if SERVER
+		               
+		 
+			                                                                          
+		 
+	#endif
+
+	ShPlaylist_CacheData()
+}
+
+void function ShPlaylist_CacheData()
+{
+	PrintFunc()
+	file.cachedPlaylistArray = []
+	file.cachedPlaylistMap = {}
+
+	int numPlaylists = GetPlaylistCount()
+	file.cachedPlaylistArray.resize( numPlaylists )
+
+	for ( int index = 0; index < numPlaylists; index++ )
+	{
+		CachedPlaylistData playlistData
+		string name = string( GetPlaylistName( index ) )
+
+		playlistData.name = name
+		playlistData.index = index
+
+		playlistData.playlistSchedule = Playlist_GetScheduleData( name )
+
+		file.cachedPlaylistArray[index] = playlistData
+		file.cachedPlaylistMap[name] <- playlistData
+	}
+}
+
+#if SERVER
+                                                                 
+ 
+	           
+	                                       
+	                                                                                                                                                     
+	 
+		                      
+	 
+
+ 
+#endif
+
+array<string> function GetPlaylistModNames()
+{
+	array<string> list = []
+	int numMods = GetPlaylistModCount()
+
+	list.resize( numMods )
+	for ( int modIter = 0; modIter != numMods; modIter++ )
+		list[modIter] = string( GetPlaylistModName( modIter ) )
+
+	return list
+}
+
+array<string> function GetVisiblePlaylistNames( bool isPrivateMatchQuery = false )
+{
+	if ( GetPlaylistCount() != file.cachedPlaylistArray.len() )
+		Warning( "Playlist count mismatch: cache (%d) != actual (%d)", file.cachedPlaylistArray.len(), GetPlaylistCount() )
+
+	string forcedVisiblePlaylistsString = GetConVarString( "match_visiblePlaylists" )
+	string playlistRotationGroup = GetPlaylistRotationGroup()
+	bool shouldDisplayOptInOptions = false
+	#if UI
+		if ( ShouldDisplayOptInOptions() && IsOptInEnabled() )
+			shouldDisplayOptInOptions = true
+	#endif      
+
+	array<string> forcedVisiblePlaylists = split( forcedVisiblePlaylistsString, WHITESPACE_CHARACTERS )
 
 	array<string> list      = []
 	array<string> optInList = []
-	for ( int i = 0; i < numPlaylists; i++ )
+	for ( int i = 0; i < file.cachedPlaylistArray.len(); i++ )
 	{
-		string name    = string( GetPlaylistName( i ) )
-		bool visible   = GetPlaylistVarBool( name, "visible", false )
-		bool hubOnly   = GetPlaylistVarBool( name, "hub_only", false )
-		bool optInOnly = GetPlaylistVarBool( name, "opt_in_only", false )
-		bool isPvEOnly = GetPlaylistVarBool( name, "pve_only", false )
+		CachedPlaylistData playlistData = file.cachedPlaylistArray[i]
 
-		if ( pveLoadingIsForcedOn != isPvEOnly )
-			continue
-
-		if ( forcedVisiblePlaylists.contains( name ) )
+		if ( forcedVisiblePlaylists.contains( playlistData.name ) )
 		{
-			list.append( name )
+			list.append( playlistData.name )
 			continue
 		}
 
-		if ( !visible )
+		if ( !GetPlaylistVarBool( playlistData.name, "visible", false ) )
+			continue
+		if ( GetPlaylistVarBool( playlistData.name, "hub_only", false ) )
+			continue
+		if ( GetPlaylistVarBool( playlistData.name, "pve_only", false ) )                             
+			continue
+		if ( GetPlaylistVarBool( playlistData.name, "private_match", false )  != isPrivateMatchQuery )
 			continue
 
-		if ( hubOnly )
+		string cachedPlaylistRotationGroup = GetPlaylistVarString( playlistData.name, "playlist_rotation_group", "" )
+		if ( cachedPlaylistRotationGroup != playlistRotationGroup && cachedPlaylistRotationGroup != "" )
 			continue
 
-		if ( optInOnly )
+		if ( GetPlaylistVarBool( playlistData.name, "opt_in_only", false ) )
 		{
-			if ( ShouldDisplayOptInOptions() )
-			{
-				if ( uiGlobal.isOptInEnabled )
-					optInList.append( name )
-			}
+			if ( shouldDisplayOptInOptions )
+				optInList.append( playlistData.name )
 			continue
 		}
 
-		list.append( name )
+		if ( Playlist_ShouldBeHiddenForScheduleBlocks( playlistData.name ) )
+			continue
+
+		list.append( playlistData.name )
 	}
 
 	array<string> finalList = []
@@ -437,19 +829,317 @@ array<string> function GetVisiblePlaylistNames()
 		finalList = list
 
 	finalList.extend( optInList )
-
 	return finalList
 }
 #endif
 
 
+#if SERVER || CLIENT || UI
+string function Playlist_GetLTMSlotPlaylist( bool isPrivateMatchQuery = false )
+{
+	array<string> plNames = GetVisiblePlaylistNames( isPrivateMatchQuery )
+	foreach ( plName in plNames )
+	{
+		if ( GetPlaylistVarString( plName, "ui_slot", "" ) == "ltm" )
+			return plName
+	}
 
-//
-//
-//
-//
-//
-#if ( CLIENT || UI ) && DEV 
+	return ""
+}
+
+int function Playlist_GetNewModeVersion()
+{
+	return GetCurrentPlaylistVarInt( "newModeVersion", 0 )
+}
+#endif
+
+
+#if CLIENT || UI
+const table<string, asset> GAMEMODE_EMBLEM_MAP = {
+	airdrop = $"rui/menu/gamemode_emblem/airdrop_takeover",
+	shotguns_and_snipers = $"rui/menu/gamemode_emblem/shotguns_and_snipers",
+	jan_event = $"rui/menu/gamemode_emblem/sioree",
+	deja_loot = $"rui/menu/gamemode_emblem/deja_loot",
+                  
+		shadowfall = $"rui/menu/gamemode_emblem/shadowfall",
+       
+
+                               
+		shadow_royale = $"rui/menu/gamemode_emblem/shadow_royale",
+       
+
+	duos = $"rui/menu/gamemode_emblem/duos",
+                       
+                                                              
+       
+                           
+		death_trigger = $"rui/menu/gamemode_emblem/emblem_war_games_death_trigger",
+		flare_up = $"rui/menu/gamemode_emblem/emblem_war_games_flare_up",
+		second_chance = $"rui/menu/gamemode_emblem/emblem_war_games_second_chance",
+		armed_drop = $"rui/menu/gamemode_emblem/emblem_war_games_armed_drop",
+		glow_zones = $"rui/menu/gamemode_emblem/emblem_war_games_glow_zones",
+		shield_regen = $"rui/menu/gamemode_emblem/emblem_war_games_shield_regen",
+		auto_cards = $"rui/menu/gamemode_emblem/emblem_war_games_auto_cards",
+       
+                               
+                                                            
+       
+	lost_treasures = $"rui/menu/gamemode_emblem/campfire_lost_treasures",
+                              
+                                                          
+       
+	generic = $"rui/menu/gamemode_emblem/generic_ltm"
+	genesis = $"rui/menu/gamemode_emblem/genesis"
+
+                         
+		control_mode = $"rui/menu/gamemode_emblem/emblem_control"
+                               
+}
+#endif
+
+
+#if CLIENT || UI
+asset function GetModeEmblemImage( string playlistName )
+{
+	string emblemKey  = GetPlaylistVarString( playlistName, "emblem", "" )
+	asset emblemImage = $""
+
+	if ( emblemKey != "" )
+	{
+		if ( emblemKey in GAMEMODE_EMBLEM_MAP )
+			emblemImage = GAMEMODE_EMBLEM_MAP[emblemKey]
+		else
+			Warning( "Playlist '%s' has invalid value for 'emblem': %s", playlistName, emblemKey )
+	}
+
+	return emblemImage
+}
+#endif
+
+
+#if UI
+array<int> function GetEmblemColor( string playlistName )
+{
+	string colorString = GetPlaylistVarString( playlistName, "emblem_color", "128 128 128 255" )
+	return ColorStringToArray( colorString )
+}
+#endif
+
+#if DEV
+                                                                   
+const DEV_SecondsPerRotation = 3600
+#endif
+
+#if SERVER || CLIENT || UI
+string function GetPlaylistRotationGroup()
+{
+	string rotationGroup = GetConVarString( "playlist_rotationGroup" )
+	#if DEV
+		if ( rotationGroup == "" )
+		{
+			                            
+			                                                               
+			if ( GetUnixTimestamp() % (DEV_SecondsPerRotation * 2) < DEV_SecondsPerRotation )
+				rotationGroup = "kings_canyon"
+			else
+				rotationGroup = "worlds_edge"
+		}
+	#endif
+	return rotationGroup
+}
+#endif
+#if UI
+int function GetPlaylistRotationNextTime()
+{
+	                                                                                                                                                               
+	                                                                         
+	int nextTime = int( GetConVarString( "playlist_rotationNextTime" ) )
+
+	#if DEV
+		if ( nextTime == 0 )
+			nextTime = (GetUnixTimestamp() / DEV_SecondsPerRotation ) * DEV_SecondsPerRotation + DEV_SecondsPerRotation                             
+	#endif
+
+	return nextTime
+}
+#endif
+#if UI
+string function GetPlaylistRotationNextTimeFormatedString( int seconds = -1 )
+{
+	DisplayTime dt = SecondsToDHMS( GetPlaylistRotationNextTime() - GetUnixTimestamp() - 1 )
+
+	if(seconds > -1)
+		dt = SecondsToDHMS( seconds - 1 )
+
+	string nextTimeStr
+
+	bool isDays = dt.days > 0
+	bool isHours = dt.hours > 0
+	bool isMinutes = dt.minutes > 0
+
+	string formatString
+
+	if( isDays && !isHours ){
+		    
+		formatString = Localize( "#TIME_REMAINING_DAYS", string( dt.days ))
+	}else if ( isDays && isHours ){
+		       
+		formatString = Localize( "#TIME_REMAINING_DAYS_HOURS", string( dt.days ), string( dt.hours ) )
+	}else if( !isDays && isHours && isMinutes ){
+		        
+		formatString = Localize( "#TIME_REMAINING_HOURS_MINUTES", string( dt.hours ), string( dt.minutes ) )
+	}else if( !isDays && !isHours && isMinutes ){
+		        
+		formatString = Localize( "#TIME_REMAINING_MINUTES_SECONDS", string( dt.minutes ), string( dt.seconds ) )
+	}else if( !isDays && !isHours && !isMinutes){
+		     
+		formatString = Localize( "#TIME_REMAINING_SECONDS", string( dt.seconds ) )
+	}
+
+	return formatString
+}
+#endif
+#if UI
+array<string> function GetPlaylistsInCurrentRotationGroup()
+{
+	string playlistRotationGroup = GetPlaylistRotationGroup()
+	array<string> visiblePlaylists = GetVisiblePlaylistNames()
+	array<string> list
+
+	for ( int i = 0; i < visiblePlaylists.len(); i++ )
+	{
+		string playlistName = visiblePlaylists[i]
+		string rotationGroup = GetPlaylistVarString( playlistName, "playlist_rotation_group", "" )
+
+		if ( rotationGroup == playlistRotationGroup )
+			list.append( playlistName )
+	}
+
+	return list
+}
+#endif
+#if UI
+string function GetPanelImageKeyForCurrentRotationGroup()
+{
+	array<string> list = GetPlaylistsInCurrentRotationGroup()
+	if ( !list.len() )
+		return ""
+
+	int mapIdx = GetPlaylistActiveMapRotationIndex( list[0] )
+	string panelImageKey = GetPlaylistMapVarString( list[0], mapIdx, "panel_image", "" )
+	return panelImageKey
+}
+#endif
+#if UI
+string function GetMapDisplayNameForCurrentRotationGroup()
+{
+	array<string> list = GetPlaylistsInCurrentRotationGroup()
+	if ( !list.len() )
+		return ""
+
+	int mapIdx = GetPlaylistActiveMapRotationIndex( list[0] )
+	return GetPlaylistMapVarString( list[0], mapIdx, "map_name", "bug this!" )
+}
+#endif
+#if UI
+string function GetCurrentPlaylistInUiSlot( string uiSlot )
+{
+	array<string> playlistNames = GetPlaylistsInCurrentRotationGroup()
+	foreach( playlist in playlistNames )
+	{
+		if ( GetPlaylistVarString( playlist, "ui_slot", "" ) == uiSlot )
+			return playlist
+	}
+
+	return ""
+}
+#endif
+#if UI
+bool function PlaylistHasRotationGroup( string playlistName )
+{
+	string rotationGroup = GetPlaylistVarString( playlistName, "playlist_rotation_group", "" )
+	return rotationGroup != ""
+}
+#endif
+#if UI
+string function GetDefaultPlaylist()
+{
+	array<string> list = GetVisiblePlaylistNames()
+	Assert( list.len() > 0 )
+
+	if ( GetPartySize() == 1 && !IsExemptFromTraining() && !IsTrainingCompleted() )
+		return PLAYLIST_TRAINING
+
+	foreach ( playlist in list )
+	{
+		if (  PrivateMatchMapSelect_PlaylistIsDefaultSlot( playlist ) || GamemodeSelect_PlaylistIsDefaultSlot( playlist ) && Lobby_IsPlaylistAvailable( playlist ) )
+		{
+			return playlist
+			break
+		}
+	}
+
+	foreach ( playlist in list )
+	{
+		if ( playlist == PLAYLIST_TRAINING )
+			continue
+		return playlist
+	}
+
+	Assert( false, "Script is unable to find a default playlist. This should only be possible if 'survival_training' is the only playlist available. Check visible, opt_in_only, and private_match vars on playlists to figure what is wrong." )
+	unreachable
+}
+#endif
+#if UI
+bool function PartyHasPlaylistAccountLevelRequired( string playlistName )
+{
+	                                                                         
+
+	if ( !IsFullyConnected() )
+		return false
+
+	int accountLevelRequired = GetPlaylistVarInt( playlistName, "account_level_required", 0 ) - 1                                                     
+	if ( accountLevelRequired < 0 )
+		return true
+
+	Party party = GetParty()
+	if ( party.members.len() == 0 )
+	{
+		if ( IsPersistenceAvailable() )
+			return GetAccountLevelForXP( GetPersistentVarAsInt( "xp" ) ) >= accountLevelRequired
+		else
+			return false
+	}
+
+	bool onePartyMembersMeetRankedLevelRequirement = false
+
+	foreach ( member in party.members )
+	{
+		CommunityUserInfo ornull userInfoOrNull = GetUserInfo( member.hardware, member.uid )
+
+		if ( userInfoOrNull != null )
+		{
+			CommunityUserInfo userInfo = expect CommunityUserInfo(userInfoOrNull)
+
+			if ( userInfo.charData[ePlayerStryderCharDataArraySlots.ACCOUNT_LEVEL] >= accountLevelRequired )
+			{
+				onePartyMembersMeetRankedLevelRequirement = true
+				break
+			}
+		}
+	}
+
+	return onePartyMembersMeetRankedLevelRequirement
+}
+#endif
+
+
+                       
+                       
+                       
+                       
+                       
+#if (SERVER || CLIENT || UI) && DEV
 void function PrintPlaylists()
 {
 	printt( "=== PLAYLIST NAMES: ===" )

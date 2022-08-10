@@ -9,7 +9,6 @@ global function Bleedout_SetFirstAidStrings
 global function AddCallback_OnBleedoutStarted
 global function AddCallback_OnBleedoutEnded
 
-global function ServerCallback_Bleedout_DownStateThirdPersonCameraSettings
 
 global function Bleedout_DisplayTrainingFirstAidProgressBar
 global function Bleedout_StopTrainingFirstAidProgressBar
@@ -31,6 +30,8 @@ struct
 	float bleedoutFXAlpha = 0.0
 	float reviveStartTime = 0.0
 	float reviveEndTime = 0.0
+
+	entity oldPlayerHealer = null
 } file
 
 void function BleedoutClient_Init()
@@ -70,7 +71,7 @@ string function PlayerBleedoutUseTextOverride( entity player )
 	{
 		if ( IsRecruitMode() && CanRecruitOrRevivePlayer( localPlayer, player ) )
 			return "#RECRUIT_USE_TEAMMATE_RES_DYNAMIC"
-		//
+		                                          
 
 		if ( IsValidSyncedMeleeTarget( localPlayer, null, null, player ) )
 			return "#MELEE_EXECUTE_PROMPT_DYNAMIC"
@@ -81,8 +82,8 @@ string function PlayerBleedoutUseTextOverride( entity player )
 
 void function ClBleedout_RegisterNetworkFunctions()
 {
-	RegisterNetworkedVariableChangeCallback_time( "bleedoutEndTime", BleedoutEndTimeChanged )
-	RegisterNetworkedVariableChangeCallback_ent( "revivePlayerHealer", BLEEDOUT_RevivePlayerHealerChanged )
+	RegisterNetVarTimeChangeCallback( "bleedoutEndTime", BleedoutEndTimeChanged )
+	RegisterNetVarEntityChangeCallback( "revivePlayerHealer", BLEEDOUT_RevivePlayerHealerChanged )
 }
 
 void function AddCallback_OnBleedoutStarted( void functionref(entity,float) func )
@@ -103,7 +104,7 @@ void function Bleedout_SetFirstAidStrings( string applyString, string receiveStr
 	file.firstAidReceiveString = receiveString
 }
 
-void function BLEEDOUT_RevivePlayerHealerChanged( entity playerToRes, entity oldPlayerHealer, entity playerHealer, bool actuallyChanged )
+void function BLEEDOUT_RevivePlayerHealerChanged( entity playerToRes, entity playerHealer )
 {
 	ManageHighlightEntity( playerToRes )
 
@@ -112,15 +113,18 @@ void function BLEEDOUT_RevivePlayerHealerChanged( entity playerToRes, entity old
 		if ( IsValid( playerToRes ) )
 			playerToRes.Signal( "Bleedout_StopFirstAid" )
 
-		if ( IsValid( oldPlayerHealer ) )
-			oldPlayerHealer.Signal( "Bleedout_StopFirstAid" )
-
+		if ( IsValid( file.oldPlayerHealer ) )
+		{
+			file.oldPlayerHealer.Signal( "Bleedout_StopFirstAid" )
+			file.oldPlayerHealer = null
+		}
 		return
 	}
 
-	if ( IsValid( playerHealer ) && IsValid( oldPlayerHealer ) && (playerHealer != oldPlayerHealer) )
+	if ( IsValid( playerHealer ) && IsValid( file.oldPlayerHealer ) && (playerHealer != file.oldPlayerHealer) )
 	{
-		oldPlayerHealer.Signal( "Bleedout_StopFirstAid" )
+		file.oldPlayerHealer.Signal( "Bleedout_StopFirstAid" )
+		file.oldPlayerHealer = null
 	}
 
 	entity viewPlayer = GetLocalViewPlayer()
@@ -128,12 +132,12 @@ void function BLEEDOUT_RevivePlayerHealerChanged( entity playerToRes, entity old
 
 	bool playerOnDifferentTeam = IsEnemyTeam( playerToRes.GetTeam(),  playerHealer.GetTeam() )
 	if ( !IsRecruitMode() && playerOnDifferentTeam )
-		return	//
+		return	                                
 
 	file.reviveStartTime = Time()
 	float endTime = playerToRes.GetPlayerNetTime( "reviveEndTime" )
 	Assert( endTime > 0, "endTime was zero even though I had a valid playerToRes." )
-	//
+	                                                                                                                                                      
 
 	file.reviveEndTime = file.reviveStartTime + endTime
 
@@ -143,9 +147,25 @@ void function BLEEDOUT_RevivePlayerHealerChanged( entity playerToRes, entity old
 
 	if ( viewPlayer == playerToRes || viewPlayer == playerHealer )
 	{
-		//
-		thread Bleedout_DisplayFirstAidProgressBar( viewPlayer, endTime, endTime - Time(), ruiString )
+		                                                                      
+		bool hasGuardianAngel = false
+
+		if ( playerHealer.IsPlayer() )
+		{
+			hasGuardianAngel = playerHealer.HasPassive( ePassives.PAS_GUARDIAN_ANGEL )
+		}
+		else if ( IsValid( playerHealer.GetOwner() ) )
+		{
+			if ( playerHealer.GetOwner().IsPlayer() )
+			{
+				hasGuardianAngel = playerHealer.GetOwner().HasPassive( ePassives.PAS_GUARDIAN_ANGEL )
+			}
+		}
+
+		thread Bleedout_DisplayFirstAidProgressBar( viewPlayer, endTime, endTime - Time(), ruiString, hasGuardianAngel )
 	}
+
+	file.oldPlayerHealer = playerHealer
 }
 
 void function Bleedout_DisplayTrainingFirstAidProgressBar( entity dummy, float endTime, float progressTime )
@@ -158,9 +178,9 @@ void function Bleedout_StopTrainingFirstAidProgressBar()
 	Signal( GetLocalClientPlayer(), "Bleedout_StopFirstAid" )
 }
 
-void function Bleedout_DisplayFirstAidProgressBar( entity playerToRes, float endTime, float progressTime, string text )
+void function Bleedout_DisplayFirstAidProgressBar( entity playerToRes, float endTime, float progressTime, string text, bool hasGuardianAngel = false )
 {
-	//
+	                                                                                                                     
 
 	Signal( playerToRes, "Bleedout_OnRevive" )
 
@@ -174,6 +194,8 @@ void function Bleedout_DisplayFirstAidProgressBar( entity playerToRes, float end
 	RuiSetString( rui, "text", text )
 	RuiSetGameTime( rui, "endTime", endTime )
 	RuiSetFloat( rui, "progressTime", progressTime )
+	RuiSetBool( rui, "hasGuardianAngel", hasGuardianAngel )
+
 
 	Chroma_BeginRevive( progressTime )
 
@@ -185,7 +207,7 @@ void function Bleedout_DisplayFirstAidProgressBar( entity playerToRes, float end
 			Chroma_EndRevive()
 
 			if ( IsValid( playerToRes ) && playerToRes.IsPlayer() )
-				BleedoutEndTimeChanged( playerToRes, 0.0, playerToRes.GetPlayerNetTime( "bleedoutEndTime" ), true )
+				BleedoutEndTimeChanged( playerToRes, playerToRes.GetPlayerNetTime( "bleedoutEndTime" ) )
 		}
 	)
 
@@ -195,7 +217,7 @@ void function Bleedout_DisplayFirstAidProgressBar( entity playerToRes, float end
 	}
 }
 
-void function BleedoutEndTimeChanged( entity player, float oldVal, float newVal, bool actuallyChanged )
+void function BleedoutEndTimeChanged( entity player, float newVal )
 {
 	player.Signal( SIGNAL_BLEEDOUT_STATE_CHANGED )
 
@@ -219,7 +241,7 @@ void function ShowWoundedMarker( entity woundedPlayer, float endTime )
 	if ( !DO_OLD_WOUNDED_MARKER_3P && (woundedPlayer != GetLocalViewPlayer()) )
 		return
 
-	if ( IsEnemyTeam( woundedPlayer.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
+	if ( (woundedPlayer != GetLocalViewPlayer()) && IsEnemyTeam( woundedPlayer.GetTeam(), GetLocalViewPlayer().GetTeam() ) )
 		return
 
 	woundedPlayer.Signal( "BleedOut_OnStartDying" )
@@ -257,6 +279,12 @@ void function ShowWoundedMarker( entity woundedPlayer, float endTime )
 	else
 	{
 		RuiSetString( rui, "title", "#SURVIVAL_BLEEDING_OUT" )
+                                  
+                                                              
+    
+                                                           
+    
+        
 
 
 		incapShieldTier = EquipmentSlot_GetEquipmentTier( woundedPlayer, "incapshield" )
@@ -266,8 +294,10 @@ void function ShowWoundedMarker( entity woundedPlayer, float endTime )
 
 			RuiSetString( shieldRUI, "nameText", lootData.pickupString )
 
-			if ( incapShieldTier >= 4 )
-				RuiSetString( shieldRUI, "nameText", "#BLEEDOUT_USE_SELF_RES_TITLE" )
+                          
+                               
+                                                                          
+         
 
 			RuiSetBool( shieldRUI, "hasKOShield", true )
 			RuiSetInt( shieldRUI, "shieldTier", incapShieldTier )
@@ -275,10 +305,19 @@ void function ShowWoundedMarker( entity woundedPlayer, float endTime )
 			thread TrackKOShieldHealthAndReadiness( woundedPlayer, shieldRUI )
 		}
 
-		//
+		                                                                          
 		thread TrackSelfReviveState( woundedPlayer, shieldRUI )
 
+                          
+			                                                                      
+			thread TrackForceBleedoutState( woundedPlayer, shieldRUI )
+                                
+
+                                
+                                                              
+      
 		thread BleedoutScreenFX_Start( woundedPlayer, startTime, endTime )
+
 		didCC = true
 	}
 	RuiSetGameTime( rui, "startTime", startTime )
@@ -337,29 +376,46 @@ void function TrackSelfReviveState( entity player, var rui )
 
 }
 
+                        
+                                                                        
+void function TrackForceBleedoutState( entity player, var rui )
+{
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "Bleedout_OnRevive" )
+
+	while	( true )
+	{
+		RuiSetBool( rui, "canForceBleedout", Bleedout_GetCanForceBleedoutTimeout() )
+		WaitFrame()
+	}
+}
+                              
+
 bool function CanSelfRevive( entity player )
 {
 	if ( PlayerHasPassive( player, ePassives.PAS_SELF_REVIVE ) )
 		return true
 
-	#if(false)
+                 
+                                                                                         
+              
 
-
-
-
-
-#endif
+                                                           
+              
+       
 
 	return false
 }
 
 void function TrackKOShieldHealthAndReadiness( entity player, var rui )
 {
+	printf( "KOShieldDebug: %s()", FUNC_NAME() )
 	int shieldTier = EquipmentSlot_GetEquipmentTier( player, "incapshield" )
 	if ( shieldTier == 0 )
 		return
 
-	entity shield = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_2 )
+	entity shield = player.GetNormalWeapon( WEAPON_INVENTORY_SLOT_PRIMARY_3 )
 
 	if ( !IsValid( shield ) )
 		return
@@ -371,10 +427,14 @@ void function TrackKOShieldHealthAndReadiness( entity player, var rui )
 
 	float maxShieldHealth = float( IncapShield_GetMaxShieldHealthFromTier( shieldTier ) )
 	RuiSetFloat( rui, "shieldMaxHealth", maxShieldHealth )
+	printf( "KOShieldDebug: %s(): Setting shieldMaxHealth RUI to %f", FUNC_NAME(), maxShieldHealth )
+	printf( "KOShieldDebug: %s(): Weapon health at thread call = %i", FUNC_NAME(), shield.GetScriptInt0() )
 
 	while ( true )
 	{
 		float currentShieldHealth = float( shield.GetScriptInt0() )
+
+		                                                                                                                 
 
 		RuiSetFloat( rui, "shieldHealth", currentShieldHealth )
 		RuiSetFloat( rui, "shieldMaxHealth", maxShieldHealth )
@@ -412,10 +472,10 @@ void function BleedoutScreenFX_Start( entity woundedPlayer, float startTime, flo
 	EndSignal( woundedPlayer, "OnDeath" )
 	EndSignal( woundedPlayer, "Bleedout_StopBleedoutEffects" )
 
-	//
+	                             
 	file.bleedoutFXID = StartParticleEffectOnEntity( woundedPlayer, index, FX_PATTACH_POINT_FOLLOW, woundedPlayer.GetCockpit().LookupAttachment( "CAMERA" ) )
 
-	//
+	                      
 	EffectSetIsWithCockpit( file.bleedoutFXID, true )
 
 	OnThreadEnd(
@@ -429,10 +489,10 @@ void function BleedoutScreenFX_Start( entity woundedPlayer, float startTime, flo
 
 	float colorCorrectionWeight = 0.4
 
-	//
+	                                     
 	float currentLerpTime
 	float lerpTime = endTime
-	while ( Bleedout_IsBleedingOut( woundedPlayer ) )
+	while ( IsValid( woundedPlayer) && Bleedout_IsBleedingOut( woundedPlayer ) )
 	{
 		if ( !IsValid( Bleedout_GetRevivingPlayer( woundedPlayer ) ) && !woundedPlayer.ContextAction_IsMeleeExecutionTarget() )
 		{
@@ -519,22 +579,4 @@ void function HideWoundedMarker( entity woundedPlayer )
 	{
 		func( woundedPlayer )
 	}
-}
-
-void function ServerCallback_Bleedout_DownStateThirdPersonCameraSettings()
-{
-	SetConVarInt( "c_thirdpersonshoulderdist", 48 )
-	SetConVarFloat( "c_thirdpersonshoulderaimdist", 0.0 )
-	SetConVarFloat( "c_thirdpersonshoulderheight", 8.0 )
-	SetConVarInt( "c_thirdpersonshoulderoffset", 0 )
-	SetConVarFloat( "c_thirdpersonshoulderoffset", 8.0 )
-	SetConVarFloat( "cam_ideallag", 0.0 )
-	SetConVarFloat( "c_mindistance", 48.0 )
-	SetConVarFloat( "c_maxdistance", 48.0 )
-	SetConVarFloat( "cam_idealdist", 0.0 )
-	SetConVarToDefault( "cam_player_viewheight_scale" )
-	SetConVarToDefault( "c_thirdpersonshouldergetsviewpunch" )
-	SetConVarToDefault( "cam_pitchlock_on" )
-	SetConVarToDefault( "c_minyaw" )
-	SetConVarToDefault( "c_maxyaw" )
 }

@@ -16,38 +16,38 @@ void function MeleeWraithKunai_Init()
 	PrecacheParticleSystem( EFFECT_KUNAI_ATTACK_STAB_3P )
 }
 
-//
-//
+                                                                              
+                                                          
 void function OnWeaponActivate_melee_wraith_kunai( entity weapon )
 {
-	//
+	                                          
 
 	entity owner = weapon.GetWeaponOwner()
 
 	if ( !IsAlive( owner ) )
 		return
 
-	//
+	                                                                                
 	if ( !owner.IsOnGround() || owner.IsSliding() )
 		return
 
-	//
+	                               
 	asset effect1P = EFFECT_KUNAI_ATTACK_SWIPE_FP
 	asset effect3P = EFFECT_KUNAI_ATTACK_SWIPE_3P
 
-	//
+	            
 	if ( owner.IsSprinting() )
 	{
 		effect1P = EFFECT_KUNAI_ATTACK_STAB_FP
 		effect3P = EFFECT_KUNAI_ATTACK_STAB_3P
 	}
 
-	weapon.PlayWeaponEffect( effect1P, effect3P, "knife_base" )
+	weapon.PlayWeaponEffect( effect1P, effect3P, "KNIFE_BASE_ROT" )
 }
 
 void function OnWeaponDeactivate_melee_wraith_kunai( entity weapon )
 {
-	//
+	                                            
 
 	weapon.StopWeaponEffect( EFFECT_KUNAI_ATTACK_SWIPE_FP, EFFECT_KUNAI_ATTACK_SWIPE_3P )
 	weapon.StopWeaponEffect( EFFECT_KUNAI_ATTACK_STAB_FP, EFFECT_KUNAI_ATTACK_STAB_3P )

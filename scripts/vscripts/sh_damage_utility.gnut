@@ -9,22 +9,22 @@ global function IsMaxRangeShot
 global function IsMidRangeShot
 global function IsSuicide
 
-#if(false)
-
-
-
-
-
+#if SERVER
+                                      
+                                 
+                                             
+                               
+                           
 #endif
 
-#if(CLIENT)
+#if CLIENT
 global function ServerCallback_QuickDeathRumble
 #endif
 
 global struct ScriptDamageInfoClone
 {
-	//
-	//
+	                                                                                            
+	                                                                                                   
 	entity attacker
 	entity inflictor
 	entity weapon
@@ -35,7 +35,7 @@ global struct ScriptDamageInfoClone
 	vector damagePosition
 	int hitGroup
 	int hitBox
-	//
+	                     
 	int damageType
 	int customDamageType
 	int damageSourceIdentifier
@@ -63,7 +63,7 @@ ScriptDamageInfoClone function CloneScriptDamageInfo( var src )
 	dest.damagePosition = DamageInfo_GetDamagePosition( src )
 	dest.hitGroup = DamageInfo_GetHitGroup( src )
 	dest.hitBox = DamageInfo_GetHitBox( src )
-	//
+	                                                       
 	dest.damageType = DamageInfo_GetDamageType( src )
 	dest.customDamageType = DamageInfo_GetCustomDamageType( src )
 	dest.damageSourceIdentifier = DamageInfo_GetDamageSourceIdentifier( src )
@@ -79,21 +79,16 @@ ScriptDamageInfoClone function CloneScriptDamageInfo( var src )
 	return dest
 }
 
-#if(CLIENT)
+#if SERVER || CLIENT
 string ornull function GetWeaponClassNameFromDamageInfo( var damageInfo )
 {
-	entity weapon = DamageInfo_GetWeapon( damageInfo )
-	if ( IsValid( weapon ) )
-	{
-		LootData data = SURVIVAL_GetLootDataFromWeapon( weapon )
-		if ( SURVIVAL_Loot_IsRefValid( data.ref ) )
-			return data.ref
-		return weapon.GetWeaponClassName()
-	}
-
 	string ornull damageWeaponNameOrNull = DamageInfo_GetDamageWeaponName( damageInfo )
 	if ( damageWeaponNameOrNull != null && damageWeaponNameOrNull != "" )
 		return damageWeaponNameOrNull
+
+	entity weapon = DamageInfo_GetWeapon( damageInfo )
+	if ( IsValid( weapon ) )
+		return weapon.GetWeaponClassName()
 
 	entity inflictor = DamageInfo_GetInflictor( damageInfo )
 	if ( IsValid( inflictor ) && inflictor.IsProjectile() )
@@ -107,7 +102,7 @@ string ornull function GetWeaponClassNameFromDamageInfo( var damageInfo )
 }
 #endif
 
-#if(CLIENT)
+#if SERVER || CLIENT
 string ornull function GetWeaponClassNameFromDamageInfoClone( ScriptDamageInfoClone dic )
 {
 	if ( dic.damageWeaponName != null && dic.damageWeaponName != "" )
@@ -126,125 +121,139 @@ string ornull function GetWeaponClassNameFromDamageInfoClone( ScriptDamageInfoCl
 }
 #endif
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
+#if SERVER
+
+                                                             
+ 
+	                                                  
+	             
+		                                                                                 
+
+	                                                        
+	                 
+		            
+	                                
+		            
+
+	                                                                                              
+ 
+
+                                                      
+ 
+	                                                  
+	             
+		                                                             
+
+	                                                        
+	                 
+		            
+	                                
+		            
+
+	                                                                          
+ 
+
+                                                              
+ 
+	                                                      
+	                                               
+	                                                       
+
+	                                            
+		          
+
+	                                                                                                    
+		          
+
+	                                                         
+ 
+
+                                                                                                                                                                                               
+ 
+	                                                                                                                                          
+	                         
+	 
+		                                                                 
+			           
+
+		                                               
+		                                           
+		                                               
+		                                               
+		                                                                                                             
+		                                                                       
+			                                                                                     
+		                                                             
+		                                                 
+	 
+
+	                                                     
+		            
+
+	                                                                                                
+		            
+
+	                                
+		            
+
+	                                                   
+		            
+
+  	                          
+  	 
+  		            
+  		                   
+  		                                                         
+  		                                                                           
+  		  	            
+  	 
+                 
+                                                          
+              
+      
+
+	                          
+
+	                        
+	 
+		                                                      
+
+		                                    
+			            
+
+		                                 
+	 
+	                                                            
+	 
+		                                                             
+
+		                                    
+			            
+
+		                                              
+	 
+
+	            
+ 
+
+                                                       
+ 
+	                                                   
+
+	                                                                    
+		            
+
+	                     
+	 
+		                                                                                     
+		                                                                                               
+			            
+	 
+
+	           
+ 
+
+#endif          
 
 float function GetWeaponHeadshotDistance( entity weapon )
 {
@@ -282,7 +291,7 @@ bool function IsMaxRangeShot( var damageInfo )
 		headshotDistance = GetProjectileHeadshotDistance( weapon )
 	}
 
-	if ( farDamage >= nearDamage ) //
+	if ( farDamage >= nearDamage )                                                                                        
 		return false
 
 	if ( DamageInfo_GetDistFromAttackOrigin( damageInfo ) > headshotDistance )
@@ -313,10 +322,10 @@ bool function IsMidRangeShot( var damageInfo )
 		farDist = weapon.GetProjectileWeaponSettingFloat( eWeaponVar.damage_far_distance )
 	}
 
-	if ( farDist <= nearDist ) //
+	if ( farDist <= nearDist )                                                                                        
 		return false
 
-	//
+	                                                                                                  
 	if ( DamageInfo_GetDistFromAttackOrigin( damageInfo ) > nearDist )
 		return true
 
@@ -347,7 +356,7 @@ bool function IsInstantDeath( var damageInfo )
 
 bool function IsTitanCrushDamage( var damageInfo )
 {
-	//
+	                                                            
 	if ( DamageInfo_GetDamageSourceIdentifier( damageInfo ) == damagedef_titan_step )
 		return true
 
@@ -365,14 +374,23 @@ bool function IsSuicide( entity attacker, entity victim, int damageSourceId )
 	if ( damageSourceId == eDamageSourceId.outOfBounds )
 		return true
 
+	if ( damageSourceId == eDamageSourceId.deathField )
+		return true
+
+                               
+                                                            
+                                                                        
+              
+       
+
 	return false
 }
 
-#if(CLIENT)
+#if CLIENT
 void function ServerCallback_QuickDeathRumble()
 {
 	entity player = GetLocalClientPlayer()
 	if ( IsValid( player ) )
 		Rumble_Play( "QuickDeath", { position = player.GetOrigin() } )
 }
-#endif //
+#endif          

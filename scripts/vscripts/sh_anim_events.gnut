@@ -1,31 +1,44 @@
-
 global function MakeAnimEventData
+global function GetOptionalAnimEventVar
 global function AddAnimEvent
 global function DeleteAnimEvent
-global function GetOptionalAnimEventVar
 global function RunAnimEventCallbacks
 global function HasAnimEvent
+global function GetOptionalTokenizedAnimEventVar
+global function AddAnimEventTokenized
+global function DeleteAnimEventTokenized
+global function RunAnimEventTokenizedCallbacks
+global function HasAnimEventTokenized
 global function GetImpactTableIndex
 global function AnimEvents_Init
 
 global function AddGlobalAnimEvent
 global function AddGlobalAnimEventTokenize
 
-#if(false)
-
-
-
+#if SERVER
+                                                             
+                                    
+                                                          
 #endif
 
-#if(CLIENT)
+global function GlobalAnimEventWithStringParameter_CloakStart
+
+#if CLIENT
 global function ClientCodeCallback_HandleClientAnimEvent
 #endif
 
 global struct AnimEventData
 {
-	string eventName
+	string                     eventName
 	void functionref( entity ) callback
-	var optionalVar
+	var                        optionalVar
+}
+
+global struct TokenizedAnimEventData
+{
+	string                                    eventName
+	void functionref( entity, array<string> ) callback
+	var                                       optionalVar
 }
 
 AnimEventData function MakeAnimEventData( string eventName, void functionref( entity ) callback, var optionalVar = null )
@@ -37,42 +50,65 @@ AnimEventData function MakeAnimEventData( string eventName, void functionref( en
 	return aed
 }
 
+
 AnimEventData function GetAnimEventDataForEvent( entity ent, string eventName )
 {
 	Assert( eventName in ent.e.animEventDataForEntity )
 	return ent.e.animEventDataForEntity[ eventName ]
 }
 
+
+TokenizedAnimEventData function GetTokenizedAnimEventDataForEvent( entity ent, string eventName )
+{
+	Assert( eventName in ent.e.tokenizedAnimEventDataForEntity )
+	return ent.e.tokenizedAnimEventDataForEntity[ eventName ]
+}
+
 struct
 {
-	table<string,int> effectImpactTable
+	table<string, int> effectImpactTable
 } file
 
 
 void function AnimEvents_Init()
 {
+	RegisterSignal( "HideBodyGroupReliable" )
+	RegisterSignal( "HideReliable" )
+
 	RegisterImpactTable( "pilot_bodyslam" )
 	RegisterImpactTable( "pilot_bodyslam_small" )
+	RegisterImpactTable( "prowler_bodyfall" )
 	RegisterImpactTable( "exp_medium" )
 	RegisterImpactTable( "default" )
 	RegisterImpactTable( "default_nosound" )
 	RegisterImpactTable( "bounce_small_nosound" )
+	RegisterImpactTable( "rampart_execution_overkill" )
+	RegisterImpactTable( "pilot_landing" )
+	RegisterImpactTable( "pilot_footstep" )
+	RegisterImpactTable( "pilot_footstep_emote" )
+	RegisterImpactTable( "jump_pad_bounce_no_sound" )
+	RegisterImpactTable( "melee_human" )
 
 	AddGlobalAnimEvent( "hide", GlobalAnimEvent_Hide )
 	AddGlobalAnimEvent( "show", GlobalAnimEvent_Show )
 
 	AddGlobalAnimEvent( "hide_reliable", GlobalAnimEvent_HideReliable )
+	AddGlobalAnimEventTokenize( "hide_bodygroup_reliable", GlobalAnimEvent_HideBodygroupReliable )
+	AddGlobalAnimEventTokenize( "end_hide_bodygroup_reliable", GlobalAnimEvent_EndHideBodygroupReliable )
 
 	AddGlobalAnimEventTokenize( "set_skin", GlobalAnimEvent_SetSkin )
 	AddGlobalAnimEventTokenize( "fade_over_time", GlobalAnimEvent_FadeOverTime )
+	AddGlobalAnimEventTokenize( "fade_intensity_over_time", GlobalAnimEvent_FadeIntensityOverTime )
 }
+
 
 void function RegisterImpactTable( string name )
 {
 	file.effectImpactTable[ name ] <- PrecacheImpactEffectTable( name )
 }
 
-int function GetImpactTableIndex( string id  )
+
+int function GetImpactTableIndex( string id )
 {
 	if ( id in file.effectImpactTable )
 		return file.effectImpactTable[ id ]
@@ -80,14 +116,15 @@ int function GetImpactTableIndex( string id  )
 	return -1
 }
 
+
 var function GetOptionalAnimEventVar( entity ent, string eventName )
 {
 	AnimEventData animEventData = GetAnimEventDataForEvent( ent, eventName )
 	return animEventData.optionalVar
 }
 
-//
-//
+                                                                          
+                                                      
 void function AddAnimEvent( entity ent, string eventName, void functionref( entity ent ) func, var optionalVar = null )
 {
 	Assert( !HasAnimEvent( ent, eventName ), "Already added anim event " + eventName + " for " + ent )
@@ -99,16 +136,19 @@ void function AddAnimEvent( entity ent, string eventName, void functionref( enti
 	ent.e.animEventDataForEntity[ eventName ] <- animEventData
 }
 
+
 void function DeleteAnimEvent( entity ent, string eventName )
 {
 	Assert( HasAnimEvent( ent, eventName ) )
 	delete ent.e.animEventDataForEntity[ eventName ]
 }
 
+
 bool function HasAnimEvent( entity ent, string eventName )
 {
 	return eventName in ent.e.animEventDataForEntity
 }
+
 
 void function RunAnimEventCallbacks( entity ent, string eventName )
 {
@@ -116,63 +156,124 @@ void function RunAnimEventCallbacks( entity ent, string eventName )
 	ent.e.animEventDataForEntity[ eventName ].callback( ent )
 }
 
-//
-//
-void function AddGlobalAnimEvent( string name, void functionref(entity) func )
+
+var function GetOptionalTokenizedAnimEventVar( entity ent, string eventName )
 {
-#if(false)
-
-
-#elseif(CLIENT)
-	Assert( !( name in clGlobal.globalAnimEventCallbacks ), "Already created global anim event " + name )
-	clGlobal.globalAnimEventCallbacks[ name ] <- func
-#endif
+	TokenizedAnimEventData animEventData = GetTokenizedAnimEventDataForEvent( ent, eventName )
+	return animEventData.optionalVar
 }
 
-//
-//
-void function AddGlobalAnimEventTokenize( string name, void functionref(entity,array<string>) func )
+
+void function AddAnimEventTokenized( entity ent, string eventName, void functionref( entity ent, array<string> tokens ) func, var optionalVar = null )
 {
-	#if(false)
+	Assert( !HasAnimEventTokenized( ent, eventName ), "Already added anim event " + eventName + " for " + ent )
+
+	TokenizedAnimEventData animEventData
+	animEventData.eventName = eventName
+	animEventData.callback = func
+	animEventData.optionalVar = optionalVar
+	ent.e.tokenizedAnimEventDataForEntity[ eventName ] <- animEventData
+}
 
 
-#elseif(CLIENT)
-		Assert( !( name in clGlobal.clGlobalAnimEventTokenizeCallbacks ), "Already created global anim event " + name )
+void function DeleteAnimEventTokenized( entity ent, string eventName )
+{
+	Assert( HasAnimEventTokenized( ent, eventName ) )
+	delete ent.e.tokenizedAnimEventDataForEntity[ eventName ]
+}
+
+
+bool function HasAnimEventTokenized( entity ent, string eventName )
+{
+	return eventName in ent.e.tokenizedAnimEventDataForEntity
+}
+
+
+void function RunAnimEventTokenizedCallbacks( entity ent, string eventName, array<string> tokens )
+{
+	Assert( HasAnimEventTokenized( ent, eventName ) )
+	ent.e.tokenizedAnimEventDataForEntity[ eventName ].callback( ent, tokens )
+}
+
+                                                                                                     
+                                                 
+void function AddGlobalAnimEvent( string name, void functionref(entity) func )
+{
+	#if SERVER
+		                                                                                                   
+		                                                 
+	#elseif CLIENT
+		Assert( !(name in clGlobal.globalAnimEventCallbacks), "Already created global anim event " + name )
+		clGlobal.globalAnimEventCallbacks[ name ] <- func
+	#endif
+}
+
+                                                                       
+                                                                                                                                                                                  
+void function AddGlobalAnimEventTokenize( string name, void functionref(entity, array<string>) func )
+{
+	#if SERVER
+		                                                                                                           
+		                                                         
+	#elseif CLIENT
+		Assert( !(name in clGlobal.clGlobalAnimEventTokenizeCallbacks), "Already created global anim event " + name )
 		clGlobal.clGlobalAnimEventTokenizeCallbacks[ name ] <- func
 	#endif
 }
 
-#if(false)
+#if SERVER
+                                                                                 
+ 
+	                                   
+ 
 
+                                                                                     
+ 
+	                                                          
+	                                
+	             
+	                        
+	 
+		                        
+	 
+	    
+	 
+		                      
+		                                        
+		                                         
+	 
 
+	                                              
+ 
 
+                                                                                  
+ 
+	                             
+	              
+ 
+#endif          
 
+                               
+void function GlobalAnimEventWithStringParameter_CloakStart( entity guy, string msg )
+{
+	array<string> tokens = split( msg, WHITESPACE_CHARACTERS )
+	float duration = float( tokens[0] )
+	float fadeIn = float( tokens[1] )
 
+	guy.SetCanCloak( true )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-#endif //
+	if ( guy.CanCloak() == true )
+	{
+		guy.SetCloakDuration( fadeIn, duration, 0.1 )
+		printt( "AnimEvent: EnableCloak entity: " + guy )
+		printt( "AnimEvent: EnableCloak DURATION: " + duration )
+		printt( "AnimEvent: EnableCloak FADE IN: " + fadeIn )
+	}
+	else
+	{
+		printt( "AnimEvent: Cant Cloak: "  + guy )
+	}
+}
 
 void function SendSignalFromTokens( entity self, array<string> tokens )
 {
@@ -186,32 +287,32 @@ void function SendSignalFromTokens( entity self, array<string> tokens )
 	}
 }
 
-#if(CLIENT)
-void function ClientCodeCallback_HandleClientAnimEvent( entity self, string eventString )
+#if CLIENT
+void function ClientCodeCallback_HandleClientAnimEvent( entity eventCaller, string eventString )
 {
-	if ( HasAnimEvent( self, eventString ) )
-		thread RunAnimEventCallbacks( self, eventString )
+	if ( HasAnimEvent( eventCaller, eventString ) )
+		thread RunAnimEventCallbacks( eventCaller, eventString )
 
 	array<string> tokens = split( eventString, ":" )
-	string eventName = tokens[0]
+	string eventName     = tokens[0]
 
 	if ( eventName in clGlobal.clGlobalAnimEventTokenizeCallbacks )
 	{
-		thread clGlobal.clGlobalAnimEventTokenizeCallbacks[ eventName ]( self, tokens )
+		thread clGlobal.clGlobalAnimEventTokenizeCallbacks[ eventName ]( eventCaller, tokens )
 		return
 	}
 
 	if ( eventName in clGlobal.globalAnimEventCallbacks )
 	{
-		thread clGlobal.globalAnimEventCallbacks[ eventName ]( self )
+		thread clGlobal.globalAnimEventCallbacks[ eventName ]( eventCaller )
 		return
 	}
 
-	//
+	                                  
 	switch ( eventName )
 	{
 		case "signal":
-			SendSignalFromTokens( self, tokens )
+			SendSignalFromTokens( eventCaller, tokens )
 			break
 
 		case "level_signal":
@@ -224,7 +325,7 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			switch ( tokens[1] )
 			{
 				case "damagedef_frag_drone_throwable":
-					entity boss = self.GetBossPlayer()
+					entity boss = eventCaller.GetBossPlayer()
 					if ( IsValid( boss ) && boss.IsPlayer() )
 						damageDef = damagedef_frag_drone_throwable_PLAYER
 					else
@@ -240,31 +341,35 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 
 			entity player = GetLocalViewPlayer()
 
-			if ( IsAlive( self ) )
-				thread GrenadeArrowThink( player, self, damageRadius, 0, false )
+			if ( IsAlive( eventCaller ) )
+				thread GrenadeArrowThink( player, eventCaller, damageRadius, 0, false )
+			break
+
+		case "cloak_start":
+			GlobalAnimEventWithStringParameter_CloakStart( eventCaller, tokens[1] )
 			break
 
 		case "pet_titan_1p_sound":
 			Assert( tokens.len() == 2 )
-			Assert( self.IsTitan() )
+			Assert( eventCaller.IsTitan() )
 			entity player = GetLocalViewPlayer()
-			if ( self.GetBossPlayerName() == player.GetPlayerName() )
+			if ( eventCaller.GetBossPlayerName() == player.GetPlayerName() )
 			{
-				//
-				//
-				EmitSoundOnEntity( self, tokens[1] )
+				                                          
+				                                                      
+				EmitSoundOnEntity( eventCaller, tokens[1] )
 			}
 			break
 
 		case "pet_titan_3p_sound":
 			Assert( tokens.len() == 2 )
-			Assert( self.IsTitan() )
+			Assert( eventCaller.IsTitan() )
 			entity player = GetLocalViewPlayer()
-			if ( self.GetBossPlayerName() != player.GetPlayerName() )
+			if ( eventCaller.GetBossPlayerName() != player.GetPlayerName() )
 			{
-				//
-				//
-				EmitSoundOnEntity( self, tokens[1] )
+				                                              
+				                                                      
+				EmitSoundOnEntity( eventCaller, tokens[1] )
 			}
 			break
 
@@ -287,28 +392,31 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			Assert( tokens.len() == 2 )
 			entity player = GetLocalViewPlayer()
 			float fadetime = float( tokens[1] ) / 30
-			ScreenFade( player, 0, 0, 0, 255, fadetime, 0.1, FFADE_IN | FFADE_PURGE ) //
-			//
+			ScreenFade( player, 0, 0, 0, 255, fadetime, 0.1, FFADE_IN | FFADE_PURGE )                                  
+			  	                                                                         
 			break
 
 		case "screenshake":
-			//
+			                                                                         
 			Assert( tokens.len() == 4 )
-			ClientScreenShake( float( tokens[1] ), float( tokens[2] ), float( tokens[3] ), <0,0,0> )
+			Assert( eventCaller.IsPlayer() || IsShowingVictorySequence(), "\"screenshake\" only defined for players and victory screen currently. Needs to be updated if you want to use it with a non-player ent." )
+			if ( eventCaller == GetLocalViewPlayer() )
+				ClientScreenShake( float( tokens[1] ), float( tokens[2] ), float( tokens[3] ), <0, 0, 0> )
 			break
 
 		case "hide_cockpit":
 		{
 			entity player = GetLocalViewPlayer()
-			entity proxy = player.GetFirstPersonProxy()
-			if ( IsValid( proxy ) && proxy == self )
+			entity proxy  = player.GetFirstPersonProxy()
+			if ( IsValid( proxy ) && proxy == eventCaller )
 				player.GetCockpit().Hide()
 			break
 		}
 
-		//
-		//
-		//
+			                                                                             
+			                                                                       
+			                                                                            
+
 		case "close_vdu":
 		{
 			entity player = GetLocalViewPlayer()
@@ -331,11 +439,11 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 			break
 		}
 
-		//
-		//
-		//
-		//
-		//
+			                          
+			   
+			  	                                         
+			  	     
+			   
 
 		case "vdu_close" :
 		{
@@ -344,33 +452,34 @@ void function ClientCodeCallback_HandleClientAnimEvent( entity self, string even
 
 		case "mp_frag_drone_fx":
 		{
-			thread PlayWarningFXOnMPFragDrone( self ) //
+			                                                                                                                                                                                                        
 			break
 		}
 
-	/*
-
-
-
-
-*/
+			  	                                                                                                           
+				        
+				 
+					                                                                   
+				 
+			  
 	}
 }
-#endif //
+#endif          
 
 void function GlobalAnimEvent_Hide( entity guy )
 {
-	#if(CLIENT)
-	if ( !guy.IsClientOnly() )
-		return
+	#if CLIENT
+		if ( !guy.IsClientOnly() )
+			return
 	#endif
 
 	guy.Hide()
 }
 
+
 void function GlobalAnimEvent_Show( entity guy )
 {
-	#if(CLIENT)
+	#if CLIENT
 		if ( !guy.IsClientOnly() )
 			return
 	#endif
@@ -379,53 +488,122 @@ void function GlobalAnimEvent_Show( entity guy )
 	guy.Show()
 }
 
-void function GlobalAnimEvent_HideReliable( entity ent )
+
+void function GlobalAnimEvent_HideBodygroupReliable( entity ent, array<string> tokens )
 {
-	#if(CLIENT)
+	#if CLIENT
 		if ( !ent.IsClientOnly() )
 			return
 	#endif
 
-	thread HideReliable( ent )
+	int bodyGroupIndex      = ent.FindBodygroup( tokens[1] )
+	int bodyGroupStateStart = int( tokens[2] )
+	int bodyGroupStateEnd   = int( tokens[3] )
+
+	thread __ReliableCallbackThread( ent, ["HideBodyGroupReliable"],
+		void function( entity ent ) : ( bodyGroupIndex, bodyGroupStateStart )
+		{
+			if ( IsValid( ent ) )
+				ent.SetBodygroupModelByIndex( bodyGroupIndex, bodyGroupStateStart )
+		},
+		void function( entity ent ) : ( bodyGroupIndex, bodyGroupStateEnd )
+		{
+			if ( IsValid( ent ) )
+				ent.SetBodygroupModelByIndex( bodyGroupIndex, bodyGroupStateEnd )
+		} )
 }
 
-void function HideReliable( entity ent )
+
+void function GlobalAnimEvent_EndHideBodygroupReliable( entity guy, array<string> tokens )
+{
+	#if CLIENT
+		if ( !guy.IsClientOnly() )
+			return
+	#endif
+
+	                                                                   
+	guy.Signal( "HideBodyGroupReliable" )
+}
+
+
+void function GlobalAnimEvent_HideReliable( entity ent )
+{
+	#if CLIENT
+		if ( !ent.IsClientOnly() )
+			return
+	#endif
+
+	thread __ReliableCallbackThread( ent, ["HideReliable"], HideEnt, ShowEnt )
+}
+
+
+void function HideEnt( entity ent )
+{
+	ent.Hide()
+}
+
+
+void function ShowEnt( entity ent )
+{
+	if ( IsValid( ent ) )
+		ent.Show()
+}
+
+
+void function __ReliableCallbackThread( entity ent, array<string> endSignals, void functionref( entity ) startFunc, void functionref( entity ) endFunc )
 {
 	ent.Signal( "HideReliable" )
 	ent.EndSignal( "OnDestroy" )
 	ent.EndSignal( "ScriptAnimStop" )
-	ent.EndSignal( "HideReliable" )
+	foreach ( signal in endSignals )
+		ent.EndSignal( signal )
 
 	OnThreadEnd(
-		function() : ( ent )
+		function() : ( ent, endFunc )
 		{
-			if ( IsValid( ent ) )
-			{
-				ent.Show()
-			}
+			endFunc( ent )
 		}
 	)
 
-	ent.Hide()
+	startFunc( ent )
 
 	while ( ent.Anim_IsActive() )
 		WaitFrame()
 }
+
 
 void function GlobalAnimEvent_FadeOverTime( entity ent, array<string> tokens )
 {
 	Assert( tokens.len() == 4 )
 
 	float fadeTime = float( tokens[ 1 ] )
-	int fadeFrom = int( tokens[ 2 ] )
-	int fadeTo = int( tokens[ 3 ] )
+	int fadeFrom   = int( tokens[ 2 ] )
+	int fadeTo     = int( tokens[ 3 ] )
 
 	thread PROTO_FadeModelAlphaOverTime( ent, fadeTime, fadeFrom, fadeTo )
 }
 
+
+void function GlobalAnimEvent_FadeIntensityOverTime( entity ent, array<string> tokens )
+{
+	                                      
+	Assert( tokens.len() == 4 )
+
+	float fadeTime = float( tokens[ 1 ] )
+	float fadeFrom = float( tokens[ 2 ] )
+	float fadeTo   = float( tokens[ 3 ] )
+
+
+	if ( fadeTime > 0 )
+		thread PROTO_FadeModelIntensityOverTime( ent, fadeTime, fadeFrom, fadeTo )
+	else
+		ent.kv.intensity = fadeTo
+}
+
+
 void function GlobalAnimEvent_SetSkin( entity model, array<string> tokens )
 {
-	//
+	                   
 	Assert( tokens.len() == 2 )
 	int skin = int( tokens[1] )
 	model.SetSkin( skin )

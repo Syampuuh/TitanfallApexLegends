@@ -11,7 +11,7 @@ struct
 } file
 
 
-void function InitCustomizeWeaponMenu()
+void function InitCustomizeWeaponMenu( var newMenuArg )                                               
 {
 	var menu = GetMenu( "CustomizeWeaponMenu" )
 	file.menu = menu
@@ -28,6 +28,7 @@ void function InitCustomizeWeaponMenu()
 		Hud_GetChild( menu, "WeaponSkinsPanel2" )
 		Hud_GetChild( menu, "WeaponSkinsPanel3" )
 		Hud_GetChild( menu, "WeaponSkinsPanel4" )
+		Hud_GetChild( menu, "WeaponSkinsPanel5" )
 	]
 
 	AddMenuEventHandler( menu, eUIEvent.MENU_OPEN, CustomizeWeaponMenu_OnOpen )
@@ -44,38 +45,22 @@ void function InitCustomizeWeaponMenu()
 
 void function CustomizeWeaponMenu_OnOpen()
 {
-	//
+	                                                                      
 
-	RuiSetGameTime( file.decorationRui, "initTime", Time() )
+	RuiSetGameTime( file.decorationRui, "initTime", ClientTime() )
 	RuiSetString( file.titleRui, "title", Localize( ItemFlavor_GetLongName( GetTopLevelCustomizeContext() ) ).toupper() )
 
 	AddCallback_OnTopLevelCustomizeContextChanged( file.menu, CustomizeWeaponMenu_Update )
 	CustomizeWeaponMenu_Update( file.menu )
 
-	if ( uiGlobal.lastMenuNavDirection == MENU_NAV_FORWARD )
+	TabData tabData = GetTabDataForPanel( file.menu )
+	tabData.centerTabs = true
+	if ( GetLastMenuNavDirection() == MENU_NAV_FORWARD )
 	{
-		TabData tabData = GetTabDataForPanel( file.menu )
 		ActivateTab( tabData, 0 )
 	}
-	//
-	//
-
-	int numTabs = GetMenuNumTabs( file.menu )
-	var tabButtonPanel = Hud_GetChild( file.menu, "TabsCommon" )
-	var parentPanel = Hud_GetParent( tabButtonPanel )
-	TabData tabData = GetTabDataForPanel( parentPanel )
-	array<var> tabButtons = tabData.tabButtons
-	float totalWidth = 0
-
-	for ( int i=0; i<numTabs; i++ )
-	{
-		var tab = tabButtons[ i ]
-		totalWidth += float( Hud_GetWidth( tab ) )
-	}
-
-	var firstTab = tabButtons[ 0 ]
-	int x = int( -(totalWidth*0.5) )
-	Hud_SetX( firstTab, x + ( Hud_GetWidth( firstTab )*0.3 ) )
+	      
+	  	                                                            
 }
 
 
@@ -106,9 +91,11 @@ void function CustomizeWeaponMenu_Update( var menu )
 	}
 	file.weaponList.clear()
 
+	CharmsButton_Reset()
+
 	ClearTabs( menu )
 
-	//
+	                                   
 	if ( GetActiveMenu() == menu )
 	{
 		ItemFlavor category = GetTopLevelCustomizeContext()
@@ -118,7 +105,8 @@ void function CustomizeWeaponMenu_Update( var menu )
 		{
 			var tabBodyPanel = file.weaponTabBodyPanelList[weaponIdx]
 
-			AddTab( menu, tabBodyPanel, Localize( ItemFlavor_GetShortName( weapon ) ).toupper() )
+			float tabBarLeftOffsetFracIfVisible = 0.0        
+			AddTab( menu, tabBodyPanel, Localize( ItemFlavor_GetShortName( weapon ) ).toupper(), false, tabBarLeftOffsetFracIfVisible )
 
 			WeaponSkinsPanel_SetWeapon( tabBodyPanel, weapon )
 			Newness_AddCallbackAndCallNow_OnRerverseQueryUpdated( NEWNESS_QUERIES.WeaponTab[weapon], OnNewnessQueryChangedUpdatePanelTab, tabBodyPanel )
@@ -132,6 +120,12 @@ void function CustomizeWeaponMenu_Update( var menu )
 void function CustomizeWeaponMenu_OnNavigateBack()
 {
 	Assert( GetActiveMenu() == file.menu )
+
+	if ( IsCharmsMenuActive() )
+	{
+		CharmsMenuEnableOrDisable()
+		return
+	}
 
 	CloseActiveMenu()
 }

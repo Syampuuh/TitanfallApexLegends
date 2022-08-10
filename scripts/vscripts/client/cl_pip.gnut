@@ -3,18 +3,18 @@ global function BeginMovingPIP
 global function CaptureStillPIPThenEndMovingPIPThread
 global function ReleasePIP
 global function PIPSlotState_GetSlotID
-//
-//
+                                                       
+                                                      
 
 global function ClientCodeCallback_MonitorSnapshotDone
 
 
-Assert( PIP_MONITOR_START_INDEX == 0 ) //
-Assert( PIP_NUM_MONITORS == 3 ) //
-Assert( PIP_SNAPSHOT_START_INDEX == 0 ) //
-Assert( PIP_NUM_SNAPSHOTS == 10 ) //
-Assert( PIP_INVALID == -1 ) //
-//
+Assert( PIP_MONITOR_START_INDEX == 0 )                  
+Assert( PIP_NUM_MONITORS == 3 )                  
+Assert( PIP_SNAPSHOT_START_INDEX == 0 )                  
+Assert( PIP_NUM_SNAPSHOTS == 10 )                  
+Assert( PIP_INVALID == -1 )                  
+                                                                                                                                
 const int PIP_NUM_TOTAL = PIP_NUM_SNAPSHOTS
 
 
@@ -31,16 +31,16 @@ global struct PIPSlotState
 	bool isUsableForMoving
 
 	int                 status = ePIPSlotStatus.AVAILABLE
-	PIPSlotState ornull associatedProcessingSlotStateOrNull = null //
-	//
+	PIPSlotState ornull associatedProcessingSlotStateOrNull = null                                                                 
+	                                                                                                                                        
 
-	entity camera //
+	entity camera                   
 	bool   hasColorCorrectionAssigned = false
 }
 
 struct
 {
-	//
+	                                           
 	array<PIPSlotState> slotStateList
 
 	bool                isCaptureInProgress = false
@@ -112,12 +112,12 @@ PIPSlotState function BeginMovingPIP( entity camera, int colorCorrectionLayer = 
 
 void function CaptureStillPIPThenEndMovingPIPThread( PIPSlotState movingSlotState, PIPSlotState ornull[1] outArray_stillSlotState, bool allowWaitForStillSlot = false )
 {
-	Assert( movingSlotState.slotIndex != -1 ) //
-	Assert( movingSlotState.isUsableForMoving ) //
-	Assert( movingSlotState.status == ePIPSlotStatus.MOVING ) //
-	Assert( movingSlotState.associatedProcessingSlotStateOrNull == null ) //
+	Assert( movingSlotState.slotIndex != -1 )              
+	Assert( movingSlotState.isUsableForMoving )                                      
+	Assert( movingSlotState.status == ePIPSlotStatus.MOVING )                                           
+	Assert( movingSlotState.associatedProcessingSlotStateOrNull == null )                                                                               
 
-	//
+	                             
 	bool shouldWaitOneFrame = false
 	if ( file.isCaptureInProgress )
 	{
@@ -128,10 +128,10 @@ void function CaptureStillPIPThenEndMovingPIPThread( PIPSlotState movingSlotStat
 		} )
 
 		WaitSignal( movingSlotState, "YouMayProceedWithPIPSnapshot" )
-		//
+		                                     
 		file.captureQueue.remove( 0 )
 
-		shouldWaitOneFrame = true //
+		shouldWaitOneFrame = true                                                                                                  
 	}
 	else
 	{
@@ -171,7 +171,7 @@ void function CaptureStillPIPThenEndMovingPIPThread( PIPSlotState movingSlotStat
 	PIPSlotState stillSlotState
 	for ( int slotsTriedCount = 0; slotsTriedCount < PIP_NUM_TOTAL; slotsTriedCount++ )
 	{
-		//
+		                                
 		int candidateSlotIndex          = (PIP_MONITOR_START_INDEX + PIP_NUM_MONITORS + slotsTriedCount) % PIP_NUM_TOTAL
 		PIPSlotState candidateSlotState = file.slotStateList[candidateSlotIndex]
 		if ( candidateSlotState.status != ePIPSlotStatus.AVAILABLE )
@@ -190,16 +190,16 @@ void function CaptureStillPIPThenEndMovingPIPThread( PIPSlotState movingSlotStat
 	stillSlotState.associatedProcessingSlotStateOrNull = movingSlotState
 	movingSlotState.associatedProcessingSlotStateOrNull = stillSlotState
 
-	//
+	                                                                                      
 	movingSlotState.camera.QueueMonitorSnapshot( stillSlotState.slotIndex )
 
 	WaitSignal( stillSlotState, "PIPSnapshotCaptured" )
-	//
+	                                
 
-	Assert( stillSlotState.status == ePIPSlotStatus.STILL ) //
-	Assert( movingSlotState.status == ePIPSlotStatus.MOVING ) //
-	Assert( stillSlotState.associatedProcessingSlotStateOrNull == movingSlotState ) //
-	Assert( movingSlotState.associatedProcessingSlotStateOrNull == stillSlotState ) //
+	Assert( stillSlotState.status == ePIPSlotStatus.STILL )                                                 
+	Assert( movingSlotState.status == ePIPSlotStatus.MOVING )                                                  
+	Assert( stillSlotState.associatedProcessingSlotStateOrNull == movingSlotState )                                                                 
+	Assert( movingSlotState.associatedProcessingSlotStateOrNull == stillSlotState )                                                                  
 
 	stillSlotState.associatedProcessingSlotStateOrNull = null
 	movingSlotState.associatedProcessingSlotStateOrNull = null
@@ -207,25 +207,25 @@ void function CaptureStillPIPThenEndMovingPIPThread( PIPSlotState movingSlotStat
 	ReleasePIP( movingSlotState )
 
 	outArray_stillSlotState[0] = stillSlotState
-	//
+	                       
 }
 
 
 void function ClientCodeCallback_MonitorSnapshotDone( int stillSlotIndex )
 {
 	PIPSlotState stillSlotState = file.slotStateList[stillSlotIndex]
-	//
-	//
-	//
+	                                                         
+	                                                                      
+	                                                                                                                                           
 
 	Signal( stillSlotState, "PIPSnapshotCaptured" )
-	//
+	                                              
 }
 
 
 void function ReleasePIP( PIPSlotState slotState )
 {
-	Assert( slotState.slotIndex != -1 ) //
+	Assert( slotState.slotIndex != -1 )              
 	Assert( slotState.status != ePIPSlotStatus.AVAILABLE, "Attempted to end PIP on slot that was not in use." )
 
 	if ( slotState.status == ePIPSlotStatus.MOVING )
@@ -249,7 +249,7 @@ void function ReleasePIP( PIPSlotState slotState )
 	}
 	else if ( slotState.status == ePIPSlotStatus.STILL )
 	{
-		Assert( slotState.associatedProcessingSlotStateOrNull == null ) //
+		Assert( slotState.associatedProcessingSlotStateOrNull == null )                                                                                
 	}
 
 	slotState.status = ePIPSlotStatus.AVAILABLE
@@ -265,166 +265,166 @@ void function ReleasePIP( PIPSlotState slotState )
 
 int function PIPSlotState_GetSlotID( PIPSlotState slotState )
 {
-	Assert( slotState.slotIndex != -1 ) //
+	Assert( slotState.slotIndex != -1 )              
 	Assert( slotState.status != ePIPSlotStatus.AVAILABLE, "Attempted to get PIP slot ID for display when it was not in use." )
 	return slotState.slotIndex
 }
 
 
-//
-//
-//
-//
-//
+    
+        
+                                      
+        
+    
 
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+                                    
+   
+  	                    
+  	                  
+  	                          
+   
+          
+  	                                                                
+  	                                                         
+  
+  	                           
+  	                           
+                                 
+  
+                                                                                         
+   
+  	       
+  	                                                    
+  	 
+  		                                                   
+  		                                              
+  		                                                                         
+  	 
+  	       
+  
+  	                                                                              
+  	                                                           
+  	                                                                     
+  
+  	                               
+  	                   
+  	                     
+  
+  	                                                             
+  
+  	                                                        
+  
+  	                                                 
+  	                                                    
+  		                                    
+   
+  
+  
+                                                                            
+   
+  	                                                                     
+  
+  	                                                           
+  	                                                                  
+  
+  	                                                                                        
+  	                                                             
+  
+  	                                                            
+  
+  	                                                        
+  
+  	                                           
+   
+  
+  
+                                             
+   
+  	                                                   
+  	                              
+  		                                                    
+  	   
+  
+  	                                                       
+  	 
+  		                      
+  		                                                     
+  			     
+  
+  		                                                                                 
+  		                                                                             
+  		                                       
+  	 
+   
+  
+  
+                                                                            
+   
+  	                                              
+  
+  	                                                                         
+  	                                                                                             
+  	                                           
+  
+  	                                                                 
+  
+  	                                                                                                         
+  	                               
+  	                                      
+  	                                          
+  
+  	                                              
+  	                                    
+  	                                    
+  
+  	                                                                                     
+  	                             
+  	                                             
+  	                                    
+  
+  	                           
+  	                                                                                                                                                          
+  	                                                                                                                                    
+  	                                                                                                        
+  	                                         
+  	                                           
+  
+  	                                                                        
+  		                                                                                          
+  
+  		                              
+  
+  		                   
+  		                             
+  		                       
+  			               
+  		                       
+  			               
+  		                        
+  			                
+  	   
+  
+  	                                                                                                      
+  
+  	                                                       
+  	                                                                                                                    
+  	                                                                                                   
+  	                                                                    
+  
+  	                                                                                                    
+  
+  	               
+  	               
+  	                
+  	                                                                                          
+  	             
+   
 
 
-//
-//
-//
-//
-//
+    
+        
+                                    
+        
+    
 

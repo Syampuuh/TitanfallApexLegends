@@ -1,4 +1,4 @@
-"resource/ui/menus/panels/dialog_footer_buttons.res"
+"resource/ui/menus/panels/promo_footer_buttons.res"
 {
 	PinFrame
 	{
@@ -18,11 +18,11 @@
 	LeftRuiFooterButton0
 	{
 		ControlName				RuiButton
-		//InheritProperties		LeftRuiFooterButton
         classname				"LeftRuiFooterButtonClass MenuButton"
         style					RuiFooterButton
         rui						"ui/promo_footer_button.rpak"
         wide                    200
+        wide_nx_handheld        300		[$NX || $NX_UI_PC]
         tall					60
         font                    Default_28
         labelText				"DEFAULT"
@@ -38,11 +38,11 @@
 	LeftRuiFooterButton1
 	{
 		ControlName				RuiButton
-		//InheritProperties		LeftRuiFooterButton
         classname				"LeftRuiFooterButtonClass MenuButton"
         style					RuiFooterButton
         rui						"ui/promo_footer_button.rpak"
         wide                    200
+        wide_nx_handheld        300		[$NX || $NX_UI_PC]
         tall					60
         font                    Default_28
         labelText				"DEFAULT"

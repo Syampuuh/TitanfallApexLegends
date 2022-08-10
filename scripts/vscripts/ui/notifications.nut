@@ -7,20 +7,24 @@ struct
 	var notificationBoxRui
 } file
 
+global string fakeBackEndError = ""
 void function ShowNotification()
 {
 	BackendError backendError = GetBackendError()
+	#if DEV
+		if ( fakeBackEndError != "" )
+		{
+			backendError.errorString = fakeBackEndError
+			fakeBackEndError = ""
+		}
+	#endif
 	if ( backendError.errorString == "" && IsViewingNotification() )
 		return
 
 	if ( backendError.errorString != "" )
 	{
-		printt( "showing notification of " + backendError.errorString )
-		RuiSetString( file.notificationBoxRui, "titleText", "#NOTIFICATION" )
-		RuiSetString( file.notificationBoxRui, "messageText", backendError.errorString )
-
-		Hud_Show( file.menu )
-		thread HideNotificationInABit()
+		                                                                 
+		thread ShowNotificationForABit( "#NOTIFICATION", backendError.errorString )
 
 		if ( !IsLobby() && IsFullyConnected() )
 			RunClientScript( "UIToClient_Notification", "#NOTIFICATION", backendError.errorString )
@@ -31,27 +35,42 @@ void function ShowNotification()
 	}
 }
 
-void function HideNotificationInABit()
+
+void function ShowNotificationForABit( string titleText, string messageText )
 {
-	 EndSignal( uiGlobal.signalDummy, "CleanupInGameMenus" )
+	EndSignal( uiGlobal.signalDummy, "CleanupInGameMenus" )
+
+	RuiSetString( file.notificationBoxRui, "titleText", titleText )
+	RuiSetString( file.notificationBoxRui, "messageText", messageText )
+	
+	#if NX_PROG
+		RuiSetFloat( file.notificationBoxRui, "ifSwitch", 1.0 )
+	#endif
+	
+	Hud_Show( file.menu )
+
+	OnThreadEnd(
+		function() : ()
+		{
+			Hud_Hide( file.menu )
+			ShowNotification()
+		}
+	)
 
 	float notificationWaitTime = GetConVarFloat( "notification_displayTime" )
-	printt( "about to wait " + notificationWaitTime + " while we show a notification\n" )
+	                                                                                       
 	wait notificationWaitTime
-
-	printt( "we're done waiting " + notificationWaitTime + " while we showed a notification" )
-
-	Hud_Hide( file.menu )
-
-	ShowNotification()
+	                                                                                            
 }
+
 
 bool function IsViewingNotification()
 {
 	return Hud_IsVisible( file.menu )
 }
 
-void function InitNotificationsMenu()
+
+void function InitNotificationsMenu( var newMenuArg )                                               
 {
 	file.menu = GetMenu( "Notifications" )
 

@@ -1,13 +1,13 @@
 global function ClRespawnselect_MP_Init
 
 
-//
-//
-//
+                          		                                       
+                          		                                       
+                           		                                              
 
-//
-//
-//
+                                	                                             
+                                	                                             
+                                 	                                                    
 
 const RESPAWN_SELECTIONS = 2
 const PRE_SHOW_WAIT = 1.5
@@ -40,31 +40,31 @@ struct
 
 void function ClRespawnselect_MP_Init()
 {
-    //
-    //
-    //
-    //
-    //
-    //
+                                               
+                                               
+                                                
+                                                     
+                                                     
+                                                      
 
 	RegisterSignal( "TitanReadyPulse" )
 	RegisterSignal( "RefreshDelayed" )
 
 	file.respawnHintRui = CreatePermanentCockpitRui( $"ui/respawn_hint.rpak", HUD_Z_BASE )
 
-	RegisterServerVarChangeCallback( "gameState", RespawnSelect_GameStateChanged )
-	RegisterServerVarChangeCallback( "respawnAvailableBits0", RespawnSelect_OnRespawnAvailableChanged )
-	RegisterServerVarChangeCallback( "respawnAvailableBits1", RespawnSelect_OnRespawnAvailableChanged )
-	RegisterServerVarChangeCallback( "respawnAvailableBits2", RespawnSelect_OnRespawnAvailableChanged )
-	RegisterServerVarChangeCallback( "respawnAvailableBits3", RespawnSelect_OnRespawnAvailableChanged )
-	RegisterServerVarChangeCallback( "gameEndTime", RespawnSelection_GameEndTimeChanged )
+	AddCallback_OnGameStateChanged( RespawnSelect_GameStateChanged )
+	RegisterNetVarIntChangeCallback( "respawnAvailableBits0", RespawnSelect_OnRespawnAvailableChanged )
+	RegisterNetVarIntChangeCallback( "respawnAvailableBits1", RespawnSelect_OnRespawnAvailableChanged )
+	RegisterNetVarIntChangeCallback( "respawnAvailableBits2", RespawnSelect_OnRespawnAvailableChanged )
+	RegisterNetVarIntChangeCallback( "respawnAvailableBits3", RespawnSelect_OnRespawnAvailableChanged )
+	RegisterNetVarTimeChangeCallback( "gameEndTime", RespawnSelection_GameEndTimeChanged )
 
 	AddCallback_OnPlayerLifeStateChanged( RespawnSelect_LifeStateChanged )
 }
 
-void function RespawnSelect_GameStateChanged()
+void function RespawnSelect_GameStateChanged( int newVal )
 {
-	UpdateRespawnSelectHud()
+		UpdateRespawnSelectHud()
 }
 
 void function RespawnSelect_OnTitanAvailableChanged()
@@ -72,12 +72,12 @@ void function RespawnSelect_OnTitanAvailableChanged()
 	UpdateRespawnSelectHud()
 }
 
-void function RespawnSelect_OnRespawnAvailableChanged()
+void function RespawnSelect_OnRespawnAvailableChanged(entity player, int newVal )
 {
 	UpdateRespawnSelectHud()
 }
 
-void function RespawnSelection_GameEndTimeChanged()
+void function RespawnSelection_GameEndTimeChanged(entity player, float newVal )
 {
 	UpdateRespawnSelectHud()
 }
@@ -120,14 +120,14 @@ void function RegisterRespawnCommands()
 	if ( file.commandsRegistered )
 		return
 
-	//
+	                                                  
 	file.spawnAsTitanBindStyleUsed = GetSpawnAsTitanBindStyle()
 
-	//
+	                                                          	                            
 	RegisterButtonPressedCallback( KEY_SPACE,				PlayerPressed_RespawnPilot )
 	RegisterButtonPressedCallback( BUTTON_X,				PlayerPressed_RespawnPilot )
 
-	//
+	                                                          	                            
 	RegisterButtonPressedCallback( BUTTON_Y,				PlayerPressed_RespawnTitan )
 
 	switch ( file.spawnAsTitanBindStyleUsed )
@@ -152,11 +152,11 @@ void function DeregisterRespawnCommands()
 	if ( !file.commandsRegistered )
 		return
 
-	//
+	                                                                                        
 	DeregisterButtonPressedCallback( KEY_SPACE,				PlayerPressed_RespawnPilot )
 	DeregisterButtonPressedCallback( BUTTON_X,				PlayerPressed_RespawnPilot )
 
-	//
+	                                                                                        
 	DeregisterButtonPressedCallback( BUTTON_Y,				PlayerPressed_RespawnTitan )
 
 	switch ( file.spawnAsTitanBindStyleUsed )
@@ -228,25 +228,31 @@ bool function RespawnSelect_ShouldShowRespawnAsPilot( entity player )
 {
 	if ( IsAlive( player ) && !IsWatchingKillReplay() )
 	{
-		//
+		                               
 		return false
 	}
 
 	if ( IsPlayerEliminated( player ) )
 	{
-		//
+		                                          
 		return false
 	}
 
 	if ( !IsRespawnAvailable( player ) )
 	{
-		//
+		                                           
 		return false
 	}
 
-	if ( GetGameState() != eGameState.Playing && GetGameState() != eGameState.Epilogue && GetGameState() != eGameState.WinnerDetermined )
+	if ( GetGameState() != eGameState.Playing && GetGameState() != eGameState.Resolution && GetGameState() != eGameState.WinnerDetermined )
 	{
-		//
+		                                                    
+		return false
+	}
+
+	                                                     
+	if ( IsPrivateMatch() )
+	{
 		return false
 	}
 
@@ -257,28 +263,28 @@ bool function RespawnSelect_ShouldShowSkipReplay( entity player )
 {
 	if ( !IsWatchingKillReplay() )
 	{
-		//
+		                                     
 		return false
 	}
 
 	if ( !IsPlayerEliminated( player ) )
 	{
-		//
+		                                        
 		return false
 	}
 
 	int gameState = GetGameState()
 
-	if ( gameState != eGameState.Playing && gameState != eGameState.Epilogue )
+	if ( gameState != eGameState.Playing && gameState != eGameState.Resolution )
 	{
-		//
+		                                  
 		return false
 	}
 
 	return true
 }
 
-//
+                                                                
 bool function RespawnSelect_CanPlayerSpawnIntoTitan( entity player )
 {
 	return PlayerCanSpawnIntoTitan( player )

@@ -2,7 +2,9 @@ global function ClUnitFrames_Init
 global function PlayerHasUnitFrame
 global function PlayerShouldHaveUnitFrame
 global function GetUnitFrame
+global function GetTeamUnitFrames
 global function OnInUseHealingKitTypeChanged
+global function OnPlayerEquippedWeaponChanged
 
 global function UnitFrame_GetOwnerByIndex
 global function UnitFrame_SetConsumableIconForPlayer
@@ -10,9 +12,20 @@ global function UnitFrame_SetConsumableIconForPlayer
 global function AddCallback_OnTeamUnitFrameCreated
 global function AddCallback_OnTeamUnitFrameDestroyed
 
+global function SetUnitFrameCustomIcon
+global function SetUnitFrameCustomTreatment
+global function SetUnitFrameCustomColor
+global function SetUnitFrameShadowFormState
+global function ClearUnitFrameCustomColor
+
 global function SetUnitFrameDataFromOwner
 
-#if(DEV)
+global function OverwriteWithCustomUnitFrameInfo
+
+global function RefreshUnitframesForPlayer
+global function SquadMemberIndexSort
+
+#if DEV
 global function PrintUnitFrames
 global function PrintTeammates
 #endif
@@ -26,9 +39,14 @@ global struct UnitFrameDef
 
 struct
 {
+	array<UnitFrameDef>				  RASUnitFrames
 	table<entity, UnitFrameDef>       teamUnitFrames
 	array< void functionref(int) >    Callbacks_OnTeamUnitFrameCreated
 	array< void functionref(int) >    Callbacks_OnTeamUnitFrameDestroyed
+
+	table<entity, asset>  customPlayerInfoTreatment
+	table<entity, vector> customCharacterColor
+	table<entity, asset>  customCharacterIcon
 } file
 
 void function ClUnitFrames_Init()
@@ -38,10 +56,8 @@ void function ClUnitFrames_Init()
 	AddDestroyCallback( "player", OnPlayerDestroyed )
 	AddCallback_PlayerClassChanged( OnPlayerClassChanged )
 	AddOnSpectatorTargetChangedCallback( OnSpectatorTargetChanged )
-
-	#if(false)
-
-#endif //
+	AddCallback_OnViewPlayerChanged( OnViewPlayerChanged )
+	AddCallback_GameStateEnter( eGameState.Playing, OnGameStateEnterPlaying )
 
 	if ( IsRecruitMode() )
 		CL_RecruitModeUnitFrames_Init()
@@ -50,7 +66,7 @@ void function ClUnitFrames_Init()
 
 void function OnPlayerCreated( entity player )
 {
-	OnPlayerTeamChanged( player, TEAM_UNASSIGNED, player.GetTeam() ) //
+	OnPlayerTeamChanged( player, TEAM_UNASSIGNED, player.GetTeam() )                                                                                                                                                                                             
 }
 
 
@@ -58,10 +74,12 @@ void function OnPlayerTeamChanged( entity player, int oldTeam, int newTeam )
 {
 	if ( PlayerShouldHaveUnitFrame( player ) )
 	{
+		                                                                   
 		CreateTeamUnitFrame( player )
 	}
 	else
 	{
+		                                                                    
 		DestroyTeamUnitFrame( player )
 	}
 }
@@ -77,168 +95,390 @@ void function OnPlayerClassChanged( entity player )
 {
 	if ( PlayerHasUnitFrame( player ) && player.GetPlayerSettings() != SPECTATOR_SETTINGS )
 	{
-		SetUnitFrameOwner( GetUnitFrame( player ), player )
+		SetUnitFrameOwner( GetUnitFrame( player ), player, GetLocalViewPlayer() )
 	}
 	else if ( PlayerShouldHaveUnitFrame( player ) )
 	{
+		                                              
 		CreateTeamUnitFrame( player )
 	}
 }
 
-//
-//
+
+void function OnGameStateEnterPlaying()
+{
+	                                                               
+	entity viewPlayer = GetLocalViewPlayer()
+	RefreshUnitframesForPlayer( viewPlayer )
+}
+
+
+                                                                                                                                          
+                                                                                                                                 
 void function OnSpectatorTargetChanged( entity spectator, entity prevTarget, entity newTarget )
 {
-	if ( newTarget == null ) //
+	                                                                            
+	RefreshUnitframesForPlayer( newTarget )
+}
+
+
+void function OnViewPlayerChanged( entity newViewPlayer )
+{
+	                                                    
+	RefreshUnitframesForPlayer( newViewPlayer )
+	UpdateFullmapRuiTracks()
+}
+
+
+void function RefreshUnitframesForPlayer( entity player, int RASState = 0, bool RASMergeSuccessful = false )
+{
+	if ( player == null )                                    
 		return
 
-	//
-	if ( !newTarget.IsPlayer() )
+	                                                                                                  
+	if ( !player.IsPlayer() )
 		return
 
-	int newTargetTeam = newTarget.GetTeam()
+	                                                  
+	if ( SPECTATOR_UI_STATE == SPEC_UI_STATE_SHOW_ONLY_MINIMAP )
+		return
+
+	int playerTeam = player.GetTeam()
 	array<entity> playersToRemove
 
-	foreach ( player, unitFrame in file.teamUnitFrames )
+	foreach ( unitframePlayer, unitFrame in file.teamUnitFrames )
 	{
-		if ( !IsValid( player ) || player.GetTeam() != newTargetTeam )
-			playersToRemove.append( player )
+		if ( !IsValid( unitframePlayer ) || unitframePlayer.GetTeam() != playerTeam || !PlayerShouldHaveUnitFrame( unitframePlayer ) )
+			playersToRemove.append( unitframePlayer )
+		else
+			thread SetUnitFrameDataFromOwner( unitFrame.rui, unitframePlayer, player )
 	}
 
-	foreach ( player in playersToRemove )
-		DestroyTeamUnitFrame( player )
+	foreach ( unitframePlayer in playersToRemove )
+	{
+		DestroyTeamUnitFrame( unitframePlayer )
+	}
 
-	//
-	//
-	//
+	  	                                                               
+	  	                                                     
+	  		      
 
-	foreach ( player in GetPlayerArrayOfTeam( newTargetTeam ) )
-		CreateTeamUnitFrame( player )
+	foreach ( teamPlayer in GetPlayerArrayOfTeam( playerTeam ) )
+	{
+		if ( PlayerShouldHaveUnitFrame( teamPlayer ) )
+			CreateTeamUnitFrame( teamPlayer )
+	}
+
+                       
+                       
+  
+                                                
+   
+                                  
+                                                             
+    
+                             
+    
+
+                                   
+                                                                                            
+    
+                                                                   
+     
+                              
+                         
+     
+    
+
+                                                                                             
+    
+                        
+    
+
+                               
+                                            
+    
+                                                           
+    
+          
+                           
+                                              
+                                        
+                             
+   
+  
+      
 }
+
+
+                       
+                                  
+ 
+                                                      
+                                                                                     
+
+                       
+                    
+                                                                       
+
+                                       
+
+                                                               
+                                  
+ 
+
+                                       
+ 
+                                     
+        
+
+                                         
+
+                                             
+                                             
+
+                                   
+ 
+
+                                                                                        
+ 
+                    
+
+                                                   
+                                         
+
+                                                                                      
+  
+                                              
+                                                            
+                                                                                              
+  
+                                                   
+  
+                                             
+                                                            
+                                                                                              
+  
+                                                          
+  
+                                                         
+                                                            
+                                                                                              
+  
+                                                
+  
+                           
+   
+                                                        
+                                                                     
+                                                                                              
+   
+      
+   
+                                                   
+                                                                   
+                                                                                              
+   
+  
+
+ 
+      
 
 
 void function CreateTeamUnitFrame( entity player )
 {
-	//
-	if ( player == GetLocalViewPlayer() )
+	if ( GetCurrentPlaylistVarBool( "teammate_huds_enabled", true ) == false )
 		return
+
+
+
+	                                                                                                          
+	if ( player == GetLocalViewPlayer() && ( !IsSpectating() || IsAlive( player ) ) )
+		return
+
+                           
+		if ( IsSecondChanceGameMode() )
+		{
+			if ( ( !IsAlive( player ) && ShGameMode_SecondChance_CanPlayerStillRespawn( player ) ) )
+			{
+				return
+			}
+		}
+       
 
 	if ( PlayerHasUnitFrame( player ) )
 		return
 
+	                                                                   
+
 	DeleteUnitFrameForDisconnectedPlayer()
 
-	var rui = CreatePermanentCockpitPostFXRui( $"ui/unitframe_survival_v3.rpak", HUD_Z_BASE )
+	asset unitFrameAsset = GetUnitFrameAssetForGameMode()
+	var rui              = CreatePermanentCockpitPostFXRui( unitFrameAsset, HUD_Z_BASE )
+
+	if  ( SquadInfoIsDisabled())
+		RuiSetBool( rui, "isVisible", false )
+
 
 	UnitFrameDef unitFrame
 	unitFrame.rui = rui
 
-	if ( player == GetLocalClientPlayer() )
-	{
-		unitFrame.index = 0
+	file.teamUnitFrames[player] <- unitFrame
 
-		foreach ( frame in file.teamUnitFrames )
-		{
-			if ( frame.index >= 0 )
-			{
-				frame.index++
-				SetUnitFramePosition( frame )
-			}
-		}
-	}
-	else
-	{
-		unitFrame.index = file.teamUnitFrames.len()
-	}
+	UpdateUnitFrameIndices()
 
 	foreach ( callbackFunc in file.Callbacks_OnTeamUnitFrameCreated )
 	{
 		callbackFunc( unitFrame.index )
 	}
 
-	file.teamUnitFrames[player] <- unitFrame
-
-	SetUnitFrameOwner( unitFrame, player )
+	SetUnitFrameOwner( unitFrame, player, GetLocalViewPlayer() )
 	SetUnitFramePosition( unitFrame )
+	UpdateEquipmentSlot( player, unitFrame.rui )
+}
+
+int function SquadMemberIndexSort( entity a, entity b )
+{
+	if ( a.GetTeamMemberIndex() > b.GetTeamMemberIndex() )
+		return 1
+	else if ( a.GetTeamMemberIndex() < b.GetTeamMemberIndex() )
+		return -1
+
+	return 0
+}
+
+void function UpdateUnitFrameIndices()
+{
+	entity localPlayer = GetLocalViewPlayer()
+	array<entity> team = GetPlayerArrayOfTeam( localPlayer.GetTeam() )
+	team.fastremovebyvalue( localPlayer )
+
+	                                                                                                 
+	                                                              
+	team.sort( SquadMemberIndexSort )
+
+	                                                                                                     
+	if ( PlayerHasUnitFrame( localPlayer ) )
+	{
+		team.insert( 0, localPlayer )
+	}
+
+	int displayIndex = 0;
+	foreach ( entity player in team )
+	{
+		if ( player in file.teamUnitFrames )
+		{
+			UnitFrameDef unitFrame = file.teamUnitFrames[player];
+			unitFrame.index = displayIndex
+			SetUnitFramePosition( unitFrame )
+
+			displayIndex++
+		}
+	}
 }
 
 
-void function SetUnitFrameOwner( UnitFrameDef unitFrame, entity ent )
+asset function GetUnitFrameAssetForGameMode()
 {
-	thread SetUnitFrameDataFromOwner( unitFrame.rui, ent )
+                  
+		if ( IsFallLTM() )
+			return $"ui/unitframe_shadow_squad.rpak"
+       
+	return $"ui/unitframe_survival_v3.rpak"
 }
 
 
-void function SetUnitFrameDataFromOwner( var rui, entity ent, bool forceUpdate = false )
+void function SetUnitFrameOwner( UnitFrameDef unitFrame, entity ent, entity viewPlayer )
 {
-	EndSignal( ent, "OnDestroy" ) //
+	thread SetUnitFrameDataFromOwner( unitFrame.rui, ent, viewPlayer )
+}
+
+
+void function SetUnitFrameDataFromOwner( var rui, entity ent, entity localPlayer, bool forceUpdate = false )
+{
+	EndSignal( ent, "OnDestroy" )                                                                           
 
 	Assert ( IsNewThread(), "Must be threaded off." )
 
 	while ( !EHIHasValidScriptStruct( ToEHI( ent ) ) )
-		WaitFrame() //
+		WaitFrame()                                      
 
-	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( ent ), Loadout_CharacterClass() )
-	asset classIcon      = CharacterClass_GetGalleryPortrait( character )
+	ItemFlavor character = LoadoutSlot_WaitForItemFlavor( ToEHI( ent ), Loadout_Character() )
+	asset characterIcon  = CharacterClass_GetGalleryPortrait( character )
 
-	//
-	//
+	                                                                                 
+	                                                                                                           
 	if ( !HaveMatchingUnitframeRui( rui ) && !forceUpdate )
 		return
 
 	RuiTrackString( rui, "name", ent, RUI_TRACK_PLAYER_NAME_STRING )
 	RuiTrackInt( rui, "micStatus", ent, RUI_TRACK_MIC_STATUS )
+	RuiSetInt( rui, "baseShield", GetPlayerSettingBaseShield( ent ) )
 	RuiTrackFloat( rui, "healthFrac", ent, RUI_TRACK_HEALTH )
 	RuiTrackFloat( rui, "shieldFrac", ent, RUI_TRACK_SHIELD_FRACTION )
 	RuiTrackGameTime( rui, "lastFireTime", ent, RUI_TRACK_LAST_FIRED_TIME )
 	RuiSetBool( rui, "isLocalPlayer", (ent == GetLocalViewPlayer()) )
-	RuiSetImage( rui, "icon", classIcon )
+	RuiSetImage( rui, "icon", characterIcon )
 	RuiTrackFloat( rui, "reviveEndTime", ent, RUI_TRACK_SCRIPT_NETWORK_VAR, GetNetworkedVariableIndex( "reviveEndTime" ) )
 	RuiTrackInt( rui, "reviveType", ent, RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "reviveType" ) )
 	RuiTrackFloat( rui, "bleedoutEndTime", ent, RUI_TRACK_SCRIPT_NETWORK_VAR, GetNetworkedVariableIndex( "bleedoutEndTime" ) )
 	RuiTrackBool( rui, "isJumpmaster", ent, RUI_TRACK_SCRIPT_NETWORK_VAR_BOOL, GetNetworkedVariableIndex( "isJumpmaster" ) )
 	RuiTrackInt( rui, "respawnStatus", ent, RUI_TRACK_SCRIPT_NETWORK_VAR_INT, GetNetworkedVariableIndex( "respawnStatus" ) )
-	RuiTrackFloat( rui, "respawnDNATimeout", ent, RUI_TRACK_SCRIPT_NETWORK_VAR, GetNetworkedVariableIndex( "respawnDNATimeout" ) )
-
-	RuiSetBool( rui, "disconnected", false )
+	RuiTrackFloat( rui, "respawnStatusEndTime", ent, RUI_TRACK_SCRIPT_NETWORK_VAR, GetNetworkedVariableIndex( "respawnStatusEndTime" ) )
+	RuiTrackFloat( rui, "cameraViewFrac", ent, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.camera_view )                                                                                                 
+                                
+		if ( IsValid( localPlayer) )
+			RuiTrackFloat( rui, "cameraViewFracLocal", localPlayer, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.camera_view )
+       
+	RuiSetBool( rui, "disconnected", !ent.IsConnectionActive() )
 	RuiSetImage( rui, "healTypeIcon", $"" )
-	#if(true)
+	#if MEMBER_COLORS
 		RuiTrackInt( rui, "teamMemberIndex", ent, RUI_TRACK_PLAYER_TEAM_MEMBER_INDEX )
 	#endif
 
+                     
+	RuiTrackBool( rui, "isDriving", ent, RUI_TRACK_PLAYER_IS_DRIVING_HOVER_VEHICLE )
+                           
+
 	RuiTrackFloat( rui, "targetHealthFrac", ent, RUI_TRACK_HEAL_TARGET )
-	if ( GetCurrentPlaylistVarInt( "survival_shields", 1 ) )
-	{
-		RuiTrackFloat( rui, "targetShieldFrac", ent, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.target_shields )
-		RuiTrackFloat( rui, "targetHealthFrac", ent, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.target_health )
-		RuiTrackFloat( rui, "targetHealthFracTemp", ent, RUI_TRACK_HEAL_TARGET )
-	}
+	RuiTrackFloat( rui, "targetShieldFrac", ent, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.target_shields )
+	RuiTrackFloat( rui, "targetHealthFrac", ent, RUI_TRACK_STATUS_EFFECT_SEVERITY, eStatusEffect.target_health )
+	RuiTrackFloat( rui, "targetHealthFracTemp", ent, RUI_TRACK_HEAL_TARGET )
 
+	string platformString = CrossplayUserOptIn() ? PlatformIDToIconString( GetHardwareFromName( ent.GetHardwareName() ) ) : ""
+	RuiSetString( rui, "platformString", platformString )
+
+                
+                                                                                                                    
+       
+
+
+	if (!SquadInfoIsDisabled())
 	RuiSetBool( rui, "isVisible", true )
+	else RuiSetBool( rui, "isVisible", false )
 
-	#if(false)
+	RuiTrackInt( rui, "squadID", ent, RUI_TRACK_SQUADID )
 
+                    
+                                                       
+   
+                                                                      
+                                                   
+   
+       
+	                                           
+}
 
-
-#endif //
+void function SetUnitFrameDataFromRAS( var rui, entity ent, bool forceUpdate = false )
+{
+	if (!SquadInfoIsDisabled())
+		RuiSetBool( rui, "isVisible", true )
+	else RuiSetBool( rui, "isVisible", false )
+	RuiTrackInt( rui, "squadID", ent, RUI_TRACK_SQUADID )
 }
 
 
-#if(false)
-
-
-//
-//
-
-
-
-
-
-
-
-#endif //
-
-void function OnInUseHealingKitTypeChanged( entity player, int oldkitType, int kitType, bool actuallyChanged )
+void function OnInUseHealingKitTypeChanged( entity player, int kitType )
 {
 	asset hudIcon = $""
 
@@ -247,7 +487,7 @@ void function OnInUseHealingKitTypeChanged( entity player, int oldkitType, int k
 		if ( WeaponDrivenConsumablesEnabled() )
 		{
 			ConsumableInfo info = Consumable_GetConsumableInfo( kitType )
-			LootData lootData    = info.lootData
+			LootData lootData   = info.lootData
 			hudIcon = lootData.hudIcon
 		}
 		else
@@ -256,7 +496,6 @@ void function OnInUseHealingKitTypeChanged( entity player, int oldkitType, int k
 			LootData lootData    = kitData.lootData
 			hudIcon = lootData.hudIcon
 		}
-
 	}
 
 	foreach ( framePlayer, frame in file.teamUnitFrames )
@@ -266,6 +505,51 @@ void function OnInUseHealingKitTypeChanged( entity player, int oldkitType, int k
 		RuiSetImage( frame.rui, "healTypeIcon", hudIcon )
 		RuiSetBool( frame.rui, "consumablePanelVisible", hudIcon != $"" )
 		break
+	}
+}
+
+
+void function OnPlayerEquippedWeaponChanged( entity player, int newWeaponRef )
+{
+	const int WEAPON_COUNT = 2
+
+	foreach ( framePlayer, frame in file.teamUnitFrames )
+	{
+		if ( framePlayer != player )
+			continue
+
+		for ( int i = 0; i < WEAPON_COUNT; i++ )
+		{
+			string ammoTypeIconBool = "showAmmoIcon0" + string(i)
+			string ammoTypeIcon     = "ammoTypeIcon0" + string(i)
+			asset hudIcon           = $"white"
+
+			string weaponSlot = "playerPrimaryWeapon" + string(i)
+			int weaponIndex   = player.GetPlayerNetInt( weaponSlot )
+
+			if ( !SURVIVAL_Loot_IsLootIndexValid( weaponIndex ) )
+			{
+				hudIcon = $"white"
+
+				RuiSetBool( frame.rui, ammoTypeIconBool, false )
+				RuiSetImage( frame.rui, ammoTypeIcon, hudIcon )
+			}
+			else
+			{
+				LootData weaponData = SURVIVAL_Loot_GetLootDataByIndex( weaponIndex )
+				string ammoType     = weaponData.ammoType
+				if ( GetWeaponInfoFileKeyField_GlobalBool( weaponData.baseWeapon, "uses_ammo_pool" ) )
+				{
+					LootData ammoData = SURVIVAL_Loot_GetLootDataByRef( ammoType )
+					hudIcon = ammoData.hudIcon
+				}
+				else
+					hudIcon = weaponData.fakeAmmoIcon
+
+				RuiSetImage( frame.rui, ammoTypeIcon, hudIcon )
+				RuiSetBool( frame.rui, ammoTypeIconBool, true )
+			}
+		}
 	}
 }
 
@@ -293,6 +577,8 @@ void function DestroyTeamUnitFrame( entity player )
 	if ( !PlayerHasUnitFrame( player ) )
 		return
 
+	                                              
+
 	if ( file.teamUnitFrames[player].rui != null )
 		RuiDestroyIfAlive( file.teamUnitFrames[player].rui )
 
@@ -304,14 +590,7 @@ void function DestroyTeamUnitFrame( entity player )
 		callbackFunc( removedIndex )
 	}
 
-	foreach ( unitFrame in file.teamUnitFrames )
-	{
-		if ( unitFrame.index >= removedIndex )
-		{
-			unitFrame.index--
-			SetUnitFramePosition( unitFrame )
-		}
-	}
+	UpdateUnitFrameIndices()
 }
 
 
@@ -334,7 +613,7 @@ void function DestroyTeamUnitFrameAfterDelay( entity player, float delay = 15.0 
 
 void function DeleteUnitFrameForDisconnectedPlayer()
 {
-	foreach( player, unitframe in clone file.teamUnitFrames )
+	foreach ( player, unitframe in clone file.teamUnitFrames )
 	{
 		if ( !IsValid( player ) )
 			DestroyTeamUnitFrame( player )
@@ -346,9 +625,15 @@ bool function PlayerShouldHaveUnitFrame( entity player )
 {
 	entity viewer  = GetLocalViewPlayer()
 	int playerTeam = player.GetTeam()
+	entity client = GetLocalClientPlayer()
 
-	if ( player == viewer )
+	                                                                                                          
+	if ( player == viewer && ( !IsSpectating() || IsAlive( player ) ) )
 		return false
+
+	if( client.GetTeam() == TEAM_SPECTATOR )
+		if ( client.GetObserverTarget() == player )
+			return false
 
 	if ( playerTeam == TEAM_UNASSIGNED )
 		return false
@@ -358,6 +643,13 @@ bool function PlayerShouldHaveUnitFrame( entity player )
 
 	if ( playerTeam != viewer.GetTeam() )
 		return false
+
+	int gameState = GetGameState()
+	if ( gameState < eGameState.Playing && !IsFiringRangeGameMode() )
+	{
+		if( !( gameState == eGameState.Prematch && GetCurrentPlaylistVarBool( "show_teamunitframes_in_prematch", false ) ) )
+			return false
+	}
 
 	return true
 }
@@ -401,7 +693,7 @@ entity function UnitFrame_GetOwnerByIndex( int index )
 	return null
 }
 
-#if(DEV)
+#if DEV
 void function PrintUnitFrames()
 {
 	printt( "file.teamUnitFrames size:", file.teamUnitFrames.len() )
@@ -419,7 +711,7 @@ void function PrintTeammates( entity player )
 		printt( "team:", team, "teammate:", p )
 	}
 }
-#endif //
+#endif       
 
 void function AddCallback_OnTeamUnitFrameCreated( void functionref(int) callbackFunc )
 {
@@ -432,4 +724,117 @@ void function AddCallback_OnTeamUnitFrameDestroyed( void functionref(int) callba
 {
 	Assert( !file.Callbacks_OnTeamUnitFrameDestroyed.contains( callbackFunc ), "Already added " + string( callbackFunc ) + " with AddCallback_OnTeamUnitFrameDestroyed" )
 	file.Callbacks_OnTeamUnitFrameDestroyed.append( callbackFunc )
+}
+
+
+void function SetUnitFrameCustomIcon( entity player, asset icon )
+{
+	foreach ( unitframePlayer, unitFrame in file.teamUnitFrames )
+	{
+		if ( player == unitframePlayer )
+		{
+			if ( !(player in file.customCharacterIcon) )
+				file.customCharacterIcon[player] <- icon
+			file.customCharacterIcon[player] = icon
+			RuiSetImage( unitFrame.rui, "icon", icon )
+		}
+	}
+}
+
+
+void function SetUnitFrameCustomTreatment( entity player, asset treatment )
+{
+	foreach ( unitframePlayer, unitFrame in file.teamUnitFrames )
+	{
+		if ( player == unitframePlayer )
+		{
+			if ( !(player in file.customPlayerInfoTreatment) )
+				file.customPlayerInfoTreatment[player] <- treatment
+			file.customPlayerInfoTreatment[player] = treatment
+			RuiSetImage( unitFrame.rui, "customTreatment", treatment )
+		}
+	}
+}
+
+
+void function SetUnitFrameShadowFormState( entity player, bool state )
+{
+	foreach ( unitframePlayer, unitFrame in file.teamUnitFrames )
+	{
+		if ( player == unitframePlayer )
+		{
+			RuiSetBool( unitFrame.rui, "useShadowFormFrame", state )
+		}
+	}
+}
+
+
+void function SetUnitFrameCustomColor( entity player, vector color )
+{
+	foreach ( unitframePlayer, unitFrame in file.teamUnitFrames )
+	{
+		if ( player == unitframePlayer )
+		{
+			if ( !(player in file.customCharacterColor) )
+				file.customCharacterColor[player] <- color
+			file.customCharacterColor[player] = color
+			RuiSetColorAlpha( unitFrame.rui, "customCharacterColor", SrgbToLinear( color / 255.0 ), 1.0 )
+			RuiSetBool( unitFrame.rui, "useCustomCharacterColor", true )
+		}
+	}
+}
+
+
+void function ClearUnitFrameCustomColor( entity player )
+{
+	foreach ( unitframePlayer, unitFrame in file.teamUnitFrames )
+	{
+		if ( player == unitframePlayer )
+		{
+			if ( player in file.customCharacterColor )
+				delete file.customCharacterColor[player]
+			RuiSetBool( unitFrame.rui, "useCustomCharacterColor", false )
+		}
+	}
+}
+
+
+void function OverwriteWithCustomUnitFrameInfo( entity player, var rui )
+{
+	if ( player in file.customCharacterIcon )
+		RuiSetImage( rui, "playerIcon", file.customCharacterIcon[player] )
+
+	if ( player in file.customPlayerInfoTreatment )
+	{
+		RuiSetImage( rui, "customTreatment", file.customPlayerInfoTreatment[player] )
+	}
+
+	if ( player in file.customCharacterColor )
+	{
+		RuiSetColorAlpha( rui, "customCharacterColor", SrgbToLinear( GetUnitFrameColor( player ) / 255.0 ), 1.0 )
+		RuiSetBool( rui, "useCustomCharacterColor", true )
+	}
+	else
+	{
+		RuiSetBool( rui, "useCustomCharacterColor", false )
+	}
+}
+
+bool function SquadInfoIsDisabled()
+{
+	return GetCurrentPlaylistVarBool( "hide_ui_squadinfo", false )
+}
+
+
+vector function GetUnitFrameColor( entity player )
+{
+	if ( player in file.customCharacterColor )
+		return file.customCharacterColor[player]
+
+	return GetKeyColor( COLORID_MEMBER_COLOR0, player.GetTeamMemberIndex() )
+}
+
+table<entity, UnitFrameDef> function GetTeamUnitFrames()
+{
+	return file.teamUnitFrames
 }

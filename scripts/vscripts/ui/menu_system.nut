@@ -1,11 +1,10 @@
 global function InitSystemMenu
-global function InitSystemPanelMain
-global function InitSystemPanel
-global function UpdateSystemPanel
-
+global function UpdateSystemMenu
 global function OpenSystemMenu
 
 global function ShouldDisplayOptInOptions
+global function EnableCharacterChangeInFiringRange
+global function IsOptInEnabled
 
 struct ButtonData
 {
@@ -15,23 +14,35 @@ struct ButtonData
 
 struct
 {
-	var                    menu
+	var menu
 
-	table<var, array<var> >            buttons
-	table<var, array<ButtonData> > buttonDatas
+	array<var>        buttons
+	array<ButtonData> buttonDatas
 
-	table<var, ButtonData > settingsButtonData
-	table<var, ButtonData > leaveMatchButtonData
-	table<var, ButtonData > exitButtonData
-	table<var, ButtonData > lobbyReturnButtonData
-	table<var, ButtonData > nullButtonData
-	table<var, ButtonData > leavePartyData
-	table<var, ButtonData > abandonMissionButtonData
+	ButtonData settingsButtonData
+	ButtonData leaveMatchButtonData
+	ButtonData endMatchButtonData
+	ButtonData exitButtonData
+	ButtonData lobbyReturnButtonData
+	ButtonData nullButtonData
+	ButtonData leavePartyData
+	ButtonData leaveCustomMatchData
+	ButtonData abandonMissionButtonData
+	ButtonData changeCharacterButtonData
+	ButtonData friendlyFireButtonData
+                          
+                                    
+                                           
+       
+	ButtonData suicideButtonData
+
+	bool enableChangeCharacterButton = true
 
 	InputDef& qaFooter
+	bool isOptInEnabled = false
 } file
 
-void function InitSystemMenu()
+void function InitSystemMenu( var newMenuArg )                                               
 {
 	var menu = GetMenu( "SystemMenu" )
 	Hud_SetAboveBlur( menu, true )
@@ -40,146 +51,230 @@ void function InitSystemMenu()
 	AddMenuEventHandler( menu, eUIEvent.MENU_OPEN, OnSystemMenu_Open )
 	AddMenuEventHandler( menu, eUIEvent.MENU_CLOSE, OnSystemMenu_Close )
 	AddMenuEventHandler( menu, eUIEvent.MENU_NAVIGATE_BACK, OnSystemMenu_NavigateBack )
-}
 
-void function InitSystemPanelMain( var panel )
-{
-	InitSystemPanel( panel )
 
-	AddPanelFooterOption( panel, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
+	file.buttons = GetElementsByClassname( menu, "SystemButtonClass" )
+	file.buttonDatas.resize( file.buttons.len() )
 
-	#if(CONSOLE_PROG)
-	AddPanelFooterOption( panel, RIGHT, BUTTON_BACK, false, "#BUTTON_RETURN_TO_MAIN", "", ReturnToMain_OnActivate )
-	#endif
-
-	#if(DEV)
-		AddPanelFooterOption( panel, LEFT, BUTTON_Y, true, "#Y_BUTTON_DEV_MENU", "#DEV_MENU", OpenDevMenu )
-	#endif
-
-	file.qaFooter = AddPanelFooterOption( panel, LEFT, BUTTON_X, true, "#X_BUTTON_QA", "QA", ToggleOptIn, ShouldDisplayOptInOptions )
-}
-
-void function InitSystemPanel( var panel )
-{
-	var menu = Hud_GetParent( panel )
-	file.buttons[ panel ] <- GetElementsByClassname( menu, "SystemButtonClass" )
-	file.buttonDatas[ panel ] <- []
-	file.buttonDatas[ panel ].resize( file.buttons[ panel ].len() )
-
-	ButtonData data
-
-	file.nullButtonData[ panel ] <- clone data
-
-	foreach ( index, button in file.buttons[ panel ] )
+	foreach ( index, button in file.buttons )
 	{
-		SetButtonData( panel, index, file.nullButtonData[ panel ] )
+		SetButtonData( index, file.nullButtonData )
 		Hud_AddEventHandler( button, UIE_CLICK, OnButton_Activate )
 	}
 
-	file.settingsButtonData[ panel ] <- clone data
-	file.leaveMatchButtonData[ panel ] <- clone data
-	file.exitButtonData[ panel ] <- clone data
-	file.lobbyReturnButtonData[ panel ] <- clone data
-	file.leavePartyData[ panel ] <- clone data
-	file.abandonMissionButtonData[ panel ] <- clone data
+	file.settingsButtonData.label = "#SETTINGS"
+	file.settingsButtonData.activateFunc = OpenSettingsMenu
 
-	file.settingsButtonData[ panel ].label = "#SETTINGS"
-	file.settingsButtonData[ panel ].activateFunc = OpenSettingsMenu
+	file.leaveMatchButtonData.label = "#LEAVE_MATCH"
+	file.leaveMatchButtonData.activateFunc = LeaveDialog
 
-	file.leaveMatchButtonData[ panel ].label = "#LEAVE_MATCH"
-	file.leaveMatchButtonData[ panel ].activateFunc = LeaveDialog
+	file.endMatchButtonData.label = "#TOURNAMENT_END_MATCH"
+	file.endMatchButtonData.activateFunc = EndMatchDialog
 
-	file.exitButtonData[ panel ].label = "#EXIT_TO_DESKTOP"
-	file.exitButtonData[ panel ].activateFunc = OpenConfirmExitToDesktopDialog
+	file.exitButtonData.label = "#EXIT_TO_DESKTOP"
+	file.exitButtonData.activateFunc = OpenConfirmExitToDesktopDialog
 
-	file.lobbyReturnButtonData[ panel ].label = "#RETURN_TO_LOBBY"
-	file.lobbyReturnButtonData[ panel ].activateFunc = LeaveDialog
+	file.lobbyReturnButtonData.label = "#RETURN_TO_LOBBY"
+	file.lobbyReturnButtonData.activateFunc = LeaveDialog
 
-	file.leavePartyData[ panel ].label = "#LEAVE_PARTY"
-	file.leavePartyData[ panel ].activateFunc = LeavePartyDialog
+	file.leavePartyData.label = "#LEAVE_PARTY"
+	file.leavePartyData.activateFunc = LeavePartyDialog
 
-	file.abandonMissionButtonData[ panel ].label = "#ABANDON_MISSION"
-	file.abandonMissionButtonData[ panel ].activateFunc = LeaveDialog
+                       
+		file.leaveCustomMatchData.label = "#CUSTOMMATCH_LEAVE"
+		file.leaveCustomMatchData.activateFunc = LeaveCustomMatchDialog
+       
 
-	AddPanelEventHandler( panel, eUIEvent.PANEL_SHOW, SystemPanelShow )
+	file.abandonMissionButtonData.label = "#QUEST_LEAVE_MATCH"
+	file.abandonMissionButtonData.activateFunc = LeaveDialog
+
+	file.changeCharacterButtonData.label = "#BUTTON_CHARACTER_CHANGE"
+	file.changeCharacterButtonData.activateFunc = TryChangeCharacters
+
+	file.friendlyFireButtonData.label = "#BUTTON_FRIENDLY_FIRE_TOGGLE"
+	file.friendlyFireButtonData.activateFunc = ToggleFriendlyFire
+
+                          
+                                                                     
+                                                                 
+
+                                                                                     
+                                                                               
+       
+
+	file.suicideButtonData.label = "#BUTTON_SUICIDE"
+	file.suicideButtonData.activateFunc = TryRespawnAndChangeCharacters
+
+
+	AddMenuFooterOption( menu, LEFT, BUTTON_B, true, "#B_BUTTON_BACK", "#B_BUTTON_BACK" )
+	#if DEV
+		AddMenuFooterOption( menu, LEFT, BUTTON_Y, true, "#Y_BUTTON_DEV_MENU", "#DEV_MENU", OpenDevMenu )
+	#endif
+	file.qaFooter = AddMenuFooterOption( menu, LEFT, BUTTON_X, true, "#X_BUTTON_QA", "QA", ToggleOptIn, ShouldDisplayOptInOptions )
+
+	#if NX_PROG
+		AddMenuFooterOption( menu, LEFT, BUTTON_STICK_RIGHT, true, "#BUTTON_VIEW_CINEMATIC", "#VIEW_CINEMATIC", ViewCinematic, IsLobby )
+	#else
+		AddMenuFooterOption( menu, RIGHT, BUTTON_STICK_RIGHT, true, "#BUTTON_VIEW_CINEMATIC", "", ViewCinematic, IsLobby )
+		AddMenuFooterOption( menu, RIGHT, KEY_V, true, "", "#BUTTON_VIEW_CINEMATIC", ViewCinematic, IsLobby )
+	#endif
+
+	AddMenuFooterOption( menu, RIGHT, BUTTON_BACK, true, "#BUTTON_RETURN_TO_MAIN", "", ReturnToMain_OnActivate, IsLobby )
+	AddMenuFooterOption( menu, RIGHT, KEY_R, true, "", "#BUTTON_RETURN_TO_MAIN", ReturnToMain_OnActivate, IsLobby )
 }
 
-void function SystemPanelShow( var panel )
+
+void function ViewCinematic( var button )
 {
-	UpdateSystemPanel( panel )
+	CloseActiveMenu()
+	#if NX_PROG
+		string videoName = "intro_720p"
+	#else
+		string videoName = "intro"
+	#endif
+	thread PlayVideoMenu( false, videoName, "Apex_Opening_Movie", eVideoSkipRule.INSTANT )
 }
+
+void function TryChangeCharacters()
+{
+	if ( !file.enableChangeCharacterButton )
+		return
+
+	RunClientScript( "UICallback_OpenCharacterSelectNewMenu" )
+}
+
+void function ToggleFriendlyFire()
+{
+	Remote_ServerCallFunction( "ClientCallback_firingrange_toggle_friendlyfire" )
+}
+
+                         
+                                   
+ 
+                                                                              
+ 
+
+                                          
+ 
+                                                            
+ 
+      
+
+void function TryRespawnAndChangeCharacters()
+{
+	RunClientScript( "UICallback_DieAndChangeCharacters" )
+}
+
+void function EnableCharacterChangeInFiringRange( bool enable )
+{
+	file.enableChangeCharacterButton = enable
+	UpdateSystemMenu()
+}
+
 
 void function OnSystemMenu_Open()
 {
+	UpdateSystemMenu()
 	SetBlurEnabled( true )
-	ShowPanel( Hud_GetChild( file.menu, "SystemPanel" ) )
 
 	UpdateOptInFooter()
 }
 
 
-void function UpdateSystemPanel( var panel )
+void function UpdateSystemMenu()
 {
-	foreach ( index, button in file.buttons[ panel ] )
-		SetButtonData( panel, index, file.nullButtonData[ panel ] )
+	foreach ( index, button in file.buttons )
+		SetButtonData( index, file.nullButtonData )
 
 	int buttonIndex = 0
 	if ( IsConnected() && !IsLobby() )
 	{
-		UISize screenSize = GetScreenSize()
+		                                     
 		SetCursorPosition( <1920.0 * 0.5, 1080.0 * 0.5, 0> )
 
-		SetButtonData( panel, buttonIndex++, file.settingsButtonData[ panel ] )
-#if(false)
-
-
-
-
-
-
-
-
-#endif
+		SetButtonData( buttonIndex++, file.settingsButtonData )
 		{
-			SetButtonData( panel, buttonIndex++, file.leaveMatchButtonData[ panel ] )
+			if ( IsPVEMode() )
+				SetButtonData( buttonIndex++, file.abandonMissionButtonData )
+			else if ( IsSurvivalTraining() || IsFiringRangeGameMode() )
+				SetButtonData( buttonIndex++, file.lobbyReturnButtonData )
+			else
+				SetButtonData( buttonIndex++, file.leaveMatchButtonData )
 		}
+
+		if ( IsFiringRangeGameMode() )
+		{
+			if ( file.enableChangeCharacterButton )
+				SetButtonData( buttonIndex++, file.changeCharacterButtonData )
+
+			if ( (GetTeamSize( GetTeam() ) > 1) && FiringRangeHasFriendlyFire() )
+				SetButtonData( buttonIndex++, file.friendlyFireButtonData )
+
+                            
+                                        
+                                                                 
+
+                                       
+                                                                        
+         
+		}
+
+		int gameState = GetGameState()
+		bool playingOrSuddenDeath = ( gameState == eGameState.Playing )  || ( gameState == eGameState.SuddenDeath )
+		if ( IsPrivateMatch() && HasMatchAdminRole() && playingOrSuddenDeath )
+			SetButtonData( buttonIndex++, file.endMatchButtonData )
+
+                          
+			if ( Control_IsModeEnabled() && gameState == eGameState.Playing )
+				SetButtonData( buttonIndex++, file.suicideButtonData )
+        
 	}
 	else
 	{
 		if ( AmIPartyMember() || AmIPartyLeader() && GetPartySize() > 1 )
-			SetButtonData( panel, buttonIndex++, file.leavePartyData[ panel ] )
-		SetButtonData( panel, buttonIndex++, file.settingsButtonData[ panel ] )
-		#if(PC_PROG)
-			SetButtonData( panel, buttonIndex++, file.exitButtonData[ panel ] )
+			SetButtonData( buttonIndex++, file.leavePartyData )
+                        
+			if ( MenuStack_Contains( GetMenu( "CustomMatchLobbyMenu" ) ) )
+				SetButtonData( buttonIndex++, file.leaveCustomMatchData )
+        
+		SetButtonData( buttonIndex++, file.settingsButtonData )
+		#if PC_PROG
+			SetButtonData( buttonIndex++, file.exitButtonData )
 		#endif
+		if ( IsPrivateMatchLobby() )
+			SetButtonData( buttonIndex++, file.leaveMatchButtonData )
 	}
 
 	const int maxNumButtons = 4;
 	for( int i = 0; i < maxNumButtons; i++ )
 	{
 		if( i > 0 && i < buttonIndex)
-			Hud_SetNavUp( file.buttons[ panel ][i], file.buttons[ panel ][i - 1] )
+			Hud_SetNavUp( file.buttons[i], file.buttons[i - 1] )
 		else
-			Hud_SetNavUp( file.buttons[ panel ][i], null )
+			Hud_SetNavUp( file.buttons[i], null )
 
 		if( i < (buttonIndex - 1) )
-			Hud_SetNavDown( file.buttons[ panel ][i], file.buttons[ panel ][i + 1] )
+			Hud_SetNavDown( file.buttons[i], file.buttons[i + 1] )
 		else
-			Hud_SetNavDown( file.buttons[ panel ][i], null )
+			Hud_SetNavDown( file.buttons[i], null )
 	}
+
+	var dataCenterElem = Hud_GetChild( file.menu, "DataCenter" )
+	Hud_SetText( dataCenterElem, Localize( "#SYSTEM_DATACENTER", GetDatacenterName(), GetDatacenterPing(), GetDatacenterSelectedReasonSymbol() ) )
 }
 
-void function SetButtonData( var panel, int buttonIndex, ButtonData buttonData )
-{
-	file.buttonDatas[ panel ][buttonIndex] = buttonData
 
-	var rui = Hud_GetRui( file.buttons[ panel ][buttonIndex] )
-	RHud_SetText( file.buttons[ panel ][buttonIndex], buttonData.label )
+void function SetButtonData( int buttonIndex, ButtonData buttonData )
+{
+	file.buttonDatas[buttonIndex] = buttonData
+
+	var rui = Hud_GetRui( file.buttons[buttonIndex] )
+	RHud_SetText( file.buttons[buttonIndex], buttonData.label )
 
 	if ( buttonData.label == "" )
-		Hud_SetVisible( file.buttons[ panel ][buttonIndex], false )
+		Hud_SetVisible( file.buttons[buttonIndex], false )
 	else
-		Hud_SetVisible( file.buttons[ panel ][buttonIndex], true )
+		Hud_SetVisible( file.buttons[buttonIndex], true )
 }
 
 
@@ -200,11 +295,9 @@ void function OnButton_Activate( var button )
 	if ( GetActiveMenu() == file.menu )
 		CloseActiveMenu()
 
-	var panel = Hud_GetParent( button )
-
 	int buttonIndex = int( Hud_GetScriptID( button ) )
 
-	file.buttonDatas[ panel ][buttonIndex].activateFunc()
+	file.buttonDatas[buttonIndex].activateFunc()
 }
 
 void function OpenSystemMenu()
@@ -217,14 +310,14 @@ void function OpenSettingsMenu()
 	AdvanceMenu( GetMenu( "MiscMenu" ) )
 }
 
-#if(CONSOLE_PROG)
+                  
 void function ReturnToMain_OnActivate( var button )
 {
 	ConfirmDialogData data
 	data.headerText = "#EXIT_TO_MAIN"
 	data.messageText = ""
 	data.resultCallback = OnReturnToMainMenu
-	//
+	                                                                          
 
 	OpenConfirmDialogFromData( data )
 	AdvanceMenu( GetMenu( "ConfirmDialog" ) )
@@ -233,14 +326,17 @@ void function ReturnToMain_OnActivate( var button )
 void function OnReturnToMainMenu( int result )
 {
 	if ( result == eDialogResult.YES )
+	{
+		LeaveMatch()
 		ClientCommand( "disconnect" )
+	}
 }
-#endif
+        
 
 
 void function ToggleOptIn( var button )
 {
-	uiGlobal.isOptInEnabled = !uiGlobal.isOptInEnabled
+	file.isOptInEnabled = !file.isOptInEnabled
 
 	if ( GetActiveMenu() == file.menu )
 		CloseActiveMenu()
@@ -261,7 +357,7 @@ bool function ShouldDisplayOptInOptions()
 
 void function UpdateOptInFooter()
 {
-	if ( uiGlobal.isOptInEnabled )
+	if ( file.isOptInEnabled )
 	{
 		file.qaFooter.gamepadLabel = "#X_BUTTON_HIDE_OPT_IN"
 		file.qaFooter.mouseLabel = "#HIDE_OPT_IN"
@@ -276,3 +372,7 @@ void function UpdateOptInFooter()
 }
 
 
+bool function IsOptInEnabled()
+{
+	return file.isOptInEnabled
+}

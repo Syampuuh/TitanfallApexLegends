@@ -2,279 +2,358 @@ resource/ui/menus/survival_ground_list.menu
 {
 	menu
 	{
-		ControlName				Frame
-		xpos					0
-		ypos					0
-		zpos					3
-		wide					f0
-		tall					f0
-		autoResize				0
-		pinCorner				0
-		visible					1
-		enabled					1
-		PaintBackgroundType		0
-		infocus_bgcolor_override	"0 0 0 0"
-		outoffocus_bgcolor_override	"0 0 0 0"
+		ControlName                 Frame
+		xpos                        0
+		ypos                        0
+		zpos                        3
+		wide                        f0
+		tall                        f0
+		autoResize                  0
+		pinCorner                   0
+		visible                     1
+		enabled                     1
+		PaintBackgroundType         0
+		infocus_bgcolor_override    "0 0 0 0"
+		outoffocus_bgcolor_override "0 0 0 0"
 
-        Vignette
-        {
-            ControlName             ImagePanel
-            InheritProperties       MenuVignette
-        }
+		Vignette
+		{
+			ControlName                 ImagePanel
+			InheritProperties           MenuVignette
+			visible                     0 // The vignette for this menu is handled by HackyDeathBoxMenuVignette of weapon_hud_v2 in weapon_status.rui
+		}
 
-        ScreenBlur
-        {
-            ControlName             Label
-            labelText               ""
-        }
+		ScreenBlur
+		{
+			ControlName                 Label
+			labelText                   ""
+		}
 
-        ToolTip
-        {
-            ControlName				RuiPanel
-            InheritProperties       ToolTip
-            zpos                    999
-        }
+		ToolTip
+		{
+			ControlName                 RuiPanel
+			InheritProperties           ToolTip
+			zpos                        999
+		}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        BUSYBLOCKER
-        {
-            ControlName				ImagePanel
+		Backer
+		{
+			ControlName                 RuiPanel
+			rui                         "ui/survival_ground_list_backer.rpak"
 
-            zpos                    1
-            wide					%200
-            tall					%200
-            visible					0
+			pin_corner_to_sibling       RIGHT
+			pin_to_sibling              Vignette
+			pin_to_sibling_corner       CENTER
+			xpos                        -286
+			ypos                        0
+			wide                        598
+			tall                        918
+			tall_nx_handheld            946		[$NX || $NX_UI_PC]
+		}
+
+		ListPanel
+		{
+			ControlName                 CNestedPanel
+			controlSettingsFile         "Resource/UI/menus/panels/survival_inventory_list.res"
+
+			pin_corner_to_sibling       TOP_LEFT
+			pin_to_sibling              Backer
+			pin_to_sibling_corner       TOP_LEFT
+			xpos                        -24
+			ypos                        -65
+			wide                        550
+			tall                        811
+			tall_nx_handheld            785		[$NX || $NX_UI_PC]
+
+			tabPosition                 1
+		}
+
+		ScrollBar
+		{
+			ControlName                 RuiButton
+			zpos                        1
+			xpos                        0
+			ypos                        -72
+			wide                        23
+			wide_nx_handheld            35		[$NX || $NX_UI_PC]
+			tall                        798
+			visible                     0
+			enabled                     1
+			rui                         "ui/survival_ground_list_scroll_bar.rpak"
+			zpos                        1
+
+			pin_to_sibling              Backer
+			pin_corner_to_sibling       TOP_LEFT
+			pin_to_sibling_corner       TOP_LEFT
+		}
+
+		BlackMarketWidget
+		{
+			ControlName                 RuiPanel
+			rui                         "ui/loba_black_market_use_limit_widget.rpak"
+
+			pin_corner_to_sibling       LEFT
+			pin_to_sibling              ListPanel
+			pin_to_sibling_corner       RIGHT
+			xpos                        338
+			xpos_nx_handheld        	650		[$NX || $NX_UI_PC]
+			ypos                        0
+			wide                        580
+			tall                        918
+		}
+		BlackMarketWidget_Player0_ItemButton0
+		{
+			ControlName			RuiButton
+			rui                 "ui/loba_black_market_item_square.rpak"
+
+			pin_corner_to_sibling       CENTER
+			pin_to_sibling              BlackMarketWidget
+			pin_to_sibling_corner       CENTER
+			xpos			-61
+			ypos			-155
+			wide			110
+			tall			110
+		}
+		BlackMarketWidget_Player0_ItemButton1
+		{
+			ControlName			RuiButton
+			rui                 "ui/loba_black_market_item_square.rpak"
+
+			pin_corner_to_sibling       TOP_LEFT
+			pin_to_sibling              BlackMarketWidget_Player0_ItemButton0
+			pin_to_sibling_corner       TOP_RIGHT
+			xpos			14
+			ypos			0
+			wide			110
+			tall			110
+		}
+		BlackMarketWidget_Player1_ItemButton0
+		{
+			ControlName			RuiButton
+			rui                 "ui/loba_black_market_item_square.rpak"
+
+			pin_corner_to_sibling       CENTER
+			pin_to_sibling              BlackMarketWidget
+			pin_to_sibling_corner       CENTER
+			xpos			-141
+			ypos			156//216
+			wide			60
+			tall			60
+		}
+		BlackMarketWidget_Player1_ItemButton1
+		{
+			ControlName			RuiButton
+			rui                 "ui/loba_black_market_item_square.rpak"
+
+			pin_corner_to_sibling       TOP_LEFT
+			pin_to_sibling              BlackMarketWidget_Player1_ItemButton0
+			pin_to_sibling_corner       TOP_RIGHT
+			xpos			7
+			ypos			0
+			wide			60
+			tall			60
+		}
+		BlackMarketWidget_Player2_ItemButton0
+		{
+			ControlName			RuiButton
+			rui                 "ui/loba_black_market_item_square.rpak"
+
+			pin_corner_to_sibling       CENTER
+			pin_to_sibling              BlackMarketWidget
+			pin_to_sibling_corner       CENTER
+			xpos			159
+			ypos			156//216
+			wide			60
+			tall			60
+		}
+		BlackMarketWidget_Player2_ItemButton1
+		{
+			ControlName			RuiButton
+			rui                 "ui/loba_black_market_item_square.rpak"
+
+			pin_corner_to_sibling       TOP_LEFT
+			pin_to_sibling              BlackMarketWidget_Player2_ItemButton0
+			pin_to_sibling_corner       TOP_RIGHT
+			xpos			7
+			ypos			0
+			wide			60
+			tall			60
+		}
+
+		QuickSwapHeader
+		{
+			ControlName                 RuiPanel
+			rui                         "ui/survival_container_header.rpak"
+			xpos                        0
+			ypos                        8
+			zpos                        20
+			wide                        300
+			tall                        64
+			visible                     0
+
+			pin_to_sibling              QuickSwapGrid
+			pin_corner_to_sibling       BOTTOM
+			pin_to_sibling_corner       TOP
+		}
+
+		QuickSwapBacker
+		{
+			ControlName                 RuiPanel
+			xpos                        0
+			ypos                        0
+			zpos                        20
+			wide                        500
+			tall                        665
+			visible                     0
+			enabled                     1
+			scaleImage                  1
+			rui                         "ui/screen_blur.rpak"
+
+			ruiArgs
+			{
+				tintColor                   "0.1 0.1 0.1 1"
+			}
+
+			pin_to_sibling              QuickSwapHeader
+			pin_corner_to_sibling       TOP
+			pin_to_sibling_corner       BOTTOM
+		}
+
+		QuickSwapGrid
+		{
+			ControlName                 CNestedPanel
+			zpos                        21
+			xpos                        104
+			ypos                        0
+			wide                        800
+			tall                        200
+			visible                     0
+			tabPosition                 1
+			controlSettingsFile         "resource/ui/menus/panels/survival_quick_inventory_grid.res"
+
+			pin_to_sibling              ListPanel
+			pin_corner_to_sibling       TOP_LEFT
+			pin_to_sibling_corner       TOP_RIGHT
+		}
+
+		SwapIcon
+		{
+			ControlName                 RuiPanel
+			rui                         "ui/basic_image.rpak"
+			xpos                        8
+			ypos                        0
+			zpos                        20
+			wide                        48
+			tall                        48
+			visible                     0
+
+			pin_to_sibling              QuickSwapGrid
+			pin_corner_to_sibling       RIGHT
+			pin_to_sibling_corner       LEFT
+		}
+
+        PlayerInfo
+        {
+            ControlName				RuiPanel
+            ypos                    31
+			ypos_nx_handheld        -40			[$NX || $NX_UI_PC]
+            xpos                    32
+			xpos_nx_handheld        50			[$NX || $NX_UI_PC]
+            wide					468
+            tall					91
+            visible					1
             enabled 				1
             scaleImage				1
-            image					"vgui/HUD/white"
-            drawColor				"0 0 0 1"
+            rui                     "ui/inventory_player_info.rpak"
             zpos                    20
+
+            pin_to_sibling			Backer
+            pin_corner_to_sibling	BOTTOM_LEFT
+            pin_to_sibling_corner	BOTTOM_RIGHT
         }
 
-        GroundHeader
-        {
-            ControlName				RuiPanel
-            rui						"ui/survival_container_header.rpak"
-            zpos                    2
-            xpos					12
-            ypos					0
-            wide					548
-            tall					64
-            visible					1
+        TeammateInfo1
+            {
+        	    ControlName				RuiPanel
 
-            pin_to_sibling			ListPanel
-            pin_corner_to_sibling	BOTTOM_RIGHT
-            pin_to_sibling_corner	TOP_RIGHT
-        }
+        	    scriptID                1
 
-        WeaponSwapButton
-        {
-            ControlName			RuiButton
-            rui						"ui/survival_equipment_button.rpak"
-            xpos			10
-            ypos			0
-            wide			96
-            tall			96
-            visible			1
-            scaleImage		1
-            drawColor		"255 255 255 255"
-			activeInputExclusivePaint	keyboard
+                ypos                    50
+                ypos_nx_handheld        35			[$NX || $NX_UI_PC]
+                xpos                    0
+                wide					440
+                wide_nx_handheld		704			[$NX || $NX_UI_PC]
+                tall					50
+                tall_nx_handheld		80			[$NX || $NX_UI_PC]
+                visible					1
+                enabled 				1
+                scaleImage				1
+                rui                     "ui/unitframe_survival_inventory.rpak"
+                zpos                    20
 
-            zpos			1
+                pin_to_sibling			PlayerInfo
+                pin_corner_to_sibling	BOTTOM_LEFT
+                pin_to_sibling_corner	TOP_LEFT
+            }
 
-			pin_to_sibling			GroundHeader
-			pin_corner_to_sibling	TOP_LEFT
-			pin_to_sibling_corner	TOP_RIGHT
-        }
+            TeammateInfo0
+            {
+        	    ControlName				RuiPanel
 
-		Cover
-		{
-			ControlName				RuiPanel
-			xpos					0
-			ypos					0
-            wide					548
-            tall					900
-			visible					1
-			enabled 				1
-			scaleImage				1
-			rui                     "ui/screen_blur.rpak"
-			drawColor				"0 0 0 250"
+        	    scriptID                0
 
-			pin_to_sibling			GroundHeader
-			pin_corner_to_sibling	TOP_LEFT
-			pin_to_sibling_corner	TOP_LEFT
-		}
+                ypos                    10
+                ypos_nx_handheld        35			[$NX || $NX_UI_PC]
+                xpos                    0
+                wide					440
+                wide_nx_handheld		704			[$NX || $NX_UI_PC]
+                tall					50
+                tall_nx_handheld		80			[$NX || $NX_UI_PC]
+                visible					1
+                enabled 				1
+                scaleImage				1
+                rui                     "ui/unitframe_survival_inventory.rpak"
+                zpos                    20
 
-		CoverColor
-		{
-            ControlName				ImagePanel
-
-            xpos					0
-            ypos					0
-            wide					548
-            tall					900
-            visible					1
-            enabled 				1
-            scaleImage				1
-            image					"vgui/HUD/white"
-            drawColor				"0 0 0 200"
-            zpos                    1
-
-			pin_to_sibling			GroundHeader
-			pin_corner_to_sibling	TOP_LEFT
-			pin_to_sibling_corner	TOP_LEFT
-		}
-
-        ListPanel
-        {
-            ControlName				CNestedPanel
-            zpos                    2
-            xpos                    -300
-            ypos                    20
-            wide					500
-            tall					800
-            visible					1
-            tabPosition				1
-            controlSettingsFile		"Resource/UI/menus/panels/survival_inventory_list.res"
-
-            pin_to_sibling			Vignette
-            pin_corner_to_sibling	RIGHT
-            pin_to_sibling_corner	CENTER
-        }
-
-        QuickSwapHeader
-        {
-            ControlName				RuiPanel
-            rui						"ui/survival_container_header.rpak"
-            xpos					2
-            ypos					0
-            wide					300
-            tall					64
-            visible					0
-
-            pin_to_sibling			QuickSwapGrid
-            pin_corner_to_sibling	BOTTOM
-            pin_to_sibling_corner	TOP
-        }
-
-        QuickSwapBacker
-        {
-			ControlName				RuiPanel
-			xpos					0
-			ypos					0
-            wide					500
-            tall					679
-			visible					0
-			enabled 				1
-			scaleImage				1
-			rui                     "ui/screen_blur.rpak"
-			drawColor				"0 0 0 255"
-
-
-            pin_to_sibling			QuickSwapHeader
-            pin_corner_to_sibling	TOP
-            pin_to_sibling_corner	BOTTOM
-        }
-
-        QuickSwapGrid
-        {
-            ControlName				CNestedPanel
-            zpos                    3
-            xpos					80
-            ypos                    0
-            wide					800
-            tall					200
-            visible					0
-            tabPosition				1
-            controlSettingsFile		"resource/ui/menus/panels/survival_quick_inventory_grid.res"
-
-            pin_to_sibling			ListPanel
-            pin_corner_to_sibling	TOP_LEFT
-            pin_to_sibling_corner	TOP_RIGHT
-        }
-
-        SwapIcon
-        {
-            ControlName				RuiPanel
-            rui                     "ui/basic_image.rpak"
-            xpos					4
-            ypos					0
-            wide					48
-            tall					48
-            visible					0
-
-            pin_to_sibling			QuickSwapGrid
-            pin_corner_to_sibling	RIGHT
-            pin_to_sibling_corner	LEFT
-        }
-
-
-        ScrollBar
-        {
-            ControlName				RuiButton
-            zpos                    1
-            xpos					12
-            ypos					0
-            wide					24
-            tall					800
-            visible					0
-            enabled 				1
-            rui						"ui/survival_scroll_bar.rpak"
-            zpos                    1
-
-            pin_to_sibling			ListPanel
-            pin_corner_to_sibling	TOP_RIGHT
-            pin_to_sibling_corner	TOP_LEFT
-        }
-
+                pin_to_sibling			TeammateInfo1
+                pin_corner_to_sibling	BOTTOM_LEFT
+                pin_to_sibling_corner	TOP_LEFT
+            }
 // FOOTER //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		FooterButtons
 		{
-			ControlName				CNestedPanel
-			zpos					20
-			wide					f0
-			tall					36
-			ypos 					0
-			xpos                    24
-			visible					1
-			controlSettingsFile		"resource/ui/menus/panels/footer_buttons.res"
+			ControlName                 CNestedPanel
+			controlSettingsFile         "resource/ui/menus/panels/footer_buttons.res"
 
-			pin_to_sibling			ListPanel
-			pin_corner_to_sibling	TOP_RIGHT
-			pin_to_sibling_corner	BOTTOM_RIGHT
+			pin_corner_to_sibling       BOTTOM_RIGHT
+			pin_to_sibling              Backer
+			pin_to_sibling_corner       BOTTOM_RIGHT
+			xpos                        24
+			ypos                        -3
+			wide                        f0
+			tall                        36
+			tall_nx_handheld            54		[$NX || $NX_UI_PC]
+			zpos                        20
+
+			visible                     1
+
 		}
 
-        FooterBacker
-        {
-			ControlName				ImagePanel
-			xpos					12
-			ypos					0
-            wide					550
-            tall					36
-			visible					1
-			enabled 				1
-			scaleImage				1
-			image					"vgui/HUD/white"
-			drawColor				"100 100 100 150"
+		HoldToUseElem
+		{
+			ControlName                 RuiPanel
+			rui                         "ui/extended_use_hint_menu.rpak"
 
+			wide                        64
+			tall                        64
+			zpos                        2000
 
-            pin_to_sibling			ListPanel
-			pin_corner_to_sibling	TOP_RIGHT
-			pin_to_sibling_corner	BOTTOM_RIGHT
-        }
-
-        HoldToUseElem
-        {
-            ControlName				RuiPanel
-            wide					64
-            tall					64
-            visible					0
-            enabled 				1
-            scaleImage				1
-            rui                     "ui/extended_use_hint_menu.rpak"
-            zpos                    2000
-        }
+			visible                     0
+		}
 	}
 }
+
+

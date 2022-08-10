@@ -19,7 +19,7 @@ struct LootCeremonyLightData
 
 struct LootCeremonyLightingRigData
 {
-	string                    lightingRigAnimSeq
+	string                   lightingRigAnimSeq
 	LootCeremonyLightData&[4] lightDataList
 }
 
@@ -33,8 +33,8 @@ void function Init_LOOT_TYPE_LIGHTING_RIG_DATA()
 		rigData.lightingRigAnimSeq = "loot_ceremony_light_weapon"
 
 		LootCeremonyLightData ld1
-		ld1.col = <0.9, 0.9, 1.0>
-		ld1.brightness = 0.2
+		ld1.col = <0.8, 0.9, 1.0>
+		ld1.brightness = 0.1
 		ld1.specularIntensity = 1.0
 		ld1.distance = 150.0
 		ld1.innerCone = 5.0
@@ -51,8 +51,8 @@ void function Init_LOOT_TYPE_LIGHTING_RIG_DATA()
 		rigData.lightingRigAnimSeq = "loot_ceremony_light_character"
 
 		LootCeremonyLightData ld1
-		ld1.col = <0.9, 0.9, 1.0>
-		ld1.brightness = 0.2
+		ld1.col = <0.8, 0.9, 1.0>
+		ld1.brightness = 0.1
 		ld1.specularIntensity = 1.0
 		ld1.distance = 150.0
 		ld1.innerCone = 5.0
@@ -69,8 +69,8 @@ void function Init_LOOT_TYPE_LIGHTING_RIG_DATA()
 		rigData.lightingRigAnimSeq = "loot_ceremony_light_character"
 
 		LootCeremonyLightData ld1
-		ld1.col = <0.9, 0.9, 1.0>
-		ld1.brightness = 0.2
+		ld1.col = <0.8, 0.9, 1.0>
+		ld1.brightness = 0.1
 		ld1.specularIntensity = 1.0
 		ld1.distance = 150.0
 		ld1.innerCone = 5.0
@@ -84,6 +84,24 @@ void function Init_LOOT_TYPE_LIGHTING_RIG_DATA()
 	{
 		LootCeremonyLightingRigData rigData
 		LOOT_TYPE_LIGHTING_RIG_DATA[eItemType.account_currency_bundle] <- rigData
+		rigData.lightingRigAnimSeq = "loot_ceremony_light_character"
+
+		LootCeremonyLightData ld1
+		ld1.col = <0.9, 0.9, 1.0>
+		ld1.brightness = 0.5
+		ld1.specularIntensity = 1.0
+		ld1.distance = 150.0
+		ld1.innerCone = 5.0
+		ld1.outerCone = 15.0
+		ld1.halfBrightFrac = 0.25
+		ld1.pbrFalloff = true
+		ld1.castsShadows = true
+		rigData.lightDataList[0] = ld1
+	}
+
+	{
+		LootCeremonyLightingRigData rigData
+		LOOT_TYPE_LIGHTING_RIG_DATA[eItemType.voucher] <- rigData
 		rigData.lightingRigAnimSeq = "loot_ceremony_light_character"
 
 		LootCeremonyLightData ld1
@@ -145,7 +163,7 @@ void function InitLootCeremonyLightingRigs( table< string, table<string, vector>
 					break
 
 				case "FX_C_EYE":
-					location = "right" //
+					location = "right"                                                                                                                          
 					break
 
 				case "FX_R_EYE":
@@ -162,6 +180,8 @@ void function InitLootCeremonyLightingRigs( table< string, table<string, vector>
 				break
 			entity light = lights[0]
 			light.SetTweakLightRealtimeShadows( false )
+			light.SetTweakLightUpdateShadowsEveryFrame( false )
+			light.SetTweakLightDistance( 2.0 )                                                 
 			spot.tweakLights.append( light )
 		}
 	}
@@ -218,7 +238,7 @@ void function CeremonySpotSceneThread( LootCeremonySpotInfo spot, int itemType )
 		{
 			tweakLight.SetTweakLightRealtimeShadows( false )
 			tweakLight.SetTweakLightUpdateShadowsEveryFrame( false )
-			tweakLight.SetTweakLightDistance( 2.0 ) //
+			tweakLight.SetTweakLightDistance( 2.0 )                                                 
 		}
 	} )
 
@@ -268,7 +288,7 @@ void function DoUpdateSpot( LootCeremonySpotInfo spot, int itemType, entity ligh
 		tweakLight.SetTweakLightPBRFalloff( lightData.pbrFalloff )
 		tweakLight.SetTweakLightRealtimeShadows( lightData.castsShadows )
 		tweakLight.SetTweakLightUpdateShadowsEveryFrame( lightData.castsShadows )
-		//
+		                                               
 	}
 }
 

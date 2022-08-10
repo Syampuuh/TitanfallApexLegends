@@ -1,5 +1,10 @@
 #base "_base_handgun.txt"
-#base "_base_mags_heavy.txt"
+
+                       
+	#base "_base_mags_sniper.txt"
+     
+                             
+      
 
 WeaponData
 {
@@ -9,7 +14,11 @@ WeaponData
 	"description" 									"#WPN_WINGMAN_DESC"
 	"longdesc" 										"#WPN_WINGMAN_LONGDESC"
 
-	"ammo_pool_type"								"highcal"
+                       
+	"ammo_pool_type"								"sniper"
+     
+                                  
+      
 
 	"menu_icon"										"rui/weapon_icons/r5/weapon_wingman"
 	"hud_icon"										"rui/weapon_icons/r5/weapon_wingman"
@@ -17,7 +26,13 @@ WeaponData
 	"fire_mode"   									"automatic"
 	"is_semi_auto"									"1"
 
+	"weapon_type_flags"								"WPT_PRIMARY"
 	"damage_flags"									"DF_BULLET | DF_KNOCK_BACK | DF_DISMEMBERMENT"
+
+	// Callbacks
+	"OnWeaponActivate"                              "OnWeaponActivate_weapon_wingman"
+	"OnWeaponDeactivate"                            "OnWeaponDeactivate_weapon_wingman"
+	"OnWeaponReload"                                "OnWeaponReload_weapon_wingman"
 
 	// Menu
 	"menu_category"                                 "pistol"
@@ -57,16 +72,24 @@ WeaponData
 
 	"damage_type" 									"bullet"
 
-	"ammo_clip_size"   								"4"
+	"ammo_clip_size"   								"6"
 
 	"dof_zoom_focusArea_horizontal"					"0.06"
 	"dof_zoom_focusArea_top"						"0.070"
 	"dof_zoom_focusArea_bottom"						"-0.011"
 
-    "ammo_default_total"							"160"
-    "ammo_stockpile_max"							"160"
-    "ammo_no_remove_from_stockpile"					"1"
     "ammo_min_to_fire"								"1"
+
+    "ammo_default_total"			"0"
+    "ammo_stockpile_max"			"20"
+    "ammo_no_remove_from_stockpile"	"0"
+
+    "low_ammo_fraction" 			"0.4"
+
+    "uses_ammo_pool"				"1"
+
+	// PS5 Adaptive Triggers
+	"custom_trig_str"								1
 
     // Damage - When Used by Players
     "damage_near_value"   							"45"
@@ -77,13 +100,11 @@ WeaponData
     "damage_very_far_value_titanarmor" 				"45"
     "damage_rodeo" 									"350"
 
-    "damage_headshot_scale"                         "2.0"
+    "damage_headshot_scale"                         "2.15"
 
     "damage_near_distance"							"800"
     "damage_far_distance" 							"1300"
     "damage_very_far_distance"						"1800"
-
-    "damage_heavyarmor_nontitan_scale"				"0.35"
 
 	// NPC
 	// Damage - When Used by NPCs
@@ -123,10 +144,12 @@ WeaponData
 	"reloadempty_time"								"2.1"
 	"reloadempty_time_late1"						"1.75"
 	"reloadempty_time_late2"						"0.65"
-	"deploy_time" 									"0.45"
-	"holster_time"									"0.4"
-	"raise_time"  									"0.35"
-	"lower_time"  									"0.3"
+	"deploy_time" 									"0.4"   //"0.45" Quickdraw buff integration after removal. 10% faster handling from base
+	"holster_time"									"0.36"  //"0.4"
+	"raise_time"  									"0.315" //"0.35"
+	"lower_time"  									"0.27"  //"0.3"
+    "zoom_time_in"					            	"0.18"
+    "zoom_time_out"   				            	"0.16"
 
 	// Projectile
 	"projectile_launch_speed"                  		"18000"
@@ -191,7 +214,7 @@ WeaponData
 	"spread_stand_hip" 								"2.4"
 	"spread_stand_hip_run" 							"3.0"
 	"spread_stand_hip_sprint"						"4.0"
-	"spread_crouch_hip"								"0.5"
+	"spread_crouch_hip"								"1.5"
 	"spread_air_hip"	   							"6.0"
 
 	"spread_kick_on_fire_stand_hip"					"2.5"
@@ -209,8 +232,12 @@ WeaponData
 	//setting to "0" so it's tunable in Bakery
 	"sprintcycle_time"								"0"
 	"deployfirst_time"								"1.45"
-	"activitymodifier"								"pistol"
+	"activitymodifier3p"							"pistol"
 	"holster_type"									"pistol"
+
+	// Sway
+    "sway_min_pitch_zoomed"  						"-0.005"  //"-0.015"
+    "sway_max_pitch_zoomed"  						"0.015"  //"0.02"
 
 
     "clip_bodygroup"						"b3wing_magazine"
@@ -221,44 +248,147 @@ WeaponData
     "clip_bodygroup_show_for_milestone_2"	"1"
     "clip_bodygroup_show_for_milestone_3"	"1"
 
+	"viewmodel_ads_rui_bottomleft_attachment"	"RUI_BL_CROSSHAIR_WINGMAN"
+	"viewmodel_ads_centerpoint_attachment"      "ADS_CENTER_SIGHT_WINGMAN"
+
+    "smart_reload_overload_ammo_required"           "2"
+
 	Mods
 	{
-	    gold
-	    {
-	    }
-
-		survival_finite_ammo
+        purple_paintball
         {
-            "ammo_default_total"			"0"
-            "ammo_stockpile_max"			"20"
-            "ammo_no_remove_from_stockpile"	"0"
+          "impact_effect_table" 				"bullet_pb_Random"
 
-            "low_ammo_fraction" 			"0.3"
+          "projectile_trail_effect_0_1p" 		"P_tracer_projectile_pb"
+          "projectile_trail_effect_0_3p" 		"P_tracer_projectile_pb"
 
-	   		"uses_ammo_pool"				"1"
+          "reload_time"						"*0.75"
+          "reload_time_late1"					"*0.75"
+          "reload_time_late2"					"*0.75"
+          "reload_time_late3"					"*0.75"
+          "reload_time_late4"					"*0.75"
+          "reload_time_late5"					"*0.75"
+          "reloadempty_time"					"*0.75"
+          "reloadempty_time_late1"			"*0.75"
+          "reloadempty_time_late2"			"*0.75"
+          "reloadempty_time_late3"			"*0.75"
+          "reloadempty_time_late4"			"*0.75"
+          "reloadempty_time_late5"			"*0.75"
+        }
+
+		gold_paintball
+        {
+          "impact_effect_table" 				"bullet_pb_Random"
+
+          "projectile_trail_effect_0_1p" 		"P_tracer_projectile_pb"
+          "projectile_trail_effect_0_3p" 		"P_tracer_projectile_pb"
+
+          "reload_time"						"*0.75"
+          "reload_time_late1"					"*0.75"
+          "reload_time_late2"					"*0.75"
+          "reload_time_late3"					"*0.75"
+          "reload_time_late4"					"*0.75"
+          "reload_time_late5"					"*0.75"
+          "reloadempty_time"					"*0.75"
+          "reloadempty_time_late1"			"*0.75"
+          "reloadempty_time_late2"			"*0.75"
+          "reloadempty_time_late3"			"*0.75"
+          "reloadempty_time_late4"			"*0.75"
+          "reloadempty_time_late5"			"*0.75"
+        }
+
+        hopup_smart_reload
+        {
+        }
+
+        fast_reload_mod
+        {
+            "reload_time" 									"1.4"
+        }
+
+        overloaded_ammo
+        {
+            "ammo_clip_size"   							"++2"
         }
 
         hopup_headshot_dmg
         {
-        	"damage_headshot_scale"			"2.25"
-        	"projectile_trail_effect_0"     "P_tracer_proj_sniper_piercer"
+        	"damage_headshot_scale"			"2.5"
+        	"projectile_trail_effect_0_1p"     "P_tracer_proj_sniper_piercer"
+        	"projectile_trail_effect_0_3p"     "P_tracer_proj_sniper_piercer"
         	"fire_sound_1_player_1p"		"weapon_wingman_fire_skull_1p"
 			"fire_sound_1_player_3p"		"weapon_wingman_fire_skull_3p"
 			"fire_sound_1_npc"				"weapon_wingman_fire_skull_3p"
         }
+                        
+                        
+   
+                                                                 
+                                                                                  
+   
 
-        highcal_mag_l1
+                          
+         
+                                              
+
+                               
+
+                                     
+                                                
+                                           
+                                             
+                                         
+
+                                    
+                                 
+                                     
+                                          
+                                          
+                                              
+                                
+
+                                          
+                                                   
+
+                                                        
+   
+      
+                       
+        sniper_mag_l1
 		{
-			"ammo_clip_size"   							"6"
+			"ammo_clip_size"   							"7"
 		}
-		highcal_mag_l2
+		sniper_mag_l2
 		{
 			"ammo_clip_size"   							"8"
 		}
-		highcal_mag_l3
+		sniper_mag_l3
 		{
-			"ammo_clip_size"   							"10"
+			"ammo_clip_size"   							"9"
 		}
+        sniper_mag_l4
+        {
+            "ammo_clip_size"   							"9"
+        }
+     
+                      
+   
+                                
+   
+                
+   
+                                
+   
+                
+   
+                                
+   
+                      
+         
+                                         
+         
+      
+
 
 		legendary1
 		{
@@ -269,6 +399,20 @@ WeaponData
 			//"dof_zoom_nearDepthStart"						"4.750"
 			//"dof_zoom_nearDepthEnd"							"11.000"
 		}
+
+        hopup_quickdraw_holster
+        {
+            "zoom_time_in"						"*0.7"
+            "zoom_time_out"   					"*0.7"
+
+            "deploy_time" 						"*0.7"
+            "holster_time"						"*0.7"
+            "raise_time" 						"*0.75"
+            "lower_time"						"*0.75"
+
+            "spread_stand_hip"					"*0.75"
+            "spread_stand_hip_run"				"*0.9"
+        }
 	}
 
 	"ui1_enable"		"1"
@@ -280,6 +424,7 @@ WeaponData
 		Args
 		{
 			vis							player_zoomfrac
+			centerOffset				weapon_ads_center_offset
 		}
 	}
 
@@ -321,6 +466,7 @@ WeaponData
 			Args
 			{
 				isFiring				weapon_is_firing
+				playerFov             player_fov
 			}
 		}
 	}

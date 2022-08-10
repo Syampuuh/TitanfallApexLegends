@@ -9,9 +9,9 @@ global function ArcCannon_ChargeBegin
 global function ArcCannon_ChargeEnd
 global function FireArcCannon
 global function ArcCannon_HideIdleEffect
-#if(false)
-
-
+#if SERVER
+	                                     
+	                                     
 #endif
 global function GetArcCannonChargeFraction
 
@@ -19,35 +19,35 @@ global function IsEntANeutralMegaTurret
 global function CreateArcCannonBeam
 
 
-//
-global const DEFAULT_ARC_CANNON_FOVDOT			= 0.98		//
-global const DEFAULT_ARC_CANNON_FOVDOT_MISSILE	= 0.95		//
-global const ARC_CANNON_RANGE_CHAIN				= 400		//
-global const ARC_CANNON_TITAN_RANGE_CHAIN		= 900		//
-global const ARC_CANNON_CHAIN_COUNT_MIN			= 5			//
-global const ARC_CANNON_CHAIN_COUNT_MAX			= 5			//
-global const ARC_CANNON_CHAIN_COUNT_NPC			= 2			//
-global const ARC_CANNON_FORK_COUNT_MAX			= 1			//
+                 
+global const DEFAULT_ARC_CANNON_FOVDOT			= 0.98		                                                                      
+global const DEFAULT_ARC_CANNON_FOVDOT_MISSILE	= 0.95		                                                                                                                     
+global const ARC_CANNON_RANGE_CHAIN				= 400		                                                     
+global const ARC_CANNON_TITAN_RANGE_CHAIN		= 900		                                                     
+global const ARC_CANNON_CHAIN_COUNT_MIN			= 5			                                    
+global const ARC_CANNON_CHAIN_COUNT_MAX			= 5			                                      
+global const ARC_CANNON_CHAIN_COUNT_NPC			= 2			                                                
+global const ARC_CANNON_FORK_COUNT_MAX			= 1			                                                                   
 global const ARC_CANNON_FORK_DELAY				= 0.1
 
 global const ARC_CANNON_RANGE_CHAIN_BURN		= 400
 global const ARC_CANNON_TITAN_RANGE_CHAIN_BURN	= 900
-global const ARC_CANNON_CHAIN_COUNT_MIN_BURN	= 100		//
-global const ARC_CANNON_CHAIN_COUNT_MAX_BURN	= 100		//
-global const ARC_CANNON_CHAIN_COUNT_NPC_BURN	= 10		//
-global const ARC_CANNON_FORK_COUNT_MAX_BURN		= 10		//
+global const ARC_CANNON_CHAIN_COUNT_MIN_BURN	= 100		                                    
+global const ARC_CANNON_CHAIN_COUNT_MAX_BURN	= 100		                                      
+global const ARC_CANNON_CHAIN_COUNT_NPC_BURN	= 10		                                                
+global const ARC_CANNON_FORK_COUNT_MAX_BURN		= 10		                                                                   
 global const ARC_CANNON_BEAM_LIFETIME_BURN		= 1.0
 
-//
-global const ARC_CANNON_BOLT_RADIUS_MIN 		= 32		//
-global const ARC_CANNON_BOLT_RADIUS_MAX 		= 640		//
-global const ARC_CANNON_BOLT_WIDTH_MIN 			= 1			//
-global const ARC_CANNON_BOLT_WIDTH_MAX 			= 26		//
-global const ARC_CANNON_BOLT_WIDTH_NPC			= 8			//
+                  
+global const ARC_CANNON_BOLT_RADIUS_MIN 		= 32		                                                                                
+global const ARC_CANNON_BOLT_RADIUS_MAX 		= 640		                                                                                  
+global const ARC_CANNON_BOLT_WIDTH_MIN 			= 1			                          
+global const ARC_CANNON_BOLT_WIDTH_MAX 			= 26		                            
+global const ARC_CANNON_BOLT_WIDTH_NPC			= 8			                              
 global const ARC_CANNON_BEAM_COLOR				= "150 190 255"
 global const ARC_CANNON_BEAM_LIFETIME			= 0.75
 
-//
+                 
 global const ARC_CANNON_TITAN_SCREEN_SFX 		= "Null_Remove_SoundHook"
 global const ARC_CANNON_PILOT_SCREEN_SFX 		= "Null_Remove_SoundHook"
 global const ARC_CANNON_EMP_DURATION_MIN 		= 0.1
@@ -58,16 +58,16 @@ global const ARC_CANNON_SCREEN_EFFECTS_MAX 		= 0.02
 global const ARC_CANNON_SCREEN_THRESHOLD		= 0.3385
 global const ARC_CANNON_3RD_PERSON_EFFECT_MIN_DURATION = 0.2
 
-//
-global const ARC_CANNON_DAMAGE_FALLOFF_SCALER		= 0.75		//
-global const ARC_CANNON_DAMAGE_CHARGE_RATIO			= 0.85		//
-global const ARC_CANNON_DAMAGE_CHARGE_RATIO_BURN	= 0.676		//
+         
+global const ARC_CANNON_DAMAGE_FALLOFF_SCALER		= 0.75		                                                                                                                                                                                                                  
+global const ARC_CANNON_DAMAGE_CHARGE_RATIO			= 0.85		                                                     
+global const ARC_CANNON_DAMAGE_CHARGE_RATIO_BURN	= 0.676		                                                     
 global const ARC_CANNON_CAPACITOR_CHARGE_RATIO		= 1.0
 
-//
-global const ARC_CANNON_TARGETS_MISSILES 			= 1			//
+          
+global const ARC_CANNON_TARGETS_MISSILES 			= 1			                                                                                       
 
-//
+      
 global const OVERCHARGE_MAX_SHIELD_DECAY       		= 0.2
 global const OVERCHARGE_SHIELD_DECAY_MULTIPLIER 	= 0.04
 global const OVERCHARGE_BONUS_CHARGE_FRACTION		= 0.05
@@ -110,7 +110,7 @@ global const ArcCannonTargetClassnames = {
 
 struct {
 	array<string> missileCheckTargetnames = [
-		//
+		               
 		"Arc Ball"
 	]
 } file
@@ -123,7 +123,7 @@ void function ArcCannon_Init()
 	PrecacheParticleSystem( ARC_CANNON_BEAM_EFFECT_MOD )
 	PrecacheImpactEffectTable( ARC_CANNON_FX_TABLE )
 
-	#if(CLIENT)
+	#if CLIENT
 		AddDestroyCallback( "mp_titanweapon_arc_cannon", ClientDestroyCallback_ArcCannon_Stop )
 	#else
 		level._arcCannonTargetsArrayID <- CreateScriptManagedEntArray()
@@ -164,7 +164,7 @@ void function ArcCannon_Stop( entity weapon, entity player = null )
 
 void function ArcCannon_ChargeBegin( entity weapon )
 {
-	#if(CLIENT)
+	#if CLIENT
 		if ( !weapon.ShouldPredictProjectiles() )
 			return
 
@@ -176,12 +176,12 @@ void function ArcCannon_ChargeBegin( entity weapon )
 
 void function ArcCannon_ChargeEnd( entity weapon, entity player = null )
 {
-	#if(false)
+	#if SERVER
+		                        
+			                                            
+	#endif
 
-
-#endif
-
-	#if(CLIENT)
+	#if CLIENT
 		if ( weapon.GetWeaponOwner() == GetLocalViewPlayer() )
 		{
 			entity weaponOwner
@@ -198,7 +198,7 @@ void function ArcCannon_ChargeEnd( entity weapon, entity player = null )
 
 int function FireArcCannon( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
-	float baseCharge = GetWeaponChargeFrac( weapon ) //
+	float baseCharge = GetWeaponChargeFrac( weapon )                                        
 	float charge = clamp( baseCharge * ( 1 / GetArcCannonChargeFraction( weapon ) ), 0.0, 1.0 )
 	float newVolume = GraphCapped( charge, 0.25, 1.0, 0.0, 1.0 )
 
@@ -211,7 +211,7 @@ int function FireArcCannon( entity weapon, WeaponPrimaryAttackParams attackParam
 	Assert( attachmentIndex >= 0 )
 	vector muzzleOrigin = weapon.GetAttachmentOrigin( attachmentIndex )
 
-	//
+	                                                 
 
 	table firstTargetInfo = GetFirstArcCannonTarget( weapon, attackParams )
 	if ( !IsValid( firstTargetInfo.target ) )
@@ -227,7 +227,7 @@ table function GetFirstArcCannonTarget( entity weapon, WeaponPrimaryAttackParams
 	entity owner 				= weapon.GetWeaponOwner()
 	float coneHeight 			= weapon.GetMaxDamageFarDist()
 
-	float angleToAxis 			= 2.0 //
+	float angleToAxis 			= 2.0                                                                                      
 	array<entity> ignoredEntities = [ owner, weapon ]
 	int traceMask 				= TRACE_MASK_SHOT
 	int flags					= VIS_CONE_ENTS_TEST_HITBOXES
@@ -240,8 +240,8 @@ table function GetFirstArcCannonTarget( entity weapon, WeaponPrimaryAttackParams
 
 	int ownerTeam = owner.GetTeam()
 
-	//
-	//
+	                                                                                    
+	                                                                                                        
 	table firstTargetInfo = {}
 	firstTargetInfo.target <- null
 	firstTargetInfo.hitLocation <- null
@@ -250,7 +250,7 @@ table function GetFirstArcCannonTarget( entity weapon, WeaponPrimaryAttackParams
 	{
 		bool missileCheck = i == 0
 		float coneAngle = angleToAxis
-		if ( missileCheck && owner.IsPlayer() ) //
+		if ( missileCheck && owner.IsPlayer() )                                         
 			coneAngle *= 8.0
 
 		coneAngle = clamp( coneAngle, 0.1, 89.9 )
@@ -294,7 +294,7 @@ table function GetFirstArcCannonTarget( entity weapon, WeaponPrimaryAttackParams
 			break
 		}
 	}
-	//
+	                           
 	WeaponFireBulletSpecialParams fireBulletParams
 	fireBulletParams.pos = attackParams.pos
 	fireBulletParams.dir = attackParams.dir
@@ -326,31 +326,31 @@ void function FireArcNoTargets( entity weapon, WeaponPrimaryAttackParams attackP
 	if ( vortexHit )
 	{
 		expect VortexBulletHit( vortexHit )
-		#if(false)
-
-
-
-
-//
-
-
-
-
-//
-
-//
-
-
-#endif
+		#if SERVER
+			                                                       
+			                                                    
+			                                                                                                                         
+			 
+				                          
+				                                                   
+			 
+			                                              
+			 
+				                                                                           
+				                                                                           
+				                                                                                                                              
+				                                                            
+			 
+		#endif
 		beamEnd = vortexHit.hitPos
 	}
 
 	float radius = Graph( chargeFrac, 0, 1, ARC_CANNON_BOLT_RADIUS_MIN, ARC_CANNON_BOLT_RADIUS_MAX )
 	thread CreateArcCannonBeam( weapon, null, muzzleOrigin, beamEnd, player, ARC_CANNON_BEAM_LIFETIME, radius, 2, true )
 
-	#if(false)
-
-#endif
+	#if SERVER
+		                                                                                           
+	#endif
 }
 
 void function FireArcWithTargets( entity weapon, table firstTargetInfo, WeaponPrimaryAttackParams attackParams, vector muzzleOrigin )
@@ -419,352 +419,352 @@ void function ZapTargetRecursive( entity target, table zapInfo, vector beamStart
 
 	waitthread ZapTarget( zapInfo, target, beamStartPos, beamEndPos, chainNum )
 
-	//
-	#if(false)
+	                                           
+	#if SERVER
+		                                 
+			      
 
+		                                                                                         
 
+		                                        
+			                                       
 
+		                                                            
+		                                                                                    
+		                                              
+		 
+			                          
+			                                                  
+				             
+			                                            
+			                                                                                
+		 
 
-
-
-//
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-//
-//
-
-#endif
+		                                                                                                 
+		 
+			               
+			                      
+			  	                                                                                           
+			        
+		 
+	#endif
 }
 
 void function ZapTarget( table zapInfo, entity target, vector beamStartPos, vector beamEndPos, int chainNum = 1 )
 {
-	//
+	                                                                 
 
 	bool firstBeam = ( chainNum == 1 )
-	#if(false)
-
-
-
-
-#endif
+	#if SERVER
+		                
+		 
+			                                                                                                                       
+		 
+	#endif
 
 	thread CreateArcCannonBeam( expect entity( zapInfo.weapon ), target, beamStartPos, beamEndPos, expect entity( zapInfo.player ), ARC_CANNON_BEAM_LIFETIME, zapInfo.radius, 5, firstBeam )
 
-	#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-//
-//
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-#endif //
+	#if SERVER
+		                                                           
+		                 
+			                          
+		    
+			         
+
+		                                        
+
+		                  
+		             
+		             
+
+		                                                
+		                                                  
+		                                                                     
+		                                                                       
+		                             
+		 
+			                                                
+			                                                  
+			                                                                     
+			                                                                       
+		 
+
+		                                                     
+		 
+			                           
+			                     
+
+			                                
+			 
+				                                             
+				                                                                                                                              
+				                                                                                                                      
+			 
+
+			                                                
+			 
+				                                
+				 
+					                                               
+					                                                                  
+					                                                                   
+				 
+				    
+				 
+					               
+					                                               
+				 
+			 
+			    
+			 
+				                                
+				 
+					                                               
+					                                                        
+					                                                         
+				 
+				    
+				 
+					               
+					                                              
+				 
+
+				                     
+				 
+					              	                                                    
+					              
+				 
+			 
+
+
+			                                                                                 
+			                                                                                                           
+			 
+				                                                   
+				                                               
+				                                                                                
+				                                                                              
+
+				                                                               
+				                                                                           
+			 
+			    
+			 
+				                                                           
+				                                                                                      
+			 
+			                                                      
+			                                                                       
+				                                              
+			                                                  
+
+			                                                   
+
+			                                                                                                                       
+			                                   
+			                       
+			 
+				                                                                                                                               
+
+				                                                                            
+				 
+					                                                                                                                                       
+
+					                                                                            
+					 
+						                                                                                                                              
+						                                                                            
+					 
+					                                                             
+					 
+						                                                                                                                 
+						                                                                            
+					 
+				 
+
+				                                   
+				            
+				          
+				                                                                                                                                                                                             
+				                                                     
+				                             
+				                                    
+				                                                              
+
+				                                                  
+				 
+					                                                                                          
+					 
+						                                                                               
+
+						                        
+							                                                                                
+					 
+				 
+
+				                                                       
+					                                                       
+				    
+					                                              
+
+				                                                
+				 
+					                                   
+					                       
+				 
+				    
+				 
+					                            
+					                  
+				 
+
+				                        
+				 
+					                                          
+						                                                             
+				 
+
+				                        
+					                                                                                 
+				    
+					                                                           
+
+				                                                                                                                           
+			 
+			    
+			 
+				                                                 
+				                                          
+			 
+
+			                
+			 
+				                                
+					                                 
+				                       
+			 
+		 
+	#endif          
 }
 
 
-#if(false)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-//
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//
-
-
-
-
-
-
-
-//
-
-
-
-
-//
-
-
-
-#endif //
+#if SERVER
+
+                                                                       
+ 
+	                          
+	                             
+	                        
+	          
+	 
+		                        
+			     
+		                                                                
+		                                     
+		                                   
+		                             
+		           
+	 
+ 
+
+                                                                                                      
+ 
+	                                                           
+	                          
+	                                 
+		              
+
+	                                                          
+	                                                                                                                
+	                                                   
+
+	                 
+	                                
+		                                                            
+	    
+		                                                          
+
+	                                                                  
+
+	                             
+	 
+		                                         
+		                                          
+			                                   
+		                                                                
+			                                          
+
+		                                 
+			     
+
+		                           
+			        
+
+		                     
+		 
+			                                                                                                             
+			                                  
+			                                                                    
+				        
+
+			                                             
+			                     
+				        
+		 
+
+		                                           
+			        
+
+		                                                 
+			        
+
+		                      
+			        
+
+		                                                 
+		                                   
+			        
+
+		                                               
+		                                                             
+		               
+		                                                 
+		                 
+			        
+
+		                                                                   
+		                                                                   
+
+		                                                      
+		 
+			                             
+			                              
+				                                 
+		 
+
+		                                                                                                                                                                                         
+
+		                                             
+		                               
+		 
+			                              
+			                            
+				                                                                                                                                                                                  
+		 
+
+		                               
+			        
+
+		                                         
+		                               
+			                     
+	 
+
+	                                                              
+
+	              
+ 
+#endif          
 
 bool function IsEntANeutralMegaTurret( entity ent, int playerTeam )
 {
@@ -794,8 +794,8 @@ void function ArcCannon_HideIdleEffect( entity weapon, float delay )
 		return
 
 	entity weaponOwner = weapon.GetWeaponOwner()
-	//
-	//
+	                                                                             
+	                                                         
 	if ( !IsValid( weaponOwner ) )
 		return
 
@@ -813,98 +813,98 @@ void function ArcCannon_HideIdleEffect( entity weapon, float delay )
 	}
 }
 
-#if(false)
+#if SERVER
+                                                 
+ 
+	                                                                 
+ 
 
+                                                 
+ 
+	                                                                      
+ 
 
+                                                                     
+ 
+	                                                                                                                                          
 
+	                                  
+		                                                                                                             
 
+	              
+ 
 
+                                                                                           
+ 
+	                                                              
+	                            
 
+	                 
+	            
+	                                                   
+	 
+		                                                                                   
+		                                                                  
+	 
+	    
+	 
+		                                                                         
+		                                                        
+	 
 
+	                                
+	 
+		                                                   
+		                                                         
+		                     
+			                               
+	 
 
+	                     
+ 
+#endif          
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //
-
-//
+                                                    
 void function CreateArcCannonBeam( entity weapon, entity target, vector startPos, vector endPos, entity player, float lifeDuration = ARC_CANNON_BEAM_LIFETIME, radius = 256, noiseAmplitude = 5, bool firstBeam = false )
 {
-	//
-	//
-	//
+	                            
+	   	                     
+	                            
 	if ( weapon.HasMod( "burn_mod_titan_arc_cannon" ) )
 		lifeDuration = ARC_CANNON_BEAM_LIFETIME_BURN
-	//
-	#if(CLIENT)
+	                                                                                                    
+	#if CLIENT
 		if ( firstBeam )
 			thread CreateClientArcBeam( weapon, endPos, lifeDuration )
 	#endif
 
-	#if(false)
-//
+	#if SERVER
+		                                                    
+		                                                      
+		                                                               
+		                         
+		                      
 
+		                                                       
+		                                          
 
+		                                                           
 
+		                           
+		                          
+		                             
+		                
+		 
+			                                                                                   	                     
+			                                                                                                        
+		 
+		                        
 
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
-
-
-
-
-#endif
+		                       
+		                                                  
+		                                                         
+		                                                       
+	#endif
 }
 
 asset function GetBeamEffect( entity weapon )
@@ -915,14 +915,14 @@ asset function GetBeamEffect( entity weapon )
 	return ARC_CANNON_BEAM_EFFECT
 }
 
-#if(CLIENT)
+#if CLIENT
 void function CreateClientArcBeam( entity weapon, vector endPos, float lifeDuration )
 {
 	Assert( IsClient() )
 
 	asset beamEffect = GetBeamEffect( weapon )
 
-	//
+	                      
 	string tag = "muzzle_flash"
 	if ( weapon.GetWeaponInfoFileKeyField( "client_tag_override" ) != null )
 		tag = expect string( weapon.GetWeaponInfoFileKeyField( "client_tag_override" ) )
@@ -946,7 +946,7 @@ void function ClientDestroyCallback_ArcCannon_Stop( entity ent )
 {
 	ArcCannon_Stop( ent )
 }
-#endif //
+#endif          
 
 float function GetArcCannonChargeFraction( entity weapon )
 {

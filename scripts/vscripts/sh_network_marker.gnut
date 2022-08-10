@@ -3,23 +3,23 @@ untyped
 global function NetworkMarkerShared_Init
 global function RegisterMarker
 
-#if(false)
-
-
+#if SERVER
+	                         
+	                           
 #else
 	global function AddMarkerChangeCallback
 	global function ServerCallback_UpdateMarker
 #endif
 global function NetworkMarkerIsValid
 
-//
+                                                  
 global const MARKER_TOWERDEFENSEGENERATOR = "TowerDefenseGeneratorEnt"
 
 
 
-/*
-
-*/
+                                                                                      
+							                           
+                                                                                      
 global const MARKER_ENT_CLASSNAME = "script_ref"
 global const MARKET_ENT_MARKED_NAME = "mfd_marked"
 global const MARKET_ENT_PENDING_MARKED_NAME = "mfd_pending_marked"
@@ -47,9 +47,9 @@ void function NetworkMarkerShared_Init()
 	level.NetworkMarkedEnts <- {}
 	level.MarkerRegistryIndex <- 0
 
-	#if(false)
-
-#else
+	#if SERVER
+		                                   
+	#else
 		AddCreateCallback( MARKER_ENT_CLASSNAME, __OnMarkerCreated )
 
 		level.RegisteredClientMarkers <- {}
@@ -59,66 +59,66 @@ void function NetworkMarkerShared_Init()
 	RegisterNetworkMarkers()
 }
 
-#if(false)
+#if SERVER
+	                                                  
+	 
+		                              
+		 
+			                           
+			      
+		 
 
+		                           
+	 
 
+	                                        
+	 
+		                              
+			      
 
+		                            
+	 
 
+	                                                       
+	 
+		                                   
+		                      
+		                                
+	 
 
+	                                                         
+	 
+		                    
+		                                                    
+		                           
+		                             
+		                                                              
+		                           
 
+		                      
 
+		                           
+		                       
 
+		             
+	 
 
+	                                                     
+	 
+		                                        
+		                                                    
 
+		                             
+			                                                                             
+	 
 
+	                                                            
+	 
+		                                               
+		                                                          
+	 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#else /**/
+#else             
 
 	string function GetRegisteredNameFromMarkerIndex( int index )
 	{
@@ -141,7 +141,7 @@ void function NetworkMarkerShared_Init()
 		if ( name == "" )
 			return
 
-		__AddMarkerToList( marker )	//
+		__AddMarkerToList( marker )	                                                                                                                                             
 		__UpdateMarkerOnClient( name )
 	}
 
@@ -162,22 +162,22 @@ void function NetworkMarkerShared_Init()
 	}
 #endif
 
-/**/
+            
 bool function __IsMarker( entity marker )
 {
-	#if(false)
-
-#elseif(CLIENT)
+	#if SERVER
+		                                                    
+	#elseif CLIENT
 		return marker.GetNetworkedClassName() == MARKER_ENT_CLASSNAME
 	#endif
 }
 
 void function RegisterMarker( string name )
 {
-	#if(false)
-
-
-#elseif(CLIENT)
+	#if SERVER
+		                                                                  
+		                           
+	#elseif CLIENT
 		level.RegisteredClientMarkers[ level.MarkerRegistryIndex ] <- name
 		level.MarkerRegistryIndex++
 	#endif
@@ -226,7 +226,7 @@ void function __AddMarkerToList( entity marker )
 	string name = marker.GetTargetName()
 	Assert( name != "" )
 
-	//
+	                                                        
 	if ( !__MarkerExists( name ) )
 		level.NetworkMarkedEnts[ name ] <- null
 

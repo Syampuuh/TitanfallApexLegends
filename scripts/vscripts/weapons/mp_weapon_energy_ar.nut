@@ -1,14 +1,8 @@
-global function MpWeaponEnergyAR_Init
 global function OnWeaponActivate_Energy_AR
 global function OnWeaponDeactivate_Energy_AR
-global function OnWeaponPrimaryAttack_Energy_AR
 
-#if(false)
-
-#endif
-
-
-//
+                                          
+   	                                                                                                          
 const string HACK_FLASH_FX_REF_1 = $"P_havok_leg_orng_lvl1"
 const string HACK_FLASH_FX_REF_2 = $"P_havok_leg_orng_lvl2"
 const string HACK_FLASH_FX_REF_3 = $"P_havok_leg_orng_lvl3"
@@ -67,73 +61,19 @@ const string HACK_FLASH_FX_REF_56 = $"P_havok_leg_orng_lvl3_3P"
 
 
 
-
-void function MpWeaponEnergyAR_Init()
-{
-}
-
 void function OnWeaponActivate_Energy_AR( entity weapon )
 {
 	OnWeaponActivate_RUIColorSchemeOverrides( weapon )
 	OnWeaponActivate_ReactiveKillEffects( weapon )
 
-	#if(false)
-//
-
-
-#endif
+	#if SERVER
+		                                                                                    
+		                                           
+			                                   
+	#endif
 }
 
 void function OnWeaponDeactivate_Energy_AR( entity weapon )
 {
 	OnWeaponDeactivate_ReactiveKillEffects( weapon )
 }
-
-
-bool function CanFire_EnergyAR( entity weapon )
-{
-	if ( weapon.GetWeaponChargeFraction() < 1.0 )
-		return false
-
-	return true
-}
-
-
-var function OnWeaponPrimaryAttack_Energy_AR( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	if ( !CanFire_EnergyAR( weapon ) )
-		return 0
-
-	return Fire_EnergyAR( weapon, attackParams )
-}
-
-
-#if(false)
-
-
-
-
-
-
-
-#endif //
-
-
-int function Fire_EnergyAR( entity weapon, WeaponPrimaryAttackParams attackParams )
-{
-	//
-	if ( weapon.HasMod( "altfire" ) )
-	{
-		int chargeShotDamageFlags = weapon.GetWeaponDamageFlags()
-		weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
-		weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, chargeShotDamageFlags )
-	}
-	//
-	else
-	{
-		OnWeaponPrimaryAttack_weapon_basic_bolt( weapon, attackParams )
-	}
-
-	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
-}
-
